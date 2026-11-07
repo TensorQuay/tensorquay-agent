@@ -42,7 +42,8 @@ jobs:
       - name: Run sandbox contracts against Docker Engine
         # Left to the jobs and hosts that have what they need: the Firecracker suites and SBX-F-014's ruleset case
         # need KVM and the Firecracker host image (images/vmm), so the KVM gate runs them (G-13, tools/check.sh
-        # --kvm); the tests that start a runtime image run in runtime.yml once it has built both images;
+        # --kvm); the tests that start a runtime image run in runtime.yml once it has built both images, and the
+        # Desktop image's posture test (SBX-C-020) runs in the integration, which builds that image;
         # workspace_clone runs in gateway.yml; egress needs a pinned gateway image as well; manual_daemon restarts
         # Docker Desktop and is run by hand.
         env:
@@ -53,6 +54,7 @@ jobs:
           skip+=' | binary(firecracker_kvm) | test(sbx_f_014_ruleset_loads_in_the_vm_host_image)'
           skip+=' | binary(runtime_image) | binary(runtime_recovery) | binary(runtime_posture) | binary(template_files)'
           skip+=' | test(sec_010_a_process_storm_stops_at_the_pids_limit) | test(sbx_c_023_a_sandbox_reaches_its_own_loopback)'
+          skip+=' | test(sbx_c_020_the_desktop_runs_as_the_sandbox_user)'
           skip+=' | binary(workspace_clone) | binary(egress) | binary(manual_daemon)'
           sudo env "PATH=$PATH" "RUSTUP_HOME=$HOME/.rustup" "CARGO_HOME=$HOME/.cargo" \
             TQA_DOCKER_TESTS=1 cargo nextest run -p tqa-sandbox --run-ignored all --no-fail-fast -E "not ($skip)"
