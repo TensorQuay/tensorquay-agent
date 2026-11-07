@@ -315,7 +315,11 @@ current instance of it.
   bridge, LibreOffice, Firefox and Chromium with renderer accessibility on, partial for Electron and Java, absent for
   canvas-drawn apps. The session sets the AT-SPI accessibility flag on the session bus at start, so Chromium and toolkit
   apps build their trees without a relaunch. The display is X11 (Xvfb) because it reports exact global positions and
-  accepts XTEST input, which Wayland withholds.
+  accepts XTEST input, which Wayland withholds. An application can stop answering its tree, so each call to it is
+  bounded (3 s; a whole window's walk 10 s): past the bound the screenshot goes without that application's elements,
+  and an action on one is refused as unavailable (TOOL-U-138). A tree box whose centre lies outside the focused
+  window's frame (GTK4 reports boxes relative to the window) gets no mark; the element stays listed for its own actions
+  (TOOL-U-139). Typed text sends a line break or a tab as the Return or Tab key, never as a character (TOOL-U-140).
   One `computer` tool exposes `screenshot`, `click`, `double_click`, `drag`, `scroll`, `type`, `key` and `wait`; a
   route whose protocol has its own computer-use tool gets it through the transparent relay (ADR-0019); the route must
   declare `vision`. The web UI shows a **Screen** panel: a VNC server in the sandbox serves the display on the internal
@@ -509,8 +513,14 @@ pub trait ModelProvider: Send + Sync {
   instructions_role = "system"               # Chat: system | developer; Responses: top_level | developer
   first_response_secs = 300                  # 5..900: how long to wait for the model's first byte
   ```
-  `reasoning.field` maps to the protocol's own field (`reasoning_effort`, `reasoning.effort`, or a thinking token
-  budget); `extra_body` and `extra_headers` are the escape hatch for anything a vendor adds; a `quirk` is a named,
+  `reasoning.field` maps to the protocol's own field (`reasoning_effort`, `reasoning.effort`, or on Messages a
+  thinking token budget from `budget_tokens`, one per allowed value). A Messages route with no `budget_tokens` thinks
+  adaptively: requests send `thinking = {type = "adaptive"}` and the effort as `output_config.effort`, for models that
+  refuse a budget (Claude Opus 5.5 and later take `low`, `medium`, `high`, `xhigh`, `max`; set `max_output` high
+  enough for the thinking too, such as 64000), and `extra_body` may add to `output_config` but not set its effort
+  (LLM-U-055). Such a route replays no earlier thinking (LLM-U-057): the protocol binds each thinking block to the
+  conversation before it and refuses a replayed block once that changed, and the runner re-renders earlier
+  screenshots (ADR-0039 section 3); `extra_body` and `extra_headers` are the escape hatch for anything a vendor adds; a `quirk` is a named,
   tested workaround in the adapter, added only when `extra_body` cannot express it. `strict = "auto"` sends a tool
   strict exactly when its schema meets the strict rules (every builtin's does); `on` and `off` force it for an endpoint
   that needs or refuses the field. `off` is also for a server whose constrained decoding narrows what a strict call can

@@ -38,6 +38,9 @@ jobs:
       - run: npm install --global corepack@0.32.0
       - run: corepack pnpm install --frozen-lockfile
       - run: corepack pnpm run check
+        # ESLint over the whole interface needs more than Node's default heap.
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
       - run: corepack pnpm exec playwright install --with-deps chromium
       # The interface names these Linux faces for Thai, Tamil, Chinese, Japanese and Korean (fonts.spec.ts checks them).
       - name: Install the fonts the interface lists for Linux

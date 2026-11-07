@@ -146,6 +146,9 @@ fails validation. Beta features go through `extra_headers`. Requests are built f
     below `max_output`. For example:
     `reasoning = { field = "thinking", allowed = ["low", "high"], default = "low", budget_tokens = { low = 2048, high = 8192 } }`.
   - The effort becomes `thinking: {type: "enabled", budget_tokens}`, and `reasoning.field` does not apply.
+  - A reasoning policy without `budget_tokens` thinks adaptively, for models that refuse a budget: requests send
+    `thinking: {type: "adaptive"}` and the effort as `output_config.effort`. `extra_body` may add other
+    `output_config` fields but not the effort (LLM-U-055).
   - A budget table on another protocol fails validation.
   - `extra_body` cannot override `model`, `messages`, `system`, tools, `tool_choice`, `stream`, `max_tokens`,
     `stop_sequences`, temperature, `metadata` or `thinking`.
@@ -162,8 +165,9 @@ fails validation. Beta features go through `extra_headers`. Requests are built f
   - `parallel_tools = false` sends `tool_choice: {type: "auto", disable_parallel_tool_use: true}`.
   - `metadata` is not sent: the protocol's field only takes a user id.
   - A temperature with thinking on is refused before sending.
-  - With `cache_hint = "anthropic_cache_control"`, the last system block and the last tool carry
-    `cache_control: {type: "ephemeral"}`.
+  - With `cache_hint = "anthropic_cache_control"`, the last system block, the last tool and the latest message's
+    last block (unless it is a thinking block) carry `cache_control: {type: "ephemeral"}`, so each step reads the
+    whole history from cache (LLM-U-056).
 - **Streamed events:**
   - `text_delta` becomes text and `thinking_delta` becomes reasoning.
   - A `tool_use` block's `input_json_delta` fragments are buffered and emitted whole at the block's stop. An input
@@ -181,17 +185,23 @@ fails validation. Beta features go through `extra_headers`. Requests are built f
   <type>")`.
 - **Reasoning state (ADR-0027):**
   - A thinking block with a signature, or a redacted thinking block, becomes `ReasoningState`: the block as received.
-  - States are replayed unchanged, first in their assistant turn.
+  - On a budget route, states are replayed unchanged, first in their assistant turn.
+  - An adaptive route replays none, and thinking stays on (LLM-U-057). The protocol binds each thinking block to the
+    conversation before it and refuses a replayed block once that changed, and the runner re-renders earlier turns
+    (a screenshot loses its marks, then becomes a line). A request without thinking blocks is accepted.
   - A state that is not a thinking block is refused.
-  - When the latest assistant turn has calls but no state (the state was lost), that one request is sent without
-    `thinking` and without states, because the protocol refuses such a turn while thinking is on.
+  - When the latest assistant turn of a budget route has calls but no state (the state was lost), that one request
+    is sent without `thinking` and without states, because the protocol refuses such a turn while budget thinking is
+    on.
 - **Cache breakpoints inside a sandbox:** the route snapshot carries `cache_hint` (protocol revision 7), and the
   runtime builds its route with it. So in-sandbox Messages requests on an `anthropic_cache_control` route carry the
   same markers as above, and the relay passes them through unchanged.
 - **Relay:** `relay_shaping::shape_request` pins `model`, forces streaming and merges `extra_body` over the request.
   It only checks `thinking`: enabled thinking must carry a budget from the route's table, a route without one
   refuses it, and absent or disabled thinking passes (a request that lost its reasoning state stays without
-  thinking). Thinking blocks, signatures and cache markers pass through unchanged. The relay sends the pinned
+  thinking). Adaptive thinking needs a route without budgets; there `output_config.effort` must be allowed and is
+  the route's default when missing (LLM-U-055). Thinking blocks, signatures and cache markers pass through
+  unchanged: the client keeps its own history. The relay sends the pinned
   version header itself (`MESSAGES_VERSION_HEADER`).
 - **Relay usage:** usage is split across `message_start` (input side) and `message_delta` (output side), so
   `read_usage` returns `None` for this protocol. `relay_shaping::UsageReader` observes every event of one response

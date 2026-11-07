@@ -311,3 +311,44 @@ fn llm_c_032_the_adapters_apply_the_settings_when_they_encode() -> TestResult {
     );
     Ok(())
 }
+
+// TEST: LLM-U-055
+#[test]
+fn llm_u_055_the_relay_checks_adaptive_thinking_and_its_effort() -> TestResult {
+    let routes = |reasoning: &str| -> Result<Route, Box<dyn std::error::Error>> {
+        let registry = Registry::from_toml(&format!(
+            "[[routes]]\nname='m'\nprotocol='anthropic_messages'\nbase_url='https://models.example/v1'\n\
+             model='pinned-model'\nmax_output=64000\n{reasoning}"
+        ))?;
+        Ok(registry.get("m").ok_or("missing route")?.clone())
+    };
+    let adaptive = routes("reasoning={field='effort',allowed=['low','high'],default='low'}\n")?;
+    let mut sent = json!({"messages":[],"thinking":{"type":"adaptive"},"output_config":{"effort":"high","format":{"type":"text"}}});
+    shape_request(&adaptive, &mut sent)?;
+    assert_eq!(
+        sent["output_config"],
+        json!({"effort":"high","format":{"type":"text"}})
+    );
+    let mut defaulted = json!({"messages":[],"thinking":{"type":"adaptive"}});
+    shape_request(&adaptive, &mut defaulted)?;
+    assert_eq!(
+        defaulted["output_config"],
+        json!({"effort":"low"}),
+        "the route's default"
+    );
+    for mut refused in [
+        json!({"thinking":{"type":"adaptive"},"output_config":{"effort":"max"}}),
+        json!({"thinking":{"type":"adaptive"},"output_config":{"effort":3}}),
+        json!({"thinking":{"type":"adaptive"},"output_config":"x"}),
+        json!({"thinking":{"type":"enabled","budget_tokens":2048}}),
+    ] {
+        assert!(shape_request(&adaptive, &mut refused).is_err(), "{refused}");
+    }
+    // A budget route keeps its budgets: adaptive thinking isn't one of them.
+    let budgets = routes(
+        "reasoning={field='thinking',allowed=['low'],default='low',budget_tokens={low=2048}}\n",
+    )?;
+    let mut adaptive_on_budgets = json!({"messages":[],"thinking":{"type":"adaptive"}});
+    assert!(shape_request(&budgets, &mut adaptive_on_budgets).is_err());
+    Ok(())
+}

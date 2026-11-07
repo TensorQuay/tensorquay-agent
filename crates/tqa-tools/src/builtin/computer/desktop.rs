@@ -5,8 +5,10 @@
 //! browser's, `a:` for the tree's.
 use std::{
     collections::hash_map::DefaultHasher,
+    future::Future,
     hash::{Hash, Hasher},
     sync::Arc,
+    time::Duration,
 };
 
 use async_trait::async_trait;
@@ -18,12 +20,18 @@ use super::{
         Source,
     },
     framebuffer::Framebuffer,
-    raster::Raster,
+    raster::{Raster, Rect},
     x11::{ActiveWindow, XDo},
 };
 
 /// The accessibility actions a click may perform, in AT-SPI's names, preferred in order.
 const CLICK_ACTIONS: [&str; 5] = ["click", "press", "activate", "jump", "toggle"];
+/// How long one call to an application's accessibility tree may take. An application can stop answering it (a modal
+/// dialog of Thunar's or Ark's in the agent eval, 6 Nov 2026): the screen is never held for it (TOOL-U-138).
+const TREE_BOUND: Duration = Duration::from_secs(3);
+/// How long reading a focused window's whole tree may take: one call per node, so a large window (an office
+/// document's) needs more than one call's bound, and a stalled one still costs seconds, not minutes.
+const WINDOW_BOUND: Duration = Duration::from_secs(10);
 /// The window a snapshot or state names while no window has the focus.
 const NO_WINDOW: &str = "none";
 /// The title a snapshot shows while no window has the focus.
@@ -114,7 +122,7 @@ impl Desktop {
 
     /// An element's own action, else a click at its centre.
     async fn click(&self, handle: &str, count: u8) -> Result<(), DriverError> {
-        if count == 1 && self.tree.act(handle, &CLICK_ACTIONS).await? {
+        if count == 1 && bounded(self.tree.act(handle, &CLICK_ACTIONS)).await? {
             return Ok(());
         }
         let centre = self.centre(handle).await?;
@@ -122,19 +130,20 @@ impl Desktop {
     }
 
     async fn centre(&self, handle: &str) -> Result<(i32, i32), DriverError> {
-        let (x, y, width, height) =
-            self.tree.extents(handle).await?.ok_or_else(|| {
-                DriverError::Failed("the element has no place on the screen".into())
-            })?;
+        let (x, y, width, height) = bounded(self.tree.extents(handle))
+            .await?
+            .ok_or_else(|| DriverError::Failed("the element has no place on the screen".into()))?;
         Ok((x + width / 2, y + height / 2))
     }
 
     /// Its text set, else the focus given and the text typed.
     async fn type_into(&self, handle: &str, text: &str) -> Result<(), DriverError> {
-        if self.tree.set_text(handle, text).await? {
+        // A value holding a line break or a tab would hold the character, not submit or move on (TOOL-U-140).
+        let keys = text.contains(['\n', '\t']);
+        if !keys && bounded(self.tree.set_text(handle, text)).await? {
             return Ok(());
         }
-        if !self.tree.focus(handle).await? {
+        if !bounded(self.tree.focus(handle)).await? {
             let centre = self.centre(handle).await?;
             self.x.click(centre, 1).await?;
         }
@@ -161,11 +170,28 @@ impl Desktop {
                 Ok(snapshot)
             }
             Focus::Application(active, pid) => {
-                let window = self.tree.window(pid).await?;
+                // A tree that doesn't answer leaves the snapshot without the application's elements; the screenshot
+                // still goes to the model, and its marks (if any) still come.
+                let window = match within(WINDOW_BOUND, self.tree.window(pid)).await {
+                    Ok(window) => window,
+                    Err(DriverError::Unavailable(reason)) => {
+                        tracing::warn!(%reason, "desktop: the snapshot goes without the application's tree");
+                        None
+                    }
+                    Err(error) => return Err(error),
+                };
                 let (title, mut found) = window.map_or_else(
                     || (active.title.clone(), Vec::new()),
                     |window| (window.title, elements(&window.nodes)),
                 );
+                // A box outside the window's frame (a GTK4 tree's, relative to the window) is no place on the screen:
+                // the element stays listed for its own actions, without a mark (TOOL-U-139).
+                if let Some(frame) = self.x.geometry(&active.id).await {
+                    found
+                        .iter_mut()
+                        .filter(|element| element.rect.is_some_and(|rect| !inside(rect, frame)))
+                        .for_each(|element| element.rect = None);
+                }
                 for element in &mut found {
                     element.handle = format!("a:{}", element.handle);
                 }
@@ -190,6 +216,32 @@ impl Desktop {
             }),
         }
     }
+}
+
+/// Whether a box's centre lies inside a window's frame (x, y, width, height).
+fn inside(rect: Rect, (x, y, width, height): (i32, i32, u32, u32)) -> bool {
+    let (cx, cy) = rect.centre();
+    let right = i64::from(x) + i64::from(width);
+    let bottom = i64::from(y) + i64::from(height);
+    (i64::from(x)..right).contains(&cx) && (i64::from(y)..bottom).contains(&cy)
+}
+
+/// One call to the accessibility tree within [`TREE_BOUND`]; past it, the tree is unavailable.
+async fn bounded<T>(call: impl Future<Output = Result<T, DriverError>>) -> Result<T, DriverError> {
+    within(TREE_BOUND, call).await
+}
+
+/// A call to the accessibility tree within `bound`; past it, the tree is unavailable.
+async fn within<T>(
+    bound: Duration,
+    call: impl Future<Output = Result<T, DriverError>>,
+) -> Result<T, DriverError> {
+    tokio::time::timeout(bound, call).await.unwrap_or_else(|_| {
+        Err(DriverError::Unavailable(format!(
+            "the application's accessibility tree didn't answer within {} s",
+            bound.as_secs()
+        )))
+    })
 }
 
 #[async_trait]

@@ -14,8 +14,10 @@ mod tests;
 /// `reasoning.effort`, streaming is forced and `store` is always false (the history is ours).
 /// For Chat and Responses, each tool's `strict` and schema follow the route's tool-schema settings.
 /// For Messages, streaming is forced and `thinking` is only checked: enabled thinking must carry a
-/// budget the route maps, and a request without thinking (a lost reasoning state) stays without
-/// it. Thinking blocks, signatures and cache markers pass through unchanged.
+/// budget the route maps, adaptive thinking needs a route without budgets (whose effort, in
+/// `output_config.effort`, must be allowed and defaults to the route's), and a request without
+/// thinking (a lost reasoning state) stays without it. Thinking blocks, signatures and cache
+/// markers pass through unchanged.
 ///
 /// # Errors
 /// Rejects unsupported protocols, invalid routes, non-object bodies and invalid reasoning/options.
@@ -136,6 +138,7 @@ fn shape_messages(route: &Route, body: &mut Value) -> Result<(), LlmError> {
         .as_object_mut()
         .ok_or_else(|| LlmError::Protocol("relay body must be an object".into()))?;
     check_thinking(route, body.get("thinking"))?;
+    adaptive_effort(route, body)?;
     body.insert("model".into(), Value::String(route.model.clone()));
     body.insert("stream".into(), Value::Bool(true));
     shape_content(route, body);
@@ -153,6 +156,10 @@ fn check_thinking(route: &Route, thinking: Option<&Value>) -> Result<(), LlmErro
     };
     match thinking.get("type").and_then(Value::as_str) {
         Some("disabled") => Ok(()),
+        Some("adaptive") => match &route.reasoning {
+            Some(reasoning) if reasoning.budget_tokens.is_none() => Ok(()),
+            _ => Err(refused("is not adaptive on this route")),
+        },
         Some("enabled") => {
             let budgets = route
                 .reasoning
@@ -170,6 +177,40 @@ fn check_thinking(route: &Route, thinking: Option<&Value>) -> Result<(), LlmErro
         }
         _ => Err(refused("type is not supported")),
     }
+}
+
+/// On an adaptive-thinking route (a reasoning policy without budgets), `output_config.effort` is one
+/// of the route's allowed values, the route's default when the request names none.
+fn adaptive_effort(route: &Route, body: &mut Map<String, Value>) -> Result<(), LlmError> {
+    let Some(policy) = route
+        .reasoning
+        .as_ref()
+        .filter(|policy| policy.budget_tokens.is_none())
+    else {
+        return Ok(());
+    };
+    let refused = |detail: &str| LlmError::Protocol(format!("output_config {detail}"));
+    let config = body
+        .entry("output_config")
+        .or_insert_with(|| Value::Object(Map::new()));
+    if config.is_null() {
+        *config = Value::Object(Map::new());
+    }
+    let config = config
+        .as_object_mut()
+        .ok_or_else(|| refused("must be an object"))?;
+    let effort = match config.get("effort") {
+        None | Some(Value::Null) => policy.default.clone(),
+        Some(Value::String(effort)) => effort.clone(),
+        Some(_) => return Err(refused("effort must be a string")),
+    };
+    if !policy.allowed.contains(&effort) {
+        return Err(LlmError::Protocol(
+            "reasoning effort is not allowed by the route".into(),
+        ));
+    }
+    config.insert("effort".into(), Value::String(effort));
+    Ok(())
 }
 
 fn include_usage(body: &mut Map<String, Value>) -> Result<(), LlmError> {

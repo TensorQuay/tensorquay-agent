@@ -239,7 +239,6 @@ fn llm_c_022_messages_routes_declare_output_and_budgets() {
     assert!(Registry::from_toml(&format!("{base}{MESSAGES_THINKING}")).is_ok());
     for bad in [
         String::new(),
-        format!("max_output=16000\n{}", reasoning("")),
         format!(
             "max_output=16000\n{}",
             reasoning(",budget_tokens={low=2048}")
@@ -272,6 +271,39 @@ fn llm_c_022_messages_routes_declare_output_and_budgets() {
             reasoning(",budget_tokens={low=2048,high=4096}")
         ))
         .is_err()
+    );
+}
+
+// TEST: LLM-U-055
+#[test]
+fn llm_u_055_a_messages_route_without_budgets_thinks_adaptively() {
+    let base =
+        "[[routes]]\nname='t'\nprotocol='anthropic_messages'\nbase_url='http://h/v1'\nmodel='m'\n";
+    let adaptive = "max_output=64000\nreasoning={field='effort',allowed=['low','medium','high'],default='medium'}\n";
+    let registry = Registry::from_toml(&format!("{base}{adaptive}"));
+    assert!(
+        registry.is_ok(),
+        "an effort table without budgets is adaptive thinking"
+    );
+    // The effort is the harness's on such a route: extras may add to `output_config`, never set its effort.
+    assert!(
+        Registry::from_toml(&format!(
+            "{base}{adaptive}extra_body={{output_config={{effort='max'}}}}\n"
+        ))
+        .is_err()
+    );
+    assert!(
+        Registry::from_toml(&format!(
+            "{base}{adaptive}extra_body={{output_config={{format={{type='text'}}}}}}\n"
+        ))
+        .is_ok()
+    );
+    // Without a reasoning policy the route sends no thinking settings, so an extra effort stays the route's own.
+    assert!(
+        Registry::from_toml(&format!(
+            "{base}max_output=100\nextra_body={{output_config={{effort='low'}}}}\n"
+        ))
+        .is_ok()
     );
 }
 

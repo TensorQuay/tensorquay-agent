@@ -100,6 +100,25 @@ impl XDo {
             .map_err(failed)
     }
 
+    /// A window's frame on the screen (x, y, width, height), when xdotool can read it.
+    pub async fn geometry(&self, id: &str) -> Option<(i32, i32, u32, u32)> {
+        let text = self
+            .xdotool(&["getwindowgeometry", "--shell", id])
+            .await
+            .ok()?;
+        let value = |key: &str| {
+            text.lines()
+                .find_map(|line| line.strip_prefix(key)?.strip_prefix('='))
+                .map(str::trim)
+        };
+        Some((
+            value("X")?.parse().ok()?,
+            value("Y")?.parse().ok()?,
+            value("WIDTH")?.parse().ok()?,
+            value("HEIGHT")?.parse().ok()?,
+        ))
+    }
+
     /// The focused window, or `None` when no window has the focus: the window manager names no active window until
     /// one exists, so an empty desktop has none (c16's integration: every action on it failed `display_unavailable`).
     ///
@@ -234,6 +253,30 @@ impl XDo {
     /// # Errors
     /// `Failed` when the display refuses it.
     pub async fn type_text(&self, text: &str) -> Result<(), DriverError> {
+        // A line break or a tab is the key a person presses, never xdotool's character for it: "\n" typed is
+        // Linefeed, which GTK's and LibreOffice's fields take as a character (TOOL-U-140).
+        let mut run = String::new();
+        for character in text.chars() {
+            let key = match character {
+                '\n' => "Return",
+                '\t' => "Tab",
+                _ => {
+                    run.push(character);
+                    continue;
+                }
+            };
+            self.type_run(&std::mem::take(&mut run)).await?;
+            self.xdotool(&["key", "--clearmodifiers", key])
+                .await
+                .map_err(failed)?;
+        }
+        self.type_run(&run).await
+    }
+
+    async fn type_run(&self, text: &str) -> Result<(), DriverError> {
+        if text.is_empty() {
+            return Ok(());
+        }
         self.xdotool(&[
             "type",
             "--clearmodifiers",

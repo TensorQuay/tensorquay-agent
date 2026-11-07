@@ -75,6 +75,9 @@ database or service of their own), which is chosen by its own licence.
      and zip 9.0.5, the three IDs left `deny.toml`, and the TEST-PLAN §19a entry went with them, as this point said
      they would. Our zip calls (`ZipArchive::new`, `len`, `by_index`, `by_name`, `ZipFile::size`,
      `ZipError::UnsupportedArchive` with `PASSWORD_REQUIRED`, and the tests' `ZipWriter`) are the same in zip 9.
+   - **calamine 0.38.0 (7 Nov 2026):** RUSTSEC-2026-0436 (a panic and an unbounded allocation in calamine's compound-file
+     parser on a crafted `.xls` or `.xlsb`) failed G-05's advisories on calamine 0.37.0; the gateway pins 0.38.0, the
+     fixed release. zip stays 9.0.5, and the preview's tests (unit and database) pass unchanged.
    - **The gate stays:** G-05-zip (`tools/check-zip-reads.py`, SEC-063) still fails if any Rust source under `crates/`
      names the extraction API. We only read entries, and zip 9.0.1 to 9.0.3 fixed that API again. Its stale check
      covers only these three IDs: if `deny.toml` ignores any of them again, it fails once the lock holds no zip 8 or

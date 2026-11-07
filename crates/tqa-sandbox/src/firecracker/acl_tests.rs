@@ -93,15 +93,22 @@ fn sbx_f_001_missing_acl_support_fails_closed_with_its_reason() {
     assert_eq!(set_error(rustix::io::Errno::PERM).code(), "sandbox.backend");
 }
 
-/// The uid this process must grant so that container uid `inner` of this user's rootless engine can read a file. On
-/// the host that is the subordinate range start + inner - 1; inside the engine's own user namespace (as under
-/// tools/rootless-test.sh) container uids appear unchanged.
+/// The uid this process must grant so that container uid `inner` of the Docker engine can read a file. A rootless
+/// engine runs it as the subordinate range start + inner - 1 on the host; inside the engine's own user namespace (as
+/// under tools/rootless-test.sh) container uids appear unchanged, and a rootful engine (a CI runner's) runs them as
+/// the same host uids.
 fn mapped(inner: u32) -> Result<u32, Box<dyn Error>> {
     let identity = std::fs::read_to_string("/proc/self/uid_map")?
         .split_whitespace()
         .collect::<Vec<_>>()
         == ["0", "0", "4294967295"];
     if !identity {
+        return Ok(inner);
+    }
+    let security = Command::new("docker")
+        .args(["info", "--format", "{{json .SecurityOptions}}"])
+        .output()?;
+    if !String::from_utf8_lossy(&security.stdout).contains("rootless") {
         return Ok(inner);
     }
     let user = String::from_utf8(Command::new("id").arg("-un").output()?.stdout)?

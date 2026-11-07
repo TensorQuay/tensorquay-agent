@@ -23,6 +23,10 @@ use tqa_testkit::FakeClock;
 
 type TestResult = Result<(), Box<dyn Error>>;
 
+/// A Messages route that thinks adaptively, its depth set by effort (Claude Opus 5.5 and later; LLM-U-055).
+const ADAPTIVE: &str = "max_output=64000\nreasoning={field='effort',allowed=['low','medium','high'],\
+    default='medium'}\n";
+
 const THINKING: &str = "max_output=16000\nreasoning={field='thinking',allowed=['low','high'],\
     default='low',budget_tokens={low=2048,high=8192}}\n";
 
@@ -417,5 +421,121 @@ async fn llm_u_044_empty_system_texts_are_left_out() -> TestResult {
         cached["system"],
         json!([{"type":"text","text":"Be brief.","cache_control":{"type":"ephemeral"}}])
     );
+    Ok(())
+}
+
+// TEST: LLM-U-055
+#[tokio::test]
+async fn llm_u_055_an_adaptive_route_sends_its_effort() -> TestResult {
+    let history = vec![
+        text(Role::User, "a"),
+        calls("", &[("c1", "{}")]),
+        result("c1", "x"),
+    ];
+    let sent = body(ADAPTIVE, &request(history.clone())).await?;
+    assert_eq!(sent["thinking"], json!({"type":"adaptive"}));
+    assert_eq!(
+        sent["output_config"],
+        json!({"effort":"medium"}),
+        "the route's default"
+    );
+    assert!(!sent.to_string().contains("budget_tokens"));
+    let mut high = request(history);
+    high.reasoning_effort = Some("high".into());
+    assert_eq!(
+        body(ADAPTIVE, &high).await?["output_config"]["effort"],
+        "high"
+    );
+    Ok(())
+}
+
+// TEST: LLM-U-057
+#[tokio::test]
+async fn llm_u_057_an_adaptive_route_sends_no_earlier_thinking() -> TestResult {
+    // The protocol binds each thinking block to the conversation before it, and the runner re-renders earlier turns
+    // (a screenshot loses its marks, then becomes a line: ADR-0039 section 3), so a replayed block would be refused.
+    // A request without any is accepted, and thinking stays on.
+    let mut history = vec![text(Role::User, "a")];
+    for (id, signature) in [("c1", "s1"), ("c2", "s2")] {
+        let mut turn = calls("", &[(id, "{}")]);
+        turn.content
+            .insert(0, ContentPart::ReasoningState(thinking_state(signature)));
+        history.extend([turn, result(id, "x")]);
+    }
+    let sent = body(ADAPTIVE, &request(history.clone())).await?;
+    assert_eq!(sent["thinking"], json!({"type":"adaptive"}));
+    assert_eq!(sent["output_config"], json!({"effort":"medium"}));
+    assert!(
+        !sent.to_string().contains("\"signature\""),
+        "no state is replayed: {sent}"
+    );
+    for turn in [1, 3] {
+        let blocks = sent["messages"][turn]["content"]
+            .as_array()
+            .ok_or("no content")?;
+        assert!(
+            blocks.iter().all(|block| block["type"] == "tool_use"),
+            "turn {turn} keeps only its call: {blocks:?}"
+        );
+    }
+    // A budget route still replays each turn's state first: its latest tool turn needs it.
+    let budget = body(THINKING, &request(history)).await?;
+    for (turn, signature) in [(1, "s1"), (3, "s2")] {
+        assert_eq!(
+            budget["messages"][turn]["content"][0],
+            json!({"type":"thinking","thinking":"Plan.","signature":signature})
+        );
+    }
+    Ok(())
+}
+
+// TEST: LLM-U-055
+#[test]
+fn llm_u_055_an_adaptive_route_refuses_temperature_and_unknown_efforts() -> TestResult {
+    let adaptive = route(ADAPTIVE)?;
+    let mut hot = request(vec![text(Role::User, "a")]);
+    hot.temperature = Some(0.5);
+    let mut effort = request(vec![text(Role::User, "a")]);
+    effort.reasoning_effort = Some("extreme".into());
+    for (request, expected) in [(hot, "temperature"), (effort, "reasoning effort")] {
+        let error = request_body_len(&adaptive, &request)
+            .err()
+            .ok_or(expected)?;
+        assert!(
+            matches!(&error, LlmError::Protocol(text) if text.contains(expected)),
+            "{expected}: {error}"
+        );
+    }
+    Ok(())
+}
+
+// TEST: LLM-U-056
+#[tokio::test]
+async fn llm_u_056_the_latest_message_carries_the_conversation_breakpoint() -> TestResult {
+    let hint = "max_output=100\ncache_hint='anthropic_cache_control'\n";
+    let marked = json!({"type":"ephemeral"});
+    let mut history = vec![text(Role::System, "Rules."), text(Role::User, "a")];
+    for step in 0..6 {
+        history.push(calls("", &[(&format!("c{step}"), "{}")]));
+        history.push(result(&format!("c{step}"), "x"));
+        let body = body(hint, &request(history.clone())).await?;
+        let messages = body["messages"].as_array().ok_or("messages")?;
+        let last = messages.last().ok_or("no message")?;
+        let blocks = last["content"].as_array().ok_or("blocks")?;
+        assert_eq!(
+            blocks.last().ok_or("no block")?["cache_control"],
+            marked,
+            "step {step}"
+        );
+        // One breakpoint in the history, so the request stays within the protocol's four.
+        let all = body.to_string().matches("cache_control").count();
+        assert_eq!(
+            all, 3,
+            "system, tools and the latest message at step {step}"
+        );
+    }
+    // Without the hint, no breakpoint anywhere.
+    let plain = body("max_output=100\n", &request(history)).await?;
+    assert!(!plain.to_string().contains("cache_control"));
     Ok(())
 }
