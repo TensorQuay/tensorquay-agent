@@ -5,7 +5,7 @@
 //! tokens a second it passes with `slow_answers`.
 
 use super::RelayConfig;
-use super::probe::{Observation, deadline, longest_deadline};
+use super::probe::{Check, Observation, deadline, longest_deadline};
 use super::probe_tests::{NONCE, TestResult, call, lines, probe_with, route, start_model};
 use std::time::Duration;
 use tokio_util::sync::CancellationToken;
@@ -84,6 +84,34 @@ async fn gw_u_092_a_local_model_that_stops_answering_still_times_out() -> TestRe
     let observed = check(answers(1, Duration::from_secs(3), 20), &config).await?;
     assert_eq!(code(&observed), Some("timeout"), "{observed:?}");
     assert!(!observed.warnings.contains(&"slow_answers"));
+    Ok(())
+}
+
+// TEST: GW-U-092
+#[tokio::test]
+async fn gw_u_092_a_local_model_out_of_time_after_its_round_trip_passes_slowly() -> TestResult {
+    // The 7 Nov 2026 first hour: the README's CPU model passed the call and the round trip, then ran out of time in the
+    // strict-lines step (5,078 tokens of thinking at 12 a second reached the outer cap). It works for tasks, slowly:
+    // the check passes, says so, and says the line breaks went unverified. Out of time before its round trip, a model
+    // still fails with `timeout` (above).
+    let config = RelayConfig {
+        idle_timeout: 1,
+        ..RelayConfig::default()
+    };
+    let mut scripts = answers(0, Duration::ZERO, 64);
+    scripts[2] = slowly(
+        1,
+        Duration::from_secs(3),
+        lines(&format!("{NONCE}\n{NONCE}")),
+        64,
+    );
+    let observed = check(scripts, &config).await?;
+    assert!(observed.ok, "{observed:?}");
+    assert_eq!(observed.round_trip, Check::Passed, "{observed:?}");
+    assert_eq!(observed.strict_line_breaks, Check::NotRun, "{observed:?}");
+    for warning in ["line_breaks_unverified", "slow_answers"] {
+        assert!(observed.warnings.contains(&warning), "{observed:?}");
+    }
     Ok(())
 }
 
