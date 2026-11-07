@@ -175,6 +175,10 @@ async fn rt_i_007_an_unknown_route_protocol_fails_closed_without_relay_traffic()
         .err()
         .ok_or("an unknown protocol must fail closed")?;
     assert_eq!(error.exit_code(), 2, "a configuration error is not retried");
+    // The error frame's recording can follow the runtime's exit (the instrumented run on CI's runner read none).
+    wait_for(|| !f.gateway.frames().is_empty())
+        .await
+        .map_err(|error| format!("no error frame after the exit: {error}"))?;
     let frames = f.gateway.frames();
     assert!(
         matches!(
