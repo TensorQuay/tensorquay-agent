@@ -74,10 +74,11 @@ jobs:
           done
       - name: Check the sandbox tests that start a runtime image
         # docker.yml has no runtime image: the process storm at the pids limit (SEC-010), the loopback server in
-        # proxy mode (SBX-C-023) and the template checks on the real engine (template_files) run here.
+        # proxy mode (SBX-C-023) and the template checks on the real engine (template_files) run here, with the base
+        # image as the runtime under test and Workstation as the test image, as the integration names them.
         run: |
           sudo env "PATH=$PATH" "RUSTUP_HOME=$HOME/.rustup" "CARGO_HOME=$HOME/.cargo" \
-            TQA_DOCKER_TESTS=1 TQA_RUNTIME_TEST_IMAGE=tqa-runtime:workstation TQA_RUNTIME_IMAGE=tqa-runtime:workstation \
+            TQA_DOCKER_TESTS=1 TQA_RUNTIME_TEST_IMAGE=tqa-runtime:workstation TQA_RUNTIME_IMAGE=tqa-runtime:dev \
             cargo nextest run -p tqa-sandbox --run-ignored all --retries 0 \
             -E 'binary(template_files) | test(sec_010_a_process_storm_stops_at_the_pids_limit) | test(sbx_c_023_a_sandbox_reaches_its_own_loopback)'
       - name: Report image identity and size

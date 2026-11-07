@@ -127,6 +127,19 @@ jobs:
           docker build --target base -f images/runtime/Dockerfile -t tqa-runtime:base .
           docker build --target workstation -f images/runtime/Dockerfile -t tqa-runtime:workstation .
           docker build -f images/fake-model/Dockerfile -t tqa-fake-model:local .
+      - name: Name the images under test by their IDs
+        # The stack harness refuses bare tags (deploy/tests/compose.py): on a shared engine a tag may name another
+        # build. Every later step gets the IDs; a step that sets one itself keeps its own.
+        run: |
+          set -euo pipefail
+          image() { docker image inspect --format '{{.Id}}' "$1"; }
+          {
+            printf 'TQA_GATEWAY_IMAGE=%s\n' "$(image tqa-gateway:local)"
+            printf 'TQA_WEB_IMAGE=%s\n' "$(image tqa-web:local)"
+            printf 'TQA_RUNTIME_IMAGE=%s\n' "$(image tqa-runtime:base)"
+            printf 'TQA_WORKSTATION_IMAGE=%s\n' "$(image tqa-runtime:workstation)"
+            printf 'TQA_FAKE_MODEL_IMAGE=%s\n' "$(image tqa-fake-model:local)"
+          } >> "$GITHUB_ENV"
       - name: Check repository cloning through the policy proxy
         env:
           SQLX_OFFLINE: "true"
@@ -135,7 +148,6 @@ jobs:
         run: |
           set -euo pipefail
           docker build --target clone-probe -f images/runtime/Dockerfile -t tqa-runtime:clone-probe .
-          export TQA_GATEWAY_IMAGE="$(docker image inspect --format '{{.Id}}' tqa-gateway:local)"
           export TQA_CLONE_PROBE_IMAGE="$(docker image inspect --format '{{.Id}}' tqa-runtime:clone-probe)"
           cargo nextest run -p tqa-sandbox --test workspace_clone --run-ignored all --retries 0
       - name: Install the pinned browser test tools
