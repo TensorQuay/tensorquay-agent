@@ -46,14 +46,19 @@ jobs:
           docker build --target workstation -f images/runtime/Dockerfile -t tqa-runtime:workstation .
           python3 -m unittest discover -s images/runtime -p 'test_*.py'
           python3 images/runtime/packages.py --check
+      # The image tests make the runtime's state directory uid 1000's, as the gateway does: as root on this
+      # runner's rootful engine (tools/rootless-test.sh is the way on a rootless one).
       - name: Check base hardening, process cleanup and links
-        env:
-          TQA_RUNTIME_TEST_IMAGE: tqa-runtime:dev
-        run: cargo nextest run -p tqa-runtime --test docker_image --test link_runs --run-ignored all --retries 0 -E 'not test(rt_i_012) and not test(sbx_c_017)'
+        run: |
+          sudo env "PATH=$PATH" "RUSTUP_HOME=$HOME/.rustup" "CARGO_HOME=$HOME/.cargo" \
+            TQA_TEST_DEADLINE_SCALE="$TQA_TEST_DEADLINE_SCALE" TQA_RUNTIME_TEST_IMAGE=tqa-runtime:dev \
+            cargo nextest run -p tqa-runtime --test docker_image --test link_runs --run-ignored all --retries 0 \
+            -E 'not test(rt_i_012) and not test(sbx_c_017)'
       - name: Check Workstation tools and offline browser
-        env:
-          TQA_RUNTIME_TEST_IMAGE: tqa-runtime:workstation
-        run: cargo nextest run -p tqa-runtime --test docker_image --test link_runs --run-ignored all --retries 0
+        run: |
+          sudo env "PATH=$PATH" "RUSTUP_HOME=$HOME/.rustup" "CARGO_HOME=$HOME/.cargo" \
+            TQA_TEST_DEADLINE_SCALE="$TQA_TEST_DEADLINE_SCALE" TQA_RUNTIME_TEST_IMAGE=tqa-runtime:workstation \
+            cargo nextest run -p tqa-runtime --test docker_image --test link_runs --run-ignored all --retries 0
       - name: Check both runtime images through sandbox admission
         env:
           TQA_DOCKER_TESTS: "1"
