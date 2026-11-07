@@ -368,6 +368,48 @@ async fn tool_u_006_background_children_stop_when_leader_returns() -> TestResult
     Ok(())
 }
 
+// TEST: TOOL-U-141
+#[tokio::test]
+async fn tool_u_141_on_a_desktop_an_application_opened_from_the_shell_reaches_the_display()
+-> TestResult {
+    // The 7 Nov 2026 first hour: the Desktop shell's description says to open applications from it, but its commands
+    // had no DISPLAY ("cannot open display") and no session bus; the model found DISPLAY=:0 on its third try. The
+    // runtime has both from the desktop's init; a Desktop session's commands get them, other shells never do.
+    const MARKER: &str = "TQA_TOOL_TEST_DESKTOP_CHILD";
+    if std::env::var_os(MARKER).is_none() {
+        let output = Command::new(std::env::current_exe()?)
+            .args([
+                "--exact",
+                "tool_u_141_on_a_desktop_an_application_opened_from_the_shell_reaches_the_display",
+            ])
+            .env(MARKER, "1")
+            .env("DISPLAY", ":7")
+            .env("DBUS_SESSION_BUS_ADDRESS", "unix:path=/tmp/fixture-bus")
+            .output()?;
+        assert!(
+            output.status.success(),
+            "{}{}",
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr)
+        );
+        // A filter that matches nothing also exits successfully; the child must have run this test.
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        assert!(stdout.contains("test result: ok. 1 passed;"), "{stdout}");
+        return Ok(());
+    }
+    let fixture = workspace_fixture()?;
+    let cx = support::context(&fixture);
+    let show = json!({"command": "printf '%s|%s' \"$DISPLAY\" \"$DBUS_SESSION_BUS_ADDRESS\""});
+    let on_desktop = Shell::new().with_desktop().call(show.clone(), &cx).await?;
+    assert_eq!(
+        on_desktop.text, ":7|unix:path=/tmp/fixture-bus",
+        "{on_desktop:?}"
+    );
+    let elsewhere = Shell::new().call(show, &cx).await?;
+    assert_eq!(elsewhere.text, "|", "{elsewhere:?}");
+    Ok(())
+}
+
 // TEST: TOOL-U-064
 #[tokio::test]
 async fn tool_u_064_on_a_desktop_the_shell_points_screen_input_to_the_computer_tool() -> TestResult
