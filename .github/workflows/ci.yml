@@ -102,6 +102,7 @@ jobs:
           # The internal-term list (machine, team and script names); optional until the secret is configured.
           TQ_GUARD_INTERNAL_SECRET: ${{ secrets.TQ_GUARD_INTERNAL }}
           TQ_GUARD_INTERNAL: ${{ runner.temp }}/guard-internal
+          TQ_GUARD_IDENTITY: "1"
         run: |
           set -euo pipefail
           if [[ -z "$TQ_GUARD_SECRET" ]]; then
@@ -118,4 +119,9 @@ jobs:
       # Fork pull requests receive no repository secrets; the public checks still run.
       - name: Audit repository and history on pull request
         if: github.event_name == 'pull_request'
-        run: python3 tools/git-guard.py audit
+        # The pull request's own commits carry their author's identity (GitHub's squash merge keeps it); the
+        # history before them is held to the maintainers' identity rule.
+        env:
+          TQ_GUARD_IDENTITY: "1"
+          BASE: origin/${{ github.base_ref }}
+        run: python3 tools/git-guard.py audit --contributed "$BASE"

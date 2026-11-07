@@ -30,13 +30,17 @@ Everything here is written for a stranger reading it on GitHub. In code, comment
 - No screenshots or fixtures containing real user data, secrets or internal hostnames.
 - Plain, professional English. Say what changed and why.
 
-## Git guardrails (enforced by hooks; run `tools/install-guardrails.sh` once per clone)
+## Git guardrails (enforced by hooks; run `tools/install-guardrails.sh` once per clone, with `--maintainer` in a maintainer's)
 
-### 1. One identity
-- Every new commit's author **and** committer is exactly **`TensorQuay <dev@tensorquay.com>`**. The install script
-  sets this in the repository's git config. Commits made before 7 Nov 2026 carry `TensorQuay <admin@tensorquay.com>`;
-  the push and audit checks accept that identity in history, never for a new commit. A pull request merged on
-  GitHub has `GitHub <noreply@github.com>` as its committer, which those checks accept; GitHub never authors one.
+### 1. Identity
+- A maintainer's every new commit has author **and** committer exactly **`TensorQuay <dev@tensorquay.com>`**.
+  `tools/install-guardrails.sh --maintainer` sets this in the repository's git config and turns on the identity and
+  remote checks. Commits made before 7 Nov 2026 carry `TensorQuay <admin@tensorquay.com>`; the push and audit checks
+  accept that identity in history, never for a new commit.
+- A contributor commits as themselves and pushes to their own fork; they run the install script without
+  `--maintainer`. GitHub squash-merges a pull request with its contributor as author and
+  `GitHub <noreply@github.com>` as committer, which the checks accept; GitHub never authors a commit. CI holds the
+  history to these rules, and a pull request's own commits may carry their author's identity.
 
 ### 2. Commit messages
 - Conventional Commits: `type(scope): subject`, first line ≤ 100 characters. Types: `feat fix perf test docs refactor
@@ -63,8 +67,8 @@ Deliberate exceptions go in `.guard-allow`, reviewed in the PR, with a comment g
 - `internal-ok:<glob>`: skip the internal-reference check, only for files that cannot change (applied migrations).
 
 ### 4. Before every push (the pre-push hook checks 1–4 automatically)
-1. The remote is a `github.com/TensorQuay/…` repository.
-2. Every outgoing commit has the TensorQuay identity and a clean, conventional message.
+1. A maintainer pushes only to a `github.com/TensorQuay/…` repository; a contributor pushes to their fork.
+2. Every outgoing commit has a clean, conventional message, and a maintainer's has the TensorQuay identity.
 3. No outgoing commit adds a secret, personal data, an attribution marker, a forbidden file or a file > 2 MB. This is
    checked per commit, because deleting something in a later commit does not remove it from history.
 4. No force-push and no deletion of `main`. Rewriting pushed history needs explicit Product Owner approval; then use

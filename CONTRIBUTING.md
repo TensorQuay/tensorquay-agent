@@ -7,8 +7,9 @@ small change that can be checked independently.
 ## Getting started
 1. Read [AGENTS.md](AGENTS.md), [the engineering rules](docs/DEV-GUIDELINES.md) and
    [the engineering guardrails](docs/ENGINEERING-GUARDRAILS.md).
-2. Install the repository guardrails with `tools/install-guardrails.sh` and configure the private local denylist
-   described in AGENTS.md.
+2. Install the repository guardrails with `tools/install-guardrails.sh`: its hooks check what you commit and push
+   for secrets, personal data and the message rules. Commit as yourself. Maintainers add `--maintainer`, which sets
+   the TensorQuay identity, and keep the private local lists described in AGENTS.md.
 3. Read the design documents: [PRD](docs/PRD.md), [ARCHITECTURE](docs/ARCHITECTURE.md), [DEV-PLAN](docs/DEV-PLAN.md),
    [TEST-PLAN](docs/TEST-PLAN.md).
 
@@ -139,5 +140,5 @@ CI on every pull request that changes a catalogue.
 ## Pull requests
 - One concern per PR; tests included; documentation updated in the same PR.
 - Review follows [`REVIEW.md`](REVIEW.md): its risk tier decides who reviews and what evidence the PR carries.
-- Conventional Commits; the TensorQuay identity; no attribution lines (AGENTS.md).
+- Conventional Commits under your own name (maintainers commit as TensorQuay); no attribution lines (AGENTS.md).
 - Describe what changed, why, and how it was verified. The maintainers run independent acceptance for milestones.

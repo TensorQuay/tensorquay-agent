@@ -5,7 +5,13 @@ Subcommands (wired by .githooks/*):
   pre-commit            identity + staged paths, sizes and added lines
   commit-msg <file>     message format and banned words
   pre-push <remote> <url>   (ref updates on stdin) remote, force-push, every outgoing commit
-  audit                 whole tree + full history; exit 1 on any violation
+  audit [--contributed <base>]   whole tree + full history; exit 1 on any violation. With --contributed, the
+                        commits in <base>..HEAD are a pull request's own: any identity, everything else checked.
+
+The identity and remote rules are the maintainers': they apply in a clone set up with
+`tools/install-guardrails.sh --maintainer` (git config tq.guard.maintainer) and in CI's audits
+(TQ_GUARD_IDENTITY=1). A contributor commits as themselves and pushes to their own fork; GitHub's squash merge of
+their pull request keeps them as its author. Content and messages are checked for everyone.
 
 Personal identifiers are never stored in the repository. They are read from a local denylist file
 (default ~/.config/tensorquay/guard-denylist, or $TQ_GUARD_DENYLIST), one case-insensitive literal per line.
@@ -222,6 +228,13 @@ def scan_patch(patch, deny, allow, problems):
             lineno += 1
 
 
+def maintainer():
+    """Whether the identity and remote rules apply: a maintainer's clone, or a run that asks for them (CI)."""
+    if os.environ.get("TQ_GUARD_IDENTITY") == "1":
+        return True
+    return git("config", "--get", "--bool", "tq.guard.maintainer", check=False).strip() == "true"
+
+
 def check_identity(name, email, what, problems, history=False, committer=False):
     """A new commit is made as IDENTITY; an existing one (pushed or audited) may also carry an earlier identity, and a
     pull request merged on GitHub has GitHub as its committer."""
@@ -232,6 +245,17 @@ def check_identity(name, email, what, problems, history=False, committer=False):
             allowed.add(MERGER)
     if (name, email) not in allowed:
         problems.append(f"{what} is '{name} <{email}>', must be '{IDENTITY[0]} <{IDENTITY[1]}>'")
+
+
+def check_history_identity(sha, author_name, author_email, committer_name, committer_email, problems):
+    """An existing commit: one GitHub made by merging a pull request keeps that pull request's author, whoever it is
+    (GitHub never authors one); any other commit is a maintainer's."""
+    if (committer_name, committer_email) == MERGER:
+        if (author_name, author_email) == MERGER:
+            problems.append(f"{sha} author is '{MERGER[0]} <{MERGER[1]}>', which never authors a commit")
+        return
+    check_identity(author_name, author_email, f"{sha} author", problems, history=True)
+    check_identity(committer_name, committer_email, f"{sha} committer", problems, history=True, committer=True)
 
 
 def check_message(msg, what, problems, require_format=True):
@@ -255,7 +279,7 @@ def report(problems, stage):
 
 def pre_commit():
     problems = []
-    for var in ("GIT_AUTHOR_IDENT", "GIT_COMMITTER_IDENT"):
+    for var in ("GIT_AUTHOR_IDENT", "GIT_COMMITTER_IDENT") if maintainer() else ():
         m = re.match(r"(.*) <(.*)>", git("var", var).strip())
         check_identity(m.group(1), m.group(2), var.split("_")[1].lower(), problems)
     allow = allowlist()
@@ -272,11 +296,11 @@ def commit_msg(path):
     report(problems, "commit-msg")
 
 
-def check_commit(sha, deny, allow, problems):
+def check_commit(sha, deny, allow, problems, identity=True):
     short = sha[:8]
-    an, ae, cn, ce = git("show", "-s", "--format=%an%x00%ae%x00%cn%x00%ce", sha).strip().split("\0")
-    check_identity(an, ae, f"{short} author", problems, history=True)
-    check_identity(cn, ce, f"{short} committer", problems, history=True, committer=True)
+    if identity:
+        an, ae, cn, ce = git("show", "-s", "--format=%an%x00%ae%x00%cn%x00%ce", sha).strip().split("\0")
+        check_history_identity(short, an, ae, cn, ce, problems)
     check_message(git("show", "-s", "--format=%B", sha), short, problems)
     for row in git("diff-tree", "-r", "--root", "--no-commit-id", "--diff-filter=ACMR", sha).splitlines():
         meta, path = row.split("\t", 1)
@@ -287,7 +311,8 @@ def check_commit(sha, deny, allow, problems):
 
 def pre_push(remote, url):
     problems = []
-    if not REMOTE_OK.search(url):
+    identity = maintainer()
+    if identity and not REMOTE_OK.search(url):
         problems.append(f"remote '{remote}' ({url}) is not a TensorQuay GitHub repository")
     deny, allow = denylist(), allowlist()
     for line in sys.stdin.read().splitlines():
@@ -304,18 +329,21 @@ def pre_push(remote, url):
                 problems.append(f"{remote_ref}: force-push (history rewrite) needs PM approval; see AGENTS.md")
             shas = git("rev-list", f"{remote_sha}..{local_sha}", check=False).split()
         for sha in shas:
-            check_commit(sha, deny, allow, problems)
+            check_commit(sha, deny, allow, problems, identity)
     report(problems, "pre-push")
 
 
-def audit():
+def audit(contributed=None):
     problems = []
     deny, allow, terms = denylist(), allowlist(), internal_terms()
-    for row in git("log", "--all", "--format=%h%x00%an%x00%ae%x00%cn%x00%ce").splitlines():
-        sha, an, ae, cn, ce = row.split("\0")
-        check_identity(an, ae, f"{sha} author", problems, history=True)
-        check_identity(cn, ce, f"{sha} committer", problems, history=True, committer=True)
-        check_message(git("show", "-s", "--format=%B", sha), sha, problems, require_format=False)
+    identity = maintainer()
+    own = set(git("rev-list", f"{contributed}..HEAD").split()) if contributed else set()
+    for row in git("log", "--all", "--format=%H%x00%an%x00%ae%x00%cn%x00%ce").splitlines():
+        full, an, ae, cn, ce = row.split("\0")
+        sha = full[:10]
+        if identity and full not in own:
+            check_history_identity(sha, an, ae, cn, ce, problems)
+        check_message(git("show", "-s", "--format=%B", full), sha, problems, require_format=False)
     for path in filter(None, git("ls-files", "-z").split("\0")):
         full = root() / path
         size = full.stat().st_size if full.exists() else None
@@ -336,8 +364,10 @@ def main(argv):
         commit_msg(argv[2])
     elif cmd == "pre-push" and len(argv) == 4:
         pre_push(argv[2], argv[3])
-    elif cmd == "audit":
+    elif cmd == "audit" and len(argv) == 2:
         audit()
+    elif cmd == "audit" and len(argv) == 4 and argv[2] == "--contributed":
+        audit(argv[3])
     else:
         sys.exit(__doc__)
 
