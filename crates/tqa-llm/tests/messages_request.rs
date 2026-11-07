@@ -433,7 +433,11 @@ async fn llm_u_055_an_adaptive_route_sends_its_effort() -> TestResult {
         result("c1", "x"),
     ];
     let sent = body(ADAPTIVE, &request(history.clone())).await?;
-    assert_eq!(sent["thinking"], json!({"type":"adaptive"}));
+    assert_eq!(
+        sent["thinking"],
+        json!({"type":"adaptive","display":"summarized"}),
+        "the thinking shown, not omitted"
+    );
     assert_eq!(
         sent["output_config"],
         json!({"effort":"medium"}),
@@ -463,7 +467,10 @@ async fn llm_u_057_an_adaptive_route_sends_no_earlier_thinking() -> TestResult {
         history.extend([turn, result(id, "x")]);
     }
     let sent = body(ADAPTIVE, &request(history.clone())).await?;
-    assert_eq!(sent["thinking"], json!({"type":"adaptive"}));
+    assert_eq!(
+        sent["thinking"],
+        json!({"type":"adaptive","display":"summarized"})
+    );
     assert_eq!(sent["output_config"], json!({"effort":"medium"}));
     assert!(
         !sent.to_string().contains("\"signature\""),
