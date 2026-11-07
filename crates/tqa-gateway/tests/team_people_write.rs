@@ -279,7 +279,10 @@ async fn deleting_a_lead_with_helpers(f: &Fixture) -> TestResult {
     .bind(vec![t.lead.clone(), t.member.clone()])
     .fetch_all(&f.pool)
     .await?;
-    assert!(remaining.is_empty(), "the lead and its helper: {remaining:?}");
+    assert!(
+        remaining.is_empty(),
+        "the lead and its helper: {remaining:?}"
+    );
     let (state, reason) = team_state(f, t.id).await?;
     assert_eq!(
         (state.as_str(), reason.as_deref()),
