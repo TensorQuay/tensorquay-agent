@@ -149,6 +149,16 @@ impl Tool for Shell {
             .kill_on_drop(true)
             .process_group(0);
         environment(&mut command, cx).await?;
+        // On a Desktop, applications opened from here reach its display and its session bus, as the description says:
+        // the runtime has both from the desktop's init, and the reaper leaves an application connected to the display
+        // running (ADR-0039 §1 and §10; TOOL-U-141). Other shells never get them.
+        if self.desktop {
+            for name in DESKTOP_VARIABLES {
+                if let Some(value) = std::env::var_os(name) {
+                    command.env(name, value);
+                }
+            }
+        }
         // The run's keys and git's settings, the repository-safety ones first (ADR-0035 §1, ADR-0037 §7).
         command.envs(self.host_keys.variables());
         if let Some(bundle) = &self.ca_bundle {
@@ -187,6 +197,8 @@ impl Tool for Shell {
 /// A10 and A12b). A nudge, not a control: the command has run.
 const SCREEN_INPUT_NOTE: &str = "\n[the desktop's screen is the computer tool's: input sent from the shell isn't \
                                  checked, counted or shown to the person]";
+/// What a Desktop session's commands get from the runtime's own environment (TOOL-U-141).
+const DESKTOP_VARIABLES: [&str; 2] = ["DISPLAY", "DBUS_SESSION_BUS_ADDRESS"];
 /// X input tools by name: a whole word of the command (`xdotool.md` and `xdotoolbox` aren't).
 const SCREEN_INPUT_TOOLS: [&str; 5] = ["xdotool", "xte", "ydotool", "pyautogui", "XTest"];
 
