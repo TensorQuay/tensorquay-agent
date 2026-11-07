@@ -5,8 +5,11 @@ use std::{error::Error, time::Duration};
 async fn llm_c_002_standalone_priming_success_and_failure_contract() -> Result<(), Box<dyn Error>> {
     let script =
         std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("scripts/test_prime_model.py");
+    // A liveness bound on the whole Python suite (nine cases, some starting a server), so it scales with the load
+    // setting as the harness's other waits do: on CI's 2-core runner, beside the workspace's other tests, it ran
+    // past a fixed minute.
     let output = tokio::time::timeout(
-        Duration::from_mins(1),
+        tqa_testkit::deadline::scaled(Duration::from_mins(1)),
         tokio::process::Command::new("python3")
             .arg("-B")
             .arg(script)
