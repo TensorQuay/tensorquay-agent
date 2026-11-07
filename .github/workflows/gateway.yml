@@ -206,10 +206,17 @@ jobs:
             exit 1
           fi
           grep -F 'Docker tests require TQA_DOCKER_TESTS=1' missing-docker.log
-      - name: Free the image build cache for the coverage build
-        # The images under test stay (the steps above ran them with --no-build); only their build layers go. The
-        # instrumented build comes beside the debug build, which the cache keeps.
+      - name: Check crate documentation
+        env:
+          SQLX_OFFLINE: "true"
+          RUSTDOCFLAGS: -D warnings
+        run: cargo doc -p tqa-gateway --no-deps
+      - name: Free the disk for the coverage build
+        # The runner had 14 GB left here on 7 Nov and the instrumented build's linker died of it (ld: Bus error). The
+        # debug test build goes (its tests are done; the cache saves whatever is rebuilt), and so do the image build
+        # layers; the images under test stay (the instrumented contracts run them with --no-build).
         run: |
+          rm -rf target/debug
           docker builder prune -af > /dev/null
           df -h /
       - name: Report crate coverage
@@ -218,15 +225,10 @@ jobs:
           TQA_DOCKER_TESTS: "1"
           TQA_GATEWAY_IMAGE: tqa-gateway:local
         # The same contracts as above, instrumented (the release-only PERF tests left out as there). The coverage
-        # build goes once the report is printed, so the cache keeps only the debug build.
+        # build goes once the report is printed.
         run: |
           cargo llvm-cov nextest -p tqa-gateway --run-ignored all --no-fail-fast -E 'not test(/^perf_/)'
           rm -rf target/llvm-cov-target
-      - name: Check crate documentation
-        env:
-          SQLX_OFFLINE: "true"
-          RUSTDOCFLAGS: -D warnings
-        run: cargo doc -p tqa-gateway --no-deps
       - name: Stop the ephemeral database
         if: always()
         run: docker compose -f deploy/compose/dev.yml down --volumes
