@@ -162,7 +162,8 @@ jobs:
           SQLX_OFFLINE: "true"
           TQA_DOCKER_TESTS: "1"
           TQA_GATEWAY_IMAGE: tqa-gateway:local
-        run: cargo nextest run -p tqa-gateway --run-ignored all
+        # Every failure in one run: the job takes over an hour on the runner.
+        run: cargo nextest run -p tqa-gateway --run-ignored all --no-fail-fast
       - name: Test the deployment harness failures without Docker
         run: python3 -m unittest discover -s deploy/tests -p 'test_*.py' -v
       - name: Run the full-stack browser and workspace contract
