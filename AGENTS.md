@@ -33,8 +33,9 @@ Everything here is written for a stranger reading it on GitHub. In code, comment
 ## Git guardrails (enforced by hooks; run `tools/install-guardrails.sh` once per clone)
 
 ### 1. One identity
-- Every commit's author **and** committer is exactly **`TensorQuay <admin@tensorquay.com>`**. The install script sets
-  this in the repository's git config.
+- Every new commit's author **and** committer is exactly **`TensorQuay <dev@tensorquay.com>`**. The install script
+  sets this in the repository's git config. Commits made before 7 Nov 2026 carry `TensorQuay <admin@tensorquay.com>`;
+  the push and audit checks accept that identity in history, never for a new commit.
 
 ### 2. Commit messages
 - Conventional Commits: `type(scope): subject`, first line ≤ 100 characters. Types: `feat fix perf test docs refactor

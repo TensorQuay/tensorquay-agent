@@ -26,14 +26,26 @@ pub(super) fn encode(route: &Route, request: &CompletionRequest) -> Result<Vec<u
     if history.is_empty() {
         return Err(protocol("completion requires at least one message"));
     }
-    let budget = budget(route, request, max_tokens)?;
-    // The protocol refuses a tool turn without its thinking block while thinking is on, so a
+    // The protocol refuses a tool turn without its thinking block while budget thinking is on, so a
     // request whose latest tool turn lost its state is sent without thinking and without states.
-    let budget = budget.filter(|_| !lost_state(history));
-    let messages = turns(history, route.vision, budget.is_some())?;
+    // Adaptive thinking stays on and replays no states (LLM-U-057): the protocol binds each thinking
+    // block to the conversation before it and refuses a replayed block once that changed, and the
+    // runner re-renders earlier turns (a screenshot loses its marks, then becomes a line). A request
+    // without any thinking block is accepted.
+    let (budget, effort) = match thinking(route, request, max_tokens)? {
+        Thinking::Off => (None, None),
+        Thinking::Budget(budget) => ((!lost_state(history)).then_some(budget), None),
+        Thinking::Adaptive(effort) => (None, Some(effort)),
+    };
+    let mut messages = turns(history, route.vision, budget.is_some())?;
+    let cache = route.cache_hint == CacheHint::AnthropicCacheControl;
+    // The conversation's breakpoint: the latest message's last block, so the next step reads the whole
+    // history from cache (the system blocks and tools carry the other two of the protocol's four).
+    if cache {
+        mark_latest(&mut messages);
+    }
     let mut body =
         json!({"model":route.model,"max_tokens":max_tokens,"messages":messages,"stream":true});
-    let cache = route.cache_hint == CacheHint::AnthropicCacheControl;
     // The provider refuses an empty system text block, and the runner's prompt has slots that can be empty
     // (LLM-U-044): empty and whitespace-only texts are left out, and no `system` is sent when none remains.
     let mut blocks: Vec<Value> = system
@@ -67,6 +79,10 @@ pub(super) fn encode(route: &Route, request: &CompletionRequest) -> Result<Vec<u
     if let Some(budget) = budget {
         body["thinking"] = json!({"type":"enabled","budget_tokens":budget});
     }
+    if let Some(effort) = effort {
+        body["thinking"] = json!({"type":"adaptive"});
+        body["output_config"] = json!({"effort":effort});
+    }
     if let Some(temperature) = request.temperature {
         body["temperature"] = json!(temperature);
     }
@@ -74,19 +90,45 @@ pub(super) fn encode(route: &Route, request: &CompletionRequest) -> Result<Vec<u
     serde_json::to_vec(&body).map_err(|error| LlmError::Protocol(crate::redact(&error.to_string())))
 }
 
-/// The thinking budget for the request's effort, when the route has a reasoning policy.
-fn budget(
+/// Marks the latest message's last block for caching, unless it is a thinking block (which the
+/// protocol doesn't let carry a breakpoint).
+fn mark_latest(messages: &mut [Value]) {
+    let block = messages
+        .last_mut()
+        .and_then(|message| message.get_mut("content"))
+        .and_then(Value::as_array_mut)
+        .and_then(|blocks| blocks.last_mut());
+    if let Some(block) = block
+        && !matches!(
+            block.get("type").and_then(Value::as_str),
+            Some("thinking" | "redacted_thinking")
+        )
+    {
+        block["cache_control"] = json!({"type":"ephemeral"});
+    }
+}
+
+/// How a request thinks: not at all (no reasoning policy), with the budget its effort maps to, or
+/// adaptively at its effort (a policy without a budget table, for models that refuse a budget).
+enum Thinking {
+    Off,
+    Budget(u32),
+    Adaptive(String),
+}
+
+/// The request's thinking, when the route has a reasoning policy.
+fn thinking(
     route: &Route,
     request: &CompletionRequest,
     max_tokens: u32,
-) -> Result<Option<u32>, LlmError> {
+) -> Result<Thinking, LlmError> {
     if let Some(temperature) = request.temperature
         && !temperature.is_finite()
     {
         return Err(protocol("temperature must be finite"));
     }
     let Some(reasoning) = &route.reasoning else {
-        return Ok(None);
+        return Ok(Thinking::Off);
     };
     let effort = request
         .reasoning_effort
@@ -95,21 +137,22 @@ fn budget(
     if !reasoning.allowed.contains(effort) {
         return Err(protocol("reasoning effort is not allowed by the route"));
     }
-    let budget = reasoning
-        .budget_tokens
-        .as_ref()
-        .and_then(|budgets| budgets.get(effort))
-        .copied()
-        .ok_or_else(|| protocol("route has no thinking budget for the reasoning effort"))?;
-    if max_tokens <= budget {
-        return Err(protocol("max_output must be above the thinking budget"));
-    }
     if request.temperature.is_some() {
         return Err(protocol(
             "temperature cannot be set while thinking is enabled",
         ));
     }
-    Ok(Some(budget))
+    let Some(budgets) = &reasoning.budget_tokens else {
+        return Ok(Thinking::Adaptive(effort.clone()));
+    };
+    let budget = budgets
+        .get(effort)
+        .copied()
+        .ok_or_else(|| protocol("route has no thinking budget for the reasoning effort"))?;
+    if max_tokens <= budget {
+        return Err(protocol("max_output must be above the thinking budget"));
+    }
+    Ok(Thinking::Budget(budget))
 }
 
 /// Whether the latest assistant turn holds tool calls but no reasoning state.

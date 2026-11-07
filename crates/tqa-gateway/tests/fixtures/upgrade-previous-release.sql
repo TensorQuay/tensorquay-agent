@@ -1,4 +1,4 @@
--- level: 88
+-- level: 103
 -- GW-I-016: the previous release's database, as synthetic rows in every table that exists at the level above (the
 -- highest migration the previous release shipped). The test migrates an empty database to that level, loads this file,
 -- upgrades it with every newer migration and checks that each row is kept and that the schema equals a fresh install's.
@@ -6,7 +6,9 @@
 -- Written by hand against the migrations up to the level, never copied from a real database. Each table has at least
 -- one row (the test fails on a table without one), with the awkward cases a long-lived installation has: optional
 -- columns set and unset, a customised and a deleted built-in, a refused environment check, a running and an ended team,
--- a helper whose run failed, queued and held messages, usage of a purged task, and seeded and administrator settings.
+-- a helper whose run failed and kept its seat, queued and held messages (one copied to its team's log), usage of a
+-- purged task and an estimated one, screen take-overs and hand-backs, a purged screenshot, a deleted Desktop, and seeded
+-- and administrator settings.
 --
 -- At each release, once it is on main: raise the level to that release's highest migration, add rows for the tables it
 -- added, and adjust rows for columns it changed (docs/release.md, "The upgrade fixture").
@@ -150,6 +152,25 @@ INSERT INTO usage (id, conversation_id, user_id, run_id, route, prompt_tokens, c
      '00000000-0000-7000-8000-000000000101', NULL, 'local', 90, 8, NULL, NULL, 'title'),
     ('00000000-0000-7000-8000-000000000323', NULL, '00000000-0000-7000-8000-000000000102', 'run-8', 'seeded',
      NULL, NULL, NULL, NULL, 'model');
+INSERT INTO usage (id, conversation_id, user_id, run_id, route, prompt_tokens, completion_tokens, kind, estimated) VALUES
+    ('00000000-0000-7000-8000-000000000324', '00000000-0000-7000-8000-000000000302',
+     '00000000-0000-7000-8000-000000000101', 'run-2', 'local', 5200, 13974, 'model', true);
+
+-- The Desktop's screen: a take-over, a hand-back, one ended by a restart, a sign-out that failed; stored screenshots.
+INSERT INTO screen_notices (id, conversation_id, kind, by_user, by_name, at, after_seq, seconds, ended, reason) VALUES
+    ('00000000-0000-7000-8000-000000000331', '00000000-0000-7000-8000-000000000301', 'screen.taken_over', '00000000-0000-7000-8000-000000000101',
+     'admin@example.invalid', '2026-10-09 16:03:00+00', 2, NULL, NULL, NULL),
+    ('00000000-0000-7000-8000-000000000332', '00000000-0000-7000-8000-000000000301', 'screen.handed_back', '00000000-0000-7000-8000-000000000101',
+     'admin@example.invalid', '2026-10-09 16:04:35+00', 2, 95, 'hand_back', NULL),
+    ('00000000-0000-7000-8000-000000000333', '00000000-0000-7000-8000-000000000301', 'screen.handed_back', '00000000-0000-7000-8000-000000000101',
+     'admin@example.invalid', '2026-10-09 16:10:00+00', 4, NULL, 'restart', NULL),
+    ('00000000-0000-7000-8000-000000000334', '00000000-0000-7000-8000-000000000301', 'screen.sign_out_failed', '00000000-0000-7000-8000-000000000101',
+     'admin@example.invalid', '2026-10-09 16:11:00+00', 4, NULL, NULL, 'unconfirmed');
+INSERT INTO screenshots (conversation_id, id, bytes, stored_at, purged_at) VALUES
+    ('00000000-0000-7000-8000-000000000301', encode(sha256('fixture:screenshot-1'::bytea), 'hex'), 182044,
+     '2026-10-09 16:03:10+00', NULL),
+    ('00000000-0000-7000-8000-000000000301', encode(sha256('fixture:screenshot-2'::bytea), 'hex'), 240311,
+     '2026-09-30 12:00:00+00', '2026-10-07 12:00:00+00');
 
 -- Environments: a built-in, a customised built-in, an administrator's environment whose check refused it, a seeded one.
 INSERT INTO templates (name, display_name, image, capabilities, is_default, version, last_set_by,
@@ -157,10 +178,11 @@ INSERT INTO templates (name, display_name, image, capabilities, is_default, vers
     ('minimal', 'Minimal', 'tqa-minimal:fixture', '{shell,files}', true, 2, 'builtin', '2026-10-01 00:00:00+00',
      'sha256:minimal-fixture', 'verified', 2);
 INSERT INTO templates (name, display_name, image, capabilities, cpu_millicores, memory_bytes, pids, workspace_bytes,
-                       clamped_from, sizes_from_limits, version, last_set_by, customised_builtin, description) VALUES
+                       clamped_from, sizes_from_limits, version, last_set_by, customised_builtin, description,
+                       builtin_base_image) VALUES
     ('workstation', 'Workstation', 'tqa-workstation:fixture', '{shell,files,browser,git,python,node}', 2000,
      4294967296, 1024, 10737418240, '{"memory_bytes": 8589934592}', true, 3, 'admin', true,
-     'Customised by an administrator');
+     'Customised by an administrator', 'sha256:workstation-fixture');
 INSERT INTO templates (name, display_name, image, capabilities, version, last_set_by, enabled, base, check_state,
                        check_reason, checked_version, check_secret_files, check_scan_limit) VALUES
     ('research', 'Research', 'tqa-research:fixture', '{shell}', 2, 'admin', false, 'workstation', 'refused',
@@ -169,6 +191,8 @@ INSERT INTO templates (name, display_name, image, capabilities, version, last_se
     ('seeded', 'Seeded', 'tqa-seeded:fixture', '{}', 1, 'seed', sha256('fixture:seed-template'::bytea), 'current');
 
 INSERT INTO builtin_deletions (name, deleted_at) VALUES ('data', '2026-10-04 09:00:00+00');
+INSERT INTO builtin_deletions (name, deleted_at, image) VALUES
+    ('desktop', '2026-10-30 10:00:00+00', 'sha256:desktop-fixture');
 
 -- Secrets, and everything that names one. Values are placeholders: the test never decrypts them.
 INSERT INTO secrets (ref, nonce, ciphertext, rotate_after_days) VALUES
@@ -260,6 +284,9 @@ INSERT INTO settings (id, key, user_id, value, last_set_by) VALUES
 INSERT INTO settings (id, key, user_id, value, version, last_set_by, seed_digest, seed_state, clamped_from) VALUES
     ('00000000-0000-7000-8000-000000000512', 'agent_teams.max_members', NULL, 6, 2, 'seed',
      sha256('fixture:seed-setting'::bytea), 'current', 12);
+INSERT INTO settings (id, key, user_id, value, last_set_by) VALUES
+    ('00000000-0000-7000-8000-000000000513', 'desktop.max_sessions', NULL, 2, 'admin'),
+    ('00000000-0000-7000-8000-000000000514', 'computer.max_actions_per_run', NULL, 400, 'admin');
 UPDATE settings_generation SET generation = 7 WHERE id = 1;
 
 INSERT INTO egress_rules (host, ports, last_set_by, seed_digest, seed_state, preset) VALUES
@@ -307,12 +334,13 @@ INSERT INTO agent_teams (id, channel_id, lead_conversation, owner_id, state, sto
      '00000000-0000-7000-8000-000000000304', '00000000-0000-7000-8000-000000000101', 'ended', 'person', 100000,
      '2026-10-08 14:00:00+00', '2026-10-08 12:00:00+00');
 
--- A helper whose run failed (the previous release had no `failed_run`) and an ended team's stopped helper.
-INSERT INTO agent_team_members (conversation_id, team_id, name, role, workspace, state, last_read_seq) VALUES
+-- A helper whose run failed (it keeps its seat: `failed_run`, one failure counted) and an ended team's stopped helper.
+INSERT INTO agent_team_members (conversation_id, team_id, name, role, workspace, state, last_read_seq, failed_run,
+                                failures) VALUES
     ('00000000-0000-7000-8000-000000000302', '00000000-0000-7000-8000-000000000801', 'researcher', 'Find the sources',
-     'own_copy', 'failed', 1),
+     'own_copy', 'failed', 1, true, 1),
     ('00000000-0000-7000-8000-000000000305', '00000000-0000-7000-8000-000000000802', 'writer', 'Draft the report',
-     'my_files', 'stopped', 2);
+     'my_files', 'stopped', 2, false, 0);
 
 INSERT INTO channel_messages (channel_id, seq, author_kind, author_id, author_name, type, parent, task_seq,
                               proposal_seq, body, to_kind, to_conversation) VALUES
@@ -337,6 +365,14 @@ INSERT INTO channel_messages (channel_id, seq, author_kind, author_id, author_na
      '{"type": "notice", "text": "writer stopped"}', 'lead', NULL),
     ('00000000-0000-7000-8000-000000000703', 2, 'gateway', 'gateway', NULL, 'ended', NULL, NULL, NULL,
      '{"type": "ended", "reason": "person"}', NULL, NULL);
+
+-- A person's message to the lead while its team runs: held, with its copy in the team's log.
+INSERT INTO idempotency (key, user_id, route, response_status, response_body, conversation_id, queued_frame,
+                         execution_status, held, team_copy_channel, team_copy_seq) VALUES
+    ('fixture-team-copy', '00000000-0000-7000-8000-000000000101', 'POST /api/v1/conversations/{id}/messages', 202,
+     convert_to('{"queued": true}', 'UTF8'), '00000000-0000-7000-8000-000000000301',
+     convert_to('{"type": "user.message", "text": "Keep it short"}', 'UTF8'), 'queued', true,
+     '00000000-0000-7000-8000-000000000702', 3);
 
 INSERT INTO channel_claims (channel_id, task_seq, claimant_kind, claimant_id, claim_seq) VALUES
     ('00000000-0000-7000-8000-000000000701', 2, 'conversation', '00000000-0000-7000-8000-000000000301', 3);

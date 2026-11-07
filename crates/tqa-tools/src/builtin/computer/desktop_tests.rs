@@ -31,6 +31,8 @@ struct Display {
     commands: StdMutex<Vec<String>>,
     pointer: StdMutex<(i32, i32)>,
     blind: bool,
+    /// The focused window's frame, for `getwindowgeometry`; refused when `None`.
+    frame: Option<(i32, i32, u32, u32)>,
 }
 
 impl Display {
@@ -42,6 +44,20 @@ impl Display {
             commands: StdMutex::new(Vec::new()),
             pointer: StdMutex::new((640, 400)),
             blind: false,
+            frame: None,
+        })
+    }
+
+    /// A focused window whose frame xdotool reports at (x, y, width, height).
+    fn framed(window: &str, pid: u32, title: &str, frame: (i32, i32, u32, u32)) -> Arc<Self> {
+        Arc::new(Self {
+            window: window.into(),
+            pid: Some(pid),
+            title: title.into(),
+            commands: StdMutex::new(Vec::new()),
+            pointer: StdMutex::new((640, 400)),
+            blind: false,
+            frame: Some(frame),
         })
     }
 
@@ -54,6 +70,7 @@ impl Display {
             commands: StdMutex::new(Vec::new()),
             pointer: StdMutex::new((640, 400)),
             blind: true,
+            frame: None,
         })
     }
 
@@ -76,6 +93,15 @@ impl Runner for Display {
                 .map(|pid| format!("{pid}\n"))
                 .ok_or_else(|| DriverError::Unavailable("no pid".into())),
             Some("getwindowname") => Ok(format!("{}\n", self.title)),
+            Some("getwindowgeometry") => self
+                .frame
+                .map(|(x, y, width, height)| {
+                    format!(
+                        "WINDOW={}\nX={x}\nY={y}\nWIDTH={width}\nHEIGHT={height}\nSCREEN=0\n",
+                        self.window
+                    )
+                })
+                .ok_or_else(|| DriverError::Unavailable("no geometry".into())),
             Some("getmouselocation") if self.blind => Err(DriverError::Unavailable(
                 "the display refused the request".into(),
             )),
@@ -821,6 +847,146 @@ async fn tool_u_084_a_pointer_that_cant_be_read_moves_without_waiting() -> TestR
         [
             "mousemove 100 200 click --repeat 1 1",
             "mousemove 100 200 click --repeat 1 4",
+        ]
+    );
+    Ok(())
+}
+
+/// An application whose accessibility side has stopped answering (Thunar's New Folder dialog and Ark's dialogs in
+/// the agent eval, 6 Nov 2026: every screenshot waited 300 s, then failed).
+struct Stalled;
+
+#[async_trait]
+impl A11y for Stalled {
+    async fn window(&self, _: u32) -> Result<Option<Window>, DriverError> {
+        std::future::pending().await
+    }
+    async fn act(&self, _: &str, _: &[&str]) -> Result<bool, DriverError> {
+        std::future::pending().await
+    }
+    async fn set_text(&self, _: &str, _: &str) -> Result<bool, DriverError> {
+        std::future::pending().await
+    }
+    async fn focus(&self, _: &str) -> Result<bool, DriverError> {
+        std::future::pending().await
+    }
+    async fn extents(&self, _: &str) -> Result<Option<(i32, i32, i32, i32)>, DriverError> {
+        std::future::pending().await
+    }
+}
+
+// TEST: TOOL-U-138
+#[tokio::test]
+async fn tool_u_138_a_stalled_tree_never_holds_the_screen() -> TestResult {
+    let display = Display::focused("52428807", Some(311), "Create New Folder");
+    let desktop = Desktop::new(None, XDo::new(display.clone()), Arc::new(Stalled), None);
+    let started = std::time::Instant::now();
+    // The snapshot still comes, without the application's elements, within the window's bound (10 s).
+    let bound = std::time::Duration::from_secs(20);
+    let snapshot = tokio::time::timeout(bound, desktop.snapshot())
+        .await
+        .map_err(|_| "the snapshot waited on the stalled tree")??;
+    assert_eq!(
+        (snapshot.window.as_str(), snapshot.title.as_str()),
+        ("52428807", "Create New Folder")
+    );
+    assert!(snapshot.elements.is_empty());
+    assert!(
+        started.elapsed() < std::time::Duration::from_secs(12),
+        "{:?}",
+        started.elapsed()
+    );
+    // An element's action is refused as quickly, so the agent goes on with the pointer and the keys.
+    let started = std::time::Instant::now();
+    let refused = tokio::time::timeout(bound, desktop.act("a::1.5/save", ElementAct::Click))
+        .await
+        .map_err(|_| "the click waited on the stalled tree")?;
+    assert!(
+        matches!(refused, Err(DriverError::Unavailable(_))),
+        "{refused:?}"
+    );
+    assert!(
+        started.elapsed() < std::time::Duration::from_secs(5),
+        "{:?}",
+        started.elapsed()
+    );
+    Ok(())
+}
+
+// TEST: TOOL-U-139
+#[tokio::test]
+async fn tool_u_139_a_tree_box_outside_its_window_draws_no_mark() -> TestResult {
+    // A GTK4 window (Nautilus in the agent eval, 6 Nov 2026) at (390, 250): one button's box is where it is drawn,
+    // two come back relative to the window and land in the screen's corner, where every mark piled up.
+    let display = Display::framed("52428807", 311, "Documents", (390, 250, 890, 550));
+    let placed = |handle: &str, extents| Node {
+        extents: Some(extents),
+        ..node("push button", handle, &["sensitive"], None, handle)
+    };
+    let tree = Tree {
+        window: Some(Window {
+            handle: ":1.5/frame".into(),
+            title: "Documents".into(),
+            nodes: vec![
+                placed(":1.5/new", (1100, 262, 32, 32)),
+                placed(":1.5/menu", (0, 12, 32, 32)),
+                placed(":1.5/view", (4, 60, 120, 24)),
+            ],
+        }),
+        ..Tree::default()
+    };
+    let (desktop, _) = desktop(&display, tree, None);
+    let snapshot = desktop.snapshot().await?;
+    let boxes: Vec<(&str, bool)> = snapshot
+        .elements
+        .iter()
+        .map(|element| (element.name.as_str(), element.rect.is_some()))
+        .collect();
+    assert_eq!(
+        boxes,
+        [
+            (":1.5/new", true),
+            (":1.5/menu", false),
+            (":1.5/view", false)
+        ],
+        "every element stays listed (its own action still works); only a box inside the window is drawn"
+    );
+    Ok(())
+}
+
+// TEST: TOOL-U-140
+#[tokio::test]
+async fn tool_u_140_line_breaks_and_tabs_are_keys_not_characters() -> TestResult {
+    // xdotool types "\n" as Linefeed, which GTK's and LibreOffice's fields take as a character (the agent eval,
+    // 6 Nov 2026: "the newline was typed as a character" in Calc's and GIMP's dialogs): a person presses Return.
+    let display = Display::focused("52428807", Some(311), "Untitled - Mousepad");
+    let mut editor = mousepad();
+    editor.editable.push(":1.5/text".into());
+    editor.focusable.push(":1.5/text".into());
+    let (desktop, tree) = desktop(&display, editor, None);
+    desktop.type_focused("name.txt\n").await?;
+    desktop.type_focused("a\tb").await?;
+    assert_eq!(
+        display.input(),
+        [
+            "type --clearmodifiers --delay 12 -- name.txt",
+            "key --clearmodifiers Return",
+            "type --clearmodifiers --delay 12 -- a",
+            "key --clearmodifiers Tab",
+            "type --clearmodifiers --delay 12 -- b",
+        ]
+    );
+    // Into an editable element: its value isn't set to text holding a line break (that would hold the break
+    // itself); the element gets the focus and the keys.
+    desktop
+        .act("a::1.5/text", ElementAct::Type("done\n".into()))
+        .await?;
+    assert!(tree.done().is_empty(), "{:?}", tree.done());
+    assert_eq!(
+        &display.input()[5..],
+        [
+            "type --clearmodifiers --delay 12 -- done",
+            "key --clearmodifiers Return"
         ]
     );
     Ok(())

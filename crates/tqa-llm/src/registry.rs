@@ -323,7 +323,15 @@ const BUDGET_TOKENS: std::ops::RangeInclusive<u32> = 1024..=1_048_576;
 /// A Responses route may add to `reasoning` (for example `summary`), never set its `effort`.
 fn owned_extra(route: &Route, key: &str, value: &serde_json::Value) -> bool {
     match route.protocol {
-        crate::Protocol::AnthropicMessages => MESSAGES_OWNED_FIELDS.contains(&key),
+        // An adaptive-thinking route's effort is the harness's; extras may add other `output_config` fields.
+        crate::Protocol::AnthropicMessages => {
+            MESSAGES_OWNED_FIELDS.contains(&key)
+                || (key == "output_config"
+                    && route.reasoning.is_some()
+                    && value
+                        .as_object()
+                        .is_none_or(|config| config.contains_key("effort")))
+        }
         crate::Protocol::OpenAiResponses => {
             RESPONSES_OWNED_FIELDS.contains(&key)
                 || (key == "reasoning"
@@ -465,9 +473,11 @@ pub(crate) fn validate_route(route: &Route) -> Result<(), RouteInvalid> {
     Ok(())
 }
 
-/// A Messages route declares its output limit (the protocol requires `max_tokens`) and, with a
-/// reasoning policy, one thinking budget per allowed value, each below that limit. Other
-/// protocols take an effort, so a budget table there is a configuration error.
+/// A Messages route declares its output limit (the protocol requires `max_tokens`). With a reasoning
+/// policy it either maps one thinking budget per allowed value, each below that limit, or has no
+/// budget table and thinks adaptively, its allowed values sent as `output_config.effort` (models
+/// that refuse a budget). Other protocols take an effort, so a budget table there is a
+/// configuration error.
 fn validate_budget(route: &Route) -> Result<(), RouteInvalid> {
     let budgets = route
         .reasoning
@@ -490,9 +500,9 @@ fn validate_budget(route: &Route) -> Result<(), RouteInvalid> {
     let Some(reasoning) = &route.reasoning else {
         return Ok(());
     };
-    let budgets = budgets.ok_or(RouteInvalid::BudgetInvalid(
-        "anthropic_messages reasoning requires budget_tokens",
-    ))?;
+    let Some(budgets) = budgets else {
+        return Ok(());
+    };
     if budgets.len() != reasoning.allowed.len()
         || reasoning
             .allowed

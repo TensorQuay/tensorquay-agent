@@ -73,7 +73,7 @@ class Import(unittest.TestCase):
         self.assertEqual(run(self.repo, "rev-parse", commit + "^{tree}"),
                          run(self.repo, "rev-parse", self.source + "^{tree}"))
         self.assertEqual(run(self.repo, "log", "-1", "--format=%an <%ae>|%cn <%ce>|%B", commit),
-                         "TensorQuay <admin@tensorquay.com>|TensorQuay <admin@tensorquay.com>|" + MESSAGE.strip())
+                         "TensorQuay <dev@tensorquay.com>|TensorQuay <dev@tensorquay.com>|" + MESSAGE.strip())
         self.assertEqual(run(self.repo, "rev-parse", "refs/heads/import/main"), commit)
         self.assertIn("a fast-forward", "\n".join(lines))
         self.assertEqual(lines[-1], "nothing was pushed")

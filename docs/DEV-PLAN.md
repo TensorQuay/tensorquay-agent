@@ -457,6 +457,16 @@ the total is about 16–24 weeks. Deferring Firecracker to v1.1 (PRD §12 decisi
 5. A TEST-PLAN audit: every P0 and P1 ID implemented and passing on the candidate, or its gap stated.
 6. The PO's OK. Then a squashed commit to `main`, with the release notes.
 
+**Amended 6 Nov 2026 (PO): the technical lead releases, through a pull request.** The team works solo under the
+technical lead, who decides and ships each release without a separate OK from the PO. A release reaches `main` only
+through a pull request opened by the TensorQuay account (never a direct push, never a personal account); the pull
+request carries the release notes and the evidence of steps 1 to 5, so the PO can follow it and object there.
+- **A feature release** (a new capability, a migration, a protocol change) keeps every step above, 1 to 5.
+- **A fix release** (fixes only: no new capability, no migration, no protocol change) may ship the same day. It needs
+  step 1 for the crates and images it changes and every repository gate, the first-hour check when a page or the
+  Desktop changes, step 4, and the audit of the TEST-PLAN IDs it touches. The 24-hour soak (step 3) is required only
+  when it changes the gateway's connection handling, the runtime link, the sandbox lifecycle or the event store.
+
 **Unchanged from v0.2:**
 - Semantic versions; `main` always releasable behind gates; release branches only for fixes.
 - A release produces: gateway, web and runtime images by digest; the Firecracker rootfs and kernel manifest; an

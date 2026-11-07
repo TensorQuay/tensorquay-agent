@@ -3,7 +3,7 @@
 set -e
 cd "$(git rev-parse --show-toplevel)"
 git config user.name "TensorQuay"
-git config user.email "admin@tensorquay.com"
+git config user.email "dev@tensorquay.com"
 git config core.hooksPath .githooks
 chmod +x .githooks/* tools/git-guard.py
 deny="${TQ_GUARD_DENYLIST:-$HOME/.config/tensorquay/guard-denylist}"
