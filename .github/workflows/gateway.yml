@@ -51,8 +51,9 @@ permissions:
 jobs:
   gateway:
     runs-on: ubuntu-latest
-    # A 2-core runner builds three images and the coverage report after the contracts: well over an hour.
-    timeout-minutes: 180
+    # A 2-core runner builds three images and the coverage report after the contracts: on 7 Nov the job took 97 minutes
+    # to the contracts' end, and the browser suites and the instrumented rerun of every contract come after.
+    timeout-minutes: 300
     # The runner's disk holds the build without debug information (tests and coverage don't need it).
     env:
       CARGO_INCREMENTAL: "0"
@@ -162,8 +163,9 @@ jobs:
           SQLX_OFFLINE: "true"
           TQA_DOCKER_TESTS: "1"
           TQA_GATEWAY_IMAGE: tqa-gateway:local
-        # Every failure in one run: the job takes over an hour on the runner.
-        run: cargo nextest run -p tqa-gateway --run-ignored all --no-fail-fast
+        # Every failure in one run: the job takes over an hour on the runner. PERF-002 and PERF-003 measure a release
+        # build and refuse this debug one; a shared 2-core runner's timings would measure the runner anyway.
+        run: cargo nextest run -p tqa-gateway --run-ignored all --no-fail-fast -E 'not test(/^perf_/)'
       - name: Test the deployment harness failures without Docker
         run: python3 -m unittest discover -s deploy/tests -p 'test_*.py' -v
       - name: Run the full-stack browser and workspace contract
@@ -204,12 +206,22 @@ jobs:
             exit 1
           fi
           rg 'Docker tests require TQA_DOCKER_TESTS=1' missing-docker.log
+      - name: Free the image build cache for the coverage build
+        # The images under test stay (the steps above ran them with --no-build); only their build layers go. The
+        # instrumented build comes beside the debug build, which the cache keeps.
+        run: |
+          docker builder prune -af > /dev/null
+          df -h /
       - name: Report crate coverage
         env:
           SQLX_OFFLINE: "true"
           TQA_DOCKER_TESTS: "1"
           TQA_GATEWAY_IMAGE: tqa-gateway:local
-        run: cargo llvm-cov nextest -p tqa-gateway --run-ignored all
+        # The same contracts as above, instrumented (the release-only PERF tests left out as there). The coverage
+        # build goes once the report is printed, so the cache keeps only the debug build.
+        run: |
+          cargo llvm-cov nextest -p tqa-gateway --run-ignored all --no-fail-fast -E 'not test(/^perf_/)'
+          rm -rf target/llvm-cov-target
       - name: Check crate documentation
         env:
           SQLX_OFFLINE: "true"
