@@ -18,6 +18,9 @@ jobs:
       CARGO_PROFILE_TEST_DEBUG: "0"
       # A 2-core runner is slower than a workstation: the harness scales its deadlines, as tools/check.sh does.
       TQA_TEST_DEADLINE_SCALE: "4"
+      # The test build (39 GB) and the coverage build don't fit the runner's disk together: check.sh removes the
+      # first once its tests are done.
+      TQA_CHECK_LOW_DISK: "1"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -25,8 +28,10 @@ jobs:
           persist-credentials: false
       - name: Free the runner's disk for the build
         run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
-          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache \
+            /usr/share/swift /usr/local/share/boost /usr/local/share/powershell /usr/lib/jvm /opt/az
+          docker image prune --all --force > /dev/null
+          df -h / /mnt 2>/dev/null || df -h /
       - name: Install pinned Rust toolchain
         run: rustup show active-toolchain || rustup toolchain install
       - name: Cache Cargo registry and build output
