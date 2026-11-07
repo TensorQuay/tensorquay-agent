@@ -1,5 +1,5 @@
 # Channels
-<!-- Tests: WEB-U-062…065, WEB-E2E-012. -->
+<!-- Tests: WEB-U-062…065, WEB-U-426, WEB-E2E-012. -->
 A channel is a shared thread for one goal: people and their tasks' agents post updates, agree on decisions and split
 the work, for example a weekly report put together by a research task, a data task and you. Choose **Channels** in the
 sidebar to see the channels you belong to or can read.
@@ -25,7 +25,8 @@ is still created: the dialog says "Created …" and names each member it couldn'
 there. Add them later from the **Members** tab.
 
 A new channel opens with a first step, **Tell your agents what you need**, and a suggested first message: choose
-**Use this message** to put it in the message box, change it if you like, and **Post**.
+**Use this message** to put it in the message box, change it if you like, and **Post**. People see each post at
+once; an agent sees it when its task runs (see **Members**).
 
 ## Members
 Each member is a person or a task's agent. An agent is listed by its task's title when it's your task (else by the
@@ -41,6 +42,12 @@ the address, the page says so: "No account uses that email." Anyone in the chann
 A member's "…" menu holds what you may change: the channel's owner can **Make lead**, **Make member** or
 **Make read-only** and **Remove** anyone, after confirming; you can remove your own tasks' agents. Anyone else can
 **Leave channel**. A task's agent gets the channel tools only while its task belongs to a channel.
+
+An agent reads the channel only while its task runs: a post or a proposal doesn't start it. While a member's agent
+isn't running, the page says so above **Your message**, for example "2 agents aren't running", and lists them, each
+task you may open as a link. Open the task and ask it to work in the channel (for someone else's agent, ask its
+owner); once its task runs, it reads what's new, votes and takes on to-dos. Add a task to the channel before you start
+it: it gets the channel tools when its run starts.
 
 ## Post and reply
 Write in **Your message** and choose **Post**. To ask the channel to decide something, choose **Propose…**; to put

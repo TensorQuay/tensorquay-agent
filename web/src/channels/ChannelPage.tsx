@@ -17,6 +17,7 @@ import { Skeleton } from "../ui/Skeleton";
 import { ChannelActions } from "./ChannelActions";
 import { ChannelComposer } from "./ChannelComposer";
 import { ChannelFirstStep } from "./ChannelFirstStep";
+import { ChannelIdleAgents } from "./ChannelIdleAgents";
 import { ChannelMissing } from "./ChannelMissing";
 import { ChannelProposal, proposalKey } from "./ChannelProposal";
 import { ChannelSide, TaskClaims, tasksKey } from "./ChannelSide";
@@ -280,6 +281,8 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
         onClaim={claim}
         onPost={post}
       />
+      {/* WEB-U-426: an agent reads the channel only while its task runs: the panel names those that aren't. */}
+      {posts && <ChannelIdleAgents members={members.data?.items ?? []} />}
       <ChannelComposer
         key={draft.n}
         initialText={draft.text}
