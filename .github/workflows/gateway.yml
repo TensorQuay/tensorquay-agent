@@ -194,7 +194,7 @@ jobs:
             cat missing-database.log
             exit 1
           fi
-          rg 'PostgreSQL tests require TQA_DATABASE_URL' missing-database.log
+          grep -F 'PostgreSQL tests require TQA_DATABASE_URL' missing-database.log
       - name: Prove explicitly selected Docker tests fail without opt-in
         shell: bash
         env:
@@ -205,7 +205,7 @@ jobs:
             cat missing-docker.log
             exit 1
           fi
-          rg 'Docker tests require TQA_DOCKER_TESTS=1' missing-docker.log
+          grep -F 'Docker tests require TQA_DOCKER_TESTS=1' missing-docker.log
       - name: Free the image build cache for the coverage build
         # The images under test stay (the steps above ran them with --no-build); only their build layers go. The
         # instrumented build comes beside the debug build, which the cache keeps.
