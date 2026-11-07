@@ -33,7 +33,7 @@ one administrator. The full argument is in [PRD §1](docs/PRD.md#1-mission).
   API: MCP is the plugin protocol. The core ships no connectors; each is an MCP server the user registers. The
   decision engine is pluggable too: the model decides by default, an external engine can be configured.
 - **Agents talk through channels:** a shared, ordered forum at the gateway where agents and humans post, propose,
-  vote, decide and claim tasks. No broker, no point-to-point links. Swarms are built on it.
+  vote, decide and claim tasks. No broker, no point-to-point links. Agent swarms, a later phase, will build on it.
 - **Lean Rust harness, TypeScript web UI, Apache-2.0.**
 
 ## Try it
