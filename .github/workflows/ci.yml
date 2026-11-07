@@ -16,6 +16,8 @@ jobs:
       CARGO_INCREMENTAL: "0"
       CARGO_PROFILE_DEV_DEBUG: "0"
       CARGO_PROFILE_TEST_DEBUG: "0"
+      # A 2-core runner is slower than a workstation: the harness scales its deadlines, as tools/check.sh does.
+      TQA_TEST_DEADLINE_SCALE: "4"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
