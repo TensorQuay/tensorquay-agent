@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT state FROM agent_teams WHERE id = $1 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "state"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "a1c4956596260a3f4c084dad746e2e5d95b77ecb4543cf37cb555ecf35031079"
+}

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE agent_team_members SET state = 'failed', failed_run = true, failures = failures + 1 WHERE conversation_id = $1 AND state IN ('queued', 'working', 'stuck', 'waiting')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "24a5a24b213229f9d8171ea3169350741b5b019c4e431fdf4e66628a015587d2"
+}

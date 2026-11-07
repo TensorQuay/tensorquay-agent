@@ -1,0 +1,6 @@
+id = "sh-feature-backup-dry-run"
+title = "Add a dry-run mode to a shell backup script"
+tags = ["shell", "feature", "small", "fallback-relevant", "cmp"]
+budgets = { max_steps = 30, wall_clock_secs = 600, max_tokens = 200000 }
+protected = []
+check = { image = "runtime", timeout_secs = 120 }

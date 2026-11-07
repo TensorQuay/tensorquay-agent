@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE egress_rules SET ports=$2,internal=$3,version=version+1,last_set_by='admin',preset_edited=(preset IS NOT NULL),updated_at=CURRENT_TIMESTAMP WHERE host=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int4Array",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "119cdef1d389c27d62855cca3de3419fadb644d0190cae84842571e968475239"
+}

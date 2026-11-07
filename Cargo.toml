@@ -1,0 +1,48 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/tqa-types",
+    "crates/tqa-llm",
+    "crates/tqa-context",
+    "crates/tqa-tools",
+    "crates/tqa-prompt",
+    "crates/tqa-core",
+    "crates/tqa-runtime",
+    "crates/tqa-sandbox",
+    "crates/tqa-gateway",
+    "crates/tqa-testkit",
+    "crates/tqa-vm-init",
+    "crates/tqa-ext-check",
+]
+
+[workspace.package]
+edition = "2024"
+license = "Apache-2.0"
+rust-version = "1.97"
+publish = false
+
+[workspace.lints.rust]
+missing_docs = "deny"
+unsafe_code = "forbid"
+unsafe_op_in_unsafe_fn = "deny"
+rust_2018_idioms = { level = "deny", priority = -1 }
+unused_must_use = "deny"
+
+[workspace.lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }
+undocumented_unsafe_blocks = "deny"
+multiple_unsafe_ops_per_block = "deny"
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"
+dbg_macro = "deny"
+print_stdout = "deny"
+print_stderr = "deny"
+excessive_nesting = "deny"
+large_enum_variant = "deny"
+missing_errors_doc = "deny"
+missing_panics_doc = "deny"
+cast_possible_truncation = "deny"

@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT host,version,preset_edited FROM egress_rules WHERE preset=$1 ORDER BY host FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "host",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "egress_rules",
+            "name": "host"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "version",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "egress_rules",
+            "name": "version"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "preset_edited",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "egress_rules",
+            "name": "preset_edited"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "fec3763969f6e148e8768cef1198d9cbaf2ae2b9437aa5bb75fe6c491d780a75"
+}

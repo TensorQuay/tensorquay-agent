@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO templates (name,display_name,image,capabilities,cpu_millicores,memory_bytes,pids,workspace_bytes,is_default,enabled,version,last_set_by,seed_digest,seed_state,description) VALUES ($1,$2,$3,$4,$5,$6,$12,$13,$7,$8,1,'admin',$9,$10,$11)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "TextArray",
+        "Int4",
+        "Int8",
+        "Bool",
+        "Bool",
+        "Bytea",
+        "Text",
+        "Text",
+        "Int4",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7d4a99f88123045f2863803d5c534472d2a7a2dbffb446bd5e7653b932ee7fd4"
+}

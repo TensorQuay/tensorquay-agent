@@ -1,0 +1,77 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT seq, author_kind, author_id, author_name, body FROM channel_messages WHERE channel_id = $1 AND type = 'vote' AND proposal_seq = $2 ORDER BY seq",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "seq",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "seq"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "author_kind",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "author_kind"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "author_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "author_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "author_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "author_name"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "body",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "body"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "f60daf573ff4c4060008dee8b58eb8db6cd061efff9da83756f705d6f83cd5ff"
+}

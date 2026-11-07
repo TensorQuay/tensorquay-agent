@@ -1,0 +1,96 @@
+{
+ "causes": {
+  "incidents/auth/INC-003.md": "config-push",
+  "incidents/auth/INC-007.md": "disk-full",
+  "incidents/auth/INC-011.md": "dns",
+  "incidents/auth/INC-015.md": "disk-full",
+  "incidents/auth/INC-019.md": "dns",
+  "incidents/auth/INC-023.md": "disk-full",
+  "incidents/auth/INC-027.md": "dns",
+  "incidents/auth/INC-031.md": "dependency-timeout",
+  "incidents/auth/INC-035.md": "disk-full",
+  "incidents/auth/INC-039.md": "expired-certificate",
+  "incidents/payments/INC-001.md": "disk-full",
+  "incidents/payments/INC-005.md": "memory-leak",
+  "incidents/payments/INC-009.md": "memory-leak",
+  "incidents/payments/INC-013.md": "config-push",
+  "incidents/payments/INC-017.md": "expired-certificate",
+  "incidents/payments/INC-021.md": "dns",
+  "incidents/payments/INC-025.md": "expired-certificate",
+  "incidents/payments/INC-029.md": "expired-certificate",
+  "incidents/payments/INC-033.md": "expired-certificate",
+  "incidents/payments/INC-037.md": "config-push",
+  "incidents/search/INC-002.md": "disk-full",
+  "incidents/search/INC-006.md": "config-push",
+  "incidents/search/INC-010.md": "dns",
+  "incidents/search/INC-014.md": "clock-skew",
+  "incidents/search/INC-018.md": "config-push",
+  "incidents/search/INC-022.md": "disk-full",
+  "incidents/search/INC-026.md": "disk-full",
+  "incidents/search/INC-030.md": "expired-certificate",
+  "incidents/search/INC-034.md": "memory-leak",
+  "incidents/search/INC-038.md": "memory-leak",
+  "incidents/storage/INC-004.md": "config-push",
+  "incidents/storage/INC-008.md": "expired-certificate",
+  "incidents/storage/INC-012.md": "manual-error",
+  "incidents/storage/INC-016.md": "config-push",
+  "incidents/storage/INC-020.md": "disk-full",
+  "incidents/storage/INC-024.md": "memory-leak",
+  "incidents/storage/INC-028.md": "dependency-timeout",
+  "incidents/storage/INC-032.md": "expired-certificate",
+  "incidents/storage/INC-036.md": "dns",
+  "incidents/storage/INC-040.md": "dependency-timeout"
+ },
+ "names": {
+  "config-push": "Bad configuration push",
+  "disk-full": "Disk full",
+  "dns": "DNS misconfiguration",
+  "expired-certificate": "Expired TLS certificate",
+  "memory-leak": "Memory leak"
+ },
+ "order": [
+  "disk-full",
+  "expired-certificate",
+  "config-push",
+  "dns",
+  "memory-leak"
+ ],
+ "words": {
+  "clock-skew": [
+   "clock",
+   "ntp"
+  ],
+  "config-push": [
+   "config"
+  ],
+  "dependency-timeout": [
+   "dependency",
+   "upstream",
+   "timeout"
+  ],
+  "disk-full": [
+   "disk",
+   "space",
+   "volume"
+  ],
+  "dns": [
+   "dns",
+   "resolver"
+  ],
+  "expired-certificate": [
+   "certificat",
+   "tls",
+   "ssl"
+  ],
+  "manual-error": [
+   "manual",
+   "operator"
+  ],
+  "memory-leak": [
+   "memory",
+   "leak",
+   "oom",
+   "heap"
+  ]
+ }
+}

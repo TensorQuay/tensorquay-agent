@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE templates SET display_name=$2,image=$3,capabilities=$4,cpu_millicores=$5,memory_bytes=$6,pids=$12,workspace_bytes=$13,is_default=$7,enabled=$8,version=$9,description=$11,last_set_by='admin',clamped_from=NULL,sizes_from_limits=false,builtin_image_created=NULL,builtin_updated_at=NULL,customised_builtin=(templates.last_set_by='builtin' OR templates.customised_builtin),builtin_base_image=CASE WHEN templates.last_set_by='builtin' THEN templates.image ELSE templates.builtin_base_image END,check_state=CASE WHEN $10 THEN 'unchecked' ELSE check_state END,check_reason=CASE WHEN $10 THEN NULL ELSE check_reason END,checked_version=CASE WHEN $10 THEN NULL WHEN checked_version=version THEN $9 ELSE checked_version END,base=CASE WHEN $10 THEN NULL ELSE base END,image_id=CASE WHEN $10 THEN NULL ELSE image_id END,updated_at=CURRENT_TIMESTAMP WHERE name=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "TextArray",
+        "Int4",
+        "Int8",
+        "Bool",
+        "Bool",
+        "Int8",
+        "Bool",
+        "Text",
+        "Int4",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c953e2d4b61ba639d62401701363377ab0ccc8cefe2c5716cd14778db17d37ea"
+}

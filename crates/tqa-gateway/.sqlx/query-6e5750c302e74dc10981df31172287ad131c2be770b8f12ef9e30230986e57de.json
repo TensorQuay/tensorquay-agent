@@ -1,0 +1,47 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT q.seq, q.body->>'text' AS \"text!\", q.created_at FROM channel_messages q WHERE q.channel_id = $1 AND q.type = 'person_question' AND NOT EXISTS (SELECT 1 FROM channel_messages a WHERE a.channel_id = q.channel_id AND a.type = 'person_answer' AND a.body->>'question_seq' = q.seq::text) ORDER BY q.seq DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "seq",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "seq"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "text!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "created_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false
+    ]
+  },
+  "hash": "6e5750c302e74dc10981df31172287ad131c2be770b8f12ef9e30230986e57de"
+}

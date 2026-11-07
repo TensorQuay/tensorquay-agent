@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT t.lead_conversation FROM agent_team_members m JOIN agent_teams t ON t.id = m.team_id WHERE m.conversation_id = $1 AND t.state = 'running'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "lead_conversation",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "lead_conversation"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "340d471d5c338be4618730b391b8bec10c41cae3c6ebbd473d0691a8d465cda7"
+}

@@ -1,0 +1,6 @@
+id = "m2-bug-reports"
+title = "Reproduce three bug reports with tests, then fix the two real ones"
+tags = ["teams-eval", "teams-mixed"]
+budgets = { max_steps = 40, wall_clock_secs = 900, max_tokens = 300000 }
+protected = ["issues/101.md", "issues/102.md", "issues/103.md"]
+check = { image = "runtime", timeout_secs = 120 }

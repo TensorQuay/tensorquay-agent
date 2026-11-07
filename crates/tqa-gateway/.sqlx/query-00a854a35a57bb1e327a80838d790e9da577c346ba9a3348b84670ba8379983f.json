@@ -1,0 +1,53 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT t.id AS team, t.channel_id AS channel, m.name FROM agent_team_members m JOIN agent_teams t ON t.id = m.team_id WHERE m.conversation_id = $1 AND t.owner_id = $2 AND t.state = 'running'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "team",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "channel",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "channel_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "agent_team_members",
+            "name": "name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "00a854a35a57bb1e327a80838d790e9da577c346ba9a3348b84670ba8379983f"
+}

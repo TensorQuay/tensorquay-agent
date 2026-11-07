@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE templates SET builtin_base_image=$2,check_state='unchecked',check_reason=NULL,checked_version=NULL,base=NULL,image_id=NULL,updated_at=CURRENT_TIMESTAMP WHERE name=$1 AND customised_builtin AND builtin_base_image IS NULL AND image=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f25e633e88b58498b205ac2655d088655b1618e40f6e20405abab2001a9b3441"
+}

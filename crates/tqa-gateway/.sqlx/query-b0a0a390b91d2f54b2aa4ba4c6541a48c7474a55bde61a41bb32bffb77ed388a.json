@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT version FROM templates WHERE name=$1 AND last_set_by='builtin' AND NOT customised_builtin AND NOT is_default AND check_state='verified' AND checked_version=version FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "version",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "version"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "b0a0a390b91d2f54b2aa4ba4c6541a48c7474a55bde61a41bb32bffb77ed388a"
+}

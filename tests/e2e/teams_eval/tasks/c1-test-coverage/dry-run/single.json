@@ -1,0 +1,76 @@
+{
+ "model": "fixture",
+ "select": "prompt",
+ "responses": [
+  {
+   "when": "The modules `lib/textstats.py`, `lib/money.py` and `lib/dates.py` have no tests. Add tests under `tests/` until",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "tests/test_dates.py",
+      "content": "import datetime\nimport unittest\n\nfrom lib import dates\n\n\nclass DatesTest(unittest.TestCase):\n    def test_business_days(self):\n        friday = dates.parse_date(\"2026-10-02\")\n        self.assertTrue(dates.is_weekend(dates.parse_date(\"2026-10-03\")))\n        self.assertEqual(dates.add_business_days(friday, 1), datetime.date(2026, 10, 5))\n        self.assertEqual(dates.add_business_days(friday, -1), datetime.date(2026, 10, 1))\n\n    def test_quarter_and_month_range(self):\n        self.assertEqual(dates.quarter(datetime.date(2026, 8, 1)), 3)\n        self.assertEqual(dates.month_range(2026, 2), (datetime.date(2026, 2, 1), datetime.date(2026, 2, 28)))\n        self.assertEqual(dates.month_range(2026, 12)[1], datetime.date(2026, 12, 31))\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The modules `lib/textstats.py`, `lib/money.py` and `lib/dates.py` have no tests. Add tests under `tests/` until",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "tests/test_money.py",
+      "content": "import unittest\n\nfrom lib import money\n\n\nclass MoneyTest(unittest.TestCase):\n    def test_parse(self):\n        self.assertEqual(money.parse(\"12.34\"), 1234)\n        self.assertEqual(money.parse(\"-0.5\"), -50)\n        for bad in (\"\", \"1.2.3\", \"abc\"):\n            with self.assertRaises(ValueError):\n                money.parse(bad)\n\n    def test_format(self):\n        self.assertEqual(money.format_cents(123456), \"1,234.56 EUR\")\n        self.assertEqual(money.format_cents(-5), \"-0.05 EUR\")\n\n    def test_split_and_vat(self):\n        self.assertEqual(money.split(100, 3), [34, 33, 33])\n        with self.assertRaises(ValueError):\n            money.split(1, 0)\n        self.assertEqual(money.add_vat(1000), 1200)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The modules `lib/textstats.py`, `lib/money.py` and `lib/dates.py` have no tests. Add tests under `tests/` until",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "tests/test_textstats.py",
+      "content": "import unittest\n\nfrom lib import textstats\n\n\nclass TextstatsTest(unittest.TestCase):\n    def test_words_and_counts(self):\n        self.assertEqual(textstats.words(\"It's a Test\"), [\"it's\", \"a\", \"test\"])\n        self.assertEqual(textstats.word_count(\"one two three\"), 3)\n\n    def test_top_words(self):\n        self.assertEqual(textstats.top_words(\"b a b c a b\", 2), [\"b\", \"a\"])\n\n    def test_reading_level(self):\n        self.assertEqual(textstats.reading_level(\"\"), \"empty\")\n        self.assertEqual(textstats.reading_level(\"a cat\"), \"easy\")\n        self.assertEqual(textstats.reading_level(\"simple words\"), \"medium\")\n        self.assertEqual(textstats.reading_level(\"extraordinary complexity\"), \"hard\")\n\n    def test_sentences(self):\n        self.assertEqual(textstats.sentences(\"One. Two! Three?\"), [\"One\", \"Two\", \"Three\"])\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The modules `lib/textstats.py`, `lib/money.py` and `lib/dates.py` have no tests. Add tests under `tests/` until",
+   "events": [
+    {
+     "type": "text",
+     "text": "Done: tests/test_dates.py, tests/test_money.py, tests/test_textstats.py."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  }
+ ]
+}

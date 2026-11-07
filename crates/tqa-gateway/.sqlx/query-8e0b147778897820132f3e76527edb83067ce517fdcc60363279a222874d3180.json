@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO users (id, email, password_hash, role) VALUES ($1, 'migration@example.invalid', 'fixture-hash', 'admin')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8e0b147778897820132f3e76527edb83067ce517fdcc60363279a222874d3180"
+}

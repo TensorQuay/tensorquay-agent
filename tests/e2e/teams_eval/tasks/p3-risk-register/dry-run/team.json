@@ -1,0 +1,186 @@
+{
+ "model": "fixture",
+ "select": "prompt",
+ "responses": [
+  {
+   "when": "The folder `project/` holds a store rollout's plan, its budget sheet and status mails. Write `risks.md`: a risk",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "start_member",
+     "arguments": {
+      "role": "scout",
+      "workspace": "own_copy",
+      "profile": null,
+      "brief": {
+       "objective": "Write scout-notes.md listing the files in this workspace for p3-risk-register.",
+       "output": "scout-notes.md, one line per file.",
+       "sources": null,
+       "boundaries": "Write only scout-notes.md."
+      }
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The folder `project/` holds a store rollout's plan, its budget sheet and status mails. Write `risks.md`: a risk",
+   "events": [
+    {
+     "type": "text",
+     "text": "I started a helper; I'll continue when it reports."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The folder `project/` holds a store rollout's plan, its budget sheet and status mails. Write `risks.md`: a risk",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_reports",
+     "arguments": {
+      "wait": 30,
+      "limit": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The folder `project/` holds a store rollout's plan, its budget sheet and status mails. Write `risks.md`: a risk",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "take_files",
+     "arguments": {
+      "report_seq": {
+       "seq_of": {
+        "type": "report",
+        "from": "scout"
+       }
+      },
+      "files": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The folder `project/` holds a store rollout's plan, its budget sheet and status mails. Write `risks.md`: a risk",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "risks.md",
+      "content": "# Risk register\n\n| Risk | Likelihood | Impact | Owner |\n|---|---|---|---|\n| Vendor risk | Medium | High | Ken |\n| Key person risk | Medium | High | Priya |\n| Budget risk | Medium | High | Omar |\n| Regulat risk | Medium | High | Dana |\n| Migration risk | Medium | High | Ken |\n| Audit risk | Medium | High | Omar |\n| Scope risk | Medium | High | Dana |\n| Integration risk | Medium | High | Lena |\n| Training risk | Medium | High | Priya |\n| Capacity risk | Medium | High | Lena |\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The folder `project/` holds a store rollout's plan, its budget sheet and status mails. Write `risks.md`: a risk",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "done",
+     "arguments": {
+      "summary": "Wrote risks.md."
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The folder `project/` holds a store rollout's plan, its budget sheet and status mails. Write `risks.md`: a risk",
+   "events": [
+    {
+     "type": "text",
+     "text": "Done: risks.md."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "shell",
+     "arguments": {
+      "command": "find . -path ./.git -prune -o -type f -print | sort > scout-notes.md"
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "send_to_lead",
+     "arguments": {
+      "type": "report",
+      "text": "scout-notes.md lists the workspace's files.",
+      "question_seq": null,
+      "files": [
+       "scout-notes.md"
+      ]
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "text",
+     "text": "I reported to my lead."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  }
+ ]
+}

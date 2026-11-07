@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE secrets SET nonce=(SELECT nonce FROM secrets WHERE ref=$1),ciphertext=(SELECT ciphertext FROM secrets WHERE ref=$1) WHERE ref=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e35a6ad506c10be91d57d4a9656b62a78af25ee9e209df74b2629cf34d2db4c0"
+}

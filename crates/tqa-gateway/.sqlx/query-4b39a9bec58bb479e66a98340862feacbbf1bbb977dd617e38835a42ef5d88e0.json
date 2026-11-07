@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM templates WHERE name=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4b39a9bec58bb479e66a98340862feacbbf1bbb977dd617e38835a42ef5d88e0"
+}

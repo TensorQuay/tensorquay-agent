@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT key FROM idempotency ORDER BY key",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "key",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "idempotency",
+            "name": "key"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "9dd05cc2e47aa9e1475b4e906458e187ecc0b4137e358ef93b8472ccf15625a1"
+}

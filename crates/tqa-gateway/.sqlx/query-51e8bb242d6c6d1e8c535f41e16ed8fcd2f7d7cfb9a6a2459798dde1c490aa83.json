@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT MIN(seq) FILTER (WHERE lifecycle='run.started') AS \"started\",\n                  MAX(seq) FILTER (WHERE lifecycle IN ('run.completed','run.failed','run.cancelled')) AS \"ended\"\n           FROM events WHERE conversation_id=$1 AND (run_id=$2 OR frame->'event'->>'run_id'=$2)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "started",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "ended",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "51e8bb242d6c6d1e8c535f41e16ed8fcd2f7d7cfb9a6a2459798dde1c490aa83"
+}

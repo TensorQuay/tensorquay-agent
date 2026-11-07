@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(EXTRACT(EPOCH FROM CURRENT_TIMESTAMP - LEAST( (SELECT min(updated_at) FROM conversations WHERE state='deleted'), (SELECT min(updated_at) FROM workspaces WHERE state='deleted')))::double precision, 0) AS \"seconds!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "seconds!",
+        "type_info": "Float8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "6dffbde799bbdc97f6bac2e336672a8fdb6cb88b378950c8644a33a6674117eb"
+}

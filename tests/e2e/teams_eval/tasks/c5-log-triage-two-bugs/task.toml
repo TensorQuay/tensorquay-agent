@@ -1,0 +1,6 @@
+id = "c5-log-triage-two-bugs"
+title = "Trace two crashes in a long service log to their handlers and fix them"
+tags = ["teams-eval", "teams-code"]
+budgets = { max_steps = 60, wall_clock_secs = 1500, max_tokens = 800000 }
+protected = ["logs/service.log"]
+check = { image = "runtime", timeout_secs = 120 }

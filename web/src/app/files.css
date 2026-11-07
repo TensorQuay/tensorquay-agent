@@ -1,0 +1,626 @@
+/* UI-GUIDELINES §6: the conversation column and the optional 360 px right panel for the task's files. */
+.conversation-layout {
+  container: conversation-layout / inline-size;
+  position: relative;
+  display: flex;
+  gap: var(--space-6);
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+.conversation-layout > .conversation-page {
+  flex: 1 1 auto;
+}
+.files-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 var(--panel-width);
+  width: var(--panel-width);
+  min-height: 0;
+  padding-left: var(--space-4);
+  border-left: var(--border-width) solid var(--line);
+  background: var(--paper);
+}
+/* The panel docks beside the transcript, which narrows, where the task's layout has room for both (DOCK_WIDTH in
+   use-task-layout.ts: 360 + 24 + 516 px of conversation; WEB-U-022 at 1280, WEB-U-170 at 1024 with the rail). The layout's
+   own width decides, so an open sidebar counts (the fix's review). With less room the panel takes the whole column,
+   never part of it, from where the header ends (its lines vary: the pickers' second line on a phone, WEB-U-171) to
+   above the composer, which stays usable with the panel open. */
+@container conversation-layout (max-width: 899px) {
+  .files-panel {
+    position: absolute;
+    top: var(--bar-offset, var(--bar-height));
+    /* Ends above the composer (use-task-layout). */
+    bottom: var(--composer-offset, var(--space-4));
+    left: 0;
+    right: 0;
+    width: auto;
+    z-index: 5;
+    padding-inline: var(--space-4);
+    border: var(--border-width) solid var(--line);
+    border-radius: var(--dialog-radius);
+    box-shadow: var(--elevation);
+  }
+}
+.files-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--bar-height);
+  flex-shrink: 0;
+}
+.files-heading h2 {
+  flex: 1;
+  margin: 0;
+}
+.files-path {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  padding-bottom: var(--space-2);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.files-step {
+  font-size: var(--small-size);
+  line-height: var(--small-leading);
+}
+button.files-step {
+  min-height: var(--min-control-height);
+  padding: 0 var(--space-1);
+  border: 0;
+  border-radius: var(--control-radius);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+button.files-step:hover {
+  color: var(--ink);
+  background: var(--hover-tint);
+}
+span.files-step {
+  padding: 0 var(--space-1);
+  font-weight: 700;
+}
+.files-running {
+  padding-bottom: var(--space-2);
+}
+.files-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--space-1);
+}
+.files-state {
+  padding-block: var(--space-4);
+}
+.file-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.file-open {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  /* §5c: a file or change is a 32 px row with 14 px text. */
+  min-height: var(--row-height-nav);
+  padding: 0 var(--nav-pad-inline);
+  font-size: var(--nav-font-size);
+  border: 0;
+  border-radius: var(--control-radius);
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+}
+button.file-open {
+  cursor: pointer;
+}
+button.file-open:hover {
+  background: var(--hover-tint);
+}
+.file-open svg {
+  flex-shrink: 0;
+  color: var(--muted);
+}
+.file-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.files-more {
+  margin-top: var(--space-2);
+}
+.file-preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.file-preview-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+/* Findings F1-F3: an image, a rendered document or a table, as the agent made it; the text a toggle away. */
+.file-kind {
+  gap: var(--space-2);
+  min-width: 0;
+}
+.file-kind-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.file-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--control-radius);
+  background: var(--surface);
+}
+.file-document {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.file-table {
+  max-height: 60vh;
+  overflow: auto;
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+}
+/* A sheet wider than its box fades at the right edge while there is more to scroll to (WEB-U-182). */
+.file-sheet[data-more] {
+  mask-image: linear-gradient(to left, transparent, var(--ink) var(--space-8));
+}
+.file-table table {
+  border-collapse: collapse;
+  width: max-content;
+  min-width: 100%;
+  font-size: var(--label-size);
+}
+.file-table th,
+.file-table td {
+  padding: var(--space-1) var(--space-2);
+  border-bottom: var(--border-width) solid var(--line);
+  text-align: left;
+  vertical-align: top;
+  white-space: pre-wrap;
+}
+.file-table th {
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+}
+/* The file previews design: an agent's web page in a sandboxed frame, on the white a browser gives a page. */
+.file-page {
+  display: block;
+  width: 100%;
+  height: 60vh;
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+  background: var(--page-canvas);
+  color-scheme: light;
+}
+/* A PDF's pages, drawn by pdf.js, one under another at the panel's width. */
+.file-pdf {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-height: 70vh;
+  overflow: auto;
+}
+.preview-dialog .file-pdf {
+  max-height: calc(100dvh - 220px);
+  align-items: center;
+}
+/* A page: its picture, and its text laid over it (WEB-U-277). It keeps the width it was drawn at, so the text stays on
+   its words; the pages' column scrolls instead. */
+.file-pdf-page {
+  position: relative;
+  flex-shrink: 0;
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+  background: var(--page-canvas);
+}
+.file-pdf-page canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: inherit;
+}
+/* pdf.js's text layer (its viewer's .textLayer rules, the part a text layer without highlights or images needs): each
+   run of text sits on its words, transparent, so the picture shows and the text can be read and selected. */
+.file-pdf-page .textLayer {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  line-height: 1;
+  text-align: initial;
+  letter-spacing: normal;
+  word-spacing: normal;
+  text-size-adjust: none;
+  forced-color-adjust: none;
+  transform-origin: 0 0;
+  caret-color: CanvasText;
+  --min-font-size: 1;
+  --text-scale-factor: calc(var(--total-scale-factor) * var(--min-font-size));
+  --min-font-size-inv: calc(1 / var(--min-font-size));
+}
+.file-pdf-page .textLayer :is(span, br) {
+  position: absolute;
+  color: transparent;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0% 0%;
+  user-select: text;
+}
+.file-pdf-page .textLayer > :not(.markedContent),
+.file-pdf-page .textLayer .markedContent span:not(.markedContent) {
+  --font-height: 0;
+  --scale-x: 1;
+  --rotate: 0deg;
+  z-index: 1;
+  font-size: calc(var(--text-scale-factor) * var(--font-height));
+  transform: rotate(var(--rotate)) scaleX(var(--scale-x))
+    scale(var(--min-font-size-inv));
+}
+.file-pdf-page .textLayer .markedContent {
+  display: contents;
+}
+.file-pdf-page .textLayer ::selection {
+  background: color-mix(in srgb, var(--focus), transparent 70%);
+  color: transparent;
+}
+.file-pdf-page .textLayer br::selection {
+  background: transparent;
+}
+.file-pdf-page .textLayer .endOfContent {
+  position: absolute;
+  inset: 100% 0 0;
+  display: block;
+  user-select: none;
+  cursor: default;
+}
+.file-preview-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+/* Expand (the file previews review): the same preview wide, over the conversation. */
+.preview-dialog {
+  width: min(1200px, calc(100% - var(--space-8)));
+  height: calc(100dvh - var(--space-8));
+  display: flex;
+  flex-direction: column;
+}
+.preview-dialog:not([open]) {
+  display: none;
+}
+.preview-dialog .dialog-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+.preview-dialog .file-page {
+  height: calc(100dvh - 220px);
+}
+.preview-dialog .file-table {
+  max-height: calc(100dvh - 260px);
+}
+/*
+ * A sheet's columns are capped so one long cell can't decide a column: it ends in an ellipsis and shows in full on
+ * hover. The cap sits on each cell's content (a table stretches cells past their max-width), and a sheet's table
+ * never stretches to fill; wide, the cap is higher. The table scrolls sideways under sticky letters and row numbers.
+ */
+.file-table.file-sheet {
+  width: fit-content;
+  max-width: 100%;
+}
+.file-table.file-sheet table {
+  min-width: 0;
+}
+.file-sheet th,
+.file-sheet td {
+  white-space: nowrap;
+}
+.file-cell {
+  display: block;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.preview-dialog .file-cell {
+  max-width: 320px;
+}
+.file-table.file-sheet td.file-cell-number {
+  min-width: 6ch;
+}
+.file-sheet tbody th {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--surface);
+}
+.file-sheet thead td {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  background: var(--surface);
+}
+.file-sheets {
+  align-self: flex-start;
+}
+.file-table td.file-cell-number,
+.file-table th.file-cell-number {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.file-sheet-row {
+  color: var(--muted);
+  font-weight: 400;
+  text-align: right;
+}
+/* Line numbers come from a counter, so copying the text never copies them. */
+.file-text {
+  margin: 0;
+  padding: var(--space-3);
+  overflow: auto;
+  border-radius: var(--control-radius);
+  background: var(--code-bg);
+  counter-reset: line;
+}
+.file-line {
+  counter-increment: line;
+}
+.file-line::before {
+  content: counter(line);
+  display: inline-block;
+  min-width: 4ch;
+  margin-right: var(--space-3);
+  color: var(--muted);
+  text-align: right;
+  user-select: none;
+}
+/* Composer attachments (§7): chips inside the card, above the text. */
+.attachment-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+.user-message .attachment-chips {
+  margin: var(--space-2) 0 0;
+}
+.attachment-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 100%;
+  min-height: var(--min-control-height);
+  padding: 0 var(--space-1) 0 var(--space-2);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+  background: var(--surface);
+}
+.attachment-chip[data-status="sent"] {
+  padding-right: var(--space-2);
+  background: var(--paper);
+}
+.attachment-chip[data-status="failed"] {
+  border-color: var(--danger);
+}
+.attachment-chip svg {
+  flex-shrink: 0;
+  color: var(--muted);
+}
+.attachment-name {
+  min-width: 0;
+  max-width: 24ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.attachment-error {
+  color: var(--danger);
+}
+.attachment-progress {
+  display: block;
+  width: 64px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: var(--pill-radius);
+  background: var(--line);
+}
+.attachment-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--ink);
+  transition: inline-size var(--motion-fast) linear;
+}
+.button.attachment-remove {
+  width: var(--min-control-height);
+  height: var(--min-control-height);
+}
+.composer-controls:has(.composer-attach) {
+  justify-content: space-between;
+}
+.composer-drop {
+  margin: 0 0 var(--space-3);
+}
+.composer[data-dragging] .composer-card {
+  outline: var(--focus-width) dashed var(--ink);
+  outline-offset: var(--focus-offset);
+}
+/* The header's quiet Files icon (the UI standard): tinted while its panel is open. */
+.files-toggle > .button[aria-expanded="true"] {
+  background: var(--hover-tint);
+}
+/* Focus moved here by the page (a view change) shows no ring; the keyboard's focus shows the usual one (WCAG 2.4.7). */
+.files-body:focus:not(:focus-visible) {
+  outline: none;
+}
+/* Task 068c: the Files and Changes tabs, the changed-file list and a run's diff (§7 tool-card diff tints). */
+.files-tabs {
+  display: flex;
+  flex: 1;
+  gap: var(--space-1);
+}
+.files-tab {
+  min-height: var(--min-control-height);
+  padding: 0 var(--space-2);
+  border: 0;
+  border-bottom: var(--focus-width) solid transparent;
+  border-radius: var(--control-radius);
+  background: transparent;
+  color: var(--muted);
+  font-size: var(--body-size);
+  font-weight: 700;
+  cursor: pointer;
+}
+.files-tab:hover {
+  color: var(--ink);
+  background: var(--hover-tint);
+}
+/* The selected tab is underlined, so hovering it still shows a change. */
+.files-tab[aria-selected="true"] {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+.change-status {
+  flex-shrink: 0;
+}
+.change-status[data-status="added"] {
+  color: var(--ok);
+}
+.change-status[data-status="modified"] {
+  color: var(--info);
+}
+.change-status[data-status="deleted"] {
+  color: var(--danger);
+}
+.change-counts {
+  display: flex;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+.change-counts [data-tone="ok"] {
+  color: var(--ok);
+}
+.change-counts [data-tone="danger"] {
+  color: var(--danger);
+}
+.changes-back {
+  align-self: flex-start;
+}
+.diff-scroll {
+  overflow: auto;
+  border-radius: var(--control-radius);
+}
+.diff-lines {
+  margin: 0;
+  padding: var(--space-3) 0;
+  list-style: none;
+  border-radius: var(--control-radius);
+  background: var(--code-bg);
+}
+/* Review of 068c: long lines wrap inside the panel; the +/- marker keeps its own first column. */
+.diff-line {
+  display: flex;
+  padding: 0 var(--space-3);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.diff-marker {
+  flex: 0 0 1ch;
+}
+.diff-text {
+  min-width: 0;
+}
+.diff-line[data-kind="added"] {
+  background: color-mix(in srgb, var(--ok) var(--status-tint), transparent);
+}
+.diff-line[data-kind="removed"] {
+  background: color-mix(in srgb, var(--danger) var(--status-tint), transparent);
+}
+/* A hunk is a quiet separator in words (WEB-U-164, its words in the label type), with space above it, and the section it
+   is in (a function's name) after it, in the code type. */
+.diff-line[data-kind="hunk"] {
+  color: var(--muted);
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+.diff-line[data-kind="hunk"]:first-child {
+  margin-top: 0;
+}
+.diff-section {
+  min-width: 0;
+}
+/* Review of 068c: the run picker in the app's menu style; the diff headed like its list row. */
+.changes-picker .picker-button {
+  max-width: 100%;
+}
+.change-path {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
+.change-dir {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+}
+.change-name {
+  flex-shrink: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.diff-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--body-size);
+  font-weight: 400;
+  min-width: 0;
+}
+/* WEB-U-046: the Context tab, what the latest run loaded (FR-11). Names and paths wrap inside the 360 px panel. */
+.context-view {
+  padding: var(--space-2);
+}
+.context-empty {
+  padding: var(--space-4) var(--space-2);
+}
+.context-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.context-entry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-2);
+  padding-block: var(--space-2);
+  border-top: var(--border-width) solid var(--line);
+}
+.context-entry > p {
+  flex-basis: 100%;
+  margin: 0;
+}
+.context-name {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}

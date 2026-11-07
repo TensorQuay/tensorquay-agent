@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE templates SET check_state='refused',check_reason=$3,checked_version=$2,check_secret_files=$4,check_scan_limit=$5,updated_at=CURRENT_TIMESTAMP WHERE name=$1 AND version=$2 RETURNING is_default",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "is_default",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "is_default"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8",
+        "Text",
+        "Jsonb",
+        "Jsonb"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "efe31e49ea818400b091f7afa9683fb415292dd32acc0e599ed834bf581ee8df"
+}

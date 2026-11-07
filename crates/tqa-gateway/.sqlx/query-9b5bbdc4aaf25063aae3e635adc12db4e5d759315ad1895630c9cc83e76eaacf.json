@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT seq FROM events WHERE conversation_id=$1 ORDER BY seq OFFSET $2 LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "seq",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "events",
+            "name": "seq"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "9b5bbdc4aaf25063aae3e635adc12db4e5d759315ad1895630c9cc83e76eaacf"
+}

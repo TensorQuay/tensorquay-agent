@@ -1,0 +1,54 @@
+data: {"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"```"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"t"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"qa"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"_call"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"\n"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"{\""},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"name"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"\":"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":" \""},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"glob"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"\","},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":" \""},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"arguments"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"\":"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":" {\""},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"pattern"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"\":"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":" \"**"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"/*."},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"py"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"\"}}"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"\n"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"```"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: {"choices":[],"usage":{"prompt_tokens":1535,"completion_tokens":24}}
+
+data: [DONE]
+

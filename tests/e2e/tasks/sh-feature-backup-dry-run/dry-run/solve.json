@@ -1,0 +1,35 @@
+{
+ "model": "fixture",
+ "responses": [
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "backup.sh",
+      "content": "#!/bin/sh\n# Copies every file under SOURCE into DEST, keeping relative paths, and reports each copy.\n# Usage: sh backup.sh [--dry-run] SOURCE DEST\nset -eu\ndry_run=false\nif [ \"${1:-}\" = \"--dry-run\" ]; then\n    dry_run=true\n    shift\nfi\nsrc=$1\ndest=$2\nfind \"$src\" -type f | sort | while IFS= read -r file; do\n    rel=${file#\"$src\"/}\n    if [ \"$dry_run\" = true ]; then\n        printf 'would copy %s\\n' \"$rel\"\n        continue\n    fi\n    mkdir -p \"$dest/$(dirname \"$rel\")\"\n    cp \"$file\" \"$dest/$rel\"\n    printf 'copied %s\\n' \"$rel\"\ndone\n",
+      "create_parents": false
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 420,
+    "completion_tokens": 160
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "backup.sh now takes --dry-run and only reports what it would copy."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 700,
+    "completion_tokens": 20
+   }
+  }
+ ]
+}

@@ -1,0 +1,7 @@
+id = "ts-config-npm-test"
+title = "Repair a package configuration so npm test runs every test"
+tags = ["typescript", "config", "small", "cmp"]
+budgets = { max_steps = 25, wall_clock_secs = 600, max_tokens = 150000 }
+protected = ["src/money.ts", "test/money.test.ts", "test/format.test.ts"]
+check = { image = "workstation", timeout_secs = 120 }
+template = "workstation"

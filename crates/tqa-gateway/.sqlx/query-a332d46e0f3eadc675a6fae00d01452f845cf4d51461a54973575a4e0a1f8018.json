@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE egress_rules SET seed_state='current' WHERE host=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a332d46e0f3eadc675a6fae00d01452f845cf4d51461a54973575a4e0a1f8018"
+}

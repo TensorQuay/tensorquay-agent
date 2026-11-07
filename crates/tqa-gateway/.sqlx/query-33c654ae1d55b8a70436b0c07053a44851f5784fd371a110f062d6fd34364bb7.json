@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT set_config('lock_timeout', reset_val, true) FROM pg_settings WHERE name = 'lock_timeout'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "set_config",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "33c654ae1d55b8a70436b0c07053a44851f5784fd371a110f062d6fd34364bb7"
+}

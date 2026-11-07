@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT state FROM agent_team_members WHERE conversation_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "agent_team_members",
+            "name": "state"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "c516f818892768bb7baf7985e908944be5e0c42722a636ba0a6ba892013e16e2"
+}

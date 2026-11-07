@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT execution_status,execution_error FROM idempotency WHERE conversation_id=$1 ORDER BY ordinal DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "execution_status",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "idempotency",
+            "name": "execution_status"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "execution_error",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "idempotency",
+            "name": "execution_error"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "efdf4d6ba3744839d7ac3964c762f05aba4c72ba07c299989a6bd00089ebe272"
+}

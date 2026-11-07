@@ -1,0 +1,5 @@
+.recorded-duration,
+.run-elapsed {
+  display: inline-block;
+  width: 7ch;
+}

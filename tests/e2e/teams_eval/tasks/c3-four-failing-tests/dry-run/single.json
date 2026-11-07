@@ -1,0 +1,95 @@
+{
+ "model": "fixture",
+ "select": "prompt",
+ "responses": [
+  {
+   "when": "Four tests fail in `suite/`, each in a different module of `suite/pkg/`. Fix the code so that every test passes,",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "suite/pkg/duration.py",
+      "content": "\"\"\"Durations.\"\"\"\nimport re\n\nUNITS = {\"h\": 3600, \"m\": 60, \"s\": 1}\n\n\ndef parse_duration(text):\n    \"\"\"'1h30m', '45m', '2h' or '90s' in seconds.\"\"\"\n    total = 0\n    for amount, unit in re.findall(r\"(\\d+)([hms])\", text):\n        total += int(amount) * UNITS[unit]\n    if not total and not re.fullmatch(r\"(\\d+[hms])+\", text):\n        raise ValueError(f\"not a duration: {text!r}\")\n    return total\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Four tests fail in `suite/`, each in a different module of `suite/pkg/`. Fix the code so that every test passes,",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "suite/pkg/rounding.py",
+      "content": "\"\"\"Rounding for invoices.\"\"\"\nfrom decimal import ROUND_HALF_UP, Decimal\n\n\ndef round_half_up(value, places=0):\n    \"\"\"A decimal string rounded half away from zero.\"\"\"\n    exponent = Decimal(1).scaleb(-places)\n    return Decimal(value).quantize(exponent, ROUND_HALF_UP)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Four tests fail in `suite/`, each in a different module of `suite/pkg/`. Fix the code so that every test passes,",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "suite/pkg/slug.py",
+      "content": "\"\"\"URL slugs.\"\"\"\nimport re\n\n\ndef slugify(text):\n    \"\"\"Lower case words joined by single dashes.\"\"\"\n    return re.sub(r\"[^a-z0-9]+\", \"-\", text.lower()).strip(\"-\")\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Four tests fail in `suite/`, each in a different module of `suite/pkg/`. Fix the code so that every test passes,",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "suite/pkg/window.py",
+      "content": "\"\"\"Moving averages.\"\"\"\n\n\ndef moving_average(values, size):\n    \"\"\"The mean of every run of `size` consecutive values.\"\"\"\n    return [sum(values[start:start + size]) / size for start in range(len(values) - size + 1)]\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Four tests fail in `suite/`, each in a different module of `suite/pkg/`. Fix the code so that every test passes,",
+   "events": [
+    {
+     "type": "text",
+     "text": "Done: suite/pkg/duration.py, suite/pkg/rounding.py, suite/pkg/slug.py, suite/pkg/window.py."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  }
+ ]
+}

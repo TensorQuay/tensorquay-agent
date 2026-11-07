@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT type, body FROM channel_messages WHERE channel_id = $1 AND seq = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "type",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "type"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "body",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "body"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "93795da14d1150d85ee361d616f23195c44be1534e9ef4c2ca1acc5965600dfa"
+}

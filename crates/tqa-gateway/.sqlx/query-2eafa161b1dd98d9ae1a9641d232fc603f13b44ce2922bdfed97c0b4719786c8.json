@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM seed_tombstones WHERE area=$1 AND item=$2 RETURNING seed_digest",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "seed_digest",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "seed_tombstones",
+            "name": "seed_digest"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "2eafa161b1dd98d9ae1a9641d232fc603f13b44ce2922bdfed97c0b4719786c8"
+}

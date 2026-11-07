@@ -1,0 +1,33 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT c.template_digest AS image,count(*) AS \"count!\" FROM sandbox_instances s JOIN conversations c ON c.id=s.conversation_id WHERE s.phase<>'destroying' GROUP BY c.template_digest",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "image",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "template_digest"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "51f1235a6a0993f228fe5414815725541b90041cafdd964ee5623e352479695d"
+}

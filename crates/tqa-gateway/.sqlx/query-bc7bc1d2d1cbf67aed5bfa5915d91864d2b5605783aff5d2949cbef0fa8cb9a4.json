@@ -1,0 +1,54 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT w.id AS workspace, w.lease_conversation_id AS \"holder!\", COALESCE(w.lease_expires_at<=CURRENT_TIMESTAMP, true) AS \"expired!\", COALESCE(h.pinned, false) AS \"pinned!\" FROM workspaces w LEFT JOIN conversations h ON h.id=w.lease_conversation_id WHERE w.id = ANY($1) AND w.lease_conversation_id IS NOT NULL AND EXISTS(SELECT 1 FROM sandbox_instances s WHERE s.conversation_id=w.lease_conversation_id)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "workspace",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "holder!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "lease_conversation_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "expired!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "pinned!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      null,
+      null
+    ]
+  },
+  "hash": "bc7bc1d2d1cbf67aed5bfa5915d91864d2b5605783aff5d2949cbef0fa8cb9a4"
+}

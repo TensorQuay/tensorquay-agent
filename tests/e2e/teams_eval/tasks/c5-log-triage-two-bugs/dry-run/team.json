@@ -1,0 +1,205 @@
+{
+ "model": "fixture",
+ "select": "prompt",
+ "responses": [
+  {
+   "when": "Some requests fail with status 500 in `logs/service.log`. Find the handlers under `app/handlers/` that cause the",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "start_member",
+     "arguments": {
+      "role": "scout",
+      "workspace": "own_copy",
+      "profile": null,
+      "brief": {
+       "objective": "Write scout-notes.md listing the files in this workspace for c5-log-triage-two-bugs.",
+       "output": "scout-notes.md, one line per file.",
+       "sources": null,
+       "boundaries": "Write only scout-notes.md."
+      }
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Some requests fail with status 500 in `logs/service.log`. Find the handlers under `app/handlers/` that cause the",
+   "events": [
+    {
+     "type": "text",
+     "text": "I started a helper; I'll continue when it reports."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Some requests fail with status 500 in `logs/service.log`. Find the handlers under `app/handlers/` that cause the",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_reports",
+     "arguments": {
+      "wait": 30,
+      "limit": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Some requests fail with status 500 in `logs/service.log`. Find the handlers under `app/handlers/` that cause the",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "take_files",
+     "arguments": {
+      "report_seq": {
+       "seq_of": {
+        "type": "report",
+        "from": "scout"
+       }
+      },
+      "files": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Some requests fail with status 500 in `logs/service.log`. Find the handlers under `app/handlers/` that cause the",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/handlers/h13.py",
+      "content": "\"\"\"Handler 13: request statistics for endpoint /api/e13.\"\"\"\n\nWEIGHT = 7\n\n\ndef ratio(hits, count):\n    \"\"\"Return hits per request, rounded to four places; 0.0 when there were no requests.\"\"\"\n    if count == 0:\n        return 0.0\n    return round(hits / count, 4)\n\n\ndef score(values):\n    \"\"\"Return the weighted sum of the values; 0 for no values.\"\"\"\n    if not values:\n        return 0\n    top = max(values)\n    return sum(min(value, top) * WEIGHT for value in values)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Some requests fail with status 500 in `logs/service.log`. Find the handlers under `app/handlers/` that cause the",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/handlers/h27.py",
+      "content": "\"\"\"Handler 27: request statistics for endpoint /api/e27.\"\"\"\n\nWEIGHT = 7\n\n\ndef ratio(hits, count):\n    \"\"\"Return hits per request, rounded to four places; 0.0 when there were no requests.\"\"\"\n    if count == 0:\n        return 0.0\n    return round(hits / count, 4)\n\n\ndef score(values):\n    \"\"\"Return the weighted sum of the values; 0 for no values.\"\"\"\n    return sum(value * WEIGHT for value in values)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Some requests fail with status 500 in `logs/service.log`. Find the handlers under `app/handlers/` that cause the",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "done",
+     "arguments": {
+      "summary": "Wrote app/handlers/h13.py, app/handlers/h27.py."
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Some requests fail with status 500 in `logs/service.log`. Find the handlers under `app/handlers/` that cause the",
+   "events": [
+    {
+     "type": "text",
+     "text": "Done: app/handlers/h13.py, app/handlers/h27.py."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "shell",
+     "arguments": {
+      "command": "find . -path ./.git -prune -o -type f -print | sort > scout-notes.md"
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "send_to_lead",
+     "arguments": {
+      "type": "report",
+      "text": "scout-notes.md lists the workspace's files.",
+      "question_seq": null,
+      "files": [
+       "scout-notes.md"
+      ]
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "text",
+     "text": "I reported to my lead."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  }
+ ]
+}

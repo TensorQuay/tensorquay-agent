@@ -1,0 +1,5 @@
+[
+ "Each of lib/textstats.py, lib/money.py and lib/dates.py reaches 80 % line coverage",
+ "lib/ is unchanged; the tests pass",
+ "Worth covering: reading_level's four outcomes, parse's errors, negative business days, December in month_range"
+]

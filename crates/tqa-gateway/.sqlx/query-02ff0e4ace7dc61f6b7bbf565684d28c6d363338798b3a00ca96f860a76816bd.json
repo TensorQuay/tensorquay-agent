@@ -1,0 +1,77 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT key,user_id,ordinal AS \"ordinal!\",held,queued_frame FROM idempotency WHERE conversation_id=$1 AND route=$2 AND execution_status='queued' ORDER BY ordinal FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "key",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "idempotency",
+            "name": "key"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "idempotency",
+            "name": "user_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "ordinal!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "idempotency",
+            "name": "ordinal"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "held",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "idempotency",
+            "name": "held"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "queued_frame",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "idempotency",
+            "name": "queued_frame"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "02ff0e4ace7dc61f6b7bbf565684d28c6d363338798b3a00ca96f860a76816bd"
+}

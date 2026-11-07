@@ -1,0 +1,50 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT ref,rotated_at,rotate_after_days FROM secrets WHERE rotate_after_days IS NOT NULL ORDER BY ref",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ref",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "secrets",
+            "name": "ref"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "rotated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "secrets",
+            "name": "rotated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "rotate_after_days",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "secrets",
+            "name": "rotate_after_days"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "70936711a8a1e6ee2c86d8fee44c8711c570aa4d867cabb2168708042c3af054"
+}

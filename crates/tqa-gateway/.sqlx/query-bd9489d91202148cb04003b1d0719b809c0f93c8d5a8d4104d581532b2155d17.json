@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT sha256(convert_to(document::text, 'UTF8')) AS \"digest!\" FROM model_routes WHERE name=$1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "digest!",
+        "type_info": "Bytea",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "bd9489d91202148cb04003b1d0719b809c0f93c8d5a8d4104d581532b2155d17"
+}

@@ -1,0 +1,5 @@
+[
+ "101 is real: percent uses floor division (//); 1/3 gives 33.33 once fixed",
+ "103 is real: median does not sort its values",
+ "102 is not a bug: mean documents a ValueError for no values; its test is expectedFailure"
+]

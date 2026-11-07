@@ -1,0 +1,58 @@
+[package]
+name = "tqa-runtime"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+description = "The sandbox runtime process, outbound gateway link, supervision and health."
+
+[features]
+testing = []
+
+# A scriptable stdio MCP server for the runtime's own tests; never part of a release build.
+[[bin]]
+name = "tqa-fake-mcp"
+path = "src/bin/tqa-fake-mcp.rs"
+required-features = ["testing"]
+
+[[bin]]
+name = "tqa-runtime"
+path = "src/bin/tqa-runtime.rs"
+
+[dependencies]
+tqa-types = { version = "0.1.0", path = "../tqa-types" }
+tqa-llm = { version = "0.1.0", path = "../tqa-llm" }
+tqa-context = { version = "0.1.0", path = "../tqa-context" }
+tqa-tools = { version = "0.1.0", path = "../tqa-tools" }
+tqa-prompt = { version = "0.1.0", path = "../tqa-prompt" }
+tqa-core = { version = "0.1.0", path = "../tqa-core" }
+async-trait = "~0.1"
+base64 = "~0.22"
+sha2 = "~0.11"
+futures = "~0.3"
+tokio = { version = "~1.53", features = ["rt-multi-thread", "macros", "net", "process", "signal", "sync", "time"] }
+tokio-util = { version = "~0.7", features = ["rt", "codec"] }
+serde = { version = "~1.0", features = ["derive"] }
+serde_json = "~1.0"
+thiserror = "~2.0"
+secrecy = "~0.10"
+reqwest = { version = "~0.12", default-features = false, features = ["rustls-tls", "stream", "json"] }
+url = "~2.5"
+time = { version = "~0.3", features = ["formatting", "parsing"] }
+tracing = "~0.1"
+tracing-subscriber = { version = "~0.3", features = ["json"] }
+tokio-tungstenite = { version = "~0.29", default-features = false, features = ["connect", "rustls-tls-webpki-roots"] }
+# The stdio MCP client only (ADR-0011 decision 6): pinned, with the client and async read/write transport features.
+rmcp = { version = "=3.4.1", default-features = false, features = ["client", "transport-async-rw"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+rustix = { version = "~1.1", features = ["process", "fs", "net", "param"] }
+
+[dev-dependencies]
+tqa-runtime = { path = ".", features = ["testing"] }
+tqa-testkit = { version = "0.1.0", path = "../tqa-testkit" }
+tempfile = "~3.27"
+
+[lints]
+workspace = true

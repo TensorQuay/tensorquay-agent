@@ -1,0 +1,120 @@
+/* The Screen panel (ADR-0039 §5; the computer-use design note): the desktop's picture at 16:10, fitted, never cropped. */
+.screen-panel {
+  min-width: 0;
+}
+.screen-status {
+  margin: 0;
+}
+.screen-picture {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  outline: var(--border-width) solid var(--line);
+}
+/* While it is away (reconnecting, the screen unavailable) the last picture stays, dimmed. */
+.screen-picture[data-away] {
+  opacity: 0.5;
+}
+/* This tab has control: the picture says so by its outline, as the status line does in words. */
+.screen-picture[data-control] {
+  outline: calc(var(--border-width) * 2) solid var(--warn);
+}
+/* A sign-out that may have left sign-ins behind reads in the danger tone, beside its words (WEB-U-270). */
+.screen-panel [data-tone="danger"] {
+  color: var(--danger);
+}
+/* A state to wait out (a late grant) reads in the attention tone, its clock before the words (WEB-U-333). */
+.screen-panel [data-tone="warn"] {
+  color: var(--warn);
+}
+.screen-status[data-tone="warn"] {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+}
+.screen-status[data-tone="warn"] svg {
+  flex-shrink: 0;
+  margin-top: calc(var(--space-1) / 2);
+}
+/* No picture drawn (not connected yet, or dropped): no empty box (WEB-U-334). */
+.screen-picture[data-empty] {
+  display: none;
+}
+.screen-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .screen-picture {
+    transition: opacity 150ms ease-out;
+  }
+}
+/* Where the picture is shown: the panel, or the expanded dialog, up to the desktop's own width (ADR-0039 §1). */
+.screen-slot {
+  width: 100%;
+  min-width: 0;
+}
+/* In the dialog the picture's width is also held to the height left for it at 16:10, so the status, Hand back, ⋯ and
+   the lines stay in view at a laptop's height (the 16d page pass, Z14); 22.5rem is the rest of the dialog, its lines
+   wrapped at that width. The status, the controls and the lines take the picture's width, so they start where it does. */
+.preview-dialog .screen-panel {
+  width: 100%;
+  max-width: min(1280px, calc((100dvh - 22.5rem) * 16 / 10));
+  margin-inline: auto;
+}
+/* A desktop action's pictures on its card (ADR-0039 §9): side by side where they fit, one above the other when not. */
+.screen-pictures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: var(--space-3);
+}
+.screen-figure {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  min-width: 0;
+}
+.screen-thumb {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+}
+/* The picture keeps the room its size reserves before it loads (§5b: no shift), and never overflows its column. */
+.screen-thumb img,
+.screen-wide {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-control);
+  outline: var(--border-width) solid var(--line);
+}
+.screen-missing {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+}
+/* The replay's Previous or Next at an end: unavailable, still focusable (WEB-U-272). */
+.screen-replay .button[aria-disabled="true"] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+/* The agent is acting on the desktop (the c16 UX review, #14): a dot on the Screen toggle, beside its words. */
+.screen-acting > .button {
+  position: relative;
+}
+.screen-acting > .button::after {
+  content: "";
+  position: absolute;
+  inset-block-start: var(--space-1);
+  inset-inline-end: var(--space-1);
+  inline-size: 6px;
+  block-size: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}

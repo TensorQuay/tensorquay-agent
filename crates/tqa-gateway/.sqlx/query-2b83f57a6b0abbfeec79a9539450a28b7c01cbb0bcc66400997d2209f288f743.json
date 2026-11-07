@@ -1,0 +1,137 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT CASE WHEN usable THEN p.key_id END AS \"key_id?\", k.secret_ref AS \"secret_ref?\", p.conversation_id, p.sandbox_id, p.run_id, p.ended_at IS NOT NULL AS \"ended!\", p.sender_id, p.name, COALESCE(k.host, p.host) AS \"host!\", COALESCE(k.port, p.port) AS \"port!\", CASE WHEN k.id IS NULL THEN p.path_prefix ELSE k.path_prefix END AS path_prefix, COALESCE(k.scheme, p.scheme) AS \"scheme!\", CASE WHEN k.id IS NULL THEN p.user_name ELSE k.user_name END AS user_name FROM host_key_placeholders p LEFT JOIN host_keys k ON k.id=p.key_id CROSS JOIN LATERAL (SELECT k.id IS NOT NULL AND (k.owner_id=p.sender_id OR (k.owner_id IS NULL AND (k.for_everyone OR EXISTS (SELECT 1 FROM host_key_users u WHERE u.key_id=k.id AND u.user_id=p.sender_id))))AS usable) m WHERE p.hash=$1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "key_id?",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "secret_ref?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "host_keys",
+            "name": "secret_ref"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "conversation_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "host_key_placeholders",
+            "name": "conversation_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "sandbox_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "host_key_placeholders",
+            "name": "sandbox_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "run_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "host_key_placeholders",
+            "name": "run_id"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "ended!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "sender_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "host_key_placeholders",
+            "name": "sender_id"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "host_key_placeholders",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "host!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "port!",
+        "type_info": "Int4",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "path_prefix",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "scheme!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 12,
+        "name": "user_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Bytea"
+      ]
+    },
+    "nullable": [
+      null,
+      true,
+      false,
+      false,
+      true,
+      null,
+      false,
+      false,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "2b83f57a6b0abbfeec79a9539450a28b7c01cbb0bcc66400997d2209f288f743"
+}

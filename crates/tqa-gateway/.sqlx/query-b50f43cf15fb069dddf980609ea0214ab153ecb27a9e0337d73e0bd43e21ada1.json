@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT connector,origin,updated_at FROM connector_credentials WHERE user_id=$1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "connector",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "connector_credentials",
+            "name": "connector"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "origin",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "connector_credentials",
+            "name": "origin"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "connector_credentials",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "b50f43cf15fb069dddf980609ea0214ab153ecb27a9e0337d73e0bd43e21ada1"
+}

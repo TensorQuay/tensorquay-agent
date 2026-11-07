@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE egress_rules SET seed_state='removed' WHERE seed_state='current' AND NOT (host = ANY($1))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7ee66ef62cbfdb0ac4626d2bc925567da5da1e0e24f5beb99250285fc35f6f96"
+}

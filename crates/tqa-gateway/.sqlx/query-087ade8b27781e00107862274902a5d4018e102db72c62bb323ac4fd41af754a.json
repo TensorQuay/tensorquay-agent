@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT name FROM agent_team_members WHERE team_id = $1 AND state <> 'stopped' AND NOT (state = 'failed' AND NOT failed_run) ORDER BY created_at, name",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "agent_team_members",
+            "name": "name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "087ade8b27781e00107862274902a5d4018e102db72c62bb323ac4fd41af754a"
+}

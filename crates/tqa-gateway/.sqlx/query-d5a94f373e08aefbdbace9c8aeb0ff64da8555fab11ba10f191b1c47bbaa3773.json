@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT name AS \"name!\",COALESCE(builtin_base_image,image) AS \"image!\" FROM templates WHERE ((last_set_by='seed' AND seed_state='current') OR last_set_by='builtin' OR builtin_base_image IS NOT NULL) AND image<>'' UNION ALL SELECT name,image FROM builtin_deletions WHERE image IS NOT NULL ORDER BY 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "image!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "d5a94f373e08aefbdbace9c8aeb0ff64da8555fab11ba10f191b1c47bbaa3773"
+}

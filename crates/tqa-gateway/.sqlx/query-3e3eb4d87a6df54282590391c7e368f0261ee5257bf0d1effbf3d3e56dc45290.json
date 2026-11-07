@@ -1,0 +1,36 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO screen_notices (id,conversation_id,kind,by_user,by_name,after_seq,seconds,ended,reason) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "screen_notices",
+            "name": "at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Uuid",
+        "Text",
+        "Int8",
+        "Int8",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "3e3eb4d87a6df54282590391c7e368f0261ee5257bf0d1effbf3d3e56dc45290"
+}

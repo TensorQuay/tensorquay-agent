@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT name,display_name AS \"display_name!\" FROM model_routes WHERE display_name IS NOT NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "model_routes",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "model_routes",
+            "name": "display_name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "a3139b79fa8809dbebe709242bc914c0be8917d6ad0c39c1ddfccc0982c5a72a"
+}

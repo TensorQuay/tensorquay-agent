@@ -1,0 +1,53 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT seq, step AS \"step!\", ts FROM events WHERE conversation_id = $1 AND run_id = $2 AND step IS NOT NULL AND frame->'event'->>'type' = 'step.started' ORDER BY seq DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "seq",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "events",
+            "name": "seq"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "step!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "events",
+            "name": "step"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "ts",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "events",
+            "name": "ts"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "468b3a7e8273c1430c5ca43179149d3d8f5f1f9c538f26587bc61570ef33388a"
+}

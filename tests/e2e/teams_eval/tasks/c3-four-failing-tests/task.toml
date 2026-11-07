@@ -1,0 +1,6 @@
+id = "c3-four-failing-tests"
+title = "Fix four failing tests, each in a different module"
+tags = ["teams-eval", "teams-code"]
+budgets = { max_steps = 40, wall_clock_secs = 900, max_tokens = 300000 }
+protected = ["suite/tests/test_duration.py", "suite/tests/test_rounding.py", "suite/tests/test_slug.py", "suite/tests/test_window.py", "suite/tests/__init__.py"]
+check = { image = "runtime", timeout_secs = 120 }

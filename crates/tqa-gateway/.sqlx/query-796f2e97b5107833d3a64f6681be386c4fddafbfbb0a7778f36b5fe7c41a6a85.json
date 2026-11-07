@@ -1,0 +1,45 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO invitations (id,email,role,token_hash,created_by,expires_at) VALUES ($1,$2::text::citext,$3,$4,$5,CURRENT_TIMESTAMP+make_interval(hours=>$6)) RETURNING created_at,expires_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "invitations",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "expires_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "invitations",
+            "name": "expires_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Bytea",
+        "Uuid",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "796f2e97b5107833d3a64f6681be386c4fddafbfbb0a7778f36b5fe7c41a6a85"
+}

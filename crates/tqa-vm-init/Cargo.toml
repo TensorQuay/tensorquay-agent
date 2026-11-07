@@ -1,0 +1,20 @@
+[package]
+name = "tqa-vm-init"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+description = "Guest init for microVM sandboxes: mounts, token delivery, privilege drop and the seccomp filter."
+
+[dependencies]
+caps = "=0.5.6"
+nix = { version = "~0.31", features = ["fs", "mount", "personality", "process", "reboot", "sched", "signal", "user"] }
+seccompiler = "=0.5.0"
+secrecy = "~0.10"
+serde = { version = "~1.0", features = ["derive"] }
+serde_json = "~1.0"
+thiserror = "~2.0"
+
+[lints]
+workspace = true

@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE templates SET is_default=true,version=version+1,checked_version=CASE WHEN checked_version=version THEN version+1 ELSE checked_version END,updated_at=CURRENT_TIMESTAMP WHERE name=$1 RETURNING name,version",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "version",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "version"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "eb7b0ddef0a3ccbfeea1c504818e463d634588b02b13112b58f89254981c71f0"
+}

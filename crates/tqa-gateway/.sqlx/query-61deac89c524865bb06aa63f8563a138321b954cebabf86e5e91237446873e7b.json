@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO usage (id,conversation_id,user_id,route,run_id) VALUES ($1,$2,(SELECT owner_id FROM conversations WHERE id=$2),$3,$4)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "61deac89c524865bb06aa63f8563a138321b954cebabf86e5e91237446873e7b"
+}

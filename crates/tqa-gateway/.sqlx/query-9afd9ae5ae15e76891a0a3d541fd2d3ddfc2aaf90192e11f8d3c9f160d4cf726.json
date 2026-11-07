@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO runtime_tokens (conversation_id,sandbox_id,token_hash,peer_address) VALUES ($1,$2,$3,$4::text::inet) ON CONFLICT (conversation_id) DO UPDATE SET sandbox_id=EXCLUDED.sandbox_id,token_hash=EXCLUDED.token_hash,peer_address=EXCLUDED.peer_address,expires_at=NULL,created_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Bytea",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9afd9ae5ae15e76891a0a3d541fd2d3ddfc2aaf90192e11f8d3c9f160d4cf726"
+}

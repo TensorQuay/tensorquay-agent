@@ -1,0 +1,43 @@
+# TK-U-018: the live provider suite's dry mode. One scripted fake per hosted-provider profile, each answering as that
+# provider's fake does (tqa-fake-model --profile); tests/e2e/live/providers.py writes the scenario and the routes.
+x-fake: &fake
+  image: ${TQA_FAKE_MODEL_IMAGE:-tqa-fake-model:local}
+  user: "1000:1000"
+  networks: [control]
+  read_only: true
+  tmpfs: ["/tmp:rw,nosuid,nodev,noexec,size=16777216,mode=1777"]
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  mem_limit: 64m
+  cpus: 0.25
+  pids_limit: 64
+  volumes:
+    - type: bind
+      source: ${TQA_E2E_SCENARIO:?Set the scenario file the fakes serve}
+      target: /scenarios/current.json
+      read_only: true
+      bind: {create_host_path: false}
+  healthcheck:
+    test: [CMD, wget, -q, -O, /dev/null, --header, "Authorization: Bearer healthcheck", "http://127.0.0.1:8080/v1/models"]
+    interval: 2s
+    timeout: 3s
+    retries: 15
+services:
+  gateway:
+    depends_on:
+      fake-chat-strict: {condition: service_healthy}
+      fake-chat-compat: {condition: service_healthy}
+      fake-responses-backend: {condition: service_healthy}
+      fake-messages: {condition: service_healthy}
+  fake-chat-strict:
+    <<: *fake
+    command: ["--scenario", "/scenarios/current.json", "--profile", "chat-strict"]
+  fake-chat-compat:
+    <<: *fake
+    command: ["--scenario", "/scenarios/current.json", "--profile", "chat-compat"]
+  fake-responses-backend:
+    <<: *fake
+    command: ["--scenario", "/scenarios/current.json", "--profile", "responses-backend"]
+  fake-messages:
+    <<: *fake
+    command: ["--scenario", "/scenarios/current.json", "--profile", "messages"]

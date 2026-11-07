@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO events (conversation_id,seq,run_id,step,ts,frame,blob_key,lifecycle,call_id) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8",
+        "Text",
+        "Int8",
+        "Timestamptz",
+        "Jsonb",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0bcb6411eb0f7e2cc17c4564a73e087d84216208aa0ba648af019e96fe563d2e"
+}

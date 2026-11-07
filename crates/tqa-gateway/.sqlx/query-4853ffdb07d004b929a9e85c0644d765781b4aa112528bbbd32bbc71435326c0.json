@@ -1,0 +1,121 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT m.conversation_id, m.name, m.state, lc.lifecycle AS \"lifecycle?\", EXTRACT(EPOCH FROM lc.created_at)::bigint AS \"lifecycle_at?\", lc.frame->'event'->>'reason' AS \"failed_reason?\", (SELECT EXTRACT(EPOCH FROM MAX(e.created_at))::bigint FROM events e WHERE e.conversation_id = m.conversation_id AND e.seq >= lc.seq) AS \"progress_at?\", EXISTS (SELECT 1 FROM channel_messages r WHERE r.channel_id = $2 AND r.type = 'report' AND r.author_id = m.conversation_id::text AND r.seq > COALESCE((SELECT MAX(a.seq) FROM channel_messages a WHERE a.channel_id = $2 AND a.type = 'assign' AND a.to_conversation = m.conversation_id), 0)) AS \"reported!\", EXISTS (SELECT 1 FROM channel_messages w WHERE w.channel_id = $2 AND w.seq > m.last_read_seq AND (w.to_conversation = m.conversation_id OR w.to_kind IN ('members', 'team'))) AS \"waiting!\", EXISTS (SELECT 1 FROM channel_messages n WHERE n.channel_id = $2 AND n.type = 'notice' AND n.body->>'kind' = 'member_idle' AND n.body->>'member' = m.name AND n.created_at >= lc.created_at) AS \"idle_notified!\", EXISTS (SELECT 1 FROM channel_messages n WHERE n.channel_id = $2 AND n.type = 'notice' AND n.body->>'kind' = 'member_stuck' AND n.body->>'member' = m.name AND n.created_at >= (SELECT MAX(e.created_at) FROM events e WHERE e.conversation_id = m.conversation_id AND e.seq >= lc.seq)) AS \"stuck_notified!\", EXISTS (SELECT 1 FROM channel_messages n WHERE n.channel_id = $2 AND n.type = 'notice' AND n.body->>'kind' = 'member_failed' AND n.body->>'member' = m.name AND n.created_at >= lc.created_at) AS \"failed_notified!\" FROM agent_team_members m LEFT JOIN LATERAL (SELECT seq, lifecycle, created_at, frame FROM events WHERE conversation_id = m.conversation_id AND lifecycle IS NOT NULL ORDER BY seq DESC LIMIT 1) lc ON true WHERE m.team_id = $1 ORDER BY m.created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "conversation_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_team_members",
+            "name": "conversation_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "agent_team_members",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "agent_team_members",
+            "name": "state"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "lifecycle?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "events",
+            "name": "lifecycle"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "lifecycle_at?",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "failed_reason?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "progress_at?",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "reported!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "waiting!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "idle_notified!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "stuck_notified!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "failed_notified!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "4853ffdb07d004b929a9e85c0644d765781b4aa112528bbbd32bbc71435326c0"
+}

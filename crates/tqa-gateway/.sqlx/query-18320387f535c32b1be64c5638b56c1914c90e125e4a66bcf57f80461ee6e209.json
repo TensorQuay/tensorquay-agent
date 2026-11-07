@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM decision_engines WHERE name=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "18320387f535c32b1be64c5638b56c1914c90e125e4a66bcf57f80461ee6e209"
+}

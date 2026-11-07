@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT m.conversation_id FROM agent_team_members m JOIN conversations c ON c.id = m.conversation_id WHERE c.workspace_id = $1 AND m.state = 'starting'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "conversation_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_team_members",
+            "name": "conversation_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "96d2e8db0aa5e8a0d91cdf6e15de582778fbaab3df1d99722cdf4dd9b51ac2a6"
+}

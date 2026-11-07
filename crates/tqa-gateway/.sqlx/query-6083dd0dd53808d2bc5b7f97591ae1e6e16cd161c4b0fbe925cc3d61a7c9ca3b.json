@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE workspaces w SET state='deleted', updated_at=CURRENT_TIMESTAMP WHERE w.id=$1 AND w.state='ready' AND w.lease_conversation_id IS NULL AND COALESCE(w.last_used_at, w.created_at) < CURRENT_TIMESTAMP - make_interval(secs=>$2) AND NOT EXISTS(SELECT 1 FROM conversations c WHERE c.workspace_id=w.id AND c.state='active')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Float8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6083dd0dd53808d2bc5b7f97591ae1e6e16cd161c4b0fbe925cc3d61a7c9ca3b"
+}

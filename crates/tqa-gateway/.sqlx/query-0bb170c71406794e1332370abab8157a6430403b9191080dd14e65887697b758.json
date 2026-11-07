@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE git_credentials SET moved_at=CURRENT_TIMESTAMP WHERE user_id=$1 AND remote=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0bb170c71406794e1332370abab8157a6430403b9191080dd14e65887697b758"
+}

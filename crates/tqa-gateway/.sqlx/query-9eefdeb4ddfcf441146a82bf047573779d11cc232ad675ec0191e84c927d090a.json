@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT c.id FROM conversations c WHERE c.state='deleted' AND NOT EXISTS(SELECT 1 FROM sandbox_instances s WHERE s.conversation_id=c.id) ORDER BY c.updated_at, c.id LIMIT $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "9eefdeb4ddfcf441146a82bf047573779d11cc232ad675ec0191e84c927d090a"
+}

@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO secret_consumers (ref,consumer_kind,consumer,bound_by) VALUES ($1,$2,$3,'seed') ON CONFLICT DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "56bbe3dcec19e69aa99e5ef4407db350d92cdf05f5fa845879faff76adc8d8bb"
+}

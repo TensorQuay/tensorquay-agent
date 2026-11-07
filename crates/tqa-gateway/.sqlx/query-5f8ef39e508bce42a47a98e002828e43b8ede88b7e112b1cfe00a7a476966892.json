@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE users SET last_active_at=CURRENT_TIMESTAMP WHERE id=$1 AND (last_active_at IS NULL OR last_active_at<CURRENT_TIMESTAMP-INTERVAL '1 minute')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5f8ef39e508bce42a47a98e002828e43b8ede88b7e112b1cfe00a7a476966892"
+}

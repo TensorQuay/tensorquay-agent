@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT user_id, conversation_id FROM channel_members WHERE channel_id = $1 AND role IN ('lead', 'member')",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "channel_members",
+            "name": "user_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "conversation_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "channel_members",
+            "name": "conversation_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      true
+    ]
+  },
+  "hash": "3f9be8821ecbd7f175414dc594d42c6743862c83b79c7d25d2adbdbb3478b314"
+}

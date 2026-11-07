@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE templates SET display_name=$2,image=$3,capabilities=$4,version=$5,builtin_image_created=$6,builtin_updated_at=CURRENT_TIMESTAMP,check_state='unchecked',check_reason=NULL,checked_version=NULL,base=NULL,image_id=NULL,updated_at=CURRENT_TIMESTAMP WHERE name=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "TextArray",
+        "Int8",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8568280c270af70e2e2f255b77f49809abfed9182dcd47a5a13fafd0dc750d9a"
+}

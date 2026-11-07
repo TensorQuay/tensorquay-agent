@@ -1,0 +1,13 @@
+{
+  "model": "fixture",
+  "responses": [
+    {
+      "events": [{"type": "tool_call", "name": "fetch_url", "arguments": {"url": "https://example.invalid/data"}, "split_into": 2}],
+      "usage": {"prompt_tokens": 20, "completion_tokens": 20}
+    },
+    {
+      "events": [{"type": "text", "text": "The page could not be fetched because network access to that host is not allowed."}],
+      "usage": {"prompt_tokens": 40, "completion_tokens": 20}
+    }
+  ]
+}

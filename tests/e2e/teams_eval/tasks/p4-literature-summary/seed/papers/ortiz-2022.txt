@@ -1,0 +1,12 @@
+Compressed hours in a call centre
+Ortiz et al., 2022
+
+Abstract
+Calls handled per hour rose by 8 %. Customer satisfaction did not change.
+
+Method
+We describe the setting, the data and the limits of the study.
+
+Results
+Calls handled per hour rose by 8 %.
+Customer satisfaction did not change.

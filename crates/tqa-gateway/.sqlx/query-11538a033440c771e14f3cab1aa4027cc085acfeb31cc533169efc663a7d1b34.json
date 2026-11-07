@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT state,profile FROM conversations WHERE id=$1 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "state"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "profile",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "profile"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "11538a033440c771e14f3cab1aa4027cc085acfeb31cc533169efc663a7d1b34"
+}

@@ -1,0 +1,112 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT c.template_digest,t.name AS \"name?\",t.image AS \"image?\",t.version AS \"version?\",t.enabled AS \"enabled?\",t.check_state AS \"check_state?\",t.last_set_by AS \"last_set_by?\",t.is_default AS \"is_default?\" FROM conversations c LEFT JOIN templates t ON t.name=c.template WHERE c.id=$1 FOR UPDATE OF c",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "template_digest",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "template_digest"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "image?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "image"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "version?",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "version"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "enabled?",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "enabled"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "check_state?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "check_state"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "last_set_by?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "last_set_by"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "is_default?",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "is_default"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "46cf08b14c32de6dc59daf106a83c5061ba00785853db04f14e552f39aebb180"
+}

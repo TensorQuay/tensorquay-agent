@@ -1,0 +1,186 @@
+{
+ "model": "fixture",
+ "select": "prompt",
+ "responses": [
+  {
+   "when": "`feedback.csv` holds 60 customer comments from four segments. Find the main themes. Write `themes.md` with a",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "start_member",
+     "arguments": {
+      "role": "scout",
+      "workspace": "own_copy",
+      "profile": null,
+      "brief": {
+       "objective": "Write scout-notes.md listing the files in this workspace for r4-feedback-themes.",
+       "output": "scout-notes.md, one line per file.",
+       "sources": null,
+       "boundaries": "Write only scout-notes.md."
+      }
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "`feedback.csv` holds 60 customer comments from four segments. Find the main themes. Write `themes.md` with a",
+   "events": [
+    {
+     "type": "text",
+     "text": "I started a helper; I'll continue when it reports."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "`feedback.csv` holds 60 customer comments from four segments. Find the main themes. Write `themes.md` with a",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_reports",
+     "arguments": {
+      "wait": 30,
+      "limit": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "`feedback.csv` holds 60 customer comments from four segments. Find the main themes. Write `themes.md` with a",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "take_files",
+     "arguments": {
+      "report_seq": {
+       "seq_of": {
+        "type": "report",
+        "from": "scout"
+       }
+      },
+      "files": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "`feedback.csv` holds 60 customer comments from four segments. Find the main themes. Write `themes.md` with a",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "themes.md",
+      "content": "# Feedback themes\n\n| Theme | Count | Quote | Quote |\n|---|---|---|---|\n| slow sync | 18 | \"Sync takes forever, sometimes ten minutes before my files show up on the laptop.\" | \"Files I save on my phone appear on the desktop only after a long delay.\" |\n| pricing | 14 | \"The price went up again and we are paying for seats we do not use.\" | \"Too expensive for a team of three compared with the alternatives.\" |\n| mobile app crashes | 12 | \"The Android app crashes whenever I open a PDF.\" | \"The iPhone app closes itself when I rotate the screen.\" |\n| missing export | 9 | \"There is no way to export a whole project as a zip.\" | \"Please add an export to CSV for the activity log.\" |\n| helpful support | 7 | \"Support answered within an hour and fixed my account.\" | \"The support team was patient and walked me through the setup.\" |\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "`feedback.csv` holds 60 customer comments from four segments. Find the main themes. Write `themes.md` with a",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "done",
+     "arguments": {
+      "summary": "Wrote themes.md."
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "`feedback.csv` holds 60 customer comments from four segments. Find the main themes. Write `themes.md` with a",
+   "events": [
+    {
+     "type": "text",
+     "text": "Done: themes.md."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "shell",
+     "arguments": {
+      "command": "find . -path ./.git -prune -o -type f -print | sort > scout-notes.md"
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "send_to_lead",
+     "arguments": {
+      "type": "report",
+      "text": "scout-notes.md lists the workspace's files.",
+      "question_seq": null,
+      "files": [
+       "scout-notes.md"
+      ]
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "text",
+     "text": "I reported to my lead."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  }
+ ]
+}

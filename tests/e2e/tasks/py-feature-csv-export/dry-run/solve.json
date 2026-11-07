@@ -1,0 +1,53 @@
+{
+ "model": "fixture",
+ "responses": [
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "report.py",
+      "content": "\"\"\"Print sales totals by region from a JSON file of {region, amount} rows.\"\"\"\nimport argparse\nimport json\n\n\ndef load(path):\n    with open(path) as file:\n        return json.load(file)\n\n\ndef totals(rows):\n    \"\"\"Return (region, total) pairs sorted by region.\"\"\"\n    sums = {}\n    for row in rows:\n        sums[row[\"region\"]] = sums.get(row[\"region\"], 0) + row[\"amount\"]\n    return sorted(sums.items())\n\n\ndef render_text(pairs):\n    return \"\\n\".join(f\"{region}: {total}\" for region, total in pairs)\n\n\ndef render_csv(pairs):\n    return \"\\n\".join([\"region,total\"] + [f\"{region},{total}\" for region, total in pairs])\n\n\ndef main(argv=None):\n    parser = argparse.ArgumentParser(prog=\"report\", description=\"Sales totals by region.\")\n    parser.add_argument(\"path\", help=\"a JSON file of {region, amount} rows\")\n    parser.add_argument(\"--format\", choices=[\"text\", \"csv\"], default=\"text\", help=\"output format\")\n    args = parser.parse_args(argv)\n    render = render_csv if args.format == \"csv\" else render_text\n    print(render(totals(load(args.path))))\n\n\nif __name__ == \"__main__\":\n    main()\n",
+      "create_parents": false
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 500,
+    "completion_tokens": 200
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "tests/test_csv.py",
+      "content": "import unittest\n\nfrom report import render_csv\n\n\nclass CsvTest(unittest.TestCase):\n    def test_csv_has_a_header_and_one_line_per_region(self):\n        self.assertEqual(render_csv([(\"a\", 1), (\"b\", 5)]), \"region,total\\na,1\\nb,5\")\n",
+      "create_parents": false
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 800,
+    "completion_tokens": 90
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "report.py now takes --format text|csv; added a CSV test."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 950,
+    "completion_tokens": 20
+   }
+  }
+ ]
+}

@@ -1,0 +1,6 @@
+id = "d5-implement-review-fix"
+title = "Implement a rate limiter to a spec, review it, fix what the review finds"
+tags = ["teams-eval", "teams-dependent"]
+budgets = { max_steps = 80, wall_clock_secs = 2100, max_tokens = 1000000 }
+protected = []
+check = { image = "runtime", timeout_secs = 120 }

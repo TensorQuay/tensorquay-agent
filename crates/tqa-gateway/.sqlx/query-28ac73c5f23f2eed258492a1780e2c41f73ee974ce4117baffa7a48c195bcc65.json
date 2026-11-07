@@ -1,0 +1,113 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT kind, by_user, by_name, at, after_seq, seconds, ended, reason FROM (SELECT * FROM screen_notices WHERE conversation_id=$1 ORDER BY at DESC, id DESC LIMIT $2) newest ORDER BY at, id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "kind",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "screen_notices",
+            "name": "kind"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "by_user",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "screen_notices",
+            "name": "by_user"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "by_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "screen_notices",
+            "name": "by_name"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "screen_notices",
+            "name": "at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "after_seq",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "screen_notices",
+            "name": "after_seq"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "seconds",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "screen_notices",
+            "name": "seconds"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "ended",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "screen_notices",
+            "name": "ended"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "screen_notices",
+            "name": "reason"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "28ac73c5f23f2eed258492a1780e2c41f73ee974ce4117baffa7a48c195bcc65"
+}

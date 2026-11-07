@@ -1,0 +1,11 @@
+# L7 short task titles: the scripted model answers each task by its first message and the gateway's tool-less title
+# call with the scenario's summary reply.
+services:
+  fake-model:
+    command: ["--scenario", "/scenarios/titles.json"]
+    volumes:
+      - type: bind
+        source: ../tests/fixtures/titles.json
+        target: /scenarios/titles.json
+        read_only: true
+        bind: {create_host_path: false}

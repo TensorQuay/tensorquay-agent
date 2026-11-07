@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO workspace_snapshots (id,workspace_id,conversation_id,after_seq,files,truncated) VALUES ($1,$2,$3,$4,$5,$6)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Int8",
+        "Int4",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "139f6c33f3df6cc22ac046284dda252cb35f6d0cc05c9655b8c3dfeac13becea"
+}

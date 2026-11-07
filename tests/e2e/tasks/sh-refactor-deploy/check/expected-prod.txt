@@ -1,0 +1,4 @@
+deploy: target prod (app.example)
+deploy: sync build/ to app.example:/srv/app
+deploy: restart app with 6 replica(s)
+deploy: check https://app.example/healthz

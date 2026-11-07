@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO builtin_deletions (name,image) VALUES ($1,$2) ON CONFLICT (name) DO UPDATE SET deleted_at=CURRENT_TIMESTAMP,image=EXCLUDED.image",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "bbb7dbd3e533a3ce1f5102aacc07247e0bf543678b1049f6203bd842bb6571dc"
+}

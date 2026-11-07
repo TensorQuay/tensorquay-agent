@@ -1,0 +1,13 @@
+{
+ "components": [
+  "api",
+  "auth",
+  "queue",
+  "worker",
+  "billing",
+  "storage",
+  "notifier",
+  "config"
+ ],
+ "pass_at": 7
+}

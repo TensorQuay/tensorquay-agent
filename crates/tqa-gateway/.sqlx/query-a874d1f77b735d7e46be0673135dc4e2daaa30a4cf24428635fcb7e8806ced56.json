@@ -1,0 +1,61 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT m.author_id, m.author_name, m.body, EXISTS (SELECT 1 FROM agent_team_members a JOIN conversations c ON c.id = a.conversation_id WHERE a.team_id = $3 AND a.conversation_id::text = m.author_id AND c.state <> 'deleted') AS \"present!\" FROM channel_messages m WHERE m.channel_id = $1 AND m.seq = $2 AND m.type = 'report'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "author_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "author_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "author_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "author_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "body",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "body"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "present!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      null
+    ]
+  },
+  "hash": "a874d1f77b735d7e46be0673135dc4e2daaa30a4cf24428635fcb7e8806ced56"
+}

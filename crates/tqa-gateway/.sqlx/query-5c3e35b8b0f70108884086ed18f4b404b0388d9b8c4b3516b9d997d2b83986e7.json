@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO screen_notices (id,conversation_id,kind,by_user,by_name,after_seq,ended) VALUES ($1,$2,'screen.handed_back',$3,$4,$5,'restart')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5c3e35b8b0f70108884086ed18f4b404b0388d9b8c4b3516b9d997d2b83986e7"
+}

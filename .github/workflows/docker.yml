@@ -1,0 +1,49 @@
+name: Docker sandbox contracts
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - crates/tqa-sandbox/**
+      - Cargo.lock
+      - rust-toolchain.toml
+      - .github/workflows/docker.yml
+  pull_request:
+    paths:
+      - crates/tqa-sandbox/**
+      - Cargo.lock
+      - rust-toolchain.toml
+      - .github/workflows/docker.yml
+
+permissions:
+  contents: read
+
+jobs:
+  sandbox:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install pinned Rust toolchain
+        run: rustup show
+      - name: Cache Cargo registry and build output
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: |
+            ~/.cargo/registry
+            target
+          key: ${{ runner.os }}-sandbox-rust-1.97.1-${{ hashFiles('Cargo.lock', 'Cargo.toml', 'crates/**/Cargo.toml') }}
+      - name: Install pinned test runner
+        uses: taiki-e/install-action@9114bf4d891761788c546334fd37538eae1bf8b3 # v2.87.16
+        with:
+          tool: cargo-nextest@0.9.145
+      - name: Run sandbox contracts against Docker Engine
+        env:
+          TQA_DOCKER_TESTS: "1"
+        # Runtime image admission runs in runtime.yml after both images are built.
+        # The ephemeral runner can assign credential-file ownership to sandbox uid 1000.
+        run: |
+          sudo env "PATH=$PATH" "RUSTUP_HOME=$HOME/.rustup" "CARGO_HOME=$HOME/.cargo" \
+            TQA_DOCKER_TESTS=1 cargo nextest run -p tqa-sandbox --run-ignored all -E 'not binary(runtime_image) and not binary(runtime_recovery) and not binary(manual_daemon) and not binary(egress) and not binary(runtime_posture) and not binary(workspace_clone)'

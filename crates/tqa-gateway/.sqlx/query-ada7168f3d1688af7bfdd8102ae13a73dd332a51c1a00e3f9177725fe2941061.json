@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE workspaces SET lease_expires_at=CURRENT_TIMESTAMP+make_interval(secs=>$2) WHERE lease_conversation_id=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Float8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ada7168f3d1688af7bfdd8102ae13a73dd332a51c1a00e3f9177725fe2941061"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM runtime_token_reservations",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "7bdc8f8c276ee9e02f4ac0e9b6d3ab77ff6086b6c42ff2f3f6a2dd3493eecbcd"
+}

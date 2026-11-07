@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT seqs, more FROM agent_team_reads WHERE reader = $1 AND call_key = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "seqs",
+        "type_info": "Int8Array",
+        "origin": {
+          "Table": {
+            "table": "agent_team_reads",
+            "name": "seqs"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "more",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "agent_team_reads",
+            "name": "more"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "38f2b849f415190d4a6e496750b44555c91559edfc0e5abd4a26b4d302e6cbdc"
+}

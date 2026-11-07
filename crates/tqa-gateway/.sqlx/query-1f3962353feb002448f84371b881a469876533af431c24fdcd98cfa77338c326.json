@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT DISTINCT i.conversation_id AS \"conversation_id!\" FROM idempotency i JOIN conversations c ON c.id=i.conversation_id WHERE i.execution_status='queued' AND c.state='active' AND c.profile->>'decision_engine' IS NOT NULL AND NOT (c.profile->>'decision_engine' = ANY($1)) AND NOT EXISTS (SELECT 1 FROM sandbox_instances s WHERE s.conversation_id=i.conversation_id) LIMIT $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "conversation_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "idempotency",
+            "name": "conversation_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "TextArray",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "1f3962353feb002448f84371b881a469876533af431c24fdcd98cfa77338c326"
+}

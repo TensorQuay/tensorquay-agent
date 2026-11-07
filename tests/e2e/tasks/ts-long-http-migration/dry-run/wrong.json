@@ -1,0 +1,51 @@
+{
+ "model": "fixture",
+ "responses": [
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "grep",
+     "arguments": {
+      "pattern": "legacy/http",
+      "path": "src/app",
+      "output_mode": "count"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 700,
+    "completion_tokens": 40
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "shell",
+     "arguments": {
+      "command": "sed -E -i -e 's#import \\{ request(, DEFAULT_RETRIES)? \\} from \"\\.\\./legacy/http\\.ts\";#import { send, DEFAULT_ATTEMPTS } from \"../net/client.ts\";#' -e 's#request\\(#send(#' -e 's#DEFAULT_RETRIES#DEFAULT_ATTEMPTS#' src/app/*.ts"
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 2000,
+    "completion_tokens": 160
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "Renamed request to send in every endpoint."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 2300,
+    "completion_tokens": 20
+   }
+  }
+ ]
+}

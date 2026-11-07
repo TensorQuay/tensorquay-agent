@@ -1,0 +1,134 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.id, r.run_id, r.user_id, k.name, (k.owner_id IS NOT DISTINCT FROM $4 OR (k.owner_id IS NULL AND (k.for_everyone OR EXISTS (SELECT 1 FROM host_key_users u WHERE u.key_id=k.id AND u.user_id=$4)))) AS \"usable!\", r.consumer, r.outcome, r.count, r.first_at, r.last_at FROM secret_reads r JOIN host_keys k ON k.secret_ref=r.ref WHERE r.consumer_kind='host' AND r.conversation_id=$1 AND ($2::uuid IS NULL OR (r.last_at, r.id) < (SELECT last_at, id FROM secret_reads WHERE id=$2)) ORDER BY r.last_at DESC, r.id DESC LIMIT $3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "secret_reads",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "run_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "secret_reads",
+            "name": "run_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "user_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "secret_reads",
+            "name": "user_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "host_keys",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "usable!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "consumer",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "secret_reads",
+            "name": "consumer"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "outcome",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "secret_reads",
+            "name": "outcome"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "count",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "secret_reads",
+            "name": "count"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "first_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "secret_reads",
+            "name": "first_at"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "last_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "secret_reads",
+            "name": "last_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Int8",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      false,
+      null,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "855680619df8971cd92008487406b7c7b8be46aa21048f62880560118d33d5ae"
+}

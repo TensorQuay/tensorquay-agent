@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE agent_profiles SET seed_state='removed' WHERE owner_id IS NULL AND seed_state='current' AND NOT (name = ANY($1))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "92ddb06d7c838a8c7a7c588736a5dc3c092e5546413d7d09dc963afbfaebcf9d"
+}

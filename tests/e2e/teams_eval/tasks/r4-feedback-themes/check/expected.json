@@ -1,0 +1,113 @@
+{
+ "themes": [
+  {
+   "comments": [
+    "Syncing a folder of photos stalls halfway every time.",
+    "Large folders never finish syncing overnight.",
+    "The sync is so slow that we email files to each other instead.",
+    "Files I save on my phone appear on the desktop only after a long delay.",
+    "Large folders never finish syncing overnight.",
+    "Large folders never finish syncing overnight.",
+    "Changes from my colleagues show up hours late; sync is unreliable.",
+    "The sync is so slow that we email files to each other instead.",
+    "Changes from my colleagues show up hours late; sync is unreliable.",
+    "Files I save on my phone appear on the desktop only after a long delay.",
+    "The sync is so slow that we email files to each other instead.",
+    "Sync takes forever, sometimes ten minutes before my files show up on the laptop.",
+    "Changes from my colleagues show up hours late; sync is unreliable.",
+    "Syncing a folder of photos stalls halfway every time.",
+    "Sync takes forever, sometimes ten minutes before my files show up on the laptop.",
+    "Syncing a folder of photos stalls halfway every time.",
+    "Sync takes forever, sometimes ten minutes before my files show up on the laptop.",
+    "Files I save on my phone appear on the desktop only after a long delay."
+   ],
+   "count": 18,
+   "name": "slow sync",
+   "words": [
+    "sync"
+   ]
+  },
+  {
+   "comments": [
+    "We would upgrade if the yearly plan cost less.",
+    "The price went up again and we are paying for seats we do not use.",
+    "Paying per seat is hard to justify for occasional users.",
+    "Too expensive for a team of three compared with the alternatives.",
+    "Paying per seat is hard to justify for occasional users.",
+    "The new pricing tiers make no sense for a small school.",
+    "The price went up again and we are paying for seats we do not use.",
+    "Too expensive for a team of three compared with the alternatives.",
+    "We would upgrade if the yearly plan cost less.",
+    "Too expensive for a team of three compared with the alternatives.",
+    "The new pricing tiers make no sense for a small school.",
+    "The price went up again and we are paying for seats we do not use.",
+    "We would upgrade if the yearly plan cost less.",
+    "The new pricing tiers make no sense for a small school."
+   ],
+   "count": 14,
+   "name": "pricing",
+   "words": [
+    "pric",
+    "cost",
+    "expensive"
+   ]
+  },
+  {
+   "comments": [
+    "The iPhone app closes itself when I rotate the screen.",
+    "The app on my tablet freezes and then crashes on upload.",
+    "Mobile app crashed three times during a client meeting.",
+    "The Android app crashes whenever I open a PDF.",
+    "The Android app crashes whenever I open a PDF.",
+    "Mobile app crashed three times during a client meeting.",
+    "The app on my tablet freezes and then crashes on upload.",
+    "Mobile app crashed three times during a client meeting.",
+    "The Android app crashes whenever I open a PDF.",
+    "The app on my tablet freezes and then crashes on upload.",
+    "The iPhone app closes itself when I rotate the screen.",
+    "The iPhone app closes itself when I rotate the screen."
+   ],
+   "count": 12,
+   "name": "mobile app crashes",
+   "words": [
+    "mobile",
+    "crash",
+    "app"
+   ]
+  },
+  {
+   "comments": [
+    "Please add an export to CSV for the activity log.",
+    "There is no way to export a whole project as a zip.",
+    "There is no way to export a whole project as a zip.",
+    "Please add an export to CSV for the activity log.",
+    "There is no way to export a whole project as a zip.",
+    "I cannot export my notes to PDF, which our auditors need.",
+    "Please add an export to CSV for the activity log.",
+    "I cannot export my notes to PDF, which our auditors need.",
+    "I cannot export my notes to PDF, which our auditors need."
+   ],
+   "count": 9,
+   "name": "missing export",
+   "words": [
+    "export"
+   ]
+  },
+  {
+   "comments": [
+    "Support answered within an hour and fixed my account.",
+    "Great support, they called me back the same day.",
+    "The support team was patient and walked me through the setup.",
+    "Support answered within an hour and fixed my account.",
+    "The support team was patient and walked me through the setup.",
+    "Support answered within an hour and fixed my account.",
+    "Great support, they called me back the same day."
+   ],
+   "count": 7,
+   "name": "helpful support",
+   "words": [
+    "support"
+   ]
+  }
+ ]
+}

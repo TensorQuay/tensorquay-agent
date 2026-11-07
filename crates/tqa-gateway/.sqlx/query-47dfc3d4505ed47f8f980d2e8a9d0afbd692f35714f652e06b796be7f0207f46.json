@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM seed_tombstones WHERE area=$1 AND NOT (item = ANY($2))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "47dfc3d4505ed47f8f980d2e8a9d0afbd692f35714f652e06b796be7f0207f46"
+}

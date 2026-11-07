@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE settings_generation SET generation = generation + 1 WHERE id = 1 RETURNING generation",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "generation",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "settings_generation",
+            "name": "generation"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "b1723001ad1b4c80019f45bdc0a3be71b233bb6123398f2de279501bc3351278"
+}

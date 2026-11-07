@@ -1,0 +1,6 @@
+[
+ "csv_parser (the csv module) is fastest; char_parser is quadratic (rows = rows + [row])",
+ "split_parser is slowed by a JSON round trip per row",
+ "tool/report.py imports csv_parser and prints the same totals",
+ "bench.py times all three"
+]

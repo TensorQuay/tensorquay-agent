@@ -1,0 +1,794 @@
+{
+ "model": "fixture",
+ "select": "prompt",
+ "responses": [
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "start_member",
+     "arguments": {
+      "role": "scout",
+      "workspace": "own_copy",
+      "profile": null,
+      "brief": {
+       "objective": "Write scout-notes.md listing the files in this workspace for l1-storage-port.",
+       "output": "scout-notes.md, one line per file.",
+       "sources": null,
+       "boundaries": "Write only scout-notes.md."
+      }
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "text",
+     "text": "I started a helper; I'll continue when it reports."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_reports",
+     "arguments": {
+      "wait": 30,
+      "limit": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "take_files",
+     "arguments": {
+      "report_seq": {
+       "seq_of": {
+        "type": "report",
+        "from": "scout"
+       }
+      },
+      "files": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/address.py",
+      "content": "\"\"\"The addresss: create, read, list, update and delete, through store/.\"\"\"\nimport store\n\n\ndef create_address(path, customer_id, street, postcode):\n    return store.open(path).addresss.insert({\"customer_id\": customer_id, \"street\": street, \"postcode\": postcode})\n\n\ndef get_address(path, address_id):\n    return store.open(path).addresss.get(address_id)\n\n\ndef list_addresss(path):\n    return store.open(path).addresss.all()\n\n\ndef find_addresss(path, customer_id):\n    return store.open(path).addresss.where(\"customer_id\", customer_id)\n\n\ndef update_address(path, address_id, customer_id, street, postcode):\n    return store.open(path).addresss.update(address_id, {\"customer_id\": customer_id, \"street\": street, \"postcode\": postcode})\n\n\ndef delete_address(path, address_id):\n    return store.open(path).addresss.delete(address_id)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/campaign.py",
+      "content": "\"\"\"The campaigns: create, read, list, update and delete, through store/.\"\"\"\nimport store\n\n\ndef create_campaign(path, name, budget_cents, channel):\n    return store.open(path).campaigns.insert({\"name\": name, \"budget_cents\": budget_cents, \"channel\": channel})\n\n\ndef get_campaign(path, campaign_id):\n    return store.open(path).campaigns.get(campaign_id)\n\n\ndef list_campaigns(path):\n    return store.open(path).campaigns.all()\n\n\ndef find_campaigns(path, name):\n    return store.open(path).campaigns.where(\"name\", name)\n\n\ndef update_campaign(path, campaign_id, name, budget_cents, channel):\n    return store.open(path).campaigns.update(campaign_id, {\"name\": name, \"budget_cents\": budget_cents, \"channel\": channel})\n\n\ndef delete_campaign(path, campaign_id):\n    return store.open(path).campaigns.delete(campaign_id)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/category.py",
+      "content": "\"\"\"The categorys: create, read, list, update and delete, through store/.\"\"\"\nimport store\n\n\ndef create_category(path, name, parent_id, position):\n    return store.open(path).categorys.insert({\"name\": name, \"parent_id\": parent_id, \"position\": position})\n\n\ndef get_category(path, category_id):\n    return store.open(path).categorys.get(category_id)\n\n\ndef list_categorys(path):\n    return store.open(path).categorys.all()\n\n\ndef find_categorys(path, name):\n    return store.open(path).categorys.where(\"name\", name)\n\n\ndef update_category(path, category_id, name, parent_id, position):\n    return store.open(path).categorys.update(category_id, {\"name\": name, \"parent_id\": parent_id, \"position\": position})\n\n\ndef delete_category(path, category_id):\n    return store.open(path).categorys.delete(category_id)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/contract.py",
+      "content": "\"\"\"The contracts: create, read, list, update and delete, through store/.\"\"\"\nimport store\n\n\ndef create_contract(path, supplier_id, starts, ends):\n    return store.open(path).contracts.insert({\"supplier_id\": supplier_id, \"starts\": starts, \"ends\": ends})\n\n\ndef get_contract(path, contract_id):\n    return store.open(path).contracts.get(contract_id)\n\n\ndef list_contracts(path):\n    return store.open(path).contracts.all()\n\n\ndef find_contracts(path, supplier_id):\n    return store.open(path).contracts.where(\"supplier_id\", supplier_id)\n\n\ndef update_contract(path, contract_id, supplier_id, starts, ends):\n    return store.open(path).contracts.update(contract_id, {\"supplier_id\": supplier_id, \"starts\": starts, \"ends\": ends})\n\n\ndef delete_contract(path, contract_id):\n    return store.open(path).contracts.delete(contract_id)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/coupon.py",
+      "content": "\"\"\"The coupons: create, read, list, update and delete, through store/.\"\"\"\nimport store\n\n\ndef create_coupon(path, code, percent, active):\n    return store.open(path).coupons.insert({\"code\": code, \"percent\": percent, \"active\": active})\n\n\ndef get_coupon(path, coupon_id):\n    return store.open(path).coupons.get(coupon_id)\n\n\ndef list_coupons(path):\n    return store.open(path).coupons.all()\n\n\ndef find_coupons(path, code):\n    return store.open(path).coupons.where(\"code\", code)\n\n\ndef update_coupon(path, coupon_id, code, percent, active):\n    return store.open(path).coupons.update(coupon_id, {\"code\": code, \"percent\": percent, \"active\": active})\n\n\ndef delete_coupon(path, coupon_id):\n    return store.open(path).coupons.delete(coupon_id)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/customer.py",
+      "content": "\"\"\"The customers: create, read, list, update and delete, through store/.\"\"\"\nimport store\n\n\ndef create_customer(path, name, email, city):\n    return store.open(path).customers.insert({\"name\": name, \"email\": email, \"city\": city})\n\n\ndef get_customer(path, customer_id):\n    return store.open(path).customers.get(customer_id)\n\n\ndef list_customers(path):\n    return store.open(path).customers.all()\n\n\ndef find_customers(path, name):\n    return store.open(path).customers.where(\"name\", name)\n\n\ndef update_customer(path, customer_id, name, email, city):\n    return store.open(path).customers.update(customer_id, {\"name\": name, \"email\": email, \"city\": city})\n\n\ndef delete_customer(path, customer_id):\n    return store.open(path).customers.delete(customer_id)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/db.py",
+      "content": "\"\"\"The service's storage, now through store/ (STORE.md). reset() empties every table.\"\"\"\nimport store\n\nPATH = \"shop.db\"\n\n\ndef reset(path=None):\n    store.open(path or PATH).reset()\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/delivery.py",
+      "content": "\"\"\"The deliverys: create, read, list, update and delete, through store/.\"\"\"\nimport store\n\n\ndef create_delivery(path, shipment_id, state, attempts):\n    return store.open(path).deliverys.insert({\"shipment_id\": shipment_id, \"state\": state, \"attempts\": attempts})\n\n\ndef get_delivery(path, delivery_id):\n    return store.open(path).deliverys.get(delivery_id)\n\n\ndef list_deliverys(path):\n    return store.open(path).deliverys.all()\n\n\ndef find_deliverys(path, shipment_id):\n    return store.open(path).deliverys.where(\"shipment_id\", shipment_id)\n\n\ndef update_delivery(path, delivery_id, shipment_id, state, attempts):\n    return store.open(path).deliverys.update(delivery_id, {\"shipment_id\": shipment_id, \"state\": state, \"attempts\": attempts})\n\n\ndef delete_delivery(path, delivery_id):\n    return store.open(path).deliverys.delete(delivery_id)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/employee.py",
+      "content": "\"\"\"The employees: create, read, list, update and delete, through store/.\"\"\"\nimport store\n\n\ndef create_employee(path, name, role, team):\n    return store.open(path).employees.insert({\"name\": name, \"role\": role, \"team\": team})\n\n\ndef get_employee(path, employee_id):\n    return store.open(path).employees.get(employee_id)\n\n\ndef list_employees(path):\n    return store.open(path).employees.all()\n\n\ndef find_employees(path, name):\n    return store.open(path).employees.where(\"name\", name)\n\n\ndef update_employee(path, employee_id, name, role, team):\n    return store.open(path).employees.update(employee_id, {\"name\": name, \"role\": role, \"team\": team})\n\n\ndef delete_employee(path, employee_id):\n    return store.open(path).employees.delete(employee_id)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/invoice.py",
+      "content": "\"\"\"The invoices: create, read, list, update and delete, through store/.\"\"\"\nimport store\n\n\ndef create_invoice(path, order_id, number, paid):\n    return store.open(path).invoices.insert({\"order_id\": order_id, \"number\": number, \"paid\": paid})\n\n\ndef get_invoice(path, invoice_id):\n    return store.open(path).invoices.get(invoice_id)\n\n\ndef list_invoices(path):\n    return store.open(path).invoices.all()\n\n\ndef find_invoices(path, order_id):\n    return store.open(path).invoices.where(\"order_id\", order_id)\n\n\ndef update_invoice(path, invoice_id, order_id, number, paid):\n    return store.open(path).invoices.update(invoice_id, {\"order_id\": order_id, \"number\": number, \"paid\": paid})\n\n\ndef delete_invoice(path, invoice_id):\n    return store.open(path).invoices.delete(invoice_id)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/lead.py",
+      "content": "\"\"\"The leads: create, read, list, update and delete, through store/.\"\"\"\nimport store\n\n\ndef create_lead(path, email, source, score):\n    return store.open(path).leads.insert({\"email\": email, \"source\": source, \"score\": score})\n\n\ndef get_lead(path, lead_id):\n    return store.open(path).leads.get(lead_id)\n\n\ndef list_leads(path):\n    return store.open(path).leads.all()\n\n\ndef find_leads(path, email):\n    return store.open(path).leads.where(\"email\", email)\n\n\ndef update_lead(path, lead_id, email, source, score):\n    return store.open(path).leads.update(lead_id, {\"email\": email, \"source\": source, \"score\": score})\n\n\ndef delete_lead(path, lead_id):\n    return store.open(path).leads.delete(lead_id)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/note.py",
+      "content": "\"\"\"The notes: create, read, list, update and delete, through store/.\"\"\"\nimport store\n\n\ndef create_note(path, subject, body, author_id):\n    return store.open(path).notes.insert({\"subject\": subject, \"body\": body, \"author_id\": author_id})\n\n\ndef get_note(path, note_id):\n    return store.open(path).notes.get(note_id)\n\n\ndef list_notes(path):\n    return store.open(path).notes.all()\n\n\ndef find_notes(path, subject):\n    return store.open(path).notes.where(\"subject\", subject)\n\n\ndef update_note(path, note_id, subject, body, author_id):\n    return store.open(path).notes.update(note_id, {\"subject\": subject, \"body\": body, \"author_id\": author_id})\n\n\ndef delete_note(path, note_id):\n    return store.open(path).notes.delete(note_id)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/order.py",
+      "content": "\"\"\"The orders: create, read, list, update and delete, through store/.\"\"\"\nimport store\n\n\ndef create_order(path, customer_id, status, total_cents):\n    return store.open(path).orders.insert({\"customer_id\": customer_id, \"status\": status, \"total_cents\": total_cents})\n\n\ndef get_order(path, order_id):\n    return store.open(path).orders.get(order_id)\n\n\ndef list_orders(path):\n    return store.open(path).orders.all()\n\n\ndef find_orders(path, customer_id):\n    return store.open(path).orders.where(\"customer_id\", customer_id)\n\n\ndef update_order(path, order_id, customer_id, status, total_cents):\n    return store.open(path).orders.update(order_id, {\"customer_id\": customer_id, \"status\": status, \"total_cents\": total_cents})\n\n\ndef delete_order(path, order_id):\n    return store.open(path).orders.delete(order_id)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/payment.py",
+      "content": "\"\"\"The payments: create, read, list, update and delete, through store/.\"\"\"\nimport store\n\n\ndef create_payment(path, order_id, method, amount_cents):\n    return store.open(path).payments.insert({\"order_id\": order_id, \"method\": method, \"amount_cents\": amount_cents})\n\n\ndef get_payment(path, payment_id):\n    return store.open(path).payments.get(payment_id)\n\n\ndef list_payments(path):\n    return store.open(path).payments.all()\n\n\ndef find_payments(path, order_id):\n    return store.open(path).payments.where(\"order_id\", order_id)\n\n\ndef update_payment(path, payment_id, order_id, method, amount_cents):\n    return store.open(path).payments.update(payment_id, {\"order_id\": order_id, \"method\": method, \"amount_cents\": amount_cents})\n\n\ndef delete_payment(path, payment_id):\n    return store.open(path).payments.delete(payment_id)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/product.py",
+      "content": "\"\"\"The products: create, read, list, update and delete, through store/.\"\"\"\nimport store\n\n\ndef create_product(path, sku, title, price_cents):\n    return store.open(path).products.insert({\"sku\": sku, \"title\": title, \"price_cents\": price_cents})\n\n\ndef get_product(path, product_id):\n    return store.open(path).products.get(product_id)\n\n\ndef list_products(path):\n    return store.open(path).products.all()\n\n\ndef find_products(path, sku):\n    return store.open(path).products.where(\"sku\", sku)\n\n\ndef update_product(path, product_id, sku, title, price_cents):\n    return store.open(path).products.update(product_id, {\"sku\": sku, \"title\": title, \"price_cents\": price_cents})\n\n\ndef delete_product(path, product_id):\n    return store.open(path).products.delete(product_id)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/refund.py",
+      "content": "\"\"\"The refunds: create, read, list, update and delete, through store/.\"\"\"\nimport store\n\n\ndef create_refund(path, order_id, amount_cents, reason):\n    return store.open(path).refunds.insert({\"order_id\": order_id, \"amount_cents\": amount_cents, \"reason\": reason})\n\n\ndef get_refund(path, refund_id):\n    return store.open(path).refunds.get(refund_id)\n\n\ndef list_refunds(path):\n    return store.open(path).refunds.all()\n\n\ndef find_refunds(path, order_id):\n    return store.open(path).refunds.where(\"order_id\", order_id)\n\n\ndef update_refund(path, refund_id, order_id, amount_cents, reason):\n    return store.open(path).refunds.update(refund_id, {\"order_id\": order_id, \"amount_cents\": amount_cents, \"reason\": reason})\n\n\ndef delete_refund(path, refund_id):\n    return store.open(path).refunds.delete(refund_id)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/reports/finance.py",
+      "content": "\"\"\"Finance: refunds against payments per order, and unpaid invoices.\"\"\"\nimport store\n\n\ndef net_by_order(path):\n    repositories = store.open(path)\n    paid, refunded = {}, {}\n    for row in repositories.payments.all():\n        paid[row[\"order_id\"]] = paid.get(row[\"order_id\"], 0) + row[\"amount_cents\"]\n    for row in repositories.refunds.all():\n        refunded[row[\"order_id\"]] = refunded.get(row[\"order_id\"], 0) + row[\"amount_cents\"]\n    return {order: paid[order] - refunded.get(order, 0) for order in sorted(paid)}\n\n\ndef unpaid_invoices(path):\n    return sorted(row[\"number\"] for row in store.open(path).invoices.all() if row[\"paid\"] == 0)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/reports/sales.py",
+      "content": "\"\"\"Sales: revenue per customer city, and the best customers.\"\"\"\nimport store\n\n\ndef _paid(path):\n    repositories = store.open(path)\n    customers = {row[\"id\"]: row for row in repositories.customers.all()}\n    return [(customers[order[\"customer_id\"]], order[\"total_cents\"]) for order in repositories.orders.all()\n            if order[\"status\"] == \"paid\"]\n\n\ndef revenue_by_city(path):\n    cities = {}\n    for customer, cents in _paid(path):\n        cities[customer[\"city\"]] = cities.get(customer[\"city\"], 0) + cents\n    return dict(sorted(cities.items()))\n\n\ndef best_customers(path, limit=3):\n    totals = {}\n    for customer, cents in _paid(path):\n        totals[(customer[\"id\"], customer[\"name\"])] = totals.get((customer[\"id\"], customer[\"name\"]), 0) + cents\n    ranked = sorted(totals.items(), key=lambda item: (-item[1], item[0][1]))\n    return [(name, cents) for (_, name), cents in ranked[:limit]]\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/reports/stock.py",
+      "content": "\"\"\"Stock: units per warehouse city, and the products below a level.\"\"\"\nimport store\n\n\ndef units_by_city(path):\n    repositories = store.open(path)\n    warehouses = {row[\"id\"]: row for row in repositories.warehouses.all()}\n    cities = {}\n    for row in repositories.stocks.all():\n        city = warehouses[row[\"warehouse_id\"]][\"city\"]\n        cities[city] = cities.get(city, 0) + row[\"quantity\"]\n    return dict(sorted(cities.items()))\n\n\ndef low_stock(path, level):\n    repositories = store.open(path)\n    products = {row[\"id\"]: row for row in repositories.products.all()}\n    units = {}\n    for row in repositories.stocks.all():\n        units[row[\"product_id\"]] = units.get(row[\"product_id\"], 0) + row[\"quantity\"]\n    return sorted(products[product][\"sku\"] for product, total in units.items() if total < level)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/reports/support.py",
+      "content": "\"\"\"Support: open tickets per customer, and products' average stars.\"\"\"\nimport store\n\n\ndef open_tickets(path):\n    repositories = store.open(path)\n    customers = {row[\"id\"]: row for row in repositories.customers.all()}\n    counts = {}\n    for ticket in repositories.tickets.all():\n        if ticket[\"state\"] == \"open\":\n            email = customers[ticket[\"customer_id\"]][\"email\"]\n            counts[email] = counts.get(email, 0) + 1\n    return dict(sorted(counts.items()))\n\n\ndef average_stars(path):\n    repositories = store.open(path)\n    products = {row[\"id\"]: row for row in repositories.products.all()}\n    stars = {}\n    for review in repositories.reviews.all():\n        stars.setdefault(products[review[\"product_id\"]][\"sku\"], []).append(review[\"stars\"])\n    return {sku: round(sum(values) / len(values), 2) for sku, values in sorted(stars.items())}\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/review.py",
+      "content": "\"\"\"The reviews: create, read, list, update and delete, through store/.\"\"\"\nimport store\n\n\ndef create_review(path, product_id, customer_id, stars):\n    return store.open(path).reviews.insert({\"product_id\": product_id, \"customer_id\": customer_id, \"stars\": stars})\n\n\ndef get_review(path, review_id):\n    return store.open(path).reviews.get(review_id)\n\n\ndef list_reviews(path):\n    return store.open(path).reviews.all()\n\n\ndef find_reviews(path, product_id):\n    return store.open(path).reviews.where(\"product_id\", product_id)\n\n\ndef update_review(path, review_id, product_id, customer_id, stars):\n    return store.open(path).reviews.update(review_id, {\"product_id\": product_id, \"customer_id\": customer_id, \"stars\": stars})\n\n\ndef delete_review(path, review_id):\n    return store.open(path).reviews.delete(review_id)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/rma.py",
+      "content": "\"\"\"The rmas: create, read, list, update and delete, through store/.\"\"\"\nimport store\n\n\ndef create_rma(path, order_id, state, items):\n    return store.open(path).rmas.insert({\"order_id\": order_id, \"state\": state, \"items\": items})\n\n\ndef get_rma(path, rma_id):\n    return store.open(path).rmas.get(rma_id)\n\n\ndef list_rmas(path):\n    return store.open(path).rmas.all()\n\n\ndef find_rmas(path, order_id):\n    return store.open(path).rmas.where(\"order_id\", order_id)\n\n\ndef update_rma(path, rma_id, order_id, state, items):\n    return store.open(path).rmas.update(rma_id, {\"order_id\": order_id, \"state\": state, \"items\": items})\n\n\ndef delete_rma(path, rma_id):\n    return store.open(path).rmas.delete(rma_id)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/shipment.py",
+      "content": "\"\"\"The shipments: create, read, list, update and delete, through store/.\"\"\"\nimport store\n\n\ndef create_shipment(path, order_id, carrier, tracking):\n    return store.open(path).shipments.insert({\"order_id\": order_id, \"carrier\": carrier, \"tracking\": tracking})\n\n\ndef get_shipment(path, shipment_id):\n    return store.open(path).shipments.get(shipment_id)\n\n\ndef list_shipments(path):\n    return store.open(path).shipments.all()\n\n\ndef find_shipments(path, order_id):\n    return store.open(path).shipments.where(\"order_id\", order_id)\n\n\ndef update_shipment(path, shipment_id, order_id, carrier, tracking):\n    return store.open(path).shipments.update(shipment_id, {\"order_id\": order_id, \"carrier\": carrier, \"tracking\": tracking})\n\n\ndef delete_shipment(path, shipment_id):\n    return store.open(path).shipments.delete(shipment_id)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/stock.py",
+      "content": "\"\"\"The stocks: create, read, list, update and delete, through store/.\"\"\"\nimport store\n\n\ndef create_stock(path, product_id, warehouse_id, quantity):\n    return store.open(path).stocks.insert({\"product_id\": product_id, \"warehouse_id\": warehouse_id, \"quantity\": quantity})\n\n\ndef get_stock(path, stock_id):\n    return store.open(path).stocks.get(stock_id)\n\n\ndef list_stocks(path):\n    return store.open(path).stocks.all()\n\n\ndef find_stocks(path, product_id):\n    return store.open(path).stocks.where(\"product_id\", product_id)\n\n\ndef update_stock(path, stock_id, product_id, warehouse_id, quantity):\n    return store.open(path).stocks.update(stock_id, {\"product_id\": product_id, \"warehouse_id\": warehouse_id, \"quantity\": quantity})\n\n\ndef delete_stock(path, stock_id):\n    return store.open(path).stocks.delete(stock_id)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/supplier.py",
+      "content": "\"\"\"The suppliers: create, read, list, update and delete, through store/.\"\"\"\nimport store\n\n\ndef create_supplier(path, name, country, rating):\n    return store.open(path).suppliers.insert({\"name\": name, \"country\": country, \"rating\": rating})\n\n\ndef get_supplier(path, supplier_id):\n    return store.open(path).suppliers.get(supplier_id)\n\n\ndef list_suppliers(path):\n    return store.open(path).suppliers.all()\n\n\ndef find_suppliers(path, name):\n    return store.open(path).suppliers.where(\"name\", name)\n\n\ndef update_supplier(path, supplier_id, name, country, rating):\n    return store.open(path).suppliers.update(supplier_id, {\"name\": name, \"country\": country, \"rating\": rating})\n\n\ndef delete_supplier(path, supplier_id):\n    return store.open(path).suppliers.delete(supplier_id)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/tag.py",
+      "content": "\"\"\"The tags: create, read, list, update and delete, through store/.\"\"\"\nimport store\n\n\ndef create_tag(path, name, colour, uses):\n    return store.open(path).tags.insert({\"name\": name, \"colour\": colour, \"uses\": uses})\n\n\ndef get_tag(path, tag_id):\n    return store.open(path).tags.get(tag_id)\n\n\ndef list_tags(path):\n    return store.open(path).tags.all()\n\n\ndef find_tags(path, name):\n    return store.open(path).tags.where(\"name\", name)\n\n\ndef update_tag(path, tag_id, name, colour, uses):\n    return store.open(path).tags.update(tag_id, {\"name\": name, \"colour\": colour, \"uses\": uses})\n\n\ndef delete_tag(path, tag_id):\n    return store.open(path).tags.delete(tag_id)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/team.py",
+      "content": "\"\"\"The teams: create, read, list, update and delete, through store/.\"\"\"\nimport store\n\n\ndef create_team(path, name, lead_id, size):\n    return store.open(path).teams.insert({\"name\": name, \"lead_id\": lead_id, \"size\": size})\n\n\ndef get_team(path, team_id):\n    return store.open(path).teams.get(team_id)\n\n\ndef list_teams(path):\n    return store.open(path).teams.all()\n\n\ndef find_teams(path, name):\n    return store.open(path).teams.where(\"name\", name)\n\n\ndef update_team(path, team_id, name, lead_id, size):\n    return store.open(path).teams.update(team_id, {\"name\": name, \"lead_id\": lead_id, \"size\": size})\n\n\ndef delete_team(path, team_id):\n    return store.open(path).teams.delete(team_id)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/ticket.py",
+      "content": "\"\"\"The tickets: create, read, list, update and delete, through store/.\"\"\"\nimport store\n\n\ndef create_ticket(path, customer_id, subject, state):\n    return store.open(path).tickets.insert({\"customer_id\": customer_id, \"subject\": subject, \"state\": state})\n\n\ndef get_ticket(path, ticket_id):\n    return store.open(path).tickets.get(ticket_id)\n\n\ndef list_tickets(path):\n    return store.open(path).tickets.all()\n\n\ndef find_tickets(path, customer_id):\n    return store.open(path).tickets.where(\"customer_id\", customer_id)\n\n\ndef update_ticket(path, ticket_id, customer_id, subject, state):\n    return store.open(path).tickets.update(ticket_id, {\"customer_id\": customer_id, \"subject\": subject, \"state\": state})\n\n\ndef delete_ticket(path, ticket_id):\n    return store.open(path).tickets.delete(ticket_id)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/warehouse.py",
+      "content": "\"\"\"The warehouses: create, read, list, update and delete, through store/.\"\"\"\nimport store\n\n\ndef create_warehouse(path, code, city, capacity):\n    return store.open(path).warehouses.insert({\"code\": code, \"city\": city, \"capacity\": capacity})\n\n\ndef get_warehouse(path, warehouse_id):\n    return store.open(path).warehouses.get(warehouse_id)\n\n\ndef list_warehouses(path):\n    return store.open(path).warehouses.all()\n\n\ndef find_warehouses(path, code):\n    return store.open(path).warehouses.where(\"code\", code)\n\n\ndef update_warehouse(path, warehouse_id, code, city, capacity):\n    return store.open(path).warehouses.update(warehouse_id, {\"code\": code, \"city\": city, \"capacity\": capacity})\n\n\ndef delete_warehouse(path, warehouse_id):\n    return store.open(path).warehouses.delete(warehouse_id)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "store/__init__.py",
+      "content": "\"\"\"The repositories: store.open(path) gives every table's repository, on SQLite unless\nuse_memory() is in force.\"\"\"\nfrom app import schema\nfrom store.memory import MemoryStore\nfrom store.sqlite import SqliteStore\n\n_memory = None\n\n\ndef open(path):  # noqa: A001 (the spec's name)\n    return _memory if _memory is not None else SqliteStore(path or \"shop.db\", schema.TABLES)\n\n\ndef use_memory():\n    global _memory\n    _memory = MemoryStore(schema.TABLES)\n\n\ndef use_sqlite():\n    global _memory\n    _memory = None\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "store/base.py",
+      "content": "\"\"\"One table's repository: what every implementation offers.\"\"\"\n\n\nclass Repository:\n    def insert(self, row):\n        \"\"\"Adds the row (a dict without id); returns its new id.\"\"\"\n        raise NotImplementedError\n\n    def get(self, row_id):\n        \"\"\"The row as a dict with its id, or None.\"\"\"\n        raise NotImplementedError\n\n    def all(self):\n        \"\"\"Every row, by id.\"\"\"\n        raise NotImplementedError\n\n    def where(self, field, value):\n        \"\"\"The rows whose field equals value, by id.\"\"\"\n        raise NotImplementedError\n\n    def update(self, row_id, row):\n        \"\"\"Replaces the row's fields; whether it existed.\"\"\"\n        raise NotImplementedError\n\n    def delete(self, row_id):\n        \"\"\"Removes the row; whether it existed.\"\"\"\n        raise NotImplementedError\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "store/memory.py",
+      "content": "\"\"\"In-memory repositories, for tests and for running without a database.\"\"\"\nfrom store.base import Repository\n\n\nclass MemoryRepository(Repository):\n    def __init__(self):\n        self.rows, self.next_id = {}, 1\n\n    def insert(self, row):\n        row_id, self.next_id = self.next_id, self.next_id + 1\n        self.rows[row_id] = {\"id\": row_id, **row}\n        return row_id\n\n    def get(self, row_id):\n        row = self.rows.get(row_id)\n        return dict(row) if row else None\n\n    def all(self):\n        return [dict(self.rows[row_id]) for row_id in sorted(self.rows)]\n\n    def where(self, field, value):\n        return [row for row in self.all() if row.get(field) == value]\n\n    def update(self, row_id, row):\n        if row_id not in self.rows:\n            return False\n        self.rows[row_id].update(row)\n        return True\n\n    def delete(self, row_id):\n        return self.rows.pop(row_id, None) is not None\n\n\nclass MemoryStore:\n    def __init__(self, tables):\n        self.tables = tables\n        self.reset()\n\n    def reset(self):\n        for table in self.tables:\n            setattr(self, table, MemoryRepository())\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "store/sqlite.py",
+      "content": "\"\"\"The SQLite repositories: the only module that imports sqlite3.\"\"\"\nimport sqlite3\n\nfrom app import schema\nfrom store.base import Repository\n\n\nclass SqliteRepository(Repository):\n    def __init__(self, path, table):\n        self.path, self.table = path, table\n\n    def _connect(self):\n        connection = sqlite3.connect(self.path)\n        connection.row_factory = sqlite3.Row\n        return connection\n\n    def insert(self, row):\n        names = \", \".join(row)\n        marks = \", \".join(\"?\" for _ in row)\n        with self._connect() as connection:\n            cursor = connection.execute(f\"INSERT INTO {self.table} ({names}) VALUES ({marks})\", tuple(row.values()))\n            return cursor.lastrowid\n\n    def get(self, row_id):\n        with self._connect() as connection:\n            row = connection.execute(f\"SELECT * FROM {self.table} WHERE id = ?\", (row_id,)).fetchone()\n            return dict(row) if row else None\n\n    def all(self):\n        with self._connect() as connection:\n            return [dict(row) for row in connection.execute(f\"SELECT * FROM {self.table} ORDER BY id\")]\n\n    def where(self, field, value):\n        with self._connect() as connection:\n            return [dict(row) for row in connection.execute(f\"SELECT * FROM {self.table} WHERE {field} = ? ORDER BY id\",\n                                                            (value,))]\n\n    def update(self, row_id, row):\n        sets = \", \".join(f\"{name} = ?\" for name in row)\n        with self._connect() as connection:\n            return connection.execute(f\"UPDATE {self.table} SET {sets} WHERE id = ?\",\n                                      (*row.values(), row_id)).rowcount == 1\n\n    def delete(self, row_id):\n        with self._connect() as connection:\n            return connection.execute(f\"DELETE FROM {self.table} WHERE id = ?\", (row_id,)).rowcount == 1\n\n\nclass SqliteStore:\n    def __init__(self, path, tables):\n        self.path = path\n        for table in tables:\n            setattr(self, table, SqliteRepository(path, table))\n\n    def reset(self):\n        with sqlite3.connect(self.path) as connection:\n            for statement in schema.STATEMENTS:\n                connection.execute(statement)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "done",
+     "arguments": {
+      "summary": "Wrote app/address.py, app/campaign.py, app/category.py, app/contract.py, app/coupon.py, app/customer.py, app/db.py, app/delivery.py, app/employee.py, app/invoice.py, app/lead.py, app/note.py, app/order.py, app/payment.py, app/product.py, app/refund.py, app/reports/finance.py, app/reports/sales.py, app/reports/stock.py, app/reports/support.py, app/review.py, app/rma.py, app/shipment.py, app/stock.py, app/supplier.py, app/tag.py, app/team.py, app/ticket.py, app/warehouse.py, store/__init__.py, store/base.py, store/memory.py, store/sqlite.py."
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The service in `app/` (24 entity modules and four reports) calls SQLite directly. Port it to repositories as",
+   "events": [
+    {
+     "type": "text",
+     "text": "Done: app/address.py, app/campaign.py, app/category.py, app/contract.py, app/coupon.py, app/customer.py, app/db.py, app/delivery.py, app/employee.py, app/invoice.py, app/lead.py, app/note.py, app/order.py, app/payment.py, app/product.py, app/refund.py, app/reports/finance.py, app/reports/sales.py, app/reports/stock.py, app/reports/support.py, app/review.py, app/rma.py, app/shipment.py, app/stock.py, app/supplier.py, app/tag.py, app/team.py, app/ticket.py, app/warehouse.py, store/__init__.py, store/base.py, store/memory.py, store/sqlite.py."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "shell",
+     "arguments": {
+      "command": "find . -path ./.git -prune -o -type f -print | sort > scout-notes.md"
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "send_to_lead",
+     "arguments": {
+      "type": "report",
+      "text": "scout-notes.md lists the workspace's files.",
+      "question_seq": null,
+      "files": [
+       "scout-notes.md"
+      ]
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "text",
+     "text": "I reported to my lead."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  }
+ ]
+}

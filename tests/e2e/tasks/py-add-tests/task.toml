@@ -1,0 +1,6 @@
+id = "py-add-tests"
+title = "Write tests for an untested statistics module"
+tags = ["python", "add-tests", "small", "fallback-relevant", "cmp"]
+budgets = { max_steps = 30, wall_clock_secs = 600, max_tokens = 200000 }
+protected = ["stats.py"]
+check = { image = "runtime", timeout_secs = 120 }

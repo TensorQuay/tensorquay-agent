@@ -1,0 +1,35 @@
+{
+ "model": "fixture",
+ "responses": [
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "test/slug.test.ts",
+      "content": "import assert from \"node:assert/strict\";\nimport { test } from \"node:test\";\nimport { slugify } from \"../src/slug.ts\";\n\ntest(\"returns a string\", () => {\n  assert.equal(typeof slugify(\"anything\"), \"string\");\n});\n",
+      "create_parents": false
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 480,
+    "completion_tokens": 260
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "Added a smoke test."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 820,
+    "completion_tokens": 20
+   }
+  }
+ ]
+}

@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT sandbox_id FROM runtime_tokens WHERE conversation_id=$1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "sandbox_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "runtime_tokens",
+            "name": "sandbox_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "9e7146ea92779816844aa271e1af1f97944a4adacfc334a3ef30c7d542ec4e16"
+}

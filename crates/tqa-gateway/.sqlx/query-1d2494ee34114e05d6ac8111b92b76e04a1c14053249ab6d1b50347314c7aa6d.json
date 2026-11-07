@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT remote FROM git_credentials WHERE moved_at IS NULL LIMIT $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "remote",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "git_credentials",
+            "name": "remote"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "1d2494ee34114e05d6ac8111b92b76e04a1c14053249ab6d1b50347314c7aa6d"
+}

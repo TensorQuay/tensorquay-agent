@@ -1,0 +1,8 @@
+[[routes]]
+name = "local"
+protocol = "openai_chat"
+base_url = "https://models.example/v1"
+model = "example-model"
+auth = { kind = "none" }
+# The model's context in tokens, as its server runs it (Ollama: `ollama ps`, CONTEXT); tasks need at least 16384.
+context_window = 32768

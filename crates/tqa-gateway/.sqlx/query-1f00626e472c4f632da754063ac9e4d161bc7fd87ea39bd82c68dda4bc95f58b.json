@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO channel_claims (channel_id, task_seq, claimant_kind, claimant_id, claim_seq) VALUES ($1, $2, $3, $4, $5)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8",
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1f00626e472c4f632da754063ac9e4d161bc7fd87ea39bd82c68dda4bc95f58b"
+}

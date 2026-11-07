@@ -1,0 +1,133 @@
+{
+ "model": "fixture",
+ "select": "prompt",
+ "responses": [
+  {
+   "when": "Build the weekly service report in `pipeline/`: the four stages described in `docs/PIPELINE.md` (parse, normalise,",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "out/weekly.json",
+      "content": "{\n \"api\": {\n  \"errors\": 3,\n  \"p95_ms\": 837,\n  \"requests\": 105,\n  \"users\": 47\n },\n \"auth\": {\n  \"errors\": 9,\n  \"p95_ms\": 2369,\n  \"requests\": 86,\n  \"users\": 46\n },\n \"billing\": {\n  \"errors\": 6,\n  \"p95_ms\": 2435,\n  \"requests\": 77,\n  \"users\": 43\n },\n \"mailer\": {\n  \"errors\": 6,\n  \"p95_ms\": 8338,\n  \"requests\": 101,\n  \"users\": 50\n },\n \"search\": {\n  \"errors\": 5,\n  \"p95_ms\": 864,\n  \"requests\": 106,\n  \"users\": 49\n },\n \"worker\": {\n  \"errors\": 7,\n  \"p95_ms\": 8718,\n  \"requests\": 92,\n  \"users\": 45\n }\n}\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Build the weekly service report in `pipeline/`: the four stages described in `docs/PIPELINE.md` (parse, normalise,",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "out/weekly.md",
+      "content": "| Service | Requests | Errors | p95 (ms) | Users |\n|---|---|---|---|---|\n| api | 105 | 3 | 837 | 47 |\n| auth | 86 | 9 | 2369 | 46 |\n| billing | 77 | 6 | 2435 | 43 |\n| mailer | 101 | 6 | 8338 | 50 |\n| search | 106 | 5 | 864 | 49 |\n| worker | 92 | 7 | 8718 | 45 |\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Build the weekly service report in `pipeline/`: the four stages described in `docs/PIPELINE.md` (parse, normalise,",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "pipeline/aggregate.py",
+      "content": "\"\"\"Stage 3: the week's figures per service (docs/PIPELINE.md).\"\"\"\nimport math\nfrom datetime import datetime, timedelta, timezone\n\n\ndef aggregate(records, week):\n    \"\"\"`week`: the Monday it starts, \"YYYY-MM-DD\" (UTC). Returns {service: {requests, errors, p95_ms, users}}.\"\"\"\n    start = datetime.fromisoformat(week).replace(tzinfo=timezone.utc)\n    end = start + timedelta(days=7)\n    by_service = {}\n    for record in records:\n        if start <= record[\"time\"] < end:\n            by_service.setdefault(record[\"service\"], []).append(record)\n    figures = {}\n    for service, items in sorted(by_service.items()):\n        durations = sorted(item[\"ms\"] for item in items)\n        figures[service] = {\"requests\": len(items), \"errors\": sum(item[\"failed\"] for item in items),\n                            \"p95_ms\": durations[math.ceil(0.95 * len(durations)) - 1],\n                            \"users\": len({item[\"user\"] for item in items})}\n    return figures\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Build the weekly service report in `pipeline/`: the four stages described in `docs/PIPELINE.md` (parse, normalise,",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "pipeline/normalize.py",
+      "content": "\"\"\"Stage 2: raw records from any source into one record shape (docs/PIPELINE.md):\ntime (an aware UTC datetime),\nservice, failed (bool), ms (int) and user.\"\"\"\nfrom datetime import datetime, timezone\n\n\ndef normalize(raw, source):\n    \"\"\"`raw`: stage 1's records from one source (\"access\", \"app\" or \"worker\").\"\"\"\n    records = []\n    for item in raw:\n        if source == \"access\":\n            time = datetime.fromisoformat(item[\"time\"].replace(\"Z\", \"+00:00\"))\n            failed, ms = int(item[\"status\"]) >= 500, int(item[\"ms\"])\n        elif source == \"app\":\n            time = datetime.fromisoformat(item[\"time\"].replace(\"Z\", \"+00:00\"))\n            failed, ms = int(item[\"status\"]) >= 500, int(item[\"duration_ms\"])\n        else:\n            time = datetime.strptime(f\"2026 {item['month']} {item['day']} {item['clock']}\", \"%Y %b %d %H:%M:%S\")\n            time = time.replace(tzinfo=timezone.utc)\n            failed, ms = item[\"status\"] == \"failed\", round(float(item[\"seconds\"]) * 1000)\n        records.append({\"time\": time, \"service\": item[\"service\"], \"failed\": failed, \"ms\": ms, \"user\": item[\"user\"]})\n    return records\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Build the weekly service report in `pipeline/`: the four stages described in `docs/PIPELINE.md` (parse, normalise,",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "pipeline/parse.py",
+      "content": "\"\"\"Stage 1: each log format's lines into raw records (docs/PIPELINE.md).\"\"\"\nimport json\nimport re\n\nACCESS = re.compile(r\"(?P<time>\\S+) (?P<method>\\S+) (?P<path>\\S+) (?P<status>\\d{3}) (?P<ms>\\d+)ms \"\n                    r\"user=(?P<user>\\S+) \"\n                    r\"svc=(?P<service>\\S+)\")\nWORKER = re.compile(r\"(?P<month>\\w{3}) +(?P<day>\\d+) (?P<clock>[\\d:]+) \\S+ (?P<service>\\w+)\\[\\d+\\]: job=\\S+ \"\n                    r\"status=(?P<status>\\w+) took=(?P<seconds>[\\d.]+)s user=(?P<user>\\S+)\")\n\n\ndef parse_access(lines):\n    return [match.groupdict() for match in map(ACCESS.fullmatch, lines) if match]\n\n\ndef parse_app(lines):\n    events = [json.loads(line) for line in lines if line.strip()]\n    return [event for event in events if event.get(\"event\") == \"request\"]\n\n\ndef parse_worker(lines):\n    return [match.groupdict() for match in map(WORKER.fullmatch, lines) if match]\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Build the weekly service report in `pipeline/`: the four stages described in `docs/PIPELINE.md` (parse, normalise,",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "pipeline/report.py",
+      "content": "\"\"\"Stage 4: weekly.json and weekly.md (docs/PIPELINE.md).\"\"\"\nimport json\n\n\ndef write(figures, out):\n    out.mkdir(parents=True, exist_ok=True)\n    (out / \"weekly.json\").write_text(json.dumps(figures, indent=1, sort_keys=True) + \"\\n\")\n    rows = [\"| Service | Requests | Errors | p95 (ms) | Users |\", \"|---|---|---|---|---|\"]\n    rows += [f\"| {service} | {f['requests']} | {f['errors']} | {f['p95_ms']} | {f['users']} |\"\n             for service, f in sorted(figures.items())]\n    (out / \"weekly.md\").write_text(\"\\n\".join(rows) + \"\\n\")\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Build the weekly service report in `pipeline/`: the four stages described in `docs/PIPELINE.md` (parse, normalise,",
+   "events": [
+    {
+     "type": "text",
+     "text": "Done: out/weekly.json, out/weekly.md, pipeline/aggregate.py, pipeline/normalize.py, pipeline/parse.py, pipeline/report.py."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  }
+ ]
+}

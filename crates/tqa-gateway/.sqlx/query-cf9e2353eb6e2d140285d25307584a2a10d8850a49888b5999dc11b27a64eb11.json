@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE templates SET seed_state='current' WHERE name=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cf9e2353eb6e2d140285d25307584a2a10d8850a49888b5999dc11b27a64eb11"
+}

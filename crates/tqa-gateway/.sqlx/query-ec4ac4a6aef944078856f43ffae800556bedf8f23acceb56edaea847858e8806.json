@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM host_key_placeholders WHERE sandbox_id=$1 AND run_id IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ec4ac4a6aef944078856f43ffae800556bedf8f23acceb56edaea847858e8806"
+}

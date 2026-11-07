@@ -1,0 +1,69 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT k.id, k.for_everyone, u.user_id AS \"user_id?\", p.email AS \"email?\" FROM host_keys k LEFT JOIN host_key_users u ON u.key_id=k.id LEFT JOIN users p ON p.id=u.user_id WHERE k.id=ANY($1) ORDER BY k.id, p.email",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "host_keys",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "for_everyone",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "host_keys",
+            "name": "for_everyone"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "user_id?",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "host_key_users",
+            "name": "user_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "email?",
+        "type_info": {
+          "Custom": {
+            "name": "citext",
+            "kind": "Simple"
+          }
+        },
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "email"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "508d451fc143a6f4b4811ef3a3398fa5a7edcb4102614474418301e2b760d954"
+}

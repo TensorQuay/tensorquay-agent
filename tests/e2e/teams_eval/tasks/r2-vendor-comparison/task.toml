@@ -1,0 +1,6 @@
+id = "r2-vendor-comparison"
+title = "Compare three vendors' APIs from their documentation"
+tags = ["teams-eval", "teams-research"]
+budgets = { max_steps = 80, wall_clock_secs = 1800, max_tokens = 1000000 }
+protected = []
+check = { image = "runtime", timeout_secs = 180 }

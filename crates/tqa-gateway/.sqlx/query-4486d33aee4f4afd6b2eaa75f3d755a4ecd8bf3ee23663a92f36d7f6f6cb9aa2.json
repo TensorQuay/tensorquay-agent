@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(SUM(bytes), 0)::bigint AS \"held!\" FROM screenshots WHERE conversation_id = $1 AND purged_at IS NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "held!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "4486d33aee4f4afd6b2eaa75f3d755a4ecd8bf3ee23663a92f36d7f6f6cb9aa2"
+}

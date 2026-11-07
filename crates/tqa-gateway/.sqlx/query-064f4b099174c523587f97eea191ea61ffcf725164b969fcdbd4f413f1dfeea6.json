@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE sandbox_instances SET phase='destroying',updated_at=CURRENT_TIMESTAMP WHERE conversation_id=$1 AND ($2::timestamptz IS NULL OR (last_action_at=$2 AND $3=COALESCE((SELECT MAX(seq) FROM events WHERE conversation_id=$1),0) AND NOT EXISTS (SELECT 1 FROM idempotency WHERE conversation_id=$1 AND execution_status='queued'))) RETURNING conversation_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "conversation_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "sandbox_instances",
+            "name": "conversation_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "064f4b099174c523587f97eea191ea61ffcf725164b969fcdbd4f413f1dfeea6"
+}

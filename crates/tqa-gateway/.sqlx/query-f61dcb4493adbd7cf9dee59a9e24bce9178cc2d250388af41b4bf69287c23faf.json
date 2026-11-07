@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE idempotency SET team_copy_channel = $3, team_copy_seq = $4 WHERE key = $1 AND user_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid",
+        "Uuid",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f61dcb4493adbd7cf9dee59a9e24bce9178cc2d250388af41b4bf69287c23faf"
+}

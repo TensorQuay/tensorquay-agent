@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT lead_conversation FROM agent_teams WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "lead_conversation",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "lead_conversation"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "e9bdcb500ba49d6d1d888121738d3fef6c9fb67d56213c9dc35b652dfe99e6c7"
+}

@@ -1,0 +1,98 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT document,display_name,description,version,last_set_by,seed_state,updated_at FROM model_routes ORDER BY name",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "document",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "model_routes",
+            "name": "document"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "model_routes",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "description",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "model_routes",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "version",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "model_routes",
+            "name": "version"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "last_set_by",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "model_routes",
+            "name": "last_set_by"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "seed_state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "model_routes",
+            "name": "seed_state"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "model_routes",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "5b9aaf4d8aae69338240cbe08ee43e3974440eba8625125a23daadfa68d4a113"
+}

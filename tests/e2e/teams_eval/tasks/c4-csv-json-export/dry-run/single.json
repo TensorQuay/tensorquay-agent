@@ -1,0 +1,76 @@
+{
+ "model": "fixture",
+ "select": "prompt",
+ "responses": [
+  {
+   "when": "Add a `--format` option to `report.py` with three values: `text`, the default, which keeps today's output",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "README.md",
+      "content": "# report\n\nSales totals by region.\n\n## Usage\n\n```sh\npython3 report.py sales.json\n```\n\nThe output is one `region: total` line per region, sorted by region.\n\n`--format csv` prints `region,total` lines after a header, and `--format json` a list of `{\"region\", \"total\"}` objects; `--format text` is the default.\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Add a `--format` option to `report.py` with three values: `text`, the default, which keeps today's output",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "report.py",
+      "content": "\"\"\"Print sales totals by region from a JSON file of {region, amount} rows.\"\"\"\nimport argparse\nimport csv\nimport io\nimport json\n\n\ndef load(path):\n    with open(path) as file:\n        return json.load(file)\n\n\ndef totals(rows):\n    \"\"\"Return (region, total) pairs sorted by region.\"\"\"\n    sums = {}\n    for row in rows:\n        sums[row[\"region\"]] = sums.get(row[\"region\"], 0) + row[\"amount\"]\n    return sorted(sums.items())\n\n\ndef render_text(pairs):\n    return \"\\n\".join(f\"{region}: {total}\" for region, total in pairs)\n\n\ndef render_csv(pairs):\n    out = io.StringIO()\n    writer = csv.writer(out, lineterminator=\"\\n\")\n    writer.writerow((\"region\", \"total\"))\n    writer.writerows(pairs)\n    return out.getvalue().rstrip(\"\\n\")\n\n\ndef render_json(pairs):\n    return json.dumps([{\"region\": region, \"total\": total} for region, total in pairs], indent=2)\n\n\nRENDER = {\"text\": render_text, \"csv\": render_csv, \"json\": render_json}\n\n\ndef main(argv=None):\n    parser = argparse.ArgumentParser(prog=\"report\", description=\"Sales totals by region.\")\n    parser.add_argument(\"path\", help=\"a JSON file of {region, amount} rows\")\n    parser.add_argument(\"--format\", choices=sorted(RENDER), default=\"text\")\n    args = parser.parse_args(argv)\n    print(RENDER[args.format](totals(load(args.path))))\n\n\nif __name__ == \"__main__\":\n    main()\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Add a `--format` option to `report.py` with three values: `text`, the default, which keeps today's output",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "tests/test_report.py",
+      "content": "import unittest\n\nimport json\n\nfrom report import render_csv, render_json, render_text, totals\n\n\nclass ReportTest(unittest.TestCase):\n    def test_totals_sorted_by_region(self):\n        rows = [{\"region\": \"b\", \"amount\": 2}, {\"region\": \"a\", \"amount\": 1}, {\"region\": \"b\", \"amount\": 3}]\n        self.assertEqual(totals(rows), [(\"a\", 1), (\"b\", 5)])\n\n    def test_text(self):\n        self.assertEqual(render_text([(\"a\", 1), (\"b\", 5)]), \"a: 1\\nb: 5\")\n\n    def test_csv(self):\n        self.assertEqual(render_csv([(\"a\", 1)]), \"region,total\\na,1\")\n\n    def test_json(self):\n        self.assertEqual(json.loads(render_json([(\"a\", 1)])), [{\"region\": \"a\", \"total\": 1}])\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Add a `--format` option to `report.py` with three values: `text`, the default, which keeps today's output",
+   "events": [
+    {
+     "type": "text",
+     "text": "Done: README.md, report.py, tests/test_report.py."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  }
+ ]
+}

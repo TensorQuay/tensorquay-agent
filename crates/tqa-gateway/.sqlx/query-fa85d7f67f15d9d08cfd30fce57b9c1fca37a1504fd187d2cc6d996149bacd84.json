@@ -1,0 +1,66 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT key,user_id,route,queued_frame FROM idempotency WHERE conversation_id=$1 AND execution_status='queued' AND (NOT $2 OR route<>$3) ORDER BY ordinal LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "key",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "idempotency",
+            "name": "key"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "idempotency",
+            "name": "user_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "route",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "idempotency",
+            "name": "route"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "queued_frame",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "idempotency",
+            "name": "queued_frame"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "fa85d7f67f15d9d08cfd30fce57b9c1fca37a1504fd187d2cc6d996149bacd84"
+}

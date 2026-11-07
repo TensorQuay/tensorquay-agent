@@ -1,0 +1,53 @@
+title = "Repository secrets checks"
+
+[extend]
+useDefault = true
+
+# Short provider keys must be detected even without an assignment or high entropy.
+[[rules]]
+id = "provider-api-key"
+description = "Provider key prefix with at least 32 credential characters"
+regex = '''\bsk-[A-Za-z0-9_-]{32,}\b'''
+keywords = ["sk-"]
+
+# A private-key header is enough to reject a partial or truncated key file.
+[[rules]]
+id = "private-key-header"
+description = "Private key header"
+regex = '''-----BEGIN (?:[A-Z0-9]+ )?PRIVATE KEY-----'''
+keywords = ["PRIVATE KEY"]
+
+# Exceptions are listed below. Each must name one fixture path
+# and explain its synthetic contents here; directory-wide exclusions are forbidden.
+
+# RFC 6455 section 1.3 publishes this Sec-WebSocket-Key as its sample handshake nonce ("the sample nonce" in
+# base64). The gateway security test sends it in a WebSocket upgrade request; it is a public example, not a secret.
+# Scoped to one rule, one file and the exact value: any other finding in that file is still reported.
+[[allowlists]]
+description = "RFC 6455 sample WebSocket handshake nonce in the gateway security test"
+targetRules = ["generic-api-key"]
+condition = "AND"
+paths = ['''^crates/tqa-gateway/tests/security\.rs$''']
+regexTarget = "secret"
+regexes = ['''^dGhlIHNhbXBsZSBub25jZQ==$''']
+
+# WEB-U-044's connector-credential test types a synthetic token into the write-only field and asserts it is never rendered
+# back; it's a made-up value that authenticates nothing. Scoped to one rule, one file and the exact value.
+[[allowlists]]
+description = "Synthetic connector token in the web credentials and keys unit tests"
+targetRules = ["generic-api-key"]
+condition = "AND"
+paths = ['''^web/src/settings/(ConnectorCredentials|KeysSettings)\.test\.tsx$''']
+regexTarget = "secret"
+regexes = ['''^tok\-9f8e7d6c5b4a$''']
+
+# WEB-U-294's first version (c8f211ec, and the backup snapshot c2fd352b that carries the same line) typed a made-up,
+# key-shaped value into the Shared key field to show it's refused and never sent; it authenticates nothing. The test now
+# builds that value at runtime, so only these two history commits hold it. Scoped to one rule, one file and those two
+# commits: any other finding in that file, or in any other commit, is still reported.
+[[allowlists]]
+description = "Made-up key-shaped value in WEB-U-294's first version of the Shared key test (history only)"
+targetRules = ["generic-api-key"]
+condition = "AND"
+paths = ['''^web/src/settings/paste-key\.test\.tsx$''']
+commits = ["c8f211ec02d95ae1cc3fe9828785da7d25b3e9a5", "c2fd352b2515f76d9f6babd0728c8010890e789c"]

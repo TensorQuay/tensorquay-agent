@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT seed_digest FROM seed_tombstones WHERE area=$1 AND item=$2 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "seed_digest",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "seed_tombstones",
+            "name": "seed_digest"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "7e93e4bc5342afb533d324f865b9ad12484bb8f8e6ec763213f8b216b8f89171"
+}

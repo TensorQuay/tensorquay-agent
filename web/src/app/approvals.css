@@ -1,0 +1,93 @@
+.approval-card {
+  min-width: 0;
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--warn);
+  border-radius: var(--control-radius);
+  background: color-mix(in srgb, var(--warn) var(--status-tint), var(--paper));
+  gap: var(--space-3);
+}
+.approval-heading,
+.approval-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.approval-heading {
+  justify-content: space-between;
+}
+.approval-summary {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.approval-summary code {
+  display: block;
+  margin-top: var(--space-2);
+}
+/* A push's target: each label beside its value, code wrapping anywhere (was WEB-E2E-005; old tasks still show past
+   push calls). */
+.approval-target {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+}
+.approval-target > div {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--space-2);
+}
+.approval-target dd {
+  margin: 0;
+  min-width: 0;
+}
+.approval-target code {
+  margin-top: 0;
+}
+/* An argument wraps, collapsed or shown in full, rather than running sideways (UX review 0927). */
+.approval-target .approval-argument {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+/* Flush with the value above it, not inset by the button's padding (UX review 0927). */
+.approval-target .approval-show-full {
+  min-width: 0;
+  padding-inline: 0;
+  justify-content: flex-start;
+}
+.approval-card:focus-visible {
+  outline: var(--focus-width) solid var(--focus);
+  outline-offset: var(--focus-offset);
+  border-color: transparent;
+  box-shadow: none;
+}
+.approval-session.button {
+  max-width: 100%;
+  height: auto;
+  min-height: var(--control-height);
+  padding: var(--space-1) var(--space-3);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+.approval-session .button-label {
+  display: block;
+  min-width: 0;
+}
+.approval-session code {
+  white-space: pre-wrap;
+}
+.approval-recovery a {
+  text-decoration: underline;
+  text-underline-offset: var(--space-1);
+}
+.conversation-status [data-tone="warn"] {
+  color: var(--warn);
+}
+
+/* A task-wide grant's scope, shown in full above the decision; it wraps like an argument (UX review 0927). */
+.approval-scope pre {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

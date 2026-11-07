@@ -1,0 +1,80 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT to_char(d.day, 'YYYY-MM-DD') AS \"key!\", NULL::text AS label, count(u.id) AS \"requests!\", count(u.id) FILTER (WHERE (u.prompt_tokens IS NOT NULL OR u.completion_tokens IS NOT NULL) AND NOT coalesce(u.estimated, false)) AS \"reported!\", count(u.id) FILTER (WHERE u.estimated) AS \"estimated!\", coalesce(sum(u.prompt_tokens),0)::bigint AS \"prompt_tokens!\", coalesce(sum(u.completion_tokens),0)::bigint AS \"completion_tokens!\", sum(u.cached_tokens)::bigint AS cached_tokens, sum(u.reasoning_tokens)::bigint AS reasoning_tokens FROM generate_series($1::date, $2::date, interval '1 day') AS d(day) LEFT JOIN usage u ON u.created_at >= d.day AT TIME ZONE 'UTC' AND u.created_at < (d.day + interval '1 day') AT TIME ZONE 'UTC' GROUP BY d.day ORDER BY d.day",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "key!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "label",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "requests!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "reported!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "estimated!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "prompt_tokens!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "completion_tokens!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "cached_tokens",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "reasoning_tokens",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Date",
+        "Date"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "d53628284cb5df1ac7f298e714d4b10f9482f64e150e53d035309a963ef4a98f"
+}

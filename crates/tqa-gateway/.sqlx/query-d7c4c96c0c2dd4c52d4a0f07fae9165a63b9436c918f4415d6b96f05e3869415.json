@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE users SET disabled_at=CURRENT_TIMESTAMP WHERE id=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d7c4c96c0c2dd4c52d4a0f07fae9165a63b9436c918f4415d6b96f05e3869415"
+}

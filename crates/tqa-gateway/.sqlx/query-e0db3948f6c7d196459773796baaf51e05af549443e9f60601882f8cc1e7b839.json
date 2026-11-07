@@ -1,0 +1,80 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE users SET role=COALESCE($2,role), disabled_at=CASE WHEN $3::boolean IS NULL THEN disabled_at WHEN $3 THEN COALESCE(disabled_at,CURRENT_TIMESTAMP) ELSE NULL END, updated_at=CURRENT_TIMESTAMP WHERE id=$1 RETURNING id, email::text AS \"email!\", role, disabled_at IS NOT NULL AS \"disabled!\", created_at, last_active_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "role",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "role"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "disabled!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "last_active_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "last_active_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false,
+      null,
+      false,
+      true
+    ]
+  },
+  "hash": "e0db3948f6c7d196459773796baaf51e05af549443e9f60601882f8cc1e7b839"
+}

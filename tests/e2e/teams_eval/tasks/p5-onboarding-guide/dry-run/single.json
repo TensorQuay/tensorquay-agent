@@ -1,0 +1,38 @@
+{
+ "model": "fixture",
+ "select": "prompt",
+ "responses": [
+  {
+   "when": "Write an onboarding guide for the repository in `repo/` as `repo/ONBOARDING.md`, from its code, tests and existing",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "repo/ONBOARDING.md",
+      "content": "# Onboarding\n\n## Setup\n\nYou need Python 3.10 or later; there are no dependencies.\n\n## Project layout\n\n- `ledgerlite/book.py`: the ledger\n- `ledgerlite/__main__.py`: the command line\n- `tests/`: unit tests\n\n## Running the tests\n\n```sh\npython3 -m unittest discover -s tests -t .\n```\n\n## Using the tool\n\n```sh\npython3 -m ledgerlite --help\npython3 -m ledgerlite --file /tmp/l.json add 5 coffee\n```\n\n## Making a change\n\nBranch from main and add a test with every change (`CONTRIBUTING.md`).\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Write an onboarding guide for the repository in `repo/` as `repo/ONBOARDING.md`, from its code, tests and existing",
+   "events": [
+    {
+     "type": "text",
+     "text": "Done: repo/ONBOARDING.md."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  }
+ ]
+}

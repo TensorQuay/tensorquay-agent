@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE agent_team_members SET state = $3 WHERE team_id = $1 AND name = $2 AND state = ANY($4)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "da079e5a348c293692d13de582b76bca2cae1fe358c96e6078e92348e909e189"
+}

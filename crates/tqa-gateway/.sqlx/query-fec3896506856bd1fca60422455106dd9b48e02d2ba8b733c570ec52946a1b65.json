@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"count!\" FROM conversations c WHERE c.state='deleted' AND EXISTS(SELECT 1 FROM sandbox_instances s WHERE s.conversation_id=c.id)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "fec3896506856bd1fca60422455106dd9b48e02d2ba8b733c570ec52946a1b65"
+}

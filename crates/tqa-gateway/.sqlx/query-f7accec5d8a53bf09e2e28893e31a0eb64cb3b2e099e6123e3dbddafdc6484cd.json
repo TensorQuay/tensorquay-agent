@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO seed_tombstones (area,item,seed_digest) VALUES ($1,$2,$3) ON CONFLICT (area,item) DO UPDATE SET seed_digest=EXCLUDED.seed_digest, buried_at=CURRENT_TIMESTAMP",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Bytea"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f7accec5d8a53bf09e2e28893e31a0eb64cb3b2e099e6123e3dbddafdc6484cd"
+}

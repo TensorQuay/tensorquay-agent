@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM host_key_placeholders WHERE conversation_id=ANY($1)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e465cbd05ec1a4d265effc7b1b9996ca5cd7a06f48654e79abdc329e8c65b18b"
+}

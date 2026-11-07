@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE model_routes SET seed_digest=$2 WHERE name=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Bytea"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a80dda5948118f8858857590d589a49de68997e4aec6ac6366dc5d8ef38e151d"
+}

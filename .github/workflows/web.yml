@@ -1,0 +1,45 @@
+name: Web
+
+on:
+  push:
+    branches: [main]
+    paths: ["web/**", "brand/**", "docs/admin-guide/**", "docs/user-guide/**", "crates/tqa-types/schema/**", "crates/tqa-gateway/openapi.json", ".github/workflows/web.yml"]
+  pull_request:
+    paths: ["web/**", "brand/**", "docs/admin-guide/**", "docs/user-guide/**", "crates/tqa-types/schema/**", "crates/tqa-gateway/openapi.json", ".github/workflows/web.yml"]
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: web
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: web/.nvmrc
+      - name: Verify Node version
+        run: |
+          node --version
+          node --input-type=module -e '
+            const [major, minor] = process.versions.node.split(".").map(Number);
+            if (major < 22 || (major === 22 && minor < 13)) {
+              console.error("Node 22.13 or newer is required.");
+              process.exit(1);
+            }
+          '
+      - run: npm install --global corepack@0.32.0
+      - run: corepack pnpm install --frozen-lockfile
+      - run: corepack pnpm run check
+      - run: corepack pnpm exec playwright install --with-deps chromium
+      # The interface names these Linux faces for Thai, Tamil, Chinese, Japanese and Korean (fonts.spec.ts checks them).
+      - name: Install the fonts the interface lists for Linux
+        run: sudo apt-get install --yes --no-install-recommends fonts-noto-core fonts-noto-cjk
+      - run: corepack pnpm run test:e2e

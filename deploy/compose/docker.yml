@@ -1,0 +1,117 @@
+name: tqa
+
+services:
+  postgres:
+    image: postgres:18.6-alpine@sha256:77f585114c32fbca283dc835b0596f4e52b51b4c6662d7810b2f4084f60a1873
+    environment:
+      POSTGRES_USER: tqa
+      POSTGRES_DB: gateway
+      POSTGRES_PASSWORD: ${TQA_POSTGRES_PASSWORD:?Set the database password}
+    volumes:
+      - postgres:/var/lib/postgresql
+    networks: [control]
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U tqa -d gateway"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    mem_limit: 512m
+    cpus: 2
+    pids_limit: 256
+    security_opt: ["no-new-privileges:true"]
+
+  gateway:
+    # A stable name: the gateway attaches this container to every sandbox's own network ([sandbox] gateway_container).
+    container_name: ${TQA_GATEWAY_CONTAINER:-tqa-gateway}
+    image: ${TQA_GATEWAY_IMAGE:-tqa-gateway:local}
+    build:
+      context: ../..
+      dockerfile: images/gateway/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+    environment:
+      TQA_DATABASE_URL: postgres://tqa:${TQA_POSTGRES_PASSWORD:?Set the database password}@postgres:5432/gateway
+      TQA_BOOTSTRAP_TOKEN: ${TQA_BOOTSTRAP_TOKEN:?Set a bootstrap token}
+      TQA_INSTALL_KEY_FILE: /run/secrets/install.key
+      TQA_SECRETS_SEED_FILE: /run/secrets/secrets.toml
+      # Unset or empty keeps the gateway's default log filter (info); see deploy/README.md.
+      TQA_LOG: ${TQA_LOG:-}
+      DOCKER_HOST: unix:///var/run/docker.sock
+    user: "1000:1000"
+    group_add: ["${TQA_DOCKER_GID:-0}"]
+    ports:
+      - "127.0.0.1:${TQA_HTTP_PORT:-8080}:8080"
+    volumes:
+      # Storage uses the same absolute host and container path for sandbox bind mounts.
+      - type: bind
+        source: ${TQA_STORAGE_ROOT:?Set an absolute private storage directory}
+        target: ${TQA_STORAGE_ROOT:?Set an absolute private storage directory}
+        bind: {create_host_path: false}
+      - type: bind
+        source: ${TQA_INSTALL_DIR:?Set the private installation directory}/gateway.toml
+        target: /etc/tqa/gateway.toml
+        read_only: true
+        bind: {create_host_path: false}
+      - type: bind
+        source: ${TQA_INSTALL_DIR:?Set the private installation directory}/models.toml
+        target: /etc/tqa/models.toml
+        read_only: true
+        bind: {create_host_path: false}
+      - type: bind
+        source: ${TQA_INSTALL_DIR:?Set the private installation directory}/install.key
+        target: /run/secrets/install.key
+        read_only: true
+        bind: {create_host_path: false}
+      - type: bind
+        source: ${TQA_INSTALL_DIR:?Set the private installation directory}/secrets.toml
+        target: /run/secrets/secrets.toml
+        read_only: true
+        bind: {create_host_path: false}
+      # Even read-only, the Docker socket grants daemon control. The gateway is a trusted control-plane component.
+      - type: bind
+        source: ${TQA_DOCKER_SOCKET:-/var/run/docker.sock}
+        target: /var/run/docker.sock
+        read_only: true
+        bind: {create_host_path: false}
+    networks: [control, sandboxes, web]
+    read_only: true
+    tmpfs: ["/tmp:rw,nosuid,nodev,noexec,size=16777216,mode=1777"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 512m
+    cpus: 2
+    pids_limit: 256
+    stop_grace_period: 15s
+
+  web:
+    image: ${TQA_WEB_IMAGE:-tqa-web:local}
+    build:
+      context: ../..
+      dockerfile: images/web/Dockerfile
+    user: "1000:1000"
+    networks: [web]
+    read_only: true
+    tmpfs: ["/tmp:rw,nosuid,nodev,noexec,size=16777216,mode=1777"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 256m
+    cpus: 1
+    pids_limit: 128
+
+networks:
+  control: {}
+  web:
+    internal: true
+  sandboxes:
+    name: ${TQA_SANDBOX_NETWORK:-tqa-sandboxes}
+    driver: bridge
+    internal: true
+    enable_ipv6: false
+    labels:
+      tqa.instance: ${TQA_SANDBOX_NETWORK:-tqa-sandboxes}
+
+volumes:
+  postgres:

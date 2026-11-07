@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM conversations o JOIN idempotency w ON w.conversation_id=o.id WHERE o.workspace_id=(SELECT workspace_id FROM conversations WHERE id=$1) AND o.id<>$1 AND o.state='active' AND w.execution_status='queued') AS \"queued!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "queued!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "fbed55f5184663390ce92e62853e3be5d33ba5e4301ae425a844861679c57237"
+}

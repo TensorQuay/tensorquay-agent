@@ -1,0 +1,80 @@
+{
+ "risks": [
+  {
+   "owner": "Ken",
+   "words": [
+    "vendor",
+    "shipping",
+    "deliver"
+   ]
+  },
+  {
+   "owner": "Priya",
+   "words": [
+    "key person",
+    "leave",
+    "lead engineer",
+    "attrition"
+   ]
+  },
+  {
+   "owner": "Omar",
+   "words": [
+    "budget",
+    "overrun",
+    "hardware cost"
+   ]
+  },
+  {
+   "owner": "Dana",
+   "words": [
+    "regulat"
+   ]
+  },
+  {
+   "owner": "Ken",
+   "words": [
+    "migration",
+    "data quality",
+    "legacy data"
+   ]
+  },
+  {
+   "owner": "Omar",
+   "words": [
+    "audit",
+    "security"
+   ]
+  },
+  {
+   "owner": "Dana",
+   "words": [
+    "scope",
+    "sales request"
+   ]
+  },
+  {
+   "owner": "Lena",
+   "words": [
+    "integration",
+    "payment provider",
+    "api change"
+   ]
+  },
+  {
+   "owner": "Priya",
+   "words": [
+    "training"
+   ]
+  },
+  {
+   "owner": "Lena",
+   "words": [
+    "capacity",
+    "power",
+    "datacenter",
+    "data centre"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO templates (name,display_name,image,capabilities,cpu_millicores,memory_bytes,pids,workspace_bytes,is_default,version,last_set_by,seed_digest,seed_state,description) VALUES ($1,$2,$3,$4,$5,$6,$11,$12,$7,$8,'seed',$9,'current',$10) ON CONFLICT (name) DO UPDATE SET display_name=EXCLUDED.display_name,description=COALESCE(EXCLUDED.description,templates.description),image=EXCLUDED.image,capabilities=EXCLUDED.capabilities,cpu_millicores=CASE WHEN templates.sizes_from_limits THEN COALESCE(EXCLUDED.cpu_millicores,templates.cpu_millicores) ELSE EXCLUDED.cpu_millicores END,memory_bytes=CASE WHEN templates.sizes_from_limits THEN COALESCE(EXCLUDED.memory_bytes,templates.memory_bytes) ELSE EXCLUDED.memory_bytes END,pids=CASE WHEN templates.sizes_from_limits THEN COALESCE(EXCLUDED.pids,templates.pids) ELSE EXCLUDED.pids END,workspace_bytes=CASE WHEN templates.sizes_from_limits THEN COALESCE(EXCLUDED.workspace_bytes,templates.workspace_bytes) ELSE EXCLUDED.workspace_bytes END,clamped_from=CASE WHEN templates.sizes_from_limits THEN NULLIF(templates.clamped_from - $13::text[],'{}'::jsonb) END,is_default=EXCLUDED.is_default,version=EXCLUDED.version,last_set_by='seed',seed_digest=EXCLUDED.seed_digest,seed_state='current',check_state='unchecked',check_reason=NULL,checked_version=NULL,builtin_image_created=NULL,builtin_updated_at=NULL,customised_builtin=false,builtin_base_image=NULL,updated_at=CURRENT_TIMESTAMP",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "TextArray",
+        "Int4",
+        "Int8",
+        "Bool",
+        "Int8",
+        "Bytea",
+        "Text",
+        "Int4",
+        "Int8",
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "57dc468588e274aa16b3974a82ed3a618742c81db4cabcf09254b4fbe9424900"
+}

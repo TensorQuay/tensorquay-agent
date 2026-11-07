@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE workspaces SET name=$2, updated_at=CURRENT_TIMESTAMP WHERE id=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ef43496f22d639efa647233d87629346d7dcc2ba75f84cfdd99bc350d7fa515d"
+}

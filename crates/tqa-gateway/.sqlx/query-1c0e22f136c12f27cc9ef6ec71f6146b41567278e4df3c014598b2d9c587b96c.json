@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT version,seed_digest,nonce,ciphertext FROM secrets WHERE ref=$1 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "version",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "secrets",
+            "name": "version"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "seed_digest",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "secrets",
+            "name": "seed_digest"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "nonce",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "secrets",
+            "name": "nonce"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "ciphertext",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "secrets",
+            "name": "ciphertext"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "1c0e22f136c12f27cc9ef6ec71f6146b41567278e4df3c014598b2d9c587b96c"
+}

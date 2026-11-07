@@ -1,0 +1,15 @@
+[
+ "web/files.py serve: path traversal",
+ "db/queries.py find_user: SQL injection",
+ "util/calc.py evaluate: eval on input",
+ "auth/tokens.py new_token: predictable random",
+ "cache/store.py load: pickle on untrusted bytes",
+ "api/admin.py delete_user: no admin check",
+ "lists/paging.py page: drops the last item",
+ "timeutil/expiry.py is_expired: reversed",
+ "billing/split.py shares: loses cents",
+ "core/registry.py register: shared mutable default",
+ "jobs/runner.py run: a failure reported as success",
+ "text/escape.py html: & escaped last, quotes not",
+ "At least six fixed, each with a test"
+]

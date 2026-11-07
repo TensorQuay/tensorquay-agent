@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM workspaces w WHERE w.id=$1 AND w.state='deleted' AND NOT EXISTS(SELECT 1 FROM conversations c WHERE c.workspace_id=w.id)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6203efac514c38a04a05664c3a97da1187a3a179028d6cf34f326c6d5d3aabe9"
+}

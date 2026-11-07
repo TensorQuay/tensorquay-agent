@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE decision_engines SET document=$2,version=$3,last_set_by='seed',seed_digest=$4,seed_state='current',updated_at=CURRENT_TIMESTAMP,budget_since=CASE WHEN document->'budget' IS NOT DISTINCT FROM $2::jsonb->'budget' THEN budget_since WHEN $2::jsonb ? 'budget' THEN CURRENT_TIMESTAMP END WHERE name=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Jsonb",
+        "Int8",
+        "Bytea"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4c2bd77336bc53a1199f9e9a5c35e140793357492a77ad2191c656c3a9dc53fe"
+}

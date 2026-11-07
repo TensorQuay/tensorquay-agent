@@ -1,0 +1,63 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH live AS (SELECT c.owner_id, count(*) AS n FROM sandbox_instances s JOIN conversations c ON c.id=s.conversation_id GROUP BY c.owner_id), queued AS (SELECT i.conversation_id, MIN(i.created_at) AS first FROM idempotency i WHERE i.execution_status='queued' GROUP BY i.conversation_id), waiting AS (SELECT w.conversation_id, c.owner_id, c.workspace_id, MIN(w.first) AS first FROM queued w JOIN conversations c ON c.id=w.conversation_id WHERE c.state='active' AND (c.profile->>'decision_engine' IS NULL OR c.profile->>'decision_engine' = ANY($2)) AND NOT EXISTS (SELECT 1 FROM sandbox_instances s WHERE s.conversation_id=w.conversation_id) GROUP BY w.conversation_id, c.owner_id, c.workspace_id) SELECT w.conversation_id AS \"conversation_id!\", w.owner_id AS \"owner_id!\", COALESCE(l.n,0) AS \"live!\", EXISTS(SELECT 1 FROM waiting o LEFT JOIN live ol ON ol.owner_id=o.owner_id WHERE o.workspace_id=w.workspace_id AND o.conversation_id<>w.conversation_id AND o.first<w.first AND COALESCE(ol.n,0)<$3) AS \"behind!\", EXISTS (SELECT 1 FROM conversations d JOIN templates t ON t.name=d.template WHERE d.id=w.conversation_id AND 'desktop'=ANY(t.capabilities)) AS \"desktop!\" FROM waiting w LEFT JOIN live l ON l.owner_id=w.owner_id ORDER BY COALESCE(l.n,0), w.first, w.conversation_id LIMIT $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "conversation_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "idempotency",
+            "name": "conversation_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "owner_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "owner_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "live!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "behind!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "desktop!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "TextArray",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      true,
+      false,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "35ab9b6de15349c180316bddebb9e663c87334bb5ee88dd56518f24aee36a70e"
+}

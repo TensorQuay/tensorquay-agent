@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE idempotency SET execution_status='cancelled',execution_error=NULL,updated_at=CURRENT_TIMESTAMP WHERE key=$1 AND user_id=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0f2f8d34e1e3d7e26d6347cbe6defa54cc058115845a7411115b87a7a9f7bea7"
+}

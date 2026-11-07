@@ -1,0 +1,6 @@
+id = "sh-config-env-spec"
+title = "Make a service configuration follow its written specification"
+tags = ["shell", "config", "small", "fallback-relevant"]
+budgets = { max_steps = 30, wall_clock_secs = 600, max_tokens = 150000 }
+protected = ["start.sh", "docs/CONFIG.md"]
+check = { image = "runtime", timeout_secs = 60 }

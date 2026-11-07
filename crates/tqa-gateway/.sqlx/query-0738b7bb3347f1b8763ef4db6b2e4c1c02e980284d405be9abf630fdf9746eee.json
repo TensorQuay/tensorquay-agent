@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"voting!\" FROM channel_members WHERE channel_id = $1 AND role IN ('lead', 'member')",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "voting!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "0738b7bb3347f1b8763ef4db6b2e4c1c02e980284d405be9abf630fdf9746eee"
+}

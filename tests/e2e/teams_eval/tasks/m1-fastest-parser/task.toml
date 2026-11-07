@@ -1,0 +1,6 @@
+id = "m1-fastest-parser"
+title = "Benchmark three CSV parsers and switch a tool to the fastest"
+tags = ["teams-eval", "teams-mixed"]
+budgets = { max_steps = 40, wall_clock_secs = 900, max_tokens = 300000 }
+protected = ["parsers/char_parser.py", "parsers/csv_parser.py", "parsers/split_parser.py", "data/sales.csv"]
+check = { image = "runtime", timeout_secs = 300 }

@@ -1,0 +1,10 @@
+# E2E-ENV-010 adds an offline scenario to the owned demo stack.
+services:
+  fake-model:
+    command: ["--scenario", "/scenarios/environment.json"]
+    volumes:
+      - type: bind
+        source: ../tests/fixtures/environment.json
+        target: /scenarios/environment.json
+        read_only: true
+        bind: {create_host_path: false}

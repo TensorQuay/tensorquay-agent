@@ -1,0 +1,7 @@
+[
+ "Rule 4: a cost above burst is refused and takes nothing, even on a full bucket",
+ "Rule 5: a cost that isn't a positive number raises ValueError",
+ "Rule 6: a clock set back adds no tokens; the bucket goes on from the new reading",
+ "Refill is continuous at a possibly fractional rate, capped at burst",
+ "REVIEW.md goes through all seven rules with a verdict each"
+]

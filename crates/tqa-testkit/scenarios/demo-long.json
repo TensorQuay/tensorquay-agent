@@ -1,0 +1,440 @@
+{
+  "model": "fixture",
+  "responses": [
+    {
+      "events": [
+        {
+          "type": "reasoning",
+          "text": "A small arithmetic module makes the test failure easy to explain."
+        },
+        {
+          "type": "text",
+          "text": "I'll create a module and a short README, then check the behavior.\n\n"
+        },
+        {
+          "type": "tool_call",
+          "name": "write_file",
+          "arguments": {
+            "path": "demo/README.md",
+            "content": "# Arithmetic demo\nDraft: checks pending.\n",
+            "create_parents": true
+          },
+          "split_into": 4
+        },
+        {
+          "type": "tool_call",
+          "name": "write_file",
+          "arguments": {
+            "path": "demo/arithmetic.py",
+            "content": "def add(left, right):\n    return left - right\n",
+            "create_parents": false
+          },
+          "split_into": 4
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 320,
+        "completion_tokens": 100,
+        "reasoning_tokens": 20
+      },
+      "delay_ms": 65
+    },
+    {
+      "events": [
+        {
+          "type": "reasoning",
+          "text": "The implementation needs a regression test for ordinary inputs and zero."
+        },
+        {
+          "type": "text",
+          "text": "The module is in place. I'll read it and add two focused tests.\n\n"
+        },
+        {
+          "type": "tool_call",
+          "name": "read_file",
+          "arguments": {
+            "path": "demo/arithmetic.py"
+          },
+          "split_into": 4
+        },
+        {
+          "type": "tool_call",
+          "name": "write_file",
+          "arguments": {
+            "path": "demo/test_arithmetic.py",
+            "content": "import unittest\nfrom arithmetic import add\n\nclass ArithmeticTests(unittest.TestCase):\n    def test_addition(self):\n        self.assertEqual(add(19, 23), 42)\n\n    def test_zero(self):\n        self.assertEqual(add(0, 0), 0)\n",
+            "create_parents": false
+          },
+          "split_into": 4
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 320,
+        "completion_tokens": 100,
+        "reasoning_tokens": 20
+      },
+      "delay_ms": 65
+    },
+    {
+      "events": [
+        {
+          "type": "reasoning",
+          "text": "Running the tests before editing will expose the incorrect operation."
+        },
+        {
+          "type": "text",
+          "text": "I'll list the project files and run the first test pass.\n\n"
+        },
+        {
+          "type": "tool_call",
+          "name": "glob",
+          "arguments": {
+            "pattern": "demo/*.py"
+          },
+          "split_into": 4
+        },
+        {
+          "type": "tool_call",
+          "name": "shell",
+          "arguments": {
+            "command": "python3 -B -m unittest discover -s demo -v"
+          },
+          "split_into": 4
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 320,
+        "completion_tokens": 100,
+        "reasoning_tokens": 20
+      },
+      "delay_ms": 65
+    },
+    {
+      "events": [
+        {
+          "type": "reasoning",
+          "text": "The ordinary addition case failed because the function subtracts its second input."
+        },
+        {
+          "type": "text",
+          "text": "One test failed as expected. I'll locate the subtraction and replace it with addition.\n\n"
+        },
+        {
+          "type": "tool_call",
+          "name": "grep",
+          "arguments": {
+            "pattern": "return",
+            "path": "demo/arithmetic.py",
+            "output_mode": "content"
+          },
+          "split_into": 4
+        },
+        {
+          "type": "tool_call",
+          "name": "edit_file",
+          "arguments": {
+            "path": "demo/arithmetic.py",
+            "edits": [
+              {
+                "old_text": "return left - right",
+                "new_text": "return left + right"
+              }
+            ]
+          },
+          "split_into": 4
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 320,
+        "completion_tokens": 100,
+        "reasoning_tokens": 20
+      },
+      "delay_ms": 65
+    },
+    {
+      "events": [
+        {
+          "type": "reasoning",
+          "text": "The exact replacement is complete; the same test command should now pass."
+        },
+        {
+          "type": "text",
+          "text": "I'll rerun both tests and update the README with the result.\n\n"
+        },
+        {
+          "type": "tool_call",
+          "name": "shell",
+          "arguments": {
+            "command": "python3 -B -m unittest discover -s demo -v"
+          },
+          "split_into": 4
+        },
+        {
+          "type": "tool_call",
+          "name": "edit_file",
+          "arguments": {
+            "path": "demo/README.md",
+            "edits": [
+              {
+                "old_text": "Draft: checks pending.",
+                "new_text": "Verified: two arithmetic tests pass."
+              }
+            ]
+          },
+          "split_into": 4
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 320,
+        "completion_tokens": 100,
+        "reasoning_tokens": 20
+      },
+      "delay_ms": 65
+    },
+    {
+      "events": [
+        {
+          "type": "reasoning",
+          "text": "A final read and test discovery check will confirm the files match the summary."
+        },
+        {
+          "type": "text",
+          "text": "Both tests passed. I'll check the final documentation and the test names.\n\n"
+        },
+        {
+          "type": "tool_call",
+          "name": "read_file",
+          "arguments": {
+            "path": "demo/README.md"
+          },
+          "split_into": 4
+        },
+        {
+          "type": "tool_call",
+          "name": "grep",
+          "arguments": {
+            "pattern": "def test_",
+            "path": "demo/test_arithmetic.py",
+            "output_mode": "content"
+          },
+          "split_into": 4
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 320,
+        "completion_tokens": 100,
+        "reasoning_tokens": 20
+      },
+      "delay_ms": 65
+    },
+    {
+      "events": [
+        {
+          "type": "text",
+          "text": "## A working arithmetic example\n\nCreated a small Python project "
+        },
+        {
+          "type": "text",
+          "text": "in `demo/` and checked it with two repeatable tests. The additio"
+        },
+        {
+          "type": "text",
+          "text": "n function now returns\nthe sum of its inputs. The first test run"
+        },
+        {
+          "type": "text",
+          "text": " exposed a subtraction bug; an exact edit corrected the operatio"
+        },
+        {
+          "type": "text",
+          "text": "n, and the\nsecond run passed both cases. The initial failure is "
+        },
+        {
+          "type": "text",
+          "text": "preserved in the activity history so the correction can be\nrevie"
+        },
+        {
+          "type": "text",
+          "text": "wed alongside the command that revealed it.\n\n- `demo/arithmetic."
+        },
+        {
+          "type": "text",
+          "text": "py` contains the implementation, with one function and no extern"
+        },
+        {
+          "type": "text",
+          "text": "al dependencies.\n- `demo/test_arithmetic.py` checks a normal add"
+        },
+        {
+          "type": "text",
+          "text": "ition and the zero case using the standard library test runner.\n"
+        },
+        {
+          "type": "text",
+          "text": "- `demo/README.md` records the verified result and provides a co"
+        },
+        {
+          "type": "text",
+          "text": "ncise entry point for the project.\n\n| Check | First run | Final "
+        },
+        {
+          "type": "text",
+          "text": "run |\n| --- | --- | --- |\n| Add 19 and 23 | Failed: returned -4 "
+        },
+        {
+          "type": "text",
+          "text": "| Passed: returned 42 |\n| Add zero to zero | Passed | Passed |\n|"
+        },
+        {
+          "type": "text",
+          "text": " Project documentation | Checks pending | Two tests verified |\n\n"
+        },
+        {
+          "type": "text",
+          "text": "The implementation is intentionally small enough to inspect in o"
+        },
+        {
+          "type": "text",
+          "text": "ne screen. The tests assert observable return values;\nthey do no"
+        },
+        {
+          "type": "text",
+          "text": "t repeat the implementation as their oracle. Keeping the same co"
+        },
+        {
+          "type": "text",
+          "text": "mmand before and after the edit makes the\nresult easy to reprodu"
+        },
+        {
+          "type": "text",
+          "text": "ce, and the unchanged zero case checks that the correction did n"
+        },
+        {
+          "type": "text",
+          "text": "ot disturb that boundary.\n\n```python\ndef add(left, right):\n    r"
+        },
+        {
+          "type": "text",
+          "text": "eturn left + right\n\nassert add(19, 23) == 42\nassert add(0, 0) =="
+        },
+        {
+          "type": "text",
+          "text": " 0\n```\n\n## Verification and next steps\n\nRun `python3 -B -m unitt"
+        },
+        {
+          "type": "text",
+          "text": "est discover -s demo -v` from the workspace root. This uses the "
+        },
+        {
+          "type": "text",
+          "text": "Python standard library and does\nnot require a package download."
+        },
+        {
+          "type": "text",
+          "text": " The command exits successfully when both tests pass. If a later"
+        },
+        {
+          "type": "text",
+          "text": " edit breaks addition,\nthe failure identifies the expected and a"
+        },
+        {
+          "type": "text",
+          "text": "ctual values instead of silently accepting an incorrect result.\n"
+        },
+        {
+          "type": "text",
+          "text": "\nThe final file read confirmed that the README describes the ver"
+        },
+        {
+          "type": "text",
+          "text": "ified state. A search also found both test methods,\nand the file"
+        },
+        {
+          "type": "text",
+          "text": " listing showed the implementation and test file together. These"
+        },
+        {
+          "type": "text",
+          "text": " checks give separate evidence for the\nbehavior, the project str"
+        },
+        {
+          "type": "text",
+          "text": "ucture and the documentation. The workspace retains every file f"
+        },
+        {
+          "type": "text",
+          "text": "or further inspection.\n\nThe compact record below uses one delibe"
+        },
+        {
+          "type": "text",
+          "text": "rately long line so it remains easy to copy as a complete JSON v"
+        },
+        {
+          "type": "text",
+          "text": "alue. Its\nrepeated entries illustrate a batch report; the table "
+        },
+        {
+          "type": "text",
+          "text": "above describes the two actual tests that were executed.\n\n```jso"
+        },
+        {
+          "type": "text",
+          "text": "n\n{\"checks\": [{\"name\": \"addition-and-zero\", \"result\": \"passed\", "
+        },
+        {
+          "type": "text",
+          "text": "\"iteration\": 0}, {\"name\": \"addition-and-zero\", \"result\": \"passed"
+        },
+        {
+          "type": "text",
+          "text": "\", \"iteration\": 1}, {\"name\": \"addition-and-zero\", \"result\": \"pas"
+        },
+        {
+          "type": "text",
+          "text": "sed\", \"iteration\": 2}, {\"name\": \"addition-and-zero\", \"result\": \""
+        },
+        {
+          "type": "text",
+          "text": "passed\", \"iteration\": 3}, {\"name\": \"addition-and-zero\", \"result\""
+        },
+        {
+          "type": "text",
+          "text": ": \"passed\", \"iteration\": 4}, {\"name\": \"addition-and-zero\", \"resu"
+        },
+        {
+          "type": "text",
+          "text": "lt\": \"passed\", \"iteration\": 5}, {\"name\": \"addition-and-zero\", \"r"
+        },
+        {
+          "type": "text",
+          "text": "esult\": \"passed\", \"iteration\": 6}, {\"name\": \"addition-and-zero\","
+        },
+        {
+          "type": "text",
+          "text": " \"result\": \"passed\", \"iteration\": 7}]}\n```\n\nFor a larger module,"
+        },
+        {
+          "type": "text",
+          "text": " add cases for negative inputs and mixed numeric types before ex"
+        },
+        {
+          "type": "text",
+          "text": "tending the implementation.\nThe current change is complete: the "
+        },
+        {
+          "type": "text",
+          "text": "regression is fixed, both tests pass, and the documentation matc"
+        },
+        {
+          "type": "text",
+          "text": "hes the files.\n"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 2200,
+        "completion_tokens": 800
+      },
+      "delay_ms": 65
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE idempotency SET held=true WHERE conversation_id=$1 AND route=$2 AND execution_status='queued' AND NOT held",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "81d0c3e8071f7179cbf69ffa652b992145f97313881cd2a46451b9e5a59feeb7"
+}

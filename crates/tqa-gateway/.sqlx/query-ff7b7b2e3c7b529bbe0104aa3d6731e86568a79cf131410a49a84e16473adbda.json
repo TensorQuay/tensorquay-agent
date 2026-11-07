@@ -1,0 +1,82 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO agent_profiles (id,owner_id,name,document,last_set_by,seed_digest,seed_state) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id,owner_id,document,version,updated_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_profiles",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "owner_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_profiles",
+            "name": "owner_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "document",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "agent_profiles",
+            "name": "document"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "version",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "agent_profiles",
+            "name": "version"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "agent_profiles",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Jsonb",
+        "Text",
+        "Bytea",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "ff7b7b2e3c7b529bbe0104aa3d6731e86568a79cf131410a49a84e16473adbda"
+}

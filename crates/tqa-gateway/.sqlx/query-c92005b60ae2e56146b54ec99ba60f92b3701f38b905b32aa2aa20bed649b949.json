@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE decision_engines SET seed_state='current' WHERE name=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c92005b60ae2e56146b54ec99ba60f92b3701f38b905b32aa2aa20bed649b949"
+}

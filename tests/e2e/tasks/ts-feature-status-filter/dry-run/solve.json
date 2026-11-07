@@ -1,0 +1,53 @@
+{
+ "model": "fixture",
+ "responses": [
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "src/tasks.ts",
+      "content": "export type Status = \"open\" | \"done\";\n\nexport interface Task {\n  id: number;\n  title: string;\n  status: Status;\n  tags: string[];\n}\n\nexport interface ListOptions {\n  /** Keep only tasks carrying this tag. */\n  tag?: string;\n  /** Keep only tasks with this status. */\n  status?: Status;\n}\n\n/** Returns the matching tasks ordered by id. */\nexport function listTasks(tasks: Task[], options: ListOptions = {}): Task[] {\n  if (options.status !== undefined && options.status !== \"open\" && options.status !== \"done\") {\n    throw new Error(`unknown status: ${String(options.status)}`);\n  }\n  return tasks\n    .filter((task) => options.tag === undefined || task.tags.includes(options.tag))\n    .filter((task) => options.status === undefined || task.status === options.status)\n    .sort((a, b) => a.id - b.id);\n}\n",
+      "create_parents": false
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 520,
+    "completion_tokens": 200
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "test/status.test.ts",
+      "content": "import assert from \"node:assert/strict\";\nimport { test } from \"node:test\";\nimport { listTasks, type Task } from \"../src/tasks.ts\";\n\nconst tasks: Task[] = [\n  { id: 2, title: \"b\", status: \"open\", tags: [\"x\"] },\n  { id: 1, title: \"a\", status: \"done\", tags: [\"x\"] },\n];\n\ntest(\"filters by status\", () => {\n  assert.deepEqual(listTasks(tasks, { status: \"open\" }).map((task) => task.id), [2]);\n});\n",
+      "create_parents": false
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 850,
+    "completion_tokens": 110
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "listTasks now filters by status, alone or with tag, and rejects unknown values."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 1050,
+    "completion_tokens": 20
+   }
+  }
+ ]
+}

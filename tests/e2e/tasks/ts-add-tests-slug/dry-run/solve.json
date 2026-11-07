@@ -1,0 +1,35 @@
+{
+ "model": "fixture",
+ "responses": [
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "test/slug.test.ts",
+      "content": "import assert from \"node:assert/strict\";\nimport { test } from \"node:test\";\nimport { MAX_LENGTH, slugify } from \"../src/slug.ts\";\n\ntest(\"lowercases and joins words with one hyphen\", () => {\n  assert.equal(slugify(\"Hello World\"), \"hello-world\");\n  assert.equal(slugify(\"a  --  b\"), \"a-b\");\n});\n\ntest(\"drops hyphens at both ends\", () => {\n  assert.equal(slugify(\"  --Rust & Go!--  \"), \"rust-go\");\n});\n\ntest(\"cuts long titles without a trailing hyphen\", () => {\n  const slug = slugify(\"The quick brown fox jumps over the lazy dog again and again\");\n  assert.ok(slug.length <= MAX_LENGTH);\n  assert.equal(slug, \"the-quick-brown-fox-jumps-over-the-lazy\");\n});\n",
+      "create_parents": false
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 480,
+    "completion_tokens": 260
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "Added tests for case, hyphen runs, the ends and the length limit."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 820,
+    "completion_tokens": 20
+   }
+  }
+ ]
+}

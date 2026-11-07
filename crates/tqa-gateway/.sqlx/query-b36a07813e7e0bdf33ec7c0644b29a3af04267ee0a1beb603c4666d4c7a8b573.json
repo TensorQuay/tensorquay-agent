@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO secrets (ref,nonce,ciphertext) VALUES ($1,$2,$3) ON CONFLICT (ref) DO UPDATE SET nonce=EXCLUDED.nonce,ciphertext=EXCLUDED.ciphertext,version=secrets.version+1,last_set_by='admin',updated_at=CURRENT_TIMESTAMP,rotated_at=CURRENT_TIMESTAMP",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Bytea",
+        "Bytea"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b36a07813e7e0bdf33ec7c0644b29a3af04267ee0a1beb603c4666d4c7a8b573"
+}

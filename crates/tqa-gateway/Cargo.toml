@@ -1,0 +1,91 @@
+[package]
+name = "tqa-gateway"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+description = "HTTP and runtime-link control plane, persistence, relay, sandbox admission and administration."
+
+[features]
+# Test hooks only the crate's own tests use (they switch it on below); never in a release build (REL-U-009).
+testing = ["dep:jsonschema"]
+
+[dependencies]
+tqa-types = { version = "0.1.0", path = "../tqa-types" }
+tqa-sandbox = { version = "0.1.0", path = "../tqa-sandbox" }
+tqa-llm = { version = "0.1.0", path = "../tqa-llm" }
+tqa-context = { version = "0.1.0", path = "../tqa-context" }
+tqa-tools = { version = "0.1.0", path = "../tqa-tools" }
+async-trait = "=0.1.92"
+base64 = "=0.22.1"
+chacha20poly1305 = { version = "=0.11.0", features = ["zeroize"] }
+axum = { version = "=0.8.9", features = ["ws", "macros", "http2"] }
+axum-extra = { version = "=0.12.6", default-features = false, features = ["cookie", "typed-header"] }
+tower-http = { version = "=0.6.11", features = ["trace", "limit", "cors"] }
+tokio = { version = "=1.53.3", features = ["fs", "io-util", "macros", "rt-multi-thread", "net", "signal", "sync", "time"] }
+tokio-util = { version = "=0.7.19", features = ["rt"] }
+futures = "=0.3.34"
+sqlx = { version = "=0.9.0", default-features = false, features = ["runtime-tokio", "tls-rustls", "postgres", "migrate", "macros", "uuid", "time", "json"] }
+argon2 = { version = "=0.6.0", features = ["zeroize"] }
+uuid = { version = "=1.26.1", features = ["v7", "serde"] }
+time = { version = "=0.3.55", features = ["formatting", "parsing", "serde-well-known"] }
+serde = { version = "=1.0.229", features = ["derive"] }
+serde_json = "=1.0.151"
+serde_path_to_error = "=0.1.20"
+toml = "~1.1"
+thiserror = "=2.0.20"
+tracing = "=0.1.44"
+tracing-subscriber = { version = "=0.3.23", features = ["json", "env-filter"] }
+metrics = "=0.24.6"
+metrics-exporter-prometheus = { version = "=0.18.3", default-features = false }
+secrecy = { version = "=0.10.3", features = ["serde"] }
+rand = "=0.9.5"
+sha2 = "=0.11.0"
+subtle = "=2.6.1"
+calamine = { version = "=0.37.0", default-features = false }
+# `encoding`: our ODS reader decodes a content.xml in its declared encoding (GW-U-208); calamine 0.36.1 used to switch
+# it on for the whole build.
+quick-xml = { version = "=0.41.0", features = ["encoding"] }
+zip = { version = "=9.0.5", default-features = false, features = ["deflate"] }
+url = { version = "=2.5.8", features = ["serde"] }
+
+# Directory-fd path walking with O_NOFOLLOW for workspace files (task 068).
+rustix = { version = "~1.1", features = ["fs"] }
+# Line diffs of a run's changed text files (task 068c, answers-068 Q8); bounded by a deadline.
+similar = "~3.2"
+reqwest = { version = "=0.12.28", default-features = false, features = ["rustls-tls", "json", "stream"] }
+# The Git relay serves its routes on the egress listener's connections (task 065g); all already in the lock file.
+bytes = "=1.12.1"
+http-body-util = "=0.1.5"
+hyper = { version = "=1.11.1", features = ["server", "client", "http1"] }
+hyper-util = { version = "=0.1.20", features = ["tokio"] }
+# TCP keepalive on every socket the gateway accepts (`net`, GW-U-205); already in the lock file via tokio. `all` for
+# the keepalive getters the tests read.
+socket2 = { version = "=0.6.5", features = ["all"] }
+
+tokio-tungstenite = "=0.30.0"
+# The install CA for host keys (ADR-0037 §6): P-256 on ring, which rustls already brings; no certificate parser.
+rcgen = { version = "=0.14.10", default-features = false, features = ["crypto", "pem", "ring", "zeroize"] }
+# The proxy's TLS for keyed hosts (ADR-0037 §4): the leaf to the sandbox, verified TLS upstream against the public roots;
+# the same rustls on ring that reqwest uses.
+rustls = { version = "=0.23.46", default-features = false, features = ["ring", "std", "tls12"] }
+tokio-rustls = { version = "=0.26.5", default-features = false, features = ["ring", "tls12"] }
+webpki-roots = "=1.0.10"
+
+# The testing feature's response check against openapi.json (GW-U-142); never in a release build.
+jsonschema = { version = "~0.57", default-features = false, optional = true }
+[dev-dependencies]
+tqa-gateway = { path = ".", features = ["testing"] }
+tqa-testkit = { version = "0.1.0", path = "../tqa-testkit" }
+tqa-runtime = { version = "0.1.0", path = "../tqa-runtime", features = ["testing"] }
+tempfile = "=3.27.0"
+# Checks the install CA's leaves as a TLS client would (GW-U-105).
+rustls-webpki = "=0.103.16"
+rustls-pki-types = "=1.15.1"
+proptest = "=1.11.0"
+tokio = { version = "=1.53.3", features = ["test-util"] }
+tower = { version = "=0.5.3", features = ["util"] }
+
+[lints]
+workspace = true

@@ -1,0 +1,53 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id,document,version FROM agent_profiles WHERE id=$1 AND (owner_id=$2 OR owner_id IS NULL)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_profiles",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "document",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "agent_profiles",
+            "name": "document"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "version",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "agent_profiles",
+            "name": "version"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "69efbc1553d615a141fe9a2575279287636fab0312af59eaf527b5f115cb4977"
+}

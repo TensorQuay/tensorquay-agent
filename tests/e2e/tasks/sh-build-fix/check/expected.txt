@@ -1,0 +1,6 @@
+Site build
+Introduction: what the tool does.
+Installation: copy the binary onto your path.
+Usage: run it with a file name.
+Questions: answers to common questions.
+Licence: Apache-2.0.

@@ -1,0 +1,35 @@
+{
+ "model": "fixture",
+ "responses": [
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "deploy.sh",
+      "content": "#!/bin/sh\n# Prints the deployment plan for one environment: sh deploy.sh dev|staging|prod\nset -eu\n\n# deploy_to ENV HOST REPLICAS: prints the plan for one environment.\ndeploy_to() {\n    echo \"deploy: target $1 ($2)\"\n    echo \"deploy: sync build/ to $2:/srv/app\"\n    echo \"deploy: restart app with $3 replica(s)\"\n    echo \"deploy: check https://$2/healthz\"\n}\n\nenv=${1:-}\ncase $env in\n    dev) deploy_to \"$env\" dev.internal.example 1 ;;\n    staging) deploy_to \"$env\" staging.internal.example 2 ;;\n    prod) deploy_to \"$env\" app.example 3 ;;\n    *)\n        echo \"deploy: unknown environment '$env'\" >&2\n        exit 2\n        ;;\nesac\n",
+      "create_parents": false
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 520,
+    "completion_tokens": 170
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "Refactored deploy.sh into deploy_to."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 820,
+    "completion_tokens": 20
+   }
+  }
+ ]
+}

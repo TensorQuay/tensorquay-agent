@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT conversation_id FROM agent_team_members WHERE team_id = $1 AND lower(name) = lower($2)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "conversation_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_team_members",
+            "name": "conversation_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "1e05aff30bd2495d3c55c8c7e157b428ea9ff3e11963925f1f18783cc46555a4"
+}

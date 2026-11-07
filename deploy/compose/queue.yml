@@ -1,0 +1,10 @@
+# WEB-E2E-018 holds a real admission slot with a held scripted reply until the holder presses Stop.
+services:
+  fake-model:
+    command: ["--scenario", "/scenarios/queue.json"]
+    volumes:
+      - type: bind
+        source: ../tests/fixtures/queue.json
+        target: /scenarios/queue.json
+        read_only: true
+        bind: {create_host_path: false}

@@ -1,0 +1,9 @@
+# Test-only PERF-020 (PRD M4) override for the demo stack: the gateway gets the target 2 vCPU / 4 GB, and the model
+# fixture a whole CPU so the gateway, not the model, carries the load.
+services:
+  gateway:
+    mem_limit: 4g
+    cpus: 2
+  fake-model:
+    mem_limit: 256m
+    cpus: 1

@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, workspace_id FROM workspace_snapshots WHERE conversation_id=$1 LIMIT $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "workspace_snapshots",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "workspace_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "workspace_snapshots",
+            "name": "workspace_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "3a7a70a8d69369c7c32f6f828e9f548aacc0d7263553e86312d75c0f57820c59"
+}

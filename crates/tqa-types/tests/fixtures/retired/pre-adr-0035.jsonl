@@ -1,0 +1,9 @@
+{"type":"permission.request","seq":1,"request_id":"q","action_hash":"0707070707070707070707070707070707070707070707070707070707070707","tool":"shell","summary":"run tests","risk":"medium","expires_at":"2026-09-28T10:05:00Z"}
+{"type":"event","seq":2,"run_id":"r","step":1,"ts":"2026-09-28T10:00:00Z","event":{"type":"permission.resolved","request_id":"q","action_hash":"0707070707070707070707070707070707070707070707070707070707070707","decision":"allow_once"}}
+{"type":"event","seq":3,"run_id":"r","step":1,"ts":"2026-09-28T10:00:00Z","event":{"type":"permission.expired","request_id":"q","action_hash":"0707070707070707070707070707070707070707070707070707070707070707"}}
+{"type":"event","seq":4,"run_id":"r","step":1,"ts":"2026-09-28T10:00:00Z","event":{"type":"run.parked","run_id":"r","request_id":"q"}}
+{"type":"event","seq":5,"run_id":"r","step":1,"ts":"2026-09-28T10:00:00Z","event":{"type":"sandbox.state","state":"parked"}}
+{"type":"event","seq":6,"run_id":"r","step":1,"ts":"2026-09-28T10:00:00Z","event":{"type":"tool.result","call_id":"call","status":"error","content":"denied","denied":{"by":"policy","origin":"profile"}}}
+{"type":"event","seq":7,"run_id":"r","step":1,"ts":"2026-09-28T10:00:00Z","event":{"type":"run.failed","run_id":"r","reason":"binding","code":"permission_binding"}}
+{"type":"error","seq":8,"code":"permission_binding","message":"stale approval","retryable":false}
+{"type":"session.ready","conversation_id":"c","resumed":true,"sandbox":{"backend":"docker","state":"parked"}}

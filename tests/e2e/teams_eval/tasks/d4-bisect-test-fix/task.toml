@@ -1,0 +1,6 @@
+id = "d4-bisect-test-fix"
+title = "Find the commit behind a regression, test it, fix it"
+tags = ["teams-eval", "teams-dependent"]
+budgets = { max_steps = 80, wall_clock_secs = 2100, max_tokens = 1000000 }
+protected = []
+check = { image = "runtime", timeout_secs = 180 }

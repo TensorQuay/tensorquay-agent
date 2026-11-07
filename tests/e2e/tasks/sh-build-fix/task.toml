@@ -1,0 +1,6 @@
+id = "sh-build-fix"
+title = "Repair a shell build that fails and orders pages wrongly"
+tags = ["shell", "build", "bug-fix", "small", "fallback-relevant", "cmp"]
+budgets = { max_steps = 30, wall_clock_secs = 600, max_tokens = 200000 }
+protected = ["src/1-intro.txt", "src/2-install.txt", "src/3-usage.txt", "src/10-faq.txt", "src/11-license.txt"]
+check = { image = "runtime", timeout_secs = 120 }

@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT c.seq FROM channel_messages c WHERE c.channel_id = $1 AND c.seq = ANY($2) AND c.type = 'person_message' AND c.body->>'member' = '' AND NOT EXISTS (SELECT 1 FROM idempotency i WHERE i.team_copy_channel = c.channel_id AND i.team_copy_seq = c.seq AND i.execution_status = 'delivered')",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "seq",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "seq"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8Array"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "8ae4d07c7d94e690fe78e02ee7c8261f0cc8a00af46fc8664214a8af6a6f5b28"
+}

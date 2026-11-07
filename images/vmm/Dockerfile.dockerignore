@@ -1,0 +1,16 @@
+**
+!Cargo.toml
+!Cargo.lock
+!rust-toolchain.toml
+!crates
+!crates/**
+!images
+!images/rootfs
+!images/rootfs/mkrootfs.sh
+!images/vmm
+!images/vmm/launch.sh
+**/target
+**/*.log
+**/tests
+**/tests/**
+**/node_modules

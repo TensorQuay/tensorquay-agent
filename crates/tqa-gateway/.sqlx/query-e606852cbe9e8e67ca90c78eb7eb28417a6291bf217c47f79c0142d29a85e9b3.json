@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM host_key_placeholders WHERE delivery_id=$1 AND run_id IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e606852cbe9e8e67ca90c78eb7eb28417a6291bf217c47f79c0142d29a85e9b3"
+}

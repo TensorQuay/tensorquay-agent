@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO connector_credentials (user_id,connector,origin,secret_ref) VALUES ($1,$2,$3,$4) ON CONFLICT (user_id,connector) DO UPDATE SET origin=EXCLUDED.origin, updated_at=CURRENT_TIMESTAMP RETURNING (xmax = 0) AS \"created!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "created!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "82884cc36d91df3c449fe3d4f046e2d19455f5332d562c14da41afecfcc0b41b"
+}

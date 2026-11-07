@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM agent_team_reads WHERE reader = $1 AND call_key = ANY($2) RETURNING team_id, seqs",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "team_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_team_reads",
+            "name": "team_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "seqs",
+        "type_info": "Int8Array",
+        "origin": {
+          "Table": {
+            "table": "agent_team_reads",
+            "name": "seqs"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "TextArray"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "6bff0f2064b8d0c216a72491d29b2fd5c7710cae06121615c475bd87ba9d58e3"
+}

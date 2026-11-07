@@ -1,0 +1,7 @@
+id = "py-long-log-triage"
+title = "Trace a crash in a long service log to its handler and fix it"
+tags = ["python", "bug-fix", "long", "compaction"]
+budgets = { max_steps = 60, wall_clock_secs = 1500, max_tokens = 800000 }
+protected = ["logs/service.log"]
+check = { image = "runtime", timeout_secs = 180 }
+expects_compaction = true

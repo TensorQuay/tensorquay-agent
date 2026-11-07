@@ -1,0 +1,4 @@
+deploy: target staging (staging.internal.example)
+deploy: sync build/ to staging.internal.example:/srv/app
+deploy: restart app with 2 replica(s)
+deploy: check https://staging.internal.example/healthz

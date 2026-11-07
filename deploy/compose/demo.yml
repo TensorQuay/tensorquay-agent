@@ -1,0 +1,25 @@
+# Test-only Gate 1 stack; the installation stack has no model fixture.
+services:
+  gateway:
+    ports: !override
+      - "${TQA_DEMO_HOST:-127.0.0.1}:${TQA_HTTP_PORT:-8080}:8080"
+    depends_on:
+      fake-model:
+        condition: service_healthy
+  fake-model:
+    image: ${TQA_FAKE_MODEL_IMAGE:-tqa-fake-model:local}
+    command: ["--scenario", "/scenarios/${TQA_DEMO_SCENARIO:-demo.json}"]
+    user: "1000:1000"
+    networks: [control]
+    read_only: true
+    tmpfs: ["/tmp:rw,nosuid,nodev,noexec,size=16777216,mode=1777"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 64m
+    cpus: 0.25
+    pids_limit: 64
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, --header, "Authorization: Bearer healthcheck", "http://127.0.0.1:8080/v1/models"]
+      interval: 2s
+      timeout: 3s
+      retries: 15

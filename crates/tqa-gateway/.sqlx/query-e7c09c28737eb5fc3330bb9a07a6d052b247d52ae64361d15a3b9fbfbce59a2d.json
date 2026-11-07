@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO sandbox_instances (conversation_id,idle_seconds,max_lifetime_seconds) VALUES ($1,$2,$3)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e7c09c28737eb5fc3330bb9a07a6d052b247d52ae64361d15a3b9fbfbce59a2d"
+}

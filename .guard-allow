@@ -1,0 +1,103 @@
+# Reviewed exceptions for tools/git-guard.py (see AGENTS.md, "Git guardrails").
+# One entry per line: <glob>, path:<glob>, ip:<address>, personal-ok:<glob>, secret-ok:<glob>.
+# Add a comment above each entry saying why it is needed.
+
+# The LAN-origin test needs a multicast address to verify rejection.
+ip:224.0.0.1
+
+# Test suites use synthetic credentials ("synthetic-password", "password1234", "never-echo-this") to exercise
+# login, bootstrap, the password policy and secret redaction. Real token formats are still blocked everywhere.
+secret-ok:crates/tqa-gateway/tests/*
+secret-ok:deploy/tests/*
+# The sandbox egress contract stack creates a random synthetic account password per run.
+secret-ok:crates/tqa-sandbox/tests/*
+# The Firecracker stack (SBX-F-020) creates a random synthetic account password per run, and its unit test renders the
+# Compose model with placeholder database and bootstrap values that no stack ever uses.
+secret-ok:deploy/firecracker/stack.py
+secret-ok:deploy/firecracker/test_stack.py
+# The Linux baseline script creates a random synthetic account password for its throwaway test stack.
+secret-ok:web/scripts/linux-baselines.sh
+secret-ok:web/e2e/*
+secret-ok:web/src/*.test.ts
+secret-ok:web/src/*.test.tsx
+# HTML autocomplete attribute values ("new-password", "current-password") on the sign-in form, not credentials.
+secret-ok:web/src/auth/AuthForm.tsx
+secret-ok:web/src/auth/PasswordField.tsx
+
+# Egress policy tests: private, shared and reserved ranges that the proxy must refuse, and one public
+# documentation-style address (93.184.215.14) that an allow rule must pass. None is a real host of ours.
+ip:10.0.0.1
+ip:10.0.0.5
+ip:10.0.0.7
+ip:10.1.2.3
+ip:172.16.0.1
+ip:192.168.1.1
+ip:100.64.0.1
+ip:93.184.215.14
+# The reserved-range guard's boundary test (GW-I-012): the edges of multicast, broadcast, "this network" and
+# 100.64.0.0/10, and the public addresses just outside them. Synthetic range edges, not hosts of ours.
+ip:239.255.255.255
+ip:255.255.255.255
+ip:0.1.2.3
+ip:0.255.255.255
+ip:100.64.0.0
+ip:100.127.255.255
+ip:1.0.0.1
+ip:100.63.255.255
+ip:100.128.0.0
+ip:223.255.255.255
+# The special-purpose ranges added to the guard (GW-I-012): the edges of 198.18.0.0/15, 240.0.0.0/4, 192.0.0.0/24
+# and 192.88.99.0/24, their IPv6-embedded forms, and the public addresses just outside. Synthetic range edges.
+ip:198.18.0.0
+ip:198.19.255.255
+ip:240.0.0.0
+ip:254.255.255.255
+ip:192.0.0.0
+ip:192.0.0.255
+ip:192.88.99.0
+ip:192.88.99.255
+ip:198.18.0.1
+ip:240.0.0.1
+ip:198.17.255.255
+ip:198.20.0.0
+ip:191.255.255.255
+ip:192.0.1.0
+ip:192.88.98.255
+ip:192.88.100.0
+
+# Message catalogues hold translated interface text; keys such as "outputTokens" name UI strings, not credentials.
+secret-ok:web/src/i18n/locales/*.json
+
+# Upload name sanitisation tests use a synthetic Windows-style user-directory path as hostile input.
+personal-ok:crates/tqa-gateway/src/files/upload_tests.rs
+
+# The Firecracker backend's fixed tap /30 inside each VM's private container network namespace; not a host address.
+ip:169.254.100.1
+ip:169.254.100.2
+# The /30 netmask of that tap link, in the guest kernel's ip= argument; a mask, not an address.
+ip:255.255.255.252
+
+# The Firecracker configuration device contract fixture carries a synthetic marker in its "token" field; the host
+# backend and the guest init both test these exact bytes (SBX-F-011, SBX-F-016).
+secret-ok:crates/tqa-sandbox/src/firecracker/device_v1.json
+# The per-sandbox network pool (ADR-0021 amendment): the product default pool 10.213.0.0/16, the first address of the
+# 10/8 and 172.16/12 private ranges (range-edge tests), and one synthetic 192.168.4.0/24 network whose /28 subnets the
+# allocator tests hand out (SBX-U-003/004, GW-U-040). Public networks in these tests use the documentation ranges.
+ip:10.213.0.0
+# The install guide's example pool for a second installation on one host (deploy/README.md), next to the default.
+ip:10.214.0.0
+ip:10.0.0.0
+ip:172.16.0.0
+ip:192.168.4.0
+ip:192.168.4.1
+ip:192.168.4.16
+ip:192.168.4.32
+ip:192.168.4.48
+
+# Applied migrations cannot change: sqlx checksums each migration file, comments included, and refuses to start an
+# install whose applied migration differs. These five carry internal note labels in their header comments.
+internal-ok:crates/tqa-gateway/migrations/0037_settings.sql
+internal-ok:crates/tqa-gateway/migrations/0041_route_probes.sql
+internal-ok:crates/tqa-gateway/migrations/0049_audit_user_actors.sql
+internal-ok:crates/tqa-gateway/migrations/0051_secret_reads.sql
+internal-ok:crates/tqa-gateway/migrations/0052_secret_consumers.sql

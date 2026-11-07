@@ -1,0 +1,50 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT completion_tokens,estimated,conversation_id FROM usage ORDER BY completion_tokens NULLS FIRST",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "completion_tokens",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "usage",
+            "name": "completion_tokens"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "estimated",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "usage",
+            "name": "estimated"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "conversation_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "usage",
+            "name": "conversation_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      true,
+      false,
+      true
+    ]
+  },
+  "hash": "ca89ab587649cc89374879997056094aa95bd56ff44451cdb3a784edb3705b1e"
+}

@@ -1,0 +1,6022 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "ActionHash": {
+      "description": "Exactly 64 lowercase hexadecimal characters encoding a SHA-256 action digest.",
+      "maxLength": 64,
+      "minLength": 64,
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "AttachmentPath": {
+      "maxLength": 136,
+      "pattern": "^uploads/[A-Za-z0-9_-][A-Za-z0-9._-]{0,127}$",
+      "type": "string"
+    },
+    "Brief": {
+      "additionalProperties": false,
+      "description": "What the lead writes for a new member: the objective, the expected output and the boundaries, all required\n(proposal A, ADR-0034), and optionally the sources or tools to use.",
+      "properties": {
+        "boundaries": {
+          "description": "What not to do.",
+          "type": "string"
+        },
+        "objective": {
+          "description": "What the member is to achieve.",
+          "type": "string"
+        },
+        "output": {
+          "description": "What it hands back, and in what form.",
+          "type": "string"
+        },
+        "sources": {
+          "description": "The sources or tools to use.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "objective",
+        "output",
+        "boundaries"
+      ],
+      "type": "object"
+    },
+    "BudgetKind": {
+      "description": "The run budget approaching its hard ceiling.",
+      "oneOf": [
+        {
+          "const": "steps",
+          "description": "Completed steps within the run.",
+          "type": "string"
+        },
+        {
+          "const": "wall_clock",
+          "description": "Active execution time in whole seconds.",
+          "type": "string"
+        },
+        {
+          "const": "output_tokens",
+          "description": "Output tokens across all attempts, including estimated counts when usage is absent.",
+          "type": "string"
+        },
+        {
+          "const": "no_progress",
+          "description": "Consecutive completed steps without new tool-result content.",
+          "type": "string"
+        }
+      ]
+    },
+    "CacheHint": {
+      "description": "A route's declared caching capability; it never selects a provider by name.",
+      "oneOf": [
+        {
+          "const": "prefix",
+          "description": "Preserve stable prefixes for implicit cache reuse.",
+          "type": "string"
+        },
+        {
+          "const": "anthropic_cache_control",
+          "description": "Support explicit cache-control blocks in the corresponding adapter.",
+          "type": "string"
+        },
+        {
+          "const": "none",
+          "description": "No cache hint was declared; omitted on the wire.",
+          "type": "string"
+        }
+      ]
+    },
+    "CapturePhase": {
+      "description": "When a `screen.capture`'s screenshot was taken.",
+      "oneOf": [
+        {
+          "const": "before",
+          "description": "Before the action, journaled ahead of its call's `tool.start`.",
+          "type": "string"
+        },
+        {
+          "const": "after",
+          "description": "After it settled, journaled ahead of its call's `tool.result`.",
+          "type": "string"
+        },
+        {
+          "const": "screenshot",
+          "description": "The model's own `screenshot` action, journaled ahead of its call's `tool.result`.",
+          "type": "string"
+        }
+      ]
+    },
+    "ClientFrame": {
+      "description": "Client inputs are exact: unknown fields and malformed bounded values are rejected.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "Gateway-to-runtime configuration, rejected on every client binding.",
+          "properties": {
+            "computer_limits": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/ComputerLimits"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The `computer` tool's per-run caps, for an environment that declares `desktop` (revision 14, ADR-0039\nsection 4); absent means their defaults."
+            },
+            "conversation_id": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/ConversationId"
+                }
+              ],
+              "description": "The configured conversation."
+            },
+            "decision_engine": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/DecisionEngineSnapshot"
+                }
+              ],
+              "description": "The decision engine the session consults; absent means the model decides (revision 9, ADR-0013). The\ngateway sends it only to a runtime announcing revision 9 or later."
+            },
+            "environment": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Environment"
+                }
+              ],
+              "description": "Declared environment; omission preserves the legacy Minimal shell environment."
+            },
+            "fallback_routes": {
+              "description": "Admin-declared fallback routes the run may switch to, in order; empty from older gateways.",
+              "items": {
+                "$ref": "#/definitions/RouteSnapshot"
+              },
+              "maxItems": 3,
+              "type": "array"
+            },
+            "gateway_revision": {
+              "description": "The gateway's protocol revision; absent from older gateways. The gateway announces it so a runtime can\ntell which additions the gateway reads.",
+              "format": "uint16",
+              "maximum": 65535,
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "host_ca": {
+              "description": "The install CA the sandbox trusts for keyed hosts, PEM, the current one first (revision 11, ADR-0037 §6);\nabsent from older gateways and without a CA.",
+              "maxLength": 8192,
+              "pattern": "^(-----BEGIN CERTIFICATE-----\\n[A-Za-z0-9+/=\\n]+-----END CERTIFICATE-----\\n){1,2}$",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "last_stored_seq": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Seq"
+                }
+              ],
+              "description": "The durable gateway watermark for replay."
+            },
+            "limits": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/RunLimits"
+                }
+              ],
+              "description": "Validated run budgets."
+            },
+            "mcp": {
+              "description": "MCP servers, applied from the next run; empty from older gateways (revision 7).",
+              "items": {
+                "$ref": "#/definitions/McpServer"
+              },
+              "maxItems": 8,
+              "type": "array"
+            },
+            "network": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/NetworkSnapshot"
+                }
+              ],
+              "description": "The task's network allow-list, for the prompt (ADR-0035 §3); the gateway's proxy enforces it."
+            },
+            "profile": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/ProfileSnapshot"
+                }
+              ],
+              "description": "The agent profile the session runs under; absent from older gateways and without a profile (revision 8)."
+            },
+            "protocol": {
+              "description": "Protocol version, negotiated separately from parsing.",
+              "format": "uint16",
+              "maximum": 65535,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "route": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/RouteSnapshot"
+                }
+              ],
+              "description": "A route without credentials or upstream settings."
+            },
+            "run_host_keys": {
+              "description": "The keys of the run in progress, with placeholders minted for this sandbox, for the runtime to give that\nrun when it resumes (revision 11, ADR-0037 §3); empty, and not written, when no run with keys is going.",
+              "items": {
+                "$ref": "#/definitions/HostKeyGrant"
+              },
+              "maxItems": 320,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "type": {
+              "const": "session.config",
+              "type": "string"
+            },
+            "workspace": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/WorkspaceSnapshot"
+                }
+              ],
+              "description": "Workspace presentation facts."
+            }
+          },
+          "required": [
+            "type",
+            "conversation_id",
+            "last_stored_seq",
+            "route",
+            "network",
+            "limits",
+            "workspace",
+            "protocol"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Gateway-to-runtime route replacement for subsequent runs, rejected on client bindings.",
+          "properties": {
+            "fallback_routes": {
+              "description": "The new route's fallback routes, in order.",
+              "items": {
+                "$ref": "#/definitions/RouteSnapshot"
+              },
+              "maxItems": 3,
+              "type": "array"
+            },
+            "route": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/RouteSnapshot"
+                }
+              ],
+              "description": "A route without credentials or upstream settings."
+            },
+            "type": {
+              "const": "session.update",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "route"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Gateway-to-runtime workspace request (revision 7), rejected on every client binding.",
+          "properties": {
+            "op": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/WorkspaceOp"
+                }
+              ],
+              "description": "The operation."
+            },
+            "request_id": {
+              "description": "Correlates the reply; never reused on a link.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "type": {
+              "const": "workspace.request",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "request_id",
+            "op"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Gateway-to-runtime cancellation of a workspace request, rejected on every client binding.",
+          "properties": {
+            "request_id": {
+              "description": "The request to stop.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "type": {
+              "const": "workspace.cancel",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "request_id"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Open a conversation and request replay.",
+          "properties": {
+            "conversation_id": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/ConversationId"
+                }
+              ],
+              "description": "The conversation to open."
+            },
+            "last_seq": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Seq"
+                }
+              ],
+              "description": "The last received sequence, or zero before any event."
+            },
+            "protocol": {
+              "description": "The requested protocol version, checked during negotiation.",
+              "format": "uint16",
+              "maximum": 65535,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "type": {
+              "const": "session.init",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "conversation_id",
+            "last_seq",
+            "protocol"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Submit a nonempty user message.",
+          "properties": {
+            "attachments": {
+              "description": "At most 32 distinct upload paths (`uploads/<name>`), in submission order; may be empty.",
+              "items": {
+                "$ref": "#/definitions/AttachmentPath"
+              },
+              "maxItems": 32,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "host_keys": {
+              "description": "The run's host keys, which only the gateway adds as it delivers the turn to the runtime (revision 11,\nADR-0037 §3); empty, and not written, everywhere else.",
+              "items": {
+                "$ref": "#/definitions/HostKeyGrant"
+              },
+              "maxItems": 320,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "lead_brief": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/LeadBrief"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "On an agent team member's first turn, the lead's brief (revision 12, ADR-0034); absent, and not written,\non every other message."
+            },
+            "team_wake": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/TeamWake"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "On the gateway's wake of an agent team reader, whose messages wait (revision 13, ADR-0034); absent, and\nnot written, on every other message."
+            },
+            "text": {
+              "description": "Message text containing at most 64 KiB of UTF-8 bytes.",
+              "maxLength": 65536,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": {
+              "const": "user.message",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "text",
+            "attachments"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Request cooperative cancellation of a run.",
+          "properties": {
+            "run_id": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/RunId"
+                }
+              ],
+              "description": "The run to cancel."
+            },
+            "type": {
+              "const": "run.cancel",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "run_id"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Sign out everywhere (revision 14, ADR-0039 section 6): the runtime closes the desktop's browser, empties its\nprofile, and answers `screen.sign_out.done`; the next action starts the browser fresh. Sent only when no run is\nactive.",
+          "properties": {
+            "type": {
+              "const": "screen.sign_out",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The gateway's answer to a screenshot upload (revision 14, ADR-0039 section 9): kept, or why not. The runtime\njournals the capture's `screen.capture` only after `ok`.",
+          "properties": {
+            "id": {
+              "description": "The upload's id, its PNG's SHA-256.",
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "ok": {
+              "description": "Whether the store holds it now.",
+              "type": "boolean"
+            },
+            "reason": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/StoreRefusal"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Why not, when `ok` is false; absent otherwise."
+            },
+            "type": {
+              "const": "screen.stored",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "id",
+            "ok"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "CompactionSource": {
+      "description": "Who produced a compaction summary.",
+      "oneOf": [
+        {
+          "const": "model",
+          "description": "The route's model, from the fixed summary prompt.",
+          "type": "string"
+        },
+        {
+          "const": "fallback",
+          "description": "The deterministic summary built from events when the model summary was unusable.",
+          "type": "string"
+        }
+      ]
+    },
+    "CompactionSummary": {
+      "description": "Fixed summary fields replacing older turns. Unknown fields are ignored and never kept.",
+      "properties": {
+        "decisions": {
+          "description": "Decisions made and their reasons.",
+          "items": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "maxItems": 32,
+          "type": "array"
+        },
+        "done": {
+          "description": "Work already completed.",
+          "items": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "maxItems": 32,
+          "type": "array"
+        },
+        "goal": {
+          "description": "The task being worked on.",
+          "maxLength": 512,
+          "type": "string"
+        },
+        "key_paths": {
+          "description": "Workspace paths that matter for the remaining work.",
+          "items": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "maxItems": 32,
+          "type": "array"
+        },
+        "open_errors": {
+          "description": "Errors that were not yet resolved.",
+          "items": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "maxItems": 32,
+          "type": "array"
+        },
+        "pending": {
+          "description": "Work still outstanding.",
+          "items": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "maxItems": 32,
+          "type": "array"
+        }
+      },
+      "required": [
+        "goal",
+        "done",
+        "pending",
+        "decisions",
+        "key_paths",
+        "open_errors"
+      ],
+      "type": "object"
+    },
+    "ComputerLimits": {
+      "additionalProperties": false,
+      "description": "The `computer` tool's per-run caps, the administrator's settings as `session.config` carries them (revision 14,\nADR-0039 section 4). Absent means these defaults.",
+      "properties": {
+        "max_actions_per_run": {
+          "format": "uint32",
+          "maximum": 5000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "max_screenshots_per_run": {
+          "format": "uint32",
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "max_screenshots_per_run",
+        "max_actions_per_run"
+      ],
+      "type": "object"
+    },
+    "ConversationId": {
+      "description": "A validated conversation identifier, encoded as a JSON string.",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "type": "string"
+    },
+    "DecisionChoice": {
+      "description": "A decision as the loop applied it.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "The step called `route` with these tools.",
+          "properties": {
+            "kind": {
+              "const": "call_model",
+              "type": "string"
+            },
+            "route": {
+              "description": "The route called: the conversation's own or a declared fallback.",
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            "tools": {
+              "description": "The tools offered, in registry order.",
+              "items": {
+                "anyOf": [
+                  {
+                    "pattern": "^[a-z][a-z0-9_]{0,63}$"
+                  },
+                  {
+                    "not": {
+                      "pattern": "^mcp\\.[^.]*(__|_\\.)"
+                    },
+                    "pattern": "^mcp\\.[a-z][a-z0-9_]{0,15}\\.[A-Za-z0-9_.-]{1,128}$"
+                  }
+                ],
+                "type": "string"
+              },
+              "maxItems": 256,
+              "type": "array"
+            }
+          },
+          "required": [
+            "kind",
+            "route",
+            "tools"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The loop ran a call the engine originated.",
+          "properties": {
+            "arguments": {
+              "description": "Its arguments, a JSON object of at most 64 KiB serialized.",
+              "type": "object"
+            },
+            "kind": {
+              "const": "act",
+              "type": "string"
+            },
+            "tool": {
+              "anyOf": [
+                {
+                  "pattern": "^[a-z][a-z0-9_]{0,63}$"
+                },
+                {
+                  "not": {
+                    "pattern": "^mcp\\.[^.]*(__|_\\.)"
+                  },
+                  "pattern": "^mcp\\.[a-z][a-z0-9_]{0,15}\\.[A-Za-z0-9_.-]{1,128}$"
+                }
+              ],
+              "description": "The tool run.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "tool",
+            "arguments"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The loop compacted the conversation now.",
+          "properties": {
+            "kind": {
+              "const": "compact",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The run stopped as failed with this reason.",
+          "properties": {
+            "kind": {
+              "const": "stop",
+              "type": "string"
+            },
+            "reason": {
+              "description": "1 through 200 characters, no control characters.",
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "reason"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The response's calls kept, by id; the others got an error result.",
+          "properties": {
+            "call_ids": {
+              "description": "At most 64 call ids.",
+              "items": {
+                "$ref": "#/definitions/ToolCallId"
+              },
+              "maxItems": 64,
+              "type": "array"
+            },
+            "kind": {
+              "const": "select",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "call_ids"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "DecisionEngineSnapshot": {
+      "additionalProperties": false,
+      "description": "The decision engine a session consults, as the runtime sees it (revision 9): its name, its relay path on the gateway,\nits deadline and its exposure; never its address or credential, which stay with the gateway.",
+      "properties": {
+        "exposure": {
+          "$ref": "#/definitions/DecisionExposure"
+        },
+        "name": {
+          "maxLength": 64,
+          "minLength": 1,
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "points": {
+          "default": null,
+          "description": "One or both points, each once; absent means both.",
+          "items": {
+            "$ref": "#/definitions/DecisionPoint"
+          },
+          "maxItems": 2,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "relay_path": {
+          "maxLength": 73,
+          "minLength": 11,
+          "pattern": "^/relay/d/[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "timeout_ms": {
+          "format": "uint32",
+          "maximum": 10000,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "relay_path",
+        "timeout_ms",
+        "exposure"
+      ],
+      "type": "object"
+    },
+    "DecisionExposure": {
+      "description": "How much of the conversation a decision engine may see (ADR-0013 point 5): an administrator's setting per engine.",
+      "oneOf": [
+        {
+          "const": "none",
+          "description": "Calls by id and name only; nothing of the transcript. The default.",
+          "type": "string"
+        },
+        {
+          "const": "calls",
+          "description": "Also the calls' arguments.",
+          "type": "string"
+        },
+        {
+          "const": "full",
+          "description": "Also the response's text and the transcript.",
+          "type": "string"
+        }
+      ]
+    },
+    "DecisionFallbackReason": {
+      "description": "Why the loop set an engine's answer aside and used the model's own decisions for the step.",
+      "oneOf": [
+        {
+          "const": "unreachable",
+          "description": "The engine could not be reached.",
+          "type": "string"
+        },
+        {
+          "const": "timeout",
+          "description": "The engine did not answer in time.",
+          "type": "string"
+        },
+        {
+          "const": "invalid",
+          "description": "The answer wasn't a decision.",
+          "type": "string"
+        },
+        {
+          "const": "route_not_allowed",
+          "description": "The decision named a route other than the conversation's own or a declared fallback.",
+          "type": "string"
+        },
+        {
+          "const": "tool_not_allowed",
+          "description": "The decision named a tool outside the step's set.",
+          "type": "string"
+        },
+        {
+          "const": "schema",
+          "description": "An `act` call's arguments failed the tool's schema.",
+          "type": "string"
+        },
+        {
+          "const": "repeated_compact",
+          "description": "A second `compact` in one step.",
+          "type": "string"
+        },
+        {
+          "const": "compact_nothing",
+          "description": "A `compact` with nothing old enough to fold.",
+          "type": "string"
+        },
+        {
+          "const": "act_loop",
+          "description": "A fourth `act` in a row.",
+          "type": "string"
+        },
+        {
+          "const": "circuit_open",
+          "description": "Three fallbacks in a row: the engine is no longer asked in this run.",
+          "type": "string"
+        },
+        {
+          "const": "budget_spent",
+          "description": "The engine's budget for its period is spent (the gateway refused before sending): the engine is no longer\nasked in this run; a new run asks again (ADR-0013, the adapter amendment).",
+          "type": "string"
+        }
+      ]
+    },
+    "DecisionPoint": {
+      "description": "Where the loop consulted the engine.",
+      "oneOf": [
+        {
+          "const": "before_step",
+          "description": "Before a step's model call.",
+          "type": "string"
+        },
+        {
+          "const": "after_response",
+          "description": "After a complete model response, selecting its calls.",
+          "type": "string"
+        }
+      ]
+    },
+    "EntryKind": {
+      "description": "A directory entry's kind.",
+      "oneOf": [
+        {
+          "const": "file",
+          "description": "A regular file.",
+          "type": "string"
+        },
+        {
+          "const": "dir",
+          "description": "A directory.",
+          "type": "string"
+        },
+        {
+          "const": "link",
+          "description": "A symbolic link, never followed.",
+          "type": "string"
+        },
+        {
+          "const": "other",
+          "description": "Anything else.",
+          "type": "string"
+        }
+      ]
+    },
+    "Environment": {
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "properties": {
+            "digest": {
+              "pattern": "^([A-Za-z0-9][A-Za-z0-9._:-]*(/[A-Za-z0-9][A-Za-z0-9._:-]*)*@)?sha256:[0-9a-f]{64}$",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "properties": {
+            "capabilities": {
+              "const": [
+                "shell"
+              ]
+            },
+            "digest": {
+              "const": ""
+            },
+            "template": {
+              "const": "minimal"
+            },
+            "version": false
+          }
+        }
+      ],
+      "properties": {
+        "capabilities": {
+          "items": {
+            "description": "A declared environment capability, ordered independently of registry input order.",
+            "oneOf": [
+              {
+                "const": "shell",
+                "description": "Bounded shell execution.",
+                "type": "string"
+              },
+              {
+                "const": "python",
+                "description": "A Python toolchain.",
+                "type": "string"
+              },
+              {
+                "const": "node",
+                "description": "A Node toolchain.",
+                "type": "string"
+              },
+              {
+                "const": "build",
+                "description": "A native build toolchain.",
+                "type": "string"
+              },
+              {
+                "const": "browser",
+                "description": "A headless browser.",
+                "type": "string"
+              },
+              {
+                "const": "data",
+                "description": "Python's data libraries (pandas, matplotlib and openpyxl) installed, for tables, charts and spreadsheets.",
+                "type": "string"
+              },
+              {
+                "const": "desktop",
+                "description": "A graphical desktop the agent sees and operates (revision 14, ADR-0039): a display, a window manager, desktop\napps and a headed browser, with the `computer` tool.",
+                "type": "string"
+              }
+            ]
+          },
+          "maxItems": 7,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "digest": {
+          "maxLength": 512,
+          "type": "string"
+        },
+        "template": {
+          "maxLength": 64,
+          "minLength": 1,
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "version": {
+          "format": "uint64",
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "template",
+        "digest",
+        "capabilities"
+      ],
+      "type": "object"
+    },
+    "ErrorCode": {
+      "description": "The closed protocol-v1 error vocabulary, with documented retry defaults.",
+      "oneOf": [
+        {
+          "const": "unknown_frame",
+          "description": "Unknown frame kinds require a compatible sender; retrying unchanged input cannot help.",
+          "type": "string"
+        },
+        {
+          "const": "invalid_frame",
+          "description": "Invalid input must be corrected before another attempt.",
+          "type": "string"
+        },
+        {
+          "const": "seq_gap",
+          "description": "A sequence gap can recover by reconnecting and replaying events.",
+          "type": "string"
+        },
+        {
+          "const": "unsupported_protocol",
+          "description": "An unsupported version requires a compatible client or server.",
+          "type": "string"
+        },
+        {
+          "const": "busy",
+          "description": "Occupied capacity may become available on a later attempt.",
+          "type": "string"
+        },
+        {
+          "const": "permission_binding",
+          "description": "Retired by ADR-0035 (an approval binding that no longer held): read from histories written before it, never\nsent.",
+          "type": "string"
+        },
+        {
+          "const": "egress_denied",
+          "description": "Egress policy denied this destination; repeating the same request cannot help.",
+          "type": "string"
+        },
+        {
+          "const": "restarting",
+          "description": "The service can accept work after its restart completes.",
+          "type": "string"
+        },
+        {
+          "const": "store_unavailable",
+          "description": "A temporary store outage may recover.",
+          "type": "string"
+        },
+        {
+          "const": "provider_error",
+          "description": "The provider may recover from a transient failure.",
+          "type": "string"
+        },
+        {
+          "const": "budget",
+          "description": "A consumed run budget requires an explicit policy change.",
+          "type": "string"
+        },
+        {
+          "const": "repeated_failure",
+          "description": "Repeated failures require intervention instead of another automatic retry.",
+          "type": "string"
+        },
+        {
+          "const": "no_progress",
+          "description": "A stalled run needs a changed approach before continuing.",
+          "type": "string"
+        },
+        {
+          "const": "fallback_parse",
+          "description": "On a route without native tool calls, the model's reply could not be read as a tool call\neven after one retry prompt; another model or route is needed.",
+          "type": "string"
+        },
+        {
+          "const": "io",
+          "description": "Disk or read failures require operator attention.",
+          "type": "string"
+        },
+        {
+          "const": "internal",
+          "description": "An internal invariant failure requires investigation.",
+          "type": "string"
+        },
+        {
+          "const": "sandbox_failed",
+          "description": "A sandbox could not start or register; retry with a new action key after recovery.",
+          "type": "string"
+        },
+        {
+          "const": "runtime_start_failed",
+          "description": "The runtime exited before registration; retry a new action after startup is repaired.",
+          "type": "string"
+        },
+        {
+          "const": "action_failed",
+          "description": "An accepted action failed to execute; retry with a new action key after recovery.",
+          "type": "string"
+        },
+        {
+          "const": "workspace_quota",
+          "description": "The workspace is over its quota; the run stops past the quota plus a margin, and new runs start only once it\nholds less again (N4).",
+          "type": "string"
+        },
+        {
+          "const": "state_quota",
+          "description": "The conversation's runtime state is over its bound; its run was stopped and an administrator must intervene.",
+          "type": "string"
+        },
+        {
+          "const": "decision_stop",
+          "description": "A decision engine stopped the run as failed, with its reason (ADR-0013 point 2); it reaches the wire with the\nprotocol revision of ADR-0013 point 7.",
+          "type": "string"
+        },
+        {
+          "const": "decision_engine_unavailable",
+          "description": "The task's decision engine is gone or disabled (ADR-0013 point 6): its sandbox was retired without a\nreplacement, and a message continues the task once an administrator restores the engine. Gateway to clients\nonly (revision 9).",
+          "type": "string"
+        },
+        {
+          "const": "decision_engine_budget_spent",
+          "description": "The task's decision engine has used its budget for the period (ADR-0013, the adapter amendment): the agent decides\non its own until the period ends or an administrator raises the budget. Gateway to clients only (revision 9).",
+          "type": "string"
+        },
+        {
+          "const": "approvals_removed",
+          "description": "A run parked for an approval when ADR-0035 removed approvals; written only by the gateway's upgrade, never sent\nby a runtime. A message starts a new run (revision 9).",
+          "type": "string"
+        },
+        {
+          "const": "reply_cut",
+          "description": "The model ended its reply at its output limit (`finish_reason = length`) while the run's own output budget was\nleft: the model server's context or max tokens, or the route's max output, cut it (revision 10). Retrying with\nthe same limits cuts it again, so it is not retryable.",
+          "type": "string"
+        },
+        {
+          "const": "host_keys_unsupported",
+          "description": "The task's sender has keys for web addresses the task could use, but its environment's runtime is older than\nrevision 11 and can't take them: the run goes ahead without them until the environment is rebuilt (ADR-0037).\nAn unsequenced notice, gateway to clients only (revision 11).",
+          "type": "string"
+        }
+      ]
+    },
+    "ErrorTarget": {
+      "description": "A bounded destination for client-authored error copy, preserving the supplied ASCII spelling.\nUnknown fields are ignored for compatibility with future server frames.",
+      "properties": {
+        "host": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*\\.?$"
+            },
+            {
+              "format": "ipv6",
+              "pattern": ":"
+            }
+          ],
+          "maxLength": 253,
+          "minLength": 1,
+          "not": {
+            "pattern": "[^A-Za-z0-9.:-]"
+          },
+          "type": "string"
+        },
+        "port": {
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "host",
+        "port"
+      ],
+      "type": "object"
+    },
+    "Event": {
+      "description": "The skeleton event vocabulary; unknown fields are ignored for additive compatibility.",
+      "oneOf": [
+        {
+          "description": "Repository initialization progress, journaled before the first model run.",
+          "properties": {
+            "code": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/ErrorCode"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Stable failure classification; omitted for progress and success."
+            },
+            "message": {
+              "description": "Fixed status text within 256 UTF-8 bytes; never a URL or process output.",
+              "maxLength": 256,
+              "minLength": 1,
+              "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]+$",
+              "type": "string"
+            },
+            "status": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/WorkspaceCloneStatus"
+                }
+              ],
+              "description": "Whether initialization started, completed, was skipped or failed."
+            },
+            "type": {
+              "const": "workspace.clone",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "status",
+            "message"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Retired by ADR-0035 (an approval's answer): read from histories written before it, never sent. The old\nstored payload parses; none of its fields is kept.",
+          "properties": {
+            "type": {
+              "const": "permission.resolved",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Retired by ADR-0035 (an approval that expired): read from histories written before it, never sent.",
+          "properties": {
+            "type": {
+              "const": "permission.expired",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "The environment's template or declared capability set changed.",
+          "properties": {
+            "capabilities": {
+              "description": "Unique capabilities, normalized into canonical enum order.",
+              "items": {
+                "description": "A declared environment capability, ordered independently of registry input order.",
+                "oneOf": [
+                  {
+                    "const": "shell",
+                    "description": "Bounded shell execution.",
+                    "type": "string"
+                  },
+                  {
+                    "const": "python",
+                    "description": "A Python toolchain.",
+                    "type": "string"
+                  },
+                  {
+                    "const": "node",
+                    "description": "A Node toolchain.",
+                    "type": "string"
+                  },
+                  {
+                    "const": "build",
+                    "description": "A native build toolchain.",
+                    "type": "string"
+                  },
+                  {
+                    "const": "browser",
+                    "description": "A headless browser.",
+                    "type": "string"
+                  },
+                  {
+                    "const": "data",
+                    "description": "Python's data libraries (pandas, matplotlib and openpyxl) installed, for tables, charts and spreadsheets.",
+                    "type": "string"
+                  },
+                  {
+                    "const": "desktop",
+                    "description": "A graphical desktop the agent sees and operates (revision 14, ADR-0039): a display, a window manager, desktop\napps and a headed browser, with the `computer` tool.",
+                    "type": "string"
+                  }
+                ]
+              },
+              "maxItems": 7,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "template": {
+              "description": "Validated template slug; the image digest is not part of event identity.",
+              "maxLength": 64,
+              "minLength": 1,
+              "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            "type": {
+              "const": "environment.changed",
+              "type": "string"
+            },
+            "version": {
+              "description": "The template version now running, for an image-only update; absent otherwise (revision 8, ADR-0032).",
+              "format": "uint64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "type",
+            "template",
+            "capabilities"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "A validated user message enters the conversation journal.",
+          "properties": {
+            "attachments": {
+              "description": "Up to 32 distinct upload paths (`uploads/<name>`), in submission order.",
+              "items": {
+                "$ref": "#/definitions/AttachmentPath"
+              },
+              "maxItems": 32,
+              "type": "array",
+              "uniqueItems": true
+            },
+            "lead_brief": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/LeadBrief"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The lead's brief, when this is an agent team member's first turn (revision 12, ADR-0034): shown as the\nbrief from the lead, never as the person's words."
+            },
+            "team_wake": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/TeamWake"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The gateway's wake of an agent team reader (revision 13, ADR-0034): shown as the gateway's notice of\nwaiting messages, never as the person's words."
+            },
+            "text": {
+              "description": "Nonempty text containing at most 64 KiB of UTF-8 bytes.",
+              "maxLength": 65536,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": {
+              "const": "message.user",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "text",
+            "attachments"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "A run begins.",
+          "properties": {
+            "run_id": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/RunId"
+                }
+              ],
+              "description": "The run that started."
+            },
+            "type": {
+              "const": "run.started",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "run_id"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "What the runtime loaded into the model context when the run started or resumed: instruction files, skills\nand skipped skill folders (FR-11). For the context panel only; it never enters the model context.",
+          "properties": {
+            "instructions": {
+              "description": "Instruction files in prompt order, at most 64.",
+              "items": {
+                "$ref": "#/definitions/LoadedInstruction"
+              },
+              "maxItems": 64,
+              "type": "array"
+            },
+            "skills": {
+              "description": "Skills in index order, at most 64.",
+              "items": {
+                "$ref": "#/definitions/LoadedSkill"
+              },
+              "maxItems": 64,
+              "type": "array"
+            },
+            "skipped": {
+              "description": "Skill folders that were not loaded, with their reasons, at most 64.",
+              "items": {
+                "$ref": "#/definitions/SkippedSkill"
+              },
+              "maxItems": 64,
+              "type": "array"
+            },
+            "type": {
+              "const": "context.loaded",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "instructions",
+            "skills",
+            "skipped"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "A numbered model-and-tool step begins.",
+          "properties": {
+            "attempt": {
+              "default": 1,
+              "description": "The attempt number; older frames default to the first attempt.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "step": {
+              "description": "The step number within the run.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "type": {
+              "const": "step.started",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "step"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "A numbered step and its selected attempt complete.",
+          "properties": {
+            "duration_ms": {
+              "default": 0,
+              "description": "Active time for this step; older frames contribute zero duration.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "step": {
+              "description": "The step number within the run.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "type": {
+              "const": "step.completed",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "step"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Older turns were replaced by a structured summary before the next model call.",
+          "properties": {
+            "source": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/CompactionSource"
+                }
+              ],
+              "description": "Whether the model or the deterministic fallback wrote the summary."
+            },
+            "summary": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/CompactionSummary"
+                }
+              ],
+              "description": "The bounded summary, shown to the model as quoted data."
+            },
+            "through_seq": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Seq"
+                }
+              ],
+              "description": "The last replaced sequence; later events and the pinned user messages are kept."
+            },
+            "type": {
+              "const": "compaction",
+              "type": "string"
+            },
+            "version": {
+              "const": 1,
+              "description": "The summary format and prompt version; exactly 1.",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "type",
+            "through_seq",
+            "source",
+            "version",
+            "summary"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "A run budget reached its warning threshold.",
+          "properties": {
+            "budget": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BudgetKind"
+                }
+              ],
+              "description": "The measured budget."
+            },
+            "limit": {
+              "description": "Configured ceiling in the same unit.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "type": {
+              "const": "budget.warning",
+              "type": "string"
+            },
+            "used": {
+              "description": "Consumed steps or whole active seconds.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "type",
+            "budget",
+            "used",
+            "limit"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "The run switched to another route after its route failed; later steps of the run stay there.",
+          "properties": {
+            "from": {
+              "description": "The route that failed, or a fallback that is no longer configured.",
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            "reason": {
+              "description": "Error code and optional HTTP status, at most 128 bytes; never a response body.",
+              "maxLength": 128,
+              "type": "string"
+            },
+            "to": {
+              "description": "The route the run continues on.",
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": {
+              "const": "route.fallback",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "from",
+            "to",
+            "reason"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Opaque provider reasoning state for the response being streamed, recorded in stream order\nbefore that response's calls (ADR-0027). It is replayed only to the same route and model.\n`item` is absent when the state exceeded its bounds, and always absent in the client form.",
+          "properties": {
+            "bytes": {
+              "description": "The item's size in bytes, kept when the item itself is not.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "item": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/ReasoningItem"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The provider item as received; never logged or shown."
+            },
+            "model": {
+              "description": "The route's model when the item was produced.",
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            "protocol": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/WireProtocol"
+                }
+              ],
+              "description": "The protocol of the route that produced the item."
+            },
+            "route": {
+              "description": "The route that produced the item.",
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": {
+              "const": "reasoning.state",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "protocol",
+            "route",
+            "model",
+            "bytes"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "A failed model attempt will retry after bounded backoff.",
+          "properties": {
+            "attempt": {
+              "description": "The model attempt that failed.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "delay_ms": {
+              "description": "The delay before the next attempt, in milliseconds.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "fallback_problem": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/FallbackProblem"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "For a `fallback_parse` retry, what exactly made the reply unreadable, named without any of its content\n(ADR-0007); absent on every other retry and from older runtimes."
+            },
+            "provider_message": {
+              "description": "The provider's own words about the failure, sanitised and bounded; absent when there are none.",
+              "maxLength": 300,
+              "minLength": 1,
+              "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]+$",
+              "type": "string"
+            },
+            "reason": {
+              "description": "Error code and optional HTTP status, at most 128 bytes; never a response body.",
+              "maxLength": 128,
+              "type": "string"
+            },
+            "type": {
+              "const": "provider.retry",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "attempt",
+            "delay_ms",
+            "reason"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "All model deltas and prepared tool calls for an attempt have arrived.",
+          "properties": {
+            "attempt": {
+              "description": "The completed model attempt.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "finish_reason": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/FinishReason"
+                }
+              ],
+              "description": "The reason the response finished."
+            },
+            "step": {
+              "description": "The step number within the run.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "type": {
+              "const": "model.completed",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "step",
+            "attempt",
+            "finish_reason"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "A visible text fragment arrives.",
+          "properties": {
+            "text": {
+              "description": "The text fragment, which may be empty.",
+              "type": "string"
+            },
+            "type": {
+              "const": "text.delta",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "text"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "A reasoning fragment arrives.",
+          "properties": {
+            "text": {
+              "description": "The reasoning fragment, which may be empty.",
+              "type": "string"
+            },
+            "type": {
+              "const": "reasoning.delta",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "text"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "A tool call has been prepared.",
+          "properties": {
+            "arguments": {
+              "description": "The tool's JSON arguments."
+            },
+            "call_id": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/ToolCallId"
+                }
+              ],
+              "description": "The tool-call identifier."
+            },
+            "name": {
+              "description": "The registered tool name.",
+              "type": "string"
+            },
+            "type": {
+              "const": "tool.call",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "call_id",
+            "name",
+            "arguments"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Tool execution begins.",
+          "properties": {
+            "call_id": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/ToolCallId"
+                }
+              ],
+              "description": "The tool call being executed."
+            },
+            "type": {
+              "const": "tool.start",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "call_id"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "An ordered UTF-8 output chunk arrives.",
+          "properties": {
+            "call_id": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/ToolCallId"
+                }
+              ],
+              "description": "The call whose output is being streamed."
+            },
+            "chunk": {
+              "description": "The zero-based chunk index for this call.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "data": {
+              "description": "The UTF-8 output bytes before JSON escaping.",
+              "type": "string"
+            },
+            "last": {
+              "description": "Whether this is the final chunk.",
+              "type": "boolean"
+            },
+            "type": {
+              "const": "tool.output",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "call_id",
+            "chunk",
+            "last",
+            "data"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Tool execution reaches a terminal state.",
+          "properties": {
+            "call_id": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/ToolCallId"
+                }
+              ],
+              "description": "The completed tool call."
+            },
+            "exit_code": {
+              "description": "A process exit status when the tool exposes one.",
+              "format": "int32",
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "failure": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/ToolFailure"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Why the call failed, as data for clients (revision 10, C1); absent when it didn't fail or from older\nruntimes."
+            },
+            "status": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/ToolStatus"
+                }
+              ],
+              "description": "The terminal execution status."
+            },
+            "type": {
+              "const": "tool.end",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "call_id",
+            "status"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "The bounded, authoritative tool response used for conversation history.",
+          "properties": {
+            "call_id": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/ToolCallId"
+                }
+              ],
+              "description": "The tool call to which this result belongs."
+            },
+            "content": {
+              "description": "UTF-8 content capped at 256 KiB before JSON escaping.",
+              "maxLength": 262144,
+              "type": "string"
+            },
+            "evidence": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/ScreenEvidence"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "On a `computer` action that takes evidence screenshots, which of them were kept, and on a `screenshot` call's\nOk result whether its screenshot was (`after` only) (revision 14, ADR-0039); absent, and not written, on\nevery other result."
+            },
+            "status": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/ToolStatus"
+                }
+              ],
+              "description": "The terminal execution status."
+            },
+            "target": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/ScreenTarget"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "On a `computer` call that acted on an element by ref, that element (revision 14, ADR-0039), for a client's\nstep line; absent, and not written, on every other result. Never part of the model's input."
+            },
+            "type": {
+              "const": "tool.result",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "call_id",
+            "status",
+            "content"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "A decision the engine made and the loop applied (ADR-0013 point 4), journaled before it takes effect. Only a\nnon-default engine emits it, and it reaches the wire with the protocol revision of ADR-0013 point 7.",
+          "properties": {
+            "choice": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/DecisionChoice"
+                }
+              ],
+              "description": "The decision as applied."
+            },
+            "engine": {
+              "description": "The engine, by its name.",
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            "latency_ms": {
+              "description": "How long the engine took to answer.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "point": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/DecisionPoint"
+                }
+              ],
+              "description": "Where the engine was consulted."
+            },
+            "type": {
+              "const": "decision",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "point",
+            "engine",
+            "choice",
+            "latency_ms"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "The loop set an engine's answer aside and used the model's own decisions for the step (ADR-0013 point 4).",
+          "properties": {
+            "engine": {
+              "description": "The engine, by its name.",
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            "point": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/DecisionPoint"
+                }
+              ],
+              "description": "Where the engine was consulted."
+            },
+            "reason": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/DecisionFallbackReason"
+                }
+              ],
+              "description": "Why."
+            },
+            "type": {
+              "const": "decision.fallback",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "point",
+            "engine",
+            "reason"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "An MCP server's state for this session (ADR-0011), emitted around a run's start; additive, so no revision.",
+          "properties": {
+            "name": {
+              "description": "The server's name under the MCP name rule.",
+              "maxLength": 16,
+              "pattern": "^[a-z](_?[a-z0-9])*$",
+              "type": "string"
+            },
+            "reason": {
+              "description": "A stable reason code for a disabled or restarted server, 1 through 64 bytes of `[a-z_]`.",
+              "pattern": "^[a-z_]{1,64}$",
+              "type": "string"
+            },
+            "state": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/McpServerState"
+                }
+              ],
+              "description": "Where the server stands."
+            },
+            "tools": {
+              "description": "The tools it registered, at most 64.",
+              "format": "uint32",
+              "maximum": 64,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "type": {
+              "const": "mcp.server",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "name",
+            "state",
+            "tools"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "The workspace had no space left: a tool failed with `workspace_full`, or a command failed while the workspace's\nfilesystem had no free blocks (SBX-C-015). At most once per run, just before that call's `tool.result`.",
+          "properties": {
+            "call_id": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/ToolCallId"
+                }
+              ],
+              "description": "The first call that failed for lack of space."
+            },
+            "type": {
+              "const": "workspace.full",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "call_id"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Token usage is reported without narrowing counters.",
+          "properties": {
+            "cached_tokens": {
+              "description": "Cached input tokens when reported.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "completion_tokens": {
+              "description": "Output tokens charged by the route.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "estimated": {
+              "description": "Whether the counts are estimates because the provider omitted usage.",
+              "type": "boolean"
+            },
+            "estimated_images": {
+              "description": "The image tokens the runner counted for the images this call sent, which `prompt_tokens` also holds\n(CORE-U-084). Absent when `estimated_input` is.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "estimated_input": {
+              "description": "The runner's byte estimate of the request this call sent, exactly as it was built: after the older replayed\nstates it dropped, with its tools and its latest turn's states, without images (CORE-U-084). With\n`prompt_tokens`, it gives the route's density. Absent for a compaction's summary call and in older journals.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "estimated_route": {
+              "description": "The route this call was counted on, by its immutable name (ADR-0028: the key conversations store, not the\neditable display name): a density holds only on the route that measured it (CORE-U-084). Absent when\n`estimated_input` is.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "prompt_tokens": {
+              "description": "Input tokens charged by the route.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "reasoning_tokens": {
+              "description": "Reasoning tokens when reported.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "type": {
+              "const": "usage",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "prompt_tokens",
+            "completion_tokens"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "A run completes successfully.",
+          "properties": {
+            "run_id": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/RunId"
+                }
+              ],
+              "description": "The completed run."
+            },
+            "type": {
+              "const": "run.completed",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "run_id"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "A run stops after cancellation.",
+          "properties": {
+            "run_id": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/RunId"
+                }
+              ],
+              "description": "The cancelled run."
+            },
+            "type": {
+              "const": "run.cancelled",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "run_id"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "A run stops with a classified failure.",
+          "properties": {
+            "code": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/ErrorCode"
+                }
+              ],
+              "description": "The stable failure classification."
+            },
+            "provider_message": {
+              "description": "The provider's own words about the failure, sanitised and bounded; absent when there are none.",
+              "maxLength": 300,
+              "minLength": 1,
+              "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f]+$",
+              "type": "string"
+            },
+            "reason": {
+              "description": "The human-readable failure detail.",
+              "type": "string"
+            },
+            "run_id": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/RunId"
+                }
+              ],
+              "description": "The failed run."
+            },
+            "type": {
+              "const": "run.failed",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "run_id",
+            "reason",
+            "code"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "A journalled run resumes at a complete step.",
+          "properties": {
+            "from_step": {
+              "description": "The step from which execution resumes.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "run_id": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/RunId"
+                }
+              ],
+              "description": "The resumed run."
+            },
+            "type": {
+              "const": "run.resumed",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "run_id",
+            "from_step"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Retired by ADR-0035 (a run parked for an approval): read from histories written before it, never sent.",
+          "properties": {
+            "type": {
+              "const": "run.parked",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "One screenshot a `computer` call took, for the evidence or for the model (revision 14, ADR-0039), journaled\nonly once the conversation's screenshot store holds it; a client fetches it by `id`.",
+          "properties": {
+            "bytes": {
+              "description": "The stored file's size in bytes, at most 512 KiB.",
+              "format": "uint64",
+              "maximum": 524288,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "call_id": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/ToolCallId"
+                }
+              ],
+              "description": "The `computer` call it belongs to."
+            },
+            "height": {
+              "description": "Its height in pixels.",
+              "format": "uint32",
+              "maximum": 8192,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "id": {
+              "description": "Its id in the screenshot store: 1 to 128 ASCII letters, digits, `-` and `_`.",
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            "marked": {
+              "description": "Whether it carries the snapshot's marks: only the model's own screenshot does; evidence is unmarked.",
+              "type": "boolean"
+            },
+            "phase": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/CapturePhase"
+                }
+              ],
+              "description": "When it was taken."
+            },
+            "sent_to_model": {
+              "description": "Whether the model was sent it.",
+              "type": "boolean"
+            },
+            "sha256": {
+              "description": "The stored file's SHA-256, in lowercase hex.",
+              "maxLength": 64,
+              "minLength": 64,
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "type": {
+              "const": "screen.capture",
+              "type": "string"
+            },
+            "width": {
+              "description": "Its width in pixels.",
+              "format": "uint32",
+              "maximum": 8192,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "type",
+            "call_id",
+            "phase",
+            "id",
+            "width",
+            "height",
+            "bytes",
+            "sha256",
+            "sent_to_model",
+            "marked"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "The sandbox lifecycle state changes.",
+          "properties": {
+            "state": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/SandboxState"
+                }
+              ],
+              "description": "The new sandbox state."
+            },
+            "type": {
+              "const": "sandbox.state",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "state"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "FallbackProblem": {
+      "description": "What was wrong with a text-protocol reply. An unknown `kind` from a newer runtime reads as [`Self::Other`].",
+      "oneOf": [
+        {
+          "description": "The call block is a JSON object without a `name` key.",
+          "properties": {
+            "kind": {
+              "const": "no_name",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "The call block is a JSON object with a `name` but without an `arguments` key.",
+          "properties": {
+            "kind": {
+              "const": "no_arguments",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "The call block is not JSON: cut off before the object closed, or a syntax error, at a line and column.",
+          "properties": {
+            "column": {
+              "description": "The column of the error, from 1.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "cut_off": {
+              "description": "The text ended before the object closed.",
+              "type": "boolean"
+            },
+            "kind": {
+              "const": "not_json",
+              "type": "string"
+            },
+            "line": {
+              "description": "The line of the error, from 1.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "kind",
+            "cut_off",
+            "line",
+            "column"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "The call block holds JSON that is not an object.",
+          "properties": {
+            "kind": {
+              "const": "not_object",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "The call object has keys besides `name` and `arguments`; only identifier-like keys of at most\n[`MAX_MODEL_NAME_BYTES`] are kept.",
+          "properties": {
+            "keys": {
+              "description": "The extra keys, at most [`MAX_PROBLEM_NAMES`].",
+              "items": {
+                "$ref": "#/definitions/ProblemName"
+              },
+              "maxItems": 8,
+              "type": "array"
+            },
+            "kind": {
+              "const": "extra_keys",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "keys"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "The call's `name` is not a string.",
+          "properties": {
+            "kind": {
+              "const": "name_not_string",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "The call names no tool that exists.",
+          "properties": {
+            "kind": {
+              "const": "unknown_tool",
+              "type": "string"
+            },
+            "name": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/ProblemName"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The name written, when it looks like an identifier of at most [`MAX_MODEL_NAME_BYTES`]."
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "The arguments have a property the tool doesn't take.",
+          "properties": {
+            "allowed": {
+              "description": "The properties taken there (the tool's parameters, or the nested object's), at most [`MAX_PROBLEM_NAMES`].",
+              "items": {
+                "$ref": "#/definitions/ProblemName"
+              },
+              "maxItems": 8,
+              "type": "array"
+            },
+            "at": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/ProblemPath"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Where the property belongs, when it's inside the arguments rather than at their top level."
+            },
+            "kind": {
+              "const": "unexpected_property",
+              "type": "string"
+            },
+            "property": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/ProblemName"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The property written, when it looks like an identifier of at most [`MAX_MODEL_NAME_BYTES`]."
+            },
+            "tool": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/ProblemName"
+                }
+              ],
+              "description": "The tool."
+            }
+          },
+          "required": [
+            "kind",
+            "tool",
+            "allowed"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "The arguments leave out a property the tool requires.",
+          "properties": {
+            "at": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/ProblemPath"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Where the property belongs, when it's inside the arguments rather than at their top level."
+            },
+            "expected": {
+              "description": "The types it takes.",
+              "items": {
+                "$ref": "#/definitions/JsonType"
+              },
+              "maxItems": 7,
+              "type": "array"
+            },
+            "kind": {
+              "const": "missing_property",
+              "type": "string"
+            },
+            "property": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/ProblemName"
+                }
+              ],
+              "description": "The property."
+            },
+            "tool": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/ProblemName"
+                }
+              ],
+              "description": "The tool."
+            }
+          },
+          "required": [
+            "kind",
+            "tool",
+            "property",
+            "expected"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "A property has a value of the wrong type.",
+          "properties": {
+            "at": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/ProblemPath"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Where the property belongs, when it's inside the arguments rather than at their top level."
+            },
+            "expected": {
+              "description": "The types it takes.",
+              "items": {
+                "$ref": "#/definitions/JsonType"
+              },
+              "maxItems": 7,
+              "type": "array"
+            },
+            "kind": {
+              "const": "wrong_type",
+              "type": "string"
+            },
+            "property": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/ProblemName"
+                }
+              ],
+              "description": "The property."
+            },
+            "tool": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/ProblemName"
+                }
+              ],
+              "description": "The tool."
+            }
+          },
+          "required": [
+            "kind",
+            "tool",
+            "property",
+            "expected"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "The arguments don't match the tool's schema in another way.",
+          "properties": {
+            "kind": {
+              "const": "other_schema",
+              "type": "string"
+            },
+            "tool": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/ProblemName"
+                }
+              ],
+              "description": "The tool."
+            }
+          },
+          "required": [
+            "kind",
+            "tool"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "More calls than the route takes in one reply.",
+          "properties": {
+            "count": {
+              "description": "The calls the reply had.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "kind": {
+              "const": "too_many",
+              "type": "string"
+            },
+            "limit": {
+              "description": "The most the route takes.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "kind",
+            "count",
+            "limit"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "A problem this reader doesn't know (written by a newer runtime).",
+          "properties": {
+            "kind": {
+              "const": "other",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "FinishReason": {
+      "description": "Provider-independent reason that a model response finished.",
+      "oneOf": [
+        {
+          "const": "stop",
+          "description": "The model reached its normal stopping condition.",
+          "type": "string"
+        },
+        {
+          "const": "tool_calls",
+          "description": "The model yielded one or more tool calls.",
+          "type": "string"
+        },
+        {
+          "const": "length",
+          "description": "The response reached an output limit.",
+          "type": "string"
+        },
+        {
+          "const": "content_filter",
+          "description": "A content filter stopped the response.",
+          "type": "string"
+        },
+        {
+          "const": "other",
+          "description": "The provider reported another completion reason.",
+          "type": "string"
+        }
+      ]
+    },
+    "GitPushAuthorization": {
+      "description": "Discovery either authorizes one new-ref upload or confirms an identical existing ref.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "A single unused operation; the runtime derives its URL from the trusted proxy origin.",
+          "properties": {
+            "expires_in_ms": {
+              "description": "Remaining start lifetime; reading it never extends the gateway's deadline.",
+              "format": "uint64",
+              "maximum": 120000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "operation_id": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/GitPushOperationId"
+                }
+              ],
+              "description": "Opaque operation ID, not a provider credential."
+            },
+            "status": {
+              "const": "ready",
+              "type": "string"
+            }
+          },
+          "required": [
+            "status",
+            "operation_id",
+            "expires_in_ms"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Discovery confirmed the requested commit; no Git upload is needed.",
+          "properties": {
+            "status": {
+              "const": "already_at_commit",
+              "type": "string"
+            }
+          },
+          "required": [
+            "status"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "GitPushFailure": {
+      "description": "Fixed push failures suitable for model-visible output, without remote diagnostics.",
+      "oneOf": [
+        {
+          "const": "git_push_snapshot_changed",
+          "description": "The local repository no longer matches the prepared tuple.",
+          "type": "string"
+        },
+        {
+          "const": "git_push_credential_required",
+          "description": "Credential entry belongs in settings, not chat or tool arguments.",
+          "type": "string"
+        },
+        {
+          "const": "git_push_authentication",
+          "description": "The server did not accept the gateway-held credential.",
+          "type": "string"
+        },
+        {
+          "const": "git_push_rejected",
+          "description": "The remote definitively rejected the update.",
+          "type": "string"
+        },
+        {
+          "const": "git_push_outcome_unknown",
+          "description": "Some upload bytes may have reached the server without a confirmed outcome.",
+          "type": "string"
+        },
+        {
+          "const": "git_push_expired",
+          "description": "The one-use operation cannot start after its deadline.",
+          "type": "string"
+        },
+        {
+          "const": "invalid_args",
+          "description": "Malformed input was refused before forwarding.",
+          "type": "string"
+        },
+        {
+          "const": "proxy_authentication",
+          "description": "Runtime credential or source binding failed.",
+          "type": "string"
+        },
+        {
+          "const": "denied",
+          "description": "The gateway did not accept a matching one-use authorization.",
+          "type": "string"
+        },
+        {
+          "const": "egress_denied",
+          "description": "The destination was refused by the network allow-list.",
+          "type": "string"
+        },
+        {
+          "const": "output_too_large",
+          "description": "A protocol or transfer bound was exceeded.",
+          "type": "string"
+        },
+        {
+          "const": "timeout",
+          "description": "A deadline elapsed before a possible upload.",
+          "type": "string"
+        },
+        {
+          "const": "key_use_unrecorded",
+          "description": "The push's key was not used, because its use could not be recorded (D4); retryable.",
+          "type": "string"
+        }
+      ]
+    },
+    "GitPushOperationId": {
+      "description": "An opaque operation name; the source binding remains mandatory.",
+      "maxLength": 32,
+      "minLength": 32,
+      "pattern": "^[0-9a-f]{32}$",
+      "type": "string"
+    },
+    "GitPushOperationRequest": {
+      "additionalProperties": false,
+      "description": "The exact call identity submitted to the gateway, which binds one operation to it.",
+      "properties": {
+        "action_hash": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/ActionHash"
+            }
+          ],
+          "description": "SHA-256 of the canonical call envelope, recomputed by the gateway."
+        },
+        "arguments": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/GitPushTarget"
+            }
+          ],
+          "description": "The original call's arguments, never an upstream override or secret reference."
+        },
+        "context": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PermissionContext"
+            }
+          ],
+          "description": "Original execution identity, which the operation is bound to."
+        }
+      },
+      "required": [
+        "action_hash",
+        "context",
+        "arguments"
+      ],
+      "type": "object"
+    },
+    "GitPushReceipt": {
+      "description": "Durable relay state; a successful Git exit alone is never a completion receipt.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "No upload has started.",
+          "properties": {
+            "status": {
+              "const": "ready",
+              "type": "string"
+            }
+          },
+          "required": [
+            "status"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The sole upload was consumed and is still in progress.",
+          "properties": {
+            "status": {
+              "const": "uploading",
+              "type": "string"
+            }
+          },
+          "required": [
+            "status"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The upstream acknowledged the requested ref and commit.",
+          "properties": {
+            "status": {
+              "const": "pushed",
+              "type": "string"
+            }
+          },
+          "required": [
+            "status"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The upstream outcome is not known; automatic retry is forbidden.",
+          "properties": {
+            "status": {
+              "const": "unknown",
+              "type": "string"
+            }
+          },
+          "required": [
+            "status"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A definitive refusal, without upstream diagnostics.",
+          "properties": {
+            "code": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/GitPushFailure"
+                }
+              ],
+              "description": "Fixed error vocabulary shared with control responses."
+            },
+            "status": {
+              "const": "rejected",
+              "type": "string"
+            }
+          },
+          "required": [
+            "status",
+            "code"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "GitPushRelayError": {
+      "additionalProperties": false,
+      "description": "A content-free error response; unknown fields and codes fail parsing closed.",
+      "properties": {
+        "code": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/GitPushFailure"
+            }
+          ],
+          "description": "A stable code, never an upstream message or token."
+        }
+      },
+      "required": [
+        "code"
+      ],
+      "type": "object"
+    },
+    "GitPushTarget": {
+      "additionalProperties": false,
+      "description": "One HTTPS destination, short branch name and full commit object ID.",
+      "properties": {
+        "branch": {
+          "maxLength": 256,
+          "minLength": 1,
+          "not": {
+            "anyOf": [
+              {
+                "pattern": "[^!-~]|[~^:?*\\[\\\\]"
+              },
+              {
+                "pattern": "^-|^@$|^HEAD$|^refs/|@\\{|\\.\\.|\\.$|(^|/)\\.|\\.lock(/|$)|^/|/$|//"
+              }
+            ]
+          },
+          "type": "string"
+        },
+        "commit": {
+          "not": {
+            "pattern": "^0+$"
+          },
+          "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$",
+          "type": "string"
+        },
+        "remote": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "pattern": "^https://[A-Za-z0-9.\\[\\]:-]+/(?:[A-Za-z0-9._~!$&'()*+,;=:@/-]|%[A-Fa-f0-9]{2})+$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "remote",
+        "branch",
+        "commit"
+      ],
+      "type": "object"
+    },
+    "HostKeyGrant": {
+      "additionalProperties": false,
+      "description": "One key of a run: never its value, only the placeholder the proxy swaps for it.",
+      "properties": {
+        "env": {
+          "description": "The environment variable every command of the run gets, holding the placeholder.",
+          "maxLength": 64,
+          "pattern": "^[A-Z][A-Z0-9_]{0,63}$",
+          "type": "string"
+        },
+        "host": {
+          "description": "The one host it goes to, lower case.",
+          "maxLength": 253,
+          "minLength": 1,
+          "pattern": "^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*|[0-9a-f.]*:[0-9a-f:.]*)$",
+          "type": "string"
+        },
+        "path_prefix": {
+          "default": null,
+          "description": "Only below this path, when set.",
+          "maxLength": 512,
+          "pattern": "^/[^?#]*[^/?#]$",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "placeholder": {
+          "description": "What the proxy replaces with the value; valid only for this run, sandbox and address.",
+          "pattern": "^tqa_ph_[A-Za-z0-9_-]{43}$",
+          "type": "string"
+        },
+        "port": {
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "scheme": {
+          "$ref": "#/definitions/HostKeyScheme"
+        },
+        "user_name": {
+          "default": null,
+          "description": "The user name a `basic` key goes with.",
+          "maxLength": 256,
+          "minLength": 1,
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "env",
+        "host",
+        "port",
+        "scheme",
+        "placeholder"
+      ],
+      "type": "object"
+    },
+    "HostKeyOutcome": {
+      "description": "Why the proxy refused a keyed request (ADR-0037 §8, Amendment 1), as `host_key.refused` says it.",
+      "oneOf": [
+        {
+          "const": "foreign_run",
+          "description": "An earlier or another run's placeholder.",
+          "type": "string"
+        },
+        {
+          "const": "foreign_sandbox",
+          "description": "Another sandbox's or task's placeholder.",
+          "type": "string"
+        },
+        {
+          "const": "expired",
+          "description": "The placeholder's run had ended.",
+          "type": "string"
+        },
+        {
+          "const": "wrong_host",
+          "description": "Another host or port, or outside the key's path.",
+          "type": "string"
+        },
+        {
+          "const": "wrong_position",
+          "description": "Anywhere but the key's Authorization form.",
+          "type": "string"
+        },
+        {
+          "const": "not_allowed",
+          "description": "The network list no longer allows the host.",
+          "type": "string"
+        },
+        {
+          "const": "absent",
+          "description": "A placeholder the gateway doesn't hold.",
+          "type": "string"
+        },
+        {
+          "const": "revoked",
+          "description": "The key was deleted, or its person disabled, during the run.",
+          "type": "string"
+        },
+        {
+          "const": "unrecorded",
+          "description": "The use couldn't be recorded, so nothing was sent.",
+          "type": "string"
+        },
+        {
+          "const": "unavailable",
+          "description": "The key's value couldn't be read from the store.",
+          "type": "string"
+        }
+      ]
+    },
+    "HostKeyScheme": {
+      "description": "How the service expects the key; the header scheme comes in a later revision.",
+      "oneOf": [
+        {
+          "const": "bearer",
+          "description": "`Authorization: Bearer <placeholder>`.",
+          "type": "string"
+        },
+        {
+          "const": "basic",
+          "description": "`Authorization: Basic base64(<user>:<placeholder>)`.",
+          "type": "string"
+        }
+      ]
+    },
+    "JsonType": {
+      "description": "A JSON type a schema expects.",
+      "oneOf": [
+        {
+          "const": "string",
+          "description": "A string.",
+          "type": "string"
+        },
+        {
+          "const": "number",
+          "description": "A number.",
+          "type": "string"
+        },
+        {
+          "const": "integer",
+          "description": "An integer.",
+          "type": "string"
+        },
+        {
+          "const": "boolean",
+          "description": "`true` or `false`.",
+          "type": "string"
+        },
+        {
+          "const": "object",
+          "description": "An object.",
+          "type": "string"
+        },
+        {
+          "const": "array",
+          "description": "An array.",
+          "type": "string"
+        },
+        {
+          "const": "null",
+          "description": "`null`.",
+          "type": "string"
+        }
+      ]
+    },
+    "LeadBrief": {
+      "additionalProperties": false,
+      "description": "A member's first turn as the lead wrote it (revision 12): the member's role and workspace mode and the lead's\nbrief. The turn's `text` is the gateway's fixed frame; the runtime gives the model this brief after the frame,\ninside the untrusted-content marker, and a client shows it as the brief from the lead, never as the person's words.",
+      "properties": {
+        "brief": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Brief"
+            }
+          ],
+          "description": "The lead's brief."
+        },
+        "role": {
+          "description": "The member's role, as the lead named it.",
+          "type": "string"
+        },
+        "workspace": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/WorkspaceMode"
+            }
+          ],
+          "description": "Where the member works."
+        }
+      },
+      "required": [
+        "role",
+        "workspace",
+        "brief"
+      ],
+      "type": "object"
+    },
+    "ListItem": {
+      "additionalProperties": false,
+      "description": "One directory entry.",
+      "properties": {
+        "kind": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/EntryKind"
+            }
+          ],
+          "description": "The entry's kind."
+        },
+        "modified": {
+          "description": "Modification time, in Unix seconds.",
+          "format": "int64",
+          "type": "integer"
+        },
+        "name": {
+          "description": "One path component within 255 bytes.",
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+        },
+        "size": {
+          "description": "Its size in bytes.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "kind",
+        "size",
+        "modified"
+      ],
+      "type": "object"
+    },
+    "LoadedInstruction": {
+      "description": "An instruction file in the prompt, in prompt order.",
+      "properties": {
+        "path": {
+          "description": "The workspace-relative path.",
+          "maxLength": 4096,
+          "minLength": 1,
+          "type": "string"
+        },
+        "truncated": {
+          "description": "Whether a size limit cut the file.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "path",
+        "truncated"
+      ],
+      "type": "object"
+    },
+    "LoadedSkill": {
+      "description": "A skill in the prompt's skills index.",
+      "properties": {
+        "description": {
+          "description": "Its one-line description.",
+          "maxLength": 280,
+          "minLength": 1,
+          "type": "string"
+        },
+        "name": {
+          "description": "The skill's name, equal to its folder name.",
+          "pattern": "^[a-z0-9-]{1,64}$",
+          "type": "string"
+        },
+        "tier": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SkillTier"
+            }
+          ],
+          "description": "The tier it was loaded from."
+        }
+      },
+      "required": [
+        "name",
+        "tier",
+        "description"
+      ],
+      "type": "object"
+    },
+    "ManifestEntry": {
+      "additionalProperties": false,
+      "description": "One snapshot record: the workspace tree's record without the gateway's copy state.",
+      "properties": {
+        "hash": {
+          "description": "The SHA-256 of a small file, lowercase hex.",
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "path": {
+          "description": "A canonical workspace-relative path within 4096 bytes, outside `.tqa`.",
+          "maxLength": 4096,
+          "minLength": 1,
+          "type": "string"
+        },
+        "size": {
+          "description": "The file's size.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "stamp": {
+          "description": "The change stamp: modification and status-change seconds and nanoseconds, and the inode.",
+          "items": [
+            {
+              "format": "int64",
+              "type": "integer"
+            },
+            {
+              "format": "int64",
+              "type": "integer"
+            },
+            {
+              "format": "int64",
+              "type": "integer"
+            },
+            {
+              "format": "int64",
+              "type": "integer"
+            },
+            {
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          ],
+          "maxItems": 5,
+          "minItems": 5,
+          "type": "array"
+        },
+        "text": {
+          "description": "Whether the file is text.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "path",
+        "size",
+        "stamp",
+        "text"
+      ],
+      "type": "object"
+    },
+    "McpServer": {
+      "additionalProperties": false,
+      "description": "One MCP server; its tools are named `mcp.<name>.<tool>` inside the runtime.",
+      "properties": {
+        "call_timeout_seconds": {
+          "default": 60,
+          "description": "The longest one tool call may take, from 1 through 600 seconds.",
+          "format": "uint32",
+          "maximum": 600,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "name": {
+          "description": "The server's name under [`MCP_NAME_RULE`], unique among the session's servers.",
+          "maxLength": 16,
+          "pattern": "^[a-z](_?[a-z0-9])*$",
+          "type": "string"
+        },
+        "tools": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/McpToolFilter"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "An optional allow or deny list of the server's tool names."
+        },
+        "transport": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/McpTransport"
+            }
+          ],
+          "description": "How the runtime reaches the server."
+        }
+      },
+      "required": [
+        "name",
+        "transport"
+      ],
+      "type": "object"
+    },
+    "McpServerState": {
+      "description": "An MCP server's state in a session (ADR-0011).",
+      "oneOf": [
+        {
+          "const": "starting",
+          "description": "Starting: spawned or connecting, handshake pending.",
+          "type": "string"
+        },
+        {
+          "const": "ready",
+          "description": "Ready: its tools are registered for the run.",
+          "type": "string"
+        },
+        {
+          "const": "restarted",
+          "description": "Restarted once after a crash.",
+          "type": "string"
+        },
+        {
+          "const": "disabled",
+          "description": "Disabled for the rest of the session.",
+          "type": "string"
+        }
+      ]
+    },
+    "McpToolFilter": {
+      "description": "Which of a server's tools the session may use.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "Only these tools.",
+          "properties": {
+            "allow": {
+              "items": {
+                "maxLength": 1024,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 64,
+              "type": "array"
+            }
+          },
+          "required": [
+            "allow"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Every tool except these.",
+          "properties": {
+            "deny": {
+              "items": {
+                "maxLength": 1024,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 64,
+              "type": "array"
+            }
+          },
+          "required": [
+            "deny"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "McpTransport": {
+      "description": "How the runtime reaches an MCP server.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "A process inside the sandbox, spoken to over its standard input and output.",
+          "properties": {
+            "args": {
+              "default": [],
+              "description": "At most 32 arguments of at most 1024 bytes each.",
+              "items": {
+                "maxLength": 1024,
+                "type": "string"
+              },
+              "maxItems": 32,
+              "type": "array"
+            },
+            "command": {
+              "description": "An absolute path inside the sandbox, within 1024 bytes.",
+              "maxLength": 1024,
+              "pattern": "^/",
+              "type": "string"
+            },
+            "env": {
+              "additionalProperties": {
+                "maxLength": 4096,
+                "type": "string"
+              },
+              "default": {},
+              "description": "At most 32 variables; never a secret, and never a runtime `TQA_` name.",
+              "maxProperties": 32,
+              "propertyNames": {
+                "not": {
+                  "pattern": "^TQA_"
+                },
+                "pattern": "^[A-Z_][A-Z0-9_]{0,63}$"
+              },
+              "type": "object"
+            },
+            "kind": {
+              "const": "stdio",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "command"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A connector the gateway proxies at `<gateway origin>/mcp/<connector>` with the runtime's own token.",
+          "properties": {
+            "connector": {
+              "description": "The connector's name under [`MCP_NAME_RULE`].",
+              "maxLength": 16,
+              "pattern": "^[a-z](_?[a-z0-9])*$",
+              "type": "string"
+            },
+            "kind": {
+              "const": "gateway",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "connector"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "NetworkEntry": {
+      "additionalProperties": false,
+      "description": "One allowed destination.",
+      "properties": {
+        "host": {
+          "description": "An exact lower-case host name, `*.` and a domain for any of its subdomains, or a bare `*` for any website (the\n`open_web` preset, on its ports); never an address.",
+          "maxLength": 253,
+          "minLength": 1,
+          "pattern": "^(\\*|(\\*\\.)?[a-z0-9-]+(\\.[a-z0-9-]+)*)$",
+          "type": "string"
+        },
+        "ports": {
+          "description": "One to 16 distinct non-zero ports.",
+          "items": {
+            "format": "uint16",
+            "maximum": 65535,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "host",
+        "ports"
+      ],
+      "type": "object"
+    },
+    "NetworkSnapshot": {
+      "additionalProperties": false,
+      "description": "The allowed hosts and ports, in the proxy's order. An empty list means nothing outside the sandbox is reachable,\nwhich also covers egress turned off.",
+      "properties": {
+        "allowed": {
+          "items": {
+            "$ref": "#/definitions/NetworkEntry"
+          },
+          "maxItems": 32,
+          "type": "array"
+        },
+        "more": {
+          "format": "uint32",
+          "maximum": 256,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "allowed",
+        "more"
+      ],
+      "type": "object"
+    },
+    "PermissionContext": {
+      "additionalProperties": false,
+      "description": "The exact execution location included in an action digest; never supplied by a model.",
+      "properties": {
+        "attempt": {
+          "description": "One-based authoritative model attempt.",
+          "format": "uint32",
+          "minimum": 1,
+          "type": "integer"
+        },
+        "call_id": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/ToolCallId"
+            }
+          ],
+          "description": "The original model call identifier."
+        },
+        "conversation_id": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/ConversationId"
+            }
+          ],
+          "description": "The conversation that owns the binding."
+        },
+        "run_id": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/RunId"
+            }
+          ],
+          "description": "The run that produced the call."
+        },
+        "step": {
+          "description": "One-based step number.",
+          "format": "uint32",
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "conversation_id",
+        "run_id",
+        "step",
+        "attempt",
+        "call_id"
+      ],
+      "type": "object"
+    },
+    "ProblemName": {
+      "description": "A name in a problem: an identifier-like tool, property or key name, never a value.",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z_][A-Za-z0-9_.-]{0,63}$",
+      "type": "string"
+    },
+    "ProblemPath": {
+      "description": "Where in the arguments a nested problem is, such as `edits[0]`: property names and array indices only, at most\n[`MAX_PROBLEM_PATH_SEGMENTS`] segments, the first a name.",
+      "maxLength": 280,
+      "minLength": 1,
+      "pattern": "^[A-Za-z_][A-Za-z0-9_-]{0,63}(\\[[0-9]{1,6}\\]|\\.[A-Za-z_][A-Za-z0-9_-]{0,63}){0,3}$",
+      "type": "string"
+    },
+    "ProfileSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "instructions": {
+          "maxLength": 16384,
+          "minLength": 1,
+          "pattern": "^[^\\u0000]*$",
+          "type": "string"
+        },
+        "name": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "skills": {
+          "anyOf": [
+            {
+              "enum": [
+                "all",
+                "none"
+              ],
+              "type": "string"
+            },
+            {
+              "items": {
+                "pattern": "^[a-z0-9-]{1,64}$",
+                "type": "string"
+              },
+              "maxItems": 64,
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            }
+          ]
+        },
+        "tools": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "type": "string"
+          },
+          "maxItems": 64,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    },
+    "QueuePosition": {
+      "description": "A validated queue position. Future metadata fields are ignored by receivers.",
+      "properties": {
+        "ahead": {
+          "description": "Waiting runs served before this one; zero means next.",
+          "format": "uint32",
+          "maximum": 10000,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/QueueReason"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "What the run waits for; absent from older gateways. A reason this version does not know is ignored."
+        }
+      },
+      "required": [
+        "ahead"
+      ],
+      "type": "object"
+    },
+    "QueueReason": {
+      "description": "What a queued run waits for.",
+      "oneOf": [
+        {
+          "const": "slot",
+          "description": "A free sandbox slot on the host (admission).",
+          "type": "string"
+        },
+        {
+          "const": "workspace",
+          "description": "The workspace, whose write lease another task's sandbox holds.",
+          "type": "string"
+        },
+        {
+          "const": "own_sandbox",
+          "description": "Nothing but the same person's own idle sandbox, retiring to make room (revision 10, F26): from their side the\ntask is starting, not queued behind anyone.",
+          "type": "string"
+        },
+        {
+          "const": "desktop_sessions",
+          "description": "A free Desktop: as many desktop sandboxes as `desktop.max_sessions` allows are live (revision 14, ADR-0039).",
+          "type": "string"
+        }
+      ]
+    },
+    "ReasoningItem": {
+      "description": "One provider reasoning item as JSON object text, at most [`crate::MAX_REASONING_ITEM_BYTES`].\nIts `Debug` form shows only the size.",
+      "type": "string"
+    },
+    "ReasoningSnapshot": {
+      "additionalProperties": false,
+      "description": "A bounded set of reasoning choices with a default that belongs to the set.",
+      "properties": {
+        "allowed": {
+          "items": {
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "budget_tokens": {
+          "additionalProperties": {
+            "maximum": 1048576,
+            "minimum": 1024,
+            "type": "integer"
+          },
+          "default": null,
+          "maxProperties": 16,
+          "minProperties": 1,
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "default": {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "allowed",
+        "default"
+      ],
+      "type": "object"
+    },
+    "RouteSnapshot": {
+      "additionalProperties": false,
+      "description": "An immutable route snapshot with no credential, upstream endpoint or vendor settings.",
+      "properties": {
+        "cache_hint": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/CacheHint"
+            }
+          ],
+          "default": "none"
+        },
+        "context_window": {
+          "format": "uint32",
+          "minimum": 1,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "first_response_secs": {
+          "default": null,
+          "format": "uint32",
+          "maximum": 900,
+          "minimum": 5,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "max_output": {
+          "format": "uint32",
+          "minimum": 1,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "max_request_bytes": {
+          "default": null,
+          "format": "uint32",
+          "maximum": 16777216,
+          "minimum": 1024,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "model": {
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "native_tools": {
+          "type": "boolean"
+        },
+        "parallel_tools": {
+          "type": "boolean"
+        },
+        "pixel_grounding": {
+          "default": false,
+          "type": "boolean"
+        },
+        "protocol": {
+          "$ref": "#/definitions/WireProtocol"
+        },
+        "reasoning": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ReasoningSnapshot"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "relay_path": {
+          "maxLength": 4096,
+          "minLength": 10,
+          "type": "string"
+        },
+        "vision": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "protocol",
+        "model",
+        "relay_path",
+        "native_tools",
+        "parallel_tools",
+        "vision"
+      ],
+      "type": "object"
+    },
+    "RunId": {
+      "description": "A validated run identifier, encoded as a JSON string.",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "type": "string"
+    },
+    "RunLimits": {
+      "additionalProperties": false,
+      "description": "Explicit run budgets; deserialization rejects every out-of-range field.",
+      "properties": {
+        "max_output_tokens": {
+          "default": 131072,
+          "description": "Output tokens across all model attempts, from 1 through 16,777,216.\nOlder configurations default to 131,072 tokens per run.",
+          "format": "uint64",
+          "maximum": 16777216,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "max_steps": {
+          "description": "Maximum completed steps, from 1 through 500.",
+          "format": "uint32",
+          "maximum": 500,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "tool_result_bytes": {
+          "description": "Maximum authoritative tool-result bytes, from 1024 through 262,144.",
+          "format": "uint32",
+          "maximum": 262144,
+          "minimum": 1024,
+          "type": "integer"
+        },
+        "wall_clock_secs": {
+          "description": "Wall-clock ceiling in seconds, from 1 through 86,400.",
+          "format": "uint32",
+          "maximum": 86400,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "max_steps",
+        "wall_clock_secs",
+        "tool_result_bytes"
+      ],
+      "type": "object"
+    },
+    "SandboxBackend": {
+      "description": "The sandbox execution backend.",
+      "oneOf": [
+        {
+          "const": "docker",
+          "description": "A container sandbox.",
+          "type": "string"
+        },
+        {
+          "const": "firecracker",
+          "description": "A microVM sandbox.",
+          "type": "string"
+        }
+      ]
+    },
+    "SandboxRecovery": {
+      "description": "The replacement of a sandbox that stopped unexpectedly: after a few losses in a short window the gateway waits\nlonger before each replacement, and past its limit it stops (`failed`) until the owner acts.",
+      "properties": {
+        "losses": {
+          "description": "How many times this conversation's sandbox stopped unexpectedly in the last 10 minutes, this one included.",
+          "format": "uint32",
+          "minimum": 1,
+          "type": "integer"
+        },
+        "retry_in_secs": {
+          "description": "Seconds until the gateway starts the replacement; absent when it will not replace it.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "losses"
+      ],
+      "type": "object"
+    },
+    "SandboxState": {
+      "description": "Lifecycle state shared by summaries and state events.",
+      "oneOf": [
+        {
+          "const": "creating",
+          "description": "The sandbox is being provisioned.",
+          "type": "string"
+        },
+        {
+          "const": "ready",
+          "description": "The sandbox is ready for work.",
+          "type": "string"
+        },
+        {
+          "const": "busy",
+          "description": "A run is executing.",
+          "type": "string"
+        },
+        {
+          "const": "idle",
+          "description": "No run is executing.",
+          "type": "string"
+        },
+        {
+          "const": "queued",
+          "description": "A run is waiting for a free execution slot.",
+          "type": "string"
+        },
+        {
+          "const": "parked",
+          "description": "Retired by ADR-0035 (a run parked for an approval): read from histories and summaries written before it,\nnever sent.",
+          "type": "string"
+        },
+        {
+          "const": "destroyed",
+          "description": "The sandbox has been removed.",
+          "type": "string"
+        },
+        {
+          "const": "failed",
+          "description": "The sandbox cannot continue.",
+          "type": "string"
+        }
+      ]
+    },
+    "SandboxSummary": {
+      "description": "The gateway's prepared-action risk classification.\nPublic sandbox status; future summary fields are ignored by receivers.",
+      "properties": {
+        "backend": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SandboxBackend"
+            }
+          ],
+          "description": "The sandbox execution backend."
+        },
+        "recovery": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/SandboxRecovery"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Present while the gateway replaces a sandbox that stopped unexpectedly, and when it gave up doing so."
+        },
+        "state": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SandboxState"
+            }
+          ],
+          "description": "The current lifecycle state."
+        }
+      },
+      "required": [
+        "backend",
+        "state"
+      ],
+      "type": "object"
+    },
+    "ScreenEnded": {
+      "description": "How Take over ended.",
+      "oneOf": [
+        {
+          "const": "hand_back",
+          "description": "The person pressed Hand back.",
+          "type": "string"
+        },
+        {
+          "const": "socket_closed",
+          "description": "The holder's viewer socket closed, a dropped network included.",
+          "type": "string"
+        },
+        {
+          "const": "restart",
+          "description": "The gateway restarted while Take over was held: recorded at its next start, with no length (how long it was\nheld before the restart isn't known).",
+          "type": "string"
+        }
+      ]
+    },
+    "ScreenEvidence": {
+      "additionalProperties": false,
+      "description": "Which of a `computer` call's screenshots the store kept, on that call's `tool.result`, so a client tells \"not kept\"\nfrom \"not yet\" without reading the result's text. A kept one has its `screen.capture` ahead of the result. An acting\naction has both fields; a `screenshot` call's Ok result has `after` only (its one capture), `before` absent. A\ncapture that wasn't kept is a present `false`, never an absent field.",
+      "properties": {
+        "after": {
+          "description": "Whether the screenshot from after it (or the `screenshot` call's own) was kept.",
+          "type": "boolean"
+        },
+        "before": {
+          "description": "Whether the screenshot from before the action was kept; absent (never `null`) on a `screenshot` call's result.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "after"
+      ],
+      "type": "object"
+    },
+    "ScreenNoticeKind": {
+      "description": "What happened to the task's screen.",
+      "oneOf": [
+        {
+          "const": "screen.taken_over",
+          "description": "A person took over the desktop; the run was cancelled as Stop does.",
+          "type": "string"
+        },
+        {
+          "const": "screen.handed_back",
+          "description": "Take over ended: Hand back, the holder's socket closed, or the gateway restarted.",
+          "type": "string"
+        },
+        {
+          "const": "screen.signed_out",
+          "description": "The desktop's browser was signed out everywhere: its profile emptied.",
+          "type": "string"
+        },
+        {
+          "const": "screen.sign_out_failed",
+          "description": "Sign out everywhere couldn't be confirmed done: the runtime couldn't clear the profile, or never answered.",
+          "type": "string"
+        }
+      ]
+    },
+    "ScreenNoticeReason": {
+      "description": "Why Sign out everywhere couldn't be confirmed (`screen.sign_out_failed`).",
+      "oneOf": [
+        {
+          "const": "not_cleared",
+          "description": "The runtime answered that it couldn't empty the browser's profile.",
+          "type": "string"
+        },
+        {
+          "const": "unconfirmed",
+          "description": "The runtime didn't answer within 10 s, or its link dropped first.",
+          "type": "string"
+        }
+      ]
+    },
+    "ScreenPerson": {
+      "additionalProperties": false,
+      "description": "The person a notice names.",
+      "properties": {
+        "id": {
+          "description": "The person's id, a lower-case UUID.",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string"
+        },
+        "name": {
+          "description": "Their sign-in address, the gateway's name for a person: 1 to 254 bytes on one line.",
+          "maxLength": 254,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "type": "object"
+    },
+    "ScreenRole": {
+      "description": "An element's role in the snapshot's words: a closed list, so a client words each one in its own language (agreed\nwith the web side, 5 Oct 2026). Both the browser's and AT-SPI's roles map onto it; anything else is `other`.",
+      "oneOf": [
+        {
+          "const": "button",
+          "description": "A button.",
+          "type": "string"
+        },
+        {
+          "const": "link",
+          "description": "A link.",
+          "type": "string"
+        },
+        {
+          "const": "textbox",
+          "description": "A text field or text area.",
+          "type": "string"
+        },
+        {
+          "const": "searchbox",
+          "description": "A search field.",
+          "type": "string"
+        },
+        {
+          "const": "checkbox",
+          "description": "A check box.",
+          "type": "string"
+        },
+        {
+          "const": "radio",
+          "description": "A radio button.",
+          "type": "string"
+        },
+        {
+          "const": "switch",
+          "description": "An on/off switch.",
+          "type": "string"
+        },
+        {
+          "const": "combobox",
+          "description": "A combo box.",
+          "type": "string"
+        },
+        {
+          "const": "listbox",
+          "description": "A list box.",
+          "type": "string"
+        },
+        {
+          "const": "option",
+          "description": "An option in a list.",
+          "type": "string"
+        },
+        {
+          "const": "menu",
+          "description": "A menu.",
+          "type": "string"
+        },
+        {
+          "const": "menuitem",
+          "description": "A menu item.",
+          "type": "string"
+        },
+        {
+          "const": "menuitemcheckbox",
+          "description": "A menu item that checks.",
+          "type": "string"
+        },
+        {
+          "const": "menuitemradio",
+          "description": "A menu item that is one of a set.",
+          "type": "string"
+        },
+        {
+          "const": "tab",
+          "description": "A tab.",
+          "type": "string"
+        },
+        {
+          "const": "slider",
+          "description": "A slider.",
+          "type": "string"
+        },
+        {
+          "const": "spinbutton",
+          "description": "A spin button.",
+          "type": "string"
+        },
+        {
+          "const": "treeitem",
+          "description": "An item in a tree.",
+          "type": "string"
+        },
+        {
+          "const": "cell",
+          "description": "A table cell.",
+          "type": "string"
+        },
+        {
+          "const": "icon",
+          "description": "An icon (a file in a file manager, say).",
+          "type": "string"
+        },
+        {
+          "const": "heading",
+          "description": "A heading.",
+          "type": "string"
+        },
+        {
+          "const": "other",
+          "description": "Any other role.",
+          "type": "string"
+        }
+      ]
+    },
+    "ScreenTarget": {
+      "additionalProperties": false,
+      "description": "The element a `computer` action acted on.",
+      "properties": {
+        "name": {
+          "description": "Its accessible name as the snapshot showed it: at most 200 characters, one line.",
+          "maxLength": 200,
+          "type": "string"
+        },
+        "role": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/ScreenRole"
+            }
+          ],
+          "description": "Its role, from the closed list."
+        }
+      },
+      "required": [
+        "role",
+        "name"
+      ],
+      "type": "object"
+    },
+    "Seq": {
+      "description": "A per-conversation sequence number; zero denotes no received events.",
+      "format": "uint64",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "ServerFrame": {
+      "description": "Server frames ignore unknown fields so additive changes preserve existing consumers.",
+      "oneOf": [
+        {
+          "description": "Supervisor liveness on the runtime-to-gateway link only; never persisted or sent to clients.",
+          "properties": {
+            "run_id": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/RunId"
+                }
+              ],
+              "description": "The active run whose supervisor is alive; this frame has no sequence."
+            },
+            "type": {
+              "const": "heartbeat",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "run_id"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Transient sandbox status, sent before replay and on changes; never sequenced or stored.",
+          "properties": {
+            "conversation_id": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/ConversationId"
+                }
+              ],
+              "description": "The conversation whose sandbox status is being reported."
+            },
+            "queue": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/QueuePosition"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The gateway's queue position, sent only while the sandbox state is queued."
+            },
+            "resumed": {
+              "description": "Whether an existing conversation was resumed.",
+              "type": "boolean"
+            },
+            "sandbox": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/SandboxSummary"
+                }
+              ],
+              "description": "The sandbox backend and current state."
+            },
+            "type": {
+              "const": "session.ready",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "conversation_id",
+            "resumed",
+            "sandbox"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "An event carries its durable sequence and run context.",
+          "properties": {
+            "event": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Event"
+                }
+              ],
+              "description": "The typed lifecycle or streaming event."
+            },
+            "run_id": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/RunId"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The associated run, when the event belongs to one."
+            },
+            "seq": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Seq"
+                }
+              ],
+              "description": "The per-conversation sequence number."
+            },
+            "step": {
+              "description": "The associated step, when applicable.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "ts": {
+              "description": "The RFC 3339 event timestamp.",
+              "format": "date-time",
+              "type": "string"
+            },
+            "type": {
+              "const": "event",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "seq",
+            "ts",
+            "event"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Retired by ADR-0035 (an approval request): read from histories written before it, never sent. It parses the\nold stored payload and keeps only the sequence, which the store checks; the web ignores it on replay.",
+          "properties": {
+            "seq": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Seq"
+                }
+              ],
+              "description": "The per-conversation sequence number."
+            },
+            "type": {
+              "const": "permission.request",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "seq"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "A classified failure, optionally tied to a sequence.",
+          "properties": {
+            "code": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/ErrorCode"
+                }
+              ],
+              "description": "The stable error classification."
+            },
+            "message": {
+              "description": "A human-readable explanation.",
+              "type": "string"
+            },
+            "retryable": {
+              "description": "Whether this particular failure can be retried.",
+              "type": "boolean"
+            },
+            "seq": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/Seq"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The associated sequence when one is available."
+            },
+            "target": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/ErrorTarget"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The bounded network destination when this failure concerns egress."
+            },
+            "type": {
+              "const": "error",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "code",
+            "message",
+            "retryable"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Runtime-to-gateway workspace reply part: unsequenced, strict, never stored or forwarded to clients.",
+          "properties": {
+            "last": {
+              "description": "Whether this part ends the reply.",
+              "type": "boolean"
+            },
+            "part": {
+              "description": "The part's index, from 0.",
+              "format": "uint32",
+              "maximum": 4294967295,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "request_id": {
+              "description": "The request this part answers.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "result": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/WorkspaceResult"
+                }
+              ],
+              "description": "The part's content."
+            },
+            "type": {
+              "const": "workspace.reply",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "request_id",
+            "part",
+            "last",
+            "result"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Gateway to clients only: the task's messages waiting behind its run changed (\"send after this\"). Unsequenced\nand never stored; the list endpoint is the durable view. A runtime never sends it.",
+          "properties": {
+            "dropped": {
+              "description": "Messages dropped because the run failed or was stopped.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "held": {
+              "description": "Messages waiting for the run to end, oldest first.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "sent": {
+              "description": "When a turn went out: the messages joined into it, in order.",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            },
+            "type": {
+              "const": "message.queue",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "held",
+            "dropped"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Gateway to clients only: the model named the task (its short name after the first completed run, L7); a\nperson's rename is not announced here, so a receiver may treat the title as the model's. Unsequenced and never\nstored; the conversation record is the durable view. A runtime never sends it.",
+          "properties": {
+            "title": {
+              "description": "The new title: 1 to 200 characters on one line, not blank, without control characters.",
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": {
+              "const": "task.titled",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "title"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Gateway to clients only (ADR-0034, the slice S6 contract): the task's agent team changed, on the lead's stream\nand each member's. Unsequenced, never stored and never in a replay, so it never moves a client's cursor; at most\none a second per team, the latest winning. The team's routes are the durable view: a client reads the team when\n`version` rose and its messages after its last seq when `last_seq` did. A runtime never sends or receives it, so\nit takes no revision row (ADR-0026).",
+          "properties": {
+            "last_seq": {
+              "description": "The seq of the team's latest message.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "team": {
+              "description": "The agent team.",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+              "type": "string"
+            },
+            "type": {
+              "const": "team.changed",
+              "type": "string"
+            },
+            "version": {
+              "description": "The team's version: it rises with every change to the team or a helper's state.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "type",
+            "team",
+            "version",
+            "last_seq"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Gateway to clients only (ADR-0039's contract): a screen notice, sent once when the gateway stores it. Unsequenced\nand never in a replay; `after_seq` places it in the transcript after that event, and the task's notices route\nis the durable view. A runtime never sends or receives it, so it takes no revision row (ADR-0026).",
+          "properties": {
+            "after_seq": {
+              "description": "The conversation's last stored event seq when it happened.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "at": {
+              "description": "When, RFC 3339.",
+              "type": "string"
+            },
+            "by": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/ScreenPerson"
+                }
+              ],
+              "description": "Who took over, handed back or signed out."
+            },
+            "ended": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/ScreenEnded"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "`screen.handed_back` only: Hand back, the holder's socket closed, or the gateway restarted."
+            },
+            "kind": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/ScreenNoticeKind"
+                }
+              ],
+              "description": "What happened."
+            },
+            "reason": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/ScreenNoticeReason"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "`screen.sign_out_failed` only: why it couldn't be confirmed."
+            },
+            "seconds": {
+              "description": "`screen.handed_back` only: how long Take over lasted, in seconds; absent when it ended by a `restart`.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "type": {
+              "const": "screen.notice",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "kind",
+            "by",
+            "at",
+            "after_seq"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Runtime to gateway only (revision 14, ADR-0039 section 9): one chunk of a screenshot for the gateway's store.\nNever forwarded to clients or journaled; the gateway answers the last chunk with `screen.stored`.",
+          "properties": {
+            "chunk": {
+              "description": "The chunk's place, counted from 0.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "data": {
+              "description": "Base64 of at most 96 KiB.",
+              "maxLength": 131072,
+              "minLength": 1,
+              "type": "string"
+            },
+            "id": {
+              "description": "The PNG's SHA-256 in lowercase hex: its store id, as `screen.capture` names it.",
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "last": {
+              "description": "Whether this is the upload's final chunk.",
+              "type": "boolean"
+            },
+            "type": {
+              "const": "screen.upload",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "id",
+            "chunk",
+            "last",
+            "data"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Runtime to gateway only (revision 14, ADR-0039 section 6): its answer to `screen.sign_out`, after emptying the\nbrowser's profile or failing to, and after starting the browser again. The gateway records the notice from it\nand never forwards it to clients.",
+          "properties": {
+            "ok": {
+              "description": "Whether the profile is empty now.",
+              "type": "boolean"
+            },
+            "ready": {
+              "description": "Whether the browser started again and its window took the focus, as `screen.reset`'s (`false`: a Take over\nafter it says a sign-in now may not last; the 16v integration's `sec_059_a` review). Absent from a runtime\nthat doesn't say: true.",
+              "type": "boolean"
+            },
+            "reason": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/SignOutFailure"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Why not, when `ok` is false; absent otherwise."
+            },
+            "type": {
+              "const": "screen.sign_out.done",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "ok"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Runtime to gateway only (revision 14, ADR-0039 section 6): a desktop run's end reset is over, its browser's\nprofile emptied (or not, `ok` false) and the browser started again. A Take over that cancelled the run is\ngranted only after it, so the reset can't clear a sign-in made under control. Unsequenced; never forwarded.",
+          "properties": {
+            "ok": {
+              "description": "Whether the profile was emptied.",
+              "type": "boolean"
+            },
+            "ready": {
+              "description": "Whether the browser started again and its window took the focus, so a person's keys reach it (`false`: a\nTake over's control says a sign-in now may not last; the 16r int's `sec_059_a`). Absent from a runtime\nthat doesn't say: true.",
+              "type": "boolean"
+            },
+            "type": {
+              "const": "screen.reset",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "ok"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Gateway to clients only (revision 11, ADR-0037 §1.3 of the gateway plan): the run called a keyed host with its\nkey, once per run and key. Unsequenced and never stored; the task's host-key uses are the durable view.",
+          "properties": {
+            "host": {
+              "description": "Where the call went: the CONNECT's host, a name or an IP address in canonical form (ADR-0037, Amendment 2).",
+              "maxLength": 253,
+              "minLength": 1,
+              "pattern": "^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*|[0-9a-f.]*:[0-9a-f:.]*)$",
+              "type": "string"
+            },
+            "name": {
+              "description": "The key's variable, only on the sender's own streams; null for every other viewer.",
+              "pattern": "^[A-Z][A-Z0-9_]{0,63}$",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "port": {
+              "description": "And its port.",
+              "format": "uint16",
+              "maximum": 65535,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "run_id": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/RunId"
+                }
+              ],
+              "description": "The run that made the call."
+            },
+            "sender_id": {
+              "description": "The run's sender, whose keys the run holds.",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+              "type": "string"
+            },
+            "step": {
+              "default": null,
+              "description": "The step running when the proxy saw the call; null when none was (always written).",
+              "format": "uint32",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "type": {
+              "const": "host_key.used",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "run_id",
+            "sender_id",
+            "host",
+            "port"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Gateway to clients only (revision 11): the proxy refused a keyed call and nothing reached the host; at most once\na minute per run, key and outcome. Unsequenced and never stored.",
+          "properties": {
+            "host": {
+              "description": "Where the call went: the CONNECT's host, a name or an IP address in canonical form (ADR-0037, Amendment 2).",
+              "maxLength": 253,
+              "minLength": 1,
+              "pattern": "^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*|[0-9a-f.]*:[0-9a-f:.]*)$",
+              "type": "string"
+            },
+            "name": {
+              "description": "The key's variable, only on the sender's own streams; null for every other viewer, and for `absent`.",
+              "pattern": "^[A-Z][A-Z0-9_]{0,63}$",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "outcome": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/HostKeyOutcome"
+                }
+              ],
+              "description": "Why it was refused."
+            },
+            "port": {
+              "description": "And its port.",
+              "format": "uint16",
+              "maximum": 65535,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "run_id": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/RunId"
+                }
+              ],
+              "description": "The run that made the call."
+            },
+            "sender_id": {
+              "description": "The run's sender.",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+              "type": "string"
+            },
+            "step": {
+              "default": null,
+              "description": "The step running when the proxy saw the call; null when none was (always written).",
+              "format": "uint32",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "type": {
+              "const": "host_key.refused",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "run_id",
+            "sender_id",
+            "host",
+            "port",
+            "outcome"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "SignOutFailure": {
+      "description": "Why the runtime couldn't empty the browser's profile (`screen.sign_out.done` with `ok: false`); a closed list.",
+      "oneOf": [
+        {
+          "const": "profile_in_use",
+          "description": "The closing browser still held a file of the profile.",
+          "type": "string"
+        },
+        {
+          "const": "io_error",
+          "description": "Any other failure of the file system, a full tmpfs included.",
+          "type": "string"
+        }
+      ]
+    },
+    "SkillSkipReason": {
+      "description": "Why a skill folder was not loaded.",
+      "oneOf": [
+        {
+          "const": "missing_manifest",
+          "description": "The folder has no `SKILL.md`.",
+          "type": "string"
+        },
+        {
+          "const": "bad_front_matter",
+          "description": "The front matter is not exactly `name` and `description` between two `---` lines, or a value is invalid.",
+          "type": "string"
+        },
+        {
+          "const": "name_mismatch",
+          "description": "The name is not the folder name.",
+          "type": "string"
+        },
+        {
+          "const": "too_large",
+          "description": "The manifest or the folder exceeds its size bound.",
+          "type": "string"
+        },
+        {
+          "const": "symlink",
+          "description": "The folder or something inside it is a symbolic link.",
+          "type": "string"
+        },
+        {
+          "const": "not_utf8",
+          "description": "The manifest is not UTF-8.",
+          "type": "string"
+        },
+        {
+          "const": "shadowed",
+          "description": "A more specific tier has a skill with the same name.",
+          "type": "string"
+        },
+        {
+          "const": "over_limit",
+          "description": "More skills are available than a run takes.",
+          "type": "string"
+        },
+        {
+          "const": "unreadable",
+          "description": "The folder could not be read.",
+          "type": "string"
+        }
+      ]
+    },
+    "SkillTier": {
+      "description": "Where a skill comes from; the more specific tier wins a name clash.",
+      "oneOf": [
+        {
+          "const": "install",
+          "description": "Installed by the administrator for everyone.",
+          "type": "string"
+        },
+        {
+          "const": "user",
+          "description": "The running user's own skills.",
+          "type": "string"
+        }
+      ]
+    },
+    "SkippedSkill": {
+      "description": "A skill folder that was not loaded, and why.",
+      "properties": {
+        "folder": {
+          "description": "The folder name.",
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+        },
+        "reason": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SkillSkipReason"
+            }
+          ],
+          "description": "Why it was skipped."
+        },
+        "tier": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SkillTier"
+            }
+          ],
+          "description": "Its tier."
+        }
+      },
+      "required": [
+        "folder",
+        "tier",
+        "reason"
+      ],
+      "type": "object"
+    },
+    "StatItem": {
+      "additionalProperties": false,
+      "description": "One stat answer: the kind and size are present exactly when the path exists.",
+      "properties": {
+        "exists": {
+          "description": "Whether the path exists.",
+          "type": "boolean"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/EntryKind"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The entry's kind."
+        },
+        "size": {
+          "description": "The entry's size.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "exists"
+      ],
+      "type": "object"
+    },
+    "StoreRefusal": {
+      "description": "Why the gateway didn't keep a screenshot; a closed list.",
+      "oneOf": [
+        {
+          "const": "too_large",
+          "description": "Past 512 KiB raw, refused as soon as the running total passes it.",
+          "type": "string"
+        },
+        {
+          "const": "quota_full",
+          "description": "The conversation's state quota can't take it.",
+          "type": "string"
+        },
+        {
+          "const": "bad_image",
+          "description": "Not a PNG, or its SHA-256 doesn't match its id.",
+          "type": "string"
+        },
+        {
+          "const": "store_failed",
+          "description": "Anything else: a chunk out of order, a store failure.",
+          "type": "string"
+        }
+      ]
+    },
+    "TeamWake": {
+      "additionalProperties": false,
+      "description": "The gateway's wake of an agent team reader (revision 13, ADR-0034 Waking): new team messages wait after the\nreader's place in the team's log. It names no writer: the waiting messages may be several people's and the\ngateway's, and the log shows who wrote. The turn's `text` stays the gateway's fixed sentence for the model; a client\nshows this as the gateway's notice, in its own words, never as the person's message.",
+      "properties": {
+        "after": {
+          "description": "The reader's place in the team's log: the waiting messages come after it.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "after"
+      ],
+      "type": "object"
+    },
+    "ToolCallId": {
+      "description": "A validated tool-call identifier, encoded as a JSON string.",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "type": "string"
+    },
+    "ToolFailure": {
+      "description": "A failed tool call's stable code and, for a refused destination, where.",
+      "properties": {
+        "code": {
+          "description": "The tool's failure code, such as `egress_denied`: 1 to 64 lowercase letters and underscores.",
+          "maxLength": 64,
+          "minLength": 1,
+          "pattern": "^[a-z_]{1,64}$",
+          "type": "string"
+        },
+        "target": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ErrorTarget"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The destination a refusal names; absent for every other failure."
+        }
+      },
+      "required": [
+        "code"
+      ],
+      "type": "object"
+    },
+    "ToolStatus": {
+      "description": "Terminal status of one tool execution.",
+      "oneOf": [
+        {
+          "const": "ok",
+          "description": "The tool completed successfully.",
+          "type": "string"
+        },
+        {
+          "const": "error",
+          "description": "The tool failed.",
+          "type": "string"
+        },
+        {
+          "const": "cancelled",
+          "description": "The user or supervisor cancelled the tool.",
+          "type": "string"
+        },
+        {
+          "const": "interrupted",
+          "description": "Execution was interrupted before completion.",
+          "type": "string"
+        }
+      ]
+    },
+    "UploadedFile": {
+      "additionalProperties": false,
+      "description": "A stored upload.",
+      "properties": {
+        "name": {
+          "description": "The final free name within 128 bytes.",
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+        },
+        "path": {
+          "description": "`uploads/<name>`.",
+          "maxLength": 136,
+          "type": "string"
+        },
+        "size": {
+          "description": "The stored size, equal to the bytes received.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "path",
+        "name",
+        "size"
+      ],
+      "type": "object"
+    },
+    "WireProtocol": {
+      "description": "The upstream wire protocol selected by a route; no adapter is constructed here.",
+      "oneOf": [
+        {
+          "const": "openai_chat",
+          "description": "Chat-completions messages and tool calls.",
+          "type": "string"
+        },
+        {
+          "const": "openai_responses",
+          "description": "Responses requests and events.",
+          "type": "string"
+        },
+        {
+          "const": "anthropic_messages",
+          "description": "Messages requests and content blocks.",
+          "type": "string"
+        }
+      ]
+    },
+    "WorkspaceClone": {
+      "additionalProperties": false,
+      "description": "A public HTTPS repository to initialize once, before the first model run.",
+      "properties": {
+        "ref": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "not": {
+                "anyOf": [
+                  {
+                    "pattern": "[^!-~]|[~^:?*\\[\\\\]"
+                  },
+                  {
+                    "pattern": "^-|^@$|@\\{|\\.\\.|\\.$|(^|/)\\.|\\.lock(/|$)|^/|/$|//"
+                  }
+                ]
+              },
+              "type": "string"
+            }
+          ],
+          "default": null
+        },
+        "url": {
+          "maxLength": 4096,
+          "minLength": 1,
+          "pattern": "^https://[A-Za-z0-9.\\[\\]:-]+/(?:[A-Za-z0-9._~!$&'()*+,;=:@/-]|%[A-Fa-f0-9]{2})+$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "type": "object"
+    },
+    "WorkspaceCloneStatus": {
+      "description": "Durable initialization progress; completed and skipped permit the first model run.",
+      "oneOf": [
+        {
+          "const": "started",
+          "description": "Repository initialization has begun.",
+          "type": "string"
+        },
+        {
+          "const": "completed",
+          "description": "The requested checkout is installed in the workspace.",
+          "type": "string"
+        },
+        {
+          "const": "skipped",
+          "description": "Existing workspace content was preserved without cloning.",
+          "type": "string"
+        },
+        {
+          "const": "failed",
+          "description": "Initialization failed; model execution must not start.",
+          "type": "string"
+        }
+      ]
+    },
+    "WorkspaceErrorCode": {
+      "description": "Why a workspace request failed.",
+      "oneOf": [
+        {
+          "const": "not_found",
+          "description": "The path does not exist.",
+          "type": "string"
+        },
+        {
+          "const": "not_a_directory",
+          "description": "A directory was expected.",
+          "type": "string"
+        },
+        {
+          "const": "too_large",
+          "description": "A size or count bound was passed.",
+          "type": "string"
+        },
+        {
+          "const": "invalid_path",
+          "description": "The path is not a canonical workspace path, or leaves the workspace.",
+          "type": "string"
+        },
+        {
+          "const": "uploads_full",
+          "description": "The uploads space is full.",
+          "type": "string"
+        },
+        {
+          "const": "busy",
+          "description": "The runtime is busy; retry.",
+          "type": "string"
+        },
+        {
+          "const": "cancelled",
+          "description": "The gateway cancelled the request.",
+          "type": "string"
+        },
+        {
+          "const": "internal",
+          "description": "Anything else.",
+          "type": "string"
+        }
+      ]
+    },
+    "WorkspaceId": {
+      "description": "A validated workspace identifier, encoded as a JSON string.",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "type": "string"
+    },
+    "WorkspaceMode": {
+      "description": "Where a new member works (ADR-0034 point 6).",
+      "oneOf": [
+        {
+          "const": "own_copy",
+          "description": "A fork of the lead's workspace, worked in parallel; results come back as files.",
+          "type": "string"
+        },
+        {
+          "const": "my_files",
+          "description": "The lead's own workspace, taking turns under its lease.",
+          "type": "string"
+        }
+      ]
+    },
+    "WorkspaceOp": {
+      "description": "One workspace operation the gateway asks of the runtime.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "One page of a directory: directories first, then names in order.",
+          "properties": {
+            "after": {
+              "description": "The last name of the previous page.",
+              "maxLength": 255,
+              "minLength": 1,
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "limit": {
+              "description": "1 through 500 entries.",
+              "format": "uint32",
+              "maximum": 500,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "op": {
+              "const": "list",
+              "type": "string"
+            },
+            "path": {
+              "description": "A canonical workspace-relative directory; `\"\"` is the root.",
+              "maxLength": 1024,
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "path",
+            "limit"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "One chunk of a regular file.",
+          "properties": {
+            "max_bytes": {
+              "description": "1 through [`WORKSPACE_CHUNK_BYTES`] bytes.",
+              "format": "uint32",
+              "maximum": 131072,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "offset": {
+              "description": "The first byte to read.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "op": {
+              "const": "read",
+              "type": "string"
+            },
+            "path": {
+              "description": "A canonical workspace-relative file.",
+              "maxLength": 1024,
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "path",
+            "offset",
+            "max_bytes"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "One chunk of an upload into `uploads/`.",
+          "properties": {
+            "data": {
+              "description": "Standard padded base64 of at most one chunk; empty only when it ends the upload.",
+              "maxLength": 174764,
+              "pattern": "^[A-Za-z0-9+/]*={0,2}$",
+              "type": "string"
+            },
+            "last": {
+              "description": "Whether this chunk ends the upload.",
+              "type": "boolean"
+            },
+            "name": {
+              "description": "The gateway's sanitised name: one component, not hidden, within 128 bytes.",
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            "offset": {
+              "description": "Where this chunk starts.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "op": {
+              "const": "upload",
+              "type": "string"
+            },
+            "upload_id": {
+              "description": "The upload, never reused on a link.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "op",
+            "upload_id",
+            "name",
+            "offset",
+            "data",
+            "last"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Whether each path exists, and its kind and size.",
+          "properties": {
+            "op": {
+              "const": "stat",
+              "type": "string"
+            },
+            "paths": {
+              "description": "1 through [`MAX_WORKSPACE_STAT_PATHS`] canonical paths.",
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 64,
+              "minItems": 1,
+              "type": "array"
+            }
+          },
+          "required": [
+            "op",
+            "paths"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The workspace's snapshot records, in parts.",
+          "properties": {
+            "max_entries": {
+              "description": "100 through 1 000 000 walked entries.",
+              "format": "uint32",
+              "maximum": 1000000,
+              "minimum": 100,
+              "type": "integer"
+            },
+            "max_files": {
+              "description": "1 through 100 000 files.",
+              "format": "uint32",
+              "maximum": 100000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "max_text_bytes": {
+              "description": "1024 through 16 MiB: files this small are hashed and may be copied.",
+              "format": "uint32",
+              "maximum": 16777216,
+              "minimum": 1024,
+              "type": "integer"
+            },
+            "op": {
+              "const": "manifest",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "max_files",
+            "max_entries",
+            "max_text_bytes"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The content of files by their SHA-256, in chunks.",
+          "properties": {
+            "hashes": {
+              "description": "1 through [`MAX_WORKSPACE_BLOB_HASHES`] distinct lowercase hex hashes.",
+              "items": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "maxItems": 256,
+              "minItems": 1,
+              "type": "array"
+            },
+            "op": {
+              "const": "blobs",
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "hashes"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "WorkspaceResult": {
+      "description": "The content of one reply part.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "Directory entries; a page may span parts.",
+          "properties": {
+            "items": {
+              "description": "The part's entries.",
+              "items": {
+                "$ref": "#/definitions/ListItem"
+              },
+              "type": "array"
+            },
+            "kind": {
+              "const": "listing",
+              "type": "string"
+            },
+            "next_after": {
+              "description": "The name to continue after, on the last part only.",
+              "maxLength": 255,
+              "minLength": 1,
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "items"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "One chunk of a file; the gateway derives the etag and whether it is text.",
+          "properties": {
+            "data": {
+              "description": "Standard padded base64 of at most one chunk.",
+              "maxLength": 174764,
+              "pattern": "^[A-Za-z0-9+/]*={0,2}$",
+              "type": "string"
+            },
+            "eof": {
+              "description": "Whether the chunk reaches the end of the file.",
+              "type": "boolean"
+            },
+            "inode": {
+              "description": "The file's inode.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "kind": {
+              "const": "content",
+              "type": "string"
+            },
+            "modified": {
+              "description": "Modification time, in Unix seconds.",
+              "format": "int64",
+              "type": "integer"
+            },
+            "size": {
+              "description": "The file's size.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "kind",
+            "size",
+            "modified",
+            "inode",
+            "data",
+            "eof"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "An upload chunk was written.",
+          "properties": {
+            "file": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/UploadedFile"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The stored file, when the chunk ended the upload."
+            },
+            "kind": {
+              "const": "uploaded",
+              "type": "string"
+            },
+            "received": {
+              "description": "The part file's size after this chunk.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "kind",
+            "received"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "One item per requested path, in order.",
+          "properties": {
+            "items": {
+              "description": "At most [`MAX_WORKSPACE_STAT_PATHS`] items; no path is echoed back.",
+              "items": {
+                "$ref": "#/definitions/StatItem"
+              },
+              "maxItems": 64,
+              "type": "array"
+            },
+            "kind": {
+              "const": "stats",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "items"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Snapshot records; the manifest may span parts.",
+          "properties": {
+            "entries": {
+              "description": "The part's records.",
+              "items": {
+                "$ref": "#/definitions/ManifestEntry"
+              },
+              "type": "array"
+            },
+            "kind": {
+              "const": "manifest_part",
+              "type": "string"
+            },
+            "truncated": {
+              "description": "Whether a bound stopped the walk; on the last part only.",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "kind",
+            "entries",
+            "truncated"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "One chunk of one requested blob.",
+          "properties": {
+            "complete": {
+              "description": "Whether this chunk ends the blob.",
+              "type": "boolean"
+            },
+            "data": {
+              "description": "Standard padded base64 of at most one chunk.",
+              "maxLength": 174764,
+              "pattern": "^[A-Za-z0-9+/]*={0,2}$",
+              "type": "string"
+            },
+            "hash": {
+              "description": "The blob's SHA-256, lowercase hex.",
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "kind": {
+              "const": "blob_part",
+              "type": "string"
+            },
+            "offset": {
+              "description": "Where this chunk starts in the blob.",
+              "format": "uint64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "kind",
+            "hash",
+            "offset",
+            "data",
+            "complete"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The request failed; this part ends it.",
+          "properties": {
+            "code": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/WorkspaceErrorCode"
+                }
+              ],
+              "description": "A stable code the gateway maps to its HTTP errors."
+            },
+            "kind": {
+              "const": "error",
+              "type": "string"
+            },
+            "message": {
+              "description": "A bounded diagnostic for logs, never shown to clients.",
+              "maxLength": 512,
+              "type": "string"
+            },
+            "retryable": {
+              "description": "Whether a retry may succeed; only for `busy`.",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "kind",
+            "code",
+            "message",
+            "retryable"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "WorkspaceSnapshot": {
+      "additionalProperties": false,
+      "description": "Workspace facts and optional initialization; the runtime separately supplies a confined root.",
+      "properties": {
+        "clone": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/WorkspaceClone"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Optional public repository to clone only when the workspace is initially empty."
+        },
+        "display": {
+          "description": "Nonempty display text within 4096 UTF-8 bytes, without control characters.",
+          "maxLength": 4096,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "display"
+      ],
+      "type": "object"
+    }
+  },
+  "title": "TensorQuay protocol v1"
+}

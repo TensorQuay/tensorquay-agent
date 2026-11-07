@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE conversations SET template_digest=$2,template_version=$3 WHERE id=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3637eb646dbbf424e0b7b9ad1349d86c8079ffa8c374971aa0a68415fd22a524"
+}

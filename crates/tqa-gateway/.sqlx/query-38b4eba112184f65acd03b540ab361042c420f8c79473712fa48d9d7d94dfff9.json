@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE screenshots SET purged_at = CURRENT_TIMESTAMP WHERE conversation_id = $1 AND id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "38b4eba112184f65acd03b540ab361042c420f8c79473712fa48d9d7d94dfff9"
+}

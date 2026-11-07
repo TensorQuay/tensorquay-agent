@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO events (conversation_id,seq,run_id,step,ts,frame,blob_key,lifecycle,call_id)\n             SELECT $1, row.seq, row.run_id, row.step, row.ts, row.frame, row.blob_key, row.lifecycle, row.call_id\n             FROM UNNEST($2::bigint[], $3::text[], $4::bigint[], $5::timestamptz[], $6::jsonb[], $7::text[],\n                         $8::text[], $9::text[])\n                  WITH ORDINALITY AS row(seq, run_id, step, ts, frame, blob_key, lifecycle, call_id, position)\n             ORDER BY row.position",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8Array",
+        "TextArray",
+        "Int8Array",
+        "TimestamptzArray",
+        "JsonbArray",
+        "TextArray",
+        "TextArray",
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c9e7908a871a8a728042162ec83e6694b811d1850582175ad49eecc26994ab14"
+}

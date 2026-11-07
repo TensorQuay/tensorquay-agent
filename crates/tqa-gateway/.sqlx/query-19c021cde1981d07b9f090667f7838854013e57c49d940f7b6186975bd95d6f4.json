@@ -1,0 +1,139 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id,consumer_kind,consumer,conversation_id,user_id,run_id,outcome,count,first_at,last_at FROM secret_reads WHERE ref=$1 AND ($2::uuid IS NULL OR (last_at,id) < (SELECT last_at,id FROM secret_reads WHERE id=$2)) AND ($4::uuid IS NULL OR user_id=$4) ORDER BY last_at DESC, id DESC LIMIT $3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "secret_reads",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "consumer_kind",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "secret_reads",
+            "name": "consumer_kind"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "consumer",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "secret_reads",
+            "name": "consumer"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "conversation_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "secret_reads",
+            "name": "conversation_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "user_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "secret_reads",
+            "name": "user_id"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "run_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "secret_reads",
+            "name": "run_id"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "outcome",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "secret_reads",
+            "name": "outcome"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "count",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "secret_reads",
+            "name": "count"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "first_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "secret_reads",
+            "name": "first_at"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "last_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "secret_reads",
+            "name": "last_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid",
+        "Int8",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "19c021cde1981d07b9f090667f7838854013e57c49d940f7b6186975bd95d6f4"
+}

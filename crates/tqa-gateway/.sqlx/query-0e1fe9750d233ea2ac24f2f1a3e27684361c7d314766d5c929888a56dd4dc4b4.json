@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM sandbox_instances WHERE conversation_id=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0e1fe9750d233ea2ac24f2f1a3e27684361c7d314766d5c929888a56dd4dc4b4"
+}

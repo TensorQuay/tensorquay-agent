@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO host_key_users (key_id, user_id) SELECT $1, unnest($2::uuid[])",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "492399aaf6ce80bba299413000536c9bb343b800aaaca4250c0ef1599c6de9c9"
+}

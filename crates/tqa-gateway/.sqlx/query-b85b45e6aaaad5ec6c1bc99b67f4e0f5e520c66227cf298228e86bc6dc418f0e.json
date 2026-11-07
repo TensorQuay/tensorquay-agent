@@ -1,0 +1,48 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.user_id, u.email::text AS \"email!\", s.access FROM workspace_shares s JOIN users u ON u.id=s.user_id WHERE s.workspace_id=$1 ORDER BY s.created_at, s.user_id LIMIT $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "workspace_shares",
+            "name": "user_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "access",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "workspace_shares",
+            "name": "access"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false
+    ]
+  },
+  "hash": "b85b45e6aaaad5ec6c1bc99b67f4e0f5e520c66227cf298228e86bc6dc418f0e"
+}

@@ -1,0 +1,76 @@
+# Build and tool output
+target/
+/target-cov/
+/.coverage*
+node_modules/
+.next/
+/web/out/
+dist/
+coverage/
+playwright-report/
+test-results/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+*.log
+# A task's seed is committed whole, logs included (a log is often what the agent reads).
+!tests/e2e/**/seed/**/*.log
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Local AI-tool and editor state (never committed; see AGENTS.md)
+.claude/
+CLAUDE.local.md
+.codex/
+.cursor/
+.aider*
+.vscode/
+.idea/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.local.toml
+/config/local/
+/deploy/**/local/
+
+# Runtime data, sandbox images and artefacts
+/data/
+/workspaces/
+/images/build/
+*.ext4
+*.img
+*.qcow2
+*.squashfs
+vmlinux*
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+
+# Large or binary artefacts and model weights
+*.safetensors
+*.gguf
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.pdf
+*.mp4
+*.mov
+
+# cargo-mutants output
+/mutants.out*/
+
+# LLVM coverage output from instrumented test runs
+*.profraw

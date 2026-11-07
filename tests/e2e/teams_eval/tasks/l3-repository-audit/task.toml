@@ -1,0 +1,6 @@
+id = "l3-repository-audit"
+title = "Audit a 300-file repository: find 12 defects, fix six with tests"
+tags = ["teams-eval", "teams-long"]
+budgets = { max_steps = 250, wall_clock_secs = 7200, max_tokens = 2500000 }
+protected = []
+check = { image = "runtime", timeout_secs = 300 }

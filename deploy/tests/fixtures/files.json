@@ -1,0 +1,62 @@
+{
+  "model": "fixture",
+  "select": "prompt",
+  "responses": [
+    {
+      "when": "Summarise the attached sales file",
+      "events": [{"type": "tool_call", "name": "shell", "arguments": {"command": "wc -l < uploads/sales.csv | tr -d ' ' > rows.txt && printf '# Sales report\\n\\nRegions: north, south\\n' > report.md"}, "split_into": 3}],
+      "usage": {"prompt_tokens": 20, "completion_tokens": 20}
+    },
+    {
+      "when": "Summarise the attached sales file",
+      "events": [{"type": "text", "text": "I wrote report.md and rows.txt from the attached sales file."}],
+      "usage": {"prompt_tokens": 40, "completion_tokens": 20}
+    },
+    {
+      "when": "Summarise the attached sales file",
+      "events": [{"type": "tool_call", "name": "shell", "arguments": {"command": "printf '# Sales report\\n\\nRegions: north, south, east\\nChecked twice.\\n' > report.md"}, "split_into": 3}],
+      "usage": {"prompt_tokens": 60, "completion_tokens": 20}
+    },
+    {
+      "when": "Summarise the attached sales file",
+      "events": [{"type": "text", "text": "report.md now lists three regions."}],
+      "usage": {"prompt_tokens": 80, "completion_tokens": 20}
+    },
+    {
+      "when": "Add a chart and a note",
+      "events": [{"type": "tool_call", "name": "shell", "arguments": {"command": "printf 'Numbers checked twice.\\n' > .notes && printf '%s' 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' | base64 -d > chart.png"}, "split_into": 3}],
+      "usage": {"prompt_tokens": 20, "completion_tokens": 20}
+    },
+    {
+      "when": "Add a chart and a note",
+      "events": [{"type": "text", "text": "I added chart.png and a note."}],
+      "usage": {"prompt_tokens": 40, "completion_tokens": 20}
+    },
+    {
+      "when": "Correct the attached figures",
+      "events": [{"type": "tool_call", "name": "shell", "arguments": {"command": "printf 'west,5\\n' >> uploads/notes.csv"}, "split_into": 2}],
+      "usage": {"prompt_tokens": 20, "completion_tokens": 20}
+    },
+    {
+      "when": "Correct the attached figures",
+      "events": [{"type": "text", "text": "I added the missing west region to notes.csv."}],
+      "usage": {"prompt_tokens": 40, "completion_tokens": 20}
+    },
+    {
+      "when": "Correct the attached figures",
+      "events": [{"type": "text", "text": "Noted: extra.csv is in the workspace."}],
+      "usage": {"prompt_tokens": 60, "completion_tokens": 20}
+    },
+    {
+      "when": "Write a page by its full path",
+      "events": [{"type": "tool_call", "name": "write_file", "split_into": 2,
+                  "arguments": {"path": "/workspace/page.html", "content": "<h1>Written by its full path</h1>\n", "create_parents": false}}],
+      "usage": {"prompt_tokens": 20, "completion_tokens": 20}
+    },
+    {
+      "when": "Write a page by its full path",
+      "events": [{"type": "text", "text": "I wrote /workspace/page.html."}],
+      "usage": {"prompt_tokens": 40, "completion_tokens": 20}
+    }
+  ]
+}

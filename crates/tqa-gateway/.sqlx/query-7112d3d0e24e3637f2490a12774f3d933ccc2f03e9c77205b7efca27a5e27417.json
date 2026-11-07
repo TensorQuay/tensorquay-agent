@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM secret_consumers WHERE ref=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7112d3d0e24e3637f2490a12774f3d933ccc2f03e9c77205b7efca27a5e27417"
+}

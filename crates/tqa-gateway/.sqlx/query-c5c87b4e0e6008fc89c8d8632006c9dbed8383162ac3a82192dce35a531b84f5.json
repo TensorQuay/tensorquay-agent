@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id,owner_id,document,version,updated_at FROM agent_profiles WHERE owner_id=$1 OR owner_id IS NULL ORDER BY owner_id IS NULL, name",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_profiles",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "owner_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_profiles",
+            "name": "owner_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "document",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "agent_profiles",
+            "name": "document"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "version",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "agent_profiles",
+            "name": "version"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "agent_profiles",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "c5c87b4e0e6008fc89c8d8632006c9dbed8383162ac3a82192dce35a531b84f5"
+}

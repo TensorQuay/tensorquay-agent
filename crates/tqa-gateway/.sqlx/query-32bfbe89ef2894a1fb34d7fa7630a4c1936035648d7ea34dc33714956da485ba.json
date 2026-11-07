@@ -1,0 +1,80 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT t.lead_conversation AS \"task!\", t.id, t.state, (SELECT count(*) FROM agent_team_members m JOIN conversations c ON c.id = m.conversation_id WHERE m.team_id = t.id AND c.state <> 'deleted') AS \"helpers!\", (SELECT count(*) FROM agent_team_members m JOIN conversations c ON c.id = m.conversation_id WHERE m.team_id = t.id AND c.state <> 'deleted' AND m.state = 'stuck') AS \"stuck!\", (SELECT count(*) FROM agent_team_members m JOIN conversations c ON c.id = m.conversation_id WHERE m.team_id = t.id AND c.state <> 'deleted' AND m.state = 'failed') AS \"failed!\", t.state = 'running' AND EXISTS (SELECT 1 FROM channel_messages q WHERE q.channel_id = t.channel_id AND q.type = 'person_question' AND NOT EXISTS (SELECT 1 FROM channel_messages a WHERE a.channel_id = q.channel_id AND a.type = 'person_answer' AND a.body->>'question_seq' = q.seq::text)) AS \"waiting!\" FROM agent_teams t WHERE t.lead_conversation = ANY($1)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "task!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "lead_conversation"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "state"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "helpers!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "stuck!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "failed!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "waiting!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "32bfbe89ef2894a1fb34d7fa7630a4c1936035648d7ea34dc33714956da485ba"
+}

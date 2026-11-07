@@ -1,0 +1,49 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT t.channel_id, EXISTS (SELECT 1 FROM channel_messages m WHERE m.channel_id = t.channel_id AND m.seq > t.lead_last_read_seq AND m.to_kind IN ('lead', 'team') AND NOT (m.type = 'notice' AND m.body->>'kind' = 'lead_unfinished') AND NOT (m.type = 'person_message' AND m.body->>'member' = '' AND NOT EXISTS (SELECT 1 FROM idempotency i WHERE i.team_copy_channel = m.channel_id AND i.team_copy_seq = m.seq AND i.execution_status IN ('queued', 'delivered')))) AS \"unread!\", (EXISTS (SELECT 1 FROM agent_team_members w WHERE w.team_id = t.id AND w.state IN ('queued', 'starting', 'working')) OR EXISTS (SELECT 1 FROM channel_messages q WHERE q.channel_id = t.channel_id AND q.type = 'person_question' AND NOT EXISTS (SELECT 1 FROM channel_messages a WHERE a.channel_id = q.channel_id AND a.type = 'person_answer' AND a.body->>'question_seq' = q.seq::text)) OR EXISTS (SELECT 1 FROM idempotency i WHERE i.conversation_id = t.lead_conversation AND i.team_copy_seq IS NULL AND (i.execution_status IN ('queued', 'sending') OR (i.execution_status = 'delivered' AND i.updated_at > COALESCE((SELECT MAX(e.created_at) FROM events e WHERE e.conversation_id = t.lead_conversation AND e.lifecycle IS NOT NULL), '-infinity'::timestamptz))))) AS \"busy!\", (SELECT count(*) FROM channel_messages m WHERE m.channel_id = t.channel_id AND m.type = 'notice' AND m.body->>'kind' = 'lead_unfinished' AND m.seq > COALESCE((SELECT MAX(o.seq) FROM channel_messages o WHERE o.channel_id = t.channel_id AND o.author_id = t.lead_conversation::text), 0)) AS \"reminded!\" FROM agent_teams t WHERE t.lead_conversation = $1 AND t.state = 'running'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "channel_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "channel_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "unread!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "busy!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "reminded!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "1a81d30b548b747ab966786f0059a29b6364952c5d69049aa693a15d5bb8ce14"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM secret_reads WHERE id IN (SELECT id FROM secret_reads WHERE last_at < CURRENT_TIMESTAMP - make_interval(days => $1) LIMIT $2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "802d5e636a58a77cf36af535b85d650db46712026eb0f98b581f395f68e7a4d0"
+}

@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (SELECT 1 FROM builtin_deletions WHERE name=$1) AS \"deleted!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "deleted!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "5e99863ef3d05dda56ca8fcf34f0f076b36776ff15ea83ca1289e22f000dede8"
+}

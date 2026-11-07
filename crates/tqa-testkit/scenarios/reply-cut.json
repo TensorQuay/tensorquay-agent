@@ -1,0 +1,56 @@
+{
+  "model": "fixture",
+  "select": "prompt",
+  "responses": [
+    {
+      "when": "Cut the text",
+      "once": true,
+      "events": [{"type": "text", "text": "Here is the first half of the report, and then"}],
+      "usage": {"prompt_tokens": 120, "completion_tokens": 512},
+      "finish": "length"
+    },
+    {
+      "when": "Cut the text",
+      "events": [{"type": "text", "text": "Here is the whole report, shorter this time."}],
+      "usage": {"prompt_tokens": 140, "completion_tokens": 12}
+    },
+    {
+      "when": "Cut the thinking",
+      "once": true,
+      "events": [{"type": "reasoning", "text": "Let me think about every part of this before answering"}],
+      "usage": {"prompt_tokens": 120, "completion_tokens": 512, "reasoning_tokens": 512},
+      "finish": "length"
+    },
+    {
+      "when": "Cut the thinking",
+      "events": [{"type": "text", "text": "A short answer after thinking."}],
+      "usage": {"prompt_tokens": 140, "completion_tokens": 8}
+    },
+    {
+      "when": "Cut the call",
+      "once": true,
+      "events": [{"type": "tool_call", "name": "shell",
+                  "arguments": {"command": "printf 'a command long enough to be cut in half'"},
+                  "split_into": 2, "cut": true}],
+      "usage": {"prompt_tokens": 120, "completion_tokens": 512},
+      "finish": "length"
+    },
+    {
+      "when": "Cut the call",
+      "events": [{"type": "text", "text": "Done without the command."}],
+      "usage": {"prompt_tokens": 140, "completion_tokens": 6}
+    },
+    {
+      "when": "Spend the budget",
+      "events": [{"type": "text", "text": "A long answer that uses the whole allowance"}],
+      "usage": {"prompt_tokens": 120, "completion_tokens": 300},
+      "finish": "length"
+    }
+  ],
+  "by_model": {
+    "too-long": {
+      "status": 400,
+      "body": "{\"error\":{\"message\":\"This model's maximum context length is 8192 tokens. However, your messages resulted in 9120 tokens. Please reduce the length of the messages.\",\"type\":\"invalid_request_error\",\"code\":\"context_length_exceeded\"}}"
+    }
+  }
+}

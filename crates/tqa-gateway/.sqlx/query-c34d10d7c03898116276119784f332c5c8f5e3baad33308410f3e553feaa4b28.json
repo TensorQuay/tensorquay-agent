@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO users (id,email,password_hash,role,invited_by) VALUES ($1,$2::text::citext,$3,$4,$5)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c34d10d7c03898116276119784f332c5c8f5e3baad33308410f3e553feaa4b28"
+}

@@ -1,0 +1,51 @@
+{
+ "model": "fixture",
+ "responses": [
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "shell",
+     "arguments": {
+      "command": "sh start.sh --check; cat docs/CONFIG.md"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 400,
+    "completion_tokens": 30
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "config/app.env",
+      "content": "# Service configuration; see docs/CONFIG.md.\nNAME=ledger-api\nPORT=8443\nLOG_LEVEL=info\nWORKERS=4\nDATA_DIR=/var/lib/ledger\n",
+      "create_parents": false
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 80
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "Fixed PORT and LOG_LEVEL, added DATA_DIR and removed the unknown CACHE key."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 1100,
+    "completion_tokens": 20
+   }
+  }
+ ]
+}

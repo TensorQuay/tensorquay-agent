@@ -1,0 +1,227 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH v AS (SELECT w.id, w.owner_id, w.name, w.state, s.access, w.created_at, w.updated_at, w.last_used_at, w.size_bytes, w.size_measured_at, w.forked_from, w.fork_consistent, w.kind, w.quota_bytes, o.email::text AS owner_email, (SELECT count(*) FROM workspace_shares x WHERE x.workspace_id=w.id) AS share_count, (SELECT count(*) FROM conversations c WHERE c.workspace_id=w.id AND c.state='active') AS task_count, CASE WHEN $3='recent' THEN COALESCE(w.last_used_at, w.created_at) WHEN $3='created' THEN w.created_at END AS sort_time, lower(w.name) AS sort_name, (w.lease_conversation_id IS NOT NULL AND w.lease_expires_at > CURRENT_TIMESTAMP) AS in_use, (s.user_id IS NOT NULL AND w.owner_id <> $1) AS shared_in FROM workspaces w JOIN users o ON o.id=w.owner_id LEFT JOIN workspace_shares s ON s.workspace_id=w.id AND s.user_id=$1 WHERE w.state<>'deleted' AND ($2 OR w.owner_id=$1 OR s.user_id IS NOT NULL)) SELECT v.id AS \"id!\", v.owner_id AS \"owner_id!\", v.name AS \"name!\", v.state AS \"state!\", v.access AS \"access?\", v.created_at AS \"created_at!\", v.updated_at AS \"updated_at!\", v.last_used_at, v.size_bytes, v.size_measured_at, v.forked_from, v.fork_consistent, v.kind AS \"kind!\", v.quota_bytes, v.owner_email AS \"owner_email!\", v.share_count AS \"share_count!\", v.task_count AS \"task_count!\", (EXTRACT(EPOCH FROM v.sort_time) * 1000000)::bigint AS sort_micros, v.sort_name AS \"sort_name!\" FROM v WHERE ($4='all' OR ($4='in_use' AND v.in_use) OR ($4='idle' AND NOT v.in_use) OR ($4='shared_with_me' AND v.shared_in)) AND ($9 = '' OR ((v.owner_id = $1 OR v.access IS NOT NULL) AND v.name ILIKE '%' || $9 || '%')) AND ($7::uuid IS NULL OR CASE WHEN $3='name' THEN (v.sort_name > $6 OR (v.sort_name = $6 AND v.id > $7)) ELSE (v.sort_time < $5 OR (v.sort_time = $5 AND v.id > $7)) END) ORDER BY v.sort_time DESC, CASE WHEN $3='name' THEN v.sort_name END, v.id LIMIT $8",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "owner_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "owner_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "state!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "state"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "access?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "workspace_shares",
+            "name": "access"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "updated_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "last_used_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "last_used_at"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "size_bytes",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "size_bytes"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "size_measured_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "size_measured_at"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "forked_from",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "forked_from"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "fork_consistent",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "fork_consistent"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "kind!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "kind"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "quota_bytes",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "quota_bytes"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "owner_email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 15,
+        "name": "share_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 16,
+        "name": "task_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 17,
+        "name": "sort_micros",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 18,
+        "name": "sort_name!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool",
+        "Text",
+        "Text",
+        "Timestamptz",
+        "Text",
+        "Uuid",
+        "Int8",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "4d45514303e2b28e2da7c43ae602b2e5a79adc8dc7969bdbd555a7f3b003ea2a"
+}

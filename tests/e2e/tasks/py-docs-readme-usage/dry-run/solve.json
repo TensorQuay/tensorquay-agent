@@ -1,0 +1,33 @@
+{
+ "model": "fixture",
+ "responses": [
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "shell",
+     "arguments": {
+      "command": "COLUMNS=80 python3 find_lines.py --help > /tmp/help.txt && python3 -c \"\nimport re\nreadme = open('README.md').read()\nhelp_text = open('/tmp/help.txt').read().rstrip('\\n')\nhead, marker, rest = readme.partition('## Usage\\n\\n\\`\\`\\`\\n')\nblock, fence, tail = rest.partition('\\n\\`\\`\\`\\n')\nopen('README.md', 'w').write(head + marker + help_text + fence + tail)\n\""
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 480,
+    "completion_tokens": 140
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "The Usage block now shows the current help."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 760,
+    "completion_tokens": 20
+   }
+  }
+ ]
+}

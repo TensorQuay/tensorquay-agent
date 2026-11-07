@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE agent_team_members m SET state = CASE WHEN EXISTS (SELECT 1 FROM agent_teams t JOIN channel_messages r ON r.channel_id = t.channel_id WHERE t.id = m.team_id AND r.type = 'report' AND r.author_kind = 'conversation' AND r.author_id = m.conversation_id::text AND r.seq > COALESCE((SELECT MAX(a.seq) FROM channel_messages a WHERE a.channel_id = t.channel_id AND a.type = 'assign' AND a.to_conversation = m.conversation_id), 0)) THEN 'done' ELSE 'stopped' END WHERE m.team_id = $1 AND m.state NOT IN ('done', 'stopped', 'failed')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f28d293feb696e4b81ac2d5f99f255b84f14f28b673e7147a70015ee0e354213"
+}

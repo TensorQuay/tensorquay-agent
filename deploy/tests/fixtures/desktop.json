@@ -1,0 +1,25 @@
+{
+  "model": "fixture",
+  "select": "prompt",
+  "responses": [
+    {"when": "DESK-A look at a page", "events": [{"type": "tool_call", "name": "shell", "arguments": {"command": "printf '%s\\n' '<!doctype html><html><head><title>Desk page</title></head><body><h1>Desk page</h1><button>Save</button></body></html>' > /workspace/page.html"}, "split_into": 1}], "usage": {"prompt_tokens": 20, "completion_tokens": 10}},
+    {"when": "DESK-A look at a page", "events": [{"type": "tool_call", "name": "computer", "arguments": {"action": "key", "ref": null, "text": null, "keys": "ctrl+l", "ms": null, "direction": null, "amount": null}, "split_into": 1}], "usage": {"prompt_tokens": 20, "completion_tokens": 10}},
+    {"when": "DESK-A look at a page", "events": [{"type": "tool_call", "name": "computer", "arguments": {"action": "type", "ref": null, "text": "file:///workspace/page.html", "keys": null, "ms": null, "direction": null, "amount": null}, "split_into": 1}], "usage": {"prompt_tokens": 20, "completion_tokens": 10}},
+    {"when": "DESK-A look at a page", "events": [{"type": "tool_call", "name": "computer", "arguments": {"action": "key", "ref": null, "text": null, "keys": "Return", "ms": null, "direction": null, "amount": null}, "split_into": 1}], "usage": {"prompt_tokens": 20, "completion_tokens": 10}},
+    {"when": "DESK-A look at a page", "events": [{"type": "tool_call", "name": "computer", "arguments": {"action": "wait", "ref": null, "text": null, "keys": null, "ms": 8000, "direction": null, "amount": null}, "split_into": 1}], "usage": {"prompt_tokens": 20, "completion_tokens": 10}},
+    {"when": "DESK-A look at a page", "events": [{"type": "tool_call", "name": "computer", "arguments": {"action": "observe", "ref": null, "text": null, "keys": null, "ms": null, "direction": null, "amount": null}, "split_into": 1}], "usage": {"prompt_tokens": 20, "completion_tokens": 10}},
+    {"when": "DESK-A look at a page", "events": [{"type": "text", "text": "Looked at the page."}], "usage": {"prompt_tokens": 20, "completion_tokens": 10}},
+    {"when": "DESK-B hold for a take over", "events": [{"type": "text", "text": "This reply was held until someone took over."}], "usage": {"prompt_tokens": 20, "completion_tokens": 10}, "once": true, "wait_ms": 600000},
+    {"when": "DESK-B hold for a take over", "events": [{"type": "text", "text": "Carried on after the hand-back."}], "usage": {"prompt_tokens": 20, "completion_tokens": 10}},
+    {"when": "DESK-C hold for a restart", "events": [{"type": "text", "text": "This reply was held until someone took over."}], "usage": {"prompt_tokens": 20, "completion_tokens": 10}, "once": true, "wait_ms": 600000},
+    {"when": "DESK-C hold for a restart", "events": [{"type": "text", "text": "Carried on after the restart."}], "usage": {"prompt_tokens": 20, "completion_tokens": 10}},
+    {"when": "DESK-D hold before clearing", "events": [{"type": "text", "text": "This reply was held until someone took over."}], "usage": {"prompt_tokens": 20, "completion_tokens": 10}, "once": true, "wait_ms": 600000},
+    {"when": "DESK-D hold before clearing", "events": [{"type": "text", "text": "Done."}], "usage": {"prompt_tokens": 20, "completion_tokens": 10}},
+    {"when": "DESK-E two desktop actions", "events": [{"type": "tool_call", "name": "computer", "arguments": {"action": "key", "ref": null, "text": null, "keys": "ctrl+l", "ms": null, "direction": null, "amount": null}, "split_into": 1}], "usage": {"prompt_tokens": 20, "completion_tokens": 10}},
+    {"when": "DESK-E two desktop actions", "events": [{"type": "tool_call", "name": "computer", "arguments": {"action": "key", "ref": null, "text": null, "keys": "Return", "ms": null, "direction": null, "amount": null}, "split_into": 1}], "usage": {"prompt_tokens": 20, "completion_tokens": 10}},
+    {"when": "DESK-E two desktop actions", "events": [{"type": "text", "text": "Stopped at the limit."}], "usage": {"prompt_tokens": 20, "completion_tokens": 10}},
+    {"when": "DESK-G hold a desktop", "events": [{"type": "text", "text": "This reply was held until someone stopped it."}], "usage": {"prompt_tokens": 20, "completion_tokens": 10}, "once": true, "wait_ms": 600000},
+    {"when": "DESK-G hold a desktop", "events": [{"type": "text", "text": "Done."}], "usage": {"prompt_tokens": 20, "completion_tokens": 10}},
+    {"when": "DESK-H a quiet first minute", "events": [{"type": "text", "text": "Ready."}], "usage": {"prompt_tokens": 20, "completion_tokens": 10}}
+  ]
+}

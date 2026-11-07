@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM idempotency WHERE conversation_id=$1 AND route=$2 AND execution_status='queued') AS \"waiting!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "waiting!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "0ce40290790b5ff22847edc1d4343760e3102b8c5e419902fb808d06eb11ab89"
+}

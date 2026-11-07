@@ -1,0 +1,83 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT version,is_default,seed_digest,last_set_by,customised_builtin,COALESCE(builtin_base_image,image) AS \"build!\" FROM templates WHERE name=$1 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "version",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "version"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "is_default",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "is_default"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "seed_digest",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "seed_digest"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "last_set_by",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "last_set_by"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "customised_builtin",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "customised_builtin"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "build!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "82b71bef5ea57c62660cef227ae1d8c9ff84b579b7073135c1ea40ddc8ca7a44"
+}

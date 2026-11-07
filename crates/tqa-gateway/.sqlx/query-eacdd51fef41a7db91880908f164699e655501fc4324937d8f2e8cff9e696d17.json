@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM idempotency h WHERE h.conversation_id=$1 AND (h.execution_status='sending' OR (h.execution_status='delivered' AND h.updated_at > CURRENT_TIMESTAMP - make_interval(secs => $3) AND h.updated_at > COALESCE((SELECT MAX(e.created_at) FROM events e WHERE e.conversation_id=$1 AND e.lifecycle IS NOT NULL), '-infinity'::timestamptz) AND COALESCE((SELECT e.lifecycle FROM events e WHERE e.conversation_id=$1 AND e.lifecycle IS NOT NULL ORDER BY e.seq DESC LIMIT 1), '') NOT IN ('run.started', 'run.resumed')) OR (h.execution_status='queued' AND ($2::uuid IS NULL OR h.created_at <= COALESCE((SELECT MIN(w.created_at) FROM idempotency w WHERE w.conversation_id=$2 AND w.execution_status='queued'), 'infinity'::timestamptz))))) AS \"undelivered!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "undelivered!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Float8"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "eacdd51fef41a7db91880908f164699e655501fc4324937d8f2e8cff9e696d17"
+}

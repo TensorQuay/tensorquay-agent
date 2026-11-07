@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT c.owner_id FROM conversations c WHERE c.id=$1 AND c.state='deleted' AND NOT EXISTS(SELECT 1 FROM sandbox_instances s WHERE s.conversation_id=c.id)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "owner_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "owner_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "77b8f75fdbb0b890e5f806a450791dc2899f66c2d42ab3ec127ebb5f6f7ec211"
+}

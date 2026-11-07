@@ -1,0 +1,51 @@
+{
+ "model": "fixture",
+ "responses": [
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "pagination.py",
+      "content": "\"\"\"Split a list of items into fixed-size pages.\"\"\"\n\n\ndef page_count(total, size):\n    \"\"\"Return how many pages are needed for `total` items at `size` items per page.\"\"\"\n    if size <= 0:\n        raise ValueError(\"size must be positive\")\n    return (total + size - 1) // size\n\n\ndef page(items, number, size):\n    \"\"\"Return page `number` (1-based) of `items`.\"\"\"\n    if number < 1:\n        raise ValueError(\"pages start at 1\")\n    start = (number - 1) * size\n    return items[start:start + size]\n",
+      "create_parents": false
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 400,
+    "completion_tokens": 120
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "shell",
+     "arguments": {
+      "command": "python3 -m unittest discover -s tests -t ."
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 700,
+    "completion_tokens": 30
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "page_count now rounds up, so the last partial page is counted."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 20
+   }
+  }
+ ]
+}

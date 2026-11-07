@@ -1,0 +1,50 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT ref,consumer_kind,consumer FROM secret_consumers",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ref",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "secret_consumers",
+            "name": "ref"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "consumer_kind",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "secret_consumers",
+            "name": "consumer_kind"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "consumer",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "secret_consumers",
+            "name": "consumer"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "dd6ab33b897a323d94ebf247df53c72bea4fb4a72adecea263d00db734afa649"
+}

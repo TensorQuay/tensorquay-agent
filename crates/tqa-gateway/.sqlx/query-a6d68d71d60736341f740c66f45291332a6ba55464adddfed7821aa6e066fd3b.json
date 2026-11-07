@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (SELECT m.name FROM agent_team_members m JOIN idempotency i ON i.conversation_id = m.conversation_id AND i.execution_status = 'queued' WHERE m.team_id = $1 AND m.workspace = 'my_files' AND m.state NOT IN ('stopped', 'done') AND NOT (m.state = 'failed' AND NOT m.failed_run) AND NOT EXISTS (SELECT 1 FROM sandbox_instances s WHERE s.conversation_id = m.conversation_id) ORDER BY i.ordinal LIMIT 1) AS files, EXISTS(SELECT 1 FROM idempotency i JOIN conversations c ON c.id = i.conversation_id WHERE i.execution_status = 'queued' AND c.state = 'active' AND i.conversation_id <> $2 AND NOT EXISTS (SELECT 1 FROM sandbox_instances s WHERE s.conversation_id = i.conversation_id)) AS \"slot!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "files",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "slot!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "a6d68d71d60736341f740c66f45291332a6ba55464adddfed7821aa6e066fd3b"
+}

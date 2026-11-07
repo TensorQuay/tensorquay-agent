@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE builtin_deletions SET image=$2 WHERE name=$1 AND image IS DISTINCT FROM $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "538fbb70339b8c7c6f2ffdc0a0b33093e33ecf697e5c8ea9cf7ee506ff6e3542"
+}

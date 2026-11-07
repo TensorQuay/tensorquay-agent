@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT version,seed_digest FROM model_routes WHERE name=$1 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "version",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "model_routes",
+            "name": "version"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "seed_digest",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "model_routes",
+            "name": "seed_digest"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "5f14f872dc8fe5621b33a6561cc49e669b749403c77d377f62ed62395d80ac32"
+}

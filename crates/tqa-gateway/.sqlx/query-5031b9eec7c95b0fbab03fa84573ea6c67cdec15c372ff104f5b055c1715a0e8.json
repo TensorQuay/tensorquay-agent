@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (SELECT 1 FROM templates WHERE last_set_by='admin' OR customised_builtin) OR EXISTS (SELECT 1 FROM admin_audit WHERE area='templates' AND actor_kind='admin') AS \"touched!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "touched!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "5031b9eec7c95b0fbab03fa84573ea6c67cdec15c372ff104f5b055c1715a0e8"
+}

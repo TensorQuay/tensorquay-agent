@@ -1,0 +1,59 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, email::text AS \"email!\", role, created_by FROM invitations WHERE token_hash=$1 AND accepted_at IS NULL AND revoked_at IS NULL AND expires_at>CURRENT_TIMESTAMP",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "invitations",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "role",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "invitations",
+            "name": "role"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "created_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "invitations",
+            "name": "created_by"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Bytea"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false,
+      false
+    ]
+  },
+  "hash": "12f0f15235354a31b94b3e6c93f1aa4f7094fc8bd58f87547d6978cf99775622"
+}

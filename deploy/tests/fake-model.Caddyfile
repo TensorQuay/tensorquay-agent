@@ -1,0 +1,10 @@
+{
+    admin off
+    auto_https off
+}
+
+http://:8080 {
+    header Content-Type application/json
+    respond /v1/models `{"data":[{"id":"fixture"}]}`
+    respond /v1/chat/completions `{"choices":[{"message":{"content":"fixture"}}]}`
+}

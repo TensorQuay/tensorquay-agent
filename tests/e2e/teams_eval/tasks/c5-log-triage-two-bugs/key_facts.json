@@ -1,0 +1,5 @@
+[
+ "h27's ratio divides by a zero count (ZeroDivisionError)",
+ "h13's score calls max() on an empty list (ValueError)",
+ "Both fixed with a guard; no other handler changed; the log unchanged"
+]

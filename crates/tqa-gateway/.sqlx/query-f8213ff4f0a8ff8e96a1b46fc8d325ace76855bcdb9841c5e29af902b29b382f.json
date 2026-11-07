@@ -1,0 +1,37 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT c.frame->'event'->>'name' AS name, s.ts FROM events s JOIN events c ON c.conversation_id = s.conversation_id AND c.run_id = s.run_id AND c.frame->'event'->>'type' = 'tool.call' AND c.frame->'event'->>'call_id' = s.frame->'event'->>'call_id' WHERE s.conversation_id = $1 AND s.run_id = $2 AND s.step = $3 AND s.frame->'event'->>'type' = 'tool.start' AND NOT EXISTS (SELECT 1 FROM events e WHERE e.conversation_id = s.conversation_id AND e.run_id = s.run_id AND e.frame->'event'->>'type' = 'tool.end' AND e.frame->'event'->>'call_id' = s.frame->'event'->>'call_id') ORDER BY s.seq DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "ts",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "events",
+            "name": "ts"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null,
+      false
+    ]
+  },
+  "hash": "f8213ff4f0a8ff8e96a1b46fc8d325ace76855bcdb9841c5e29af902b29b382f"
+}

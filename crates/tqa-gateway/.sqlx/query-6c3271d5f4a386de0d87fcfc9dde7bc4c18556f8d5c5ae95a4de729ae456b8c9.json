@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.last_action_at,c.pinned,s.idle_seconds,s.max_lifetime_seconds FROM sandbox_instances s JOIN conversations c ON c.id=s.conversation_id WHERE s.conversation_id=$1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "last_action_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "sandbox_instances",
+            "name": "last_action_at"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "pinned",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "pinned"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "idle_seconds",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "sandbox_instances",
+            "name": "idle_seconds"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "max_lifetime_seconds",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "sandbox_instances",
+            "name": "max_lifetime_seconds"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "6c3271d5f4a386de0d87fcfc9dde7bc4c18556f8d5c5ae95a4de729ae456b8c9"
+}

@@ -1,0 +1,12 @@
+Output in a four-day week: a trial in 61 firms
+Haug et al., 2023
+
+Abstract
+Output per employee stayed the same in 52 of 61 firms. Sick days fell by 65 %.
+
+Method
+We describe the setting, the data and the limits of the study.
+
+Results
+Output per employee stayed the same in 52 of 61 firms.
+Sick days fell by 65 %.

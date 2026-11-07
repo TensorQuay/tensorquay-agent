@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT t.conversation_id,t.sandbox_id AS \"sandbox_id!\" FROM runtime_tokens t JOIN conversations c ON c.id=t.conversation_id WHERE t.token_hash=$1 AND t.peer_address=$2::text::inet AND t.sandbox_id IS NOT NULL AND (t.expires_at IS NULL OR t.expires_at>CURRENT_TIMESTAMP) AND c.state='active' FOR SHARE OF t,c",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "conversation_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "runtime_tokens",
+            "name": "conversation_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "sandbox_id!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "runtime_tokens",
+            "name": "sandbox_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Bytea",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "5580823322318e29f46dd8e66b9ad77c7b0a723c786f0d3fcc4e3cd9e4cfbd56"
+}

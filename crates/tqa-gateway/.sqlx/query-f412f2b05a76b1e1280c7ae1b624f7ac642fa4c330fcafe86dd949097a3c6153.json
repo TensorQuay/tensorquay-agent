@@ -1,0 +1,113 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT m.seq, m.author_kind, m.author_id, m.author_name, m.to_kind, t.name AS \"to_name?\", m.body, m.created_at FROM channel_messages m LEFT JOIN agent_team_members t ON t.conversation_id = m.to_conversation WHERE m.channel_id = $1 AND m.seq = ANY($2) ORDER BY m.seq",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "seq",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "seq"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "author_kind",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "author_kind"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "author_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "author_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "author_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "author_name"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "to_kind",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "to_kind"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "to_name?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "agent_team_members",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "body",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "body"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "created_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8Array"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "f412f2b05a76b1e1280c7ae1b624f7ac642fa4c330fcafe86dd949097a3c6153"
+}

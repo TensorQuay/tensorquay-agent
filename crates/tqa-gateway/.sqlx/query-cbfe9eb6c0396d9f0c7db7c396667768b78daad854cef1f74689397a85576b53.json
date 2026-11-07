@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE host_key_placeholders SET run_id=$2, updated_at=CURRENT_TIMESTAMP WHERE conversation_id=$1 AND run_id IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cbfe9eb6c0396d9f0c7db7c396667768b78daad854cef1f74689397a85576b53"
+}

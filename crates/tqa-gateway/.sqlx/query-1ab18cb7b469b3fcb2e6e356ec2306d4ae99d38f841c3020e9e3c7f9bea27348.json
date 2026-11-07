@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (SELECT 1 FROM conversations c JOIN templates t ON t.name=c.template WHERE c.id=$1 AND 'desktop'=ANY(t.capabilities)) AS \"desktop!\", (SELECT e.lifecycle FROM events e WHERE e.conversation_id=$1 AND e.lifecycle IS NOT NULL ORDER BY e.seq DESC LIMIT 1) AS latest",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "desktop!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "latest",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "1ab18cb7b469b3fcb2e6e356ec2306d4ae99d38f841c3020e9e3c7f9bea27348"
+}

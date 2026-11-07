@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE workspaces SET forked_from=NULL, fork_consistent=NULL WHERE ctid = ANY(ARRAY(SELECT ctid FROM workspaces WHERE forked_from=$1 LIMIT $2))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a4cd2082d0687667e1dacba7238b23ff2157b63fb75e2b7d17e718de4d54883e"
+}

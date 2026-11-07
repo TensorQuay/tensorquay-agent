@@ -1,0 +1,6 @@
+id = "c1-test-coverage"
+title = "Tests for three untested modules to 80 % line coverage each"
+tags = ["teams-eval", "teams-code"]
+budgets = { max_steps = 60, wall_clock_secs = 1500, max_tokens = 600000 }
+protected = ["lib/dates.py", "lib/money.py", "lib/textstats.py", "lib/util.py"]
+check = { image = "runtime", timeout_secs = 180 }

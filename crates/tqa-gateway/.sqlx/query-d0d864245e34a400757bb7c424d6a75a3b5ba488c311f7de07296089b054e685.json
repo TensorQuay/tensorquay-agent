@@ -1,0 +1,59 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT m.conversation_id, m.name, t.channel_id, m.created_at < CURRENT_TIMESTAMP - make_interval(mins => $1) AS \"overdue!\" FROM agent_team_members m JOIN agent_teams t ON t.id = m.team_id WHERE m.state = 'starting' AND NOT EXISTS (SELECT 1 FROM idempotency i WHERE i.conversation_id = m.conversation_id AND i.key = 'team-start:' || m.conversation_id::text)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "conversation_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_team_members",
+            "name": "conversation_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "agent_team_members",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "channel_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "channel_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "overdue!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "d0d864245e34a400757bb7c424d6a75a3b5ba488c311f7de07296089b054e685"
+}

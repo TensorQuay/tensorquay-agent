@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.route, p.ok FROM route_probes p JOIN model_routes r ON r.name = p.route WHERE p.document_digest = sha256(convert_to(r.document::text, 'UTF8'))",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "route",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "route_probes",
+            "name": "route"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "ok",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "route_probes",
+            "name": "ok"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "a5875c9ac7896c641961001e70d59323d5c463a0b263df2d87a46ffb1b9e0bd8"
+}

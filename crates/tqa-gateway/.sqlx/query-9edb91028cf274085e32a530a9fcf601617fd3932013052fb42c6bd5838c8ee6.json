@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM host_key_placeholders WHERE hash IN (SELECT hash FROM host_key_placeholders WHERE ended_at < CURRENT_TIMESTAMP - interval '1 day' ORDER BY ended_at LIMIT $1)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9edb91028cf274085e32a530a9fcf601617fd3932013052fb42c6bd5838c8ee6"
+}

@@ -1,0 +1,39 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(u.id) AS \"calls!\", COALESCE(sum(COALESCE(u.prompt_tokens,0)+COALESCE(u.completion_tokens,0)),0)::bigint AS \"tokens!\", COALESCE($2::timestamptz, e.budget_since) AS since FROM decision_engines e LEFT JOIN usage u ON u.route=$1 AND u.created_at >= COALESCE($2::timestamptz, e.budget_since, '-infinity'::timestamptz) WHERE e.name=$3 GROUP BY e.budget_since",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "calls!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "tokens!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "since",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Timestamptz",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "3e27018139bcfa5c4687e9486b13dddbce2a16f96dd5b47967e2991493ca26b5"
+}

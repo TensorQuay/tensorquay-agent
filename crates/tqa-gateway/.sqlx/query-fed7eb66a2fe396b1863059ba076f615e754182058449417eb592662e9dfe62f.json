@@ -1,0 +1,138 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT t.id, t.channel_id AS channel, t.lead_conversation AS lead, t.state, t.stop_reason, t.created_at AS started_at, t.deadline_at, t.token_budget, t.spent_tokens, r.place AS \"lead_read_seq!\", (SELECT count(*) FROM channel_messages c WHERE c.channel_id = t.channel_id AND c.seq > r.place AND c.to_kind IN ('lead', 'team') AND NOT (c.author_kind = 'conversation' AND c.author_id = t.lead_conversation::text) AND NOT (c.type = 'person_message' AND c.body->>'member' = '' AND NOT EXISTS (SELECT 1 FROM idempotency i WHERE i.team_copy_channel = c.channel_id AND i.team_copy_seq = c.seq AND i.execution_status IN ('queued', 'delivered')))) AS \"lead_unread!\" FROM agent_teams t CROSS JOIN LATERAL (SELECT GREATEST(t.lead_last_read_seq, COALESCE((SELECT max(s) FROM agent_team_reads a, unnest(a.seqs) AS s WHERE a.reader = t.lead_conversation), 0)) AS place) r WHERE t.lead_conversation = $1 OR EXISTS (SELECT 1 FROM agent_team_members m WHERE m.team_id = t.id AND m.conversation_id = $1) AND EXISTS (SELECT 1 FROM conversations l WHERE l.id = t.lead_conversation AND l.state <> 'deleted')",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "channel",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "channel_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "lead",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "lead_conversation"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "state"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "stop_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "stop_reason"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "started_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "deadline_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "deadline_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "token_budget",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "token_budget"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "spent_tokens",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "spent_tokens"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "lead_read_seq!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "lead_unread!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "fed7eb66a2fe396b1863059ba076f615e754182058449417eb592662e9dfe62f"
+}

@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id FROM agent_profiles WHERE name = $1 AND (owner_id = $2 OR owner_id IS NULL) ORDER BY owner_id IS NULL LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_profiles",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "9589afc319b2d0481b05d03b1419e286b76cc83059a4f87430bb2ecdf34fbd84"
+}

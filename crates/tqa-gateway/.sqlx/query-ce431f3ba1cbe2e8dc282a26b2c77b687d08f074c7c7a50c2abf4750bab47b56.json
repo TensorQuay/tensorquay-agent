@@ -1,0 +1,182 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT name,display_name,description,image,capabilities,cpu_millicores,memory_bytes,pids,workspace_bytes,is_default,enabled,check_state,check_reason,last_set_by FROM templates ORDER BY name",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "description",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "image",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "image"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "capabilities",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "capabilities"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "cpu_millicores",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "cpu_millicores"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "memory_bytes",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "memory_bytes"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "pids",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "pids"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "workspace_bytes",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "workspace_bytes"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "is_default",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "is_default"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "enabled",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "enabled"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "check_state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "check_state"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "check_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "check_reason"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "last_set_by",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "last_set_by"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "ce431f3ba1cbe2e8dc282a26b2c77b687d08f074c7c7a50c2abf4750bab47b56"
+}

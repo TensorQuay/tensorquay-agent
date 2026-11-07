@@ -1,0 +1,86 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT u.route AS \"key!\", min(r.display_name) AS label, count(*) AS \"requests!\", count(*) FILTER (WHERE (u.prompt_tokens IS NOT NULL OR u.completion_tokens IS NOT NULL) AND NOT coalesce(u.estimated, false)) AS \"reported!\", count(*) FILTER (WHERE u.estimated) AS \"estimated!\", coalesce(sum(u.prompt_tokens),0)::bigint AS \"prompt_tokens!\", coalesce(sum(u.completion_tokens),0)::bigint AS \"completion_tokens!\", sum(u.cached_tokens)::bigint AS cached_tokens, sum(u.reasoning_tokens)::bigint AS reasoning_tokens FROM usage u LEFT JOIN model_routes r ON r.name = u.route WHERE u.created_at >= $1 AND u.created_at < $2 GROUP BY u.route ORDER BY coalesce(sum(u.prompt_tokens),0) + coalesce(sum(u.completion_tokens),0) DESC, u.route LIMIT $3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "key!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "usage",
+            "name": "route"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "label",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "requests!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "reported!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "estimated!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "prompt_tokens!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "completion_tokens!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "cached_tokens",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "reasoning_tokens",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Timestamptz",
+        "Timestamptz",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "da9865b62ab07170a86a1bd8748b01398f78b22ca0c6399c27cd1f43e30b51cd"
+}

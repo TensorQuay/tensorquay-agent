@@ -1,0 +1,60 @@
+data: {"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"```"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"t"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"qa"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"_call"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"\n"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"{\""},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"name"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"\":"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":" \""},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"shell"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"\","},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":" \""},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"arguments"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"\":"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":" {\""},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"command"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"\":"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":" \""},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"ls"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":" -"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"la"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":" /"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"workspace"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"\"}}"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"\n"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"```"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: {"choices":[],"usage":{"prompt_tokens":1535,"completion_tokens":27}}
+
+data: [DONE]
+

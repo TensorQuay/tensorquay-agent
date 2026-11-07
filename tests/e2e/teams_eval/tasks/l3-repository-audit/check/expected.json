@@ -1,0 +1,16 @@
+{
+ "defects": [
+  "web/files.py",
+  "db/queries.py",
+  "util/calc.py",
+  "auth/tokens.py",
+  "cache/store.py",
+  "api/admin.py",
+  "lists/paging.py",
+  "timeutil/expiry.py",
+  "billing/split.py",
+  "core/registry.py",
+  "jobs/runner.py",
+  "text/escape.py"
+ ]
+}

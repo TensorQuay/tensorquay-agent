@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT claim_seq FROM channel_claims WHERE channel_id = $1 AND task_seq = $2 AND claimant_kind = $3 AND claimant_id = $4",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "claim_seq",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "channel_claims",
+            "name": "claim_seq"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "4e9750ef63ab69a7aac86abb6d0628e727c5cd915b032cd380083c128ea98d04"
+}

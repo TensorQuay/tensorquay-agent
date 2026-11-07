@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE model_routes SET seed_state='current' WHERE name=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4632056732b03b1ef9ad64095bf9456fc2e18c5d34a71fbf303fc119ced84f0d"
+}

@@ -1,0 +1,6 @@
+id = "smoke-fix"
+title = "Fix the Fahrenheit conversion's offset"
+tags = ["python", "bug-fix", "small", "live-smoke"]
+budgets = { max_steps = 8, wall_clock_secs = 300, max_tokens = 30000 }
+protected = ["tests/test_units.py"]
+check = { image = "runtime", timeout_secs = 60 }

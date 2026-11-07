@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE templates SET seed_state='removed' WHERE seed_state='current' AND NOT (name = ANY($1))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9cfce4122412ba109d778a4cbb1a70156fbc5e10d5ec785bb5a9c2ab7d898668"
+}

@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT w.id FROM workspaces w WHERE w.state='deleted' AND NOT EXISTS(SELECT 1 FROM conversations c WHERE c.workspace_id=w.id) ORDER BY w.updated_at, w.id LIMIT $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "24b2895982073538979d53da3a348ee662e2f78246b9159dee2378be7a9c1426"
+}

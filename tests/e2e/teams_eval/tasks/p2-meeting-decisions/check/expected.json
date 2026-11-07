@@ -1,0 +1,72 @@
+{
+ "decisions": [
+  {
+   "owner": "Dana",
+   "word": "launch"
+  },
+  {
+   "owner": "Ken",
+   "word": "mysql"
+  },
+  {
+   "owner": "Lena",
+   "word": "pricing page"
+  },
+  {
+   "owner": "Omar",
+   "word": "on-call"
+  },
+  {
+   "owner": "Dana",
+   "word": "beta"
+  },
+  {
+   "owner": "Ken",
+   "word": "payment provider"
+  },
+  {
+   "owner": "Priya",
+   "word": "hiring"
+  },
+  {
+   "owner": "Lena",
+   "word": "logo"
+  },
+  {
+   "owner": "Omar",
+   "word": "sso"
+  },
+  {
+   "owner": "Priya",
+   "word": "travel"
+  },
+  {
+   "owner": "Lena",
+   "word": "docs site"
+  },
+  {
+   "owner": "Omar",
+   "word": "freeze"
+  },
+  {
+   "owner": "Dana",
+   "word": "support hours"
+  },
+  {
+   "owner": "Ken",
+   "word": "analytics"
+  },
+  {
+   "owner": "Priya",
+   "word": "offsite"
+  }
+ ],
+ "pass_at": 13,
+ "questions": [
+  "retention",
+  "mobile",
+  "browser",
+  "conference",
+  "translation"
+ ]
+}

@@ -1,0 +1,16 @@
+# The microVM backend on the same rootless engine (deploy/firecracker/README.md, "Gateway configuration"): the gateway
+# has a pinned address on the internal sandbox network, because every VM's rules allow exactly that address. It must
+# equal `[firecracker] gateway_address` in gateway.toml, inside the subnet below.
+services:
+  gateway:
+    networks:
+      control: {}
+      web: {}
+      sandboxes:
+        ipv4_address: ${TQA_FC_GATEWAY_ADDRESS:?Set the gateway's pinned address, the same as [firecracker] gateway_address}
+
+networks:
+  sandboxes:
+    ipam:
+      config:
+        - subnet: ${TQA_FC_SUBNET:?Set the sandbox network's subnet, which holds TQA_FC_GATEWAY_ADDRESS}

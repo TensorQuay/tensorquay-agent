@@ -1,0 +1,59 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH readers AS ( SELECT t.lead_conversation AS conversation, true AS lead, t.lead_last_read_seq AS read, t.channel_id, t.owner_id, false AS given_up, (SELECT CASE WHEN e.lifecycle = 'run.failed' THEN e.seq END FROM events e WHERE e.conversation_id = t.lead_conversation AND e.lifecycle IS NOT NULL ORDER BY e.seq DESC LIMIT 1) AS failed FROM agent_teams t WHERE t.id = $1 AND t.state = 'running' UNION ALL SELECT m.conversation_id, false, m.last_read_seq, t.channel_id, t.owner_id, m.state = 'failed' AND m.failed_run, NULLIF(m.failures, 0)::bigint FROM agent_team_members m JOIN agent_teams t ON t.id = m.team_id WHERE t.id = $1 AND t.state = 'running' AND m.state NOT IN ('starting', 'stopped') AND NOT (m.state = 'failed' AND NOT m.failed_run) AND NOT (m.state = 'failed' AND t.spent_tokens * 100 >= t.token_budget * $2) ), placed AS ( SELECT r.*, GREATEST(r.read, COALESCE((SELECT max(s) FROM agent_team_reads a, unnest(a.seqs) AS s WHERE a.reader = r.conversation), 0)) AS after FROM readers r ) SELECT p.conversation AS \"conversation!\", p.lead AS \"lead!\", p.after AS \"after!\", p.owner_id AS \"owner!\", p.given_up AS \"given_up!\", p.failed FROM placed p WHERE EXISTS (SELECT 1 FROM channel_messages c WHERE c.channel_id = p.channel_id AND c.seq > p.after AND ((p.lead AND c.to_kind IN ('lead', 'team')) OR (NOT p.lead AND ((c.to_kind = 'member' AND c.to_conversation = p.conversation) OR c.to_kind IN ('members', 'team')))) AND NOT (p.lead AND c.type = 'notice' AND c.body->>'kind' = 'budget_80' AND EXISTS (SELECT 1 FROM agent_team_members w WHERE w.team_id = $1 AND w.state IN ('queued', 'starting', 'working'))) AND NOT (c.type = 'person_message' AND c.body->>'member' = '' AND NOT EXISTS (SELECT 1 FROM idempotency i WHERE i.team_copy_channel = c.channel_id AND i.team_copy_seq = c.seq AND i.execution_status IN ('queued', 'delivered')))) AND NOT EXISTS (SELECT 1 FROM idempotency i WHERE i.conversation_id = p.conversation AND i.execution_status = 'queued')",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "conversation!",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "lead!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "after!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "owner!",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "given_up!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "failed",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "5f2b218bbfad559d9637de98f5fa98b53cbfd1bd8bb5feda0aa0aa2829929748"
+}

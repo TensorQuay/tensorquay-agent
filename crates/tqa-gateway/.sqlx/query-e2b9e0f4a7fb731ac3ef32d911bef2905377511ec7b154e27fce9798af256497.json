@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM admin_audit WHERE id IN (SELECT id FROM admin_audit WHERE at < CURRENT_TIMESTAMP - make_interval(days => $1) LIMIT $2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e2b9e0f4a7fb731ac3ef32d911bef2905377511ec7b154e27fce9798af256497"
+}

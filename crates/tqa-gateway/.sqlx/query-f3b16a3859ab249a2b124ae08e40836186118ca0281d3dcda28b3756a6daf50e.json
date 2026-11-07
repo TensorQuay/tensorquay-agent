@@ -1,0 +1,50 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT route,run_id,conversation_id FROM usage",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "route",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "usage",
+            "name": "route"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "run_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "usage",
+            "name": "run_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "conversation_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "usage",
+            "name": "conversation_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "f3b16a3859ab249a2b124ae08e40836186118ca0281d3dcda28b3756a6daf50e"
+}

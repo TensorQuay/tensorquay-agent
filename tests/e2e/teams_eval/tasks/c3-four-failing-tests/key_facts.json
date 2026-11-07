@@ -1,0 +1,7 @@
+[
+ "duration.py: re.match reads only the first unit; all units must be summed",
+ "rounding.py: round() on a Decimal rounds half to even; quantize with ROUND_HALF_UP",
+ "slug.py: runs of other characters become one dash, trimmed at both ends",
+ "window.py: the range misses the last window (off by one)",
+ "The tests are unchanged"
+]

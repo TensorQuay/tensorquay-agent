@@ -1,0 +1,6 @@
+[
+ "Four callers: app/orders.py, app/users.py, app/reports.py, app/sync.py",
+ "A missing path: v1 returned None, v2 raises NotFound, which each caller must catch",
+ "Query strings move to params=; send's status becomes post(...).status",
+ "client/ and docs/MIGRATION.md unchanged"
+]

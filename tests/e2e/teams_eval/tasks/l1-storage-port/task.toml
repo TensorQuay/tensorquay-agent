@@ -1,0 +1,6 @@
+id = "l1-storage-port"
+title = "Port a 28-module service from SQLite calls to repositories"
+tags = ["teams-eval", "teams-long"]
+budgets = { max_steps = 300, wall_clock_secs = 9000, max_tokens = 3000000 }
+protected = ["tests/__init__.py", "tests/test_address.py", "tests/test_campaign.py", "tests/test_category.py", "tests/test_contract.py", "tests/test_coupon.py", "tests/test_customer.py", "tests/test_delivery.py", "tests/test_employee.py", "tests/test_invoice.py", "tests/test_lead.py", "tests/test_note.py", "tests/test_order.py", "tests/test_payment.py", "tests/test_product.py", "tests/test_refund.py", "tests/test_reports.py", "tests/test_review.py", "tests/test_rma.py", "tests/test_shipment.py", "tests/test_stock.py", "tests/test_supplier.py", "tests/test_tag.py", "tests/test_team.py", "tests/test_ticket.py", "tests/test_warehouse.py"]
+check = { image = "runtime", timeout_secs = 300 }

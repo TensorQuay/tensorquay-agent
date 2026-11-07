@@ -1,0 +1,7 @@
+id = "compaction-50"
+title = "A fifty-message ledger audit that must survive compaction"
+tags = ["demo", "long", "compaction"]
+budgets = { max_steps = 200, wall_clock_secs = 3600, max_tokens = 5000000 }
+protected = ["ledger/part-01.txt", "ledger/part-25.txt", "ledger/part-49.txt"]
+check = { image = "runtime", timeout_secs = 60 }
+expects_compaction = true

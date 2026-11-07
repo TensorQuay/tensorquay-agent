@@ -1,0 +1,329 @@
+/* Task 076: the Workspaces page (UI-GUIDELINES §6 and §7 Workspace card). */
+.workspaces-page {
+  container: workspaces / inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding-bottom: var(--space-8);
+}
+/* A narrow column (an expanded sidebar at 1024 px) drops the owner: the access badge already marks a shared one. */
+@container workspaces (max-width: 800px) {
+  .workspace-table .workspace-owner {
+    display: none;
+  }
+}
+.workspaces-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--bar-height);
+}
+.workspaces-bar h1 {
+  margin-right: auto;
+}
+.workspaces-search {
+  width: var(--search-width);
+}
+/* UI-GUIDELINES §7: search, the filters and the sort on one row; each maps to the gateway's list. */
+.workspaces-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+.workspace-filters {
+  margin-right: auto;
+}
+/* The page's one primary button, at a nav row's height rather than a heavy block. */
+.workspaces-new {
+  min-height: var(--row-height-nav);
+  padding-block: 0;
+}
+.workspaces-none > .button {
+  align-self: flex-start;
+}
+.workspaces-more {
+  align-self: flex-start;
+}
+.workspace-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(100%, var(--workspace-card-width)), 1fr)
+  );
+  gap: var(--space-4);
+}
+.workspace-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--paper);
+}
+.workspace-card:hover,
+.workspace-card:focus-within {
+  border-color: var(--muted);
+}
+.workspace-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.workspace-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+}
+/* Renamed in place, the name takes the head's width, so the field reaches the badge (the UI standard's In-place edit). */
+.workspace-name:has(.inline-edit),
+.data-name:has(.inline-edit) {
+  flex: 1;
+}
+.workspace-owner {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* The lease line: one blue state for "in use", grey when idle; the dot breathes only while a run holds it. */
+.workspace-lease {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.workspace-lease-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lease-dot {
+  flex-shrink: 0;
+  width: var(--dot-size);
+  height: var(--dot-size);
+  border-radius: var(--pill-radius);
+  background: var(--muted);
+}
+/* Blue while a run holds it; a kept environment's line stays muted (the picker's dot still marks it taken). */
+[data-lease="running"] .lease-dot,
+.lease-dot[data-lease="held"] {
+  background: var(--info);
+}
+[data-lease="running"] .lease-dot {
+  animation: pulse var(--motion-pulse) ease-in-out infinite;
+}
+/* The size meter: ink, warning from 80 %, danger from 95 %; a thin track on the surface. */
+.workspace-size {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.workspace-meter {
+  height: var(--meter-height);
+  border-radius: var(--pill-radius);
+  background: var(--line);
+  overflow: hidden;
+}
+.workspace-meter-fill {
+  display: block;
+  height: 100%;
+  background: var(--ink);
+}
+.workspace-size[data-level="warn"] .workspace-meter-fill {
+  background: var(--warn);
+}
+.workspace-size[data-level="danger"] .workspace-meter-fill {
+  background: var(--danger);
+}
+.workspace-size[data-level="warn"] .workspace-usage {
+  color: var(--warn);
+}
+.workspace-size[data-level="danger"] .workspace-usage {
+  color: var(--danger);
+}
+.workspace-failed {
+  color: var(--danger);
+}
+.workspace-copying {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+/* Actions: Open, and the menu of the rest (UI-GUIDELINES §7). */
+.workspace-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: auto;
+}
+.menu-item[data-danger] {
+  color: var(--danger);
+}
+/* The list view: §7 table rows with the card's states. */
+.workspace-table .workspace-lease,
+.workspace-table .workspace-size {
+  margin: 0;
+}
+.workspace-size-cell {
+  min-width: var(--table-name-width);
+}
+/* The name takes the room the other columns leave; they keep to their content. It is never cut while the row has room
+   (the design direction), so the tables' usual name cap doesn't apply here. */
+.workspace-table td:first-child {
+  width: 100%;
+}
+.workspace-table .data-name {
+  max-width: none;
+}
+.workspace-table td:not(:first-child) {
+  white-space: nowrap;
+}
+.share-count {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--space-1);
+}
+/* A row opens its workspace, by click or Enter. */
+.workspace-row {
+  cursor: pointer;
+}
+.workspace-row:hover {
+  background: var(--hover-tint);
+}
+.workspace-table .workspace-actions {
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+}
+/* A long "In use by …" truncates, with the whole line on hover, so the names keep their room. */
+.workspace-table .workspace-lease {
+  max-width: var(--table-name-width);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* The share dialog: the email, the access and Share on one line; members below. */
+.share-form {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+.share-form .field {
+  flex: 1;
+  min-width: 0;
+}
+.share-form .field label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.share-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.share-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--row-height-table);
+  border-bottom: var(--border-width) solid var(--line);
+}
+.share-email {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* The picker's search field and its empty line inside the menu popover. */
+.workspace-picker-search {
+  margin-bottom: var(--space-2);
+}
+.workspace-picker-empty {
+  padding: var(--space-2) var(--space-3);
+}
+.start-internet {
+  text-align: center;
+}
+/* A link in New task's quiet line reads as one: ink and underlined, like every other, with room to hit (§5b;
+   WEB-U-116, WEB-U-119). */
+.start-internet a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--min-control-height);
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.start-internet a:hover {
+  color: var(--muted);
+}
+/* The task list's workspace label and filter chip (answers-076 Q8). The label stays on one line: the workspace
+   name truncates first and the separator and time keep their width (WEB-U-026). */
+.conversation-meta {
+  display: flex;
+  min-width: 0;
+  white-space: nowrap;
+}
+.conversation-meta > * {
+  flex: none;
+}
+.conversation-meta > [aria-hidden="true"] {
+  white-space: pre;
+}
+.conversation-meta > .conversation-workspace {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.task-filter .filter-chip {
+  max-width: 100%;
+}
+.filter-chip-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sidebar-footer {
+  flex-shrink: 0;
+}
+@container sidebar (max-width: 120px) {
+  .filter-chip-label {
+    display: none;
+  }
+}
+@media (max-width: 767px) {
+  .workspaces-bar {
+    flex-wrap: wrap;
+  }
+  .workspaces-search {
+    width: 100%;
+  }
+  /* The filters scroll sideways inside their own row on a phone, never the page. */
+  .workspace-filters {
+    width: 100%;
+    margin-right: 0;
+    overflow-x: auto;
+  }
+  .workspace-filters .button {
+    flex-shrink: 0;
+  }
+  /* The 14b page pass, W4 (WEB-U-251): on a phone the email takes its own row; access and Share go under it. */
+  .share-form {
+    flex-wrap: wrap;
+  }
+  .share-form .field {
+    flex-basis: 100%;
+  }
+}

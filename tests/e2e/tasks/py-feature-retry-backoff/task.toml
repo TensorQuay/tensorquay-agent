@@ -1,0 +1,6 @@
+id = "py-feature-retry-backoff"
+title = "Add retries with exponential backoff to a fetch helper"
+tags = ["python", "feature", "small"]
+budgets = { max_steps = 30, wall_clock_secs = 600, max_tokens = 200000 }
+protected = []
+check = { image = "runtime", timeout_secs = 60 }

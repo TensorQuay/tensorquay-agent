@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM runtime_token_reservations WHERE id=$1 AND expires_at>clock_timestamp() RETURNING conversation_id,token_hash",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "conversation_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "runtime_token_reservations",
+            "name": "conversation_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "token_hash",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "runtime_token_reservations",
+            "name": "token_hash"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "d8a2b43737748df60b0c496bb87b3c2dcec7f4c54bdbd70237e239d16e49eaf8"
+}

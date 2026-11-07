@@ -1,0 +1,6 @@
+id = "c2-client-migration"
+title = "Migrate an API client and its four callers to the v2 interface"
+tags = ["teams-eval", "teams-code"]
+budgets = { max_steps = 40, wall_clock_secs = 900, max_tokens = 300000 }
+protected = ["client/server.py", "client/v1.py", "client/v2.py", "docs/MIGRATION.md"]
+check = { image = "runtime", timeout_secs = 120 }

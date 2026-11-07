@@ -1,0 +1,10 @@
+# E2E-AGENTS-020: an agent team end to end on the scripted model (docs/evals/agent-teams.md section 1).
+services:
+  fake-model:
+    command: ["--scenario", "/scenarios/agents.json"]
+    volumes:
+      - type: bind
+        source: ../tests/fixtures/agents.json
+        target: /scenarios/agents.json
+        read_only: true
+        bind: {create_host_path: false}

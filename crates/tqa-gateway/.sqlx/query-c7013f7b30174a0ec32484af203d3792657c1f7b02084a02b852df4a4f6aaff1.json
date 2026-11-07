@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT c.id FROM conversations c CROSS JOIN LATERAL (SELECT e.lifecycle AS kind FROM events e WHERE e.conversation_id=c.id AND e.lifecycle IS NOT NULL ORDER BY e.seq DESC LIMIT 1) latest WHERE c.state='active' AND latest.kind IN ('run.started','run.resumed') AND NOT EXISTS (SELECT 1 FROM sandbox_instances s WHERE s.conversation_id=c.id) ORDER BY c.id LIMIT $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "c7013f7b30174a0ec32484af203d3792657c1f7b02084a02b852df4a4f6aaff1"
+}

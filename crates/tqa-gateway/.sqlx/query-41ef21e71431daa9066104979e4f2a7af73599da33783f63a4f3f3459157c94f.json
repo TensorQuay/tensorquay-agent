@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE templates SET is_default=$2,version=version+1,checked_version=CASE WHEN checked_version=version THEN version+1 ELSE checked_version END,updated_at=CURRENT_TIMESTAMP WHERE name=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "41ef21e71431daa9066104979e4f2a7af73599da33783f63a4f3f3459157c94f"
+}

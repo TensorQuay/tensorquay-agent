@@ -1,0 +1,7 @@
+id = "ts-refactor-extract-validation"
+title = "Extract validation functions into their own module"
+tags = ["typescript", "refactor", "multi-file", "small", "cmp"]
+budgets = { max_steps = 30, wall_clock_secs = 600, max_tokens = 200000 }
+protected = ["test/users.test.ts"]
+check = { image = "workstation", timeout_secs = 120 }
+template = "workstation"

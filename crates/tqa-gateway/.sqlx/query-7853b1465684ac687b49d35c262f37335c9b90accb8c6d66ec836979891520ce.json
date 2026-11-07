@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT owner_id,state FROM conversations WHERE id=$1 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "owner_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "owner_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "state"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "7853b1465684ac687b49d35c262f37335c9b90accb8c6d66ec836979891520ce"
+}

@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM agent_team_members WHERE conversation_id = $1) OR EXISTS(SELECT 1 FROM agent_teams WHERE lead_conversation = $1) AS \"team!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "team!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "65b92708bcfd60635c67c7d5f456fa2d7a7f3e98b05d3e8060e2f0a717a5a418"
+}

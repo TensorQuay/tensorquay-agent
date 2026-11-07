@@ -1,0 +1,69 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT route,run_id,conversation_id,user_id,(SELECT owner_id FROM conversations c WHERE c.id=u.conversation_id) AS owner FROM usage u",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "route",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "usage",
+            "name": "route"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "run_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "usage",
+            "name": "run_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "conversation_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "usage",
+            "name": "conversation_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "user_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "usage",
+            "name": "user_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "owner",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      true,
+      null
+    ]
+  },
+  "hash": "32e7043824875263632c7f5ffb14329c739a34513d5760df0a2603a7b2e98d76"
+}

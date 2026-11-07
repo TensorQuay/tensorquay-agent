@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE sandbox_instances SET cpu_millicores=$2,memory_bytes=$3,pids=$4 WHERE conversation_id=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4",
+        "Int8",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c30c1f378e705c9dd1879f3ba9be8dae07ae599c21e56c8ab8724b9152e5a3ab"
+}

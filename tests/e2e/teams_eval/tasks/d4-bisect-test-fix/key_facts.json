@@ -1,0 +1,6 @@
+[
+ "The culprit is commit 3478a7e73036, \"wrap: cheaper length check\" (the 42nd of 60)",
+ "It counts the joining space twice (len(line) + 2 + len(word)), so lines break one early",
+ "The new test fails on the culprit and passes on its parent",
+ "The fix restores + 1; all of project's tests pass"
+]

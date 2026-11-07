@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM agent_team_reads r WHERE r.run_id IS DISTINCT FROM ( SELECT CASE WHEN e.lifecycle IN ('run.started', 'run.resumed') THEN e.run_id END FROM events e WHERE e.conversation_id = r.reader AND e.lifecycle IS NOT NULL ORDER BY e.seq DESC LIMIT 1)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "8a4cb8dcb96f2ae5c1eaeef44e96c40e8d5e9ec8c2910673ebf233607542a7ef"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE channel_messages SET author_name=NULL WHERE ctid = ANY(ARRAY(SELECT ctid FROM channel_messages WHERE author_kind='conversation' AND author_id=$1 AND author_name IS NOT NULL LIMIT $2))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b57f7a7131341786c00612e5a57ceab1982653fbaa9825c4df96011bd768db72"
+}

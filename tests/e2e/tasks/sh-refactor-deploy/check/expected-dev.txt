@@ -1,0 +1,4 @@
+deploy: target dev (dev.internal.example)
+deploy: sync build/ to dev.internal.example:/srv/app
+deploy: restart app with 1 replica(s)
+deploy: check https://dev.internal.example/healthz

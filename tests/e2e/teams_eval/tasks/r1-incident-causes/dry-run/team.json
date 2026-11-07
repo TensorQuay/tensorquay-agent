@@ -1,0 +1,186 @@
+{
+ "model": "fixture",
+ "select": "prompt",
+ "responses": [
+  {
+   "when": "The folder `incidents/` holds 40 incident write-ups from four teams. Find the five most common root causes across all",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "start_member",
+     "arguments": {
+      "role": "scout",
+      "workspace": "own_copy",
+      "profile": null,
+      "brief": {
+       "objective": "Write scout-notes.md listing the files in this workspace for r1-incident-causes.",
+       "output": "scout-notes.md, one line per file.",
+       "sources": null,
+       "boundaries": "Write only scout-notes.md."
+      }
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The folder `incidents/` holds 40 incident write-ups from four teams. Find the five most common root causes across all",
+   "events": [
+    {
+     "type": "text",
+     "text": "I started a helper; I'll continue when it reports."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The folder `incidents/` holds 40 incident write-ups from four teams. Find the five most common root causes across all",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_reports",
+     "arguments": {
+      "wait": 30,
+      "limit": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The folder `incidents/` holds 40 incident write-ups from four teams. Find the five most common root causes across all",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "take_files",
+     "arguments": {
+      "report_seq": {
+       "seq_of": {
+        "type": "report",
+        "from": "scout"
+       }
+      },
+      "files": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The folder `incidents/` holds 40 incident write-ups from four teams. Find the five most common root causes across all",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "causes.md",
+      "content": "# The five most common root causes\n\n## Disk full (9 incidents)\n\n- `incidents/auth/INC-007.md`\n- `incidents/auth/INC-015.md`\n- `incidents/auth/INC-023.md`\n\n## Expired TLS certificate (8 incidents)\n\n- `incidents/auth/INC-039.md`\n- `incidents/payments/INC-017.md`\n- `incidents/payments/INC-025.md`\n\n## Bad configuration push (7 incidents)\n\n- `incidents/auth/INC-003.md`\n- `incidents/payments/INC-013.md`\n- `incidents/payments/INC-037.md`\n\n## DNS misconfiguration (6 incidents)\n\n- `incidents/auth/INC-011.md`\n- `incidents/auth/INC-019.md`\n- `incidents/auth/INC-027.md`\n\n## Memory leak (5 incidents)\n\n- `incidents/payments/INC-005.md`\n- `incidents/payments/INC-009.md`\n- `incidents/search/INC-034.md`\n\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The folder `incidents/` holds 40 incident write-ups from four teams. Find the five most common root causes across all",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "done",
+     "arguments": {
+      "summary": "Wrote causes.md."
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The folder `incidents/` holds 40 incident write-ups from four teams. Find the five most common root causes across all",
+   "events": [
+    {
+     "type": "text",
+     "text": "Done: causes.md."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "shell",
+     "arguments": {
+      "command": "find . -path ./.git -prune -o -type f -print | sort > scout-notes.md"
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "send_to_lead",
+     "arguments": {
+      "type": "report",
+      "text": "scout-notes.md lists the workspace's files.",
+      "question_seq": null,
+      "files": [
+       "scout-notes.md"
+      ]
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "text",
+     "text": "I reported to my lead."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  }
+ ]
+}

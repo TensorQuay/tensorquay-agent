@@ -1,0 +1,193 @@
+name: Gateway contracts
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - crates/tqa-gateway/**
+      - crates/tqa-types/**
+      - crates/tqa-llm/**
+      - crates/tqa-sandbox/**
+      - crates/tqa-runtime/**
+      - crates/tqa-core/**
+      - crates/tqa-context/**
+      - crates/tqa-prompt/**
+      - crates/tqa-tools/**
+      - crates/tqa-testkit/**
+      - deploy/**
+      - images/gateway/**
+      - images/web/**
+      - images/runtime/**
+      - images/fake-model/**
+      - web/**
+      - Cargo.lock
+      - rust-toolchain.toml
+      - .github/workflows/gateway.yml
+  pull_request:
+    paths:
+      - crates/tqa-gateway/**
+      - crates/tqa-types/**
+      - crates/tqa-llm/**
+      - crates/tqa-sandbox/**
+      - crates/tqa-runtime/**
+      - crates/tqa-core/**
+      - crates/tqa-context/**
+      - crates/tqa-prompt/**
+      - crates/tqa-tools/**
+      - crates/tqa-testkit/**
+      - deploy/**
+      - images/gateway/**
+      - images/web/**
+      - images/runtime/**
+      - images/fake-model/**
+      - web/**
+      - Cargo.lock
+      - rust-toolchain.toml
+      - .github/workflows/gateway.yml
+
+permissions:
+  contents: read
+
+jobs:
+  gateway:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install pinned Rust toolchain
+        run: rustup show
+      - name: Cache Cargo registry and build output
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: |
+            ~/.cargo/registry
+            target
+          key: ${{ runner.os }}-gateway-rust-1.97.1-${{ hashFiles('Cargo.lock', 'Cargo.toml', 'crates/**/Cargo.toml') }}
+      - name: Install pinned test and coverage tools
+        uses: taiki-e/install-action@9114bf4d891761788c546334fd37538eae1bf8b3 # v2.87.16
+        with:
+          tool: cargo-nextest@0.9.145,cargo-llvm-cov@0.9.1
+      - name: Create ephemeral database credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          database_password="$(openssl rand -hex 32)"
+          gateway_docker_gid="$(stat -c '%g' /var/run/docker.sock)"
+          echo "::add-mask::$database_password"
+          {
+            printf 'TQA_POSTGRES_PASSWORD=%s\n' "$database_password"
+            printf 'TQA_DATABASE_URL=postgres://tqa:%s@127.0.0.1:55432/gateway\n' "$database_password"
+            printf 'DATABASE_URL=postgres://tqa:%s@127.0.0.1:55432/gateway\n' "$database_password"
+            printf 'TQA_DOCKER_GID=%s\n' "$gateway_docker_gid"
+          } >> "$GITHUB_ENV"
+      - name: Start pinned PostgreSQL
+        run: docker compose -f deploy/compose/dev.yml up -d --no-build --wait postgres
+      - name: Install SQLx CLI and apply the checked migrations
+        run: |
+          set -euo pipefail
+          cargo install sqlx-cli --version 0.9.0 --locked --no-default-features --features rustls,postgres
+          sqlx migrate run --source crates/tqa-gateway/migrations
+      - name: Verify SQL metadata against the live schema
+        working-directory: crates/tqa-gateway
+        run: cargo sqlx prepare --check -- --all-targets
+      - name: Check formatting and offline SQL metadata compilation
+        env:
+          SQLX_OFFLINE: "true"
+        run: |
+          set -euo pipefail
+          cargo fmt -p tqa-gateway --check
+          cargo clippy -p tqa-gateway --all-targets -- -D warnings
+      - name: Run database-independent contracts and show ignored tests
+        env:
+          SQLX_OFFLINE: "true"
+        run: cargo nextest run -p tqa-gateway
+      - name: Build the static gateway image for the Docker contract
+        run: docker build -f images/gateway/Dockerfile -t tqa-gateway:local .
+      - name: Build the standalone web image for the Docker contract
+        run: docker build -f images/web/Dockerfile -t tqa-web:local .
+      - name: Build the real runtime and scripted model for the demo
+        run: |
+          set -euo pipefail
+          docker build --target base -f images/runtime/Dockerfile -t tqa-runtime:base .
+          docker build --target workstation -f images/runtime/Dockerfile -t tqa-runtime:workstation .
+          docker build -f images/fake-model/Dockerfile -t tqa-fake-model:local .
+      - name: Check repository cloning through the policy proxy
+        env:
+          SQLX_OFFLINE: "true"
+          TQA_DOCKER_TESTS: "1"
+          TQA_RUNTIME_TEST_IMAGE: tqa-runtime:workstation
+        run: |
+          set -euo pipefail
+          docker build --target clone-probe -f images/runtime/Dockerfile -t tqa-runtime:clone-probe .
+          export TQA_GATEWAY_IMAGE="$(docker image inspect --format '{{.Id}}' tqa-gateway:local)"
+          export TQA_CLONE_PROBE_IMAGE="$(docker image inspect --format '{{.Id}}' tqa-runtime:clone-probe)"
+          cargo nextest run -p tqa-sandbox --test workspace_clone --run-ignored all --retries 0
+      - name: Install the pinned browser test tools
+        working-directory: web
+        run: |
+          set -euo pipefail
+          npm install --global corepack@0.36.0
+          corepack pnpm install --frozen-lockfile
+          corepack pnpm exec playwright install --with-deps chromium
+      - name: Run all gateway contracts against PostgreSQL
+        env:
+          SQLX_OFFLINE: "true"
+          TQA_DOCKER_TESTS: "1"
+          TQA_GATEWAY_IMAGE: tqa-gateway:local
+        run: cargo nextest run -p tqa-gateway --run-ignored all
+      - name: Test the deployment harness failures without Docker
+        run: python3 -m unittest discover -s deploy/tests -p 'test_*.py' -v
+      - name: Run the full-stack browser and workspace contract
+        env:
+          TQA_DOCKER_TESTS: "1"
+          TQA_WEB_EVIDENCE_DIR: ${{ runner.temp }}/tqa-demo-evidence
+        run: python3 deploy/tests/demo.py
+      - name: Run full-stack UX invariants
+        env:
+          TQA_DOCKER_TESTS: "1"
+          TQA_WEB_EVIDENCE_DIR: ${{ runner.temp }}/tqa-ux-evidence
+        run: python3 deploy/tests/demo.py --suite ux
+      - name: Run the environment switch contract
+        env:
+          TQA_DOCKER_TESTS: "1"
+          TQA_WEB_EVIDENCE_DIR: ${{ runner.temp }}/tqa-environment-evidence
+        run: python3 deploy/tests/demo.py --suite environment
+      - name: Prove explicitly selected database tests fail without opt-in
+        shell: bash
+        env:
+          SQLX_OFFLINE: "true"
+        run: |
+          set -euo pipefail
+          if env -u TQA_DATABASE_URL cargo nextest run -p tqa-gateway --run-ignored all \
+            -E 'test(gw_i_016_migrations_preserve_data_when_reapplied)' > missing-database.log 2>&1; then
+            cat missing-database.log
+            exit 1
+          fi
+          rg 'PostgreSQL tests require TQA_DATABASE_URL' missing-database.log
+      - name: Prove explicitly selected Docker tests fail without opt-in
+        shell: bash
+        env:
+          SQLX_OFFLINE: "true"
+        run: |
+          set -euo pipefail
+          if env -u TQA_DOCKER_TESTS cargo nextest run -p tqa-gateway --test compose --run-ignored all > missing-docker.log 2>&1; then
+            cat missing-docker.log
+            exit 1
+          fi
+          rg 'Docker tests require TQA_DOCKER_TESTS=1' missing-docker.log
+      - name: Report crate coverage
+        env:
+          SQLX_OFFLINE: "true"
+          TQA_DOCKER_TESTS: "1"
+          TQA_GATEWAY_IMAGE: tqa-gateway:local
+        run: cargo llvm-cov nextest -p tqa-gateway --run-ignored all
+      - name: Check crate documentation
+        env:
+          SQLX_OFFLINE: "true"
+          RUSTDOCFLAGS: -D warnings
+        run: cargo doc -p tqa-gateway --no-deps
+      - name: Stop the ephemeral database
+        if: always()
+        run: docker compose -f deploy/compose/dev.yml down --volumes

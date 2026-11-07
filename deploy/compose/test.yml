@@ -1,0 +1,16 @@
+# Test-only model endpoint; the installation stack does not enable it.
+services:
+  fake-model:
+    image: caddy:2.10.2@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d
+    user: "1000:1000"
+    volumes:
+      - ../tests/fake-model.Caddyfile:/etc/caddy/Caddyfile:ro
+    networks: [control]
+    read_only: true
+    tmpfs: ["/data:uid=1000,gid=1000,mode=0700", "/config:uid=1000,gid=1000,mode=0700"]
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 64m
+    cpus: 0.25
+    pids_limit: 64

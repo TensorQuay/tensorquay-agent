@@ -1,0 +1,522 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Budget": {
+      "additionalProperties": false,
+      "description": "The run's budget use.",
+      "properties": {
+        "max_output_tokens": {
+          "description": "The output-token limit.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "max_steps": {
+          "description": "The step limit.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "output_tokens_used": {
+          "description": "Output tokens spent.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "steps_used": {
+          "description": "Steps completed.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "steps_used",
+        "max_steps",
+        "output_tokens_used",
+        "max_output_tokens"
+      ],
+      "type": "object"
+    },
+    "Call": {
+      "additionalProperties": false,
+      "description": "A call of the previous step.",
+      "properties": {
+        "arguments": {
+          "description": "Its arguments, under exposure `calls` or `full`."
+        },
+        "name": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_]{0,63}$"
+            },
+            {
+              "not": {
+                "pattern": "^mcp\\.[^.]*(__|_\\.)"
+              },
+              "pattern": "^mcp\\.[a-z][a-z0-9_]{0,15}\\.[A-Za-z0-9_.-]{1,128}$"
+            }
+          ],
+          "description": "The tool, a valid tool name, so that under exposure `none` a name can't carry the conversation's text.",
+          "type": "string"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ToolStatus"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Its terminal status, when it has one."
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    },
+    "DecisionExposure": {
+      "description": "How much of the conversation a decision engine may see (ADR-0013 point 5): an administrator's setting per engine.",
+      "oneOf": [
+        {
+          "const": "none",
+          "description": "Calls by id and name only; nothing of the transcript. The default.",
+          "type": "string"
+        },
+        {
+          "const": "calls",
+          "description": "Also the calls' arguments.",
+          "type": "string"
+        },
+        {
+          "const": "full",
+          "description": "Also the response's text and the transcript.",
+          "type": "string"
+        }
+      ]
+    },
+    "DecisionPoint": {
+      "description": "Where the loop consulted the engine.",
+      "oneOf": [
+        {
+          "const": "before_step",
+          "description": "Before a step's model call.",
+          "type": "string"
+        },
+        {
+          "const": "after_response",
+          "description": "After a complete model response, selecting its calls.",
+          "type": "string"
+        }
+      ]
+    },
+    "Request": {
+      "additionalProperties": false,
+      "description": "A consultation: the step, what it may choose among, and what the exposure allows it to see.",
+      "properties": {
+        "attempt": {
+          "description": "The step's attempt, from 1.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "budget": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Budget"
+            }
+          ],
+          "description": "The run's budget use against its limits."
+        },
+        "point": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DecisionPoint"
+            }
+          ],
+          "description": "Where the loop consults the engine."
+        },
+        "previous_calls": {
+          "description": "The previous step's calls in journal order.",
+          "items": {
+            "$ref": "#/definitions/Call"
+          },
+          "type": "array"
+        },
+        "response_calls": {
+          "description": "For `after_response`: the response's calls, by id and name, with arguments only under exposure `calls` or\n`full`.",
+          "items": {
+            "$ref": "#/definitions/ResponseCall"
+          },
+          "type": "array"
+        },
+        "response_text": {
+          "description": "For `after_response` under exposure `full`: the response's visible text.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "routes": {
+          "description": "The routes a `call_model` may name: the conversation's own first, then its declared fallbacks.",
+          "items": {
+            "$ref": "#/definitions/Route"
+          },
+          "type": "array"
+        },
+        "run_id": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/RunId"
+            }
+          ],
+          "description": "The run."
+        },
+        "step": {
+          "description": "The step, from 1.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "tools": {
+          "description": "The step's tools.",
+          "items": {
+            "$ref": "#/definitions/Tool"
+          },
+          "type": "array"
+        },
+        "transcript": {
+          "description": "Under exposure `full`: the conversation as the model sees it, at most its last 64 KiB of text.",
+          "items": {
+            "$ref": "#/definitions/TranscriptLine"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "point",
+        "run_id",
+        "step",
+        "attempt",
+        "routes",
+        "tools",
+        "budget",
+        "previous_calls"
+      ],
+      "type": "object"
+    },
+    "Response": {
+      "description": "The engine's answer: exactly one decision.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "Call `route` with these tools.",
+          "properties": {
+            "decision": {
+              "const": "call_model",
+              "type": "string"
+            },
+            "route": {
+              "description": "The conversation's own route or a declared fallback.",
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            "tools": {
+              "description": "A subset of the step's tools.",
+              "items": {
+                "anyOf": [
+                  {
+                    "pattern": "^[a-z][a-z0-9_]{0,63}$"
+                  },
+                  {
+                    "not": {
+                      "pattern": "^mcp\\.[^.]*(__|_\\.)"
+                    },
+                    "pattern": "^mcp\\.[a-z][a-z0-9_]{0,15}\\.[A-Za-z0-9_.-]{1,128}$"
+                  }
+                ],
+                "type": "string"
+              },
+              "maxItems": 256,
+              "type": "array"
+            }
+          },
+          "required": [
+            "decision",
+            "route",
+            "tools"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Run one call without a model call.",
+          "properties": {
+            "arguments": {
+              "description": "Its arguments, a JSON object.",
+              "type": "object"
+            },
+            "decision": {
+              "const": "act",
+              "type": "string"
+            },
+            "tool": {
+              "anyOf": [
+                {
+                  "pattern": "^[a-z][a-z0-9_]{0,63}$"
+                },
+                {
+                  "not": {
+                    "pattern": "^mcp\\.[^.]*(__|_\\.)"
+                  },
+                  "pattern": "^mcp\\.[a-z][a-z0-9_]{0,15}\\.[A-Za-z0-9_.-]{1,128}$"
+                }
+              ],
+              "description": "A tool of the step.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "decision",
+            "tool",
+            "arguments"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Compact the conversation now. A struct variant, so an unknown field is refused like everywhere else.",
+          "properties": {
+            "decision": {
+              "const": "compact",
+              "type": "string"
+            }
+          },
+          "required": [
+            "decision"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Stop the run as failed.",
+          "properties": {
+            "decision": {
+              "const": "stop",
+              "type": "string"
+            },
+            "reason": {
+              "description": "1 through 200 characters, no control characters.",
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "decision",
+            "reason"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Keep these calls of the response.",
+          "properties": {
+            "call_ids": {
+              "description": "At most 64 call ids.",
+              "items": {
+                "$ref": "#/definitions/ToolCallId"
+              },
+              "maxItems": 64,
+              "type": "array"
+            },
+            "decision": {
+              "const": "select",
+              "type": "string"
+            }
+          },
+          "required": [
+            "decision",
+            "call_ids"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "ResponseCall": {
+      "additionalProperties": false,
+      "description": "A call of the response being selected from.",
+      "properties": {
+        "arguments": {
+          "description": "Its arguments, under exposure `calls` or `full`."
+        },
+        "id": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/ToolCallId"
+            }
+          ],
+          "description": "The call's id, which a `select` names."
+        },
+        "name": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_]{0,63}$"
+            },
+            {
+              "not": {
+                "pattern": "^mcp\\.[^.]*(__|_\\.)"
+              },
+              "pattern": "^mcp\\.[a-z][a-z0-9_]{0,15}\\.[A-Za-z0-9_.-]{1,128}$"
+            }
+          ],
+          "description": "The tool, a valid tool name, so that under exposure `none` a name can't carry the conversation's text.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "type": "object"
+    },
+    "Route": {
+      "additionalProperties": false,
+      "description": "A route a decision may name.",
+      "properties": {
+        "context_window": {
+          "description": "Its context window in tokens, when declared.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "max_output": {
+          "description": "Its output limit in tokens, when declared.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "name": {
+          "description": "The route's name.",
+          "maxLength": 256,
+          "minLength": 1,
+          "type": "string"
+        },
+        "native_tools": {
+          "description": "Whether it calls tools natively.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "native_tools"
+      ],
+      "type": "object"
+    },
+    "RunId": {
+      "description": "A validated run identifier, encoded as a JSON string.",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "type": "string"
+    },
+    "Tool": {
+      "additionalProperties": false,
+      "description": "A tool of the step.",
+      "properties": {
+        "description": {
+          "description": "Its description.",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_]{0,63}$"
+            },
+            {
+              "not": {
+                "pattern": "^mcp\\.[^.]*(__|_\\.)"
+              },
+              "pattern": "^mcp\\.[a-z][a-z0-9_]{0,15}\\.[A-Za-z0-9_.-]{1,128}$"
+            }
+          ],
+          "description": "Its name.",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "Its parameter schema."
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "parameters"
+      ],
+      "type": "object"
+    },
+    "ToolCallId": {
+      "description": "A validated tool-call identifier, encoded as a JSON string.",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "type": "string"
+    },
+    "ToolStatus": {
+      "description": "Terminal status of one tool execution.",
+      "oneOf": [
+        {
+          "const": "ok",
+          "description": "The tool completed successfully.",
+          "type": "string"
+        },
+        {
+          "const": "error",
+          "description": "The tool failed.",
+          "type": "string"
+        },
+        {
+          "const": "cancelled",
+          "description": "The user or supervisor cancelled the tool.",
+          "type": "string"
+        },
+        {
+          "const": "interrupted",
+          "description": "Execution was interrupted before completion.",
+          "type": "string"
+        }
+      ]
+    },
+    "TranscriptLine": {
+      "additionalProperties": false,
+      "description": "One message of the transcript.",
+      "properties": {
+        "role": {
+          "description": "`user`, `assistant`, `tool` or `system`.",
+          "type": "string"
+        },
+        "text": {
+          "description": "The message's text.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role",
+        "text"
+      ],
+      "type": "object"
+    }
+  },
+  "title": "TensorQuay decision/v1"
+}

@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO idempotency (key,user_id,route,response_status,response_body,body_hash,conversation_id,queued_frame,execution_status,held) VALUES ($1,$2,$3,202,$4,$5,$6,$7,'queued',$8) RETURNING ordinal AS \"ordinal!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ordinal!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "idempotency",
+            "name": "ordinal"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid",
+        "Text",
+        "Bytea",
+        "Bytea",
+        "Uuid",
+        "Bytea",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "4e61245f9c525c3dc39d88f0ac452eaef5e81450f8351c0aa69faaf069f41e8e"
+}

@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT w.state, w.size_bytes, w.quota_bytes FROM workspaces w JOIN conversations c ON c.workspace_id=w.id WHERE c.id=$1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "state"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "size_bytes",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "size_bytes"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "quota_bytes",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "quota_bytes"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "1ca3b47de6411a3f608ce8dd7dd19fb9c07ebbe23332c0fe456cf202f928372a"
+}

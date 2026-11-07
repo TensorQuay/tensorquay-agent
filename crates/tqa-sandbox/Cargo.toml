@@ -1,0 +1,40 @@
+[package]
+name = "tqa-sandbox"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+description = "Sandbox backend contracts, container and microVM lifecycle support and image resolution."
+
+[dependencies]
+tqa-types = { version = "0.1.0", path = "../tqa-types" }
+async-trait = "=0.1.92"
+bollard = { version = "=0.21.1", features = ["ssl"] }
+futures = "=0.3.34"
+# Gzip layers in an engine export (ADR-0032 credential-file scan); the pure-Rust backend only, no C zlib.
+flate2 = { version = "=1.1.10", default-features = false, features = ["rust_backend"] }
+log = { version = "~0.4", features = ["release_max_level_info"] }
+rustix = { version = "~1.1", features = ["fs"] }
+secrecy = "=0.10.3"
+serde = { version = "=1.0.229", features = ["derive"] }
+serde_json = "=1.0.151"
+sha2 = "~0.11"
+thiserror = "=2.0.20"
+tokio = { version = "=1.53.3", features = ["fs", "io-util", "macros", "rt-multi-thread", "sync", "time"] }
+tokio-util = { version = "=0.7.19", features = ["rt"] }
+tracing = "=0.1.44"
+url = "=2.5.8"
+tar = { version = "=0.4.46", default-features = false }
+
+[dev-dependencies]
+tqa-context = { version = "0.1.0", path = "../tqa-context" }
+tqa-runtime = { version = "0.1.0", path = "../tqa-runtime", features = ["testing"] }
+tqa-testkit = { version = "0.1.0", path = "../tqa-testkit" }
+proptest = "=1.11.0"
+tempfile = "=3.27.0"
+tracing-subscriber = { version = "=0.3.23", default-features = false, features = ["fmt"] }
+tokio = { version = "=1.53.3", features = ["test-util", "process"] }
+
+[lints]
+workspace = true

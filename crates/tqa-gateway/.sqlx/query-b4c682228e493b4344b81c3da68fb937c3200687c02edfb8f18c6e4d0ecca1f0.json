@@ -1,0 +1,61 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT t.id, t.lead_conversation, c.last_seq, ARRAY(SELECT m.conversation_id FROM agent_team_members m WHERE m.team_id = t.id) AS \"members!\" FROM agent_teams t JOIN channels c ON c.id = t.channel_id WHERE ($3 AND t.state <> 'ended') OR t.id = ANY($1) OR t.channel_id = ANY($2)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "lead_conversation",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "lead_conversation"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "last_seq",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "channels",
+            "name": "last_seq"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "members!",
+        "type_info": "UuidArray",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray",
+        "UuidArray",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "b4c682228e493b4344b81c3da68fb937c3200687c02edfb8f18c6e4d0ecca1f0"
+}

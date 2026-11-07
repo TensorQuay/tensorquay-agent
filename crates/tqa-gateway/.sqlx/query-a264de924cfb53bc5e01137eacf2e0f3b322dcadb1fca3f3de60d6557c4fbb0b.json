@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE model_routes SET document=document-'key_ref' WHERE name=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a264de924cfb53bc5e01137eacf2e0f3b322dcadb1fca3f3de60d6557c4fbb0b"
+}

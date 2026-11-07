@@ -1,0 +1,339 @@
+/*
+ * Agent teams (ADR-0034; UI-GUIDELINES §13b). The team strip: one quiet line under the lead task's bar, a chip per
+ * helper then the budget; below 520 px of its own width, one line that opens All helpers.
+ */
+.helpers-strip {
+  container: helpers-strip / inline-size;
+}
+.helpers-strip-wide {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+/* The chips give way: the row shrinks and clips, each name is cut with "…" (whole in its tooltip and name), and the
+   budget and All helpers keep their one line (WEB-U-369; three long names overlapped the budget at 1280). */
+.helpers-chips {
+  display: flex;
+  flex: 0 1 auto;
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  list-style: none;
+}
+.helpers-chips > li {
+  min-width: 0;
+}
+.helpers-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  max-width: 100%;
+  color: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.helpers-chip-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.helpers-dot {
+  flex-shrink: 0;
+  width: var(--dot-size);
+  height: var(--dot-size);
+  border-radius: var(--pill-radius);
+  background: var(--muted);
+}
+[data-tone="info"] > .helpers-dot {
+  background: var(--info);
+}
+[data-tone="danger"] > .helpers-dot {
+  background: var(--danger);
+}
+[data-tone="success"] > .helpers-dot {
+  background: var(--ok);
+}
+.helpers-more,
+.helpers-all {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.helpers-more,
+.helpers-all,
+.helpers-strip-narrow {
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.helpers-budget {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-inline-start: auto;
+  white-space: nowrap;
+}
+.helpers-meter {
+  display: inline-block;
+  inline-size: var(--space-16);
+  height: var(--meter-height);
+  border-radius: var(--pill-radius);
+  background: var(--line);
+  overflow: hidden;
+}
+.helpers-meter > span {
+  display: block;
+  height: 100%;
+  background: var(--ink);
+}
+.helpers-strip-narrow {
+  display: none;
+}
+@container helpers-strip (max-width: 519px) {
+  .helpers-strip-wide {
+    display: none;
+  }
+  .helpers-strip-narrow {
+    display: inline;
+  }
+}
+/* All helpers: one row per helper in the side sheet, its ⋯ at the end. */
+.helpers-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.helpers-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding-block: var(--space-2);
+  border-bottom: var(--border-width) solid var(--line);
+}
+.helpers-row-text {
+  flex: 1;
+  min-width: 0;
+}
+/* Open and the ⋯, side by side at the row's end (WEB-U-221). */
+.helpers-row-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--space-1);
+}
+.helpers-last {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.helpers-row [data-tone="danger"] {
+  color: var(--danger);
+}
+/* A team message in the lead's transcript: one muted 13 px line, "…" when long, the full text in place when opened. */
+.team-line-toggle {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1);
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.team-line-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.team-line[data-open] .team-line-text {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.team-line[data-tone="info"] {
+  color: var(--info);
+}
+/* A team log that couldn't be read, in its place, with Try again (WEB-U-229). */
+.team-log-problem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--danger);
+}
+.team-log-retry {
+  color: var(--ink);
+}
+/* The team's end note in the lead's transcript: a quiet surface card, as the transcript's other cards. */
+.team-end {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+}
+/* A helper's brief from its lead: a surface card at the top of its transcript, folded to six lines when longer. */
+.brief-card {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+}
+.brief-card dl,
+.brief-card dd {
+  margin: 0;
+}
+/* Each part its own space (the task, then Output, …), its label close to its text (the S6 web review). */
+.brief-body,
+.brief-card dl {
+  display: grid;
+  gap: var(--space-3);
+}
+.brief-card dl > div {
+  display: grid;
+  gap: var(--space-1);
+}
+.brief-card[data-folded] .brief-body {
+  max-height: calc(6 * var(--text-body--line-height));
+  overflow: hidden;
+}
+.brief-more {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--info);
+  font: inherit;
+  cursor: pointer;
+}
+/* Waiting for you: the lead's question to its person, warn-tinted until answered (UI-GUIDELINES §13b). */
+.waiting-card {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+}
+.waiting-card[data-tone="warn"] {
+  background: color-mix(in srgb, var(--warn) var(--status-tint), var(--paper));
+}
+/* §13b: the team's line under the task's bar (the lead's strip or a helper's "Helper of"), then the transcript. */
+.conversation-team {
+  flex-shrink: 0;
+  padding-block-end: var(--space-2);
+}
+/* One line: the lead's title gives way with "…", the words around it and the helper's name keep their room. */
+.helper-of {
+  display: flex;
+  margin: 0;
+  min-width: 0;
+  white-space: pre;
+}
+.helper-of-words {
+  flex-shrink: 0;
+}
+.helper-of-lead {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* A helper's composer says where its messages go, quietly, above the box. */
+.composer-notice {
+  margin-top: var(--space-3);
+  text-align: center;
+}
+/* §13b in the task list (WEB-U-220): a lead's count at the end of its row, its chevron, and its helpers under it. */
+.task-helpers-count {
+  flex-shrink: 0;
+  color: var(--muted);
+}
+.task-helpers-count[data-tone="danger"] {
+  color: var(--danger);
+}
+.task-helpers-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: var(--row-height-nav);
+  min-height: var(--row-height-nav);
+  padding: 0;
+  border: 0;
+  border-radius: var(--control-radius);
+  background: transparent;
+  color: var(--muted);
+}
+.task-helpers-toggle:hover {
+  background: var(--hover-tint);
+}
+.task-helpers-toggle[aria-expanded="false"] svg {
+  transform: rotate(-90deg);
+}
+.conversation-row:has(> .task-helpers),
+.conversation-row:has(> .task-helpers-note) {
+  flex-wrap: wrap;
+}
+.task-helpers,
+.task-helpers-note {
+  flex-basis: 100%;
+  margin: 0;
+  padding-inline-start: var(--space-6);
+}
+.task-helpers {
+  list-style: none;
+}
+/* An open helper is the current row, not its lead. */
+.conversation-row:has(.task-helpers [aria-current="page"]):not(
+    :has(> .conversation-link[aria-current="page"])
+  ) {
+  background: transparent;
+  font-weight: inherit;
+}
+.task-helper:has([aria-current="page"]) {
+  background: var(--surface);
+  border-radius: var(--control-radius);
+  font-weight: 500;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .task-helpers-toggle svg {
+    transition: transform var(--motion-fast) ease;
+  }
+}
+/* A helper found by a search says whose it is, under its title (WEB-U-220). */
+.task-under {
+  display: block;
+}
+/* §13b: Waiting for you in the task list, a filled amber dot; the row stays where it is. */
+.task-waiting {
+  flex-shrink: 0;
+  inline-size: var(--space-2);
+  block-size: var(--space-2);
+  border-radius: 50%;
+  background: var(--warn);
+}
+/* On a phone every row wraps and its link takes the line; a lead's row keeps its chevron, title and ⋯ on one line,
+   and its helpers wrap below it. */
+@media (max-width: 767px) {
+  .conversation-row:has(> .task-helpers-toggle) > .conversation-link {
+    flex-basis: 0;
+    flex-grow: 1;
+  }
+}
+/* A lead's "Helpers are still working." and Stop team, on one line: the line sits in its live region, the button
+   after it, outside. Empty (no height) until the line shows. */
+.helpers-still {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--space-2);
+}

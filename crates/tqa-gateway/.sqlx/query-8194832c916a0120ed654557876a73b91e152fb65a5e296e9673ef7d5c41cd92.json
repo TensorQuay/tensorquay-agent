@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT name,description AS \"description!\" FROM model_routes WHERE description IS NOT NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "model_routes",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "description!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "model_routes",
+            "name": "description"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "8194832c916a0120ed654557876a73b91e152fb65a5e296e9673ef7d5c41cd92"
+}

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE connectors SET seed_state='current' WHERE name=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2e5db68539dc82464af45d864984cda193c1c3c69ac8caa15757d3484c88b632"
+}

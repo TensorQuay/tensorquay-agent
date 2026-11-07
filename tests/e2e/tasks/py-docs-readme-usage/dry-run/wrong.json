@@ -1,0 +1,33 @@
+{
+ "model": "fixture",
+ "responses": [
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "shell",
+     "arguments": {
+      "command": "python3 -c \"\nreadme = open('README.md').read()\nopen('README.md', 'w').write(readme.replace('--ignore-case  match without regard to case', '--ignore-case  match without regard to case\\n  --limit N      stop after N matching lines'))\n\""
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 480,
+    "completion_tokens": 140
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "Added --limit to the Usage block."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 760,
+    "completion_tokens": 20
+   }
+  }
+ ]
+}

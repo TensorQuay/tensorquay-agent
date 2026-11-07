@@ -1,0 +1,51 @@
+{
+ "model": "fixture",
+ "responses": [
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "package.json",
+      "content": "{\n  \"name\": \"money\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"scripts\": {\n    \"test\": \"node --test test/*.test.ts\"\n  }\n}\n",
+      "create_parents": false
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 430,
+    "completion_tokens": 70
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "shell",
+     "arguments": {
+      "command": "HOME=/tmp npm test"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 700,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "npm test now runs every test file in test/ as ES modules."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 20
+   }
+  }
+ ]
+}

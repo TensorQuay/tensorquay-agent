@@ -1,0 +1,51 @@
+{
+ "model": "fixture",
+ "responses": [
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "src/range.ts",
+      "content": "/** Calendar helpers on ISO dates (YYYY-MM-DD), computed in UTC. */\n\nconst DAY_MS = 24 * 60 * 60 * 1000;\n\nexport function parseDay(text: string): number {\n  const match = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(text);\n  if (!match) {\n    throw new Error(`not an ISO date: ${text}`);\n  }\n  return Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]));\n}\n\n/** The number of days in the inclusive range from `start` to `end`; 0 when `end` is before `start`. */\nexport function daysInRange(start: string, end: string): number {\n  const span = (parseDay(end) - parseDay(start)) / DAY_MS;\n  return span < 0 ? 0 : span;\n}\n\n/** Every day of the inclusive range, as ISO dates. */\nexport function listDays(start: string, end: string): string[] {\n  const days: string[] = [];\n  const first = parseDay(start);\n  for (let offset = 0; offset <= daysInRange(start, end); offset++) {\n    days.push(new Date(first + offset * DAY_MS).toISOString().slice(0, 10));\n  }\n  return days;\n}\n",
+      "create_parents": false
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 520,
+    "completion_tokens": 180
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "shell",
+     "arguments": {
+      "command": "node --test test/*.test.ts"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 800,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "listDays now includes the last day."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 1000,
+    "completion_tokens": 20
+   }
+  }
+ ]
+}

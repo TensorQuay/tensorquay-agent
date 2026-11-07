@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM runtime_tokens WHERE conversation_id=ANY($1)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cdaebd80323300e4213e2428b35dbf95ee63781a55cad902813287cb39147629"
+}

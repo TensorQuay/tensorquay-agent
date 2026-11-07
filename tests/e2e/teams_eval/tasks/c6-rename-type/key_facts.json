@@ -1,0 +1,6 @@
+[
+ "StockItem in inventory/model.py and every module: io, reports, store",
+ "inventory/__init__.py keeps Record = StockItem and exports both",
+ "docs/model.md and docs/reports.md use StockItem",
+ "Behaviour and CSV output unchanged"
+]

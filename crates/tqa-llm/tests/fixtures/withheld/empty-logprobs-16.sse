@@ -1,0 +1,56 @@
+data: {"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: {"choices":[],"usage":{"prompt_tokens":1535,"completion_tokens":46}}
+
+data: [DONE]
+

@@ -1,0 +1,53 @@
+{
+ "model": "fixture",
+ "responses": [
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "src/validate.ts",
+      "content": "/** A plausible email address: one @, a non-empty local part and a dotted domain. */\nexport function isEmail(text: string): boolean {\n  return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(text);\n}\n\n/** A handle: 3 to 20 lowercase letters, digits or underscores, starting with a letter. */\nexport function isHandle(text: string): boolean {\n  return /^[a-z][a-z0-9_]{2,19}$/.test(text);\n}\n",
+      "create_parents": false
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 500,
+    "completion_tokens": 150
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "src/users.ts",
+      "content": "import { isEmail as checkEmail } from \"./validate.ts\";\n\n/** A registered user. */\nexport interface User {\n  email: string;\n  handle: string;\n  displayName: string;\n}\n\n/** A plausible email address: one @, a non-empty local part and a dotted domain. */\nexport function isEmail(text: string): boolean {\n  return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(text);\n}\n\n/** A handle: 3 to 20 lowercase letters, digits or underscores, starting with a letter. */\nexport function isHandle(text: string): boolean {\n  return /^[a-z][a-z0-9_]{2,19}$/.test(text);\n}\n\n/** Creates a user after validating its fields; the display name defaults to the handle. */\nexport function createUser(email: string, handle: string, displayName?: string): User {\n  if (!isEmail(email)) {\n    throw new Error(`invalid email: ${email}`);\n  }\n  if (!isHandle(handle)) {\n    throw new Error(`invalid handle: ${handle}`);\n  }\n  return { email: email.toLowerCase(), handle, displayName: displayName?.trim() || handle };\n}\n",
+      "create_parents": false
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 800,
+    "completion_tokens": 150
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "Added src/validate.ts."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 1300,
+    "completion_tokens": 20
+   }
+  }
+ ]
+}

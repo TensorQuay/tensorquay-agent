@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM workspaces w JOIN conversations c ON c.workspace_id = w.id WHERE c.id = $1 AND w.lease_conversation_id = c.id AND COALESCE(w.lease_expires_at <= CURRENT_TIMESTAMP, true)) AS \"expired!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "expired!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "f48c4eaed247e5f5976b6eaa9cb1bfb606b4809cec35982c70e658c30cee6bbc"
+}

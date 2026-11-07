@@ -1,0 +1,81 @@
+.markdown-body {
+  min-width: 0;
+  max-width: var(--measure);
+  overflow-wrap: anywhere;
+}
+.markdown-body > * + * {
+  margin-top: var(--space-4);
+}
+.markdown-body :is(h1, h2, h3, h4, h5, h6) {
+  font-size: var(--heading-size);
+  line-height: var(--heading-leading);
+  letter-spacing: var(--heading-tracking);
+  font-weight: 400;
+}
+.markdown-body :is(ul, ol) {
+  padding-left: var(--space-6);
+  list-style: disc;
+}
+.markdown-body ol {
+  list-style: decimal;
+}
+.markdown-body li + li {
+  margin-top: var(--space-1);
+}
+.markdown-body blockquote {
+  border-left: var(--border-width) solid var(--line);
+  padding-left: var(--space-4);
+  color: var(--muted);
+}
+.markdown-body a {
+  text-decoration: underline;
+}
+.markdown-body :not(pre) > code {
+  background: var(--code-bg);
+}
+.markdown-body hr {
+  border-color: var(--line);
+}
+.markdown-code {
+  min-width: 0;
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+  overflow: hidden;
+}
+.code-heading {
+  padding-inline: var(--space-3);
+  justify-content: space-between;
+  background: var(--surface);
+}
+.markdown-code pre {
+  margin: 0;
+  max-width: 100%;
+}
+.markdown-table {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.markdown-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+/* Cells wrap only between words: the body's `anywhere` would let the table layout squeeze a short column until its
+   words and numbers break. A table wider than the column scrolls inside its region (WEB-U-027). */
+.markdown-table :is(th, td) {
+  border: var(--border-width) solid var(--line);
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  overflow-wrap: normal;
+}
+.markdown-table .markdown-cell-short {
+  white-space: nowrap;
+}
+.markdown-table th {
+  background: var(--surface);
+}
+.clipboard-buffer {
+  position: fixed;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}

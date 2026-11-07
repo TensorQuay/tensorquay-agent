@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE agent_team_members SET state = 'working', failed_run = false WHERE conversation_id = $1 AND (state IN ('starting', 'queued', 'waiting', 'done') OR (state = 'failed' AND failed_run))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3afa62f551706df13933fe4088e77b5d45be29579a27b9375dae51a11f1d39c0"
+}

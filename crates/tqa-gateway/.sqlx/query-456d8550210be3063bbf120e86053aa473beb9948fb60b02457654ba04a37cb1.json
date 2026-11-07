@@ -1,0 +1,71 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT c.title, c.title_source, c.model_route, c.owner_id, (SELECT count(*) FROM events e WHERE e.conversation_id=c.id AND e.lifecycle='run.completed') AS \"completed!\" FROM conversations c WHERE c.id=$1 AND c.state='active'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "title",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "title_source",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "title_source"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "model_route",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "model_route"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "owner_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "owner_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "completed!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "456d8550210be3063bbf120e86053aa473beb9948fb60b02457654ba04a37cb1"
+}

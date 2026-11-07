@@ -1,0 +1,6 @@
+id = "r6-architecture-overview"
+title = "An architecture overview of a repository"
+tags = ["teams-eval", "teams-research"]
+budgets = { max_steps = 60, wall_clock_secs = 1500, max_tokens = 800000 }
+protected = []
+check = { image = "runtime", timeout_secs = 180 }

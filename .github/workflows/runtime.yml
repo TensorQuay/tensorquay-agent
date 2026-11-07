@@ -1,0 +1,58 @@
+name: Runtime image
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install pinned Rust toolchain
+        run: rustup show active-toolchain || rustup toolchain install
+      - uses: taiki-e/install-action@9114bf4d891761788c546334fd37538eae1bf8b3 # v2.87.16
+        with:
+          tool: cargo-nextest@0.9.145,cargo-llvm-cov@0.9.1
+      - name: Check runtime and fakes
+        run: |
+          cargo fmt -p tqa-runtime -p tqa-testkit --check
+          cargo clippy -p tqa-runtime -p tqa-testkit --all-targets -- -D warnings
+          cargo nextest run -p tqa-runtime -p tqa-testkit
+      - name: Enforce runtime coverage floor
+        run: |
+          available=$(df -Pk . | awk 'NR==2 {print $4}')
+          test "$available" -ge 5242880
+          cargo llvm-cov nextest -p tqa-runtime --fail-under-lines 80
+      - name: Build both sandbox images
+        run: |
+          docker build --target base -f images/runtime/Dockerfile -t tqa-runtime:dev .
+          docker build --target workstation -f images/runtime/Dockerfile -t tqa-runtime:workstation .
+          python3 -m unittest discover -s images/runtime -p 'test_*.py'
+          python3 images/runtime/packages.py --check
+      - name: Check base hardening, process cleanup and links
+        env:
+          TQA_RUNTIME_TEST_IMAGE: tqa-runtime:dev
+        run: cargo nextest run -p tqa-runtime --test docker_image --test link_runs --run-ignored all --retries 0 -E 'not test(rt_i_012) and not test(sbx_c_017)'
+      - name: Check Workstation tools and offline browser
+        env:
+          TQA_RUNTIME_TEST_IMAGE: tqa-runtime:workstation
+        run: cargo nextest run -p tqa-runtime --test docker_image --test link_runs --run-ignored all --retries 0
+      - name: Check both runtime images through sandbox admission
+        env:
+          TQA_DOCKER_TESTS: "1"
+        run: |
+          for image in tqa-runtime:dev tqa-runtime:workstation; do
+            runtime_tests=(--test runtime_image)
+            if [ "$image" = tqa-runtime:workstation ]; then
+              runtime_tests+=(--test runtime_recovery --test runtime_posture)
+            fi
+            sudo env "PATH=$PATH" "RUSTUP_HOME=$HOME/.rustup" "CARGO_HOME=$HOME/.cargo" \
+              TQA_DOCKER_TESTS=1 TQA_ALLOW_DEV_HOST_GATEWAY=1 TQA_RUNTIME_TEST_IMAGE="$image" \
+              cargo nextest run -p tqa-sandbox "${runtime_tests[@]}" --run-ignored all --retries 0
+          done
+      - name: Report image identity and size
+        run: docker image inspect tqa-runtime:dev tqa-runtime:workstation --format '{{.Id}} {{.Size}}'

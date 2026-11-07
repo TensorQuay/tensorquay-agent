@@ -1,0 +1,205 @@
+{
+ "model": "fixture",
+ "select": "prompt",
+ "responses": [
+  {
+   "when": "Document the service in `svc/` as `API.md`: every route, written as its method and path (for example",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "start_member",
+     "arguments": {
+      "role": "scout",
+      "workspace": "own_copy",
+      "profile": null,
+      "brief": {
+       "objective": "Write scout-notes.md listing the files in this workspace for m3-document-and-validate.",
+       "output": "scout-notes.md, one line per file.",
+       "sources": null,
+       "boundaries": "Write only scout-notes.md."
+      }
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Document the service in `svc/` as `API.md`: every route, written as its method and path (for example",
+   "events": [
+    {
+     "type": "text",
+     "text": "I started a helper; I'll continue when it reports."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Document the service in `svc/` as `API.md`: every route, written as its method and path (for example",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_reports",
+     "arguments": {
+      "wait": 30,
+      "limit": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Document the service in `svc/` as `API.md`: every route, written as its method and path (for example",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "take_files",
+     "arguments": {
+      "report_seq": {
+       "seq_of": {
+        "type": "report",
+        "from": "scout"
+       }
+      },
+      "files": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Document the service in `svc/` as `API.md`: every route, written as its method and path (for example",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "API.md",
+      "content": "# Items API\n\n## GET /health\n\n200 `{\"status\": \"ok\"}`\n\n## GET /items\n\nquery `limit` (default 50); 200 `{\"items\": [...]}`\n\n## POST /items\n\nbody `{name, price}`; 201 the item; 400 when invalid\n\n## GET /items/<id>\n\n200 the item; 404\n\n## PUT /items/<id>\n\nbody with `name` and/or `price`; 200; 400; 404\n\n## DELETE /items/<id>\n\n204; 404\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Document the service in `svc/` as `API.md`: every route, written as its method and path (for example",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "svc/app.py",
+      "content": "\"\"\"A small items service: ROUTES maps (method, path pattern) to a handler.\n\nA handler takes (params, body) and answers (status, body).\n\"\"\"\n\nITEMS = {}\n\n\ndef health(params, body):\n    return 200, {\"status\": \"ok\"}\n\n\ndef list_items(params, body):\n    limit = int(params.get(\"limit\", 50))\n    return 200, {\"items\": [dict(item, id=key) for key, item in sorted(ITEMS.items())][:limit]}\n\n\ndef create_item(params, body):\n    problem = invalid(body)\n    if problem:\n        return 400, {\"error\": problem}\n    key = str(len(ITEMS) + 1)\n    ITEMS[key] = {\"name\": body.get(\"name\"), \"price\": body.get(\"price\")}\n    return 201, dict(ITEMS[key], id=key)\n\n\ndef get_item(params, body):\n    item = ITEMS.get(params[\"id\"])\n    return (200, dict(item, id=params[\"id\"])) if item else (404, {\"error\": \"no such item\"})\n\n\ndef update_item(params, body):\n    if params[\"id\"] not in ITEMS:\n        return 404, {\"error\": \"no such item\"}\n    problem = invalid(body, partial=True)\n    if problem:\n        return 400, {\"error\": problem}\n    ITEMS[params[\"id\"]].update({key: body[key] for key in (\"name\", \"price\") if key in body})\n    return 200, dict(ITEMS[params[\"id\"]], id=params[\"id\"])\n\n\ndef delete_item(params, body):\n    return (204, None) if ITEMS.pop(params[\"id\"], None) else (404, {\"error\": \"no such item\"})\n\n\ndef invalid(body, partial=False):\n    \"\"\"Why an item body breaks the README's rules, or None.\"\"\"\n    if not isinstance(body, dict):\n        return \"the body must be an object\"\n    if \"name\" in body or not partial:\n        name = body.get(\"name\")\n        if not isinstance(name, str) or not 1 <= len(name) <= 80:\n            return \"name must be 1 to 80 characters\"\n    if \"price\" in body or not partial:\n        price = body.get(\"price\")\n        if isinstance(price, bool) or not isinstance(price, (int, float)) or price < 0:\n            return \"price must be a number, zero or more\"\n    return None\n\n\nROUTES = {\n    (\"GET\", \"/health\"): health,\n    (\"GET\", \"/items\"): list_items,\n    (\"POST\", \"/items\"): create_item,\n    (\"GET\", \"/items/<id>\"): get_item,\n    (\"PUT\", \"/items/<id>\"): update_item,\n    (\"DELETE\", \"/items/<id>\"): delete_item,\n}\n\n\ndef dispatch(method, path, body=None, query=None):\n    \"\"\"Routes a request; (status, body).\"\"\"\n    parts = path.strip(\"/\").split(\"/\")\n    for (route_method, pattern), handler in ROUTES.items():\n        pattern_parts = pattern.strip(\"/\").split(\"/\")\n        if route_method != method or len(pattern_parts) != len(parts):\n            continue\n        params = dict(query or {})\n        if all(p == q or (p.startswith(\"<\") and params.setdefault(p[1:-1], q)) for p, q in zip(pattern_parts, parts)):\n            return handler(params, body or {})\n    return 404, {\"error\": \"no such route\"}\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Document the service in `svc/` as `API.md`: every route, written as its method and path (for example",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "done",
+     "arguments": {
+      "summary": "Wrote API.md, svc/app.py."
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Document the service in `svc/` as `API.md`: every route, written as its method and path (for example",
+   "events": [
+    {
+     "type": "text",
+     "text": "Done: API.md, svc/app.py."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "shell",
+     "arguments": {
+      "command": "find . -path ./.git -prune -o -type f -print | sort > scout-notes.md"
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "send_to_lead",
+     "arguments": {
+      "type": "report",
+      "text": "scout-notes.md lists the workspace's files.",
+      "question_seq": null,
+      "files": [
+       "scout-notes.md"
+      ]
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "text",
+     "text": "I reported to my lead."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  }
+ ]
+}

@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT lead_last_read_seq FROM agent_teams WHERE id = $1 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "lead_last_read_seq",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "lead_last_read_seq"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "f4cb094cdbb6fcec763e994454d250147f2375bb766abeacc52a3631773e41ee"
+}

@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT lifecycle FROM events WHERE conversation_id = $1 AND lifecycle IS NOT NULL ORDER BY seq DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "lifecycle",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "events",
+            "name": "lifecycle"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "6a10277faa91cefe13ea764a281f83d1ce5275be2e8bbd648bbb70aa6b3f9f68"
+}

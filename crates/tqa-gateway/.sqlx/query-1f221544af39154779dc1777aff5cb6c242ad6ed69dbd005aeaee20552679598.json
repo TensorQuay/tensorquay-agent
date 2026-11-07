@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE agent_profiles SET document=$2,version=version+1,last_set_by='seed',seed_digest=$3,seed_state='current',updated_at=CURRENT_TIMESTAMP WHERE id=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Jsonb",
+        "Bytea"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1f221544af39154779dc1777aff5cb6c242ad6ed69dbd005aeaee20552679598"
+}

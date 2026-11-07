@@ -1,0 +1,86 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT document,display_name,version,last_set_by,seed_state,updated_at FROM connectors ORDER BY name",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "document",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "connectors",
+            "name": "document"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "connectors",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "version",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "connectors",
+            "name": "version"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "last_set_by",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "connectors",
+            "name": "last_set_by"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "seed_state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "connectors",
+            "name": "seed_state"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "connectors",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "4c01ee291479c4c2e1f7cc011849e0d7842381613f9e6716f4eef2efdd5ac2a9"
+}

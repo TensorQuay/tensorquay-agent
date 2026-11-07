@@ -1,0 +1,84 @@
+{
+  "model": "fixture",
+  "select": "prompt",
+  "responses": [
+    {
+      "when": "Record the first run",
+      "wait_ms": 600000,
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "shell",
+          "arguments": {
+            "command": "printf run, >> runs.txt"
+          },
+          "split_into": 3
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 20,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "Record a run in the copy",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "shell",
+          "arguments": {
+            "command": "printf run, >> runs.txt"
+          },
+          "split_into": 3
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 20,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "Record a run in the copy",
+      "events": [
+        {
+          "type": "text",
+          "text": "The run was recorded in runs.txt."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 20,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "Record the second run",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "shell",
+          "arguments": {
+            "command": "printf run, >> runs.txt"
+          },
+          "split_into": 3
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 20,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "Record the second run",
+      "events": [
+        {
+          "type": "text",
+          "text": "The run was recorded in runs.txt."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 20,
+        "completion_tokens": 20
+      }
+    }
+  ]
+}

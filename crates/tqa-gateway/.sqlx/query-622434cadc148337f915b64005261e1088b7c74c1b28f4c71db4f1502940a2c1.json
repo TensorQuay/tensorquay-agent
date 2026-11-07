@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE secrets SET seed_state='current' WHERE ref=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "622434cadc148337f915b64005261e1088b7c74c1b28f4c71db4f1502940a2c1"
+}

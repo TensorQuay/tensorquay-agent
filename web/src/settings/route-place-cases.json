@@ -1,0 +1,162 @@
+[
+  {
+    "url": "http://127.0.0.1:11434/v1",
+    "place": "this_computer"
+  },
+  {
+    "url": "http://[::1]:8000/v1",
+    "place": "this_computer"
+  },
+  {
+    "url": "http://localhost:8080/v1",
+    "place": "this_computer"
+  },
+  {
+    "url": "http://models.localhost/v1",
+    "place": "this_computer"
+  },
+  {
+    "url": "http://host.docker.internal:11434/v1",
+    "place": "this_computer"
+  },
+  {
+    "url": "http://host.containers.internal:11434/v1",
+    "place": "this_computer"
+  },
+  {
+    "url": "http://ollama:11434/v1",
+    "place": "network"
+  },
+  {
+    "url": "http://gpu-box.local/v1",
+    "place": "network"
+  },
+  {
+    "url": "http://models.corp.internal/v1",
+    "place": "network"
+  },
+  {
+    "url": "http://10.0.0.5/v1",
+    "place": "network"
+  },
+  {
+    "url": "http://172.16.0.1/v1",
+    "place": "network"
+  },
+  {
+    "url": "http://192.168.1.1:11434/v1",
+    "place": "network"
+  },
+  {
+    "url": "http://169.254.169.254/v1",
+    "place": "network"
+  },
+  {
+    "url": "http://100.64.0.1/v1",
+    "place": "network"
+  },
+  {
+    "url": "http://100.127.255.255/v1",
+    "place": "network"
+  },
+  {
+    "url": "http://100.63.255.255/v1",
+    "place": "hosted"
+  },
+  {
+    "url": "http://100.128.0.0/v1",
+    "place": "hosted"
+  },
+  {
+    "url": "http://[fd12:3456::1]/v1",
+    "place": "network"
+  },
+  {
+    "url": "http://[fe80::1]/v1",
+    "place": "network"
+  },
+  {
+    "url": "https://api.openai.com/v1",
+    "place": "hosted"
+  },
+  {
+    "url": "https://models.example/v1",
+    "place": "hosted"
+  },
+  {
+    "url": "http://203.0.113.9/v1",
+    "place": "hosted"
+  },
+  {
+    "url": "http://1.0.0.1/v1",
+    "place": "hosted"
+  },
+  {
+    "url": "http://[2001:db8::1]/v1",
+    "place": "hosted"
+  },
+  {
+    "url": "http://localhost.:8080/v1",
+    "place": "this_computer"
+  },
+  {
+    "url": "http://ollama.:11434/v1",
+    "place": "network"
+  },
+  {
+    "url": "http://api.openai.com./v1",
+    "place": "hosted"
+  },
+  {
+    "url": "http://[::ffff:127.0.0.1]:8000/v1",
+    "place": "this_computer"
+  },
+  {
+    "url": "http://[::ffff:192.168.1.1]/v1",
+    "place": "network"
+  },
+  {
+    "url": "http://[::ffff:1.0.0.1]/v1",
+    "place": "hosted"
+  },
+  {
+    "url": "not a url",
+    "place": "hosted"
+  },
+  {
+    "url": "HTTP://OLLAMA:11434/v1",
+    "place": "network"
+  },
+  {
+    "url": "http://GPU-BOX.LOCAL/v1",
+    "place": "network"
+  },
+  {
+    "url": "http://[::FFFF:100.64.0.1]/v1",
+    "place": "network"
+  },
+  {
+    "url": "http://[fc00::1]/v1",
+    "place": "network"
+  },
+  {
+    "url": "http://[fe80::1%25eth0]/v1",
+    "place": "hosted"
+  },
+  {
+    "url": "http://127.1/v1",
+    "place": "this_computer"
+  },
+  {
+    "url": "file:///srv/models",
+    "place": "hosted"
+  },
+  {
+    "url": "http://local/v1",
+    "place": "network"
+  },
+  {
+    "url": "https://models.example.local.example/v1",
+    "place": "hosted"
+  }
+]

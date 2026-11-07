@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM workspace_snapshots WHERE id = ANY($1)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2ff42ef3da6ae97386717e04b1b6e64f4e3e9bcd54f9bd5eb7cb773058f87fd4"
+}

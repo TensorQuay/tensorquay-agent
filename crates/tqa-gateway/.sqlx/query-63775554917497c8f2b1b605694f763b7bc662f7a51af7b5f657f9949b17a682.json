@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO host_keys (id, owner_id, name, host, port, path_prefix, scheme, user_name, secret_ref, check_name) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,true)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text",
+        "Int4",
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "63775554917497c8f2b1b605694f763b7bc662f7a51af7b5f657f9949b17a682"
+}

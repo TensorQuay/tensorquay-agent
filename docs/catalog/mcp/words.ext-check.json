@@ -1,0 +1,67 @@
+{
+  "schema": "ext-check/1",
+  "kind": "mcp",
+  "target": {
+    "transport": "stdio",
+    "place": "template",
+    "name": "words",
+    "command": "/usr/bin/python3",
+    "args": [
+      "-c",
+      "import json,sys\nfor l in sys.stdin:\n m=json.loads(l);i=m.get('id');t=m.get('method')\n if i is None:continue\n if t=='initialize':r={'protocolVersion':'2025-11-25','capabilities':{'tools':{}},'serverInfo':{'name':'words','version':'1'}}\n elif t=='tools/list':r={'tools':[{'name':'count_words','description':'Count the words in a text','inputSchema':{'type':'object','properties':{'text':{'type':'string'}},'required':['text']}}]}\n elif t=='tools/call':\n  p=m.get('params') or {};a=p.get('arguments') or {}\n  if p.get('name')=='count_words' and isinstance(a.get('text'),str):r={'content':[{'type':'text','text':'words: %d'%len(a['text'].split())}]}\n  else:r={'content':[{'type':'text','text':'unknown tool or arguments'}],'isError':True}\n else:r={}\n print(json.dumps({'jsonrpc':'2.0','id':i,'result':r}),flush=True)"
+    ],
+    "env_names": [],
+    "image": "sha256:cb399c4ac4724c1449e891d31d7aa979f48adedad8d652405b0033ddfc8abeda"
+  },
+  "server": {
+    "name": "words",
+    "version": "1"
+  },
+  "tools": [
+    {
+      "name": "count_words",
+      "model_name": "mcp__words__count_words"
+    }
+  ],
+  "tools_sha256": "7d22bb2a15c7b5c5f62687e1e9f1b2d7203745357484656f4b7265dabaab809c",
+  "checks": [
+    {
+      "code": "handshake",
+      "status": "pass",
+      "message": "the server completed the handshake at protocol 2025-11-25 within its bound"
+    },
+    {
+      "code": "tools_listed",
+      "status": "pass",
+      "message": "1 tools listed, within the bound of 64"
+    },
+    {
+      "code": "discovery",
+      "status": "pass",
+      "message": "every tool registers under the runtime's rules"
+    },
+    {
+      "code": "unknown_tool",
+      "status": "pass",
+      "message": "a call to a tool the server did not list is answered as an error"
+    },
+    {
+      "code": "call",
+      "status": "pass",
+      "message": "\"count_words\" answered as the fixture expects"
+    },
+    {
+      "code": "exits_on_input_closed",
+      "status": "pass",
+      "message": "the server exited once its input closed"
+    }
+  ],
+  "ext_check": {
+    "commit": "f2c51d287bfd"
+  },
+  "date": "2026-09-29T06:12:59.05823056Z",
+  "flags": {
+    "allow_network": false
+  },
+  "result": "pass"
+}

@@ -1,0 +1,104 @@
+{
+ "papers": [
+  {
+   "claims": [
+    [
+     "61 firms"
+    ],
+    [
+     "65"
+    ]
+   ],
+   "file": "haug-2023.txt",
+   "title": "Output in a four-day week: a trial in 61 firms"
+  },
+  {
+   "claims": [
+    [
+     "8 %",
+     "8%"
+    ],
+    [
+     "satisfaction"
+    ]
+   ],
+   "file": "ortiz-2022.txt",
+   "title": "Compressed hours in a call centre"
+  },
+  {
+   "claims": [
+    [
+     "waiting time"
+    ],
+    [
+     "staffing"
+    ]
+   ],
+   "file": "lund-2024.txt",
+   "title": "The four-day week in public services"
+  },
+  {
+   "claims": [
+    [
+     "burnout"
+    ],
+    [
+     "twelve months",
+     "12 months"
+    ]
+   ],
+   "file": "mehta-2023.txt",
+   "title": "Burnout and the shorter week"
+  },
+  {
+   "claims": [
+    [
+     "story points"
+    ],
+    [
+     "meeting"
+    ]
+   ],
+   "file": "chen-2021.txt",
+   "title": "Software teams on 32 hours"
+  },
+  {
+   "claims": [
+    [
+     "4 %",
+     "4%"
+    ],
+    [
+     "overtime"
+    ]
+   ],
+   "file": "adeyemi-2024.txt",
+   "title": "Manufacturing shifts and the four-day week"
+  },
+  {
+   "claims": [
+    [
+     "volunteer"
+    ],
+    [
+     "control group"
+    ]
+   ],
+   "file": "novak-2022.txt",
+   "title": "Selection effects in voluntary trials"
+  },
+  {
+   "claims": [
+    [
+     "error rate"
+    ],
+    [
+     "120"
+    ]
+   ],
+   "file": "sato-2023.txt",
+   "title": "Hours, rest and cognitive performance"
+  }
+ ],
+ "pass_at": 14
+}

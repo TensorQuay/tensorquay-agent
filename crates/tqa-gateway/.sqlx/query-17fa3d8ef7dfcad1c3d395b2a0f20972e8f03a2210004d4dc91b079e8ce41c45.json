@@ -1,0 +1,62 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT c.id, c.title, latest.lifecycle AS \"latest?\", ($3::uuid IS NOT NULL AND EXISTS (SELECT 1 FROM channel_members m WHERE m.channel_id = $3 AND m.conversation_id = c.id)) AS \"member!\" FROM conversations c LEFT JOIN LATERAL (SELECT e.lifecycle FROM events e WHERE e.conversation_id = c.id AND e.lifecycle IS NOT NULL ORDER BY e.seq DESC LIMIT 1) latest ON true WHERE c.owner_id = $1 AND c.state = 'active' AND ($2 = '' OR c.title ILIKE '%' || $2 || '%') ORDER BY c.last_activity_at DESC, c.id LIMIT $4",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "title",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "latest?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "events",
+            "name": "lifecycle"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "member!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Uuid",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      null
+    ]
+  },
+  "hash": "17fa3d8ef7dfcad1c3d395b2a0f20972e8f03a2210004d4dc91b079e8ce41c45"
+}

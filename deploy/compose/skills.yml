@@ -1,0 +1,10 @@
+# Optional install tier of read-only skills (gateway README, "[skills]"). The gateway resolves `[skills] root` itself,
+# and the engine binds it into sandboxes by its host path, so the gateway sees it at that same path, read-only.
+services:
+  gateway:
+    volumes:
+      - type: bind
+        source: ${TQA_SKILLS_ROOT:?Set the absolute skills directory, the same as [skills] root}
+        target: ${TQA_SKILLS_ROOT:?Set the absolute skills directory, the same as [skills] root}
+        read_only: true
+        bind: {create_host_path: false}

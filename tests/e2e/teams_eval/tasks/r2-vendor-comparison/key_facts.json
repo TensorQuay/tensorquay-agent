@@ -1,0 +1,15 @@
+[
+ "Arcwell auth: OAuth 2.0 client credentials",
+ "Arcwell rate: 600 requests per minute",
+ "Arcwell pagination: cursor-based (`next_cursor`)",
+ "Arcwell pricing: $0.002 per request",
+ "Brisa auth: an API key in the `X-Brisa-Key` header",
+ "Brisa rate: 50 requests per second",
+ "Brisa pagination: offset and limit",
+ "Brisa pricing: $49 per month flat, unlimited requests",
+ "Corvane auth: HMAC-SHA256 signed requests",
+ "Corvane rate: 10,000 requests per day",
+ "Corvane pagination: page numbers (`page` and `per_page`)",
+ "Corvane pricing: free up to 1,000 requests a month, then $0.01 per request",
+ "Changelog values are old: Arcwell's 300/min, Brisa's $29, Corvane's API keys"
+]

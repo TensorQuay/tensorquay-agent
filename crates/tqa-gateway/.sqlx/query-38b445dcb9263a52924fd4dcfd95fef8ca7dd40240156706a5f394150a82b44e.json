@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO egress_rules (host,ports,internal,version,last_set_by,seed_digest,seed_state) VALUES ($1,$2,$3,1,'seed',$4,'current')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int4Array",
+        "Bool",
+        "Bytea"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "38b445dcb9263a52924fd4dcfd95fef8ca7dd40240156706a5f394150a82b44e"
+}

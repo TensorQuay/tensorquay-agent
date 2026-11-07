@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE idempotency SET execution_status=$3,updated_at=CURRENT_TIMESTAMP WHERE (key,user_id) IN (SELECT * FROM unnest($1::text[],$2::uuid[])) AND execution_status='sending'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "TextArray",
+        "UuidArray",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6680bd6b3ea860884f0ac08d9d86309c8acc1161a919b6421365c7c8346ff99e"
+}

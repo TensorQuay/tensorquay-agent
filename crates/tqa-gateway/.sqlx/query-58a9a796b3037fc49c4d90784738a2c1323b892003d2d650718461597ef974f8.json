@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO agent_teams (id, channel_id, lead_conversation, owner_id, token_budget, deadline_at) VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP + make_interval(mins => $6))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Int8",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "58a9a796b3037fc49c4d90784738a2c1323b892003d2d650718461597ef974f8"
+}

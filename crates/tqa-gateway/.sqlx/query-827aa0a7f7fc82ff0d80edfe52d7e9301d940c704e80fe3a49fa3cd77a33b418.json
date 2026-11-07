@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE workspaces SET state='failed', updated_at=CURRENT_TIMESTAMP WHERE state='forking' RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "827aa0a7f7fc82ff0d80edfe52d7e9301d940c704e80fe3a49fa3cd77a33b418"
+}

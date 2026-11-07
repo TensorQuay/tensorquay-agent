@@ -1,0 +1,105 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install pinned Rust toolchain
+        run: rustup show active-toolchain || rustup toolchain install
+      - name: Cache Cargo registry and build output
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: |
+            ~/.cargo/registry
+            target
+          key: ${{ runner.os }}-rust-1.97.1-${{ hashFiles('Cargo.lock', 'Cargo.toml', 'crates/**/Cargo.toml') }}
+      - name: Install pinned gate tools
+        uses: taiki-e/install-action@9114bf4d891761788c546334fd37538eae1bf8b3 # v2.87.16
+        with:
+          tool: cargo-nextest@0.9.145,cargo-llvm-cov@0.9.1,cargo-deny@0.20.2
+      - name: Install checksum-pinned Gitleaks
+        run: |
+          ./tools/install-gitleaks.sh "$RUNNER_TEMP/gitleaks-bin"
+          printf '%s\n' "$RUNNER_TEMP/gitleaks-bin" >> "$GITHUB_PATH"
+      - name: Run Rust tier-1 gates
+        run: ./tools/check.sh --skip-audit
+
+  tools:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install pinned Rust toolchain
+        run: rustup show active-toolchain || rustup toolchain install
+      - name: Test and run file-length gate
+        run: |
+          python3 tools/check-file-length.py --self-test
+          python3 tools/check-file-length.py
+      - name: Test and run dependency-direction gate
+        run: |
+          python3 tools/check-dep-direction.py --self-test
+          python3 tools/check-dep-direction.py
+      - name: Test and run documentation and test-ID gate
+        run: |
+          python3 tools/check-docs.py --self-test
+          python3 tools/check-docs.py
+      - name: Test the reference decision engine
+        run: python3 examples/decision-reference/engine.py --self-test
+
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          # On a pull request, audit the branch's own commits: GitHub's synthetic merge commit carries the PR author's identity.
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Install checksum-pinned Gitleaks
+        run: |
+          ./tools/install-gitleaks.sh "$RUNNER_TEMP/gitleaks-bin"
+          printf '%s\n' "$RUNNER_TEMP/gitleaks-bin" >> "$GITHUB_PATH"
+      - name: Test and scan secrets in the working tree and full history
+        run: |
+          python3 tools/check-secrets.py --self-test
+          python3 tools/check-secrets.py
+      - name: Audit repository and history on push
+        if: github.event_name == 'push'
+        shell: bash
+        env:
+          TQ_GUARD_SECRET: ${{ secrets.TQ_GUARD_DENYLIST }}
+          TQ_GUARD_DENYLIST: ${{ runner.temp }}/guard-denylist
+          TQ_GUARD_REQUIRE_DENYLIST: "1"
+          # The internal-term list (machine, team and script names); optional until the secret is configured.
+          TQ_GUARD_INTERNAL_SECRET: ${{ secrets.TQ_GUARD_INTERNAL }}
+          TQ_GUARD_INTERNAL: ${{ runner.temp }}/guard-internal
+        run: |
+          set -euo pipefail
+          if [[ -z "$TQ_GUARD_SECRET" ]]; then
+            printf 'TQ_GUARD_DENYLIST secret must be configured.\n' >&2
+            exit 1
+          fi
+          umask 077
+          trap 'rm -f -- "$TQ_GUARD_DENYLIST" "$TQ_GUARD_INTERNAL"' EXIT
+          printf '%s\n' "$TQ_GUARD_SECRET" > "$TQ_GUARD_DENYLIST"
+          if [[ -n "$TQ_GUARD_INTERNAL_SECRET" ]]; then
+            printf '%s\n' "$TQ_GUARD_INTERNAL_SECRET" > "$TQ_GUARD_INTERNAL"
+          fi
+          python3 tools/git-guard.py audit
+      # Fork pull requests receive no repository secrets; the public checks still run.
+      - name: Audit repository and history on pull request
+        if: github.event_name == 'pull_request'
+        run: python3 tools/git-guard.py audit

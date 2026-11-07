@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM conversations c WHERE c.id=$1 AND c.state='deleted' AND NOT EXISTS(SELECT 1 FROM sandbox_instances s WHERE s.conversation_id=c.id)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0453873c5ff861fff8b16360edca5128c99cd7d0439fb1b0bcd654c6e8c5ec4c"
+}

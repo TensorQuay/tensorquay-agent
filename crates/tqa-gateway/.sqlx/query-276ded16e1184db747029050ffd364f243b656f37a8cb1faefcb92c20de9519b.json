@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT disabled_at IS NULL AS \"active!\" FROM users WHERE id=$1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "active!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "276ded16e1184db747029050ffd364f243b656f37a8cb1faefcb92c20de9519b"
+}

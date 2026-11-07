@@ -1,0 +1,112 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT m.conversation_id AS task, t.id, t.state, t.lead_conversation, c.title AS \"title?\", m.name, m.state AS helper_state, m.failed_run FROM agent_team_members m JOIN agent_teams t ON t.id = m.team_id JOIN conversations c ON c.id = t.lead_conversation WHERE m.conversation_id = ANY($1) AND c.state <> 'deleted'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "task",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_team_members",
+            "name": "conversation_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "state"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "lead_conversation",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "lead_conversation"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "title?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "agent_team_members",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "helper_state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "agent_team_members",
+            "name": "state"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "failed_run",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "agent_team_members",
+            "name": "failed_run"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "8e9f8d9cf9c28058a316f9cc16fee2fb52f95618cedfad6c5e7b18cfe94ee9f6"
+}

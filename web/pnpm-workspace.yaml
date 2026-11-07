@@ -1,0 +1,19 @@
+ignoredOptionalDependencies:
+  - sharp
+  # pdf.js renders in the browser only; its Node canvas (a native binary) is never needed.
+  - "@napi-rs/canvas"
+allowBuilds:
+  unrs-resolver: true
+overrides:
+  # GHSA-68fv-2mgg-jv7q (high): source-map-js before 1.2.2. Its dependents (@tailwindcss/node 4.3.3, postcss, css-tree,
+  # magicast) all ask for ^1.2.1, which 1.2.2 meets; this keeps every copy at 1.2.2 or later until they raise their own.
+  "source-map-js@<1.2.2": "^1.2.2"
+  # GHSA-587h-7wmj-h5pm (high): vite 8.3.0 to 8.3.2, reached only as vitest 4.1.11's peer (^6 || ^7 || ^8), which
+  # pnpm update leaves in place. 8.3.3 is the first fixed release and inside that range.
+  "vite@<8.3.3": "8.3.3"
+  # GHSA-xjj6-f33q-929c, GHSA-4w7w-5xrc-9h26, GHSA-2m5v-pch6-74hx, GHSA-qrxm-fqhp-jwvm (high): undici before 7.30.1,
+  # reached only through jsdom 29.1.1 (^7.25.0) in the unit tests. 7.30.1 is the first fixed release and in that range.
+  "undici@>=7.0.0 <7.30.1": "7.30.1"
+  # GHSA-mrhx-c7xc-m3w5 (high): zod 4 before 4.6.6, reached only through eslint-plugin-react-hooks 7.1.1 (^3.25.0 ||
+  # ^4.0.0) in lint. 4.6.6 is the first fixed release and in that range.
+  "zod@>=4.0.0 <4.6.6": "4.6.6"

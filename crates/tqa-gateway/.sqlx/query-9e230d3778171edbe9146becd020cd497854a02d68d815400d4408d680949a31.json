@@ -1,0 +1,253 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE conversations SET title=COALESCE($2,title),title_source=CASE WHEN $2::text IS NULL THEN title_source ELSE 'person' END,model_route=COALESCE($3,model_route),pinned=COALESCE($4,pinned),mcp_servers=COALESCE($5,mcp_servers),connectors=COALESCE($6,connectors),updated_at=CURRENT_TIMESTAMP WHERE id=$1 RETURNING id,owner_id,title,title_source,model_route,backend,state,template,pinned,created_at,updated_at,last_activity_at,workspace_id,mcp_servers,connectors,profile_id,profile_version,profile->>'name' AS profile_name,profile->>'display_name' AS profile_display_name,(profile->>'model_route') IS NOT NULL AS \"profile_sets_route?\",(profile->>'template') IS NOT NULL AS \"profile_sets_template?\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "owner_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "owner_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "title",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "title_source",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "title_source"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "model_route",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "model_route"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "backend",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "backend"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "state"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "template",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "template"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "pinned",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "pinned"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "last_activity_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "last_activity_at"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "workspace_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "workspace_id"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "mcp_servers",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "mcp_servers"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "connectors",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "connectors"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "profile_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "profile_id"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "profile_version",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "profile_version"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "profile_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 18,
+        "name": "profile_display_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 19,
+        "name": "profile_sets_route?",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 20,
+        "name": "profile_sets_template?",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Bool",
+        "TextArray",
+        "TextArray"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "9e230d3778171edbe9146becd020cd497854a02d68d815400d4408d680949a31"
+}

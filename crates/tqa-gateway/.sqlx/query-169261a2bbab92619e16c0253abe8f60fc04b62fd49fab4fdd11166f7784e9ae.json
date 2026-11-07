@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (SELECT count(*) FROM sandbox_instances s JOIN conversations c ON c.id = s.conversation_id WHERE c.owner_id = (SELECT owner_id FROM conversations WHERE id = $1) AND s.conversation_id IS DISTINCT FROM $2) < $3 AND (NOT EXISTS(SELECT 1 FROM conversations c JOIN templates t ON t.name = c.template WHERE c.id = $1 AND 'desktop' = ANY(t.capabilities)) OR (SELECT count(*) FROM sandbox_instances s JOIN conversations c ON c.id = s.conversation_id JOIN templates t ON t.name = c.template WHERE 'desktop' = ANY(t.capabilities) AND s.conversation_id IS DISTINCT FROM $2) < $4) AS \"admits!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "admits!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "169261a2bbab92619e16c0253abe8f60fc04b62fd49fab4fdd11166f7784e9ae"
+}

@@ -1,0 +1,6 @@
+id = "m3-document-and-validate"
+title = "Document a service's API and add the validation it lacks"
+tags = ["teams-eval", "teams-mixed"]
+budgets = { max_steps = 50, wall_clock_secs = 1200, max_tokens = 400000 }
+protected = ["svc/README.md"]
+check = { image = "runtime", timeout_secs = 120 }

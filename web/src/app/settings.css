@@ -1,0 +1,1007 @@
+/* UI-GUIDELINES §6: settings are a 760 px column with the sections listed on the left on wide screens. */
+.settings-page {
+  display: grid;
+  grid-template-columns: var(--settings-nav-width) minmax(0, var(--form-width));
+  grid-template-areas:
+    "title title"
+    "nav column";
+  column-gap: var(--space-8);
+  row-gap: var(--space-6);
+  align-items: start;
+  padding-block: var(--space-6);
+}
+.settings-title {
+  grid-area: title;
+  /* Below 768 px Open navigation comes first, as on every page in the shell (WEB-U-362). */
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.settings-title h1 {
+  /* §5c: the page heading is 20/28, not display size; the column starts 24 px under it (the grid's row gap). */
+  font-size: var(--heading-size);
+  line-height: var(--heading-line-height);
+}
+.settings-nav {
+  grid-area: nav;
+  display: flex;
+  flex-direction: column;
+  gap: var(--group-gap);
+}
+/* WEB-U-075: the sections in three groups, each under a quiet label. */
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--nav-row-gap);
+}
+.settings-group-label {
+  /* Lined up with the rows' text. */
+  padding-inline: var(--nav-pad-inline);
+  margin-bottom: var(--group-label-gap);
+  color: var(--muted);
+}
+/* Below 768 px the groups become one grouped Section select above the column. */
+.settings-select {
+  display: none;
+}
+/* The owner's ask: a 16 px line icon before each section, 12 px from its name; it takes the item's colour (muted,
+   ink when active or hovered). */
+.settings-nav .nav-item {
+  gap: var(--nav-pad-inline);
+}
+.settings-nav .nav-icon {
+  flex-shrink: 0;
+}
+.settings-nav .nav-item[aria-current="page"] {
+  background: var(--surface);
+  color: var(--ink);
+}
+.settings-nav .nav-item[aria-current="page"]:hover {
+  background: color-mix(in srgb, var(--surface), var(--ink) var(--hover-share));
+}
+.settings-column {
+  grid-area: column;
+  min-width: 0;
+}
+.settings-section {
+  gap: var(--space-4);
+}
+.settings-section > h2 {
+  margin-top: var(--space-4);
+}
+@media (max-width: 767px) {
+  /* A section's intro over its main button, as the other sections read on a phone (WEB-U-356). */
+  .settings-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .settings-page {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "title"
+      "nav"
+      "column";
+  }
+  .settings-nav {
+    display: none;
+  }
+  .settings-select {
+    grid-area: nav;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+}
+/* Keys and credentials: an administrator's Mine | Shared, and the page's purpose beside its one main action. */
+.keys-views {
+  display: flex;
+  gap: var(--space-1);
+}
+.keys-views .nav-item[aria-current="page"] {
+  background: var(--surface);
+  color: var(--ink);
+}
+.settings-bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+.settings-bar > .button {
+  flex-shrink: 0;
+}
+.account-facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+}
+.account-facts dd {
+  margin: 0;
+}
+
+/* One row of fields and the section's primary button, aligned on the controls' bottom edge. */
+.settings-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+.settings-form .field {
+  flex: 1 1 var(--settings-nav-width);
+  min-width: 0;
+}
+
+/* §7 Table: 44 px rows, label-face headers, no zebra, hover on the surface colour. */
+.data-table-scroll {
+  overflow-x: auto;
+  /* The containing block for the visually hidden header text (.sr-only is absolute), so a wide table scrolls here and
+     never widens the page on a phone (WCAG 1.4.10; the a11y audit's reflow check). */
+  position: relative;
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.data-table th {
+  font-weight: 400;
+  color: var(--muted);
+  text-align: left;
+  padding: var(--space-2);
+  border-bottom: var(--border-width) solid var(--line);
+  white-space: nowrap;
+}
+.data-table td {
+  height: var(--row-height-table);
+  padding: var(--space-2);
+  border-bottom: var(--border-width) solid var(--line);
+  white-space: nowrap;
+}
+.data-table tbody tr:hover {
+  background: var(--surface);
+}
+/* A name or email truncates with the full text on hover; a badge beside it never does. */
+.data-name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: var(--table-name-width);
+}
+.data-name > span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.data-name .status-pill {
+  flex-shrink: 0;
+}
+/* An email on People is read whole (WEB-U-117, the first hour's F19): not held to the name width, on one line wherever
+   its column has room (the 13f screens, #7, WEB-U-156), and broken only at the <wbr> after its @ and dots, never inside
+   a word. */
+.data-name-wrap {
+  max-width: none;
+  /* Beside a full-width address, "You" goes under it rather than squeezing it. */
+  flex-wrap: wrap;
+}
+.data-name-wrap > span:first-child {
+  overflow: visible;
+  overflow-wrap: normal;
+  word-break: normal;
+  /* The table sizes the column by the address's <wbr>s, so the address may break at them: kept on one line, a long one
+     ran under the next column (the 16f page pass, F3; WEB-U-382). Where the column has room it stays on one line. */
+  white-space: normal;
+  max-width: 100%;
+  /* Never squeezed below its text by the row's flex: Chromium breaks at a <wbr> once the item is narrower than its
+     text, even with room in the column (WEB-U-168). */
+  flex-shrink: 0;
+  min-width: auto;
+}
+/* People's own width decides, not the window's (the review of WEB-U-168): where the section is narrow (a phone, or a
+   tablet with the sidebar open) an email may break at its <wbr>s, so the row's ⋯ stays in view. */
+.people-page {
+  container: people / inline-size;
+}
+@container people (max-width: 679px) {
+  .data-name-wrap > span:first-child {
+    white-space: normal;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+}
+/* Links in tables and the back link: underlined, with at least the minimum control height to hit (§5b). */
+.data-table a,
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--min-control-height);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.back-link {
+  align-self: flex-start;
+}
+.data-table a:hover {
+  color: var(--muted);
+}
+.back-link:hover {
+  color: var(--ink);
+}
+.data-cell-action {
+  text-align: right;
+}
+
+/* Where a table's own column is narrow (a phone, or beside a menu), its rows are cards rather than a table to scroll
+   sideways (WEB-U-190): the row's name first with its actions beside it, then each other cell under its column's name,
+   which TableScroll copies from the header (data-label). The header row stays for screen readers only. */
+.data-table-scroll {
+  container: data-table / inline-size;
+}
+@container data-table (max-width: 599px) {
+  .data-table,
+  .data-table tbody,
+  .data-table tfoot {
+    display: block;
+  }
+  .data-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .data-table tbody tr,
+  .data-table tfoot tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: var(--space-2);
+    padding: var(--space-3);
+    margin-bottom: var(--space-2);
+    border: var(--border-width) solid var(--line);
+    border-radius: var(--control-radius);
+  }
+  .data-table td {
+    display: block;
+    grid-column: 1 / -1;
+    height: auto;
+    min-width: 0;
+    padding: var(--space-1) 0;
+    border-bottom: none;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  /* The row's name, and its actions beside it on the first line. */
+  .data-table td:first-child {
+    grid-column: 1;
+  }
+  .data-table td.data-cell-action {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: start;
+    text-align: right;
+  }
+  .data-table td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    color: var(--muted);
+    font-size: var(--label-size);
+    font-weight: 500;
+    line-height: var(--small-leading);
+  }
+  .data-table .data-name {
+    max-width: none;
+  }
+}
+.data-select {
+  width: auto;
+  min-height: var(--min-control-height);
+  padding-block: 0;
+}
+/* §5b: a destructive row action is a danger ghost (danger text, no fill). */
+.button[data-variant="ghost"].danger-ghost {
+  color: var(--danger);
+}
+
+/* A secret shown once: the whole value, wrapped, beside its copy button (the field carries type-code). */
+.secret-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+.secret-row .field {
+  flex: 1;
+  min-width: 0;
+}
+.secret-row .secret-value {
+  height: auto;
+  word-break: break-all;
+  resize: none;
+}
+
+.back-link {
+  color: var(--muted);
+}
+
+/* An administrator's metadata view of another user's task. */
+.private-task-body {
+  width: 100%;
+  max-width: var(--transcript-width);
+  margin-inline: auto;
+  padding-top: var(--space-4);
+}
+.detail-list {
+  display: grid;
+  gap: var(--space-2);
+}
+.detail-row {
+  display: grid;
+  grid-template-columns: var(--settings-nav-width) minmax(0, 1fr);
+  gap: var(--space-3);
+}
+/* Task 090: the Usage page's period and grouping sit side by side; figures align on the right in tabular digits. */
+.settings-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+.data-table .numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.data-table tfoot td {
+  font-weight: 600;
+  border-bottom: 0;
+}
+
+/* The Models page: the route dialog is form-wide and scrolls; its groups are quiet fieldsets. */
+/* The reads table's five columns show whole at 1024 and up; a long email wraps (UX review 0927b, item 1). */
+.reads-dialog {
+  width: min(52rem, calc(100% - var(--space-8)));
+}
+/* A cell of words that may wrap, so a longer label ("Configuration file") never widens its table (§6). */
+.data-table td.cell-wrap,
+.data-table td .wrap-line {
+  white-space: normal;
+}
+.reads-dialog td.read-person {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.route-dialog {
+  width: min(var(--form-width), calc(100% - var(--space-8)));
+  overflow-y: auto;
+}
+/* Paste a key, inside the route form: an inset panel whose buttons read as its own (UX review 0927b, item 2). */
+.paste-key-panel {
+  margin: 0;
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+  background: var(--surface);
+  min-width: 0;
+}
+.paste-key-panel > legend {
+  padding: 0 var(--space-1);
+}
+.panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.route-group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+/* A question's options in the normal field rhythm (the route page's Where does the model run?): one control's height
+   apart, 8 px under the question, as a label sits over its control. */
+.radio-options {
+  display: flex;
+  flex-direction: column;
+}
+.radio-options > legend {
+  padding: 0 0 var(--space-2);
+}
+details.route-group > summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--min-control-height);
+  cursor: pointer;
+  list-style: none;
+}
+/* A disclosure chevron, pointing right while closed and down while open, so a collapsed group reads as one to open
+   rather than a heading (UX review 0927b, item 3). Drawn from the text colour: two borders turned 45 degrees. */
+details.route-group > summary::before {
+  content: "";
+  flex-shrink: 0;
+  width: 0.4em;
+  height: 0.4em;
+  border-right: var(--border-width) solid currentcolor;
+  border-bottom: var(--border-width) solid currentcolor;
+  transform: rotate(-45deg);
+}
+details.route-group[open] > summary::before {
+  transform: rotate(45deg);
+}
+details.route-group > summary::-webkit-details-marker {
+  display: none;
+}
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--min-control-height);
+}
+.fallback-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.fallback-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.fallback-row > span {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.route-name {
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+/* A limit's facts under its name, one per line: when a change applies, then where the value came from. */
+.limit-facts {
+  display: flex;
+  flex-direction: column;
+}
+/* The limits table's text wraps so its four columns fit the settings column; actions and pills stay on one line. */
+.limits-table td:not(.data-cell-action) {
+  white-space: normal;
+  overflow-wrap: normal;
+  padding-block: var(--space-2);
+}
+.limits-table .status-pill {
+  white-space: nowrap;
+}
+/* A range never splits inside a value: the column takes its longest range and the names wrap instead. */
+.limits-table .limit-range {
+  white-space: nowrap;
+}
+.limits-table th,
+.limits-table td {
+  padding-inline: var(--space-1);
+}
+/* 099b-2: a route check's observations as term and value rows, and the server's answer as wrapped inert text. */
+.check-list {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+}
+.check-row-item {
+  display: grid;
+  grid-template-columns: minmax(0, 12rem) minmax(0, 1fr);
+  gap: var(--space-2);
+}
+.check-row-item dd {
+  margin: 0;
+}
+.check-excerpt {
+  margin: 0;
+  padding: var(--space-2);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 12rem;
+  overflow: auto;
+}
+/* WEB-U-052/054/056: a secret's name or reference, who may use it and its reminder wrap, so tables fit 720 px (§6). */
+.data-table td.secret-changed {
+  white-space: normal;
+}
+/* F8 (the first hour): a route's name and description wrap in their column, so a real description never pushes the
+   key and the actions off the table at 1280. */
+.models-table td:first-child {
+  white-space: normal;
+  min-width: 12ch;
+}
+/* A secret's name elsewhere (a route's key, a secret file) wraps anywhere rather than widen its table (WEB-U-054). */
+.secret-ref {
+  overflow-wrap: anywhere;
+}
+/* On Keys › Shared a name may be 120 characters long: it stays on one line, never broken mid-word, and truncates with
+   the full name on hover rather than widen the table (finding 7, UI-GUIDELINES §7). The table fits 720 px at 1024. */
+.secret-ref-line {
+  display: block;
+  min-width: 0;
+  max-width: 20ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.secret-changed .nowrap {
+  white-space: nowrap;
+}
+/* A due reminder's pill under the name keeps its own width. */
+.secret-changed .status-pill {
+  align-self: flex-start;
+}
+/* The route's Check sits under its model; the ghost button's own padding is pulled back so its label lines up with
+   the text above it, while the whole button stays the hit area (§5b). */
+.route-check {
+  margin-inline-start: calc(-1 * var(--space-4));
+}
+/* WEB-U-067: List models under the route form's Model field; the list scrolls inside the form. */
+.model-options {
+  max-block-size: 16rem;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+}
+.model-option {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-2);
+  padding: var(--space-2);
+  border-inline-start: var(--border-width) solid transparent;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.model-option:hover,
+.model-option[data-active] {
+  background: var(--surface);
+}
+.model-option[aria-selected="true"],
+.model-option[aria-current="true"] {
+  border-inline-start-color: var(--accent);
+}
+/* A short list's options are buttons (no filter): full width, read like the listbox's rows. */
+button.model-option {
+  inline-size: 100%;
+  margin: 0;
+  border-block: 0;
+  border-inline-end: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+}
+button.model-option:focus-visible {
+  background: var(--surface);
+}
+/* WEB-U-047: an environment's status pills in one wrapping row. */
+.environment-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+/* Each tool by name beside its icon, wrapping within the Tools column. */
+.environment-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.environment-tools li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  white-space: nowrap;
+}
+/* The environments table's text (a refusal's sentence, the origin line) wraps so its four columns fit the settings
+   column; pills and actions stay on one line, as on Limits. */
+.environments-table td:not(.data-cell-action) {
+  white-space: normal;
+  padding-block: var(--space-2);
+}
+.environments-table .status-pill,
+.environments-table .button {
+  white-space: nowrap;
+}
+
+/* The decision engines table's text (the host and source lines, what it sees) wraps so its four columns fit the settings
+   column, as on Environments; pills and actions stay on one line. */
+.engines-table td:not(.data-cell-action) {
+  white-space: normal;
+  padding-block: var(--space-2);
+}
+.engines-table .status-pill,
+.engines-table .button {
+  white-space: nowrap;
+}
+
+/* An engine's budget: calls, tokens and period side by side, wrapping on a narrow screen. */
+.engine-budget-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.engine-budget-row > * {
+  flex: 1 1 8rem;
+}
+/* The period's options ("Each month (UTC)") are read whole, never cut. */
+.engine-budget-row > .engine-budget-period {
+  flex: 1 1 12rem;
+}
+/* "No budget · Set a budget", and the chosen kind with its Change: one line each. */
+.engine-budget-none,
+.engine-kind-chosen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* WEB-U-118: the ready-made lists as cards, each with its line and its action at the foot. */
+.preset-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-2);
+}
+.preset-card {
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+  background: var(--paper);
+}
+.preset-card > p {
+  margin: 0;
+}
+.preset-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: auto;
+}
+
+/* WEB-U-105, WEB-U-131: a profile's tools, always listed, as a grid of group cards across the whole content width
+   (about three to a row in the settings column, one on a phone): each group under its quiet name, each tool's one line
+   under its name, lined up with the name past the checkbox. The same grid holds any other list of choices. */
+.choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-3);
+}
+.tool-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+  min-width: 0;
+}
+/* Floated, the legend is the card's first line rather than a notch in its border. */
+.tool-group > legend {
+  float: left;
+  margin-bottom: var(--space-1);
+  padding: 0;
+}
+.tool-row .check-row {
+  min-height: 0;
+}
+.tool-hint {
+  margin: 0 0 var(--space-2);
+  padding-left: calc(var(--space-4) + var(--space-2));
+}
+
+/* WEB-U-097: a quiet action inside a line of text (the ID's Change): the text's own size, underlined, no box. */
+.inline-action {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* WEB-U-097: the built-ins an environment can start from, as cards (a radio each, its whole card the target); the
+   chosen one wears the accent, as the current choice does everywhere. */
+.environment-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-2);
+}
+.environment-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+  background: var(--paper);
+  cursor: pointer;
+}
+.environment-card[data-checked] {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 var(--border-width) var(--accent);
+}
+.environment-card:has(input:disabled) {
+  cursor: default;
+  opacity: 0.6;
+}
+.environment-card:has(input:focus-visible) {
+  outline: var(--focus-width) solid var(--focus);
+  outline-offset: var(--focus-offset);
+}
+.environment-card .environment-tools > span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  white-space: nowrap;
+}
+
+/* A standing problem the page states before its content: the default environment people cannot pick (ADR-0032). */
+.settings-callout {
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) solid var(--line);
+  border-left: 3px solid var(--status-color);
+  border-radius: var(--control-radius);
+}
+
+/* WEB-U-077: the overview's lines: a quiet label, the sentence, and the link to its page at the end. */
+.overview-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+/* A line that couldn't be read: its words, then Try again beside them (WEB-U-360). */
+.overview-failed {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.overview-line {
+  display: grid;
+  grid-template-columns: var(--overview-label-width, 96px) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--row-height-table);
+  padding-block: var(--space-2);
+  border-bottom: var(--border-width) solid var(--line);
+}
+.overview-line > span:not(.type-label) {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+.overview-line:not(:has(.type-label)) > :first-child {
+  grid-column: 1 / 3;
+}
+.overview-line .lease-dot {
+  display: inline-block;
+  flex-shrink: 0;
+  align-self: center;
+  width: var(--dot-size);
+  height: var(--dot-size);
+  border-radius: var(--pill-radius);
+  background: var(--muted);
+}
+/* A row's action is a link, and looks like every other link in the app: the text's colour, underlined (WEB-U-116, the
+   first hour's F22), with room to hit. */
+.overview-line > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--min-control-height);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.overview-line[data-state="ok"] .lease-dot {
+  background: var(--ok);
+}
+.overview-line[data-state="warn"] .lease-dot {
+  background: var(--warn);
+}
+.overview-line[data-state="danger"] .lease-dot {
+  background: var(--danger);
+}
+.overview-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.overview-list > li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+.overview-list > li > .button {
+  flex-shrink: 0;
+}
+/* On a phone each overview line stacks: its label above, the sentence and the link below. */
+@media (max-width: 767px) {
+  .overview-line {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .overview-line > .type-label {
+    grid-column: 1 / -1;
+  }
+}
+/* Form controls keep a readable width: half the form column, not all 720 px of it. */
+.account-settings .field {
+  max-width: calc(var(--form-width) / 2);
+}
+/* A form section's heading: plain body type, a little stronger, not the mono label face. */
+.route-group-legend {
+  font-weight: 600;
+}
+/* A duration's number and its unit side by side; other limits have the number alone, full width (WEB-U-041). */
+.limit-value {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: start;
+}
+
+/* Usage (WEB-U-034): the period's total first, then a bar per day, then people and models side by side. */
+.usage-headline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.usage-headline p {
+  margin: 0;
+}
+/* Each day a bar, its height a share of the busiest day's; a day without tokens stays an empty gap. */
+.usage-days {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--border-width);
+  height: var(--space-16);
+  border-bottom: var(--border-width) solid var(--line);
+}
+/* The chart, its first and last dates under it and its caption (F21). */
+.usage-chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+}
+.usage-axis {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.usage-day {
+  flex: 1 1 0;
+  min-width: var(--border-width);
+  height: calc(var(--share, 0) * 100%);
+  background: var(--accent);
+}
+.usage-day[data-empty] {
+  background: transparent;
+}
+.usage-rankings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-6);
+  align-items: start;
+}
+/* A share reads as its number, with a thin bar under it for the eye. */
+.usage-share {
+  display: inline-block;
+  min-width: var(--space-12);
+  padding-bottom: var(--space-1);
+  background: linear-gradient(var(--accent), var(--accent)) left bottom /
+    calc(var(--share, 0) * 100%) calc(2 * var(--border-width)) no-repeat;
+}
+
+/* Status (WEB-U-033): whether new tasks can start, in the colour of its answer; each failing check set apart. */
+.status-verdict-line {
+  margin: 0;
+  font-weight: 600;
+}
+.status-verdict-line[data-tone="ok"] {
+  color: var(--ok);
+}
+.status-verdict-line[data-tone="danger"] {
+  color: var(--danger);
+}
+.status-problem {
+  padding: var(--space-3) var(--space-4);
+  border-left: calc(2 * var(--border-width)) solid var(--danger);
+  background: var(--surface);
+}
+.status-problem > * {
+  margin: 0;
+}
+
+/* An expired API token stays listed until revoked, greyed so the live ones stand out (finding 18). */
+tr[data-expired] td:not(.data-cell-action) {
+  color: var(--muted);
+}
+/* The current model in List models, named in words beside its edge (UI-GUIDELINES §9). */
+.model-current {
+  font-weight: 600;
+}
+
+/* The route form's one-line summaries while editing (F4): the text, then its Change or Replace. */
+.route-summary {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.route-summary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-inline-start: calc(-1 * var(--space-4));
+}
+
+/* The environment form's build help (F9): its starter file and commands, wrapped rather than widen the dialog. */
+.build-help-code {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--code-bg);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* The UI standard's Page (WEB-U-090): a long form's sections under the way back and the title, one column; Save and
+   Cancel pinned to the bottom of the view. */
+.page-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: var(--border-width) solid var(--line);
+}
+.page-section-title {
+  margin: 0;
+}
+.settings-form-footer {
+  position: sticky;
+  /* Flush on the view's edge: a sticky box stops at its scroller's padding, so it reaches past the content box's. */
+  bottom: calc(-1 * var(--content-end));
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding-block: var(--space-3);
+  border-top: var(--border-width) solid var(--line);
+  background: var(--paper);
+}
+.settings-form-unsaved {
+  margin: 0;
+  margin-inline-end: auto;
+}
+.settings-form-footer > .field-error {
+  flex-basis: 100%;
+  margin: 0;
+}
+/* A quiet line under a field (the ID made from the display name): one line of text. */
+.field-note {
+  display: block;
+  margin: 0;
+}
+/* One column, as ChatGPT's and Claude's settings (the owner's review, WEB-U-131): each field's label above it at every
+   width, a field at most --field-width wide; a list of choices takes the whole column. */
+.page-section .field {
+  max-width: var(--field-width);
+}
+.page-section-list {
+  min-width: 0;
+}

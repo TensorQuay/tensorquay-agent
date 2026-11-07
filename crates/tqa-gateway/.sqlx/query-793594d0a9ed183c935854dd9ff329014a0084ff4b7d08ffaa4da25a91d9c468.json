@@ -1,0 +1,90 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, email::text AS \"email!\", role, CASE WHEN accepted_at IS NOT NULL THEN 'accepted' WHEN revoked_at IS NOT NULL THEN 'revoked' WHEN expires_at<=CURRENT_TIMESTAMP THEN 'expired' ELSE 'pending' END AS \"status!\", created_by, created_at, expires_at FROM invitations ORDER BY created_at DESC, id DESC LIMIT $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "invitations",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "role",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "invitations",
+            "name": "role"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "created_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "invitations",
+            "name": "created_by"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "invitations",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "expires_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "invitations",
+            "name": "expires_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false,
+      null,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "793594d0a9ed183c935854dd9ff329014a0084ff4b7d08ffaa4da25a91d9c468"
+}

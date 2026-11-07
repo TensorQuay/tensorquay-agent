@@ -1,0 +1,186 @@
+{
+ "model": "fixture",
+ "select": "prompt",
+ "responses": [
+  {
+   "when": "The folder `meetings/` holds the notes of 12 team meetings from January to March 2026. Write `decisions.md`: a",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "start_member",
+     "arguments": {
+      "role": "scout",
+      "workspace": "own_copy",
+      "profile": null,
+      "brief": {
+       "objective": "Write scout-notes.md listing the files in this workspace for p2-meeting-decisions.",
+       "output": "scout-notes.md, one line per file.",
+       "sources": null,
+       "boundaries": "Write only scout-notes.md."
+      }
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The folder `meetings/` holds the notes of 12 team meetings from January to March 2026. Write `decisions.md`: a",
+   "events": [
+    {
+     "type": "text",
+     "text": "I started a helper; I'll continue when it reports."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The folder `meetings/` holds the notes of 12 team meetings from January to March 2026. Write `decisions.md`: a",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_reports",
+     "arguments": {
+      "wait": 30,
+      "limit": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The folder `meetings/` holds the notes of 12 team meetings from January to March 2026. Write `decisions.md`: a",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "take_files",
+     "arguments": {
+      "report_seq": {
+       "seq_of": {
+        "type": "report",
+        "from": "scout"
+       }
+      },
+      "files": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The folder `meetings/` holds the notes of 12 team meetings from January to March 2026. Write `decisions.md`: a",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "decisions.md",
+      "content": "# Decisions, January to March 2026\n\n| Decision | Owner | Date |\n|---|---|---|\n| Decided: the launch moves to 14 April. | Dana | 2026-01-08 |\n| We reversed the Postgres decision of 15 January: we stay on MySQL this year. | Ken | 2026-02-12 |\n| We agreed that Lena redesigns the pricing page. | Lena | 2026-01-15 |\n| Decision: on-call rotates weekly, starting with Omar. | Omar | 2026-01-22 |\n| Outcome: the beta is limited to 50 customers; Dana picks them. | Dana | 2026-01-29 |\n| Final call: Brisa becomes our payment provider; Ken owns the contract. | Ken | 2026-02-05 |\n| Decided: we hire two engineers this quarter; Priya leads the hiring. | Priya | 2026-02-05 |\n| We agreed to keep the current logo; Lena tells the agency. | Lena | 2026-02-12 |\n| Decision: single sign-on (SSO) ships in Q2; Omar owns it. | Omar | 2026-02-19 |\n| Outcome: the travel budget is cut by 20 %; Priya informs the teams. | Priya | 2026-02-26 |\n| Decided: the docs site moves to the new generator; Lena owns the move. | Lena | 2026-03-05 |\n| We agreed on a code freeze one week before launch; Omar enforces it. | Omar | 2026-03-05 |\n| Final call: support hours extend to 8 pm; Dana staffs the shifts. | Dana | 2026-03-12 |\n| Decision: we drop the old analytics tool by April; Ken removes it. | Ken | 2026-03-19 |\n| Decided: the team offsite is in May; Priya books it. | Priya | 2026-03-26 |\n\n## Open questions\n\n- How long do we keep customer data (the retention period)?\n- Who owns the mobile app after the reorganisation?\n- Which old browsers do we still support?\n- Is there budget for the autumn conference?\n- Which translation vendor do we use for the German site?\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The folder `meetings/` holds the notes of 12 team meetings from January to March 2026. Write `decisions.md`: a",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "done",
+     "arguments": {
+      "summary": "Wrote decisions.md."
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The folder `meetings/` holds the notes of 12 team meetings from January to March 2026. Write `decisions.md`: a",
+   "events": [
+    {
+     "type": "text",
+     "text": "Done: decisions.md."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "shell",
+     "arguments": {
+      "command": "find . -path ./.git -prune -o -type f -print | sort > scout-notes.md"
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "send_to_lead",
+     "arguments": {
+      "type": "report",
+      "text": "scout-notes.md lists the workspace's files.",
+      "question_seq": null,
+      "files": [
+       "scout-notes.md"
+      ]
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "text",
+     "text": "I reported to my lead."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  }
+ ]
+}

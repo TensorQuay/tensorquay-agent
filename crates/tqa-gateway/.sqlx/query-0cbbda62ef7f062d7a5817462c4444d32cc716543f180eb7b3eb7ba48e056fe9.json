@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT w.id FROM workspaces w WHERE w.state='ready' AND w.lease_conversation_id IS NULL AND COALESCE(w.last_used_at, w.created_at) < CURRENT_TIMESTAMP - make_interval(secs=>$1) AND NOT EXISTS(SELECT 1 FROM conversations c WHERE c.workspace_id=w.id AND c.state='active') ORDER BY COALESCE(w.last_used_at, w.created_at) LIMIT $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Float8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "0cbbda62ef7f062d7a5817462c4444d32cc716543f180eb7b3eb7ba48e056fe9"
+}

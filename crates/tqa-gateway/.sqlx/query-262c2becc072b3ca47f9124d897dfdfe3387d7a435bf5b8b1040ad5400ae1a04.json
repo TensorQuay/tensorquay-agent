@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT version,value,seed_digest,seed_state FROM settings WHERE key=$1 AND user_id IS NULL FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "version",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "settings",
+            "name": "version"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "value",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "settings",
+            "name": "value"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "seed_digest",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "settings",
+            "name": "seed_digest"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "seed_state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "settings",
+            "name": "seed_state"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "262c2becc072b3ca47f9124d897dfdfe3387d7a435bf5b8b1040ad5400ae1a04"
+}

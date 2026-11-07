@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE sandbox_instances SET sandbox_id=$2,phase='live',updated_at=CURRENT_TIMESTAMP WHERE conversation_id=$1 AND phase='starting'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "14f9125243edf1a84845e8bf7925f00003492529de6406ba0bba1b070e7daf81"
+}

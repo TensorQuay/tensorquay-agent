@@ -1,0 +1,395 @@
+{
+ "model": "fixture",
+ "select": "prompt",
+ "responses": [
+  {
+   "when": "Rename the type `Record` to `StockItem` everywhere in the package `inventory/` and its docs in `docs/`. The public",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "start_member",
+     "arguments": {
+      "role": "scout",
+      "workspace": "own_copy",
+      "profile": null,
+      "brief": {
+       "objective": "Write scout-notes.md listing the files in this workspace for c6-rename-type.",
+       "output": "scout-notes.md, one line per file.",
+       "sources": null,
+       "boundaries": "Write only scout-notes.md."
+      }
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Rename the type `Record` to `StockItem` everywhere in the package `inventory/` and its docs in `docs/`. The public",
+   "events": [
+    {
+     "type": "text",
+     "text": "I started a helper; I'll continue when it reports."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Rename the type `Record` to `StockItem` everywhere in the package `inventory/` and its docs in `docs/`. The public",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_reports",
+     "arguments": {
+      "wait": 30,
+      "limit": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Rename the type `Record` to `StockItem` everywhere in the package `inventory/` and its docs in `docs/`. The public",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "take_files",
+     "arguments": {
+      "report_seq": {
+       "seq_of": {
+        "type": "report",
+        "from": "scout"
+       }
+      },
+      "files": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Rename the type `Record` to `StockItem` everywhere in the package `inventory/` and its docs in `docs/`. The public",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "README.md",
+      "content": "# inventory\n\nRun the tests with `python3 -m unittest discover -s tests -t .`.\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Rename the type `Record` to `StockItem` everywhere in the package `inventory/` and its docs in `docs/`. The public",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "docs/model.md",
+      "content": "# The model\n\nA `StockItem` is one stock line: its SKU, name, quantity and reorder level. `StockItem.needs_reorder()` says whether to order more.\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Rename the type `Record` to `StockItem` everywhere in the package `inventory/` and its docs in `docs/`. The public",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "docs/reports.md",
+      "content": "# Reports\n\n`low_stock(records)` lists every StockItem at or under its reorder level.\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Rename the type `Record` to `StockItem` everywhere in the package `inventory/` and its docs in `docs/`. The public",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "inventory/__init__.py",
+      "content": "\"\"\"Stock records for a small shop.\"\"\"\nfrom inventory.io.loader import load\nfrom inventory.model import StockItem\nfrom inventory.reports.stock import low_stock\n\n# Record stays as an alias of StockItem for existing users.\nRecord = StockItem\n\n__all__ = [\"Record\", \"StockItem\", \"load\", \"low_stock\"]\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Rename the type `Record` to `StockItem` everywhere in the package `inventory/` and its docs in `docs/`. The public",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "inventory/io/__init__.py",
+      "content": "",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Rename the type `Record` to `StockItem` everywhere in the package `inventory/` and its docs in `docs/`. The public",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "inventory/io/loader.py",
+      "content": "\"\"\"StockItems from CSV text.\"\"\"\nimport csv\nimport io\n\nfrom inventory.model import StockItem\n\n\ndef load(text):\n    \"\"\"Each CSV row (sku,name,quantity,reorder_at) as a StockItem.\"\"\"\n    rows = csv.DictReader(io.StringIO(text))\n    return [StockItem(row[\"sku\"], row[\"name\"], int(row[\"quantity\"]), int(row[\"reorder_at\"])) for row in rows]\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Rename the type `Record` to `StockItem` everywhere in the package `inventory/` and its docs in `docs/`. The public",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "inventory/io/writer.py",
+      "content": "\"\"\"StockItems to CSV text.\"\"\"\nfrom inventory.model import StockItem\n\n\ndef dump(records: list[StockItem]):\n    lines = [\"sku,name,quantity,reorder_at\"]\n    lines += [f\"{r.sku},{r.name},{r.quantity},{r.reorder_at}\" for r in records]\n    return \"\\n\".join(lines) + \"\\n\"\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Rename the type `Record` to `StockItem` everywhere in the package `inventory/` and its docs in `docs/`. The public",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "inventory/model.py",
+      "content": "\"\"\"The stock record.\"\"\"\nfrom dataclasses import dataclass\n\n\n@dataclass\nclass StockItem:\n    sku: str\n    name: str\n    quantity: int\n    reorder_at: int = 5\n\n    def needs_reorder(self):\n        return self.quantity <= self.reorder_at\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Rename the type `Record` to `StockItem` everywhere in the package `inventory/` and its docs in `docs/`. The public",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "inventory/reports/__init__.py",
+      "content": "",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Rename the type `Record` to `StockItem` everywhere in the package `inventory/` and its docs in `docs/`. The public",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "inventory/reports/stock.py",
+      "content": "\"\"\"Stock reports.\"\"\"\nfrom inventory.model import StockItem\n\n\ndef low_stock(records: list[StockItem]) -> list[StockItem]:\n    \"\"\"The StockItems at or under their reorder level, by SKU.\"\"\"\n    return sorted((r for r in records if r.needs_reorder()), key=lambda r: r.sku)\n\n\ndef summary(records: list[StockItem]):\n    return f\"{len(records)} records, {len(low_stock(records))} to reorder\"\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Rename the type `Record` to `StockItem` everywhere in the package `inventory/` and its docs in `docs/`. The public",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "inventory/store/__init__.py",
+      "content": "",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Rename the type `Record` to `StockItem` everywhere in the package `inventory/` and its docs in `docs/`. The public",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "inventory/store/warehouse.py",
+      "content": "\"\"\"StockItems held in a warehouse.\"\"\"\nfrom inventory.model import StockItem\n\n\nclass Warehouse:\n    def __init__(self):\n        self._records = {}\n\n    def add(self, record: StockItem):\n        self._records[record.sku] = record\n\n    def find(self, sku) -> StockItem | None:\n        return self._records.get(sku)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Rename the type `Record` to `StockItem` everywhere in the package `inventory/` and its docs in `docs/`. The public",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "done",
+     "arguments": {
+      "summary": "Wrote README.md, docs/model.md, docs/reports.md, inventory/__init__.py, inventory/io/__init__.py, inventory/io/loader.py, inventory/io/writer.py, inventory/model.py, inventory/reports/__init__.py, inventory/reports/stock.py, inventory/store/__init__.py, inventory/store/warehouse.py."
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "Rename the type `Record` to `StockItem` everywhere in the package `inventory/` and its docs in `docs/`. The public",
+   "events": [
+    {
+     "type": "text",
+     "text": "Done: README.md, docs/model.md, docs/reports.md, inventory/__init__.py, inventory/io/__init__.py, inventory/io/loader.py, inventory/io/writer.py, inventory/model.py, inventory/reports/__init__.py, inventory/reports/stock.py, inventory/store/__init__.py, inventory/store/warehouse.py."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "shell",
+     "arguments": {
+      "command": "find . -path ./.git -prune -o -type f -print | sort > scout-notes.md"
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "send_to_lead",
+     "arguments": {
+      "type": "report",
+      "text": "scout-notes.md lists the workspace's files.",
+      "question_seq": null,
+      "files": [
+       "scout-notes.md"
+      ]
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "text",
+     "text": "I reported to my lead."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  }
+ ]
+}

@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT state, stop_reason FROM agent_teams WHERE id = $1 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "state"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "stop_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "stop_reason"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "b8a941e1743e7ab145e328a32ade5b52dcd183bb7dba5b7ae21c16e2be385c86"
+}

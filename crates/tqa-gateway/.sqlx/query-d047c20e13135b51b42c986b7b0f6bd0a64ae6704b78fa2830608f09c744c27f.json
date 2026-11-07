@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO connectors (name,document,display_name,version,last_set_by,seed_digest,seed_state) VALUES ($1,$2,$3,1,'admin',$4,$5)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Jsonb",
+        "Text",
+        "Bytea",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d047c20e13135b51b42c986b7b0f6bd0a64ae6704b78fa2830608f09c744c27f"
+}

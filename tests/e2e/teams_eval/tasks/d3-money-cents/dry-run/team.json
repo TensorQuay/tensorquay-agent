@@ -1,0 +1,319 @@
+{
+ "model": "fixture",
+ "select": "prompt",
+ "responses": [
+  {
+   "when": "The package in `shop/` keeps money as floating point, and some of its tests fail on rounding. Change `Money` to hold",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "start_member",
+     "arguments": {
+      "role": "scout",
+      "workspace": "own_copy",
+      "profile": null,
+      "brief": {
+       "objective": "Write scout-notes.md listing the files in this workspace for d3-money-cents.",
+       "output": "scout-notes.md, one line per file.",
+       "sources": null,
+       "boundaries": "Write only scout-notes.md."
+      }
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The package in `shop/` keeps money as floating point, and some of its tests fail on rounding. Change `Money` to hold",
+   "events": [
+    {
+     "type": "text",
+     "text": "I started a helper; I'll continue when it reports."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The package in `shop/` keeps money as floating point, and some of its tests fail on rounding. Change `Money` to hold",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_reports",
+     "arguments": {
+      "wait": 30,
+      "limit": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The package in `shop/` keeps money as floating point, and some of its tests fail on rounding. Change `Money` to hold",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "take_files",
+     "arguments": {
+      "report_seq": {
+       "seq_of": {
+        "type": "report",
+        "from": "scout"
+       }
+      },
+      "files": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The package in `shop/` keeps money as floating point, and some of its tests fail on rounding. Change `Money` to hold",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "shop/discount.py",
+      "content": "from decimal import Decimal\n\nfrom shop.money import Money\n\n\ndef percent_off(price, percent):\n    return price * ((Decimal(100) - Decimal(str(percent))) / 100)\n\n\ndef amount_off(price, off):\n    return price - off if off < price else Money.zero(price.currency)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The package in `shop/` keeps money as floating point, and some of its tests fail on rounding. Change `Money` to hold",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "shop/fx.py",
+      "content": "from decimal import Decimal\n\nfrom shop.money import Money\n\nRATES = {(\"EUR\", \"USD\"): Decimal(\"1.0865\"), (\"USD\", \"EUR\"): Decimal(\"0.9204\"), (\"EUR\", \"GBP\"): Decimal(\"0.8412\")}\n\n\ndef convert(money, currency):\n    if currency == money.currency:\n        return money\n    return Money(money.amount * RATES[(money.currency, currency)], currency)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The package in `shop/` keeps money as floating point, and some of its tests fail on rounding. Change `Money` to hold",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "shop/ledger.py",
+      "content": "from shop.util import total\n\n\nclass Ledger:\n    def __init__(self, currency=\"EUR\"):\n        self.currency, self.entries = currency, []\n\n    def post(self, money, memo):\n        self.entries.append((money, memo))\n\n    def balance(self):\n        return total([money for money, _ in self.entries], self.currency)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The package in `shop/` keeps money as floating point, and some of its tests fail on rounding. Change `Money` to hold",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "shop/money.py",
+      "content": "\"\"\"Money in one currency, held as integer cents. Public API: Money(amount, currency=\"EUR\"),\nMoney.parse(text),\nMoney.zero(currency), + and - between Moneys of one currency, * by a number, allocate(ratios), comparisons, str() as\n\"12.34 EUR\", .amount (the amount as an exact Decimal) and .cents.\"\"\"\nfrom decimal import ROUND_HALF_UP, Decimal\n\n\nclass CurrencyMismatch(ValueError):\n    pass\n\n\ndef _cents(amount):\n    return int((Decimal(str(amount)) * 100).quantize(Decimal(\"1\"), rounding=ROUND_HALF_UP))\n\n\nclass Money:\n    def __init__(self, amount, currency=\"EUR\"):\n        self.cents = _cents(amount)\n        self.currency = currency\n\n    @classmethod\n    def of_cents(cls, cents, currency=\"EUR\"):\n        money = cls(0, currency)\n        money.cents = int(cents)\n        return money\n\n    @property\n    def amount(self):\n        return Decimal(self.cents) / 100\n\n    @classmethod\n    def parse(cls, text):\n        amount, currency = text.split()\n        return cls(amount, currency)\n\n    @classmethod\n    def zero(cls, currency=\"EUR\"):\n        return cls(0, currency)\n\n    def _same(self, other):\n        if self.currency != other.currency:\n            raise CurrencyMismatch(f\"{self.currency} and {other.currency}\")\n\n    def __add__(self, other):\n        self._same(other)\n        return Money.of_cents(self.cents + other.cents, self.currency)\n\n    def __sub__(self, other):\n        self._same(other)\n        return Money.of_cents(self.cents - other.cents, self.currency)\n\n    def __mul__(self, factor):\n        return Money(self.amount * Decimal(str(factor)), self.currency)\n\n    __rmul__ = __mul__\n\n    def allocate(self, ratios):\n        total = sum(ratios)\n        shares = [self.cents * ratio // total for ratio in ratios]\n        for index in range(self.cents - sum(shares)):\n            shares[index] += 1\n        return [Money.of_cents(share, self.currency) for share in shares]\n\n    def __eq__(self, other):\n        return isinstance(other, Money) and (self.cents, self.currency) == (other.cents, other.currency)\n\n    def __lt__(self, other):\n        self._same(other)\n        return self.cents < other.cents\n\n    def __le__(self, other):\n        return self == other or self < other\n\n    def __hash__(self):\n        return hash((self.cents, self.currency))\n\n    def __str__(self):\n        return f\"{self.amount:.2f} {self.currency}\"\n\n    __repr__ = __str__\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The package in `shop/` keeps money as floating point, and some of its tests fail on rounding. Change `Money` to hold",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "shop/refund.py",
+      "content": "from decimal import Decimal\n\n\ndef partial(paid, fraction):\n    return paid * Decimal(str(fraction))\n\n\ndef split_refund(paid, parts):\n    return paid.allocate([1] * parts)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The package in `shop/` keeps money as floating point, and some of its tests fail on rounding. Change `Money` to hold",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "shop/report.py",
+      "content": "from decimal import ROUND_HALF_UP, Decimal\n\n\ndef average(moneys):\n    return (sum((money.amount for money in moneys), Decimal(0)) / len(moneys)).quantize(Decimal(\"0.01\"),\n                                                                                         rounding=ROUND_HALF_UP)\n\n\ndef line(name, money):\n    return f\"{name:<12}{money.amount:>10.2f} {money.currency}\"\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The package in `shop/` keeps money as floating point, and some of its tests fail on rounding. Change `Money` to hold",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "shop/tax.py",
+      "content": "from decimal import Decimal\n\nRATES = {\"standard\": Decimal(\"0.19\"), \"reduced\": Decimal(\"0.07\"), \"none\": Decimal(\"0\")}\n\n\ndef tax(net, kind=\"standard\"):\n    return net * RATES[kind]\n\n\ndef gross(net, kind=\"standard\"):\n    return net + tax(net, kind)\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The package in `shop/` keeps money as floating point, and some of its tests fail on rounding. Change `Money` to hold",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "shop/util.py",
+      "content": "from shop.money import Money\n\n\ndef total(moneys, currency=\"EUR\"):\n    result = Money.zero(currency)\n    for money in moneys:\n        result = result + money\n    return result\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The package in `shop/` keeps money as floating point, and some of its tests fail on rounding. Change `Money` to hold",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "done",
+     "arguments": {
+      "summary": "Wrote shop/discount.py, shop/fx.py, shop/ledger.py, shop/money.py, shop/refund.py, shop/report.py, shop/tax.py, shop/util.py."
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The package in `shop/` keeps money as floating point, and some of its tests fail on rounding. Change `Money` to hold",
+   "events": [
+    {
+     "type": "text",
+     "text": "Done: shop/discount.py, shop/fx.py, shop/ledger.py, shop/money.py, shop/refund.py, shop/report.py, shop/tax.py, shop/util.py."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "shell",
+     "arguments": {
+      "command": "find . -path ./.git -prune -o -type f -print | sort > scout-notes.md"
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "send_to_lead",
+     "arguments": {
+      "type": "report",
+      "text": "scout-notes.md lists the workspace's files.",
+      "question_seq": null,
+      "files": [
+       "scout-notes.md"
+      ]
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "text",
+     "text": "I reported to my lead."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  }
+ ]
+}

@@ -1,0 +1,51 @@
+[package]
+name = "tqa-ext-check"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+default-run = "tqa-ext-check"
+description = "Developer tooling: conformance checks for MCP servers, sandbox templates and decision engines (ARCHITECTURE §15.1)."
+
+[features]
+testing = []
+
+[[bin]]
+name = "tqa-ext-check"
+path = "src/main.rs"
+
+# The runtime's scriptable stdio MCP server, built from its one source for these tests (TK-U-013); never released.
+[[bin]]
+name = "tqa-fake-mcp"
+path = "../tqa-runtime/src/bin/tqa-fake-mcp.rs"
+required-features = ["testing"]
+
+[dependencies]
+tqa-types = { version = "0.1.0", path = "../tqa-types" }
+tqa-tools = { version = "0.1.0", path = "../tqa-tools" }
+tqa-runtime = { version = "0.1.0", path = "../tqa-runtime" }
+tqa-gateway = { version = "0.1.0", path = "../tqa-gateway" }
+tqa-core = { version = "0.1.0", path = "../tqa-core" }
+tqa-llm = { version = "0.1.0", path = "../tqa-llm" }
+tqa-sandbox = { version = "0.1.0", path = "../tqa-sandbox" }
+async-trait = "~0.1"
+bollard = { version = "=0.21.1", features = ["ssl"] }
+futures = "=0.3.34"
+serde = { version = "~1.0", features = ["derive"] }
+serde_json = "~1.0"
+secrecy = "~0.10"
+sha2 = "~0.11"
+tempfile = "~3.27"
+time = { version = "~0.3", features = ["formatting"] }
+tokio = { version = "~1.53", features = ["rt-multi-thread", "macros"] }
+tokio-util = "~0.7"
+toml = "~1.1"
+url = "~2.5"
+
+[dev-dependencies]
+tqa-ext-check = { path = ".", features = ["testing"] }
+tqa-testkit = { version = "0.1.0", path = "../tqa-testkit" }
+
+[lints]
+workspace = true

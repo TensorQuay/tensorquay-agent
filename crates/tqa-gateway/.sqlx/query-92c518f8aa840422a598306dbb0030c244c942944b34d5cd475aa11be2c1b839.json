@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::bigint AS \"now!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "now!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "92c518f8aa840422a598306dbb0030c244c942944b34d5cd475aa11be2c1b839"
+}

@@ -1,0 +1,35 @@
+{
+ "model": "fixture",
+ "responses": [
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "tests/test_stats.py",
+      "content": "import unittest\n\nfrom stats import mean, median, mode\n\n\nclass SmokeTest(unittest.TestCase):\n    def test_functions_run(self):\n        self.assertIsNotNone(mean([1, 2, 3]))\n        self.assertIsNotNone(median([1, 2, 3]))\n        self.assertIsNotNone(mode([1, 1, 2]))\n",
+      "create_parents": false
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 450,
+    "completion_tokens": 300
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "Added smoke tests."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 800,
+    "completion_tokens": 20
+   }
+  }
+ ]
+}

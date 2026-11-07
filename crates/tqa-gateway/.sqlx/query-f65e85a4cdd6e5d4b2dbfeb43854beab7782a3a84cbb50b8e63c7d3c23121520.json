@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM agent_team_reads WHERE reader = $1 AND run_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f65e85a4cdd6e5d4b2dbfeb43854beab7782a3a84cbb50b8e63c7d3c23121520"
+}

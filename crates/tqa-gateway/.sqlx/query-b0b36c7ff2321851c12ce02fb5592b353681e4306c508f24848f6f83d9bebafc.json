@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id FROM workspace_snapshots WHERE workspace_id=$1 AND taken_at>$2 AND NOT (conversation_id=$3 AND after_seq<$4) ORDER BY taken_at LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "workspace_snapshots",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz",
+        "Uuid",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "b0b36c7ff2321851c12ce02fb5592b353681e4306c508f24848f6f83d9bebafc"
+}

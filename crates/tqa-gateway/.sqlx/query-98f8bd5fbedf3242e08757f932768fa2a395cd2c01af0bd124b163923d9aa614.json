@@ -1,0 +1,47 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT email::text AS \"email!\", role, expires_at FROM invitations WHERE token_hash=$1 AND accepted_at IS NULL AND revoked_at IS NULL AND expires_at>CURRENT_TIMESTAMP",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "role",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "invitations",
+            "name": "role"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "expires_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "invitations",
+            "name": "expires_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Bytea"
+      ]
+    },
+    "nullable": [
+      null,
+      false,
+      false
+    ]
+  },
+  "hash": "98f8bd5fbedf3242e08757f932768fa2a395cd2c01af0bd124b163923d9aa614"
+}

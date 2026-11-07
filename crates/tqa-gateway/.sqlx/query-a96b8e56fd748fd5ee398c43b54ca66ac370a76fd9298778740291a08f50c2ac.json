@@ -1,0 +1,50 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT member_route, acceptance_check, version FROM agent_team_settings WHERE id=1 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "member_route",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "agent_team_settings",
+            "name": "member_route"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "acceptance_check",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "agent_team_settings",
+            "name": "acceptance_check"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "version",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "agent_team_settings",
+            "name": "version"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "a96b8e56fd748fd5ee398c43b54ca66ac370a76fd9298778740291a08f50c2ac"
+}

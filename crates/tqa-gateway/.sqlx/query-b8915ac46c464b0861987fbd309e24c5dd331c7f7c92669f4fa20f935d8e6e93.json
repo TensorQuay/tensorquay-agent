@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE model_routes SET document=jsonb_set(document,'{stream_usage}','true'::jsonb),version=version+1,updated_at=CURRENT_TIMESTAMP WHERE name=$1 RETURNING version",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "version",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "model_routes",
+            "name": "version"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "b8915ac46c464b0861987fbd309e24c5dd331c7f7c92669f4fa20f935d8e6e93"
+}

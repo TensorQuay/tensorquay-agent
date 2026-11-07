@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE agent_team_settings SET member_route=$1, acceptance_check=$2, version=version+1, updated_at=CURRENT_TIMESTAMP WHERE id=1 RETURNING version",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "version",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "agent_team_settings",
+            "name": "version"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "50f82b56a61d11a82c1fde0763d1429025b69eac8497b11ec653aa2fbc74542b"
+}

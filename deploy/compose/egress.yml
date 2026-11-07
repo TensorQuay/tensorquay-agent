@@ -1,0 +1,10 @@
+# SEC-001 (web side): a scripted fetch to a host that the gateway's allow-list does not name.
+services:
+  fake-model:
+    command: ["--scenario", "/scenarios/egress.json"]
+    volumes:
+      - type: bind
+        source: ../tests/fixtures/egress.json
+        target: /scenarios/egress.json
+        read_only: true
+        bind: {create_host_path: false}

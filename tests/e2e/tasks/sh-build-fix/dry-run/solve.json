@@ -1,0 +1,51 @@
+{
+ "model": "fixture",
+ "responses": [
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "build.sh",
+      "content": "#!/bin/sh\n# Builds dist/site.txt from the pages in src/, in the numeric order of their prefixes, after a header line.\nset -eu\nout=dist/site.txt\nmkdir -p dist\nprintf 'Site build\\n' > \"$out\"\nfor name in $(ls src | sort -n); do\n    cat \"src/$name\" >> \"$out\"\ndone\n",
+      "create_parents": false
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 380,
+    "completion_tokens": 90
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "shell",
+     "arguments": {
+      "command": "sh build.sh && cat dist/site.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 600,
+    "completion_tokens": 25
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "build.sh now creates dist/ and orders the pages numerically."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 760,
+    "completion_tokens": 20
+   }
+  }
+ ]
+}

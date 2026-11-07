@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT max(s) FROM agent_team_reads r, unnest(r.seqs) AS s WHERE r.reader = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "max",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "d1c43410df4f77ffc7a330a050f488d143686d1f574e849041f17c8e1b689073"
+}

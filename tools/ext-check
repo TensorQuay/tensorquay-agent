@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Conformance checks for an extension (ARCHITECTURE §15.1): developer tooling in the repository, not a product.
+# Usage: tools/ext-check --help. The report records the repository commit ext-check was built from.
+set -euo pipefail
+
+root="$(cd "$(dirname "$0")/.." && pwd)"
+commit="$(git -C "$root" rev-parse --short=12 HEAD 2>/dev/null || echo unknown)"
+if [[ $commit != unknown ]] && ! git -C "$root" diff --quiet HEAD 2>/dev/null; then
+    commit="$commit-dirty"
+fi
+export TQA_EXT_CHECK_COMMIT="$commit"
+exec cargo run --locked -q --manifest-path "$root/Cargo.toml" -p tqa-ext-check -- "$@"

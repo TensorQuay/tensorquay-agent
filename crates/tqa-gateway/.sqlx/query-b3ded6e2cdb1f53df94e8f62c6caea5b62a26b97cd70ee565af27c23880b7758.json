@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE idempotency SET execution_status='sending',team_copy_channel=NULL,team_copy_seq=NULL,updated_at=CURRENT_TIMESTAMP WHERE (key,user_id) IN (SELECT * FROM unnest($1::text[],$2::uuid[]))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "TextArray",
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b3ded6e2cdb1f53df94e8f62c6caea5b62a26b97cd70ee565af27c23880b7758"
+}

@@ -1,0 +1,333 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT t.name,t.display_name,t.description,t.image,t.capabilities,t.cpu_millicores,t.memory_bytes,t.pids,t.workspace_bytes,t.clamped_from,t.is_default,t.enabled,t.version,t.last_set_by,t.seed_state,t.check_state,t.check_reason,t.checked_version,t.check_secret_files,t.check_scan_limit,t.base,t.image_id,t.updated_at,t.builtin_image_created,t.builtin_updated_at,t.customised_builtin,(SELECT count(*) FROM conversations c WHERE c.template=t.name AND c.state='active') AS \"bound_conversations!\" FROM templates t ORDER BY t.name",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "description",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "image",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "image"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "capabilities",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "capabilities"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "cpu_millicores",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "cpu_millicores"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "memory_bytes",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "memory_bytes"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "pids",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "pids"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "workspace_bytes",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "workspace_bytes"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "clamped_from",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "clamped_from"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "is_default",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "is_default"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "enabled",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "enabled"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "version",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "version"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "last_set_by",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "last_set_by"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "seed_state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "seed_state"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "check_state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "check_state"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "check_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "check_reason"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "checked_version",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "checked_version"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "check_secret_files",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "check_secret_files"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "check_scan_limit",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "check_scan_limit"
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "base",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "base"
+          }
+        }
+      },
+      {
+        "ordinal": 21,
+        "name": "image_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "image_id"
+          }
+        }
+      },
+      {
+        "ordinal": 22,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 23,
+        "name": "builtin_image_created",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "builtin_image_created"
+          }
+        }
+      },
+      {
+        "ordinal": 24,
+        "name": "builtin_updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "builtin_updated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 25,
+        "name": "customised_builtin",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "customised_builtin"
+          }
+        }
+      },
+      {
+        "ordinal": 26,
+        "name": "bound_conversations!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      false,
+      null
+    ]
+  },
+  "hash": "c5cf28be391150d16b354afb587c2f25852bf10bd434d1c99feca1f4579da915"
+}

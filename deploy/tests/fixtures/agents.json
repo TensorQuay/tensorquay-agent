@@ -1,0 +1,2162 @@
+{
+  "model": "fixture",
+  "select": "prompt",
+  "responses": [
+    {
+      "when": "and fix the rounding in uploads/report.py",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "analyst",
+            "workspace": "own_copy",
+            "profile": null,
+            "brief": {
+              "objective": "Compare Q3 revenue by region in uploads/q3.csv with the targets in uploads/targets.md.",
+              "output": "comparison.md, one line per region.",
+              "sources": null,
+              "boundaries": "Don't edit the uploads."
+            }
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "and fix the rounding in uploads/report.py",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "fixer",
+            "workspace": "my_files",
+            "profile": null,
+            "brief": {
+              "objective": "Fix the rounding in uploads/report.py.",
+              "output": "The fixed uploads/report.py.",
+              "sources": null,
+              "boundaries": "Change only uploads/report.py."
+            }
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "and fix the rounding in uploads/report.py",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "ask_all",
+          "arguments": {
+            "text": "Anything blocking?"
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "and fix the rounding in uploads/report.py",
+      "events": [
+        {
+          "type": "text",
+          "text": "I started two helpers and asked them; I'll wait for their answers."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "and fix the rounding in uploads/report.py",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "read_reports",
+          "arguments": {
+            "wait": 30,
+            "limit": null
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "and fix the rounding in uploads/report.py",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "read_reports",
+          "arguments": {
+            "wait": 30,
+            "limit": null
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "and fix the rounding in uploads/report.py",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "read_reports",
+          "arguments": {
+            "wait": 30,
+            "limit": null
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "and fix the rounding in uploads/report.py",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "take_files",
+          "arguments": {
+            "report_seq": {
+              "seq_of": {
+                "type": "report",
+                "from": "analyst"
+              }
+            },
+            "files": null
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "and fix the rounding in uploads/report.py",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "read_helper",
+          "arguments": {
+            "name": "analyst",
+            "since": null,
+            "limit": null
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "and fix the rounding in uploads/report.py",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "ask_person",
+          "arguments": {
+            "text": "Round half up or half even?"
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "and fix the rounding in uploads/report.py",
+      "events": [
+        {
+          "type": "text",
+          "text": "I asked you how to round; I'll wait for your answer."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "and fix the rounding in uploads/report.py",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "read_reports",
+          "arguments": {
+            "wait": 30,
+            "limit": null
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "and fix the rounding in uploads/report.py",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "decide",
+          "arguments": {
+            "text": "Round half up.",
+            "question_seq": {
+              "seq_of": {
+                "type": "ask",
+                "from": "fixer"
+              }
+            }
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "and fix the rounding in uploads/report.py",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "read_reports",
+          "arguments": {
+            "wait": 30,
+            "limit": null
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "and fix the rounding in uploads/report.py",
+      "events": [
+        {
+          "type": "text",
+          "text": "The fixer is working on my files; I'll wait for its report."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "and fix the rounding in uploads/report.py",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "read_reports",
+          "arguments": {
+            "wait": 30,
+            "limit": null
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "and fix the rounding in uploads/report.py",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "done",
+          "arguments": {
+            "summary": "The Q3 comparison is in uploads/analyst-comparison.md, and report.py now rounds half up."
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "and fix the rounding in uploads/report.py",
+      "events": [
+        {
+          "type": "text",
+          "text": "Done: the comparison and the fix are in."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are analyst",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "wait_for_lead",
+          "arguments": {
+            "wait": 30,
+            "limit": null
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are analyst",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "wait_for_lead",
+          "arguments": {
+            "wait": 30,
+            "limit": null
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are analyst",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "send_to_lead",
+          "arguments": {
+            "type": "answer",
+            "text": "Nothing blocking.",
+            "question_seq": {
+              "seq_of": {
+                "type": "question",
+                "from": "lead"
+              }
+            },
+            "files": null
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are analyst",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "shell",
+          "arguments": {
+            "command": "printf 'north: 120 against a target of 100\\nsouth: 80 against a target of 90\\n' > comparison.md"
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are analyst",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "send_to_lead",
+          "arguments": {
+            "type": "report",
+            "text": "comparison.md compares each region with its target.",
+            "question_seq": null,
+            "files": [
+              "comparison.md"
+            ]
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are analyst",
+      "events": [
+        {
+          "type": "text",
+          "text": "I reported the comparison to my lead."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are fixer",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "wait_for_lead",
+          "arguments": {
+            "wait": 30,
+            "limit": null
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are fixer",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "send_to_lead",
+          "arguments": {
+            "type": "ask",
+            "text": "Round half up or half even?",
+            "question_seq": null,
+            "files": null
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are fixer",
+      "events": [
+        {
+          "type": "text",
+          "text": "I asked my lead how to round."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are fixer",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "wait_for_lead",
+          "arguments": {
+            "wait": 30,
+            "limit": null
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are fixer",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "shell",
+          "arguments": {
+            "command": "sed -i 's/return round(value)/return int(value + 0.5)/' uploads/report.py"
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are fixer",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "send_to_lead",
+          "arguments": {
+            "type": "report",
+            "text": "report.py now rounds half up.",
+            "question_seq": null,
+            "files": [
+              "uploads/report.py"
+            ]
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are fixer",
+      "events": [
+        {
+          "type": "text",
+          "text": "I reported the fix to my lead."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-A brief a helper that has no script",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "ghost",
+            "workspace": "own_copy",
+            "profile": null,
+            "brief": {
+              "objective": "Do the part that has no script.",
+              "output": "A short note to the lead when done.",
+              "sources": null,
+              "boundaries": "Don't edit the lead's files."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-A brief a helper that has no script",
+      "events": [
+        {
+          "type": "text",
+          "text": "I started ghost; I'll hear from it."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-A brief a helper that has no script",
+      "events": [
+        {
+          "type": "text",
+          "text": "Ghost failed; I'll tell the person."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-B stop a team while it works",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "holder-one",
+            "workspace": "own_copy",
+            "profile": null,
+            "brief": {
+              "objective": "Keep working until you are stopped.",
+              "output": "A short note to the lead when done.",
+              "sources": null,
+              "boundaries": "Don't edit the lead's files."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-B stop a team while it works",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "holder-two",
+            "workspace": "own_copy",
+            "profile": null,
+            "brief": {
+              "objective": "Keep working until you are stopped.",
+              "output": "A short note to the lead when done.",
+              "sources": null,
+              "boundaries": "Don't edit the lead's files."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-B stop a team while it works",
+      "events": [
+        {
+          "type": "text",
+          "text": "Both helpers are working."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-C restart while helpers work",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "holder-one",
+            "workspace": "own_copy",
+            "profile": null,
+            "brief": {
+              "objective": "Keep working until you are stopped.",
+              "output": "A short note to the lead when done.",
+              "sources": null,
+              "boundaries": "Don't edit the lead's files."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-C restart while helpers work",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "holder-two",
+            "workspace": "own_copy",
+            "profile": null,
+            "brief": {
+              "objective": "Keep working until you are stopped.",
+              "output": "A short note to the lead when done.",
+              "sources": null,
+              "boundaries": "Don't edit the lead's files."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-C restart while helpers work",
+      "events": [
+        {
+          "type": "text",
+          "text": "Both helpers are working."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-D delete a lead with live helpers",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "holder-one",
+            "workspace": "own_copy",
+            "profile": null,
+            "brief": {
+              "objective": "Keep working until you are stopped.",
+              "output": "A short note to the lead when done.",
+              "sources": null,
+              "boundaries": "Don't edit the lead's files."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-D delete a lead with live helpers",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "holder-two",
+            "workspace": "own_copy",
+            "profile": null,
+            "brief": {
+              "objective": "Keep working until you are stopped.",
+              "output": "A short note to the lead when done.",
+              "sources": null,
+              "boundaries": "Don't edit the lead's files."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-D delete a lead with live helpers",
+      "events": [
+        {
+          "type": "text",
+          "text": "Both helpers are working."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-E start more helpers than allowed",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "holder-one",
+            "workspace": "own_copy",
+            "profile": null,
+            "brief": {
+              "objective": "Keep working until you are stopped.",
+              "output": "A short note to the lead when done.",
+              "sources": null,
+              "boundaries": "Don't edit the lead's files."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-E start more helpers than allowed",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "holder-two",
+            "workspace": "own_copy",
+            "profile": null,
+            "brief": {
+              "objective": "Keep working until you are stopped.",
+              "output": "A short note to the lead when done.",
+              "sources": null,
+              "boundaries": "Don't edit the lead's files."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-E start more helpers than allowed",
+      "events": [
+        {
+          "type": "text",
+          "text": "Only one helper could start."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-F stop the lead while a helper works",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "holder-one",
+            "workspace": "own_copy",
+            "profile": null,
+            "brief": {
+              "objective": "Keep working until you are stopped.",
+              "output": "A short note to the lead when done.",
+              "sources": null,
+              "boundaries": "Don't edit the lead's files."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-F stop the lead while a helper works",
+      "events": [
+        {
+          "type": "text",
+          "text": "Thinking about the plan."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      },
+      "wait_ms": 600000
+    },
+    {
+      "when": "EDGE-G use up the team's budget",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "spender",
+            "workspace": "own_copy",
+            "profile": null,
+            "brief": {
+              "objective": "Spend the team's budget in one reply.",
+              "output": "A short note to the lead when done.",
+              "sources": null,
+              "boundaries": "Don't edit the lead's files."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-G use up the team's budget",
+      "events": [
+        {
+          "type": "text",
+          "text": "Started spender."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-G use up the team's budget",
+      "events": [
+        {
+          "type": "text",
+          "text": "Noted."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-G use up the team's budget",
+      "events": [
+        {
+          "type": "text",
+          "text": "Noted."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-G use up the team's budget",
+      "events": [
+        {
+          "type": "text",
+          "text": "Noted."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are spender",
+      "events": [
+        {
+          "type": "text",
+          "text": "I used a great deal of the budget."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 12000,
+        "completion_tokens": 0
+      }
+    },
+    {
+      "when": "EDGE-H take a helper's files twice",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "writer",
+            "workspace": "own_copy",
+            "profile": null,
+            "brief": {
+              "objective": "Write notes.md and hand it back.",
+              "output": "A short note to the lead when done.",
+              "sources": null,
+              "boundaries": "Don't edit the lead's files."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-H take a helper's files twice",
+      "events": [
+        {
+          "type": "text",
+          "text": "Started writer."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-H take a helper's files twice",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "read_reports",
+          "arguments": {
+            "wait": 30,
+            "limit": null
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-H take a helper's files twice",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "take_files",
+          "arguments": {
+            "report_seq": {
+              "seq_of": {
+                "type": "report",
+                "from": "writer"
+              }
+            },
+            "files": null
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-H take a helper's files twice",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "take_files",
+          "arguments": {
+            "report_seq": {
+              "seq_of": {
+                "type": "report",
+                "from": "writer"
+              }
+            },
+            "files": null
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-H take a helper's files twice",
+      "events": [
+        {
+          "type": "text",
+          "text": "I took the notes twice."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-H take a helper's files twice",
+      "events": [
+        {
+          "type": "text",
+          "text": "Done."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-H take a helper's files twice",
+      "events": [
+        {
+          "type": "text",
+          "text": "Done."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are writer",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "shell",
+          "arguments": {
+            "command": "printf 'Notes from the writer.\\n' > notes.md"
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are writer",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "send_to_lead",
+          "arguments": {
+            "type": "report",
+            "text": "notes.md has the notes.",
+            "question_seq": null,
+            "files": [
+              "notes.md"
+            ]
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are writer",
+      "events": [
+        {
+          "type": "text",
+          "text": "I handed back notes.md."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-I a helper goes quiet and the team idles",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "quiet",
+            "workspace": "own_copy",
+            "profile": null,
+            "brief": {
+              "objective": "Finish without reporting.",
+              "output": "A short note to the lead when done.",
+              "sources": null,
+              "boundaries": "Don't edit the lead's files."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-I a helper goes quiet and the team idles",
+      "events": [
+        {
+          "type": "text",
+          "text": "Started quiet."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-I a helper goes quiet and the team idles",
+      "events": [
+        {
+          "type": "text",
+          "text": "Quiet has stopped; there is nothing left to do."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-I a helper goes quiet and the team idles",
+      "events": [
+        {
+          "type": "text",
+          "text": "Quiet has stopped; there is nothing left to do."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-I a helper goes quiet and the team idles",
+      "events": [
+        {
+          "type": "text",
+          "text": "Quiet has stopped; there is nothing left to do."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are quiet",
+      "events": [
+        {
+          "type": "text",
+          "text": "I'm finished here."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-J first of two teams",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "holder-one",
+            "workspace": "own_copy",
+            "profile": null,
+            "brief": {
+              "objective": "Keep working until you are stopped.",
+              "output": "A short note to the lead when done.",
+              "sources": null,
+              "boundaries": "Don't edit the lead's files."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-J first of two teams",
+      "events": [
+        {
+          "type": "text",
+          "text": "Started holder-one."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-J second of two teams",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "holder-one",
+            "workspace": "own_copy",
+            "profile": null,
+            "brief": {
+              "objective": "Keep working until you are stopped.",
+              "output": "A short note to the lead when done.",
+              "sources": null,
+              "boundaries": "Don't edit the lead's files."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-J second of two teams",
+      "events": [
+        {
+          "type": "text",
+          "text": "Started holder-one."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are holder",
+      "events": [
+        {
+          "type": "text",
+          "text": "Still working."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      },
+      "wait_ms": 600000
+    },
+    {
+      "when": "EDGE-K steer the team while it works",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "holder-k",
+            "workspace": "own_copy",
+            "profile": null,
+            "brief": {
+              "objective": "Keep working until you are stopped.",
+              "output": "A short note to the lead when done.",
+              "sources": null,
+              "boundaries": "Don't edit the lead's files."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-K steer the team while it works",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "read_reports",
+          "arguments": {
+            "wait": 5,
+            "limit": null
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      },
+      "wait_ms": 60000
+    },
+    {
+      "when": "EDGE-K steer the team while it works",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "done",
+          "arguments": {
+            "summary": "Re-briefed the team: MySQL is the fourth database."
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-K steer the team while it works",
+      "events": [
+        {
+          "type": "text",
+          "text": "The team is done."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-L end a turn without done",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "reporter-l",
+            "workspace": "own_copy",
+            "profile": null,
+            "brief": {
+              "objective": "Report to the lead at once.",
+              "output": "A short note to the lead when done.",
+              "sources": null,
+              "boundaries": "Don't edit the lead's files."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-L end a turn without done",
+      "events": [
+        {
+          "type": "text",
+          "text": "I have nothing more to do."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-L end a turn without done",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "read_reports",
+          "arguments": {
+            "wait": 5,
+            "limit": null
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-L end a turn without done",
+      "events": [
+        {
+          "type": "text",
+          "text": "I have nothing more to do."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are reporter-l",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "send_to_lead",
+          "arguments": {
+            "type": "report",
+            "text": "All done.",
+            "question_seq": null,
+            "files": null
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are reporter-l",
+      "events": [
+        {
+          "type": "text",
+          "text": "Reported."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-M two helpers on the lead's files",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "files-one",
+            "workspace": "my_files",
+            "profile": null,
+            "brief": {
+              "objective": "Add a line to notes.md in the lead's files.",
+              "output": "A short note to the lead when done.",
+              "sources": null,
+              "boundaries": "Don't edit anything else."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-M two helpers on the lead's files",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "files-two",
+            "workspace": "my_files",
+            "profile": null,
+            "brief": {
+              "objective": "Add another line to notes.md in the lead's files.",
+              "output": "A short note to the lead when done.",
+              "sources": null,
+              "boundaries": "Don't edit anything else."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-M two helpers on the lead's files",
+      "events": [
+        {
+          "type": "text",
+          "text": "Both helpers wait for my files."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      },
+      "wait_ms": 600000
+    },
+    {
+      "when": "You are files-one",
+      "events": [
+        {
+          "type": "text",
+          "text": "I'm done with the files."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are files-two",
+      "events": [
+        {
+          "type": "text",
+          "text": "I'm done with the files."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-N worded ends",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "noter",
+            "workspace": "own_copy",
+            "profile": null,
+            "brief": {
+              "objective": "Write one note and report it.",
+              "output": "A short note to the lead when done.",
+              "sources": null,
+              "boundaries": "Don't edit anything else."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-N worded ends",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "profiled",
+            "workspace": "own_copy",
+            "profile": "no-such-profile",
+            "brief": {
+              "objective": "Work with a profile that doesn't exist.",
+              "output": "A short note to the lead when done.",
+              "sources": null,
+              "boundaries": "Don't edit anything else."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-N worded ends",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "shell",
+          "arguments": {
+            "command": "python3 -c 'import json; json.loads(\"bad row\")'"
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-N worded ends",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "done",
+          "arguments": {
+            "summary": "**Sights table**: three sights, each with its hours."
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      },
+      "wait_ms": 61000
+    },
+    {
+      "when": "EDGE-N worded ends",
+      "events": [
+        {
+          "type": "text",
+          "text": "Done: the sights table is in."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are noter",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "send_to_lead",
+          "arguments": {
+            "type": "report",
+            "text": "The note is written.",
+            "question_seq": null,
+            "files": null
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are noter",
+      "events": [
+        {
+          "type": "text",
+          "text": "I reported my note."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-O hand back a stopped helper's files",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "scribe-o",
+            "workspace": "own_copy",
+            "profile": null,
+            "brief": {
+              "objective": "Write your notes in notes.md, then stop.",
+              "output": "A short note to the lead when done.",
+              "sources": null,
+              "boundaries": "Don't edit the lead's files."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-O hand back a stopped helper's files",
+      "events": [
+        {
+          "type": "text",
+          "text": "Waiting for scribe-o."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      },
+      "wait_ms": 600000
+    },
+    {
+      "when": "You are scribe-o",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "shell",
+          "arguments": {
+            "command": "printf 'Day 1: temples.' > notes.md"
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are scribe-o",
+      "events": [
+        {
+          "type": "text",
+          "text": "I wrote notes.md."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-Q a lead whose step keeps failing while its helper works",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "slow-files",
+            "workspace": "my_files",
+            "profile": null,
+            "brief": {
+              "objective": "Keep working in the lead's files until you are stopped.",
+              "output": "A short note to the lead when done.",
+              "sources": null,
+              "boundaries": "Don't edit anything outside notes.md."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-Q a lead whose step keeps failing while its helper works",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "shell",
+          "arguments": {
+            "command": "exit 3"
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are slow-files",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "send_to_lead",
+          "arguments": {
+            "type": "report",
+            "text": "A first part is done.",
+            "question_seq": null,
+            "files": []
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      },
+      "wait_ms": 45000
+    },
+    {
+      "when": "You are slow-files",
+      "events": [
+        {
+          "type": "text",
+          "text": "Still working on notes.md."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      },
+      "wait_ms": 600000
+    },
+    {
+      "when": "EDGE-R stop a team with a question open and a helper not started",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "late-files",
+            "workspace": "my_files",
+            "profile": null,
+            "brief": {
+              "objective": "Add a line to notes.md in the lead's files.",
+              "output": "A short note to the lead when done.",
+              "sources": null,
+              "boundaries": "Don't edit anything else."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-R stop a team with a question open and a helper not started",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "ask_person",
+          "arguments": {
+            "text": "Which year should the notes cover?"
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-R stop a team with a question open and a helper not started",
+      "events": [
+        {
+          "type": "text",
+          "text": "I asked my person which year the notes should cover; I carry on when they answer."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are late-files",
+      "events": [
+        {
+          "type": "text",
+          "text": "I added the line."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-S the team's notice among the person's waiting messages",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "late-report",
+            "workspace": "my_files",
+            "profile": null,
+            "brief": {
+              "objective": "Report to the lead in a little while, then keep working in its files.",
+              "output": "A short note to the lead.",
+              "sources": null,
+              "boundaries": "Don't edit anything outside notes.md."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-S the team's notice among the person's waiting messages",
+      "events": [
+        {
+          "type": "text",
+          "text": "My helper reports when it can."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are late-report",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "send_to_lead",
+          "arguments": {
+            "type": "report",
+            "text": "Here is my report.",
+            "question_seq": null,
+            "files": []
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      },
+      "wait_ms": 45000
+    },
+    {
+      "when": "You are late-report",
+      "events": [
+        {
+          "type": "text",
+          "text": "Still working on notes.md."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      },
+      "wait_ms": 600000
+    },
+    {
+      "when": "EDGE-U stop the lead before it reads its helper's report",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "reporter-u",
+            "workspace": "own_copy",
+            "profile": null,
+            "brief": {
+              "objective": "Report to the lead twice, a while apart.",
+              "output": "Two short notes to the lead.",
+              "sources": null,
+              "boundaries": "Don't edit the lead's files."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-U stop the lead before it reads its helper's report",
+      "events": [
+        {
+          "type": "text",
+          "text": "My helper is on it."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "EDGE-U stop the lead before it reads its helper's report",
+      "events": [
+        {
+          "type": "text",
+          "text": "Reading my helper's report."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      },
+      "wait_ms": 600000
+    },
+    {
+      "when": "You are reporter-u",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "send_to_lead",
+          "arguments": {
+            "type": "report",
+            "text": "First part done.",
+            "question_seq": null,
+            "files": null
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      },
+      "wait_ms": 5000
+    },
+    {
+      "when": "You are reporter-u",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "send_to_lead",
+          "arguments": {
+            "type": "report",
+            "text": "Second part done.",
+            "question_seq": null,
+            "files": null
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      },
+      "wait_ms": 90000
+    },
+    {
+      "when": "You are reporter-u",
+      "events": [
+        {
+          "type": "text",
+          "text": "Reported twice."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    }
+  ]
+}

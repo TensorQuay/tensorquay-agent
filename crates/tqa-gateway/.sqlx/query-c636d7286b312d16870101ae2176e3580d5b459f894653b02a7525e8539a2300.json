@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE('desktop'=ANY(t.capabilities),false) AS \"desktop!\" FROM conversations c LEFT JOIN templates t ON t.name=c.template WHERE c.id=$1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "desktop!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "c636d7286b312d16870101ae2176e3580d5b459f894653b02a7525e8539a2300"
+}

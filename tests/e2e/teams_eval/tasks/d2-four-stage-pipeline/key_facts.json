@@ -1,0 +1,9 @@
+[
+ "One record shape across the three sources, agreed by all four stages",
+ "The worker log's durations are seconds and must become milliseconds",
+ "Syslog lines have no year: 2026, UTC",
+ "Only the week 2026-09-28 to 2026-10-05 counts; events outside it are dropped",
+ "app.jsonl's non-request events don't count",
+ "Errors: HTTP 500+ or a failed job; p95 by nearest rank",
+ "Six services, 24 figures; api had 105 requests that week"
+]

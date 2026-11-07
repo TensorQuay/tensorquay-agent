@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE secrets SET seed_state='removed' WHERE seed_digest IS NOT NULL AND NOT (ref = ANY($1))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8f11563853f8c4aaf27574d1658a8d180cf221d1f2e1dd0aeb746b1bba3ab2a6"
+}

@@ -1,0 +1,7 @@
+[
+ "No dependencies; Python 3.10+",
+ "Tests: python3 -m unittest discover -s tests -t . (from repo/)",
+ "The tool: python3 -m ledgerlite [--file F] add AMOUNT NOTE | balance",
+ "docs/old-setup.md is out of date (make test; the Makefile is gone)",
+ "CONTRIBUTING.md: branch from main, a test with every change"
+]

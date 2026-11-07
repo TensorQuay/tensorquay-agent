@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT generation FROM settings_generation WHERE id = 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "generation",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "settings_generation",
+            "name": "generation"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "57a09d74b0c553afe2446cb42cc9c65cdf6ead27a88885407b366dd22fe55b73"
+}

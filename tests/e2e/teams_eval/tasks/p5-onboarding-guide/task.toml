@@ -1,0 +1,6 @@
+id = "p5-onboarding-guide"
+title = "An onboarding guide for a repository, with commands that run"
+tags = ["teams-eval", "teams-report"]
+budgets = { max_steps = 50, wall_clock_secs = 1200, max_tokens = 600000 }
+protected = []
+check = { image = "runtime", timeout_secs = 180 }

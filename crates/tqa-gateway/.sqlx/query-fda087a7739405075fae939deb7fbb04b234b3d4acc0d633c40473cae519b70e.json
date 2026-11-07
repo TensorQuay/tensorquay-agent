@@ -1,0 +1,206 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT w.id, w.owner_id, w.name, w.state, s.access AS \"access?\", w.created_at, w.updated_at, w.last_used_at, w.size_bytes, w.size_measured_at, w.forked_from, w.fork_consistent, w.kind, w.quota_bytes, o.email::text AS \"owner_email!\", (SELECT count(*) FROM workspace_shares x WHERE x.workspace_id=w.id) AS \"share_count!\", (SELECT count(*) FROM conversations c WHERE c.workspace_id=w.id AND c.state='active') AS \"task_count!\" FROM workspaces w JOIN users o ON o.id=w.owner_id LEFT JOIN workspace_shares s ON s.workspace_id=w.id AND s.user_id=$2 WHERE w.id=$1 AND w.state<>'deleted'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "owner_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "owner_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "state"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "access?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "workspace_shares",
+            "name": "access"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "last_used_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "last_used_at"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "size_bytes",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "size_bytes"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "size_measured_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "size_measured_at"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "forked_from",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "forked_from"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "fork_consistent",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "fork_consistent"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "kind",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "kind"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "quota_bytes",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "workspaces",
+            "name": "quota_bytes"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "owner_email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 15,
+        "name": "share_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 16,
+        "name": "task_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "fda087a7739405075fae939deb7fbb04b234b3d4acc0d633c40473cae519b70e"
+}

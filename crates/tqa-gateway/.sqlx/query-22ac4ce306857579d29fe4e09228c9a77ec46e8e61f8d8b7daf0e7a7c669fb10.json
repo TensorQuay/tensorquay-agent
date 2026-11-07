@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE egress_rules SET ports=$2,internal=$5,version=$3,last_set_by='seed',seed_digest=$4,seed_state='current',updated_at=CURRENT_TIMESTAMP WHERE host=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int4Array",
+        "Int8",
+        "Bytea",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "22ac4ce306857579d29fe4e09228c9a77ec46e8e61f8d8b7daf0e7a7c669fb10"
+}

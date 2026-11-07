@@ -1,0 +1,12 @@
+# WEB-E2E-032 (the file previews design): the scripted model writes the previews' files. The scenario is generated per
+# run (deploy/tests/demo_previews.py), because the report page names this run's witness server.
+services:
+  fake-model:
+    command: ["--scenario", "/scenarios/previews.json"]
+    volumes:
+      - type: bind
+        # The default only lets a failed run tear down before its scenario exists; verify_overlay checks the real one.
+        source: ${TQA_PREVIEWS_SCENARIO:-/nonexistent/previews.json}
+        target: /scenarios/previews.json
+        read_only: true
+        bind: {create_host_path: false}

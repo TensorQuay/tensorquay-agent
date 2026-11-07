@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM channel_members WHERE channel_id = $1 AND user_id IS NOT DISTINCT FROM $2 AND conversation_id IS NOT DISTINCT FROM $3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2abcacf272cca50fe09c38666cbb53737488ac97b44ca3451a0bc3a8602a7ba9"
+}

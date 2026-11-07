@@ -1,0 +1,186 @@
+{
+ "model": "fixture",
+ "select": "prompt",
+ "responses": [
+  {
+   "when": "The folder `papers/` holds eight studies (text files) on one question: Does a four-day work week change productivity? Write `summary.md`, a",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "start_member",
+     "arguments": {
+      "role": "scout",
+      "workspace": "own_copy",
+      "profile": null,
+      "brief": {
+       "objective": "Write scout-notes.md listing the files in this workspace for p4-literature-summary.",
+       "output": "scout-notes.md, one line per file.",
+       "sources": null,
+       "boundaries": "Write only scout-notes.md."
+      }
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The folder `papers/` holds eight studies (text files) on one question: Does a four-day work week change productivity? Write `summary.md`, a",
+   "events": [
+    {
+     "type": "text",
+     "text": "I started a helper; I'll continue when it reports."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The folder `papers/` holds eight studies (text files) on one question: Does a four-day work week change productivity? Write `summary.md`, a",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_reports",
+     "arguments": {
+      "wait": 30,
+      "limit": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The folder `papers/` holds eight studies (text files) on one question: Does a four-day work week change productivity? Write `summary.md`, a",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "take_files",
+     "arguments": {
+      "report_seq": {
+       "seq_of": {
+        "type": "report",
+        "from": "scout"
+       }
+      },
+      "files": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The folder `papers/` holds eight studies (text files) on one question: Does a four-day work week change productivity? Write `summary.md`, a",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "summary.md",
+      "content": "# Does a four-day work week change productivity?\n\n## Findings\n\n- *Output in a four-day week: a trial in 61 firms* (`haug-2023.txt`): Output per employee stayed the same in 52 of 61 firms. Sick days fell by 65 %.\n- *Compressed hours in a call centre* (`ortiz-2022.txt`): Calls handled per hour rose by 8 %. Customer satisfaction did not change.\n- *The four-day week in public services* (`lund-2024.txt`): Waiting times rose in two of five agencies. The trial was ended early in one agency for staffing gaps.\n- *Burnout and the shorter week* (`mehta-2023.txt`): Self-reported burnout fell by a third. Effects faded after twelve months in a follow-up.\n- *Software teams on 32 hours* (`chen-2021.txt`): Story points delivered did not fall. Meetings were cut by 40 %.\n- *Manufacturing shifts and the four-day week* (`adeyemi-2024.txt`): Output fell by 4 % on lines that cannot speed up. Overtime costs rose.\n- *Selection effects in voluntary trials* (`novak-2022.txt`): Firms that volunteer for trials were already more productive. Most trials have no control group.\n- *Hours, rest and cognitive performance* (`sato-2023.txt`): Error rates in cognitive tests fell with more rest days. The study was a lab experiment with 120 participants.\n\n## Agreements\n\nMost trials found output unchanged and wellbeing better.\n\n## Gaps\n\nFew trials have a control group, and long-term effects are unclear.\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The folder `papers/` holds eight studies (text files) on one question: Does a four-day work week change productivity? Write `summary.md`, a",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "done",
+     "arguments": {
+      "summary": "Wrote summary.md."
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The folder `papers/` holds eight studies (text files) on one question: Does a four-day work week change productivity? Write `summary.md`, a",
+   "events": [
+    {
+     "type": "text",
+     "text": "Done: summary.md."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "shell",
+     "arguments": {
+      "command": "find . -path ./.git -prune -o -type f -print | sort > scout-notes.md"
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "send_to_lead",
+     "arguments": {
+      "type": "report",
+      "text": "scout-notes.md lists the workspace's files.",
+      "question_seq": null,
+      "files": [
+       "scout-notes.md"
+      ]
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "text",
+     "text": "I reported to my lead."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  }
+ ]
+}

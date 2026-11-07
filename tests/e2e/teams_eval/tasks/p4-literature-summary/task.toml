@@ -1,0 +1,6 @@
+id = "p4-literature-summary"
+title = "A literature-style summary of eight papers"
+tags = ["teams-eval", "teams-report"]
+budgets = { max_steps = 60, wall_clock_secs = 1500, max_tokens = 800000 }
+protected = []
+check = { image = "runtime", timeout_secs = 180 }

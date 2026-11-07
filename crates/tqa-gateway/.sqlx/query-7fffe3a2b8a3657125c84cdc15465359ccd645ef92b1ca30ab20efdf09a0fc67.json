@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM idempotency WHERE (key,user_id) IN (SELECT key,user_id FROM idempotency WHERE execution_status<>'queued' AND created_at<=CURRENT_TIMESTAMP-make_interval(secs=>$1::double precision) ORDER BY created_at LIMIT $2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Float8",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7fffe3a2b8a3657125c84cdc15465359ccd645ef92b1ca30ab20efdf09a0fc67"
+}

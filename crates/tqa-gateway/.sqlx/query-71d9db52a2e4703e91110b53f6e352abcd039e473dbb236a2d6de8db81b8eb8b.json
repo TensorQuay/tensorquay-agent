@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO workspace_shares (workspace_id,user_id,access,created_by) VALUES ($1,$2,$3,$4) ON CONFLICT (workspace_id,user_id) DO UPDATE SET access=EXCLUDED.access, updated_at=CURRENT_TIMESTAMP",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "71d9db52a2e4703e91110b53f6e352abcd039e473dbb236a2d6de8db81b8eb8b"
+}

@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT phase FROM sandbox_instances WHERE conversation_id=$1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "phase",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "sandbox_instances",
+            "name": "phase"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "56c318ef234eb2bb159aa2071a770f8f0bc1f26ea456863cd36c79764bdc66ad"
+}

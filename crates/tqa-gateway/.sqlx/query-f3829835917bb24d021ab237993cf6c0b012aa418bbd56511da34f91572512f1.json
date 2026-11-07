@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT model_route,template,mcp_servers,connectors,profile FROM conversations WHERE id=$1 AND state='active'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "model_route",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "model_route"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "template",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "template"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "mcp_servers",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "mcp_servers"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "connectors",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "connectors"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "profile",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "profile"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "f3829835917bb24d021ab237993cf6c0b012aa418bbd56511da34f91572512f1"
+}

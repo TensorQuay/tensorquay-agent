@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM agent_profiles WHERE id=$1 RETURNING seed_digest",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "seed_digest",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "agent_profiles",
+            "name": "seed_digest"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "5d4f86d78789229f51d3a304e6df2f279ba5876e4564c8fc8ad1e7812f369b2f"
+}

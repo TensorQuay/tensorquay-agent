@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE model_routes SET seed_state='removed' WHERE seed_state='current' AND NOT (name = ANY($1))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "dae110fc7f3d8f3f10cddd696b02c854612dbfe3cf433d1f0edc8e3574917422"
+}

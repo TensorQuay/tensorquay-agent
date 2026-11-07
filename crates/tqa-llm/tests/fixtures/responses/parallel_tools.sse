@@ -1,0 +1,45 @@
+event: response.created
+data: {"type":"response.created","sequence_number":0,"response":{"id":"resp_tools","object":"response","status":"in_progress","output":[]}}
+
+event: response.output_item.added
+data: {"type":"response.output_item.added","sequence_number":1,"output_index":0,"item":{"type":"reasoning","id":"rs_9","content":[]}}
+
+event: response.reasoning_text.delta
+data: {"type":"response.reasoning_text.delta","sequence_number":2,"item_id":"rs_9","output_index":0,"content_index":0,"delta":"Two lookups."}
+
+event: response.output_item.done
+data: {"type":"response.output_item.done","sequence_number":3,"output_index":0,"item":{"type":"reasoning","id":"rs_9","content":[{"type":"reasoning_text","text":"Two lookups."}]}}
+
+event: response.output_item.added
+data: {"type":"response.output_item.added","sequence_number":4,"output_index":1,"item":{"type":"function_call","id":"fc_a","call_id":"call_a","name":"read_file","arguments":"","status":"in_progress"}}
+
+event: response.output_item.added
+data: {"type":"response.output_item.added","sequence_number":5,"output_index":2,"item":{"type":"function_call","id":"fc_b","call_id":"call_b","name":"grep","arguments":"","status":"in_progress"}}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":6,"item_id":"fc_b","output_index":2,"delta":"{\"pattern\":"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":7,"item_id":"fc_a","output_index":1,"delta":"{\"path\":\"sr"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":8,"item_id":"fc_b","output_index":2,"delta":"\"fn mäin\"}"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":9,"item_id":"fc_a","output_index":1,"delta":"c/lib.rs\"}"}
+
+event: response.function_call_arguments.done
+data: {"type":"response.function_call_arguments.done","sequence_number":10,"item_id":"fc_b","output_index":2,"arguments":"{\"pattern\":\"fn mäin\"}"}
+
+event: response.output_item.done
+data: {"type":"response.output_item.done","sequence_number":11,"output_index":2,"item":{"type":"function_call","id":"fc_b","call_id":"call_b","name":"grep","arguments":"{\"pattern\":\"fn mäin\"}","status":"completed"}}
+
+event: response.function_call_arguments.done
+data: {"type":"response.function_call_arguments.done","sequence_number":12,"item_id":"fc_a","output_index":1,"arguments":"{\"path\":\"src/lib.rs\"}"}
+
+event: response.output_item.done
+data: {"type":"response.output_item.done","sequence_number":13,"output_index":1,"item":{"type":"function_call","id":"fc_a","call_id":"call_a","name":"read_file","arguments":"{\"path\":\"src/lib.rs\"}","status":"completed"}}
+
+event: response.completed
+data: {"type":"response.completed","sequence_number":14,"response":{"id":"resp_tools","object":"response","status":"completed","output":[],"usage":{"input_tokens":40,"output_tokens":22,"total_tokens":62}}}
+

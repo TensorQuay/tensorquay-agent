@@ -1,0 +1,6 @@
+[
+ "--format text (default, unchanged), csv (header region,total) and json (list of objects)",
+ "Other values are rejected (argparse choices)",
+ "Tests cover CSV and JSON",
+ "README.md's Usage documents --format"
+]

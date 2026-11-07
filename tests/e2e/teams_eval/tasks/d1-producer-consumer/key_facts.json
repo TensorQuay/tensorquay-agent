@@ -1,0 +1,7 @@
+[
+ "The spec's two gaps are settled once and written in its Decisions section: how strings are length-prefixed (and their encoding) and the trailer's size and byte order",
+ "Strings need a prefix wider than one byte (messages over 255 bytes) and UTF-8 (non-ASCII text)",
+ "data/events.jsonl's 500 events come back exactly through the writer and the reader; 53 are errors",
+ "out/summary.json is the reader's summary of them",
+ "The reader refuses a truncated file (the trailer is checked)"
+]

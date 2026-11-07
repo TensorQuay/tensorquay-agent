@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM idempotency WHERE position(convert_to($1,'UTF8') in response_body) > 0",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c9b56847c22eaee4669b2ab6bbb1dcd100592442fcfb03ba5b2ec81006717c71"
+}

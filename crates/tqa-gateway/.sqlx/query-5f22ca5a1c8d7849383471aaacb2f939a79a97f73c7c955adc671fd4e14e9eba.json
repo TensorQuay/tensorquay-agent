@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT owner_id FROM conversations WHERE id=$1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "owner_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "owner_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "5f22ca5a1c8d7849383471aaacb2f939a79a97f73c7c955adc671fd4e14e9eba"
+}

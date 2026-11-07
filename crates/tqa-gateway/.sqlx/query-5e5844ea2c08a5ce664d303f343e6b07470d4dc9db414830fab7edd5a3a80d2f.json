@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT frame IS NULL AS \"spilled!\",blob_key FROM events WHERE conversation_id=$1 AND seq=1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "spilled!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "blob_key",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "events",
+            "name": "blob_key"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      true
+    ]
+  },
+  "hash": "5e5844ea2c08a5ce664d303f343e6b07470d4dc9db414830fab7edd5a3a80d2f"
+}

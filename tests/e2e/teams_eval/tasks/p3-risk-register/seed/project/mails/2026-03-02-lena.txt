@@ -1,0 +1,4 @@
+From: Lena
+Subject: status
+
+The payment provider changes its API in April, in the middle of our integration; I own the adapter.

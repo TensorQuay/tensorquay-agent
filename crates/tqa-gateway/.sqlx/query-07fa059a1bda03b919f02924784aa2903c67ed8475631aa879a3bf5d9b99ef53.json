@@ -1,0 +1,42 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT ordinal AS \"ordinal!\", execution_status FROM idempotency WHERE conversation_id=$1 AND route=$2 AND held AND (execution_status='queued' OR (execution_status='failed' AND execution_error IN ('run_failed','run_cancelled'))) ORDER BY ordinal LIMIT $3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ordinal!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "idempotency",
+            "name": "ordinal"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "execution_status",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "idempotency",
+            "name": "execution_status"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "07fa059a1bda03b919f02924784aa2903c67ed8475631aa879a3bf5d9b99ef53"
+}

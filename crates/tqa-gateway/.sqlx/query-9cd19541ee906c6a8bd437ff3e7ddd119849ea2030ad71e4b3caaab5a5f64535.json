@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id::text AS \"id!\",model_route FROM conversations WHERE state='active' AND model_route = ANY($1)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "model_route",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "model_route"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "TextArray"
+      ]
+    },
+    "nullable": [
+      null,
+      false
+    ]
+  },
+  "hash": "9cd19541ee906c6a8bd437ff3e7ddd119849ea2030ad71e4b3caaab5a5f64535"
+}

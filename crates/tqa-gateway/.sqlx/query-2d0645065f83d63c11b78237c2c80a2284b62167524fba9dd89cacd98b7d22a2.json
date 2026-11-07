@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT m.name, COALESCE(SUM(COALESCE(u.prompt_tokens, 0) + COALESCE(u.completion_tokens, 0)), 0)::bigint AS \"tokens!\" FROM agent_team_members m JOIN agent_teams t ON t.id = m.team_id LEFT JOIN usage u ON u.conversation_id = m.conversation_id AND u.created_at >= t.created_at WHERE m.team_id = $1 GROUP BY m.name, m.created_at ORDER BY m.created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "agent_team_members",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "tokens!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "2d0645065f83d63c11b78237c2c80a2284b62167524fba9dd89cacd98b7d22a2"
+}

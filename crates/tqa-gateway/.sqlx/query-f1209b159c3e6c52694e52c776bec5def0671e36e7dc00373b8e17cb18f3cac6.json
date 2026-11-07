@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE agent_team_members SET state = CASE WHEN EXISTS (SELECT 1 FROM idempotency i WHERE i.conversation_id = $1 AND i.key = $2 AND i.execution_status = 'queued') THEN 'queued' ELSE 'working' END, last_read_seq = GREATEST(last_read_seq, $3) WHERE conversation_id = $1 AND state = 'starting'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f1209b159c3e6c52694e52c776bec5def0671e36e7dc00373b8e17cb18f3cac6"
+}

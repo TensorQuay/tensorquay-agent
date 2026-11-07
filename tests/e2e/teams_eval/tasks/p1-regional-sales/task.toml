@@ -1,0 +1,6 @@
+id = "p1-regional-sales"
+title = "A one-page Q3 sales report by region with a chart"
+tags = ["teams-eval", "teams-report"]
+budgets = { max_steps = 60, wall_clock_secs = 1500, max_tokens = 800000 }
+protected = []
+check = { image = "runtime", timeout_secs = 180 }

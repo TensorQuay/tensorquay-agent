@@ -1,0 +1,40 @@
+{
+ "figures": {
+  "api": {
+   "errors": 3,
+   "p95_ms": 837,
+   "requests": 105,
+   "users": 47
+  },
+  "auth": {
+   "errors": 9,
+   "p95_ms": 2369,
+   "requests": 86,
+   "users": 46
+  },
+  "billing": {
+   "errors": 6,
+   "p95_ms": 2435,
+   "requests": 77,
+   "users": 43
+  },
+  "mailer": {
+   "errors": 6,
+   "p95_ms": 8338,
+   "requests": 101,
+   "users": 50
+  },
+  "search": {
+   "errors": 5,
+   "p95_ms": 864,
+   "requests": 106,
+   "users": 49
+  },
+  "worker": {
+   "errors": 7,
+   "p95_ms": 8718,
+   "requests": 92,
+   "users": 45
+  }
+ }
+}

@@ -1,0 +1,6 @@
+id = "r3-breaking-changes"
+title = "Every breaking change in a year of release notes"
+tags = ["teams-eval", "teams-research"]
+budgets = { max_steps = 80, wall_clock_secs = 1800, max_tokens = 1000000 }
+protected = []
+check = { image = "runtime", timeout_secs = 180 }

@@ -1,0 +1,27 @@
+{
+  "language": "English",
+  "messages": {
+    "context.from": "Loaded by the run started {time}",
+    "context.section": "{name} · {count, number}",
+    "context.instructions": "Instructions",
+    "context.instructionsNote": "The files the agent read before it started, in order",
+    "context.skills": "Skills",
+    "context.skipped": "Not loaded",
+    "context.shortened": "Shortened",
+    "context.shortenedWhy": "Only the start of this file fits; the rest was not given to the agent.",
+    "context.tierInstall": "For everyone",
+    "context.tierUser": "Yours",
+    "context.reasonMissingManifest": "No SKILL.md in the folder.",
+    "context.reasonBadFrontMatter": "SKILL.md must start with a name and a description between two --- lines.",
+    "context.reasonNameMismatch": "The name in SKILL.md is not the folder’s name.",
+    "context.reasonTooLarge": "The skill is larger than the size limit.",
+    "context.reasonSymlink": "The folder contains a symbolic link.",
+    "context.reasonNotUtf8": "SKILL.md is not UTF-8 text.",
+    "context.reasonShadowed": "A skill with the same name in your own skills is used instead.",
+    "context.reasonOverLimit": "More skills than the limit; this one was left out.",
+    "context.reasonUnreadable": "The folder could not be read.",
+    "context.reasonUnknown": "This skill was not loaded.",
+    "context.none": "The instruction files and skills the agent loads appear here when a run starts.",
+    "context.nothing": "This run loaded no instruction files or skills."
+  }
+}

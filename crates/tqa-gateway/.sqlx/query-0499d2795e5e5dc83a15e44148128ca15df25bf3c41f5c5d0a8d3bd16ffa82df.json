@@ -1,0 +1,180 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO host_keys (id, owner_id, name, host, port, path_prefix, scheme, user_name, secret_ref) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id, owner_id, name, host, port, path_prefix, scheme, user_name, header_name, secret_ref, check_name, set_at, version",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "host_keys",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "owner_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "host_keys",
+            "name": "owner_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "host_keys",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "host",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "host_keys",
+            "name": "host"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "port",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "host_keys",
+            "name": "port"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "path_prefix",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "host_keys",
+            "name": "path_prefix"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "scheme",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "host_keys",
+            "name": "scheme"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "user_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "host_keys",
+            "name": "user_name"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "header_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "host_keys",
+            "name": "header_name"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "secret_ref",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "host_keys",
+            "name": "secret_ref"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "check_name",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "host_keys",
+            "name": "check_name"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "set_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "host_keys",
+            "name": "set_at"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "version",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "host_keys",
+            "name": "version"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text",
+        "Int4",
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "0499d2795e5e5dc83a15e44148128ca15df25bf3c41f5c5d0a8d3bd16ffa82df"
+}

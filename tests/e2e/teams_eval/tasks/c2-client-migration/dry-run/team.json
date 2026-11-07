@@ -1,0 +1,243 @@
+{
+ "model": "fixture",
+ "select": "prompt",
+ "responses": [
+  {
+   "when": "`client/v1.py` is deprecated. Migrate its four callers under `app/` to `client/v2.py`, following",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "start_member",
+     "arguments": {
+      "role": "scout",
+      "workspace": "own_copy",
+      "profile": null,
+      "brief": {
+       "objective": "Write scout-notes.md listing the files in this workspace for c2-client-migration.",
+       "output": "scout-notes.md, one line per file.",
+       "sources": null,
+       "boundaries": "Write only scout-notes.md."
+      }
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "`client/v1.py` is deprecated. Migrate its four callers under `app/` to `client/v2.py`, following",
+   "events": [
+    {
+     "type": "text",
+     "text": "I started a helper; I'll continue when it reports."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "`client/v1.py` is deprecated. Migrate its four callers under `app/` to `client/v2.py`, following",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_reports",
+     "arguments": {
+      "wait": 30,
+      "limit": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "`client/v1.py` is deprecated. Migrate its four callers under `app/` to `client/v2.py`, following",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "take_files",
+     "arguments": {
+      "report_seq": {
+       "seq_of": {
+        "type": "report",
+        "from": "scout"
+       }
+      },
+      "files": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "`client/v1.py` is deprecated. Migrate its four callers under `app/` to `client/v2.py`, following",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/orders.py",
+      "content": "from client.v2 import Client, NotFound\n\n\ndef order_summary(order_id):\n    try:\n        order = Client().get(f\"/orders/{order_id}\").json()\n    except NotFound:\n        return f\"order {order_id}: not found\"\n    return f\"order {order_id}: {len(order['items'])} item(s), {order['total']:.2f} EUR\"\n\n\ndef place_order(items):\n    status = Client().post(\"/orders\", json={\"items\": items}).status\n    return \"placed\" if status == 201 else f\"refused ({status})\"\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "`client/v1.py` is deprecated. Migrate its four callers under `app/` to `client/v2.py`, following",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/reports.py",
+      "content": "from client.v2 import Client, NotFound\n\n\ndef daily_total(day):\n    try:\n        return Client().get(\"/reports/daily\", params={\"day\": day}).json()[\"total\"]\n    except NotFound:\n        return 0.0\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "`client/v1.py` is deprecated. Migrate its four callers under `app/` to `client/v2.py`, following",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/sync.py",
+      "content": "from client.v2 import Client\n\n\ndef push(records):\n    status = Client().post(\"/sync\", json={\"records\": records}).status\n    return f\"synced {len(records)}\" if status == 200 else \"sync failed\"\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "`client/v1.py` is deprecated. Migrate its four callers under `app/` to `client/v2.py`, following",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/users.py",
+      "content": "from client.v2 import Client, NotFound\n\n\ndef user_name(user_id):\n    try:\n        return Client().get(f\"/users/{user_id}\").json()[\"name\"]\n    except NotFound:\n        return \"unknown user\"\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "`client/v1.py` is deprecated. Migrate its four callers under `app/` to `client/v2.py`, following",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "done",
+     "arguments": {
+      "summary": "Wrote app/orders.py, app/reports.py, app/sync.py, app/users.py."
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "`client/v1.py` is deprecated. Migrate its four callers under `app/` to `client/v2.py`, following",
+   "events": [
+    {
+     "type": "text",
+     "text": "Done: app/orders.py, app/reports.py, app/sync.py, app/users.py."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "shell",
+     "arguments": {
+      "command": "find . -path ./.git -prune -o -type f -print | sort > scout-notes.md"
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "send_to_lead",
+     "arguments": {
+      "type": "report",
+      "text": "scout-notes.md lists the workspace's files.",
+      "question_seq": null,
+      "files": [
+       "scout-notes.md"
+      ]
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "text",
+     "text": "I reported to my lead."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  }
+ ]
+}

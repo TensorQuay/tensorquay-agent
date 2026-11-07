@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE agent_teams SET state = 'stopping', stop_reason = 'lead_deleted' WHERE id = $1 AND state = 'running'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7c4a424285531ec97ca17c89ed65eb7f94231cfb15b7d907b0f295eea94292af"
+}

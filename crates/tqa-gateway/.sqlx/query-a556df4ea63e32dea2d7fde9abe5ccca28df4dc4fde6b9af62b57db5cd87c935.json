@@ -1,0 +1,60 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT seq, type AS kind, body->>'text' AS text, created_at FROM channel_messages WHERE channel_id = $1 AND author_kind = 'conversation' AND author_id = $2 AND to_kind = 'lead' ORDER BY seq DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "seq",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "seq"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "kind",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "type"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "text",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "created_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      false
+    ]
+  },
+  "hash": "a556df4ea63e32dea2d7fde9abe5ccca28df4dc4fde6b9af62b57db5cd87c935"
+}

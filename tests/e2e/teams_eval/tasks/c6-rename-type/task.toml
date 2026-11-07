@@ -1,0 +1,6 @@
+id = "c6-rename-type"
+title = "Rename a type across a package and its docs without breaking its public API"
+tags = ["teams-eval", "teams-code"]
+budgets = { max_steps = 40, wall_clock_secs = 900, max_tokens = 300000 }
+protected = []
+check = { image = "runtime", timeout_secs = 120 }

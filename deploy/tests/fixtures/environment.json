@@ -1,0 +1,180 @@
+{
+  "model": "fixture",
+  "select": "prompt",
+  "responses": [
+    {
+      "when": "Create a small test file",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "write_file",
+          "arguments": {
+            "path": "environment/test_persisted.py",
+            "content": "def test_workspace_survives():\n    assert 2 + 2 == 4\n",
+            "create_parents": true
+          },
+          "split_into": 3
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 20,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "Create a small test file",
+      "events": [
+        {
+          "type": "text",
+          "text": "Created environment/test_persisted.py in Minimal. The file is ready to test after switching environments."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "Create a small test file",
+      "events": [
+        {
+          "type": "text",
+          "text": "Workstation provides Python, pytest and a headless browser. I will test the retained file and render a local page."
+        },
+        {
+          "type": "tool_call",
+          "name": "shell",
+          "arguments": {
+            "command": "python3 -m pytest -q environment/test_persisted.py"
+          },
+          "split_into": 3
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 80,
+        "completion_tokens": 30
+      }
+    },
+    {
+      "when": "Create a small test file",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "write_file",
+          "arguments": {
+            "path": "environment/index.html",
+            "content": "<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><title>Environment check</title><body><h1>Workspace survived</h1><p>This page was rendered after the environment switch.</p></body></html>\n",
+            "create_parents": false
+          },
+          "split_into": 3
+        },
+        {
+          "type": "tool_call",
+          "name": "write_file",
+          "arguments": {
+            "path": "environment/browser.cjs",
+            "content": "const { chromium } = require('playwright');\nasync function main() {\n  const browser = await chromium.launch({ executablePath: '/usr/bin/chromium', chromiumSandbox: false, headless: true });\n  try {\n    const page = await browser.newPage({ viewport: { width: 800, height: 600 } });\n    await page.goto('file:///workspace/environment/index.html');\n    if (await page.locator('h1').textContent() !== 'Workspace survived') throw new Error('Unexpected page');\n    await page.screenshot({ path: 'environment/page.png' });\n    console.log('Saved environment/page.png');\n  } finally {\n    await browser.close();\n  }\n}\nmain().catch(error => { console.error(error); process.exitCode = 1; });\n",
+            "create_parents": false
+          },
+          "split_into": 4
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 120,
+        "completion_tokens": 100
+      }
+    },
+    {
+      "when": "Create a small test file",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "shell",
+          "arguments": {
+            "command": "node environment/browser.cjs"
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 240,
+        "completion_tokens": 10
+      }
+    },
+    {
+      "when": "Create a small test file",
+      "events": [
+        {
+          "type": "text",
+          "text": "The original file survived the switch. Workstation's Python and browser tools ran pytest and saved the local page to environment/page.png."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 260,
+        "completion_tokens": 25
+      }
+    },
+    {
+      "when": "Run one command in this environment",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "shell",
+          "arguments": {
+            "command": "uname -s && python3 --version"
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 20,
+        "completion_tokens": 10
+      }
+    },
+    {
+      "when": "Run one command in this environment",
+      "events": [
+        {
+          "type": "text",
+          "text": "The command ran in this task's environment."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 10
+      }
+    },
+    {
+      "when": "Try to save a note in this workspace",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "write_file",
+          "arguments": {
+            "path": "blocked.txt",
+            "content": "This file must not exist.\n",
+            "create_parents": false
+          },
+          "split_into": 2
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 20,
+        "completion_tokens": 10
+      }
+    },
+    {
+      "when": "Try to save a note in this workspace",
+      "events": [
+        {
+          "type": "text",
+          "text": "I couldn't save the note: this agent profile doesn't let me write files."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 10
+      }
+    }
+  ]
+}

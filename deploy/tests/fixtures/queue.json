@@ -1,0 +1,33 @@
+{
+  "model": "fixture",
+  "select": "prompt",
+  "responses": [
+    {
+      "when": "Hold the slot",
+      "wait_ms": 600000,
+      "events": [
+        {
+          "type": "text",
+          "text": "Held until you press Stop."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 20,
+        "completion_tokens": 5
+      }
+    },
+    {
+      "when": "Wait for a free slot",
+      "events": [
+        {
+          "type": "text",
+          "text": "The queued task ran once the slot was free."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 20,
+        "completion_tokens": 10
+      }
+    }
+  ]
+}

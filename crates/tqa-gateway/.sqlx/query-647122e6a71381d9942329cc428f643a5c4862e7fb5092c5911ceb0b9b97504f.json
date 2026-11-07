@@ -1,0 +1,100 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT seq, type, task_seq, author_kind, author_id, author_name, body FROM channel_messages WHERE channel_id = $1 AND type IN ('task', 'claim', 'report') ORDER BY seq LIMIT 5000",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "seq",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "seq"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "type",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "type"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "task_seq",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "task_seq"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "author_kind",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "author_kind"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "author_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "author_id"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "author_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "author_name"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "body",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "body"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "647122e6a71381d9942329cc428f643a5c4862e7fb5092c5911ceb0b9b97504f"
+}

@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(SUM(bytes) FILTER (WHERE purged_at IS NULL), 0)::bigint AS \"held!\", bool_or(id = $2 AND purged_at IS NULL) AS kept FROM screenshots WHERE conversation_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "held!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "kept",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "32d400d216b55fea1fdf7a1f90b8ec0f0050203a8b554341bf58f7bec9d2d4a2"
+}

@@ -1,0 +1,49 @@
+{
+ "model": "fixture",
+ "responses": [
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "shell",
+     "arguments": {
+      "command": "sed -i 's/def calc_total/def compute_total/' shop/pricing.py"
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 500,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "shell",
+     "arguments": {
+      "command": "python3 -m unittest discover -s tests -t . && python3 -m shop.cli"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 800,
+    "completion_tokens": 30
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "Renamed the function."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 950,
+    "completion_tokens": 20
+   }
+  }
+ ]
+}

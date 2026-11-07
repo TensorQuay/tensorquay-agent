@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT role FROM channel_members WHERE channel_id = $1 AND user_id IS NOT DISTINCT FROM $2 AND conversation_id IS NOT DISTINCT FROM $3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "role",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_members",
+            "name": "role"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "3cfe048e1dfe41233f9cec4b7e6ba8250c1de209d9544f950e91bce6a58b40ef"
+}

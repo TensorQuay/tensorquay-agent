@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE decision_engines SET seed_state='removed' WHERE seed_state='current' AND NOT (name = ANY($1))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "95c2922a46273408b6b69cf9620785a5ba2ee7385b785916073ff4e2d5c33a87"
+}

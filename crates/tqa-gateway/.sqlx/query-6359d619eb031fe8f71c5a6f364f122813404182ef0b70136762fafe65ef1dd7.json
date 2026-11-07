@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT spent_tokens FROM agent_teams WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "spent_tokens",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "spent_tokens"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "6359d619eb031fe8f71c5a6f364f122813404182ef0b70136762fafe65ef1dd7"
+}

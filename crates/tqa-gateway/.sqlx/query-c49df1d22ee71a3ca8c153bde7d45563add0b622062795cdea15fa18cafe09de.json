@@ -1,0 +1,160 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT version,is_default,enabled,display_name,description,image,capabilities,cpu_millicores,memory_bytes,pids,workspace_bytes,check_state FROM templates WHERE name=$1 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "version",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "version"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "is_default",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "is_default"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "enabled",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "enabled"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "display_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "description",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "image",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "image"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "capabilities",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "capabilities"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "cpu_millicores",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "cpu_millicores"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "memory_bytes",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "memory_bytes"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "pids",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "pids"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "workspace_bytes",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "workspace_bytes"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "check_state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "templates",
+            "name": "check_state"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "c49df1d22ee71a3ca8c153bde7d45563add0b622062795cdea15fa18cafe09de"
+}

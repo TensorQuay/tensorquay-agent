@@ -1,0 +1,42 @@
+{
+  "schema": "ext-check/1",
+  "kind": "template",
+  "target": {
+    "image": "sha256:35f1eae4999643bf859a35fa9c7e2b0adcd41c3f91b21990cf84f6ec945f0347",
+    "image_id": "sha256:35f1eae4999643bf859a35fa9c7e2b0adcd41c3f91b21990cf84f6ec945f0347",
+    "base": "workstation"
+  },
+  "server": null,
+  "tools": [],
+  "tools_sha256": null,
+  "checks": [
+    {
+      "code": "template_checks",
+      "status": "pass",
+      "message": "derived from the workstation template; its protocol label, image policy and runtime binary hold"
+    },
+    {
+      "code": "posture",
+      "status": "pass",
+      "message": "non-root, read-only root, writable /tmp and /workspace, no capabilities, no_new_privs"
+    },
+    {
+      "code": "boot_ready",
+      "status": "pass",
+      "message": "the runtime dialled the gateway with protocol revision 8"
+    },
+    {
+      "code": "microvm_rootfs",
+      "status": "skip",
+      "message": "the microVM rootfs checks run only on a KVM host"
+    }
+  ],
+  "ext_check": {
+    "commit": "002a812de6b9"
+  },
+  "date": "2026-09-27T03:36:49.778974913Z",
+  "flags": {
+    "allow_network": false
+  },
+  "result": "pass"
+}

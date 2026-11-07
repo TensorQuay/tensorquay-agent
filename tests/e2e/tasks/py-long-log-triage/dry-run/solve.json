@@ -1,0 +1,52 @@
+{
+ "model": "fixture",
+ "responses": [
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "grep",
+     "arguments": {
+      "pattern": "ERROR",
+      "path": "logs"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 600,
+    "completion_tokens": 40
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "app/handlers/h27.py",
+      "content": "\"\"\"Handler 27: request statistics for endpoint /api/e27.\"\"\"\n\nWEIGHT = 7\n\n\ndef ratio(hits, count):\n    \"\"\"Return hits per request, rounded to four places; 0.0 when there were no requests.\"\"\"\n    if count == 0:\n        return 0.0\n    return round(hits / count, 4)\n\n\ndef score(values):\n    \"\"\"Return the weighted sum of the values.\"\"\"\n    return sum(value * WEIGHT for value in values)\n",
+      "create_parents": false
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 2400,
+    "completion_tokens": 150
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "Handler 27 now returns 0.0 when there were no requests."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 2700,
+    "completion_tokens": 20
+   }
+  }
+ ]
+}

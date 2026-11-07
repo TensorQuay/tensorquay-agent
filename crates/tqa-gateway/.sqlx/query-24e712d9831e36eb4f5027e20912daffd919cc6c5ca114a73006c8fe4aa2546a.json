@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT DISTINCT o.id FROM conversations o JOIN idempotency w ON w.conversation_id=o.id WHERE o.workspace_id=(SELECT workspace_id FROM conversations WHERE id=$1) AND o.id<>$1 AND o.state='active' AND w.execution_status='queued' AND NOT EXISTS(SELECT 1 FROM sandbox_instances s WHERE s.conversation_id=o.id) AND w.created_at < COALESCE((SELECT MIN(h.created_at) FROM idempotency h WHERE h.conversation_id=$1 AND h.execution_status='queued'), 'infinity'::timestamptz)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "24e712d9831e36eb4f5027e20912daffd919cc6c5ca114a73006c8fe4aa2546a"
+}

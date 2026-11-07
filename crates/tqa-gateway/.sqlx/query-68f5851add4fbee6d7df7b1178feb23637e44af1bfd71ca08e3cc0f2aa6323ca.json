@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE conversations SET last_activity_at=CURRENT_TIMESTAMP WHERE id=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "68f5851add4fbee6d7df7b1178feb23637e44af1bfd71ca08e3cc0f2aa6323ca"
+}

@@ -1,0 +1,23 @@
+[
+ "2026-01-08: Decided: the launch moves to 14 April. (owner Dana)",
+ "2026-02-12: We reversed the Postgres decision of 15 January: we stay on MySQL this year. (owner Ken)",
+ "2026-01-15: We agreed that Lena redesigns the pricing page. (owner Lena)",
+ "2026-01-22: Decision: on-call rotates weekly, starting with Omar. (owner Omar)",
+ "2026-01-29: Outcome: the beta is limited to 50 customers; Dana picks them. (owner Dana)",
+ "2026-02-05: Final call: Brisa becomes our payment provider; Ken owns the contract. (owner Ken)",
+ "2026-02-05: Decided: we hire two engineers this quarter; Priya leads the hiring. (owner Priya)",
+ "2026-02-12: We agreed to keep the current logo; Lena tells the agency. (owner Lena)",
+ "2026-02-19: Decision: single sign-on (SSO) ships in Q2; Omar owns it. (owner Omar)",
+ "2026-02-26: Outcome: the travel budget is cut by 20 %; Priya informs the teams. (owner Priya)",
+ "2026-03-05: Decided: the docs site moves to the new generator; Lena owns the move. (owner Lena)",
+ "2026-03-05: We agreed on a code freeze one week before launch; Omar enforces it. (owner Omar)",
+ "2026-03-12: Final call: support hours extend to 8 pm; Dana staffs the shifts. (owner Dana)",
+ "2026-03-19: Decision: we drop the old analytics tool by April; Ken removes it. (owner Ken)",
+ "2026-03-26: Decided: the team offsite is in May; Priya books it. (owner Priya)",
+ "Postgres (15 Jan) was reversed on 12 Feb",
+ "How long do we keep customer data (the retention period)?",
+ "Who owns the mobile app after the reorganisation?",
+ "Which old browsers do we still support?",
+ "Is there budget for the autumn conference?",
+ "Which translation vendor do we use for the German site?"
+]

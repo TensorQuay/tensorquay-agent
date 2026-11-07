@@ -1,0 +1,12 @@
+Software teams on 32 hours
+Chen et al., 2021
+
+Abstract
+Story points delivered did not fall. Meetings were cut by 40 %.
+
+Method
+We describe the setting, the data and the limits of the study.
+
+Results
+Story points delivered did not fall.
+Meetings were cut by 40 %.

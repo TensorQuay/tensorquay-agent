@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM events WHERE conversation_id=$1 AND lifecycle IN ('run.started','run.resumed') AND run_id=$2) AS \"found!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "found!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "eb8fb81d42d35bb61d4f5dab4c73e1028610c66fc77ca07673759368ee6f433a"
+}

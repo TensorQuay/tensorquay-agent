@@ -1,0 +1,5 @@
+[
+ "Six routes: GET /health, GET /items (limit), POST /items, GET, PUT and DELETE /items/<id>",
+ "POST and PUT accepted any body: name must be 1-80 characters, price a number >= 0",
+ "Invalid bodies get 400 with an error; PUT validates only the fields it sends"
+]

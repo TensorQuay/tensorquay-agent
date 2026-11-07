@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE host_keys SET for_everyone=$2 WHERE id=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ff59fcec414da320ad94950108df2440729637de46d5f35d2fa63ef125fdbc25"
+}

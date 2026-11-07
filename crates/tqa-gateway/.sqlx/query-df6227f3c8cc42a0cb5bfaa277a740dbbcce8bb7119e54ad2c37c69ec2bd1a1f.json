@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO secret_reads (id,ref,consumer_kind,consumer,conversation_id,user_id,run_id,outcome,first_at,last_at,count) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) ON CONFLICT (ref,consumer_kind,consumer,conversation_id,user_id,run_id,outcome) DO UPDATE SET count=secret_reads.count+EXCLUDED.count, last_at=GREATEST(secret_reads.last_at,EXCLUDED.last_at)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text",
+        "Timestamptz",
+        "Timestamptz",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "df6227f3c8cc42a0cb5bfaa277a740dbbcce8bb7119e54ad2c37c69ec2bd1a1f"
+}

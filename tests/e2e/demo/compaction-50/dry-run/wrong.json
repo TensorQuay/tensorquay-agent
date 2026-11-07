@@ -1,0 +1,1420 @@
+{
+ "model": "fixture",
+ "select": "arrival",
+ "summary": {
+  "events": [
+   {
+    "type": "text",
+    "text": "{\"goal\": \"Audit the ledger part by part, then write REPORT.md\", \"done\": [\"read the ledger parts so far\"], \"pending\": [\"read the remaining parts\", \"write REPORT.md\"], \"decisions\": [], \"key_paths\": [\"ledger/\"], \"open_errors\": []}"
+   }
+  ],
+  "usage": {
+   "prompt_tokens": 6000,
+   "completion_tokens": 120
+  }
+ },
+ "responses": [
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-01.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 1200,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-01: TOTAL 289040"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 1400,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-02.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 1600,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-02: TOTAL 308847"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 1800,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-03.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 2000,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-03: TOTAL 269849"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 2200,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-04.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 2400,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-04: TOTAL 267598"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 2600,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-05.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 2800,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-05: TOTAL 277364"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 3000,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-06.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 3200,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-06: TOTAL 323125"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 3400,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-07.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 3600,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-07: TOTAL 275308"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 3800,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-08.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 4000,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-08: TOTAL 291829"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 4200,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-09.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 4400,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-09: TOTAL 279342"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 4600,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-10.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 4800,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-10: TOTAL 316585"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5000,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-11.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5200,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-11: TOTAL 302071"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5400,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-12.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5600,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-12: TOTAL 261375"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 5800,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-13.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 6000,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-13: TOTAL 293400"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 6200,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-14.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 6400,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-14: TOTAL 290356"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 6600,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-15.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 6800,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-15: TOTAL 315928"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 7000,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-16.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 7200,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-16: TOTAL 304170"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 7400,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-17.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 7600,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-17: TOTAL 289171"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 7800,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-18.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 8000,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-18: TOTAL 276717"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 8200,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-19.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 8400,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-19: TOTAL 323868"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 8600,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-20.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 8800,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-20: TOTAL 315297"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 9000,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-21.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 9200,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-21: TOTAL 270340"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 9400,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-22.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 9600,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-22: TOTAL 319354"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 9800,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-23.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 10000,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-23: TOTAL 289340"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 10200,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-24.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 10400,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-24: TOTAL 311698"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 10600,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-25.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 10800,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-25: TOTAL 306956"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 11000,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-26.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 11200,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-26: TOTAL 297567"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 11400,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-27.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 11600,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-27: TOTAL 320219"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 11800,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-28.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 12000,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-28: TOTAL 266580"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 12200,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-29.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 12400,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-29: TOTAL 288152"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 12600,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-30.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 12800,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-30: TOTAL 325453"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 13000,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-31.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 13200,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-31: TOTAL 338898"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 13400,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-32.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 13600,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-32: TOTAL 308373"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 13800,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-33.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 14000,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-33: TOTAL 297810"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 14200,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-34.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 14400,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-34: TOTAL 273879"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 14600,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-35.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 14800,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-35: TOTAL 284409"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 15000,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-36.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 15200,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-36: TOTAL 317878"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 15400,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-37.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 15600,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-37: TOTAL 295420"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 15800,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-38.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 16000,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-38: TOTAL 303729"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 16200,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-39.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 16400,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-39: TOTAL 309435"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 16600,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-40.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 16800,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-40: TOTAL 323001"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 17000,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-41.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 17200,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-41: TOTAL 305600"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 17400,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-42.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 17600,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-42: TOTAL 331552"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 17800,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-43.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 18000,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-43: TOTAL 309728"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 18200,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-44.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 18400,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-44: TOTAL 297797"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 18600,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-45.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 18800,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-45: TOTAL 289464"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 19000,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-46.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 19200,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-46: TOTAL 289971"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 19400,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-47.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 19600,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-47: TOTAL 310515"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 19800,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-48.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 20000,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-48: TOTAL 302584"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 20200,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_file",
+     "arguments": {
+      "path": "ledger/part-49.txt"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 20400,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "part-49: TOTAL 290375"
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 20600,
+    "completion_tokens": 15
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "REPORT.md",
+      "content": "part-01: 289040\npart-02: 308847\npart-03: 269849\npart-04: 267598\npart-05: 277364\npart-06: 323125\npart-07: 275308\npart-08: 291829\npart-09: 279342\npart-10: 316585\npart-11: 302071\npart-12: 261375\npart-13: 293400\npart-14: 290356\npart-15: 315928\npart-16: 304170\npart-17: 289171\npart-18: 276717\npart-19: 323868\npart-20: 315297\npart-21: 270340\npart-22: 319354\npart-23: 289340\npart-24: 311698\npart-25: 306956\npart-26: 297567\npart-27: 320219\npart-28: 266580\npart-29: 288152\npart-30: 325453\npart-31: 338898\npart-32: 308373\npart-33: 297810\npart-34: 273879\npart-35: 284409\npart-36: 317878\npart-37: 295420\npart-38: 303729\npart-39: 309435\npart-40: 323001\npart-41: 305600\npart-42: 331552\npart-43: 309728\npart-44: 297797\npart-45: 289464\npart-46: 289971\npart-47: 310515\npart-48: 302584\npart-49: 290375\nAudit reference: pending\n",
+      "create_parents": false
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 9000,
+    "completion_tokens": 400
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "REPORT.md is written."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 9500,
+    "completion_tokens": 10
+   }
+  }
+ ]
+}

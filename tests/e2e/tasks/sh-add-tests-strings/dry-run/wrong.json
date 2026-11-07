@@ -1,0 +1,51 @@
+{
+ "model": "fixture",
+ "responses": [
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "tests/test_strings.sh",
+      "content": "# Tests for lib/strings.sh; run with sh tests/run.sh.\ncheck \"trim\" \"a\" \"$(trim ' a')\"\ncheck \"upper\" \"A\" \"$(upper a)\"\n",
+      "create_parents": false
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 470,
+    "completion_tokens": 200
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "shell",
+     "arguments": {
+      "command": "sh tests/run.sh"
+     },
+     "split_into": 1
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 760,
+    "completion_tokens": 20
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "Added two checks."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 950,
+    "completion_tokens": 20
+   }
+  }
+ ]
+}

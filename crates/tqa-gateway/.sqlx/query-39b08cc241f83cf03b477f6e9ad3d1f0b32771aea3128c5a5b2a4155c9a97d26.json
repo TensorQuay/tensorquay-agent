@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE idempotency SET execution_status='queued',held=true,updated_at=CURRENT_TIMESTAMP WHERE conversation_id=$1 AND route=$2 AND execution_status IN ('sending','delivered') AND team_copy_seq IS NULL AND updated_at > COALESCE($3,'-infinity'::timestamptz) AND updated_at < CURRENT_TIMESTAMP-make_interval(secs=>$4) RETURNING ordinal",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ordinal",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "idempotency",
+            "name": "ordinal"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Timestamptz",
+        "Float8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "39b08cc241f83cf03b477f6e9ad3d1f0b32771aea3128c5a5b2a4155c9a97d26"
+}

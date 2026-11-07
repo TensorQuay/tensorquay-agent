@@ -1,0 +1,1206 @@
+.error-message {
+  color: var(--danger);
+  overflow-wrap: anywhere;
+}
+.page-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+}
+.conversation-list,
+.conversation-page {
+  max-width: var(--transcript-width);
+  width: 100%;
+  margin-inline: auto;
+  min-width: 0;
+}
+.conversation-rows {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.conversation-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  border-bottom: var(--border-width) solid var(--line);
+  padding-block: var(--space-4);
+}
+.conversation-link {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.conversation-link:hover {
+  text-decoration: underline;
+}
+/* The first transcript line starts within 64 px of the window top (§6): the 56 px bar plus a 4 px gap. */
+.conversation-page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+.conversation-heading {
+  flex-shrink: 0;
+  padding-bottom: var(--space-4);
+  border-bottom: var(--border-width) solid var(--line);
+}
+.conversation-heading h1 {
+  overflow-wrap: anywhere;
+}
+.sandbox-status {
+  gap: var(--space-2);
+}
+.conversation-empty {
+  padding-block: var(--space-12);
+}
+.transcript-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  min-width: 0;
+}
+/* Time-placed lines (a team's log) between turns: close together, as one log (the S6 web review). One column as wide as
+   the transcript, so a long team line ends in "…" rather than widening every turn past it (the 14b page pass, H7). */
+.transcript-lines {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.transcript-scroll {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  overflow-anchor: none;
+  scroll-behavior: auto;
+  padding: var(--space-1);
+}
+/* §5b: the composer sits 16 px below the transcript's last line (4 px gap + 12 px). */
+.conversation-page > .composer {
+  margin-top: var(--space-3);
+}
+.follow-controls {
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.user-message {
+  align-self: flex-end;
+  margin-left: auto;
+  width: fit-content;
+  max-width: min(100%, var(--measure));
+  background: var(--surface);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--control-radius);
+}
+/* A waiting message's Cancel (WEB-U-167): a quiet action at the bubble's end, the waiting itself said in the header. */
+.user-message .message-cancel {
+  display: flex;
+  margin-inline-start: auto;
+  margin-block-start: var(--space-1);
+  color: var(--muted);
+  font-weight: 400;
+}
+.transcript-items + .user-message {
+  margin-top: var(--space-8);
+}
+.message-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-width: var(--measure);
+}
+.assistant-step {
+  min-width: 0;
+}
+.reasoning summary,
+.tool-body summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--min-control-height);
+  cursor: pointer;
+  width: fit-content;
+}
+.reasoning summary:hover,
+.tool-body summary:hover {
+  color: var(--ink);
+}
+.reasoning p {
+  margin-top: var(--space-3);
+}
+/* Thinking opens like every disclosure: its chevron turns when open (WEB-U-157). */
+.reasoning summary svg {
+  transition: transform var(--motion-fast) ease-out;
+}
+.reasoning[open] > summary svg {
+  transform: rotate(90deg);
+}
+/* The live line's thinking (WEB-U-123): under the line, as the group's Thinking reads; a long one scrolls in place. */
+.reasoning-live {
+  margin-top: var(--space-2);
+  padding-inline-start: var(--space-6);
+  max-height: 16lh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.tool-card {
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+  background: var(--surface);
+  min-width: 0;
+  overflow: clip;
+}
+.tool-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  text-align: left;
+}
+.tool-name {
+  flex: 1;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+/* §5b: the card's heading shows it can be pressed (it is often open now: the latest card opens with its group). */
+.tool-heading:hover {
+  background: var(--hover-tint);
+}
+.tool-heading .disclosure-icon {
+  flex-shrink: 0;
+  transition: transform var(--motion-fast) ease-out;
+}
+.tool-heading[aria-expanded="false"] .disclosure-icon {
+  transform: rotate(-90deg);
+}
+.tool-body {
+  padding: 0 var(--space-4) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+.tool-body[hidden] {
+  display: none;
+}
+.tool-body .code-block {
+  margin: 0;
+  max-width: 100%;
+}
+.tool-body .button {
+  align-self: flex-start;
+}
+.result-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.transcript-notice {
+  padding-left: var(--space-3);
+  border-left: var(--border-width) solid var(--line);
+}
+.usage-line {
+  text-align: right;
+}
+.composer {
+  flex-shrink: 0;
+  padding: var(--space-4) 0 var(--space-2);
+  background: var(--paper);
+  border-top: var(--border-width) solid var(--line);
+}
+textarea.composer-input {
+  resize: none;
+  line-height: var(--body-leading);
+  min-height: calc(
+    var(--body-size) * var(--body-leading) * 3 + var(--space-2) +
+      var(--border-width) * 2
+  );
+  max-height: calc(
+    var(--body-size) * var(--body-leading) * 12 + var(--space-2) +
+      var(--border-width) * 2
+  );
+  overflow-y: auto;
+}
+.composer-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+.composer-controls .row {
+  flex-shrink: 0;
+}
+.streaming-text::after {
+  content: "";
+  display: inline-block;
+  height: 1em;
+  width: var(--focus-width);
+  background: var(--info);
+  margin-left: var(--space-1);
+  vertical-align: text-bottom;
+}
+@media (max-width: 767px) {
+  .conversation-row {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .conversation-link {
+    flex-basis: 100%;
+  }
+  /* The composer's row stays one row on a phone: its pickers give way before Send does. */
+  .composer-controls {
+    flex-wrap: nowrap;
+  }
+}
+
+/* The turn keeps operational detail quieter than the answer. */
+.conversation-turn {
+  min-width: 0;
+  gap: var(--space-6);
+}
+.activity-group {
+  min-width: 0;
+}
+.activity-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  /* §5c: a step's line is a 32 px row with 14/20 text, as the task's lists are. */
+  min-height: var(--row-height-nav);
+  padding-block: var(--nav-pad-block);
+  font-size: var(--nav-font-size);
+  line-height: var(--nav-line-height);
+  border-radius: var(--control-radius);
+}
+.activity-toggle:hover {
+  color: var(--ink);
+  background: var(--hover-tint);
+}
+.activity-toggle > svg {
+  flex-shrink: 0;
+}
+.activity-heading[aria-expanded="false"] > svg {
+  transform: rotate(-90deg);
+}
+/* A step's row and its card are one item (the review of 049): one surface while open, the chevron turned with it. The
+   border is there while closed too, transparent, so opening moves nothing. */
+.activity-line {
+  border: var(--border-width) solid transparent;
+  border-radius: var(--control-radius);
+}
+.activity-line > .activity-toggle {
+  padding-inline: var(--space-2);
+}
+.activity-line[data-open] {
+  border-color: var(--line);
+  background: var(--surface);
+}
+.activity-line > .activity-toggle[aria-expanded="true"] > svg {
+  transform: rotate(90deg);
+}
+.tool-disclosure {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--min-control-height);
+  padding: 0;
+  cursor: pointer;
+}
+.tool-disclosure:hover {
+  color: var(--ink);
+}
+/* A tool card's folded Result: the product's chevron, not the browser's triangle, turned when open. */
+.tool-fold > summary {
+  list-style: none;
+}
+.tool-fold > summary::-webkit-details-marker {
+  display: none;
+}
+.tool-fold > summary svg {
+  transition: transform var(--motion-fast) ease-out;
+}
+.tool-fold[open] > summary svg {
+  transform: rotate(90deg);
+}
+.tool-card-embedded {
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+.activity-lines {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+/* A next step under a failed line (a push without a credential links to Settings), aligned with the line's text. */
+.activity-next {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--min-control-height);
+  margin-inline-start: var(--space-6);
+}
+.activity-body {
+  padding-left: var(--space-4);
+  border-left: var(--border-width) solid var(--line);
+  margin-left: var(--space-2);
+}
+.activity-body[hidden] {
+  display: none;
+}
+.activity-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+/* An open step shows its whole line (the 16d page pass, Z25: a cut line lost what happens next). */
+.activity-line[data-open] .activity-label {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.activity-mark {
+  flex-shrink: 0;
+  color: var(--muted);
+}
+/* An approval's outcome on its tool's line, before the tool's own mark (UX review 0927). */
+.activity-decision {
+  flex-shrink: 0;
+  color: var(--muted);
+}
+.activity-error,
+.activity-interrupted {
+  color: var(--danger);
+}
+.activity-running {
+  color: var(--info);
+}
+.turn-summary {
+  line-height: var(--body-leading);
+}
+.conversation-start {
+  justify-content: flex-start;
+}
+.start-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-6);
+  padding: var(--space-2);
+  overflow: auto;
+}
+.start-body > h2 {
+  text-align: center;
+}
+.start-body.has-prompt {
+  justify-content: flex-start;
+  overflow: hidden;
+}
+.start-prompt {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--space-1);
+}
+.composer {
+  position: relative;
+  padding: var(--space-2);
+  border: 0;
+}
+/*
+ * A task's model and environment (the owner's correction, WEB-U-113): two small quiet pickers in the task header,
+ * right of the title and status (New task: its top bar). They keep their size; the title and status give way first.
+ */
+.header-choices {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-1);
+}
+.header-choices .choice-row {
+  display: flex;
+}
+/* Small text buttons (the standard), not boxed: no border, a tint on hover and while open. */
+.header-choices .picker-button.button {
+  border-color: transparent;
+  background: transparent;
+  color: var(--ink);
+  padding-inline: var(--space-2);
+}
+.header-choices .picker-button.button:hover,
+.header-choices .picker-button.button[aria-expanded="true"] {
+  background: var(--hover-tint);
+  color: var(--ink);
+}
+.header-choices .picker-button .button-label {
+  gap: var(--space-1);
+}
+/* A choice that can't change now (a run, or the task's profile) is muted beside a free one (UX review 0927b, item 6);
+   its reason is in its description, not a dashed box. */
+.header-choices .button.picker-button[aria-disabled="true"] {
+  border-color: transparent;
+  color: var(--muted);
+}
+/*
+ * Where the names don't fit beside the title and the status (a phone, often beside the Files panel; the header measures
+ * it, WEB-U-125) each picker shows its icon, never a cut name (WEB-U-106): the chosen name is in its tooltip, on focus
+ * or hover, and its menu's title. The tooltip floats under the header, where the whole of it fits.
+ */
+.conversation-bar {
+  container: task-header / inline-size;
+}
+.conversation-bar[data-compact] .header-choices .picker-icon {
+  display: block;
+}
+.conversation-bar[data-compact] .header-choices .picker-name {
+  display: none;
+}
+/* The icon alone, as square as the Files icon: its chevron would cost the status its word. */
+.conversation-bar[data-compact] .header-choices .picker-button.button {
+  width: var(--composer-button-size);
+  padding-inline: 0;
+  justify-content: center;
+}
+.conversation-bar[data-compact]
+  .header-choices
+  .picker-button
+  .button-label
+  > svg:last-child {
+  display: none;
+}
+.conversation-bar[data-compact] .header-choices .picker-name-tip {
+  display: block;
+}
+.conversation-bar[data-compact] .header-choices .choice-row,
+.conversation-bar[data-compact] .header-choices .menu-picker {
+  position: static;
+}
+.conversation-bar[data-compact] .header-choices .picker-tooltip {
+  top: 100%;
+  right: var(--space-2);
+  bottom: auto;
+  left: auto;
+  max-width: calc(100% - var(--space-4));
+}
+.conversation-bar[data-compact]
+  .header-choices
+  .menu-picker:not(:has([aria-expanded="true"])):hover
+  .picker-tooltip.picker-tooltip-name,
+.conversation-bar[data-compact]
+  .header-choices
+  .menu-picker:not(:has([aria-expanded="true"])):has(:focus-visible)
+  .picker-tooltip.picker-tooltip-name {
+  display: block;
+}
+/* Never over its own open menu. */
+.conversation-bar[data-compact]
+  .header-choices
+  .menu-picker:has([aria-expanded="true"])
+  .picker-tooltip {
+  display: none;
+}
+/*
+ * What New task's "+" added (a workspace, an agent profile): chips above the text, each a small quiet picker and its ×
+ * (the UI standard's composer).
+ */
+.composer-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-block-end: var(--space-2);
+}
+.composer-chip {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  min-width: 0;
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--pill-radius);
+  background: var(--surface);
+}
+/* A chip and its status line under it (WEB-U-107), in the chips' row. */
+.composer-chip-item {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  max-width: 100%;
+  min-width: 0;
+}
+.composer-chip-note {
+  padding-inline: var(--space-3);
+}
+.composer-chip .menu-picker {
+  min-width: 0;
+}
+.composer-chip .picker-button.button {
+  border-color: transparent;
+  background: transparent;
+  padding-inline: var(--space-3) var(--space-1);
+}
+.composer-controls .composer-submit {
+  margin-inline-start: auto;
+}
+/* An environment's question to switch, and a choice that failed, float just under the header (WEB-U-031). */
+.choices-notice {
+  position: absolute;
+  top: 100%;
+  inset-inline: var(--space-2);
+  z-index: 5;
+  padding: var(--space-3);
+  border-radius: var(--control-radius);
+  background: var(--surface-raised);
+  box-shadow: var(--elevation);
+}
+.composer-card {
+  background: var(--paper);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--composer-radius);
+  box-shadow: var(--elevation);
+  padding: var(--space-4);
+}
+.composer-card:focus-within {
+  outline: var(--focus-width) solid var(--focus);
+  outline-offset: var(--focus-offset);
+  border-color: transparent;
+  box-shadow: none;
+}
+.composer-card .field > label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.composer-card textarea.composer-input {
+  background: var(--paper);
+  border: 0;
+  outline: none;
+  box-shadow: none;
+  padding: 0;
+  min-height: calc(var(--body-size) * var(--body-leading) * 3);
+  max-height: calc(var(--body-size) * var(--body-leading) * 12);
+}
+.composer-controls {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+}
+.composer-submit.button {
+  width: var(--composer-button-size);
+  min-width: var(--composer-button-size);
+  height: var(--composer-button-size);
+  padding: 0;
+  border-radius: var(--pill-radius);
+  flex-shrink: 0;
+}
+/* Unavailable while it has the keyboard's focus (WEB-U-273): it looks as when disabled, and keeps the focus. */
+.composer-submit.button[aria-disabled="true"]:not([aria-busy]),
+.composer-submit.button:disabled {
+  background: var(--line);
+  color: var(--muted);
+  opacity: 1;
+}
+.composer-hint {
+  margin-top: var(--space-3);
+  text-align: center;
+}
+.composer-reason {
+  margin-top: var(--space-2);
+}
+/* §6/§7: one line of 56 px, no divider until the transcript scrolls under it. */
+.conversation-bar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  min-height: var(--bar-height);
+  border-bottom: var(--border-width) solid transparent;
+}
+.conversation-page[data-scrolled="true"] .conversation-bar {
+  border-bottom-color: var(--line);
+}
+.conversation-bar-main {
+  flex: 1;
+}
+.conversation-bar-main,
+.conversation-title,
+.conversation-pickers {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+/* The title starts beside the menu button; what follows it (status, pickers) is pushed right by its own margin. */
+.conversation-bar-main {
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+}
+/*
+ * The title and, under it, the profile a task came from (ADR-0012) share one block that truncates before anything
+ * else in the bar gives way; the rename control keeps its size, and the block clips rather than run under the run
+ * status (UX review 0927b, item 7).
+ */
+.conversation-title {
+  flex: 0 1 auto;
+  min-width: min(8rem, 30%);
+  overflow: clip;
+  overflow-clip-margin: var(--space-1);
+}
+.conversation-name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.conversation-title h1,
+.conversation-origin {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.conversation-title .button {
+  flex-shrink: 0;
+}
+/* The header's controls (the Files icon, the ⋯) stay whole: the status gives way before them (WEB-U-112). */
+.conversation-pickers {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+/* A picker gives way down to its chevron; its name truncates first and it clips rather than overlap (WEB-U-029). */
+.conversation-pickers .menu-picker {
+  flex: 0 1 auto;
+  min-width: var(--composer-button-size);
+}
+.conversation-pickers .picker-button {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+.conversation-pickers .field {
+  min-width: 0;
+  max-width: 100%;
+}
+.conversation-pickers .field > label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+/*
+ * The bar gives way in order: the environment clause takes only the room the title leaves (basis 0) and shows whole or
+ * not at all; the title truncates next, down to a few words; the pickers' names truncate; a long run status (a
+ * failure's reason) truncates to its first word or so, whole in its tooltip, and never vanishes. Nothing overlaps
+ * (UX review 0927b, item 7).
+ */
+/* The title gives way first, down to a few words; then the status truncates, whole in its tooltip, and never the
+   controls after it (c12 F18b, WEB-U-112). Nothing waits for the reader now, so no status must stay whole. */
+.conversation-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  /* It grows into the room the title leaves, for the environment's clauses. */
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+}
+/* At every width the status keeps room for its word ("Done", "Working…", "Failed"); a longer status truncates after
+   it, whole in its tooltip; the title gives way before it. */
+.conversation-status {
+  min-width: 4rem;
+}
+.conversation-status > [role="group"] {
+  flex-shrink: 1;
+  min-width: 4rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/*
+ * Where the header is narrow (a phone, or beside the Files panel) the status keeps its word and gives up the rest
+ * (c12 F18): a failure reads "Failed", its reason being the turn's outcome and still read here by assistive
+ * technology; the elapsed time is the transcript's. The title gives way to a few letters first.
+ */
+/*
+ * At every width (the 13f screen review, #4, WEB-U-155) the status is one short word: a failure reads "Failed", a working
+ * run "Working…"; the reason and the count stay in its tooltip, are still read, and are the transcript's too. The title
+ * keeps the width.
+ */
+.conversation-status .run-elapsed {
+  display: none;
+}
+.conversation-status [data-short]::before {
+  content: attr(data-short) / "";
+}
+.conversation-status .run-long {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+@container task-header (max-width: 600px) {
+  .conversation-title {
+    min-width: 3rem;
+  }
+}
+.conversation-status .environment-status {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1 1 0;
+  width: 0;
+  height: 1lh;
+  overflow: hidden;
+}
+/* An empty first item: a clause too wide for the line wraps below it, out of sight, instead of being cut. */
+.conversation-status .environment-status::before {
+  content: "";
+  height: 1lh;
+}
+/* A clause that no longer fits has already wrapped out of sight; there it shrinks instead of widening the box. */
+.conversation-status .environment-status > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.conversation-status .environment-status > span::before {
+  content: "· ";
+}
+.conversation-status [data-tone="info"] {
+  color: var(--info);
+}
+.conversation-status [data-tone="danger"] {
+  color: var(--danger);
+}
+.conversation-status [data-tone="ok"] {
+  color: var(--ok);
+}
+.environment-capabilities {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--muted);
+}
+.environment-confirmation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+  flex-shrink: 0;
+}
+.environment-confirmation p {
+  flex: 1;
+}
+/*
+ * Renaming in place (the UI standard's In-place edit): the title keeps its place, hidden, so the status and the pickers
+ * stay put; the field lies over it, reaching to the pickers (its place is measured).
+ */
+.conversation-bar-main {
+  position: relative;
+}
+.conversation-title[data-editing] {
+  visibility: hidden;
+}
+.conversation-title-field {
+  position: absolute;
+  z-index: 1;
+  /* The page's own background, over the status it covers while renaming. */
+  background: var(--paper);
+}
+/*
+ * The title edits as on Claude.ai (WEB-U-114): at rest plain text; on hover only a subtle tint behind it, no box and no
+ * pencil. The tint is a spread shadow, so it takes no room and nothing moves (the title block clips 4 px out).
+ */
+.conversation-title h1[data-renamable] {
+  cursor: text;
+  border-radius: var(--control-radius);
+}
+.conversation-title h1[data-renamable]:hover {
+  background: var(--hover-tint);
+  box-shadow: 0 0 0 var(--space-1) var(--hover-tint);
+}
+.example-tasks {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+/* Suggestions read as body text (review P3), not as bold buttons. */
+.example-tasks .button {
+  font-weight: 400;
+  text-align: left;
+  white-space: normal;
+  height: auto;
+  min-height: var(--control-height);
+  /* A long suggestion wraps inside a phone's width, never past it (the UI standard: no sideways scroll). */
+  max-width: 100%;
+}
+.example-tasks .button-label {
+  min-width: 0;
+}
+.activity-narration {
+  margin-block: var(--space-3);
+}
+/* Team reads in a row that found nothing, folded to one quiet line (WEB-U-238), aligned with the tool lines. */
+.activity-reads {
+  display: flex;
+  align-items: center;
+  min-height: var(--row-height-nav);
+  /* Past the chevron's 16 px and the gap, where a tool line's words start. */
+  padding-inline-start: calc(var(--space-4) + var(--space-2));
+}
+.conversation-list {
+  margin-block: var(--space-4);
+}
+/* One highlighted row per task: the delete action sits inside it and appears on hover or keyboard focus. */
+.conversation-row {
+  gap: var(--space-1);
+  padding: 0;
+  border: 0;
+  border-radius: var(--control-radius);
+}
+.conversation-row:hover {
+  background: var(--hover-tint);
+}
+/* UI-GUIDELINES §5c: the open task is a fill and weight 500, as the Settings menu's item; no accent bar. */
+.conversation-row:has([aria-current="page"]),
+.conversation-row:has([data-current]) {
+  background: var(--surface);
+  font-weight: 500;
+}
+/* §5c: a task is a 32 px navigation row with 14/20 text. */
+.conversation-link {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--row-height-nav);
+  padding: var(--nav-row-padding);
+  font-size: var(--nav-font-size);
+  line-height: var(--nav-line-height);
+}
+/* The live review of c7 (L1-L2): one row layout everywhere: the title takes the room and cuts with an ellipsis, the
+   time follows at the end, and the status has its own space after it. */
+.conversation-link-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+.conversation-link-text > .type-small {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The provider's own words (WEB-U-055): a line of their own, wrapping anywhere as a long token may. */
+.provider-words,
+.engine-words {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+/* A failure's code under its plain words: a line of its own, secondary (UX review 0927b, item 4). */
+.turn-code {
+  display: block;
+}
+
+.turn-outcome [data-tone="danger"] {
+  color: var(--danger);
+}
+.turn-outcome [data-tone="muted"] {
+  color: var(--muted);
+}
+.conversation-row > .button {
+  opacity: 0;
+}
+.conversation-row:hover > .button,
+.conversation-row:focus-within > .button {
+  opacity: 1;
+}
+/* Touch screens have no hover: keep the action visible there. */
+@media (hover: none) {
+  .conversation-row > .button {
+    opacity: 1;
+  }
+}
+
+/* "From {profile}" under a task's title (ADR-0012): one small line, truncated with the title. */
+.conversation-origin {
+  line-height: 1.2;
+}
+/* Finding 22: a task that could not load keeps its header; the transcript's place says so, centred. */
+.conversation-failure {
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.conversation-failure-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+/* UI-GUIDELINES §7: the sidebar's task search, date groups, status shapes and the count of tasks that need the reader. */
+/* The design direction (sidebar): the Search row, a navigation row with its shortcut at the end. */
+.task-search-row {
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+}
+.task-search-keys {
+  margin-left: auto;
+}
+/* The review of d9fb1917 (part 2): no shortcut to show where there is no keyboard to press it. */
+@media (pointer: coarse) {
+  .task-search-keys {
+    display: none;
+  }
+}
+/* The overlay's matches scroll within a cap, and the count sits clear of the box's focus ring. */
+.task-search-results {
+  max-height: min(var(--search-results-height), 60vh);
+  overflow-y: auto;
+}
+.task-search-count {
+  margin-top: var(--space-2);
+}
+/* An empty list is one quiet line; New task sits just above it. */
+.sidebar-empty {
+  margin: 0;
+}
+/* One left edge (the sidebar design, WEB-U-070): a group's heading starts where the task titles and the nav icons do, at the
+   rows' inner padding. */
+.sidebar-label {
+  padding-inline-start: var(--nav-pad-inline);
+}
+/* §5c: rows 2 px apart, groups 16 px apart, a group's 12 px label 4 px above its rows. */
+.task-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--group-label-gap);
+}
+.task-group + .task-group {
+  margin-top: var(--group-gap);
+}
+.task-group > .conversation-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--nav-row-gap);
+}
+.task-title {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.task-icon {
+  position: relative;
+  display: inline-flex;
+}
+.task-status {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+.task-status[data-status="working"] {
+  color: var(--info);
+}
+.task-status[data-status="working"] svg {
+  animation: spin 1.6s linear infinite;
+}
+.task-status[data-status="needsYou"] {
+  color: var(--warn);
+}
+.task-status[data-status="failed"] {
+  color: var(--danger);
+}
+/* L3: Show more is a quiet row in the list's style, not a bold button. */
+.button.task-more-button {
+  align-self: stretch;
+  justify-content: flex-start;
+  min-height: var(--row-height-nav);
+  padding: var(--nav-row-padding);
+  font-size: var(--nav-font-size);
+  font-weight: 400;
+  color: var(--muted);
+}
+/* The task's menu button appears over the row's end on hover or keyboard focus, so the title keeps the row's width. */
+.conversation-list .conversation-row {
+  position: relative;
+}
+.conversation-row > .task-more {
+  position: absolute;
+  top: 50%;
+  right: var(--space-2);
+  transform: translateY(-50%);
+}
+/* The ⋯ itself (inside its tooltip's holder) is what shows and hides. */
+.conversation-row > .task-more > .button {
+  background: var(--surface);
+  opacity: 0;
+}
+.conversation-row:hover > .task-more > .button,
+.conversation-row:focus-within > .task-more > .button,
+.conversation-row > .task-more > .button[aria-expanded="true"] {
+  opacity: 1;
+}
+@media (hover: none) {
+  .conversation-row > .task-more > .button {
+    opacity: 1;
+  }
+}
+/* The expanded sidebar shows titles without the task icon; the rail shows only the icon. */
+@container sidebar (min-width: 121px) {
+  .app-sidebar .task-icon {
+    display: none;
+  }
+}
+/* The phone drawer is never a rail: its rows are titles too, with no icon taking their room. */
+.navigation-drawer .task-icon {
+  display: none;
+}
+/* On the rail the status sits on the task's icon, a small badge in its corner. */
+@container sidebar (max-width: 120px) {
+  .app-sidebar .task-search-keys,
+  .app-sidebar .task-more-button {
+    display: none;
+  }
+  .app-sidebar .conversation-link {
+    position: relative;
+  }
+  .app-sidebar .task-status {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    border-radius: var(--pill-radius);
+    background: var(--paper);
+  }
+  .app-sidebar .task-status svg {
+    width: var(--space-3);
+    height: var(--space-3);
+  }
+}
+/* §3: a finished turn says what changed, with Open changes beside it; follow-ups that clearly fit sit under it. */
+.turn-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+}
+.turn-footer .turn-summary {
+  margin: 0;
+}
+.turn-follow-ups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* The design direction (task page): an icon's tooltip, shown on hover and keyboard focus, never over the panel the
+   icon has opened. */
+.hint-anchor {
+  position: relative;
+  display: inline-flex;
+}
+.hint {
+  display: none;
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + var(--space-1));
+  right: 0;
+  width: max-content;
+  max-width: min(var(--measure), calc(100vw - var(--space-12)));
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--control-radius);
+  color: var(--ink);
+  background: var(--surface-raised);
+  border: var(--border-width) solid var(--line);
+  box-shadow: var(--elevation);
+  pointer-events: none;
+}
+.hint-anchor:hover .hint,
+.hint-anchor:focus-within .hint {
+  display: block;
+}
+.hint-anchor:has([aria-expanded="true"]) .hint {
+  display: none;
+}
+/*
+ * A task's header on a phone (the 13f screen review, #3, WEB-U-154): the first line keeps the title, the status, Files
+ * and ⋯; the task's model and environment take a quiet second line under it, with their names, one tap each. The
+ * pickers' wrapper steps aside (display: contents) so the choices wrap alone while Files and ⋯ stay on the first line.
+ * New task's header keeps its icons: its title is short.
+ */
+@container task-header (max-width: 520px) {
+  .conversation-bar-main:has(.task-choices) {
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+  /* Lines break on each item's own width, before anything shrinks: a long title would push ⋯ under it. With no width
+     of its own, the title breaks no line; it then grows first, up to its whole text, before the status takes the rest,
+     so a title that fits is whole and a longer one truncates with ⋯ beside it (the S6 web review; WEB-U-106). */
+  .conversation-bar-main:has(.task-choices) > .conversation-title {
+    flex: 1000 1 0;
+    max-width: max-content;
+  }
+  .conversation-pickers:has(> .task-choices) {
+    display: contents;
+  }
+  .conversation-pickers > .task-choices {
+    order: 1;
+    flex: 1 0 100%;
+    margin-left: 0;
+  }
+  .conversation-bar[data-compact] .task-choices .picker-icon,
+  .conversation-bar[data-compact] .task-choices .picker-name-tip {
+    display: none;
+  }
+  .conversation-bar[data-compact] .task-choices .picker-name {
+    display: inline;
+  }
+  .conversation-bar[data-compact] .task-choices .picker-button.button {
+    width: auto;
+    padding-inline: var(--space-2);
+    justify-content: flex-start;
+  }
+  .conversation-bar[data-compact]
+    .task-choices
+    .picker-button
+    .button-label
+    > svg:last-child {
+    display: block;
+  }
+}

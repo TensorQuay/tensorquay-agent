@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE secrets SET nonce=$2,ciphertext=$3,version=$4,last_set_by='seed',seed_digest=$5,seed_state='current',updated_at=CURRENT_TIMESTAMP,rotated_at=CASE WHEN $6 THEN CURRENT_TIMESTAMP ELSE rotated_at END WHERE ref=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Bytea",
+        "Bytea",
+        "Int8",
+        "Bytea",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "960ce0efc2ec9a782c32c58dbfc58f674514673e91d85fcb95c858a25d92771b"
+}

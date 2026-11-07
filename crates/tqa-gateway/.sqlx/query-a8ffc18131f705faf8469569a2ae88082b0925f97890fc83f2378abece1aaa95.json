@@ -1,0 +1,27 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM agent_team_reads WHERE reader = $4 AND call_key = $5) OR EXISTS(SELECT 1 FROM channel_messages c WHERE c.channel_id = $1 AND seq > GREATEST((SELECT CASE WHEN $3 THEN t.lead_last_read_seq ELSE m.last_read_seq END FROM agent_teams t LEFT JOIN agent_team_members m ON m.conversation_id = $4 WHERE t.id = $2), COALESCE((SELECT max(s) FROM agent_team_reads r, unnest(r.seqs) AS s WHERE r.reader = $4), 0)) AND (($3 AND to_kind IN ('lead', 'team')) OR (NOT $3 AND ((to_kind = 'member' AND to_conversation = $4) OR to_kind IN ('members', 'team')))) AND NOT (c.type = 'person_message' AND c.body->>'member' = '' AND NOT EXISTS (SELECT 1 FROM idempotency i WHERE i.team_copy_channel = c.channel_id AND i.team_copy_seq = c.seq AND i.execution_status IN ('queued', 'delivered')))) AS \"new!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "new!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Bool",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "a8ffc18131f705faf8469569a2ae88082b0925f97890fc83f2378abece1aaa95"
+}

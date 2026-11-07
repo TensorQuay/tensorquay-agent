@@ -1,0 +1,504 @@
+/* Channels (ADR-0014): the list of channels a person can see (WEB-U-062). */
+.channels-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding-bottom: var(--space-8);
+}
+.channels-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--bar-height);
+}
+.channels-bar h1 {
+  margin-right: auto;
+}
+.channel-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.channel-card {
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+  background: var(--paper);
+}
+.channel-card:hover,
+.channel-card:focus-within {
+  border-color: var(--muted);
+}
+.channel-card p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.channel-facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+}
+
+/* The channel log (WEB-U-063): posts in seq order, replies indented under their parent. */
+.channel-log,
+.channel-replies {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.channel-replies {
+  margin-top: var(--space-2);
+  padding-left: var(--space-4);
+  border-left: var(--border-width) solid var(--line);
+}
+.channel-post {
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid transparent;
+  border-radius: var(--control-radius);
+  min-width: 0;
+}
+/* A light row (UI-GUIDELINES §7, Channel post): a surface only under the pointer or focus. */
+.channel-post:hover,
+.channel-post:focus-within {
+  background: var(--surface);
+}
+.channel-post p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+/* A vote, a claim or "done" reads as a one-line event, not a card. */
+.channel-post[data-line] {
+  padding-block: var(--space-1);
+  border-color: transparent;
+  background: transparent;
+}
+/* A decision is tinted info (UI-GUIDELINES §7, Channel post). */
+.channel-post[data-tinted] {
+  border-color: color-mix(in srgb, var(--info) 45%, var(--line));
+  background: color-mix(in srgb, var(--info) var(--status-tint), var(--paper));
+}
+/* The author wraps within its own box; the quiet line keeps to the same line, at its end (no blank row at 390). */
+.channel-post-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+.channel-post-who {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-2);
+  min-width: 0;
+}
+.channel-post-meta {
+  display: inline-flex;
+  flex: none;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-inline-start: auto;
+}
+/* A post continuing the author's group has no header of its own: with a pointer and room beside the text, its quiet
+   line floats at the row's top end over the row's own surface, taking no height. In a narrow window it would cover the
+   text's first line (a "#5" reference there couldn't be reached: the 320 px audit), so there it keeps its own line, as
+   on a touch screen. */
+.channel-post {
+  position: relative;
+}
+@media (hover: hover) and (min-width: 640px) {
+  .channel-post[data-continued] > .channel-post-head {
+    position: absolute;
+    inset-block-start: var(--space-1);
+    inset-inline-end: var(--space-3);
+  }
+  .channel-post[data-continued]:hover > .channel-post-head,
+  .channel-post[data-continued]:focus-within > .channel-post-head {
+    background: var(--surface);
+  }
+}
+.channel-log > li:has(> [data-continued]),
+.channel-replies > li:has(> [data-continued]) {
+  margin-block-start: calc(-1 * var(--space-1));
+}
+.channel-report-status {
+  color: var(--status-color);
+  font-weight: 700;
+}
+.channel-post-meta a {
+  color: inherit;
+  text-decoration: none;
+}
+/* Seq, time and Reply (one quiet line at the row's end) wait for hover or focus; touch screens always show them. */
+@media (hover: hover) {
+  .channel-post-meta {
+    opacity: 0;
+  }
+  .channel-post:hover > .channel-post-head > .channel-post-meta,
+  .channel-post:focus-within > .channel-post-head > .channel-post-meta {
+    opacity: 1;
+  }
+}
+.channel-refs {
+  margin: 0;
+  padding-left: var(--space-4);
+}
+.channel-refs a,
+.channel-refs code {
+  overflow-wrap: anywhere;
+}
+/* Keeps the control's minimum target (WCAG 2.5.8), with a little room either side. */
+.channel-reply {
+  padding-inline: var(--space-2);
+}
+
+/* The channel composer (WEB-U-063): a card like the task composer. */
+.channel-composer {
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--composer-radius);
+  background: var(--paper);
+}
+.channel-replying {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+/* One channel's page (WEB-U-063): its bar, the log and the composer in the transcript's column. */
+.channel-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: var(--transcript-width);
+  margin-inline: auto;
+  padding-bottom: var(--space-8);
+}
+/* A channel that couldn't be opened (WEB-U-381): its bar, then the message and its way on, centred as a task's is. */
+.channel-missing {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: var(--transcript-width);
+  margin-inline: auto;
+}
+.channel-missing .conversation-failure {
+  padding-block: var(--space-16);
+}
+.channel-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  min-height: var(--bar-height);
+}
+.channel-name {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.channel-name h1,
+.channel-name p {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.channel-bar .channel-facts {
+  margin: 0;
+}
+/* End and Delete (WEB-U-066), for the channel's owner or an administrator. */
+.channel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* A proposal's votes (WEB-U-064): the tally, a bar per side, the time left or outcome, and the person's buttons. */
+.proposal-panel {
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: var(--border-width) solid var(--line);
+}
+/* WEB-U-064: one tally bar, accepted then rejected, over the members still to vote. */
+.proposal-bar {
+  display: flex;
+  block-size: var(--space-2);
+  border-radius: var(--pill-radius);
+  background: var(--selection);
+  overflow: hidden;
+}
+.proposal-bar > span {
+  display: block;
+  block-size: 100%;
+  background: var(--status-color);
+}
+/* "Who voted" opens with the product's chevron, not the browser's triangle. */
+.proposal-panel summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  list-style: none;
+  cursor: pointer;
+}
+.proposal-panel summary::-webkit-details-marker {
+  display: none;
+}
+.proposal-panel summary svg {
+  transition: transform var(--motion-fast) ease-out;
+}
+.proposal-panel details[open] > summary svg {
+  transform: rotate(90deg);
+}
+.proposal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* The side (WEB-U-065): the task board and members as tabs; beside the log from 1280 px, above the composer below it. */
+.channel-side {
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+  background: var(--paper);
+  min-width: 0;
+}
+.channel-tabs {
+  display: flex;
+  gap: var(--space-4);
+  border-bottom: var(--border-width) solid var(--line);
+}
+.channel-tab {
+  padding: var(--space-2) 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+.channel-tab[aria-selected="true"] {
+  border-bottom-color: var(--ink);
+  color: var(--ink);
+}
+.task-board,
+.member-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.task-board ul {
+  margin: 0;
+  padding-left: var(--space-4);
+}
+/* WEB-U-065/066: a light row: the run's dot, the name (a role only when not a member) over a quiet line, and "…". */
+.member-list > li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+.member-dot {
+  flex: none;
+  inline-size: var(--space-2);
+  block-size: var(--space-2);
+  margin-block-start: var(--space-2);
+  border-radius: var(--pill-radius);
+  background: var(--status-color);
+}
+.member-who {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.member-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-2);
+}
+/* An agent's name opens its task: quiet like the other names, underlined on hover. */
+.member-link {
+  text-decoration: none;
+}
+.member-link:hover {
+  text-decoration: underline;
+}
+.member-actions {
+  flex: none;
+}
+@media (min-width: 1280px) {
+  .channel-page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--channel-side-width);
+    column-gap: var(--space-6);
+    align-items: start;
+    max-width: calc(
+      var(--transcript-width) + var(--channel-side-width) + var(--space-6)
+    );
+  }
+  .channel-bar {
+    grid-column: 1 / -1;
+  }
+  .channel-page > .channel-log,
+  .channel-page > .channel-composer,
+  .channel-page > p {
+    grid-column: 1;
+  }
+  .channel-side {
+    grid-column: 2;
+    grid-row: 2 / span 2;
+    position: sticky;
+    top: var(--space-4);
+  }
+}
+
+/* WEB-U-062: who's in a new channel, as chips above one search box whose suggestions open below it. */
+.member-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.member-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--min-control-height);
+  padding-inline: var(--space-3) var(--space-1);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--pill-radius);
+  background: var(--surface);
+  overflow-wrap: anywhere;
+}
+.member-chip:first-child {
+  padding-inline-end: var(--space-3);
+  color: var(--muted);
+}
+.member-chip-remove {
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--min-control-height);
+  block-size: var(--min-control-height);
+  border: 0;
+  border-radius: var(--pill-radius);
+  background: transparent;
+  color: var(--muted);
+}
+.member-chip-remove:hover {
+  color: var(--ink);
+}
+.member-search-box {
+  position: relative;
+}
+.member-search-popup {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: calc(100% + var(--space-1));
+  z-index: 1;
+  padding: var(--space-1);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+  background: var(--surface-raised);
+  box-shadow: var(--elevation);
+}
+.member-search-popup ul {
+  max-block-size: 18rem;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+.member-option {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: var(--control-radius);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.member-option:hover,
+.member-option[data-active] {
+  background: var(--surface);
+}
+.member-search-popup > p {
+  margin: 0;
+  padding: var(--space-2);
+}
+.channel-title-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1);
+  margin: 0;
+}
+/* WEB-U-063: a new channel's first step, above its message box. */
+.channel-first {
+  padding: var(--space-4);
+  border: var(--border-width) dashed var(--line);
+  border-radius: var(--control-radius);
+}
+.channel-first h2,
+.channel-first p {
+  margin: 0;
+}
+.channel-first-message {
+  margin: 0;
+  white-space: pre-line;
+  padding: var(--space-3);
+  border-inline-start: var(--border-width) solid var(--line);
+  background: var(--surface);
+}
+/* WEB-U-063: Propose and Add a task on the left of the composer's Post. */
+.channel-composer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.channel-composer-kinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+/* The vote this person chose (WEB-U-166): pressed, with a tick and a firmer edge, as a segmented choice reads. */
+.proposal-actions .button[aria-pressed="true"] {
+  background: var(--paper);
+  border-color: var(--ink);
+}
+
+/* A line's proposal or task by its title (WEB-U-165): cut to one line when long; the tooltip has it whole. */
+.channel-ref {
+  display: inline-block;
+  max-inline-size: min(32ch, 100%);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  /* On the small text's own baseline, also inside a decision's larger line. */
+  vertical-align: text-bottom;
+  /* A link in a sentence is marked by more than its colour (WCAG 1.4.1). */
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}

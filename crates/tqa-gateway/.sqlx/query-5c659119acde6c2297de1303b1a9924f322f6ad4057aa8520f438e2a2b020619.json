@@ -1,0 +1,50 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.conversation_id,c.owner_id,EXISTS (SELECT 1 FROM templates t WHERE t.name=c.template AND 'desktop'=ANY(t.capabilities)) AS \"desktop!\" FROM sandbox_instances s JOIN conversations c ON c.id=s.conversation_id WHERE s.phase='live' AND NOT c.pinned AND NOT EXISTS (SELECT 1 FROM idempotency i WHERE i.conversation_id=s.conversation_id AND (i.execution_status IN ('queued','sending') OR (i.execution_status='delivered' AND i.updated_at > CURRENT_TIMESTAMP - make_interval(secs => $4) AND i.updated_at > COALESCE((SELECT MAX(e.created_at) FROM events e WHERE e.conversation_id=s.conversation_id AND e.lifecycle IS NOT NULL), '-infinity'::timestamptz) AND COALESCE((SELECT e.lifecycle FROM events e WHERE e.conversation_id=s.conversation_id AND e.lifecycle IS NOT NULL ORDER BY e.seq DESC LIMIT 1), '') NOT IN ('run.started', 'run.resumed')))) AND ($2::uuid IS NULL OR c.owner_id=$2) AND (NOT $3::bool OR EXISTS (SELECT 1 FROM templates t WHERE t.name=c.template AND 'desktop'=ANY(t.capabilities))) ORDER BY s.last_action_at LIMIT $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "conversation_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "sandbox_instances",
+            "name": "conversation_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "owner_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "owner_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "desktop!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Uuid",
+        "Bool",
+        "Float8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "5c659119acde6c2297de1303b1a9924f322f6ad4057aa8520f438e2a2b020619"
+}

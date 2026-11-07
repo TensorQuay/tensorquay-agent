@@ -1,0 +1,55 @@
+{
+  "allow": [
+    "MIT",
+    "MIT-0",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "0BSD",
+    "Unlicense",
+    "CC0-1.0",
+    "BlueOak-1.0.0",
+    "Python-2.0",
+    "Zlib",
+    "MPL-2.0",
+    "CC-BY-4.0",
+    "BSL-1.0",
+    "Unicode-3.0",
+    "Unicode-DFS-2016"
+  ],
+  "forbidden": [
+    "GPL",
+    "GPL-*",
+    "LGPL",
+    "LGPL-*",
+    "AGPL",
+    "AGPL-*",
+    "SSPL",
+    "SSPL-*",
+    "BUSL",
+    "BUSL-*",
+    "EUPL",
+    "EUPL-*",
+    "*NC*",
+    "*SEE LICENSE IN*",
+    "UNLICENSED"
+  ],
+  "assets": [
+    {
+      "name": "Arimo",
+      "version": "1.31",
+      "license": "Apache-2.0",
+      "source": "https://commondatastorage.googleapis.com/chromeos-localmirror/distfiles/croscorefonts-1.31.0.tar.bz2",
+      "source_sha256": "672c3487883ec1ef83d9254240d4327b014212abc823d06d15816095867315e1",
+      "note": "The licence is the copyright holder's grant in each font's name table; see vendor/arimo-1.31/README.md.",
+      "files": {
+        "vendor/arimo-1.31/Arimo-Regular.ttf": "a5cb71302ce735698dfc756943c5bbcfbcc734e117ad452ccb3cb036e07dbd36",
+        "vendor/arimo-1.31/Arimo-Bold.ttf": "3251104cea71aee741bb5ce63370b1e84b5f4326ecf4259db8889935eb01219b",
+        "vendor/arimo-1.31/Arimo-Italic.ttf": "eb8498900d06aa4fbde30e1a539d1a04334fe9d380765f1dba01d5670d3cb2b0",
+        "vendor/arimo-1.31/Arimo-BoldItalic.ttf": "e78a9c639a5e4210d799acae0757ed8e8e6479ba1464682476a9873f71463244"
+      }
+    }
+  ]
+}

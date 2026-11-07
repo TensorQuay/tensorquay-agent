@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM idempotency i WHERE i.conversation_id=$1 AND (i.execution_status='sending' OR (i.execution_status='delivered' AND i.updated_at > CURRENT_TIMESTAMP - make_interval(secs => $2) AND i.updated_at > COALESCE((SELECT MAX(e.created_at) FROM events e WHERE e.conversation_id=$1 AND e.lifecycle IS NOT NULL), '-infinity'::timestamptz) AND COALESCE((SELECT e.lifecycle FROM events e WHERE e.conversation_id=$1 AND e.lifecycle IS NOT NULL ORDER BY e.seq DESC LIMIT 1), '') NOT IN ('run.started', 'run.resumed')))) AS \"in_flight!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "in_flight!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Float8"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "569b62a87f7c7c0069ca631860e63983512a8c7054cec59f673a8e97789b8c83"
+}

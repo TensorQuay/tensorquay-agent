@@ -1,0 +1,54 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT t.sandbox_id AS \"sandbox!\", t.created_at, c.owner_id FROM runtime_tokens t JOIN conversations c ON c.id=t.conversation_id WHERE t.conversation_id=$1 AND t.sandbox_id IS NOT NULL AND EXISTS (SELECT 1 FROM host_key_placeholders p WHERE p.conversation_id=$1 AND p.sandbox_id=t.sandbox_id AND p.run_id IS NOT NULL AND p.ended_at IS NULL AND p.host=$2 AND p.port=$3)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "sandbox!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "runtime_tokens",
+            "name": "sandbox_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "runtime_tokens",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "owner_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "owner_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "3924a129e7e4f05238d6d27b556d88cc8262c74b1449e320ae57c8f5e0b19467"
+}

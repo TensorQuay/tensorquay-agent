@@ -1,0 +1,241 @@
+{
+ "model": "fixture",
+ "select": "prompt",
+ "responses": [
+  {
+   "when": "`ISSUE.md` describes a regression in textkit. Run `python3 make_repo.py` to create `project/`, a Git repository with",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "start_member",
+     "arguments": {
+      "role": "scout",
+      "workspace": "own_copy",
+      "profile": null,
+      "brief": {
+       "objective": "Write scout-notes.md listing the files in this workspace for d4-bisect-test-fix.",
+       "output": "scout-notes.md, one line per file.",
+       "sources": null,
+       "boundaries": "Write only scout-notes.md."
+      }
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "`ISSUE.md` describes a regression in textkit. Run `python3 make_repo.py` to create `project/`, a Git repository with",
+   "events": [
+    {
+     "type": "text",
+     "text": "I started a helper; I'll continue when it reports."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "`ISSUE.md` describes a regression in textkit. Run `python3 make_repo.py` to create `project/`, a Git repository with",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_reports",
+     "arguments": {
+      "wait": 30,
+      "limit": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "`ISSUE.md` describes a regression in textkit. Run `python3 make_repo.py` to create `project/`, a Git repository with",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "take_files",
+     "arguments": {
+      "report_seq": {
+       "seq_of": {
+        "type": "report",
+        "from": "scout"
+       }
+      },
+      "files": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "`ISSUE.md` describes a regression in textkit. Run `python3 make_repo.py` to create `project/`, a Git repository with",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "shell",
+     "arguments": {
+      "command": "python3 make_repo.py"
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "`ISSUE.md` describes a regression in textkit. Run `python3 make_repo.py` to create `project/`, a Git repository with",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "BISECT.md",
+      "content": "# The regression\n\nCommit 3478a7e73036 (\"wrap: cheaper length check\") counts the joining space twice, so a line exactly `width` long breaks one word early. Found with `git bisect` and the test in `project/tests/test_regression.py`, which fails on it and passes on its parent.\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "`ISSUE.md` describes a regression in textkit. Run `python3 make_repo.py` to create `project/`, a Git repository with",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "project/tests/test_regression.py",
+      "content": "import unittest\nfrom textkit.wrap import wrap\n\n\nclass Regression(unittest.TestCase):\n    def test_a_line_exactly_width_long_stays_whole(self):\n        self.assertEqual(wrap(\"aaaa bbbb\", 9), [\"aaaa bbbb\"])\n        self.assertEqual(wrap(\"aa bb cc dd\", 5), [\"aa bb\", \"cc dd\"])\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "`ISSUE.md` describes a regression in textkit. Run `python3 make_repo.py` to create `project/`, a Git repository with",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "project/textkit/wrap.py",
+      "content": "def wrap(text, width):\n    \"\"\"Lines of at most `width` characters, broken at spaces; a word longer than width stands alone.\"\"\"\n    # A faster check with one fewer addition.\n    lines, line = [], \"\"\n    for word in text.split():\n        if line and len(line) + 1 + len(word) > width:\n            lines.append(line)\n            line = word\n        else:\n            line = f\"{line} {word}\" if line else word\n    if line:\n        lines.append(line)\n    return lines\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "`ISSUE.md` describes a regression in textkit. Run `python3 make_repo.py` to create `project/`, a Git repository with",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "done",
+     "arguments": {
+      "summary": "Wrote BISECT.md, project/tests/test_regression.py, project/textkit/wrap.py."
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "`ISSUE.md` describes a regression in textkit. Run `python3 make_repo.py` to create `project/`, a Git repository with",
+   "events": [
+    {
+     "type": "text",
+     "text": "Done: BISECT.md, project/tests/test_regression.py, project/textkit/wrap.py."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "shell",
+     "arguments": {
+      "command": "find . -path ./.git -prune -o -type f -print | sort > scout-notes.md"
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "send_to_lead",
+     "arguments": {
+      "type": "report",
+      "text": "scout-notes.md lists the workspace's files.",
+      "question_seq": null,
+      "files": [
+       "scout-notes.md"
+      ]
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "You are scout",
+   "events": [
+    {
+     "type": "text",
+     "text": "I reported to my lead."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  }
+ ]
+}

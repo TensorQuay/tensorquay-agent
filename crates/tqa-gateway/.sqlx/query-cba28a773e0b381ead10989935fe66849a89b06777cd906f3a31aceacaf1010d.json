@@ -1,0 +1,88 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT updated_at,version,last_set_by,seed_state,rotated_at,rotate_after_days FROM secrets WHERE ref=$1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "secrets",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "version",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "secrets",
+            "name": "version"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "last_set_by",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "secrets",
+            "name": "last_set_by"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "seed_state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "secrets",
+            "name": "seed_state"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "rotated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "secrets",
+            "name": "rotated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "rotate_after_days",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "secrets",
+            "name": "rotate_after_days"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      true
+    ]
+  },
+  "hash": "cba28a773e0b381ead10989935fe66849a89b06777cd906f3a31aceacaf1010d"
+}

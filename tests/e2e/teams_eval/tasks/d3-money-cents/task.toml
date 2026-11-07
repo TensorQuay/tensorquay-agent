@@ -1,0 +1,6 @@
+id = "d3-money-cents"
+title = "Move Money to integer cents across a package, keeping its API"
+tags = ["teams-eval", "teams-dependent"]
+budgets = { max_steps = 80, wall_clock_secs = 2100, max_tokens = 1000000 }
+protected = ["tests/test_cart.py", "tests/test_fx_report.py", "tests/test_ledger.py", "tests/test_money.py", "tests/test_refund_split.py", "tests/__init__.py"]
+check = { image = "runtime", timeout_secs = 120 }

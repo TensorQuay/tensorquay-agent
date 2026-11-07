@@ -1,0 +1,4 @@
+From: Lena
+Subject: status
+
+The data centre says our rack's power is near its cap; adding servers needs a new circuit. I am on it.

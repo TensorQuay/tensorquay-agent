@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO settings (id,key,value,version,last_set_by,seed_digest,seed_state) VALUES ($1,$2,$3,1,'seed',$4,'current')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Int8",
+        "Bytea"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2fbbe01d777cadda6a6d2bebe3db8ddb7abb40fe01b579948a35d2d75d5c7a7b"
+}

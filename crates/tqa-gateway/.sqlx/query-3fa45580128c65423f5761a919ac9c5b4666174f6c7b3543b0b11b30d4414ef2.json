@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE conversations SET state='deleted',updated_at=CURRENT_TIMESTAMP WHERE id=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3fa45580128c65423f5761a919ac9c5b4666174f6c7b3543b0b11b30d4414ef2"
+}

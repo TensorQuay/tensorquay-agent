@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO decision_engines (name,document,version,last_set_by,seed_digest,seed_state,budget_since) VALUES ($1,$2,1,'seed',$3,'current',CASE WHEN $2::jsonb ? 'budget' THEN CURRENT_TIMESTAMP END)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Jsonb",
+        "Bytea"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "771f8aa7567de6a66aea056797f445285b1f42aa1844d750b265983f97432fa0"
+}

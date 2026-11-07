@@ -1,0 +1,107 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT host,ports,internal,version,last_set_by,seed_state,updated_at,CASE WHEN preset_edited THEN NULL ELSE preset END AS preset FROM egress_rules ORDER BY host LIMIT $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "host",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "egress_rules",
+            "name": "host"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "ports",
+        "type_info": "Int4Array",
+        "origin": {
+          "Table": {
+            "table": "egress_rules",
+            "name": "ports"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "internal",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "egress_rules",
+            "name": "internal"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "version",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "egress_rules",
+            "name": "version"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "last_set_by",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "egress_rules",
+            "name": "last_set_by"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "seed_state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "egress_rules",
+            "name": "seed_state"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "egress_rules",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "preset",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      null
+    ]
+  },
+  "hash": "d32b369d462a5863acc9516a2035313a272812ef8b472aaf401d256a2a6afb5c"
+}

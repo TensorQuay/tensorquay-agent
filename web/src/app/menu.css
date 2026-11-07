@@ -1,0 +1,218 @@
+.popover {
+  position: fixed;
+  z-index: 50;
+  width: max-content;
+  max-width: calc(100vw - var(--space-4));
+  max-height: calc(100dvh - var(--space-4));
+  overflow: auto;
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+  background: var(--surface-raised);
+  color: var(--ink);
+  box-shadow: var(--elevation);
+}
+.menu {
+  padding: var(--space-1);
+  min-width: 12em;
+}
+/* The UI standard's Popover: past 7 choices a search field heads the list; nothing found says so in the list's place. */
+.popover .menu-search {
+  display: block;
+  width: calc(100% - var(--space-4));
+  /* Room for its focus ring inside the popover, whose scrolling edge would clip it into a heavy line. */
+  margin: var(--space-2);
+}
+.menu-empty {
+  margin: 0;
+  padding: var(--nav-row-padding);
+}
+/* A choice that can't be taken now reads muted, with its reason as its line. */
+.menu-item[aria-disabled="true"] {
+  color: var(--muted);
+  cursor: not-allowed;
+}
+/* A menu's named groups (the Settings sections on a phone, WEB-U-134): a quiet label over its rows, as the sidebar's
+   group labels, lined up with the rows' text; 8 px above a group after the first. */
+.menu-group-label {
+  margin: 0;
+  padding: var(--nav-row-padding);
+  padding-bottom: var(--space-1);
+}
+.menu-group + .menu-group {
+  margin-top: var(--space-2);
+}
+.menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  /* §5c: menu items are nav rows: 32 px, 14 px text; 44 px on touch. */
+  min-height: var(--row-height-nav);
+  padding: var(--nav-row-padding);
+  font-size: var(--nav-font-size);
+  line-height: var(--nav-line-height);
+  border-radius: var(--control-radius);
+  text-align: left;
+  cursor: pointer;
+}
+.menu-item:hover,
+.menu-item:focus-visible {
+  background: var(--hover-tint);
+}
+/*
+ * The action menu (the UI standard's Menu): a line icon, then the word, 12 px apart (§5c); under the word, why an
+ * action can't run when it can't (the item stays focusable, dimmed).
+ */
+.action-menu-item {
+  justify-content: flex-start;
+  gap: var(--nav-pad-inline);
+  height: auto;
+  color: inherit;
+  text-decoration: none;
+}
+.action-menu-word {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+/* A setting's item (a checkbox item): the word takes the free space, so its check sits at the row's end. */
+.action-menu-item[role="menuitemcheckbox"] .action-menu-word {
+  flex: 1;
+}
+.action-menu-item[aria-disabled="true"] > * {
+  opacity: 0.5;
+}
+.action-menu-item[aria-disabled="true"] .type-small {
+  opacity: 1;
+}
+.menu-icon {
+  flex-shrink: 0;
+  inline-size: var(--icon-text);
+  color: var(--muted);
+}
+.menu-item[data-danger] .menu-icon {
+  color: var(--danger);
+}
+.menu-check {
+  width: var(--space-4);
+  flex-shrink: 0;
+}
+.menu-heading {
+  padding: var(--space-2) var(--space-3);
+  overflow-wrap: anywhere;
+}
+/* The choice takes the free space, so every row's decoration sits before the check in one column (WEB-U-030). */
+.menu-choice {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+.account-signout {
+  border-top: var(--border-width) solid var(--line);
+  border-radius: 0;
+}
+.menu-picker {
+  position: relative;
+  min-width: 0;
+  max-width: 100%;
+}
+.picker-button.button {
+  border: var(--border-width) solid var(--line);
+  font-size: var(--small-size);
+  font-weight: 400;
+  max-width: 100%;
+  height: var(--composer-button-size);
+}
+/* The standard picker in a form (the shared Select, WEB-U-134): a field's height, box and colours, the name at the
+   start and the chevron at the end, as wide as the field. */
+.menu-picker:has(> .picker-field) {
+  width: 100%;
+}
+.picker-button.picker-field.button {
+  justify-content: space-between;
+  width: 100%;
+  height: var(--control-height);
+  padding: var(--space-1) var(--space-3);
+  border-color: var(--control-border);
+  border-radius: var(--control-radius);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--body-size);
+  font-weight: 400;
+}
+.picker-button.picker-field.button[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+.picker-field .button-label {
+  flex: 1;
+  justify-content: space-between;
+}
+.picker-button .button-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+/* Only the name gives way to a long title; icons keep their size (WEB-U-029). */
+.picker-button .button-label > svg {
+  flex: none;
+}
+.picker-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/*
+ * A picker a profile fixes (or one with nothing to choose) looks disabled: muted text over the ghost button's own
+ * colour, a dashed border, and no chevron, since no menu opens (UX review 0927b, item 6).
+ */
+.button.picker-button[aria-disabled="true"] {
+  color: var(--muted);
+  border-style: dashed;
+  cursor: not-allowed;
+}
+.button.picker-button[aria-disabled="true"]:hover {
+  color: var(--muted);
+  background: transparent;
+}
+.button.picker-button[aria-disabled="true"] .button-label > svg:last-child {
+  display: none;
+}
+.picker-tooltip {
+  display: none;
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  width: max-content;
+  max-width: min(var(--measure), calc(100vw - var(--space-12)));
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+  color: var(--ink);
+  background: var(--surface-raised);
+  box-shadow: var(--elevation);
+}
+.menu-picker:hover .picker-tooltip,
+.menu-picker:focus-within .picker-tooltip {
+  display: block;
+}
+/*
+ * A picker's icon and the name in its tooltip are for where its name has no room (a narrow task header, WEB-U-106);
+ * elsewhere the name says it all. No tooltip over its own open menu.
+ */
+.picker-icon,
+.picker-name-tip,
+.menu-picker .picker-tooltip.picker-tooltip-name,
+.menu-picker:has([aria-expanded="true"]) .picker-tooltip {
+  display: none;
+}
+.picker-title {
+  margin: 0;
+  padding: var(--space-2) var(--space-3) var(--space-1);
+}
+/* Submenu entries (the language list) sit one step in from their parent item. */
+.menu-subitem {
+  padding-left: var(--space-6);
+}

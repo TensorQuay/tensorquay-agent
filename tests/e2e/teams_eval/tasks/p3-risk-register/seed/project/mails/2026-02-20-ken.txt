@@ -1,0 +1,4 @@
+From: Ken
+Subject: status
+
+A third of the legacy records fail validation; the migration may need a cleanup sprint, which I will run.

@@ -1,0 +1,10 @@
+# WEB-E2E-011 (task 076): a task on a shared workspace waits for its lease; a fork runs at once in its own copy.
+services:
+  fake-model:
+    command: ["--scenario", "/scenarios/workspaces.json"]
+    volumes:
+      - type: bind
+        source: ../tests/fixtures/workspaces.json
+        target: /scenarios/workspaces.json
+        read_only: true
+        bind: {create_host_path: false}

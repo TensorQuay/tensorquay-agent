@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE workspaces SET lease_conversation_id=NULL, lease_expires_at=NULL WHERE lease_conversation_id=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b0f8cb0fed5010be363e794ff553af5253affffb2431a4cb6d80f4bf67dffb49"
+}

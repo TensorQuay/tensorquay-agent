@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE agent_team_members SET state = 'stopped' WHERE conversation_id = ANY($1) AND state NOT IN ('done', 'stopped')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d5f5a9e08b17eb985ff450df4ac569a9b36322cbf2b2c3524ef1aee8657e21c2"
+}

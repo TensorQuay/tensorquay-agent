@@ -1,0 +1,6 @@
+[
+ "Money holds integer cents; amount is an exact Decimal (or derived from cents)",
+ "Every module that did float arithmetic on .amount (tax, discount, refund, ledger, fx, report, and the shared util.round2) now goes through Money or Decimal",
+ "Multiplication rounds half up to the cent; allocate gives the remainder cents to the first parts",
+ "The public API and the tests are unchanged"
+]

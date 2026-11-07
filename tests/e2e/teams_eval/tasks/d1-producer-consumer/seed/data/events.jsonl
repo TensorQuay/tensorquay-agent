@@ -1,0 +1,500 @@
+{"ts": 1727740849991, "level": "error", "service": "auth", "message": "queue depth 3781"}
+{"ts": 1727740925792, "level": "info", "service": "café-sync", "message": "invoice 9062 generated"}
+{"ts": 1727741001395, "level": "info", "service": "api", "message": "request served in 4081 ms"}
+{"ts": 1727741059037, "level": "error", "service": "search", "message": "retrying upstream call (2455)"}
+{"ts": 1727741081042, "level": "debug", "service": "mailer", "message": "invoice 9565 generated"}
+{"ts": 1727741085418, "level": "warn", "service": "billing", "message": "timeout after 4618 s"}
+{"ts": 1727741094999, "level": "debug", "service": "café-sync", "message": "queue depth 7786"}
+{"ts": 1727741097478, "level": "error", "service": "café-sync", "message": "cache miss for key 1617"}
+{"ts": 1727741120825, "level": "info", "service": "mailer", "message": "request served in 4368 ms"}
+{"ts": 1727741124292, "level": "info", "service": "api", "message": "検索インデックスを更新しました 9467"}
+{"ts": 1727741163849, "level": "debug", "service": "api", "message": "timeout after 2391 s"}
+{"ts": 1727741217270, "level": "warn", "service": "billing", "message": "request served in 8082 ms"}
+{"ts": 1727741220159, "level": "debug", "service": "café-sync", "message": "cache miss for key 2212"}
+{"ts": 1727741272879, "level": "warn", "service": "mailer", "message": "stack trace follows: frame0 -> frame1 -> frame2 -> frame3 -> frame4 -> frame5 -> frame6 -> frame7 -> frame8 -> frame9 -> frame10 -> frame11 -> frame12 -> frame13 -> frame14 -> frame15 -> frame16 -> frame17 -> frame18 -> frame19 -> frame20 -> frame21 -> frame22 -> frame23 -> frame24 -> frame25 -> frame26 -> frame27 -> frame28 -> frame29 -> frame30 -> frame31 -> frame32 -> frame33 -> frame34 -> frame35 -> frame36 -> frame37 -> frame38 -> frame39"}
+{"ts": 1727741276611, "level": "info", "service": "billing", "message": "request served in 7599 ms"}
+{"ts": 1727741285276, "level": "error", "service": "café-sync", "message": "request served in 1792 ms"}
+{"ts": 1727741302058, "level": "info", "service": "auth", "message": "timeout after 1398 s"}
+{"ts": 1727741380911, "level": "info", "service": "search", "message": "cache miss for key 3961"}
+{"ts": 1727741441208, "level": "warn", "service": "auth", "message": ""}
+{"ts": 1727741452136, "level": "info", "service": "billing", "message": ""}
+{"ts": 1727741542118, "level": "info", "service": "café-sync", "message": "user 4538 signed in"}
+{"ts": 1727741584863, "level": "warn", "service": "search", "message": "検索インデックスを更新しました 6223"}
+{"ts": 1727741642721, "level": "info", "service": "billing", "message": "cache miss for key 3512"}
+{"ts": 1727741646837, "level": "info", "service": "billing", "message": "user 2960 signed in"}
+{"ts": 1727741655323, "level": "info", "service": "billing", "message": "user 8973 signed in"}
+{"ts": 1727741719963, "level": "info", "service": "café-sync", "message": "queue depth 1999"}
+{"ts": 1727741735547, "level": "warn", "service": "billing", "message": "payload of 9810 bytes rejected"}
+{"ts": 1727741808021, "level": "error", "service": "search", "message": "payload of 6435 bytes rejected"}
+{"ts": 1727741854445, "level": "info", "service": "billing", "message": "request served in 2926 ms"}
+{"ts": 1727741938159, "level": "info", "service": "billing", "message": "retrying upstream call (8405)"}
+{"ts": 1727741992111, "level": "info", "service": "mailer", "message": "cache miss for key 687"}
+{"ts": 1727742038300, "level": "error", "service": "search", "message": "user 6543 signed in"}
+{"ts": 1727742075567, "level": "warn", "service": "mailer", "message": "retrying upstream call (4244)"}
+{"ts": 1727742105842, "level": "info", "service": "auth", "message": "cache miss for key 4579"}
+{"ts": 1727742145636, "level": "warn", "service": "billing", "message": "timeout after 8053 s"}
+{"ts": 1727742158476, "level": "info", "service": "billing", "message": "réessai de la synchronisation 7699"}
+{"ts": 1727742221939, "level": "info", "service": "billing", "message": "retrying upstream call (7770)"}
+{"ts": 1727742286890, "level": "warn", "service": "api", "message": "payload of 9327 bytes rejected"}
+{"ts": 1727742366962, "level": "warn", "service": "café-sync", "message": "réessai de la synchronisation 440"}
+{"ts": 1727742392627, "level": "info", "service": "search", "message": "timeout after 8169 s"}
+{"ts": 1727742468663, "level": "warn", "service": "billing", "message": "retrying upstream call (7008)"}
+{"ts": 1727742490433, "level": "info", "service": "api", "message": "検索インデックスを更新しました 8419"}
+{"ts": 1727742576355, "level": "info", "service": "billing", "message": "検索インデックスを更新しました 8698"}
+{"ts": 1727742611914, "level": "info", "service": "mailer", "message": "検索インデックスを更新しました 392"}
+{"ts": 1727742644241, "level": "debug", "service": "search", "message": "timeout after 3051 s"}
+{"ts": 1727742721155, "level": "info", "service": "mailer", "message": "réessai de la synchronisation 3019"}
+{"ts": 1727742791716, "level": "info", "service": "search", "message": "request served in 3108 ms"}
+{"ts": 1727742855264, "level": "debug", "service": "search", "message": "cache miss for key 7192"}
+{"ts": 1727742869227, "level": "warn", "service": "mailer", "message": "invoice 6369 generated"}
+{"ts": 1727742911060, "level": "info", "service": "café-sync", "message": ""}
+{"ts": 1727742959898, "level": "debug", "service": "search", "message": "réessai de la synchronisation 2935"}
+{"ts": 1727743010954, "level": "warn", "service": "billing", "message": "queue depth 2628"}
+{"ts": 1727743045641, "level": "debug", "service": "api", "message": "retrying upstream call (1465)"}
+{"ts": 1727743087032, "level": "info", "service": "api", "message": "invoice 5129 generated"}
+{"ts": 1727743112633, "level": "error", "service": "café-sync", "message": "request served in 6944 ms"}
+{"ts": 1727743128198, "level": "error", "service": "search", "message": "request served in 2446 ms"}
+{"ts": 1727743197209, "level": "error", "service": "auth", "message": "invoice 5667 generated"}
+{"ts": 1727743266741, "level": "info", "service": "café-sync", "message": "timeout after 7928 s"}
+{"ts": 1727743356701, "level": "warn", "service": "mailer", "message": "検索インデックスを更新しました 8722"}
+{"ts": 1727743377897, "level": "warn", "service": "mailer", "message": "user 418 signed in"}
+{"ts": 1727743384895, "level": "info", "service": "search", "message": "user 5267 signed in"}
+{"ts": 1727743423252, "level": "debug", "service": "search", "message": "invoice 4685 generated"}
+{"ts": 1727743498368, "level": "info", "service": "mailer", "message": "invoice 2558 generated"}
+{"ts": 1727743570151, "level": "info", "service": "billing", "message": "request served in 6124 ms"}
+{"ts": 1727743619174, "level": "error", "service": "auth", "message": "timeout after 9830 s"}
+{"ts": 1727743674262, "level": "info", "service": "billing", "message": ""}
+{"ts": 1727743682354, "level": "debug", "service": "auth", "message": "invoice 6051 generated"}
+{"ts": 1727743737594, "level": "info", "service": "auth", "message": "cache miss for key 8355"}
+{"ts": 1727743819164, "level": "info", "service": "auth", "message": "request served in 1961 ms"}
+{"ts": 1727743905339, "level": "warn", "service": "café-sync", "message": "cache miss for key 9014"}
+{"ts": 1727743917412, "level": "error", "service": "mailer", "message": "request served in 1424 ms"}
+{"ts": 1727743953418, "level": "info", "service": "api", "message": "payload of 7062 bytes rejected"}
+{"ts": 1727743973528, "level": "error", "service": "mailer", "message": "検索インデックスを更新しました 1416"}
+{"ts": 1727744026640, "level": "info", "service": "search", "message": "timeout after 5808 s"}
+{"ts": 1727744103661, "level": "warn", "service": "billing", "message": "cache miss for key 8517"}
+{"ts": 1727744141623, "level": "error", "service": "café-sync", "message": "user 3017 signed in"}
+{"ts": 1727744177009, "level": "info", "service": "api", "message": "invoice 7953 generated"}
+{"ts": 1727744209128, "level": "info", "service": "café-sync", "message": "réessai de la synchronisation 3664"}
+{"ts": 1727744219909, "level": "error", "service": "search", "message": "cache miss for key 4403"}
+{"ts": 1727744252276, "level": "error", "service": "billing", "message": "retrying upstream call (2111)"}
+{"ts": 1727744274772, "level": "debug", "service": "auth", "message": "queue depth 9563"}
+{"ts": 1727744285456, "level": "info", "service": "api", "message": "cache miss for key 1195"}
+{"ts": 1727744331720, "level": "debug", "service": "billing", "message": ""}
+{"ts": 1727744368479, "level": "error", "service": "billing", "message": "queue depth 3980"}
+{"ts": 1727744407721, "level": "warn", "service": "billing", "message": "cache miss for key 2641"}
+{"ts": 1727744467750, "level": "info", "service": "auth", "message": "user 8887 signed in"}
+{"ts": 1727744496447, "level": "info", "service": "auth", "message": "invoice 1375 generated"}
+{"ts": 1727744561662, "level": "info", "service": "search", "message": "queue depth 7301"}
+{"ts": 1727744612347, "level": "debug", "service": "api", "message": "検索インデックスを更新しました 4981"}
+{"ts": 1727744615386, "level": "info", "service": "auth", "message": "payload of 2484 bytes rejected"}
+{"ts": 1727744675420, "level": "warn", "service": "search", "message": "retrying upstream call (7912)"}
+{"ts": 1727744705700, "level": "debug", "service": "mailer", "message": "cache miss for key 5674"}
+{"ts": 1727744743718, "level": "warn", "service": "search", "message": "invoice 4270 generated"}
+{"ts": 1727744771774, "level": "info", "service": "mailer", "message": "request served in 8442 ms"}
+{"ts": 1727744840938, "level": "info", "service": "api", "message": "payload of 9709 bytes rejected"}
+{"ts": 1727744918847, "level": "info", "service": "api", "message": "réessai de la synchronisation 7631"}
+{"ts": 1727744999220, "level": "info", "service": "billing", "message": "timeout after 2535 s"}
+{"ts": 1727745071423, "level": "warn", "service": "mailer", "message": "cache miss for key 290"}
+{"ts": 1727745103802, "level": "error", "service": "search", "message": "user 6690 signed in"}
+{"ts": 1727745156087, "level": "warn", "service": "search", "message": "user 6809 signed in"}
+{"ts": 1727745192455, "level": "info", "service": "café-sync", "message": "timeout after 554 s"}
+{"ts": 1727745232249, "level": "info", "service": "café-sync", "message": "user 5656 signed in"}
+{"ts": 1727745311228, "level": "info", "service": "search", "message": ""}
+{"ts": 1727745386705, "level": "warn", "service": "api", "message": "timeout after 938 s"}
+{"ts": 1727745457646, "level": "warn", "service": "search", "message": "検索インデックスを更新しました 7693"}
+{"ts": 1727745479709, "level": "info", "service": "billing", "message": ""}
+{"ts": 1727745538328, "level": "info", "service": "auth", "message": "timeout after 1877 s"}
+{"ts": 1727745604560, "level": "info", "service": "search", "message": "request served in 1481 ms"}
+{"ts": 1727745611267, "level": "warn", "service": "café-sync", "message": "request served in 5848 ms"}
+{"ts": 1727745700440, "level": "debug", "service": "search", "message": "検索インデックスを更新しました 8535"}
+{"ts": 1727745761098, "level": "info", "service": "billing", "message": "stack trace follows: frame0 -> frame1 -> frame2 -> frame3 -> frame4 -> frame5 -> frame6 -> frame7 -> frame8 -> frame9 -> frame10 -> frame11 -> frame12 -> frame13 -> frame14 -> frame15 -> frame16 -> frame17 -> frame18 -> frame19 -> frame20 -> frame21 -> frame22 -> frame23 -> frame24 -> frame25 -> frame26 -> frame27 -> frame28 -> frame29 -> frame30 -> frame31 -> frame32 -> frame33 -> frame34 -> frame35 -> frame36 -> frame37 -> frame38 -> frame39"}
+{"ts": 1727745770325, "level": "debug", "service": "auth", "message": "検索インデックスを更新しました 3359"}
+{"ts": 1727745841906, "level": "warn", "service": "café-sync", "message": "timeout after 249 s"}
+{"ts": 1727745902051, "level": "info", "service": "mailer", "message": "retrying upstream call (100)"}
+{"ts": 1727745985709, "level": "info", "service": "auth", "message": "réessai de la synchronisation 2591"}
+{"ts": 1727745992269, "level": "debug", "service": "billing", "message": "réessai de la synchronisation 1717"}
+{"ts": 1727746053501, "level": "info", "service": "billing", "message": ""}
+{"ts": 1727746143308, "level": "warn", "service": "auth", "message": "retrying upstream call (1747)"}
+{"ts": 1727746161073, "level": "warn", "service": "billing", "message": "retrying upstream call (777)"}
+{"ts": 1727746165341, "level": "debug", "service": "search", "message": "réessai de la synchronisation 275"}
+{"ts": 1727746175611, "level": "error", "service": "search", "message": "réessai de la synchronisation 4351"}
+{"ts": 1727746182840, "level": "info", "service": "auth", "message": "retrying upstream call (5734)"}
+{"ts": 1727746199219, "level": "info", "service": "search", "message": "payload of 7300 bytes rejected"}
+{"ts": 1727746257589, "level": "debug", "service": "auth", "message": "request served in 1112 ms"}
+{"ts": 1727746343035, "level": "info", "service": "search", "message": "検索インデックスを更新しました 8347"}
+{"ts": 1727746368721, "level": "info", "service": "café-sync", "message": "invoice 347 generated"}
+{"ts": 1727746439896, "level": "warn", "service": "café-sync", "message": "invoice 148 generated"}
+{"ts": 1727746517639, "level": "warn", "service": "mailer", "message": ""}
+{"ts": 1727746537083, "level": "info", "service": "café-sync", "message": "invoice 3042 generated"}
+{"ts": 1727746621545, "level": "info", "service": "billing", "message": "retrying upstream call (8277)"}
+{"ts": 1727746630513, "level": "debug", "service": "search", "message": ""}
+{"ts": 1727746650627, "level": "info", "service": "auth", "message": ""}
+{"ts": 1727746664081, "level": "info", "service": "café-sync", "message": ""}
+{"ts": 1727746732561, "level": "info", "service": "billing", "message": "user 513 signed in"}
+{"ts": 1727746817050, "level": "info", "service": "search", "message": "queue depth 9891"}
+{"ts": 1727746895607, "level": "debug", "service": "mailer", "message": "timeout after 833 s"}
+{"ts": 1727746925083, "level": "warn", "service": "café-sync", "message": ""}
+{"ts": 1727746996848, "level": "warn", "service": "mailer", "message": "検索インデックスを更新しました 4452"}
+{"ts": 1727747073070, "level": "info", "service": "search", "message": "request served in 8859 ms"}
+{"ts": 1727747133945, "level": "info", "service": "mailer", "message": "queue depth 8429"}
+{"ts": 1727747158794, "level": "error", "service": "café-sync", "message": "queue depth 1328"}
+{"ts": 1727747190328, "level": "warn", "service": "billing", "message": "user 931 signed in"}
+{"ts": 1727747264294, "level": "warn", "service": "café-sync", "message": "user 6406 signed in"}
+{"ts": 1727747299255, "level": "info", "service": "mailer", "message": "queue depth 3525"}
+{"ts": 1727747321488, "level": "warn", "service": "mailer", "message": "timeout after 8471 s"}
+{"ts": 1727747332517, "level": "info", "service": "café-sync", "message": "invoice 7266 generated"}
+{"ts": 1727747369159, "level": "warn", "service": "search", "message": "request served in 6179 ms"}
+{"ts": 1727747438328, "level": "info", "service": "auth", "message": "cache miss for key 7222"}
+{"ts": 1727747507889, "level": "info", "service": "café-sync", "message": "request served in 9755 ms"}
+{"ts": 1727747518571, "level": "error", "service": "api", "message": "réessai de la synchronisation 6564"}
+{"ts": 1727747532343, "level": "info", "service": "api", "message": ""}
+{"ts": 1727747615172, "level": "info", "service": "billing", "message": "retrying upstream call (1303)"}
+{"ts": 1727747698997, "level": "info", "service": "billing", "message": ""}
+{"ts": 1727747755613, "level": "warn", "service": "auth", "message": ""}
+{"ts": 1727747769780, "level": "error", "service": "search", "message": "invoice 9460 generated"}
+{"ts": 1727747799668, "level": "info", "service": "search", "message": "retrying upstream call (4024)"}
+{"ts": 1727747864404, "level": "info", "service": "mailer", "message": "user 9003 signed in"}
+{"ts": 1727747884398, "level": "error", "service": "billing", "message": "cache miss for key 9480"}
+{"ts": 1727747961286, "level": "info", "service": "search", "message": "invoice 1115 generated"}
+{"ts": 1727747965061, "level": "info", "service": "search", "message": "timeout after 3507 s"}
+{"ts": 1727747976823, "level": "info", "service": "mailer", "message": "request served in 1315 ms"}
+{"ts": 1727748031454, "level": "info", "service": "café-sync", "message": "user 7580 signed in"}
+{"ts": 1727748060872, "level": "warn", "service": "billing", "message": "invoice 9160 generated"}
+{"ts": 1727748122367, "level": "error", "service": "auth", "message": "検索インデックスを更新しました 6429"}
+{"ts": 1727748147819, "level": "info", "service": "auth", "message": "timeout after 1503 s"}
+{"ts": 1727748183482, "level": "info", "service": "search", "message": "request served in 3683 ms"}
+{"ts": 1727748233723, "level": "info", "service": "auth", "message": "cache miss for key 8334"}
+{"ts": 1727748263961, "level": "info", "service": "mailer", "message": "検索インデックスを更新しました 956"}
+{"ts": 1727748340160, "level": "debug", "service": "billing", "message": "検索インデックスを更新しました 5669"}
+{"ts": 1727748419603, "level": "warn", "service": "café-sync", "message": "検索インデックスを更新しました 2168"}
+{"ts": 1727748431877, "level": "info", "service": "mailer", "message": "user 5342 signed in"}
+{"ts": 1727748502326, "level": "info", "service": "café-sync", "message": "timeout after 3910 s"}
+{"ts": 1727748583631, "level": "debug", "service": "mailer", "message": "retrying upstream call (7410)"}
+{"ts": 1727748654010, "level": "warn", "service": "search", "message": "invoice 3545 generated"}
+{"ts": 1727748703454, "level": "warn", "service": "billing", "message": "request served in 5084 ms"}
+{"ts": 1727748760233, "level": "info", "service": "café-sync", "message": "timeout after 4668 s"}
+{"ts": 1727748762091, "level": "warn", "service": "billing", "message": "user 1293 signed in"}
+{"ts": 1727748779144, "level": "error", "service": "café-sync", "message": "user 6403 signed in"}
+{"ts": 1727748832596, "level": "info", "service": "billing", "message": "retrying upstream call (7178)"}
+{"ts": 1727748847771, "level": "info", "service": "auth", "message": "queue depth 6203"}
+{"ts": 1727748908224, "level": "warn", "service": "api", "message": "検索インデックスを更新しました 2309"}
+{"ts": 1727748912186, "level": "info", "service": "café-sync", "message": "cache miss for key 4746"}
+{"ts": 1727748954547, "level": "info", "service": "billing", "message": ""}
+{"ts": 1727749036058, "level": "info", "service": "api", "message": "payload of 6279 bytes rejected"}
+{"ts": 1727749065319, "level": "info", "service": "auth", "message": "payload of 9384 bytes rejected"}
+{"ts": 1727749117779, "level": "info", "service": "mailer", "message": "request served in 4517 ms"}
+{"ts": 1727749183032, "level": "debug", "service": "billing", "message": "queue depth 9837"}
+{"ts": 1727749248815, "level": "info", "service": "api", "message": "réessai de la synchronisation 7515"}
+{"ts": 1727749258896, "level": "info", "service": "mailer", "message": "payload of 7529 bytes rejected"}
+{"ts": 1727749272560, "level": "debug", "service": "api", "message": "timeout after 3401 s"}
+{"ts": 1727749349343, "level": "info", "service": "search", "message": "timeout after 7733 s"}
+{"ts": 1727749364565, "level": "info", "service": "mailer", "message": "retrying upstream call (4006)"}
+{"ts": 1727749371783, "level": "info", "service": "api", "message": "検索インデックスを更新しました 1458"}
+{"ts": 1727749393430, "level": "info", "service": "mailer", "message": "retrying upstream call (5376)"}
+{"ts": 1727749417284, "level": "warn", "service": "auth", "message": "timeout after 3776 s"}
+{"ts": 1727749480599, "level": "info", "service": "café-sync", "message": "invoice 6187 generated"}
+{"ts": 1727749518397, "level": "warn", "service": "mailer", "message": "user 6159 signed in"}
+{"ts": 1727749564809, "level": "info", "service": "mailer", "message": ""}
+{"ts": 1727749600304, "level": "debug", "service": "auth", "message": "cache miss for key 6348"}
+{"ts": 1727749608841, "level": "debug", "service": "api", "message": "invoice 1427 generated"}
+{"ts": 1727749615784, "level": "info", "service": "billing", "message": ""}
+{"ts": 1727749632272, "level": "info", "service": "mailer", "message": "request served in 4065 ms"}
+{"ts": 1727749701989, "level": "warn", "service": "api", "message": "invoice 7244 generated"}
+{"ts": 1727749784039, "level": "info", "service": "search", "message": ""}
+{"ts": 1727749811008, "level": "debug", "service": "billing", "message": "cache miss for key 8249"}
+{"ts": 1727749855568, "level": "info", "service": "search", "message": "検索インデックスを更新しました 5026"}
+{"ts": 1727749859011, "level": "warn", "service": "auth", "message": "retrying upstream call (4825)"}
+{"ts": 1727749866551, "level": "info", "service": "search", "message": "stack trace follows: frame0 -> frame1 -> frame2 -> frame3 -> frame4 -> frame5 -> frame6 -> frame7 -> frame8 -> frame9 -> frame10 -> frame11 -> frame12 -> frame13 -> frame14 -> frame15 -> frame16 -> frame17 -> frame18 -> frame19 -> frame20 -> frame21 -> frame22 -> frame23 -> frame24 -> frame25 -> frame26 -> frame27 -> frame28 -> frame29 -> frame30 -> frame31 -> frame32 -> frame33 -> frame34 -> frame35 -> frame36 -> frame37 -> frame38 -> frame39"}
+{"ts": 1727749914577, "level": "debug", "service": "search", "message": "検索インデックスを更新しました 1331"}
+{"ts": 1727749964468, "level": "warn", "service": "api", "message": "user 580 signed in"}
+{"ts": 1727750022669, "level": "info", "service": "billing", "message": "queue depth 1898"}
+{"ts": 1727750067302, "level": "info", "service": "auth", "message": "invoice 719 generated"}
+{"ts": 1727750118314, "level": "debug", "service": "billing", "message": ""}
+{"ts": 1727750128960, "level": "info", "service": "api", "message": "réessai de la synchronisation 4175"}
+{"ts": 1727750166554, "level": "error", "service": "billing", "message": "queue depth 8661"}
+{"ts": 1727750172071, "level": "info", "service": "mailer", "message": "request served in 8235 ms"}
+{"ts": 1727750182389, "level": "info", "service": "search", "message": ""}
+{"ts": 1727750189882, "level": "info", "service": "mailer", "message": "invoice 2681 generated"}
+{"ts": 1727750204370, "level": "info", "service": "mailer", "message": "timeout after 2799 s"}
+{"ts": 1727750247768, "level": "info", "service": "api", "message": "retrying upstream call (4041)"}
+{"ts": 1727750267051, "level": "info", "service": "mailer", "message": ""}
+{"ts": 1727750343035, "level": "info", "service": "café-sync", "message": "réessai de la synchronisation 7519"}
+{"ts": 1727750392871, "level": "info", "service": "auth", "message": "user 8067 signed in"}
+{"ts": 1727750443654, "level": "warn", "service": "mailer", "message": "request served in 3720 ms"}
+{"ts": 1727750514884, "level": "info", "service": "auth", "message": "request served in 3180 ms"}
+{"ts": 1727750573968, "level": "warn", "service": "search", "message": "payload of 6141 bytes rejected"}
+{"ts": 1727750644510, "level": "info", "service": "auth", "message": "cache miss for key 2661"}
+{"ts": 1727750679671, "level": "warn", "service": "auth", "message": "payload of 3592 bytes rejected"}
+{"ts": 1727750729555, "level": "error", "service": "api", "message": "検索インデックスを更新しました 9069"}
+{"ts": 1727750785798, "level": "debug", "service": "mailer", "message": ""}
+{"ts": 1727750855050, "level": "info", "service": "mailer", "message": "invoice 5595 generated"}
+{"ts": 1727750923463, "level": "info", "service": "search", "message": "user 9503 signed in"}
+{"ts": 1727750937616, "level": "error", "service": "search", "message": "request served in 7668 ms"}
+{"ts": 1727751024853, "level": "info", "service": "billing", "message": "timeout after 3458 s"}
+{"ts": 1727751068651, "level": "info", "service": "billing", "message": "invoice 5885 generated"}
+{"ts": 1727751104237, "level": "info", "service": "search", "message": "request served in 4771 ms"}
+{"ts": 1727751141732, "level": "info", "service": "auth", "message": "timeout after 5410 s"}
+{"ts": 1727751220034, "level": "warn", "service": "café-sync", "message": "réessai de la synchronisation 2727"}
+{"ts": 1727751256785, "level": "error", "service": "billing", "message": "timeout after 7827 s"}
+{"ts": 1727751289885, "level": "info", "service": "billing", "message": "invoice 764 generated"}
+{"ts": 1727751303672, "level": "warn", "service": "billing", "message": "request served in 2925 ms"}
+{"ts": 1727751313445, "level": "warn", "service": "billing", "message": "request served in 4899 ms"}
+{"ts": 1727751372491, "level": "error", "service": "search", "message": "user 7456 signed in"}
+{"ts": 1727751396801, "level": "debug", "service": "billing", "message": "検索インデックスを更新しました 5360"}
+{"ts": 1727751485827, "level": "error", "service": "api", "message": ""}
+{"ts": 1727751525781, "level": "info", "service": "search", "message": "timeout after 6176 s"}
+{"ts": 1727751560698, "level": "info", "service": "api", "message": ""}
+{"ts": 1727751568085, "level": "info", "service": "billing", "message": "cache miss for key 3729"}
+{"ts": 1727751577267, "level": "info", "service": "api", "message": "request served in 7105 ms"}
+{"ts": 1727751586332, "level": "info", "service": "api", "message": "payload of 8421 bytes rejected"}
+{"ts": 1727751664317, "level": "info", "service": "api", "message": "retrying upstream call (2453)"}
+{"ts": 1727751698560, "level": "warn", "service": "billing", "message": "request served in 9546 ms"}
+{"ts": 1727751720968, "level": "info", "service": "api", "message": "queue depth 3890"}
+{"ts": 1727751750070, "level": "debug", "service": "api", "message": "cache miss for key 3362"}
+{"ts": 1727751831619, "level": "warn", "service": "billing", "message": ""}
+{"ts": 1727751845282, "level": "warn", "service": "billing", "message": ""}
+{"ts": 1727751907262, "level": "info", "service": "auth", "message": "invoice 3510 generated"}
+{"ts": 1727751967806, "level": "error", "service": "mailer", "message": "request served in 5928 ms"}
+{"ts": 1727752040451, "level": "info", "service": "café-sync", "message": "invoice 7186 generated"}
+{"ts": 1727752048998, "level": "info", "service": "api", "message": "timeout after 7260 s"}
+{"ts": 1727752108780, "level": "info", "service": "search", "message": "invoice 6434 generated"}
+{"ts": 1727752178855, "level": "debug", "service": "café-sync", "message": "検索インデックスを更新しました 2643"}
+{"ts": 1727752213712, "level": "info", "service": "api", "message": "payload of 9616 bytes rejected"}
+{"ts": 1727752253040, "level": "info", "service": "auth", "message": "request served in 78 ms"}
+{"ts": 1727752335842, "level": "warn", "service": "api", "message": "payload of 2204 bytes rejected"}
+{"ts": 1727752376846, "level": "info", "service": "search", "message": "payload of 6603 bytes rejected"}
+{"ts": 1727752385171, "level": "info", "service": "mailer", "message": "invoice 5541 generated"}
+{"ts": 1727752470807, "level": "warn", "service": "search", "message": "timeout after 7351 s"}
+{"ts": 1727752476715, "level": "error", "service": "billing", "message": "réessai de la synchronisation 8764"}
+{"ts": 1727752511827, "level": "info", "service": "auth", "message": "payload of 3375 bytes rejected"}
+{"ts": 1727752528212, "level": "info", "service": "api", "message": "cache miss for key 8609"}
+{"ts": 1727752603327, "level": "info", "service": "auth", "message": "réessai de la synchronisation 1905"}
+{"ts": 1727752661976, "level": "info", "service": "café-sync", "message": "user 2281 signed in"}
+{"ts": 1727752721055, "level": "warn", "service": "api", "message": "invoice 8504 generated"}
+{"ts": 1727752727373, "level": "info", "service": "café-sync", "message": "検索インデックスを更新しました 8378"}
+{"ts": 1727752731232, "level": "error", "service": "café-sync", "message": "user 6241 signed in"}
+{"ts": 1727752753501, "level": "info", "service": "mailer", "message": "invoice 3195 generated"}
+{"ts": 1727752754266, "level": "warn", "service": "billing", "message": "timeout after 6324 s"}
+{"ts": 1727752812251, "level": "info", "service": "billing", "message": "cache miss for key 7411"}
+{"ts": 1727752851076, "level": "warn", "service": "search", "message": "request served in 4474 ms"}
+{"ts": 1727752856572, "level": "warn", "service": "billing", "message": "payload of 5824 bytes rejected"}
+{"ts": 1727752875332, "level": "info", "service": "search", "message": "retrying upstream call (2848)"}
+{"ts": 1727752923419, "level": "info", "service": "billing", "message": "検索インデックスを更新しました 7195"}
+{"ts": 1727752988588, "level": "info", "service": "billing", "message": ""}
+{"ts": 1727753035515, "level": "info", "service": "api", "message": "payload of 3496 bytes rejected"}
+{"ts": 1727753075091, "level": "info", "service": "api", "message": "queue depth 1778"}
+{"ts": 1727753153076, "level": "error", "service": "auth", "message": "request served in 9517 ms"}
+{"ts": 1727753206020, "level": "info", "service": "café-sync", "message": "payload of 7221 bytes rejected"}
+{"ts": 1727753211109, "level": "debug", "service": "mailer", "message": ""}
+{"ts": 1727753235400, "level": "info", "service": "auth", "message": "queue depth 2381"}
+{"ts": 1727753312478, "level": "info", "service": "search", "message": "user 6280 signed in"}
+{"ts": 1727753350722, "level": "info", "service": "billing", "message": "request served in 4222 ms"}
+{"ts": 1727753417772, "level": "error", "service": "search", "message": ""}
+{"ts": 1727753420459, "level": "warn", "service": "mailer", "message": "queue depth 3176"}
+{"ts": 1727753425066, "level": "info", "service": "search", "message": ""}
+{"ts": 1727753498644, "level": "warn", "service": "api", "message": ""}
+{"ts": 1727753527254, "level": "warn", "service": "api", "message": "検索インデックスを更新しました 5604"}
+{"ts": 1727753543342, "level": "info", "service": "mailer", "message": "user 7474 signed in"}
+{"ts": 1727753572812, "level": "info", "service": "search", "message": "payload of 2851 bytes rejected"}
+{"ts": 1727753659141, "level": "debug", "service": "search", "message": "検索インデックスを更新しました 9489"}
+{"ts": 1727753728007, "level": "info", "service": "billing", "message": "queue depth 4749"}
+{"ts": 1727753794740, "level": "debug", "service": "mailer", "message": "réessai de la synchronisation 124"}
+{"ts": 1727753878129, "level": "info", "service": "auth", "message": "invoice 5251 generated"}
+{"ts": 1727753961620, "level": "info", "service": "billing", "message": "payload of 1145 bytes rejected"}
+{"ts": 1727754025297, "level": "info", "service": "café-sync", "message": "stack trace follows: frame0 -> frame1 -> frame2 -> frame3 -> frame4 -> frame5 -> frame6 -> frame7 -> frame8 -> frame9 -> frame10 -> frame11 -> frame12 -> frame13 -> frame14 -> frame15 -> frame16 -> frame17 -> frame18 -> frame19 -> frame20 -> frame21 -> frame22 -> frame23 -> frame24 -> frame25 -> frame26 -> frame27 -> frame28 -> frame29 -> frame30 -> frame31 -> frame32 -> frame33 -> frame34 -> frame35 -> frame36 -> frame37 -> frame38 -> frame39"}
+{"ts": 1727754029569, "level": "warn", "service": "billing", "message": "payload of 112 bytes rejected"}
+{"ts": 1727754059005, "level": "debug", "service": "café-sync", "message": "queue depth 4100"}
+{"ts": 1727754060146, "level": "info", "service": "search", "message": "検索インデックスを更新しました 5033"}
+{"ts": 1727754065765, "level": "info", "service": "billing", "message": "retrying upstream call (1025)"}
+{"ts": 1727754081401, "level": "warn", "service": "search", "message": "invoice 3344 generated"}
+{"ts": 1727754086360, "level": "error", "service": "search", "message": "retrying upstream call (9508)"}
+{"ts": 1727754115513, "level": "warn", "service": "search", "message": "payload of 9370 bytes rejected"}
+{"ts": 1727754147083, "level": "debug", "service": "search", "message": "request served in 2878 ms"}
+{"ts": 1727754174560, "level": "info", "service": "café-sync", "message": "cache miss for key 7711"}
+{"ts": 1727754200358, "level": "info", "service": "café-sync", "message": "retrying upstream call (7074)"}
+{"ts": 1727754204186, "level": "info", "service": "billing", "message": "invoice 7304 generated"}
+{"ts": 1727754272591, "level": "info", "service": "auth", "message": "réessai de la synchronisation 937"}
+{"ts": 1727754326790, "level": "warn", "service": "billing", "message": "検索インデックスを更新しました 6600"}
+{"ts": 1727754369153, "level": "info", "service": "api", "message": "payload of 957 bytes rejected"}
+{"ts": 1727754446526, "level": "error", "service": "auth", "message": "invoice 6366 generated"}
+{"ts": 1727754511662, "level": "warn", "service": "mailer", "message": "queue depth 2"}
+{"ts": 1727754575028, "level": "debug", "service": "mailer", "message": "検索インデックスを更新しました 8542"}
+{"ts": 1727754588428, "level": "info", "service": "mailer", "message": "invoice 9248 generated"}
+{"ts": 1727754612347, "level": "warn", "service": "billing", "message": ""}
+{"ts": 1727754689818, "level": "info", "service": "api", "message": "invoice 2184 generated"}
+{"ts": 1727754777733, "level": "debug", "service": "café-sync", "message": "request served in 1994 ms"}
+{"ts": 1727754806434, "level": "info", "service": "search", "message": "retrying upstream call (7136)"}
+{"ts": 1727754817490, "level": "debug", "service": "auth", "message": "user 5878 signed in"}
+{"ts": 1727754821502, "level": "info", "service": "café-sync", "message": "timeout after 8911 s"}
+{"ts": 1727754832292, "level": "info", "service": "café-sync", "message": "user 3862 signed in"}
+{"ts": 1727754904844, "level": "info", "service": "auth", "message": "queue depth 6272"}
+{"ts": 1727754938384, "level": "warn", "service": "café-sync", "message": "queue depth 8529"}
+{"ts": 1727754960002, "level": "warn", "service": "mailer", "message": "invoice 1359 generated"}
+{"ts": 1727754962953, "level": "debug", "service": "café-sync", "message": "réessai de la synchronisation 2845"}
+{"ts": 1727754993375, "level": "debug", "service": "café-sync", "message": "retrying upstream call (6288)"}
+{"ts": 1727754995166, "level": "info", "service": "café-sync", "message": "request served in 2308 ms"}
+{"ts": 1727755050217, "level": "debug", "service": "api", "message": ""}
+{"ts": 1727755080902, "level": "info", "service": "api", "message": "retrying upstream call (3521)"}
+{"ts": 1727755129992, "level": "debug", "service": "search", "message": ""}
+{"ts": 1727755163965, "level": "info", "service": "auth", "message": "user 2649 signed in"}
+{"ts": 1727755204500, "level": "info", "service": "api", "message": "timeout after 2618 s"}
+{"ts": 1727755249479, "level": "info", "service": "mailer", "message": "réessai de la synchronisation 3629"}
+{"ts": 1727755305989, "level": "warn", "service": "café-sync", "message": "検索インデックスを更新しました 1942"}
+{"ts": 1727755360123, "level": "info", "service": "café-sync", "message": "queue depth 222"}
+{"ts": 1727755434141, "level": "warn", "service": "auth", "message": "cache miss for key 337"}
+{"ts": 1727755486080, "level": "info", "service": "search", "message": "timeout after 6583 s"}
+{"ts": 1727755515194, "level": "info", "service": "mailer", "message": "timeout after 5278 s"}
+{"ts": 1727755603867, "level": "debug", "service": "café-sync", "message": "réessai de la synchronisation 6368"}
+{"ts": 1727755614837, "level": "warn", "service": "mailer", "message": "invoice 3500 generated"}
+{"ts": 1727755673655, "level": "info", "service": "search", "message": "検索インデックスを更新しました 1431"}
+{"ts": 1727755702176, "level": "info", "service": "mailer", "message": ""}
+{"ts": 1727755788581, "level": "debug", "service": "billing", "message": "request served in 9095 ms"}
+{"ts": 1727755849439, "level": "error", "service": "search", "message": "invoice 270 generated"}
+{"ts": 1727755857273, "level": "warn", "service": "billing", "message": "queue depth 8891"}
+{"ts": 1727755863214, "level": "warn", "service": "mailer", "message": "retrying upstream call (1700)"}
+{"ts": 1727755906351, "level": "info", "service": "search", "message": "invoice 8011 generated"}
+{"ts": 1727755920875, "level": "debug", "service": "auth", "message": "検索インデックスを更新しました 4895"}
+{"ts": 1727755956024, "level": "error", "service": "search", "message": "検索インデックスを更新しました 3289"}
+{"ts": 1727755983119, "level": "info", "service": "billing", "message": "request served in 6785 ms"}
+{"ts": 1727756046136, "level": "info", "service": "café-sync", "message": "cache miss for key 6912"}
+{"ts": 1727756088546, "level": "debug", "service": "café-sync", "message": "request served in 2710 ms"}
+{"ts": 1727756176087, "level": "error", "service": "café-sync", "message": ""}
+{"ts": 1727756189150, "level": "info", "service": "mailer", "message": "retrying upstream call (4855)"}
+{"ts": 1727756276273, "level": "debug", "service": "café-sync", "message": "retrying upstream call (7437)"}
+{"ts": 1727756321292, "level": "warn", "service": "billing", "message": "cache miss for key 6567"}
+{"ts": 1727756330709, "level": "info", "service": "search", "message": "検索インデックスを更新しました 3921"}
+{"ts": 1727756375349, "level": "info", "service": "mailer", "message": ""}
+{"ts": 1727756418791, "level": "info", "service": "api", "message": ""}
+{"ts": 1727756465459, "level": "warn", "service": "café-sync", "message": "retrying upstream call (9481)"}
+{"ts": 1727756536814, "level": "debug", "service": "auth", "message": "invoice 6649 generated"}
+{"ts": 1727756604510, "level": "debug", "service": "api", "message": "invoice 1886 generated"}
+{"ts": 1727756663582, "level": "info", "service": "auth", "message": "検索インデックスを更新しました 6612"}
+{"ts": 1727756680722, "level": "info", "service": "mailer", "message": "request served in 9214 ms"}
+{"ts": 1727756696234, "level": "info", "service": "mailer", "message": "queue depth 6403"}
+{"ts": 1727756765584, "level": "info", "service": "mailer", "message": "retrying upstream call (1365)"}
+{"ts": 1727756785159, "level": "debug", "service": "search", "message": "payload of 697 bytes rejected"}
+{"ts": 1727756798002, "level": "warn", "service": "api", "message": "payload of 3814 bytes rejected"}
+{"ts": 1727756830781, "level": "info", "service": "mailer", "message": "cache miss for key 2848"}
+{"ts": 1727756881401, "level": "info", "service": "api", "message": "cache miss for key 2022"}
+{"ts": 1727756946222, "level": "info", "service": "search", "message": "timeout after 4664 s"}
+{"ts": 1727757013266, "level": "info", "service": "api", "message": "invoice 1770 generated"}
+{"ts": 1727757050353, "level": "warn", "service": "billing", "message": "payload of 8691 bytes rejected"}
+{"ts": 1727757084709, "level": "info", "service": "search", "message": "request served in 4600 ms"}
+{"ts": 1727757151260, "level": "info", "service": "billing", "message": "invoice 8800 generated"}
+{"ts": 1727757198567, "level": "warn", "service": "api", "message": "retrying upstream call (4962)"}
+{"ts": 1727757246277, "level": "info", "service": "café-sync", "message": "cache miss for key 5490"}
+{"ts": 1727757328848, "level": "error", "service": "auth", "message": "cache miss for key 9149"}
+{"ts": 1727757356383, "level": "info", "service": "mailer", "message": "retrying upstream call (5750)"}
+{"ts": 1727757373630, "level": "error", "service": "billing", "message": "retrying upstream call (6831)"}
+{"ts": 1727757398165, "level": "info", "service": "mailer", "message": "réessai de la synchronisation 7442"}
+{"ts": 1727757460203, "level": "info", "service": "auth", "message": "cache miss for key 6281"}
+{"ts": 1727757483481, "level": "warn", "service": "mailer", "message": "retrying upstream call (9970)"}
+{"ts": 1727757567858, "level": "debug", "service": "auth", "message": "retrying upstream call (8871)"}
+{"ts": 1727757596261, "level": "debug", "service": "search", "message": "cache miss for key 6799"}
+{"ts": 1727757607157, "level": "warn", "service": "auth", "message": ""}
+{"ts": 1727757687881, "level": "info", "service": "café-sync", "message": "request served in 5208 ms"}
+{"ts": 1727757719618, "level": "info", "service": "auth", "message": "request served in 3625 ms"}
+{"ts": 1727757762977, "level": "warn", "service": "search", "message": "retrying upstream call (9601)"}
+{"ts": 1727757821965, "level": "error", "service": "auth", "message": "cache miss for key 6976"}
+{"ts": 1727757871816, "level": "warn", "service": "billing", "message": "payload of 1984 bytes rejected"}
+{"ts": 1727757960060, "level": "info", "service": "mailer", "message": ""}
+{"ts": 1727757985338, "level": "info", "service": "auth", "message": "stack trace follows: frame0 -> frame1 -> frame2 -> frame3 -> frame4 -> frame5 -> frame6 -> frame7 -> frame8 -> frame9 -> frame10 -> frame11 -> frame12 -> frame13 -> frame14 -> frame15 -> frame16 -> frame17 -> frame18 -> frame19 -> frame20 -> frame21 -> frame22 -> frame23 -> frame24 -> frame25 -> frame26 -> frame27 -> frame28 -> frame29 -> frame30 -> frame31 -> frame32 -> frame33 -> frame34 -> frame35 -> frame36 -> frame37 -> frame38 -> frame39"}
+{"ts": 1727758045147, "level": "info", "service": "billing", "message": "user 3467 signed in"}
+{"ts": 1727758118137, "level": "info", "service": "billing", "message": "検索インデックスを更新しました 3085"}
+{"ts": 1727758186075, "level": "debug", "service": "café-sync", "message": "user 1979 signed in"}
+{"ts": 1727758257105, "level": "error", "service": "mailer", "message": "queue depth 639"}
+{"ts": 1727758345958, "level": "debug", "service": "billing", "message": "payload of 9545 bytes rejected"}
+{"ts": 1727758379281, "level": "warn", "service": "auth", "message": "検索インデックスを更新しました 4252"}
+{"ts": 1727758444600, "level": "error", "service": "mailer", "message": "invoice 2419 generated"}
+{"ts": 1727758455796, "level": "info", "service": "mailer", "message": "réessai de la synchronisation 8256"}
+{"ts": 1727758472986, "level": "warn", "service": "café-sync", "message": ""}
+{"ts": 1727758524283, "level": "info", "service": "search", "message": ""}
+{"ts": 1727758574575, "level": "info", "service": "auth", "message": "request served in 3456 ms"}
+{"ts": 1727758594315, "level": "debug", "service": "auth", "message": ""}
+{"ts": 1727758676201, "level": "error", "service": "auth", "message": "retrying upstream call (772)"}
+{"ts": 1727758695185, "level": "info", "service": "auth", "message": "invoice 5296 generated"}
+{"ts": 1727758707496, "level": "warn", "service": "api", "message": "payload of 3546 bytes rejected"}
+{"ts": 1727758708177, "level": "debug", "service": "search", "message": "queue depth 3151"}
+{"ts": 1727758781581, "level": "info", "service": "mailer", "message": "user 7314 signed in"}
+{"ts": 1727758827615, "level": "info", "service": "billing", "message": "user 3087 signed in"}
+{"ts": 1727758842565, "level": "info", "service": "billing", "message": "payload of 4356 bytes rejected"}
+{"ts": 1727758865692, "level": "info", "service": "café-sync", "message": "user 1129 signed in"}
+{"ts": 1727758925461, "level": "error", "service": "mailer", "message": "retrying upstream call (5858)"}
+{"ts": 1727758977263, "level": "info", "service": "billing", "message": ""}
+{"ts": 1727759049321, "level": "debug", "service": "auth", "message": "payload of 4159 bytes rejected"}
+{"ts": 1727759070051, "level": "info", "service": "mailer", "message": "queue depth 4472"}
+{"ts": 1727759139486, "level": "warn", "service": "billing", "message": "user 7888 signed in"}
+{"ts": 1727759190773, "level": "info", "service": "mailer", "message": "user 34 signed in"}
+{"ts": 1727759198888, "level": "info", "service": "api", "message": "cache miss for key 8150"}
+{"ts": 1727759239517, "level": "info", "service": "café-sync", "message": "検索インデックスを更新しました 6889"}
+{"ts": 1727759242522, "level": "info", "service": "café-sync", "message": "timeout after 24 s"}
+{"ts": 1727759254288, "level": "warn", "service": "api", "message": "user 8945 signed in"}
+{"ts": 1727759306999, "level": "info", "service": "search", "message": "user 2299 signed in"}
+{"ts": 1727759363184, "level": "warn", "service": "search", "message": ""}
+{"ts": 1727759403897, "level": "info", "service": "mailer", "message": "réessai de la synchronisation 8309"}
+{"ts": 1727759481922, "level": "warn", "service": "search", "message": "réessai de la synchronisation 9572"}
+{"ts": 1727759540627, "level": "info", "service": "café-sync", "message": "検索インデックスを更新しました 9855"}
+{"ts": 1727759547596, "level": "info", "service": "api", "message": "timeout after 4023 s"}
+{"ts": 1727759621877, "level": "info", "service": "api", "message": "cache miss for key 648"}
+{"ts": 1727759625722, "level": "info", "service": "mailer", "message": "cache miss for key 1004"}
+{"ts": 1727759691054, "level": "debug", "service": "café-sync", "message": "user 2887 signed in"}
+{"ts": 1727759754975, "level": "info", "service": "café-sync", "message": "réessai de la synchronisation 7176"}
+{"ts": 1727759758309, "level": "debug", "service": "mailer", "message": "invoice 4004 generated"}
+{"ts": 1727759771758, "level": "warn", "service": "mailer", "message": "payload of 5749 bytes rejected"}
+{"ts": 1727759785370, "level": "info", "service": "search", "message": "retrying upstream call (5492)"}
+{"ts": 1727759861363, "level": "info", "service": "mailer", "message": "invoice 752 generated"}
+{"ts": 1727759892973, "level": "info", "service": "search", "message": "retrying upstream call (7508)"}
+{"ts": 1727759964751, "level": "warn", "service": "mailer", "message": "cache miss for key 1422"}
+{"ts": 1727759991140, "level": "info", "service": "mailer", "message": "user 755 signed in"}
+{"ts": 1727760081072, "level": "debug", "service": "mailer", "message": "payload of 8841 bytes rejected"}
+{"ts": 1727760088987, "level": "warn", "service": "auth", "message": "retrying upstream call (4345)"}
+{"ts": 1727760174332, "level": "info", "service": "billing", "message": "timeout after 1130 s"}
+{"ts": 1727760215979, "level": "info", "service": "api", "message": "payload of 10 bytes rejected"}
+{"ts": 1727760292651, "level": "info", "service": "mailer", "message": "réessai de la synchronisation 4090"}
+{"ts": 1727760299375, "level": "debug", "service": "café-sync", "message": "invoice 5326 generated"}
+{"ts": 1727760353360, "level": "warn", "service": "mailer", "message": "検索インデックスを更新しました 4735"}
+{"ts": 1727760431377, "level": "info", "service": "search", "message": ""}
+{"ts": 1727760511365, "level": "info", "service": "mailer", "message": "user 6447 signed in"}
+{"ts": 1727760518375, "level": "warn", "service": "auth", "message": "invoice 1747 generated"}
+{"ts": 1727760573704, "level": "warn", "service": "billing", "message": "user 128 signed in"}
+{"ts": 1727760598648, "level": "error", "service": "billing", "message": "payload of 1801 bytes rejected"}
+{"ts": 1727760646485, "level": "warn", "service": "mailer", "message": "réessai de la synchronisation 7844"}
+{"ts": 1727760662366, "level": "error", "service": "café-sync", "message": ""}
+{"ts": 1727760690892, "level": "info", "service": "billing", "message": "cache miss for key 6786"}
+{"ts": 1727760774170, "level": "info", "service": "café-sync", "message": "invoice 4079 generated"}
+{"ts": 1727760802895, "level": "warn", "service": "api", "message": "検索インデックスを更新しました 2890"}
+{"ts": 1727760806092, "level": "info", "service": "billing", "message": "request served in 3722 ms"}
+{"ts": 1727760853238, "level": "info", "service": "api", "message": "queue depth 2198"}
+{"ts": 1727760899535, "level": "error", "service": "mailer", "message": "検索インデックスを更新しました 780"}
+{"ts": 1727760918472, "level": "info", "service": "mailer", "message": "cache miss for key 2116"}
+{"ts": 1727760990443, "level": "info", "service": "auth", "message": "user 6897 signed in"}
+{"ts": 1727761072511, "level": "info", "service": "api", "message": "user 5588 signed in"}
+{"ts": 1727761125008, "level": "info", "service": "api", "message": "réessai de la synchronisation 18"}
+{"ts": 1727761167327, "level": "warn", "service": "café-sync", "message": "request served in 5869 ms"}
+{"ts": 1727761182564, "level": "info", "service": "café-sync", "message": "réessai de la synchronisation 8349"}
+{"ts": 1727761222471, "level": "info", "service": "billing", "message": "invoice 9569 generated"}
+{"ts": 1727761291783, "level": "debug", "service": "mailer", "message": "retrying upstream call (1655)"}
+{"ts": 1727761331036, "level": "info", "service": "mailer", "message": "検索インデックスを更新しました 5094"}
+{"ts": 1727761387010, "level": "info", "service": "api", "message": "cache miss for key 1702"}
+{"ts": 1727761399054, "level": "error", "service": "billing", "message": "cache miss for key 1640"}
+{"ts": 1727761454887, "level": "debug", "service": "auth", "message": "request served in 6769 ms"}
+{"ts": 1727761486955, "level": "warn", "service": "billing", "message": "検索インデックスを更新しました 1381"}
+{"ts": 1727761503456, "level": "warn", "service": "auth", "message": ""}
+{"ts": 1727761587701, "level": "info", "service": "café-sync", "message": "user 6599 signed in"}
+{"ts": 1727761602494, "level": "warn", "service": "api", "message": "検索インデックスを更新しました 3765"}
+{"ts": 1727761622101, "level": "info", "service": "api", "message": "検索インデックスを更新しました 6979"}
+{"ts": 1727761643884, "level": "info", "service": "café-sync", "message": "request served in 248 ms"}
+{"ts": 1727761722528, "level": "warn", "service": "auth", "message": "invoice 860 generated"}
+{"ts": 1727761780906, "level": "warn", "service": "auth", "message": "payload of 7074 bytes rejected"}
+{"ts": 1727761853645, "level": "error", "service": "api", "message": "réessai de la synchronisation 6468"}
+{"ts": 1727761876521, "level": "debug", "service": "search", "message": ""}
+{"ts": 1727761904577, "level": "warn", "service": "api", "message": "retrying upstream call (4087)"}
+{"ts": 1727761966252, "level": "info", "service": "billing", "message": "request served in 1135 ms"}
+{"ts": 1727761992625, "level": "info", "service": "api", "message": "request served in 9781 ms"}
+{"ts": 1727762038174, "level": "warn", "service": "café-sync", "message": ""}
+{"ts": 1727762041115, "level": "warn", "service": "mailer", "message": "request served in 5944 ms"}
+{"ts": 1727762042939, "level": "error", "service": "mailer", "message": ""}
+{"ts": 1727762085631, "level": "debug", "service": "café-sync", "message": "timeout after 3434 s"}
+{"ts": 1727762143242, "level": "debug", "service": "mailer", "message": "stack trace follows: frame0 -> frame1 -> frame2 -> frame3 -> frame4 -> frame5 -> frame6 -> frame7 -> frame8 -> frame9 -> frame10 -> frame11 -> frame12 -> frame13 -> frame14 -> frame15 -> frame16 -> frame17 -> frame18 -> frame19 -> frame20 -> frame21 -> frame22 -> frame23 -> frame24 -> frame25 -> frame26 -> frame27 -> frame28 -> frame29 -> frame30 -> frame31 -> frame32 -> frame33 -> frame34 -> frame35 -> frame36 -> frame37 -> frame38 -> frame39"}
+{"ts": 1727762203400, "level": "info", "service": "billing", "message": ""}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM secret_consumers WHERE consumer_kind=$1 AND consumer=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d663d9e37f0b783437d3dd29c54a0cae077b2b5ea47a45c67def863b5cd606c7"
+}

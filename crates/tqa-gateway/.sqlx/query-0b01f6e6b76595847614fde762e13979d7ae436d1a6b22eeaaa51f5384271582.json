@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO channels (id, owner_id, name, purpose, rule) VALUES ($1, $2, $3, $4, $5) RETURNING created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "channels",
+            "name": "created_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "0b01f6e6b76595847614fde762e13979d7ae436d1a6b22eeaaa51f5384271582"
+}

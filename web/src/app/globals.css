@@ -1,0 +1,1352 @@
+@import "tailwindcss";
+@import "./menu.css";
+@import "./approvals.css";
+
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("/brand/fonts/space-grotesk-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("/brand/fonts/space-grotesk-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("/brand/fonts/ibm-plex-mono-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+  --paper: #ffffff;
+  /* An agent's web page is drawn on white in either theme, as a browser would (the file previews design). */
+  --page-canvas: #ffffff;
+  --surface: #f7f7f7;
+  --surface-raised: #ffffff;
+  --line: #e5e5e5;
+  /* Field, select and text-area borders: 3:1 on every surface (WCAG 1.4.11); --line is for dividers. */
+  --control-border: #8a8a8a;
+  --ink: #111111;
+  --muted: #626262;
+  --accent: #ed542d;
+  --ok: #186630;
+  --warn: #875000;
+  --danger: #b4233c;
+  --info: #2451bd;
+  --selection: #dedede;
+  --focus: #2563eb;
+  --code-bg: #f1f1ef;
+  --elevation: 0 8px 24px rgb(0 0 0 / 0.08);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #121211;
+  --surface: #1a1a19;
+  --surface-raised: #222220;
+  --line: #2c2c2a;
+  --control-border: #767672;
+  --ink: #f4f4f2;
+  --muted: #a3a39e;
+  --accent: #ff6a45;
+  --ok: #5ccb7a;
+  --warn: #f0b35b;
+  --danger: #fb7185;
+  --info: #7aa2ff;
+  --selection: #3a3a37;
+  --focus: #60a5fa;
+  --code-bg: #161615;
+  --elevation: 0 8px 24px rgb(0 0 0 / 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #121211;
+    --surface: #1a1a19;
+    --surface-raised: #222220;
+    --line: #2c2c2a;
+    --control-border: #767672;
+    --ink: #f4f4f2;
+    --muted: #a3a39e;
+    --accent: #ff6a45;
+    --ok: #5ccb7a;
+    --warn: #f0b35b;
+    --danger: #fb7185;
+    --info: #7aa2ff;
+    --selection: #3a3a37;
+    --focus: #60a5fa;
+    --code-bg: #161615;
+    --elevation: 0 8px 24px rgb(0 0 0 / 0.4);
+  }
+}
+
+:root {
+  /*
+   * §11b: system faces cover the shipped scripts the brand faces lack (no external fonts), for macOS, Windows and
+   * Linux, behind both the interface and the machine face (labels and times are set in the latter). The Chinese faces
+   * come first, so English and Chinese render as before; Japanese and Korean put their own faces first (below),
+   * because the three draw the same Han code points differently.
+   */
+  --fonts-thai: "Thonburi", "Leelawadee UI", "Noto Sans Thai";
+  --fonts-tamil: "Tamil Sangam MN", "Nirmala UI", "Noto Sans Tamil";
+  --fonts-sc:
+    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC",
+    "Noto Sans SC";
+  --fonts-ja:
+    "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic",
+    "Noto Sans CJK JP", "Noto Sans JP";
+  --fonts-ko:
+    "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans CJK KR", "Noto Sans KR";
+  --fonts-scripts:
+    var(--fonts-sc), var(--fonts-thai), var(--fonts-tamil), var(--fonts-ja),
+    var(--fonts-ko);
+  --font-ui: "Space Grotesk", var(--fonts-scripts), sans-serif;
+  --font-machine: "IBM Plex Mono", var(--fonts-scripts), monospace;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  /* The content box's bottom padding: a pinned Save bar reaches past it to the view's edge (WEB-U-090). */
+  --content-end: var(--space-4);
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --control-radius: 8px;
+  --dialog-radius: 8px;
+  --composer-radius: 16px;
+  --auth-width: 400px;
+  --composer-button-size: 36px;
+  /* UI-GUIDELINES §5b: text buttons are at least this wide; hover and press tint the background by these shares. */
+  --button-min-width: 72px;
+  --hover-share: 4%;
+  --press-share: 8%;
+  --hover-tint: color-mix(in srgb, var(--ink) var(--hover-share), transparent);
+  --press-tint: color-mix(in srgb, var(--ink) var(--press-share), transparent);
+  --pill-radius: 999px;
+  --display-size: 28px;
+  --heading-size: 20px;
+  /* The UI standard: a task's title is 16 px, weight 600. */
+  --task-title-size: 16px;
+  --body-size: 15px;
+  --small-size: 13px;
+  --label-size: 12px;
+  --display-leading: 1.15;
+  --heading-leading: 1.25;
+  --body-leading: 1.6;
+  --small-leading: 1.5;
+  --code-leading: 1.55;
+  --display-tracking: -0.04em;
+  --heading-tracking: -0.03em;
+  --label-tracking: 0.025em;
+  --control-height: 36px;
+  /* §5b: no interactive element is lower than this (small buttons, disclosure summaries). */
+  --min-control-height: 28px;
+  --pill-height: 22px;
+  /* UI-GUIDELINES §6: the one-line conversation bar and the sidebar brand row. */
+  --bar-height: 56px;
+  --brand-row-height: 40px;
+  /* The account avatar in the sidebar row (§7); fits the 36 px row with 4 px above and below. */
+  --avatar-size: 28px;
+  --sidebar-width: 260px;
+  /* The navigation drawer at phone width, at most 85% of the screen (the review of 7e282fc0). */
+  --drawer-width: 320px;
+  /* A side sheet: one item looked at without leaving the list; the whole width on a phone. */
+  --sheet-width: 440px;
+  /* The search overlay's matches scroll within this height (the review of d9fb1917). */
+  --search-results-height: 480px;
+  --rail-width: 56px;
+  --dialog-width: 480px;
+  --form-width: 760px;
+  /* A Settings page's field at most this wide, in one column (WEB-U-131). */
+  --field-width: 640px;
+  /* UI-GUIDELINES §3: text links in rows (the overview's actions) take the informational blue, in both themes. */
+  /* UI-GUIDELINES §5c, density: navigation rows (the Settings menu, the sidebar's tasks, Keys' tabs) and menu items,
+     table rows, and the height both grow to on touch screens. */
+  --row-height-nav: 32px;
+  --row-height-table: 40px;
+  --row-height-touch: 44px;
+  --space-half: 2px;
+  --nav-pad-block: var(--space-1);
+  --nav-pad-inline: var(--space-3);
+  --nav-row-padding: var(--nav-pad-block) var(--nav-pad-inline);
+  --nav-row-gap: var(--space-half);
+  --nav-font-size: 14px;
+  --nav-line-height: 20px;
+  --group-gap: var(--space-4);
+  --group-label-gap: var(--space-1);
+  --heading-line-height: 28px;
+  --table-name-width: 180px;
+  --settings-nav-width: 160px;
+  --transcript-width: 720px;
+  --channel-side-width: 18rem;
+  /* §6: the right panel for files and changes. */
+  --panel-width: 360px;
+  /* Task 076: workspace cards fill the row from this width; the size meter and the lease dot. */
+  --workspace-card-width: 360px;
+  --meter-height: 4px;
+  --dot-size: 8px;
+  --search-width: 220px;
+  --measure: 72ch;
+  --icon-text: 16px;
+  --icon-control: 20px;
+  --mark-header: 24px;
+  --wordmark-height: 24px;
+  --border-width: 1px;
+  --focus-width: 2px;
+  --focus-offset: 2px;
+  --status-tint: 12%;
+  --motion-fast: 120ms;
+  --motion-panel: 160ms;
+  /* The approval card's arrival ring fades over this long. */
+  --motion-highlight: 900ms;
+  --motion-lift: 4px;
+  /* How far a sheet travels as it slides in from its edge. */
+  --motion-slide: 24px;
+  --skeleton-delay: 300ms;
+  /* A lease held by a running task breathes this slowly (never under reduced motion). */
+  --motion-pulse: 1.6s;
+}
+/* §5c: on touch screens rows are tap targets, 44 px; the density above is for a mouse. */
+@media (pointer: coarse) {
+  :root {
+    --row-height-nav: var(--row-height-touch);
+    --row-height-table: var(--row-height-touch);
+  }
+}
+[lang|="ja"] {
+  --fonts-scripts:
+    var(--fonts-ja), var(--fonts-sc), var(--fonts-thai), var(--fonts-tamil),
+    var(--fonts-ko);
+}
+[lang|="ko"] {
+  --fonts-scripts:
+    var(--fonts-ko), var(--fonts-sc), var(--fonts-thai), var(--fonts-tamil),
+    var(--fonts-ja);
+}
+/* Stacks resolve where they are declared, so every language root and island re-resolves them for its language. */
+[lang] {
+  --font-ui: "Space Grotesk", var(--fonts-scripts), sans-serif;
+  --font-machine: "IBM Plex Mono", var(--fonts-scripts), monospace;
+}
+/* A language island (such as a language's own name in the menu) uses the stack for its own language. */
+[lang]:not(html) {
+  font-family: var(--font-ui);
+}
+
+@theme inline {
+  --color-*: initial;
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+  --color-selection: var(--selection);
+  --color-focus: var(--focus);
+  --color-code-bg: var(--code-bg);
+  --font-sans: var(--font-ui);
+  --font-mono: var(--font-machine);
+  --font-display: var(--font-ui);
+  --spacing: initial;
+  --spacing-1: var(--space-1);
+  --spacing-2: var(--space-2);
+  --spacing-3: var(--space-3);
+  --spacing-4: var(--space-4);
+  --spacing-6: var(--space-6);
+  --spacing-8: var(--space-8);
+  --spacing-12: var(--space-12);
+  --spacing-16: var(--space-16);
+  --radius-control: var(--control-radius);
+  --radius-dialog: var(--dialog-radius);
+  --radius-pill: var(--pill-radius);
+  --shadow-elevated: var(--elevation);
+  --text-display: var(--display-size);
+  --text-display--line-height: var(--display-leading);
+  --text-display--letter-spacing: var(--display-tracking);
+  --text-heading: var(--heading-size);
+  --text-heading--line-height: var(--heading-leading);
+  --text-heading--letter-spacing: var(--heading-tracking);
+  --text-body: var(--body-size);
+  --text-body--line-height: var(--body-leading);
+  --text-small: var(--small-size);
+  --text-small--line-height: var(--small-leading);
+  --text-label: var(--label-size);
+  --text-label--line-height: var(--body-leading);
+  --text-label--letter-spacing: var(--label-tracking);
+  --text-code: var(--small-size);
+  --text-code--line-height: var(--code-leading);
+}
+
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--body-size);
+  line-height: var(--body-leading);
+}
+::selection {
+  background: var(--selection);
+  color: var(--ink);
+}
+:focus-visible,
+[data-demo-state="focus"] {
+  outline: var(--focus-width) solid var(--focus);
+  outline-offset: var(--focus-offset);
+}
+/*
+ * The In-place edit (the UI standard): the field is the text it replaces, at its font, size and place, with one quiet
+ * underline in place of a box, a label or a second focus ring.
+ */
+.inline-edit {
+  display: block;
+  inline-size: 100%;
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  box-shadow: inset 0 calc(-1 * var(--border-width)) 0 var(--control-border);
+}
+.inline-edit:focus-visible {
+  outline: none;
+  box-shadow: inset 0 calc(-1 * var(--border-width)) 0 var(--focus);
+}
+/* The ring only when the keyboard brought it (WEB-U-114); a click leaves the text and its underline alone. */
+.inline-edit[data-keyboard]:focus-visible {
+  outline: var(--focus-width) solid var(--focus);
+  outline-offset: var(--focus-offset);
+}
+.inline-edit[aria-busy="true"] {
+  color: var(--muted);
+}
+button,
+a,
+input,
+textarea,
+select {
+  transition:
+    background-color var(--motion-fast) ease-out,
+    color var(--motion-fast) ease-out,
+    border-color var(--motion-fast) ease-out,
+    opacity var(--motion-fast) ease-out;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+button:not(:disabled),
+select:not(:disabled) {
+  cursor: pointer;
+}
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  cursor: not-allowed;
+}
+a {
+  color: inherit;
+}
+p,
+h1,
+h2,
+h3 {
+  margin: 0;
+}
+.type-display {
+  font-size: var(--display-size);
+  line-height: var(--display-leading);
+  letter-spacing: var(--display-tracking);
+  font-weight: 400;
+}
+.type-task-title {
+  font-size: var(--task-title-size);
+  line-height: var(--heading-leading);
+  font-weight: 600;
+}
+.type-heading {
+  font-size: var(--heading-size);
+  line-height: var(--heading-leading);
+  letter-spacing: var(--heading-tracking);
+  font-weight: 400;
+}
+.type-body {
+  font-size: var(--body-size);
+  line-height: var(--body-leading);
+}
+.type-body-strong {
+  font-size: var(--body-size);
+  line-height: var(--body-leading);
+  font-weight: 700;
+}
+.type-small {
+  font-size: var(--small-size);
+  line-height: var(--small-leading);
+}
+.type-label {
+  /* §5c: labels are sans, never monospace; monospace is only for values that are code or ids (.type-code). */
+  font-family: var(--font-ui);
+  font-size: var(--label-size);
+  font-weight: 500;
+  line-height: var(--small-leading);
+}
+.type-code {
+  font-family: var(--font-machine);
+  font-size: var(--small-size);
+  line-height: var(--code-leading);
+}
+.prose-measure {
+  max-width: var(--measure);
+}
+.code-block {
+  background: var(--code-bg);
+  padding: var(--space-4);
+  overflow-x: auto;
+  white-space: pre;
+}
+.muted {
+  color: var(--muted);
+}
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.button {
+  display: inline-flex;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: var(--control-height);
+  min-width: var(--button-min-width);
+  flex-shrink: 0;
+  padding: 0 var(--space-4);
+  border: var(--border-width) solid transparent;
+  border-radius: var(--control-radius);
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.button[data-variant="secondary"] {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--line);
+}
+.button[data-variant="ghost"] {
+  background: transparent;
+  color: var(--ink);
+}
+.button[data-variant="danger"] {
+  background: var(--surface);
+  color: var(--danger);
+  border-color: var(--danger);
+}
+/* §5b: hover tints the background 4 % towards the ink (darker in light, lighter in dark), pressing 8 %. */
+.button:hover:not(:disabled),
+.button[data-demo-state="hover"] {
+  background-image: linear-gradient(var(--hover-tint), var(--hover-tint));
+}
+.button:active:not(:disabled) {
+  background-image: linear-gradient(var(--press-tint), var(--press-tint));
+}
+.button[data-variant="primary"]:hover:not(:disabled),
+.button[data-variant="primary"][data-demo-state="hover"] {
+  background-color: color-mix(in srgb, var(--ink), var(--paper) 12%);
+}
+.button[data-variant="primary"]:active:not(:disabled) {
+  background-color: color-mix(in srgb, var(--ink), var(--paper) 20%);
+}
+.button[data-variant="secondary"]:hover:not(:disabled),
+.button[data-variant="danger"]:hover:not(:disabled),
+.button[data-variant="ghost"]:hover:not(:disabled),
+.button[data-variant="secondary"][data-demo-state="hover"],
+.button[data-variant="danger"][data-demo-state="hover"],
+.button[data-variant="ghost"][data-demo-state="hover"] {
+  background-color: color-mix(
+    in srgb,
+    var(--surface),
+    var(--ink) var(--hover-share)
+  );
+}
+.button:disabled {
+  opacity: 0.4;
+}
+.button[aria-busy="true"] {
+  opacity: 1;
+}
+/* A busy button keeps its focus (WEB-U-007) but, like a disabled one, shows no hover or pressed state and takes no
+   pointer; the keyboard is refused by the component. */
+.button[aria-busy="true"]:not(:disabled) {
+  pointer-events: none;
+}
+.button-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.button-label[data-loading="true"] {
+  opacity: 0;
+}
+.button-spinner {
+  position: absolute;
+  display: flex;
+  animation: spin 1s linear infinite;
+}
+.icon-button {
+  width: var(--control-height);
+  min-width: 0;
+  padding: 0;
+}
+.button.icon-button:focus-visible {
+  box-shadow: none;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.form-control {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: var(--control-height);
+  padding: var(--space-1) var(--space-3);
+  border: var(--border-width) solid var(--control-border);
+  border-radius: var(--control-radius);
+  background: var(--surface);
+  color: var(--ink);
+}
+.form-control::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+.form-control:disabled {
+  opacity: 0.5;
+}
+.form-control[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+/* A text area is as tall as its rows ask, never squeezed to one field's height. */
+textarea.form-control {
+  height: auto;
+  resize: vertical;
+  min-height: var(--control-height);
+}
+.field-error {
+  color: var(--danger);
+}
+.card {
+  padding: var(--space-6);
+  background: var(--surface);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+  min-width: 0;
+}
+[data-tone="info"] {
+  --status-color: var(--info);
+}
+[data-tone="warn"] {
+  --status-color: var(--warn);
+}
+[data-tone="muted"] {
+  --status-color: var(--muted);
+}
+[data-tone="ok"] {
+  --status-color: var(--ok);
+}
+[data-tone="danger"] {
+  --status-color: var(--danger);
+}
+.status-pill {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  height: var(--pill-height);
+  padding: 0 var(--space-2);
+  border: var(--border-width) solid var(--status-color);
+  border-radius: var(--pill-radius);
+  color: var(--status-color);
+  background: color-mix(
+    in srgb,
+    var(--status-color) var(--status-tint),
+    var(--surface)
+  );
+  white-space: nowrap;
+}
+.brand-mark {
+  display: inline-block;
+  flex-shrink: 0;
+  width: var(--mark-header);
+  height: var(--mark-header);
+  background: var(--ink);
+  mask: url("/brand/mark.svg") center / contain no-repeat;
+}
+/* An empty view names its thing with a muted 20 px icon, never the logo (the design direction). */
+.empty-icon {
+  color: var(--muted);
+}
+.brand-wordmark {
+  display: block;
+  height: var(--wordmark-height);
+  width: auto;
+  aspect-ratio: 330.25 / 64;
+  max-width: 100%;
+  background: var(--ink);
+  mask: url("/brand/wordmark.svg") left center / contain no-repeat;
+}
+.empty-state {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: var(--space-6);
+  text-align: center;
+  padding: var(--space-12) var(--space-4);
+}
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.skeleton-line {
+  display: block;
+  height: var(--space-4);
+  width: 100%;
+  background: var(--surface);
+  border-radius: var(--control-radius);
+  animation: shimmer 1.5s ease-out infinite alternate;
+}
+.skeleton-line:last-child {
+  width: 72%;
+}
+.dialog {
+  margin: auto;
+  width: min(var(--dialog-width), calc(100% - var(--space-8)));
+  max-height: calc(100dvh - var(--space-8));
+  padding: var(--space-6);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--dialog-radius);
+  background: var(--surface-raised);
+  color: var(--ink);
+  box-shadow: var(--elevation);
+}
+.dialog::backdrop {
+  background: rgb(0 0 0 / 0.4);
+}
+/*
+ * A sheet (UI-GUIDELINES' Side sheet; WEB-U-230): a dialog at an edge, full height, sliding in from it. The navigation
+ * drawer at the start, at most 85 % of the screen (the review of 7e282fc0); a side sheet at the end.
+ */
+.dialog-sheet {
+  position: fixed;
+  inset-block: 0;
+  margin: 0;
+  height: 100dvh;
+  max-height: 100dvh;
+  border-radius: 0;
+  overflow-y: auto;
+}
+.dialog-sheet[data-placement="start"] {
+  inset-inline: 0 auto;
+  width: min(var(--drawer-width), 85vw);
+  animation: sheet-from-start var(--motion-panel) ease-out;
+}
+.dialog-sheet[data-placement="end"] {
+  inset-inline: auto 0;
+  width: min(var(--sheet-width), 100vw);
+  animation: sheet-from-end var(--motion-panel) ease-out;
+}
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+}
+.toast-region {
+  position: fixed;
+  z-index: 40;
+  right: var(--space-6);
+  bottom: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: calc(100% - var(--space-8));
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  color: var(--ink);
+  background: var(--surface-raised);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+}
+.toast-message {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.toast-preview {
+  position: static;
+  max-width: 100%;
+}
+.toast > svg {
+  flex-shrink: 0;
+}
+.skip-link {
+  position: fixed;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: 60;
+  transform: translateY(-200%);
+  background: var(--paper);
+  color: var(--ink);
+  padding: var(--space-2) var(--space-4);
+}
+/* A short value never split across lines ("2 CPUs · 4 GB", WEB-U-185). */
+.nowrap {
+  white-space: nowrap;
+}
+.skip-link:focus {
+  transform: none;
+}
+.app-shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  height: 100dvh;
+  overflow: hidden;
+}
+/* The rail: chosen explicitly, or by default between 768 and 1024 px when nothing was chosen (§6). */
+:root[data-sidebar="rail"] .app-shell {
+  grid-template-columns: var(--rail-width) minmax(0, 1fr);
+  --sidebar-padding: var(--space-2);
+}
+@media (min-width: 768px) and (max-width: 1024px) {
+  :root:not([data-sidebar="expanded"]) .app-shell {
+    grid-template-columns: var(--rail-width) minmax(0, 1fr);
+    --sidebar-padding: var(--space-2);
+  }
+}
+/* The sidebar toggle's name and icon follow the same rule, so they match the layout before the scripts run too; once
+   the toggle knows its state, its hidden one stays hidden whatever the rule says (WEB-U-007). */
+.sidebar-toggle-state {
+  display: contents;
+}
+.sidebar-toggle-state[hidden],
+.sidebar-toggle-state[data-sidebar-for="rail"],
+:root[data-sidebar="rail"] .sidebar-toggle-state[data-sidebar-for="expanded"] {
+  display: none;
+}
+:root[data-sidebar="rail"]
+  .sidebar-toggle-state[data-sidebar-for="rail"]:not([hidden]) {
+  display: contents;
+}
+@media (min-width: 768px) and (max-width: 1024px) {
+  :root:not([data-sidebar="expanded"])
+    .sidebar-toggle-state[data-sidebar-for="expanded"] {
+    display: none;
+  }
+  :root:not([data-sidebar="expanded"])
+    .sidebar-toggle-state[data-sidebar-for="rail"]:not([hidden]) {
+    display: contents;
+  }
+}
+.sidebar-toggle-name {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.product-name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  min-height: var(--control-height);
+  margin-right: auto;
+  text-decoration: none;
+  border-radius: var(--control-radius);
+}
+.product-name:hover {
+  opacity: 0.8;
+}
+.product-name > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.app-sidebar {
+  container: sidebar / inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-height: 0;
+  overflow: hidden;
+  border-right: var(--border-width) solid var(--line);
+  /* The rail narrows this so its 36 px buttons fit inside 56 px. */
+  padding: var(--sidebar-padding, var(--space-3));
+  background: var(--paper);
+}
+.app-sidebar > .navigation {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: var(--brand-row-height);
+}
+.sidebar-account {
+  flex-shrink: 0;
+}
+/* The phone's drawer (WEB-U-379): the account row at its foot, as in the sidebar, and in view over a long task list. */
+.navigation-drawer[open],
+.navigation-drawer[open] > .dialog-content {
+  display: flex;
+  flex-direction: column;
+}
+.navigation-drawer[open] > .dialog-content {
+  flex: 1 0 auto;
+}
+.drawer-account {
+  position: sticky;
+  bottom: calc(-1 * var(--space-6));
+  margin-top: auto;
+  padding-block: var(--space-3) var(--space-6);
+  margin-bottom: calc(-1 * var(--space-6));
+  border-top: var(--border-width) solid var(--line);
+  background: var(--surface-raised);
+}
+/* §7 account row: avatar with initials and the email, truncated; the avatar alone on the rail. */
+.account-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--control-height);
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: var(--control-radius);
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+}
+.account-row:hover {
+  background: var(--hover-tint);
+}
+.account-avatar {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  border-radius: var(--pill-radius);
+  background: var(--ink);
+  color: var(--paper);
+}
+.account-email {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.navigation-button {
+  display: none;
+}
+/* Rail contents follow the sidebar's own width, whatever chose it. */
+@container sidebar (max-width: 120px) {
+  .sidebar-brand {
+    flex-direction: column;
+  }
+  .app-sidebar svg {
+    flex-shrink: 0;
+  }
+  .product-label,
+  .account-email,
+  .app-sidebar .sidebar-label,
+  .app-sidebar .conversation-link-text,
+  .app-sidebar .sidebar-empty,
+  .app-sidebar .conversation-row > .button,
+  .app-sidebar .conversation-row > .task-more {
+    display: none;
+  }
+  .app-sidebar .nav-item,
+  .account-row,
+  .app-sidebar .conversation-link {
+    justify-content: center;
+    padding-inline: var(--space-2);
+  }
+  .app-sidebar .conversation-row {
+    padding-right: 0;
+  }
+  .app-sidebar .nav-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+}
+@container sidebar (min-width: 121px) {
+  .app-sidebar .conversation-link > svg {
+    display: none;
+  }
+}
+.navigation {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--row-height-nav);
+  padding: var(--nav-row-padding);
+  font-size: var(--nav-font-size);
+  line-height: var(--nav-line-height);
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  text-decoration: none;
+  text-align: left;
+  border-radius: var(--control-radius);
+}
+.nav-item:hover {
+  color: var(--ink);
+  background: var(--hover-tint);
+}
+.nav-item[aria-current="page"] {
+  /* §5c: the active item is a fill and weight 500, no accent bar. */
+  color: var(--ink);
+  background: var(--surface);
+  font-weight: 500;
+}
+/* A light segmented control (the design direction): one tray, the chosen segment a paper fill; for filters. */
+.segmented {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-half);
+  padding: var(--space-half);
+  border-radius: var(--control-radius);
+  background: var(--surface);
+}
+.segmented .button {
+  min-height: var(--row-height-nav);
+  padding-block: 0;
+  color: var(--muted);
+  font-weight: 400;
+}
+.segmented .button[aria-pressed="true"] {
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 500;
+  box-shadow: 0 0 0 var(--border-width) var(--line);
+}
+.nav-item[aria-current="page"]:hover {
+  background: color-mix(in srgb, var(--surface), var(--ink) var(--hover-share));
+}
+.nav-item svg {
+  flex-shrink: 0;
+}
+.app-content {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 0 var(--space-6) var(--content-end);
+}
+.page-heading {
+  margin-bottom: var(--space-8);
+}
+.login-page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: var(--space-6);
+}
+.auth-column {
+  width: min(100%, var(--auth-width));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+/* A quiet mark above the form (the design direction): the page's heading carries the words. */
+.auth-column .brand-wordmark {
+  align-self: flex-start;
+  margin: var(--space-2) 0;
+}
+.auth-column form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+.auth-column .form-control {
+  background: var(--paper);
+}
+.auth-column form > .button[data-variant="primary"] {
+  width: 100%;
+}
+/* The 404 page's one way on, as wide as the sign-in pages' button (WEB-U-381). */
+.auth-column > .not-found-home {
+  width: 100%;
+}
+.auth-heading {
+  gap: var(--space-2);
+}
+/* An input's adornment is placed on the input's own box, not the field's, so an error line below can't move it
+   (WEB-U-383). */
+.input-adorned {
+  position: relative;
+}
+.password-input input {
+  padding-right: var(--space-12);
+}
+.password-toggle {
+  position: absolute;
+  top: 0;
+  right: var(--space-1);
+}
+.password-rules {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.password-rules li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.password-rules [data-met="true"] {
+  color: var(--ok);
+}
+.design-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-6);
+}
+.design-panel {
+  container-type: inline-size;
+  min-width: 0;
+  padding: var(--space-6);
+  background: var(--paper);
+  color: var(--ink);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+}
+.design-panel > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: var(--space-6);
+}
+.design-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-6) 0;
+  border-top: var(--border-width) solid var(--line);
+}
+.token-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+.token-item {
+  display: grid;
+  grid-template-columns: var(--space-8) minmax(0, 1fr);
+  gap: var(--space-2);
+  align-items: start;
+}
+.token-chip {
+  display: block;
+  width: var(--space-8);
+  height: var(--space-8);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+}
+.token-item code {
+  overflow-wrap: anywhere;
+}
+.type-sample {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.specimen-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+.button-specimen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+.spacing-specimen {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.spacing-bar {
+  display: block;
+  height: var(--space-2);
+  background: var(--ink);
+}
+.radius-specimen {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-width) solid var(--line);
+  background: var(--surface);
+  min-height: var(--space-12);
+  padding: var(--space-2) var(--space-4);
+}
+.dialog-preview {
+  position: static;
+  width: 100%;
+  margin: 0;
+  box-shadow: var(--elevation);
+}
+.design-panel .empty-state {
+  padding: var(--space-4);
+}
+.design-dialog-trigger {
+  align-self: flex-start;
+}
+@container (max-width: 420px) {
+  .token-list,
+  .specimen-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 1024px) {
+  .design-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 767px) {
+  /* Below 768 px the sidebar is a drawer, whatever state was remembered for wider screens. */
+  .app-shell,
+  :root[data-sidebar] .app-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .app-sidebar {
+    display: none;
+  }
+  .app-content {
+    padding: 0 var(--space-4) var(--content-end);
+  }
+  .navigation-button {
+    display: inline-flex;
+  }
+  .design-panel {
+    padding: var(--space-4);
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes shimmer {
+  from {
+    opacity: 0.45;
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* §5b motion: floating layers and the approval card arrive with opacity and a small lift. */
+@keyframes lift-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-lift));
+  }
+}
+@keyframes sheet-from-start {
+  from {
+    opacity: 0;
+    transform: translateX(calc(-1 * var(--motion-slide)));
+  }
+}
+@keyframes sheet-from-end {
+  from {
+    opacity: 0;
+    transform: translateX(var(--motion-slide));
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+/* The approval card moves and rings as it arrives but never fades: a fading card lowers every text's contrast. */
+@keyframes arrive-lift {
+  from {
+    transform: translateY(var(--motion-lift));
+  }
+}
+@keyframes arrive-ring {
+  from {
+    box-shadow: 0 0 0 var(--focus-width) var(--warn);
+  }
+  to {
+    box-shadow: 0 0 0 var(--focus-width) transparent;
+  }
+}
+/* A workspace whose lease holder is running: the dot breathes; reduced motion keeps it still. */
+@keyframes pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+/* §5b: a skeleton appears only after this much waiting, so fast loads never flash it. */
+@keyframes skeleton-wait {
+  from {
+    visibility: hidden;
+  }
+}
+.popover {
+  animation: lift-in var(--motion-panel) ease-out;
+}
+.approval-card {
+  animation:
+    arrive-lift var(--motion-panel) ease-out,
+    arrive-ring var(--motion-highlight) ease-out;
+}
+/* A focused card is already marked by its focus outline; the ring would double it. */
+.approval-card:focus-visible {
+  animation: arrive-lift var(--motion-panel) ease-out;
+}
+.skeleton {
+  animation: skeleton-wait 0s linear var(--skeleton-delay) both;
+}
+/* Numbers that change (timers, counts, durations) keep their width while they tick. */
+[role="timer"],
+.run-elapsed,
+.recorded-duration,
+.follow-controls,
+.conversation-status {
+  font-variant-numeric: tabular-nums;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+  /* Reduced motion keeps opacity changes, the approval ring and the skeleton delay, and removes every movement. */
+  .dialog-sheet[data-placement] {
+    animation: fade-in var(--motion-panel) ease-out !important;
+  }
+  .popover {
+    animation: fade-in var(--motion-panel) ease-out !important;
+  }
+  .approval-card {
+    animation: arrive-ring var(--motion-highlight) ease-out !important;
+  }
+  .approval-card:focus-visible {
+    animation: none !important;
+  }
+  .skeleton {
+    animation: skeleton-wait 0s linear var(--skeleton-delay) both !important;
+  }
+}
+
+/* IconAction (src/ui): an icon-only action with a short visible tooltip on hover and keyboard focus (mockup change 6). */
+.icon-action {
+  position: relative;
+  display: inline-flex;
+}
+/* Placed by IconAction where it fits (inside the window and its panel); shown only while hovered or focused. */
+.action-tooltip {
+  position: absolute;
+  z-index: 40;
+  top: 0;
+  left: 0;
+  width: max-content;
+  max-width: min(20rem, calc(100vw - 2 * var(--space-2)));
+  padding: var(--space-1) var(--space-2);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+  color: var(--ink);
+  background: var(--surface-raised);
+  box-shadow: var(--elevation);
+  pointer-events: none;
+}
+
+/* FormRefusal (WEB-U-110): while there is nothing to fix its line takes no room (a row of fields and a button keeps its
+   gaps), yet stays in the accessibility tree, so its words are announced when a save is refused. */
+.form-refusal {
+  margin: 0;
+}
+.form-refusal:empty {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

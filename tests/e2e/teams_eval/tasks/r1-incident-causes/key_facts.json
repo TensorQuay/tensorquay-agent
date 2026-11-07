@@ -1,0 +1,9 @@
+[
+ "Disk full: 9 incidents (rank 1)",
+ "Expired TLS certificate: 8 incidents (rank 2)",
+ "Bad configuration push: 7 incidents (rank 3)",
+ "DNS misconfiguration: 6 incidents (rank 4)",
+ "Memory leak: 5 incidents (rank 5)",
+ "Dependency timeouts (3), clock skew (1) and a manual error (1) are not in the top five",
+ "Contributing factors (noisy disk alerts, an old runbook) are not root causes"
+]

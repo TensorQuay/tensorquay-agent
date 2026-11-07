@@ -1,0 +1,81 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(u.user_id, c.owner_id)::text AS \"key!\", min(a.email::text) AS label, count(*) AS \"requests!\", count(*) FILTER (WHERE (u.prompt_tokens IS NOT NULL OR u.completion_tokens IS NOT NULL) AND NOT coalesce(u.estimated, false)) AS \"reported!\", count(*) FILTER (WHERE u.estimated) AS \"estimated!\", coalesce(sum(u.prompt_tokens),0)::bigint AS \"prompt_tokens!\", coalesce(sum(u.completion_tokens),0)::bigint AS \"completion_tokens!\", sum(u.cached_tokens)::bigint AS cached_tokens, sum(u.reasoning_tokens)::bigint AS reasoning_tokens FROM usage u LEFT JOIN conversations c ON c.id = u.conversation_id LEFT JOIN users a ON a.id = COALESCE(u.user_id, c.owner_id) WHERE u.created_at >= $1 AND u.created_at < $2 GROUP BY COALESCE(u.user_id, c.owner_id) ORDER BY coalesce(sum(u.prompt_tokens),0) + coalesce(sum(u.completion_tokens),0) DESC, COALESCE(u.user_id, c.owner_id)::text LIMIT $3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "key!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "label",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "requests!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "reported!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "estimated!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "prompt_tokens!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "completion_tokens!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "cached_tokens",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "reasoning_tokens",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Timestamptz",
+        "Timestamptz",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "25115ad19b4aa0cf80c77099a9e92cb7dd9c568c53f67945fd2b0fb0ab2f3369"
+}

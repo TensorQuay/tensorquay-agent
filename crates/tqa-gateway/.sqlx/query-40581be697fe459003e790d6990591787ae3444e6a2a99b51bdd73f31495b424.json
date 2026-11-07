@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO agent_team_reads (reader, call_key, team_id, run_id, seqs, more) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (reader, call_key) DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Uuid",
+        "Text",
+        "Int8Array",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "40581be697fe459003e790d6990591787ae3444e6a2a99b51bdd73f31495b424"
+}

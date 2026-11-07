@@ -1,0 +1,6 @@
+[
+ "store/ has an interface, a SQLite implementation (the only sqlite3 import) and an in-memory one, with store.open, use_memory and use_sqlite",
+ "All 24 entity modules and all four reports run through store/, names and arguments unchanged",
+ "The reports' joins and aggregates (revenue by city, best customers, units by city, low stock, open tickets, average stars, net by order, unpaid invoices) work without SQL",
+ "The 124 tests pass on SQLite and in memory, unchanged"
+]

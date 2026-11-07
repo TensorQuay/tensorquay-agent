@@ -1,0 +1,12 @@
+[
+ "api: HTTP handlers: validates orders and publishes them to the queue",
+ "auth: checks API tokens for the api handlers",
+ "queue: an in-process job queue between the api and the worker",
+ "worker: takes jobs off the queue and runs them",
+ "billing: charges an order's total; called by the worker",
+ "storage: saves orders and their states; used by the worker and the api",
+ "notifier: sends the customer an email when an order is charged",
+ "config: loads settings from environment variables for every component",
+ "Flow: api (auth) -> storage + queue -> worker -> billing -> storage state -> notifier",
+ "A new endpoint goes in api/handlers.py and api/routes.py; background work via queue and worker/loop.py"
+]

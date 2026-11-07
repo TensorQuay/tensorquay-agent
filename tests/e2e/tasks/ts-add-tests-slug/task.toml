@@ -1,0 +1,7 @@
+id = "ts-add-tests-slug"
+title = "Write tests for an untested slug function"
+tags = ["typescript", "add-tests", "small"]
+budgets = { max_steps = 30, wall_clock_secs = 600, max_tokens = 200000 }
+protected = ["src/slug.ts"]
+check = { image = "workstation", timeout_secs = 120 }
+template = "workstation"

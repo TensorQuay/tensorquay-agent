@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM egress_rules WHERE host=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "db567379744751f6ad0026cfab43e726d9daec1c46e14cc701b6ae5e7fb956ae"
+}

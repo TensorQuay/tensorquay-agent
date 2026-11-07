@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM workspaces w WHERE w.id=$1 AND w.state='deleted' AND NOT EXISTS(SELECT 1 FROM conversations c WHERE c.workspace_id=w.id)) AS \"ready!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ready!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "05349ce7ef4a3e062b7c9815e8909efd0ed78bdfd3e138df96d3f8d1385b959d"
+}

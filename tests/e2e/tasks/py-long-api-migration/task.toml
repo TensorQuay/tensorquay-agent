@@ -1,0 +1,7 @@
+id = "py-long-api-migration"
+title = "Migrate thirty-six callers from a deprecated client"
+tags = ["python", "refactor", "long", "compaction"]
+budgets = { max_steps = 60, wall_clock_secs = 1500, max_tokens = 800000 }
+protected = ["lib/old_api.py", "lib/new_api.py", "docs/MIGRATION.md"]
+check = { image = "runtime", timeout_secs = 180 }
+expects_compaction = true

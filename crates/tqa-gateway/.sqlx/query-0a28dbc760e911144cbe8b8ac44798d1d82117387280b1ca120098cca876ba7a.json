@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE decision_engines SET document=$2,version=version+1,last_set_by='admin',updated_at=CURRENT_TIMESTAMP,budget_since=CASE WHEN document->'budget' IS NOT DISTINCT FROM $2::jsonb->'budget' THEN budget_since WHEN $2::jsonb ? 'budget' THEN CURRENT_TIMESTAMP END WHERE name=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0a28dbc760e911144cbe8b8ac44798d1d82117387280b1ca120098cca876ba7a"
+}

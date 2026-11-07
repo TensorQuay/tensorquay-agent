@@ -1,0 +1,100 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT ref,updated_at,version,last_set_by,seed_state,rotated_at,rotate_after_days FROM secrets ORDER BY ref LIMIT $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ref",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "secrets",
+            "name": "ref"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "secrets",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "version",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "secrets",
+            "name": "version"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "last_set_by",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "secrets",
+            "name": "last_set_by"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "seed_state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "secrets",
+            "name": "seed_state"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "rotated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "secrets",
+            "name": "rotated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "rotate_after_days",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "secrets",
+            "name": "rotate_after_days"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      true
+    ]
+  },
+  "hash": "95960c9cbc3c0d3f4e81371eb7719fc39aa9173e1093019f40ae026b2a1a993c"
+}

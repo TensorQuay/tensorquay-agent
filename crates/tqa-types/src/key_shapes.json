@@ -1,0 +1,147 @@
+{
+  "$comment": "What makes a secret's name look like a key itself (SEC-033): the one source the gateway (tqa_types::is_key_shaped_name) and the web read, so the two can't diverge. A name is key-shaped when it starts with one of `prefixes` followed by a body of at least `length` characters: letters, digits, - or _ (`token`, the default) whose letters and digits, separators skipped, change class (digit, upper-case, lower-case) at at least `change_percent` % of their neighbouring places; or upper-case letters and digits only (`upper_digit`). Or when it holds a run of letters and digits (no - or _) matching one of `runs`: at least `length` long, with at least `classes` of the three classes, changing class at at least `change_percent` % of its neighbouring places. Random bodies change class often; readable names, CamelCase with a year included, rarely do. Kept conservative (the lead, 7 Oct): a refused real name is worse than a missed key, which the page's guard and log redaction still catch; so hf_token, or a prefix followed by words, is a name.",
+  "prefixes": [
+    {
+      "prefix": "sk-",
+      "length": 20,
+      "change_percent": 25
+    },
+    {
+      "prefix": "sk_live_",
+      "length": 20,
+      "change_percent": 25
+    },
+    {
+      "prefix": "sk_test_",
+      "length": 20,
+      "change_percent": 25
+    },
+    {
+      "prefix": "rk_live_",
+      "length": 20,
+      "change_percent": 25
+    },
+    {
+      "prefix": "rk_test_",
+      "length": 20,
+      "change_percent": 25
+    },
+    {
+      "prefix": "ghp_",
+      "length": 30,
+      "change_percent": 25
+    },
+    {
+      "prefix": "gho_",
+      "length": 30,
+      "change_percent": 25
+    },
+    {
+      "prefix": "ghu_",
+      "length": 30,
+      "change_percent": 25
+    },
+    {
+      "prefix": "ghs_",
+      "length": 30,
+      "change_percent": 25
+    },
+    {
+      "prefix": "ghr_",
+      "length": 30,
+      "change_percent": 25
+    },
+    {
+      "prefix": "github_pat_",
+      "length": 40,
+      "change_percent": 25
+    },
+    {
+      "prefix": "glpat-",
+      "length": 20,
+      "change_percent": 25
+    },
+    {
+      "prefix": "xoxa-",
+      "length": 20,
+      "change_percent": 25
+    },
+    {
+      "prefix": "xoxb-",
+      "length": 20,
+      "change_percent": 25
+    },
+    {
+      "prefix": "xoxp-",
+      "length": 20,
+      "change_percent": 25
+    },
+    {
+      "prefix": "xoxs-",
+      "length": 20,
+      "change_percent": 25
+    },
+    {
+      "prefix": "xapp-",
+      "length": 20,
+      "change_percent": 25
+    },
+    {
+      "prefix": "AIza",
+      "length": 30,
+      "change_percent": 25
+    },
+    {
+      "prefix": "hf_",
+      "length": 30,
+      "change_percent": 25
+    },
+    {
+      "prefix": "gsk_",
+      "length": 40,
+      "change_percent": 25
+    },
+    {
+      "prefix": "r8_",
+      "length": 30,
+      "change_percent": 25
+    },
+    {
+      "prefix": "npm_",
+      "length": 30,
+      "change_percent": 25
+    },
+    {
+      "prefix": "pplx-",
+      "length": 40,
+      "change_percent": 25
+    },
+    {
+      "prefix": "xai-",
+      "length": 40,
+      "change_percent": 25
+    },
+    {
+      "prefix": "AKIA",
+      "length": 16,
+      "characters": "upper_digit"
+    },
+    {
+      "prefix": "ASIA",
+      "length": 16,
+      "characters": "upper_digit"
+    }
+  ],
+  "runs": [
+    {
+      "length": 32,
+      "classes": 2,
+      "change_percent": 40
+    },
+    {
+      "length": 24,
+      "classes": 3,
+      "change_percent": 50
+    }
+  ]
+}

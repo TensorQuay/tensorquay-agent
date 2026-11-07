@@ -1,0 +1,7 @@
+id = "ts-fix-date-range"
+title = "Fix an inclusive date range that drops its last day"
+tags = ["typescript", "bug-fix", "small", "fallback-relevant", "cmp"]
+budgets = { max_steps = 30, wall_clock_secs = 600, max_tokens = 200000 }
+protected = ["test/range.test.ts"]
+check = { image = "workstation", timeout_secs = 120 }
+template = "workstation"

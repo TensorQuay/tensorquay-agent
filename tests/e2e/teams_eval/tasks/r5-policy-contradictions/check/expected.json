@@ -1,0 +1,68 @@
+{
+ "contradictions": [
+  {
+   "documents": [
+    "travel",
+    "expenses"
+   ],
+   "topic": "flight",
+   "words": [
+    "flight",
+    "business class",
+    "economy"
+   ]
+  },
+  {
+   "documents": [
+    "travel",
+    "expenses"
+   ],
+   "topic": "meal",
+   "words": [
+    "meal"
+   ]
+  },
+  {
+   "documents": [
+    "expenses",
+    "remote-work"
+   ],
+   "topic": "approval",
+   "words": [
+    "approval",
+    "purchase"
+   ]
+  },
+  {
+   "documents": [
+    "travel",
+    "security"
+   ],
+   "topic": "laptop",
+   "words": [
+    "laptop"
+   ]
+  },
+  {
+   "documents": [
+    "remote-work",
+    "security"
+   ],
+   "topic": "password",
+   "words": [
+    "password"
+   ]
+  },
+  {
+   "documents": [
+    "expenses",
+    "remote-work"
+   ],
+   "topic": "internet",
+   "words": [
+    "internet"
+   ]
+  }
+ ],
+ "pass_at": 5
+}

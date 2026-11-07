@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT DISTINCT t.conversation_id FROM runtime_tokens t JOIN conversations c ON c.id=t.conversation_id WHERE t.peer_address=$1::text::inet AND t.sandbox_id IS NOT NULL AND (t.expires_at IS NULL OR t.expires_at>CURRENT_TIMESTAMP) AND c.state='active' LIMIT 2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "conversation_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "runtime_tokens",
+            "name": "conversation_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "2b5c96fc8a85e412ebc796d6903a991f660d3cf72948d4a85f4a7950e64675f2"
+}

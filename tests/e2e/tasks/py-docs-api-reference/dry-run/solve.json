@@ -1,0 +1,33 @@
+{
+ "model": "fixture",
+ "responses": [
+  {
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "shell",
+     "arguments": {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -c \"\nimport inspect, api\nout = '# Inventory API\\n\\nEvery function returns a plain dictionary or list and raises \\`ValueError\\` for invalid input.\\n'\nfor name, obj in vars(api).items():\n    if inspect.isfunction(obj) and not name.startswith('_'):\n        out += '\\n### ' + name + str(inspect.signature(obj)) + '\\n\\n' + inspect.getdoc(obj).splitlines()[0] + '\\n'\nopen('docs/API.md', 'w').write(out)\n\""
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 520,
+    "completion_tokens": 160
+   }
+  },
+  {
+   "events": [
+    {
+     "type": "text",
+     "text": "docs/API.md now lists every public function with its signature."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 800,
+    "completion_tokens": 20
+   }
+  }
+ ]
+}

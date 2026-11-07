@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (SELECT 1 FROM host_keys k JOIN users u ON u.id=k.owner_id WHERE k.name=$1 AND u.disabled_at IS NULL AND ($2 OR k.owner_id=ANY($3))) AS \"clash!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "clash!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Bool",
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "ba0f56846bf2b702990c0b2abbcdb5019e11701a4ca8cc77fc84620ec5b0e42b"
+}

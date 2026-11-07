@@ -1,0 +1,62 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT prompt_tokens,completion_tokens,cached_tokens,reasoning_tokens FROM usage",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "prompt_tokens",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "usage",
+            "name": "prompt_tokens"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "completion_tokens",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "usage",
+            "name": "completion_tokens"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "cached_tokens",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "usage",
+            "name": "cached_tokens"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "reasoning_tokens",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "usage",
+            "name": "reasoning_tokens"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "6f706f7f118d861f635150debd7935e5567f051864a62b0a0633bd7c0cfdf65e"
+}

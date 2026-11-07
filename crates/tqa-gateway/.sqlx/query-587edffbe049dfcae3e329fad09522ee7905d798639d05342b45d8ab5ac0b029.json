@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE usage SET user_id=$2 WHERE ctid = ANY(ARRAY(SELECT ctid FROM usage WHERE conversation_id=$1 AND user_id IS NULL LIMIT $3))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "587edffbe049dfcae3e329fad09522ee7905d798639d05342b45d8ab5ac0b029"
+}

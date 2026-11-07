@@ -1,0 +1,8 @@
+id = "ts-long-http-migration"
+title = "Move thirty-two TypeScript callers to a new client API"
+tags = ["typescript", "refactor", "long", "compaction"]
+budgets = { max_steps = 60, wall_clock_secs = 1500, max_tokens = 800000 }
+protected = ["src/legacy/http.ts", "src/net/client.ts", "docs/MIGRATION.md"]
+check = { image = "workstation", timeout_secs = 180 }
+template = "workstation"
+expects_compaction = true

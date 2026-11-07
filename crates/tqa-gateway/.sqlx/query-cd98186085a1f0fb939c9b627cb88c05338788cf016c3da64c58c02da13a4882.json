@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT NOT EXISTS(SELECT 1 FROM idempotency WHERE conversation_id=$1 AND execution_status='queued') AND NOT EXISTS(SELECT 1 FROM sandbox_instances WHERE conversation_id=$1)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "?column?",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "cd98186085a1f0fb939c9b627cb88c05338788cf016c3da64c58c02da13a4882"
+}

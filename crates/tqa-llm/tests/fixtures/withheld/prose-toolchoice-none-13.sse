@@ -1,0 +1,84 @@
+data: {"choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"I"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"'ll"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":" start"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":" by"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":" exploring"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":" the"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":" repository"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":" structure"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":" and"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":" running"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":" the"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":" tests"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":" to"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":" see"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":" what"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"'s"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":" failing"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"."},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{"content":"\n\n"},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":null}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: {"choices":[],"usage":{"prompt_tokens":1535,"completion_tokens":60}}
+
+data: [DONE]
+

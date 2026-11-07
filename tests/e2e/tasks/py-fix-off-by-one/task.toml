@@ -1,0 +1,6 @@
+id = "py-fix-off-by-one"
+title = "Fix the page count that drops the last partial page"
+tags = ["python", "bug-fix", "small", "fallback-relevant", "cmp"]
+budgets = { max_steps = 30, wall_clock_secs = 600, max_tokens = 200000 }
+protected = ["tests/test_pagination.py"]
+check = { image = "runtime", timeout_secs = 120 }

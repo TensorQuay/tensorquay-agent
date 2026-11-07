@@ -1,0 +1,6 @@
+id = "c4-csv-json-export"
+title = "CSV and JSON export for a report command, with tests and docs"
+tags = ["teams-eval", "teams-code"]
+budgets = { max_steps = 40, wall_clock_secs = 900, max_tokens = 300000 }
+protected = ["sales.json"]
+check = { image = "runtime", timeout_secs = 120 }

@@ -1,0 +1,38 @@
+{
+ "model": "fixture",
+ "select": "prompt",
+ "responses": [
+  {
+   "when": "The folder `project/` holds a store rollout's plan, its budget sheet and status mails. Write `risks.md`: a risk",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "risks.md",
+      "content": "# Risk register\n\n| Risk | Likelihood | Impact | Owner |\n|---|---|---|---|\n| Vendor risk | Medium | High | Ken |\n| Key person risk | Medium | High | Priya |\n| Budget risk | Medium | High | Omar |\n| Regulat risk | Medium | High | Dana |\n| Migration risk | Medium | High | Ken |\n| Audit risk | Medium | High | Omar |\n| Scope risk | Medium | High | Dana |\n| Integration risk | Medium | High | Lena |\n| Training risk | Medium | High | Priya |\n| Capacity risk | Medium | High | Lena |\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The folder `project/` holds a store rollout's plan, its budget sheet and status mails. Write `risks.md`: a risk",
+   "events": [
+    {
+     "type": "text",
+     "text": "Done: risks.md."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  }
+ ]
+}

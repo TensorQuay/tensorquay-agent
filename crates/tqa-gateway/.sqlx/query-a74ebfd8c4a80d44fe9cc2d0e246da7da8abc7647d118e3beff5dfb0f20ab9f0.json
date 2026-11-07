@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE connectors SET seed_state='removed' WHERE seed_state='current' AND NOT (name = ANY($1))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a74ebfd8c4a80d44fe9cc2d0e246da7da8abc7647d118e3beff5dfb0f20ab9f0"
+}

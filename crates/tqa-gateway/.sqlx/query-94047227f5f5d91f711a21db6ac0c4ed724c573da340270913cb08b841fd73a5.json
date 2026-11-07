@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE idempotency SET execution_status='delivered',updated_at=CURRENT_TIMESTAMP WHERE key=$1 AND user_id=$2 AND execution_status='queued'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "94047227f5f5d91f711a21db6ac0c4ed724c573da340270913cb08b841fd73a5"
+}

@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT NOT EXISTS(SELECT 1 FROM events WHERE conversation_id = $1 AND frame->'event'->>'type' = 'run.started') AS \"never!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "never!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "1366d264afe8a019c9abc56cd2cbfc627fd94eed093b3248c6f356869f8c5c96"
+}

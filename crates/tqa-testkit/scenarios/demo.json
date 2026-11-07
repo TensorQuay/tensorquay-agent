@@ -1,0 +1,48 @@
+{
+  "model": "fixture",
+  "responses": [
+    {
+      "events": [
+        {"type": "reasoning", "text": "A short README will make the project easy to inspect."},
+        {"type": "text", "text": "I'll create the project."},
+        {"type": "tool_call", "name": "write_file", "arguments": {"path": "hello/README.md", "content": "# Hello\nA small demonstration project.\n", "create_parents": true}, "split_into": 4}
+      ],
+      "usage": {"prompt_tokens": 20, "completion_tokens": 30, "reasoning_tokens": 8}
+    },
+    {
+      "events": [
+        {"type": "tool_call", "name": "shell", "arguments": {"command": "cat hello/README.md && ls hello"}, "split_into": 3}
+      ],
+      "usage": {"prompt_tokens": 60, "completion_tokens": 12}
+    },
+    {
+      "events": [
+        {"type": "text", "text": "Created hello/README.md with a title and a project description."}
+      ],
+      "usage": {"prompt_tokens": 90, "completion_tokens": 14}
+    },
+    {
+      "events": [
+        {"type": "reasoning", "text": "A usage section belongs after the description."},
+        {"type": "text", "text": "I'll add a usage section."},
+        {"type": "tool_call", "name": "edit_file", "arguments": {"path": "hello/README.md", "edits": [{"old_text": "A small demonstration project.\n", "new_text": "A small demonstration project.\n\n## Usage\nRead this file.\n", "replace_all": null}]}, "split_into": 3}
+      ],
+      "usage": {"prompt_tokens": 120, "completion_tokens": 40, "reasoning_tokens": 9}
+    },
+    {
+      "events": [
+        {"type": "tool_call", "name": "shell", "arguments": {"command": "cat hello/README.md"}, "split_into": 2}
+      ],
+      "usage": {"prompt_tokens": 160, "completion_tokens": 10}
+    },
+    {
+      "events": [
+        {"type": "text", "text": "Added a Usage section to hello/README.md."}
+      ],
+      "usage": {"prompt_tokens": 190, "completion_tokens": 11}
+    }
+  ],
+  "ollama": {"ollama-small": 4096, "ollama-roomy": 32768},
+  "refuses_stream_options": ["no-usage"],
+  "decision_engines": {"stopper": {"stop": "The test engine stops here."}, "passer": {"pass": true}}
+}

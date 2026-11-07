@@ -1,0 +1,6 @@
+id = "py-docs-readme-usage"
+title = "Bring the README usage section in line with the command's help"
+tags = ["python", "docs", "small", "cmp"]
+budgets = { max_steps = 25, wall_clock_secs = 600, max_tokens = 150000 }
+protected = ["find_lines.py"]
+check = { image = "runtime", timeout_secs = 60 }

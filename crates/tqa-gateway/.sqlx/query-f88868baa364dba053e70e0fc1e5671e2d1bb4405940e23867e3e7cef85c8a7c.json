@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO admin_audit (id,actor_kind,actor_user_id,area,item,action,before_version,after_version,value_hash_changed,detail) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Int8",
+        "Int8",
+        "Bool",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f88868baa364dba053e70e0fc1e5671e2d1bb4405940e23867e3e7cef85c8a7c"
+}

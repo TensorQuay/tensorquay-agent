@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO secret_consumers (ref,consumer_kind,consumer,bound_by) VALUES ($1,$2,$3,'admin')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9dcd3fe53cf2e97fad21e7c6f5f4020393b6db510b75dbd27fa5227bfe1d34fb"
+}

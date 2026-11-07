@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM conversations WHERE id=$1 AND state<>'deleted') AS \"active!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "active!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "8496fbdd5eae982335e49333fe203d26545b15099dd606722abac5080bf93903"
+}

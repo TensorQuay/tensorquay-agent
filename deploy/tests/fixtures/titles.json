@@ -1,0 +1,57 @@
+{
+  "model": "fixture",
+  "select": "prompt",
+  "responses": [
+    {
+      "when": "Clean up sales.csv",
+      "events": [
+        {
+          "type": "text",
+          "text": "Done: 12 duplicate rows removed."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 20,
+        "completion_tokens": 10
+      }
+    },
+    {
+      "when": "Clean up sales.csv",
+      "events": [
+        {
+          "type": "text",
+          "text": "Glad to help."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 20,
+        "completion_tokens": 5
+      }
+    },
+    {
+      "when": "Summarise the quarterly numbers for the board",
+      "events": [
+        {
+          "type": "text",
+          "text": "Revenue rose 8 % on the quarter."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 20,
+        "completion_tokens": 10
+      }
+    }
+  ],
+  "summary": {
+    "events": [
+      {
+        "type": "text",
+        "text": "Sales CSV cleanup"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 40,
+      "completion_tokens": 4
+    }
+  }
+}

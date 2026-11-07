@@ -1,0 +1,11 @@
+# The feature matrix (G6, G1): Stop, a held message, copying code and following a long answer on the real stack, with
+# a scripted model that holds one reply until Stop and streams another slowly.
+services:
+  fake-model:
+    command: ["--scenario", "/scenarios/task-page.json"]
+    volumes:
+      - type: bind
+        source: ../tests/fixtures/task-page.json
+        target: /scenarios/task-page.json
+        read_only: true
+        bind: {create_host_path: false}

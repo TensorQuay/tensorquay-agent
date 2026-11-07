@@ -1,0 +1,6 @@
+id = "sh-add-tests-strings"
+title = "Write tests for a shell string library"
+tags = ["shell", "add-tests", "small", "fallback-relevant"]
+budgets = { max_steps = 30, wall_clock_secs = 600, max_tokens = 200000 }
+protected = ["lib/strings.sh", "tests/run.sh"]
+check = { image = "runtime", timeout_secs = 120 }

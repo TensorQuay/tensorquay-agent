@@ -1,0 +1,85 @@
+{
+  "name": "tensorquay-agent-web",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "packageManager": "pnpm@10.34.5",
+  "scripts": {
+    "predev": "node scripts/sync-brand.mjs && node scripts/sync-pdfjs.mjs",
+    "prebuild": "node scripts/sync-brand.mjs && node scripts/sync-pdfjs.mjs",
+    "pretest:e2e": "node scripts/sync-brand.mjs && node scripts/sync-pdfjs.mjs",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "node scripts/start.mjs",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p e2e",
+    "e2e:list": "node scripts/e2e-list.mjs",
+    "tokens": "node scripts/check-tokens.mjs --self-test && node scripts/check-tokens.mjs",
+    "copy": "node scripts/check-copy.mjs --self-test && node scripts/check-copy.mjs",
+    "i18n:gen": "node scripts/i18n.mjs",
+    "i18n:check": "node scripts/i18n.mjs --check",
+    "budgets": "node scripts/route-budgets.mjs",
+    "boundary": "node scripts/server-boundary.mjs",
+    "guides": "node scripts/check-guide-copy.mjs --self-test && node scripts/check-guide-copy.mjs",
+    "i18n:report": "node scripts/i18n.mjs --report",
+    "format:check": "prettier --check .",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage && node scripts/check-module-coverage.mjs --self-test && node scripts/check-module-coverage.mjs",
+    "test:e2e": "playwright test",
+    "test:production": "node scripts/test-production.mjs",
+    "licenses": "node scripts/check-licenses.mjs",
+    "audit": "pnpm audit --audit-level high",
+    "check": "node scripts/check.mjs",
+    "protocol:gen": "node scripts/protocol.mjs",
+    "protocol:check": "node scripts/protocol.mjs --check",
+    "api:check": "node scripts/api-parity.mjs",
+    "perf:pages": "playwright test --config playwright.perf.config.ts e2e/perf/pages.perf.ts",
+    "perf:transcript": "playwright test --config playwright.perf.config.ts e2e/perf/transcript.perf.ts"
+  },
+  "dependencies": {
+    "@novnc/novnc": "1.7.0",
+    "@tanstack/react-query": "5.103.2",
+    "ajv": "8.20.0",
+    "lucide-react": "1.47.0",
+    "next": "16.4.1",
+    "pdfjs-dist": "6.3.289",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-markdown": "10.1.0",
+    "remark-gfm": "4.0.1"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.63.0",
+    "@tailwindcss/postcss": "4.3.3",
+    "@testing-library/jest-dom": "6.9.1",
+    "@testing-library/react": "16.3.3",
+    "@types/node": "24.19.0",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitest/coverage-v8": "4.1.11",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.1",
+    "eslint-plugin-import": "2.32.0",
+    "eslint-plugin-jsx-a11y": "6.10.2",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "jsdom": "29.1.1",
+    "prettier": "3.9.8",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.70.1",
+    "vitest": "4.1.11"
+  },
+  "pnpm": {
+    "auditConfig": {
+      "ignoreGhsas": [
+        "GHSA-vfj7-8cjw-p6xm"
+      ]
+    }
+  }
+}

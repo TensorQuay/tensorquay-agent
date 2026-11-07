@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT ref FROM secrets ORDER BY ref LIMIT $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ref",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "secrets",
+            "name": "ref"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "183ce6b1341ceee945da9d407c12337d89f8543eda7b6bcaa19dcb56d1110082"
+}

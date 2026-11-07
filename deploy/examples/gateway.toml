@@ -1,0 +1,61 @@
+listen = "127.0.0.1:8080"
+public_origin = "http://localhost:8080"
+models_path = "deploy/examples/models.toml"
+session_ttl = 86400
+event_payload_cap_bytes = 65536
+stream_keepalive = 15
+
+[storage]
+root = "/var/lib/tqa"
+
+[runtime]
+backend = "docker"
+
+[sandbox]
+gateway_url = "http://gateway:8080"
+# The gateway's own container (compose `container_name`); it joins every sandbox's network as `gateway`.
+gateway_container = "tqa-gateway"
+
+# Every environment key a runtime image declares must be set here: the backend refuses an image that adds keys the
+# gateway did not choose, and the template check refuses such a template (image_env_unset). The runtime images declare
+# only these two (see deploy/README.md); add others the same way, never secrets.
+[sandbox.env]
+PATH = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+HOME = "/tmp"
+
+# The most any environment may use; an environment sets its own size within it, and one without its own size gets
+# cpu_millicores, memory_bytes and pids above ([sandbox] defaults: 1 CPU, 512 MiB, 256) and [workspaces] quota_bytes
+# (10 GiB) for a new workspace. File-only. The defaults:
+# [sandbox.ceiling]
+# cpus = 8                            # in steps of 0.5; at most 32 on microVMs
+# memory_mib = 16384
+# pids = 4096
+# workspace_mib = 102400
+
+# Each sandbox gets its own internal network with a subnet from this pool. It must not overlap any Docker network or
+# host route, and must hold at least twice `max_live` subnets. The default:
+# [sandbox.network_pool]
+# cidr = "10.213.0.0/16"
+# prefix = 29
+
+# After a task's first run completes, the gateway names it in a few words with one small call on the task's own
+# route (counted in Usage with the task). A person's rename is never replaced. On by default:
+# [tasks]
+# auto_title = true
+
+[web]
+upstream = "http://web:3000"
+
+# Egress (ARCHITECTURE §4.2, ADR-0021, ADR-0035): the network allow-list is the guardrail; inside its sandbox the
+# agent works freely, and there is no [permissions] section. Without rules nothing leaves a sandbox. With rules,
+# sandboxes use the policy proxy on this second listener, which must never be published outside the sandbox network.
+# [egress]
+# listen = "0.0.0.0:3128"
+# connections = 256                  # proxied connections at once, 1 to 4096; more wait
+# idle_seconds = 300                  # a tunnel, or a keyed connection between requests, idle this long is closed
+# keyed_connections = 256             # connections to keyed addresses at once (keys for web addresses), 1 to 4096
+# keyed_per_sandbox = 16              # of those per sandbox, 1 to 256 and at most keyed_connections
+# keyed_answer_seconds = 120          # the longest wait for a keyed address's answer to begin, 1 to 3600
+# [[egress.allow]]
+# host = "pypi.org"                   # an exact host, or "*.example.org" for its subdomains only
+# ports = [443]                       # 1 to 16 ports

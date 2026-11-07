@@ -1,0 +1,7 @@
+id = "ts-feature-status-filter"
+title = "Add a status filter to a task listing function"
+tags = ["typescript", "feature", "small", "fallback-relevant"]
+budgets = { max_steps = 30, wall_clock_secs = 600, max_tokens = 200000 }
+protected = []
+check = { image = "workstation", timeout_secs = 120 }
+template = "workstation"
