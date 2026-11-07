@@ -1894,7 +1894,7 @@ states"). Not quarantined: under investigation, to be fixed before the main push
 **`rt_i_001_first_frame_must_be_session_config_before_history_or_actions` timed out** (RT-I-001, P0;
 `crates/tqa-runtime/tests/boundaries.rs`). Not quarantined: one episode, not reproduced since.
 - *Symptom.* `Error: Elapsed(())` (a fixture wait's 5 s real-time bound): once in a full `cargo test -p tqa-runtime` run
-  (5.86 s) and once more run alone right after (6.02 s), on 1 Oct 2026, with the host shared with other teams' builds.
+  (5.86 s) and once more run alone right after (6.02 s), on 1 Oct 2026, with the host shared with other builds.
 - *Bound against work.* Each wait gets 5 s of real time for milliseconds of work (a refused first frame, one 125 ms
   redial on the fake clock, a scripted answer, a stop), so a miss is a hang at one step, not slowness. The plain
   `Elapsed` came from a fixture wait (`wait_for`, `wait_event` or `stop`), not the gateway's registration waits (those

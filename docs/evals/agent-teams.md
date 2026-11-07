@@ -68,7 +68,7 @@ budget and deadline at their defaults, and the liveness thresholds at theirs.
 their DB tests (GW-I-107, GW-I-108, GW-I-111) and by the web's own tests; E2E-AGENTS-020 keeps one happy path plus
 the restart.
 
-**On c15 (8 Oct 2026):** the agents stack suite (`deploy/tests/demo.py --suite agents`, on C15 = dev `b5caac76`'s
+**On c15 (8 Oct 2026):** the agents stack suite (`deploy/tests/demo.py --suite agents`, on C15's
 images, step 2b, 05:29 to 05:31) passed 5 of 6.
 - **E2E-AGENTS-020** passed, both its plain run and its run with a gateway restart.
 - **The owner's edge cases:** E2E-AGENTS-022 (Stop team), 023 (a restart while helpers work), 024 (deleting a lead
@@ -77,7 +77,7 @@ images, step 2b, 05:29 to 05:31) passed 5 of 6.
   which comes in c16.
 
 **On c16 (12 to 20 Oct 2026):** the suite has run in every c16 integration from 16d on. It passed 12 of 12 on 16d to
-16j: E2E-AGENTS-020, E2E-AGENTS-021…030 and WEB-E2E-062. On 16y (dev `5a59ad1d5`, 20 Oct) it passed **17 of 17** in 6.9
+16j: E2E-AGENTS-020, E2E-AGENTS-021…030 and WEB-E2E-062. On 16y (20 Oct) it passed **17 of 17** in 6.9
 minutes, with the five cases added since:
 - E2E-AGENTS-031, a message to a leading lead;
 - E2E-AGENTS-032, a lead that ends its turns without `done`;
@@ -210,7 +210,7 @@ are short and split by partition.
   convention.
 
 **Run plan for Fri 9 and Sat 10 Oct (the lead's decisions, 7 Oct):**
-- **Two nights** on the GPU slot, with Team B's agreement.
+- **Two nights** on the shared GPU's night slot.
 - **Not enough room for the whole design:** that's 27 tasks × 2 sides × 3 attempts, about 60 h of serial model time.
   So the two nights favour the new kinds, which answer the owner's question, and the short set's three attempts move
   to later nights.

@@ -1,8 +1,8 @@
 # Gate 1: Walking skeleton
 
-**State:** **reached**, by the technical lead's evaluation below (12 Oct 2026, dev `8fa48152`). Until then the page was a draft. Phase 1 was built and imported on 23 and 24 Sep 2026
+**State:** **reached**, by the technical lead's evaluation below (12 Oct 2026). Until then the page was a draft. Phase 1 was built and imported on 23 and 24 Sep 2026
 (the first import `a50bac90`), before this folder had pages, and no Gate 1 report was written then. This page
-assesses the gate on the v1.0 release's evidence: 15b's full integration (dev `23112f6b`, 10 Oct 2026, 14:56 to
+assesses the gate on the v1.0 release's evidence: 15b's full integration (10 Oct 2026, 14:56 to
 17:51) and, for one real-stack spec, 15c's web run (15b's server with the web image `28c0f621…`; 15c is on main as
 `1586fd9f`). On that evidence **all 36 IDs pass, PERF-001 is recorded well inside its target, and the phase demo
 passed**, with one demo step not automated (Phase demo).
@@ -15,7 +15,7 @@ WEB-E2E-004 and WEB-E2E-018 with the fake model server (the web app also works o
 PERF-001 baseline. Plus the phase demo (DEV-PLAN Phase 1) and milestone MS1.
 
 ## How it was checked
-- **The references:** `tools/gate-evidence.py 1`, the offline listing (no test run), on dev `3940a08d`, which names
+- **The references:** `tools/gate-evidence.py 1`, the offline listing (no test run), on the tree of 12 Oct 2026, which names
   each ID's tests: 281 references for the 36 IDs.
 - **The results:** each reference's result line in 15b's integration logs (`int-23112f6b-*.log`, the coverage logs
   left out): a nextest `PASS` line for a Rust test; the test file's line in the vitest step, where 2,462 of 2,462

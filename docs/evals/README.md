@@ -4,6 +4,11 @@ One page per phase gate (DEV-PLAN §8, TEST-PLAN §17): scope, what was independ
 their environment, and the limits of the acceptance. The technical lead writes and accepts each report. A page marked
 **draft** has been assembled from the team's gate audits and is awaiting that acceptance.
 
+**Build names and IDs.** Most pages record measurements made before release 17.0 (3 November 2026), whose
+development history is not part of this repository. They name the builds of that time: a cycle's release candidate
+(for example `c15` or `c14b-rc`) and its respins (`15b`, `16y`: cycle 16's build y). The commit and image IDs they
+quote, such as `16589e55`, identify what ran; they don't resolve in this repository. Release 17.0 is cycle 17's build.
+
 | Gate | Phase | Page | State |
 |---|---|---|---|
 | 0 | Foundation | [gate-0.md](gate-0.md) | **technical criteria met** (2026-10-12), on 15b's evidence: the four IDs and the CI gates pass; open on the product owner's MS0 record |

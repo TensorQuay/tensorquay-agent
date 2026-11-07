@@ -1,6 +1,6 @@
 # Gate 6: Extensions (live status)
 
-**State:** the gate is **reached**, by the technical lead's evaluation below (2026-09-27, dev `dd97549`).
+**State:** the gate is **reached**, by the technical lead's evaluation below (2026-09-27).
 The first audit was on `3c4493f` the same morning.
 
 ## Scope
@@ -74,7 +74,7 @@ asserts (E1-E6) are in `tests/e2e/gate6_evidence.py`:
 **Result (2026-09-27):** six runs on the same images. Runs 1-3: 2 of 3 passed; run 1 failed in the stack's setup,
 before the demo's first step, from an engine stall traced to host I/O saturation. Runs 4-6, after the fix: 3 of 3 passed.
 
-Images, built from dev `dd97549`: gateway `sha256:f1bf9008b05a0129f8606840c0532eaeedfd7f7b5605b08e8860804fc611da8a`;
+Images: gateway `sha256:f1bf9008b05a0129f8606840c0532eaeedfd7f7b5605b08e8860804fc611da8a`;
 Workstation runtime `sha256:a453f371e8fce92fe9c618f66fbe620dcb1dc51121e5d7991fbe32b156108bd8` (protocol revision 8).
 Driver: `tests/e2e/gate6.py` as merged in dev.
 
@@ -109,8 +109,7 @@ that exact moment was not recorded, so run 1 itself is attributed by this mechan
 helpers print the engine's stacks and the host's I/O pressure whenever such a step times out.
 
 ## Evaluation (technical lead, 2026-09-27)
-**Verdict: Gate 6 is reached.** Every row of the TEST-PLAN Gate 6 set passes, and the demo passed on the images built
-from dev `dd97549`.
+**Verdict: Gate 6 is reached.** Every row of the TEST-PLAN Gate 6 set passes, and the demo passed on those images.
 
 - **Checked by the lead:**
   - the lead's full integration run on `dd97549` (18:16-18:56), on the same images as the demo: E2E-MCP-006 and

@@ -5,12 +5,12 @@
 pressure, three TEST-PLAN §19a entries are closed, and the microVM host-key gap is recorded outside the gate's scope.
 15c (15b's server with a new web image) is on main as `1586fd9f`. Before that: **On c15 (8 Oct 2026), every row but one passed in the integration's first pass on the candidate's
 images; SBX-F-009 failed there** (a vCPU ENOMEM under host memory pressure; the analysis below) **and passed in the
-G-13 rerun**, with all 18 gates. **9 Oct: c15 was respun as 15b** (dev `23112f6b`; only the gateway's telemetry and
+G-13 rerun**, with all 18 gates. **9 Oct: c15 was respun as 15b** (only the gateway's telemetry and
 event hub changed), so the evaluation is drafted for 15b below. **11 Oct: refreshed on 15b, every row passed** (G-13
 18 of 18 on the first pass, SBX-F-009 included; PERF-011 within the owner's 3 s; REL-I-002), **except PERF-012's
 microVM half, which failed and was waived by the product owner for 15c**. The gate stays at that until its evaluation
 is signed (the technical lead, 11 Oct); it was signed the same day.
-Earlier: refreshed on candidate 14b (`c14b-rc`, dev `16589e55`, the integration of 4 to 5 Oct 2026) for the
+Earlier: refreshed on candidate 14b (`c14b-rc`, the integration of 4 to 5 Oct 2026) for the
 technical lead's acceptance. **Not reached** until that evaluation is recorded here. On 14b every row in the gate's
 scope passed in the integration's first pass, under its load, with no rerun: G-13 passed all 18 of its gates, and
 13h's first-pass failures did not recur. Still open: the closing of four TEST-PLAN §19a entries and the evaluation
@@ -31,21 +31,21 @@ holds the one Gate 8 row that failed in c15's integration, and the lead's decisi
 
 **A VM host dies at start when the host kernel can't allocate a vCPU (SBX-F-009, ENOMEM): host memory pressure, not
 c15.**
-- **What happened.** C5's integration (dev `b5caac76`, images of 8 Oct 01:22) failed one test of G-13-suites,
+- **What happened.** C15's integration (images of 8 Oct 01:22) failed one test of G-13-suites,
   SBX-F-009/SBX-C-011, 16 microVMs at once within the memory budget (8 Oct 02:57). Two of the 16 VM hosts exited 139
   about 0.23 s after starting, with `oom=false`. SBX-F-038's new logging kept the hosts' last lines. In both,
   Firecracker v1.17.0 itself panicked at `src/vmm/src/vstate/vcpu.rs:144:48`: `called Result::unwrap() on an Err
   value: VcpuFd(Error(12))`. Errno 12 is ENOMEM, returned by a KVM vCPU ioctl. That's host kernel memory, not the
   container's cgroup. The test took 217 s, against about 42 s on a quiet host. Its failure cancelled the suite's other
-  11 of 97 tests (fail-fast). The VM host was the gate's only Team A job at the time; the release dry run had ended at
+  11 of 97 tests (fail-fast). The VM host was the gate's only job at the time; the release dry run had ended at
   01:50.
 - **Not c15's code or images.**
-  - C5's VM host image (`sha256:d6a37e4c360a`, the new Debian base of the release gate fix) and 2012f9d5's
+  - C15's VM host image (`sha256:d6a37e4c360a`, the new Debian base of the release gate fix) and 2012f9d5's
     (`sha256:9c45ccc9cc1e`) carry the same statically linked Firecracker binary (sha256 `99ad0f5cd0514a88…`,
     v1.17.0). The base image doesn't touch Firecracker's code.
-  - On the same rootfs (`489ab9525b4c…`), kernel and test binary, 8 Oct 05:14 to 05:18: C5's VM host passed 3 of 3
+  - On the same rootfs (`489ab9525b4c…`), kernel and test binary, 8 Oct 05:14 to 05:18: C15's VM host passed 3 of 3
     (41, 43 and 42 s) and the old one 3 of 3 (45, 42 and 42 s), with no exit 139 and no panic.
-  - The whole G-13 on C5, rerun at 05:19 to 05:28: exit 0, all 18 gates passed, the suites 97 of 97 (the 11
+  - The whole G-13 on C15, rerun at 05:19 to 05:28: exit 0, all 18 gates passed, the suites 97 of 97 (the 11
     cancelled ones included), SBX-F-009 in 42.4 s. A 5 s memory sampler showed at least 51.2 GB of 63.5 GB
     available throughout. Swap already held 8.4 GB, so the host had been short of memory earlier.
 - **Likely cause.** Starting 16 VMs at once, the host kernel couldn't allocate KVM's per-vCPU memory. Other teams'
@@ -63,7 +63,7 @@ c15.**
   G-13 rerun with its sampler are in the team's `c15-run/sbx-f-009/` folder.
 
 ### The other rows on c15 (8 Oct 2026)
-**Source:** the same integration of C15 = dev `b5caac76` (logs `int-b5caac76-*`, on the candidate's images: gateway
+**Source:** the same integration of C15 (logs `int-b5caac76-*`, on the candidate's images: gateway
 `8fe72138b44c`, runtime `489ab9525b4c`, Workstation `797499325f94`, VM host `d6a37e4c360a`), and the G-13 rerun above
 (8 Oct 05:19 to 05:28, `c15-run/sbx-f-009/g13-kvm.log`).
 - **Method:** each scope ID's Rust tests were found by the ID in a `TEST:` line or comment above the test, or in the

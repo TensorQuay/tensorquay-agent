@@ -1,7 +1,7 @@
 # Gate 4: Team
 
-**State:** the gate is **reached**, by the technical lead's evaluation below (2026-09-28, dev `a0bf5ef`). The page was
-assembled from the gate audit of 2026-09-26 (dev `4d4e020`, with rechecks on `fe8cb2e`) and the follow-up tests merged
+**State:** the gate is **reached**, by the technical lead's evaluation below (2026-09-28). The page was
+assembled from the gate audit of 2026-09-26 (with rechecks on `fe8cb2e`) and the follow-up tests merged
 since.
 
 ## Scope

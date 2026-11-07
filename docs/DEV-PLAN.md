@@ -1,6 +1,6 @@
 # TensorQuay Agent: Development Plan
 
-Status: **v0.6** (21 Oct 2026): v0.5 (8 Oct 2026) with where each phase stands and the c16 step of the path brought to c16's candidate 16y (§4a, §4b): its acceptance steps, its evidence so far and the PO's decisions for it since 12 Oct. This is the phase-by-phase half of the development
+Status: **v0.7** (7 Nov 2026): v0.6 (21 Oct 2026) with where each phase stands and what comes next brought to releases 17.0 and 17.1 (§4a, §4b). This is the phase-by-phase half of the development
 plan; the design half is [ARCHITECTURE](ARCHITECTURE.md). Requirements: [PRD](PRD.md). Tests: [TEST-PLAN](TEST-PLAN.md).
 Rules: [DEV-GUIDELINES](DEV-GUIDELINES.md). v0.2 replaces the layer-by-layer phases of v0.1 with a **walking
 skeleton first, then vertical iterations**: something runs end to end in the browser within the first weeks, and
@@ -262,137 +262,34 @@ It is one stored log per goal, deleted with the goal. It starts with its contrac
 Phase 10 did: E2E-SWARM-009 and E2E-SWARM-017 are its end-to-end rows, and the gateway and tool rows are numbered
 then.
 
-## 4a. Where each phase stands (21 Oct 2026)
-Phases 0 to 8 are built, and so is Phase 9's feature work. Phase 10 (agent teams) and Phase 11 (computer use) are built
-for the release after v1.0, c16. The v1.0 candidate is **15c**: c15 became 15b (two memory-leak fixes, after c15's soak
-stopped on the gateway's growing memory), then 15c (15b's server with a new web image that shows a model retry in
-words); 15c is on main as `1586fd9f`. Gates 1 and 3 to 9 are reached on 15b's evidence, gate 9 with the PO's waiver
-of PERF-012's microVM half; gate 2 is reached on one condition, and gate 0 is open on the PO's MS0 record (the first
-row). A gate counts as reached only by its evaluation report in `docs/evals/`.
+## 4a. Where each phase stands (7 Nov 2026)
+Releases before 17.0 were internal (the v1.0 candidate, 15c, in October). **Release 17.0** (3 Nov 2026) is the first
+public one and carries Phases 0 to 11; **17.1** (7 Nov) is a fix release (§7). A gate counts as reached only by its
+evaluation report in `docs/evals/`; the [list](evals/README.md) also explains the build names those pages use.
 
-c16's candidate is **16y** (dev `5a59ad1d5`, built 20 Oct): 16x and one fix, TCP keepalive on every socket the gateway
-accepts, which 16x's soak called for (below). Dev `b256c56ee` adds only a test fix (GW-I-314's case). Gates 10 and 11
-are not reached yet: their pages are the drafts of 12 Oct, being brought to 16y's evidence.
-
-| Phase | Built | Gate (21 Oct 2026) |
+| Phase | Built | Gate |
 |---|---|---|
-| 0 to 3 | yes | **reached** by the technical lead's evaluation (12 Oct 2026), on 15b's evidence (`gate-0.md` to `gate-3.md`): gates 1 and 3 reached (3 for its 20 live IDs, Docker mode); gate 2 on one condition, SOAK-002's complete run (c16's soak): 16x's soak ran every end-of-run check (20 Oct; no orphans, a clean teardown, its sign-in renewed once), and the technical lead's ruling on the condition goes in `gate-2.md`; gate 0's technical criteria met, open on the PO's MS0 record |
-| 4 Team | yes | **reached** (`gate-4.md`, 28 Sep) |
-| 5 Local-model quality | yes | **reached** on 15b (`gate-5.md`, the technical lead's verdict, 11 Oct): every local-model run passed on 15b's images (10 Oct): E2E-CMP-003 50/50 against the reference's 50/50, E2E-WAVE-001 60/60, E2E-FALLBACK-004 24 of 30, the phase demo, and E2E-WAVE-002 60/60 with 8 helpers; M6 met |
-| 6 Extensions | yes | **reached** (`gate-6.md`, 27 Sep) |
-| 7 Channels | yes | **reached** on c15 (`gate-7.md`, the technical lead's verdict, 8 Oct) |
-| 8 Firecracker | yes | **reached** on 15b (`gate-8.md`, the technical lead's verdict, 11 Oct): every scope row passed in 15b's first pass (G-13 18 of 18, SBX-F-009 included); c15's SBX-F-009 failure is accepted as host memory pressure. Outside the gate: the start crash of c14b-rc wasn't reproduced in 1,000 starts on 12 Oct, and the microVM host-key case passed on c16's images |
-| 9 Release | features yes | **reached** on 15b (`gate-9.md`, the technical lead's verdict, 11 Oct), **with the PO's waiver of PERF-012's microVM half** (writes at 0.33 to 0.59 of the host's speed, against 0.70; no small fix, not a 15b change; the Docker half passed). Every metric M1 to M8 is met on 15b: M5, the 24-hour soak, by the PO's approved growth rule (PRD §12, item 25), with the gap below; Gate 9's rerun passed |
-| 10 Agent teams (v1.1) | yes, in c16 | **not reached yet; c16's acceptance in its last steps** (below): the tests, the page pass, the live sessions and the evaluation are done; 16y's soak and the rest of Gate 9 are under way, then `gate-10.md`. Open there: no c16 soak, 16y's included, has agent teams in its mix |
-| 11 Computer use | yes, in c16 | **not reached yet; c16's acceptance in its last steps** (below): 16y's integration passes every functional suite, the live checks passed on 16o to 16q, 16u and 16x, and the grounding evaluation is measured; 16y's soak and the rest of Gate 9 are under way, then `gate-11.md` |
+| 0 Foundation | yes | technical criteria met (12 Oct 2026); open on the product owner's MS0 record |
+| 1 Walking skeleton | yes | reached (12 Oct 2026) |
+| 2 Robustness | yes | reached on one condition (12 Oct 2026): SOAK-002's complete run; the ruling is pending |
+| 3 Safety | yes | reached (12 Oct 2026), Docker mode |
+| 4 Team | yes | reached (28 Sep 2026) |
+| 5 Local-model quality | yes | reached (11 Oct 2026) |
+| 6 Extensions | yes | reached (27 Sep 2026) |
+| 7 Channels | yes | reached (8 Oct 2026) |
+| 8 Firecracker | yes | reached (11 Oct 2026); PERF-012's microVM half waived by the product owner |
+| 9 Release hardening | yes | reached (11 Oct 2026), with the same waiver |
+| 10 Agent teams (v1.1) | yes, in 17.0 | not reached yet: `gate-10.md` is a draft. The evaluation of one agent against a team on the same budget showed no difference either way (indicative, `agent-teams.md`) |
+| 11 Computer use | yes, in 17.0 | not reached yet: `gate-11.md` is a draft; the grounding evaluation is in `computer-grounding.md` |
+| 12 Swarms | no | a later phase |
 
-**The soak's gap, accepted by the PO (10 Oct):** the soak signed in once, and its sign-in expired at hour 24 (the
-server's 24-hour session limit), so the end-of-run checks of the last 8 of its 72 conversations didn't run. Leftover
-environments were checked by hand (none). The harness now renews its sign-in: a 2-hour rehearsal on dev `298fddf1`
-with 60-second sessions passed on 11 Oct, and every end-of-run check ran. c16's soak must complete every end-of-run
-check; 16x's did (20 Oct).
-
-**c16's acceptance, where it stands (21 Oct 2026).** The order set on 12 Oct (from a row-by-row review against 16c's
-evidence) still holds; the candidate moved from 16d to 16y as fixes landed.
-1. **Before the build: done** (12 Oct): the `done` acceptance check built (GW-I-198), SBX-C-020 narrowed to Docker
-   for v1.1, and the Desktop and test fixes merged.
-2. **The integration: done on 16y** (20 Oct, 20:08 to 23:16): every functional suite passed, with no failed gate. Two
-   speed-only tests failed beside other teams' jobs, both in code 16y doesn't change and both passing on 16w and 16x:
-   PERF-002's event throughput (the sender was held back) and a microVM flush time (p95 91 ms against 50 ms). They
-   rerun on 16y with the rest of Gate 9 (step 5). The agents stack suite passed 17 of 17 in it.
-3. **The page pass and the live sessions: done on 16k to 16x** (16y changes no page): the real-world campaign the PO
-   asked for, on 16k (17 Oct): 14 computer-use and 14 agent-team runs with the real model, 20 findings, fixed from
-   16m on or kept as c17 items and PO decisions (`c16k-realworld/RESULTS.md`); the live checks on 16o to 16q, then on
-   16u (Take over after a run, a lead's header while its team works, Stop team) and on 16x (20 Oct: the desktop's own
-   accessibility reader, Take over after clearing the browser's sign-ins, uploads, a time field, typed addresses;
-   the team page never reads "Done" while its team works, WEB-U-416).
-4. **The GPU evaluations: done.** Gate 5's runs on 16x (20 Oct): E2E-CMP-003 50/50 against the reference's 49/50,
-   E2E-WAVE-001 58/60, E2E-WAVE-002 60/60 with 8 helpers, the phase demo 1/1, no harness failure. E2E-FALLBACK-004
-   passed its row at 17/30 on 16x, down from 27/30 on 16j; the binary is ruled out by replay, and a rerun on 16y gave
-   26/30. The agent teams' evaluation (three nights, 16b, 16c and 16e, 40 attempts judged blind; one agent against a
-   team on the same budget; indicative): "Not shown either way: both intervals include zero, on 7 and 13 tasks"
-   (the judged results, 14 Oct; `agent-teams.md` §3 is being filled from them). The grounding evaluation
-   (`computer-grounding.md` §6, 12 Oct, Qwen3.8 27B): by ref 200/200, by mark 199/200, by coordinates 46/200, so
-   `pixel_grounding` stays off for the local route; a rerun on 16i's capture (15 Oct) gave 200/200, 196/200 and
-   34/200, the same verdict.
-5. **The soak and Gate 9: under way.** 16x's soak (19 to 20 Oct) passed SOAK-001's rule at 4.74 % (limit 5 %) and
-   found a held connection: after a network cut, the gateway kept a sandbox's idle keep-alive open with no peer. 16y
-   fixes it (GW-U-205, GW-I-314: red on 16x, green on 16y) and gets its own 24-hour soak (from 21 Oct, 00:07), with a
-   check registered in advance that the same fault's connection is freed within 2 minutes. Gate 9 on 16x: PERF-001,
-   010 and 020 showed no slowdown and count for 16y; PERF-021, 012, 011, 002 and 003 run on 16y itself after the
-   soak. The upgrade from a 15b database (step 0088) through every c16 migration passed 66 of 66 checks on 16x.
-6. **The write-ups: next.** `gate-10.md`, `gate-11.md`, `agent-teams.md` and `computer-grounding.md` are brought to
-   16y's evidence, then the technical lead's verdicts.
-
-**The PO's decisions for c16 since 12 Oct** (not yet in PRD §12): the zip advisories listed under ADR-0017 point 9
-(17 Oct); the zbus 5 "unmaintained" notices not ignored, so the desktop's accessibility reader is our own on zbus 6
-(18 Oct, in 16v); 16y with its own soak, while 16x's Gate 5 and the clean parts of its Gate 9 count for it (20 Oct).
-
-**Agent teams' acceptance** (the PO's bar of 7 Oct: every test passes; the screens checked by automated tests and by a
-live session; long tasks and real collaboration measured):
-1. **Tests:** every agent-team row listed with its status; the edge cases written. The agents stack suite (E2E-AGENTS-020
-   to 030 and WEB-E2E-062) never ran on a c16 build: on 12 Oct it ran on dev's images for the first time, found two
-   faults (a helper that ends without reading its brief was never reported idle; a test found a task by a title two
-   suites share), and passed 12 of 12 once they were fixed. Every integration since runs it, and the Desktop suite
-   too (the agents suite 17 of 17 on 16y).
-2. **Screens:** the design review is done; its fixes (an ended team reads as ended, a failed helper can be stopped, the
-   lead's Stop line) are in c16.
-3. **The lead's live sessions:** on c16's images with the real local model, from 11 Oct, 14:21 (agent teams, then
-   computer use), again on 16i, then the real-world campaign the PO asked for, on 16k, and the team and Desktop live
-   checks on 16o, 16p, 16q, 16u and 16x (step 3 above).
-4. **The evaluation** (one agent against a team, on the same budget): three nights on c16's images (16b, 16c and
-   16e), with long tasks and tasks that need real collaboration, 40 attempts judged blind (night 1's team side
-   started no helper and was left out): no difference shown either way, and teams used their helpers in few tasks.
-   Results are labelled indicative; the write-up is step 6.
-
-The PO's decisions since v0.2 are in PRD §12, items 10 to 25.
-
-## 4b. The path to v1.0 (11 Oct 2026)
-1. **15c, the v1.0 candidate** (`release/c15` at `bf85085f`: 15b's server, dev `23112f6b`, with 15c's web image).
-   - **Done:** the 24-hour soak (passed, with the accepted gap); Gate 9's rerun; Gate 5; 15b's full integration, where
-     every gate and step passed and the four browser suites that failed were explained (test faults, and the retry
-     display that 15c fixes); every browser suite on 15c's web; the first-hour check on a fresh install (no P1); the
-     lead's browser pass (no P1). The TEST-PLAN audit's verdict: ready once the PO waives PERF-012's microVM half.
-   - **Waiting on the PO:** that waiver, and the OK for the main push (§7).
-   - **After the push:** the PO's own checks: the hosted model providers (E2E-PROVIDER-014) and a Mac with Docker
-     Desktop (SBX-D-002, not run for 15c: no sandbox, egress or proxy file changed since c15).
-2. **Gate reports refreshed** on 15c (gates 5, 8 and 9; gate 7 is done), then the PO's sign-off (MS5) and v1.0.
-3. **c16, the release after v1.0** (agent teams and computer use):
-   - **Contents:** computer use (Phase 11) and its review fixes; agent teams' fixes (a failed or given-up helper, the
-     lead's Stop, an ended team); turns on one workspace in the order they were accepted; the compaction density
-     measured per request; the repeated-failure guard's reset; the decision engine's test fake and the stack tests of
-     the c15 functions that had none; the Simplified Chinese and accessibility passes.
-   - **Built on 11 Oct** from dev `298fddf1`, with the Desktop; the review stack moved to it the same day. The
-     candidate moved on as fixes landed, to **16y** (dev `5a59ad1d5`, 20 Oct); where its acceptance stands is in §4a
-     (21 Oct).
-   - **Still to come (21 Oct):** 16y's 24-hour soak (from 21 Oct, 00:07), then the rest of Gate 9 on 16y; the
-     write-ups (`gate-10.md`, `gate-11.md`, `agent-teams.md`, `computer-grounding.md`) and the technical lead's
-     verdicts; then the PO's own try of 16y and the PO's OK before c16 goes to main.
-4. **c17, after c16:** the merge sheet's steps, in order: 15b's commit onto dev; the Web search list; the task's
-   latest run (B1); "Recently refused" with "Allow this site"; the disabled decision engine's fixes; a new
-   environment's slot (B6); the first hour's small fixes; copy sweeps 1 and 2; the app's own not-found and error
-   pages; Escape stops a run after a confirmation; and a cancelled waiting message leaving the page with its text
-   back in the box (B16, a known issue in 15c). Also for later: test stacks bind the machine's network address,
-   allowed for test runs for now (the PO, 10 Oct).
-5. **PO decisions (8 Oct 2026), each as the team recommended:**
-   - **c15 ships with the slot leak as a known issue:** rarely, a task slot stays in use when waiting work never runs
-     (after several queued tasks were cancelled, deleted or left waiting, or a busy replacement of a task's
-     environment); a new task then shows "Starting…" with no error. Restarting the gateway frees the slots, and a
-     later release fixes it (c15's release notes).
-   - **ADR-0035's network extras** (PRD §12, item 23): the allow-list as built is confirmed; per-profile lists come
-     when someone asks for them; observe mode is dropped. **"Recently refused" with "Allow this site" is queued after
-     c16**, about 2 to 3 days with its tests.
-   - **A desktop sign-in lasts one run in c16** (the computer-use review, finding 23; ADR-0039 §6; PRD §12, item 24):
-     every run ends signed out, so working in an account means a Take over and a sign-in before each message.
-     Keeping a sign-in for the whole task is for a later release.
-6. **PO decisions since (9 to 11 Oct 2026):**
-   - **The soak's growth rule** (9 Oct; PRD §12, item 25; TEST-PLAN SOAK-001).
-   - **The soak's gap is accepted, and written down to be done later** (10 Oct): c16's soak completes every end-of-run
-     check (4a).
-   - **`suggest_environment` is dropped** (10 Oct; ADR-0039 amended).
-   - **Test stacks may bind the machine's network address for test runs, for now** (10 Oct); to change later.
-   - **The PO tests the hosted model providers personally** (10 Oct): E2E-PROVIDER-014's evidence is that test, after
-     the push.
+## 4b. What comes next (7 Nov 2026)
+1. **Gates 10 and 11:** `gate-10.md`, `gate-11.md` and `agent-teams.md` brought to the current release's evidence,
+   then the technical lead's verdicts.
+2. **Gates 0 and 2:** the product owner's MS0 record, and the ruling on SOAK-002's condition.
+3. **Fix releases** as findings come in (§7).
+4. **Later:** "Recently refused" with "Allow this site" (ADR-0035 point 3); keeping a desktop sign-in for a whole
+   task (ADR-0039 §6); Phase 12, swarms, when the product owner calls for it.
 
 ## 5. Parallel tracks
 Engineering runs in three streams that own disjoint parts of the tree, so they progress in parallel and meet at each

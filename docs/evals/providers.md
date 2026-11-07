@@ -1,6 +1,6 @@
 # Live provider suite (E2E-PROVIDER-014)
 
-**State:** passing on the release candidate of 2026-09-28 (dev `545c3d0`): all four hosted routes verified and each
+**State:** passing on the release candidate of 2026-09-28: all four hosted routes verified and each
 passed its task. This page is the repository's summary. It names no provider or model: each route is named by its
 protocol and settings, and the mapping to providers is kept outside the repository.
 
@@ -19,7 +19,7 @@ The run's output shows no key, base URL or model name. Each run spends real quot
 lead's approval, before a `main` update or a demo.
 
 ## Results: release candidate, 2026-09-28 09:21–09:23 +0800
-Images of dev `545c3d0` (runtime protocol revision 8), the suite at `f88b325`.
+Images of that day's release candidate (runtime protocol revision 8).
 
 | Route | Settings | Tool call | Round trip | Strict line breaks | First byte | Task | Tokens (prompt / completion) | Requests |
 |---|---|---|---|---|---|---|---|---|

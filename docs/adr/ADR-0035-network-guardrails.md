@@ -381,7 +381,7 @@ nothing asks a person to approve, and it stays simple. §2's points 1 to 4:
 1. **The host:port allow-list with wildcards, default deny: confirmed** as v1.0's design, as built.
 2. **Per-profile network lists: when someone asks for them**, not planned now. They would add a second place where the
    rules live. Until then, an administrator who wants one kind of task to reach a site allows it for every task.
-3. **Recent refusals with "Allow this site": built after c16** (DEV-PLAN §4b), as point 3 describes: an
+3. **Recent refusals with "Allow this site": a later release** (DEV-PLAN §4b), as point 3 describes: an
    administrator's tidy-up of the list, never a gate.
 4. **Observe mode: dropped.** It would switch the only guardrail off, if only for a while; point 3 builds a list from
    real refusals without opening anything.

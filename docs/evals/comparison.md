@@ -66,7 +66,7 @@ task set with the same model.
 - **Tokens** are recorded as a secondary measure, not part of M6.
 
 ## Setup
-- **Candidate:** dev `a14afc0`, images pinned by ID: gateway `c580e6b4b246`, runtime `47fea18da874`, Workstation `8ccb9b88a291`.
+- **Candidate:** the release candidate above, images pinned by ID: gateway `c580e6b4b246`, runtime `47fea18da874`, Workstation `8ccb9b88a291`.
 - **Reference:** OpenHands 1.24.0, whose agent server is 1.49.6 (source commit `fcc102a`, MIT), built on the
   candidate's runtime and Workstation images: `8eefa67b9887` and `38f832321861`. Its API was checked
   against its own `/openapi.json`, and one uncounted attempt passed on 28 Sep with no outside network.

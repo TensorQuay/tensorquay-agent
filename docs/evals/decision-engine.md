@@ -35,7 +35,7 @@ completion? That cost at equal quality is what the seam exists for (ADR-0013 poi
 | **Routes** | `local`: the shared GPU's Qwen3.8-27B, thinking on, native tools (the eval nights' route). `local-fast`: the same server and model, thinking off (`chat_template_kwargs.enable_thinking=false`), native tools, declared as `local`'s fallback, which is how a profile's engine may choose it |
 | **Size** | 3 rounds × 2 arms × 20 tasks = **120 attempts**, 60 pairs; ABBA per round |
 | **Fixed** | One model, one route set, one candidate's images, one harness build, one tree; concurrency 1 (below) |
-| **Caps** | `--max-engine-calls 1500` (the flag is required; the reference engine costs nothing) and `--max-wall-minutes` set to the window. The night's stop rules (cutoff, Team B pause) apply as on eval nights |
+| **Caps** | `--max-engine-calls 1500` (the flag is required; the reference engine costs nothing) and `--max-wall-minutes` set to the window. The night's stop rules (cutoff, a pause when the shared GPU is needed) apply as on eval nights |
 
 **Two changes from ADR-0013 point 8, for the lead's decision:**
 1. **The engine arm is the reference engine, not the outside typed-question service.** It costs no money, needs no
