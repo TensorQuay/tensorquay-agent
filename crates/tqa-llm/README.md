@@ -147,7 +147,8 @@ fails validation. Beta features go through `extra_headers`. Requests are built f
     `reasoning = { field = "thinking", allowed = ["low", "high"], default = "low", budget_tokens = { low = 2048, high = 8192 } }`.
   - The effort becomes `thinking: {type: "enabled", budget_tokens}`, and `reasoning.field` does not apply.
   - A reasoning policy without `budget_tokens` thinks adaptively, for models that refuse a budget: requests send
-    `thinking: {type: "adaptive"}` and the effort as `output_config.effort`. `extra_body` may add other
+    `thinking: {type: "adaptive", display: "summarized"}` and the effort as `output_config.effort`. Summarized, not
+    omitted as these models do by default, so the task page shows what the model thinks. `extra_body` may add other
     `output_config` fields but not the effort (LLM-U-055).
   - A budget table on another protocol fails validation.
   - `extra_body` cannot override `model`, `messages`, `system`, tools, `tool_choice`, `stream`, `max_tokens`,
