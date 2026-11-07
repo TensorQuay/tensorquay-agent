@@ -174,4 +174,19 @@ test("WEB-E2E-012 two agents and a person decide, veto and share a task on a cha
   for (const agent of await agents.all())
     await expect(agent).toContainText(/Idle|Working|Done/);
   await expect(members).not.toContainText(/Failed|Status unknown/);
+  // WEB-U-426 on the real stack: above the box, as many agents as the Members tab shows not Working, read together
+  // (the list comes again every 15 s).
+  await expect(async () => {
+    let resting = 0;
+    for (const agent of await agents.all())
+      if (!/Working/.test((await agent.textContent()) ?? "")) resting += 1;
+    const idle = page.getByRole("region", { name: /running$/ });
+    if (resting === 0) await expect(idle).toHaveCount(0);
+    else
+      await expect(idle).toHaveAccessibleName(
+        resting === 1
+          ? "1 agent isn’t running"
+          : `${resting} agents aren’t running`,
+      );
+  }).toPass();
 });

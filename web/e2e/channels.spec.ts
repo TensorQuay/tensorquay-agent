@@ -148,6 +148,16 @@ for (const width of [1024, 1280] as const)
           .getByRole("list", { name: "Members" })
           .getByRole("listitem", { name: "Reviewer · ben" }),
       ).toContainText("Done");
+      // WEB-U-426: above the box, the agents that aren't running. Reviewer has finished and isn't the viewer's to open,
+      // so it is named without a link; Coder is working and isn't listed.
+      const idle = page.getByRole("region", { name: "1 agent isn’t running" });
+      await expect(idle).toBeVisible();
+      await expect(idle).toContainText(
+        "An agent reads this channel only while its task runs: open its task and ask it to work here, or ask its owner when the agent isn’t yours.",
+      );
+      await expect(idle).toContainText("Reviewer · ben");
+      await expect(idle.getByRole("link")).toHaveCount(0);
+      await expect(idle).not.toContainText("Coder");
       await axe(page);
       // The owner's request: an agent's name opens its task, when the viewer may open it (the gateway's can_open).
       const members = page.getByRole("list", { name: "Members" });
