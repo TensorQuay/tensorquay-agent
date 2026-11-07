@@ -281,6 +281,17 @@ async fn changed(stream: &mut support::stream::Stream) -> Result<(u64, u64)> {
     Err("no team.changed".into())
 }
 
+/// The first `team.changed` frame whose version is past `before`: a frame for an earlier change may still arrive.
+async fn changed_past(stream: &mut support::stream::Stream, before: u64) -> Result<(u64, u64)> {
+    for _ in 0..8 {
+        let (version, last_seq) = changed(stream).await?;
+        if version > before {
+            return Ok((version, last_seq));
+        }
+    }
+    Err("no team.changed past the version read".into())
+}
+
 // TEST: GW-I-206
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
@@ -302,12 +313,12 @@ async fn gw_i_206_a_change_reaches_the_streams_as_team_changed(pool: PgPool) -> 
         .bind(&t.member)
         .execute(&f.pool)
         .await?;
-        let (version, _) = changed(&mut stream).await?;
-        assert!(
-            version > before["version"].as_u64().unwrap_or(u64::MAX),
-            "{version} after {}",
-            before["version"]
-        );
+        // The team's own creation is flushed within the second after it, so its frame can reach the stream after
+        // the read above, carrying `before` (the 7 Nov integration, on a loaded host): the change's frame is the first
+        // one past that version.
+        let before = before["version"].as_u64().unwrap_or(u64::MAX);
+        let (version, _) = changed_past(&mut stream, before).await?;
+        assert!(version > before, "{version} after {before}");
         let (_, after) = get(
             f,
             &format!("/api/v1/conversations/{}/team", t.lead.id),
