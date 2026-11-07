@@ -26,6 +26,7 @@ mod probe_hints;
 mod probe_hints_tests;
 #[cfg(test)]
 mod probe_ollama_tests;
+mod probe_slow;
 #[cfg(test)]
 mod probe_slow_tests;
 #[cfg(test)]

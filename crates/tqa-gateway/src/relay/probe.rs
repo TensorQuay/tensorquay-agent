@@ -368,12 +368,14 @@ pub(super) async fn run(
         server_context: None,
         usage_refusal: None,
     };
-    let outcome = tokio::select! {biased;
+    let mut outcome = tokio::select! {biased;
         () = cancel.cancelled() => Err(fail("cancelled")),
         result = tokio::time::timeout(deadline(route, probe.config), steps(route, &probe, &mut observed)) => {
             result.unwrap_or_else(|_| Err(fail("timeout")))
         }
     };
+    let out_of_time =
+        super::probe_slow::out_of_time_after_round_trip(route, &mut outcome, &mut observed);
     // Only after the model answered: Ollama lists a model once it's loaded.
     if outcome.is_ok() && local_route(route) {
         observed.server_context = tokio::select! {biased;
@@ -400,9 +402,10 @@ pub(super) async fn run(
                 observed.warnings.push("usage_missing");
             }
             if local_route(route)
-                && observed
-                    .output_tokens_per_second
-                    .is_some_and(|speed| speed < SLOW_TOKENS_PER_SECOND)
+                && (out_of_time
+                    || observed
+                        .output_tokens_per_second
+                        .is_some_and(|speed| speed < SLOW_TOKENS_PER_SECOND))
             {
                 observed.warnings.push(SLOW_ANSWERS);
             }
