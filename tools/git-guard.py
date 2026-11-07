@@ -21,6 +21,7 @@ from pathlib import Path
 
 IDENTITY = ("TensorQuay", "dev@tensorquay.com")  # every new commit, from 7 Nov 2026
 EARLIER_IDENTITIES = (("TensorQuay", "admin@tensorquay.com"),)  # history made before then; never a new commit
+MERGER = ("GitHub", "noreply@github.com")  # the committer of a pull request merged on GitHub; never an author
 REMOTE_OK = re.compile(r"github\.com[:/]TensorQuay/", re.I)
 MAX_BYTES = 2 * 1024 * 1024
 ZERO = "0" * 40
@@ -221,9 +222,15 @@ def scan_patch(patch, deny, allow, problems):
             lineno += 1
 
 
-def check_identity(name, email, what, problems, history=False):
-    """A new commit is made as IDENTITY; an existing one (pushed or audited) may also carry an earlier identity."""
-    if (name, email) != IDENTITY and not (history and (name, email) in EARLIER_IDENTITIES):
+def check_identity(name, email, what, problems, history=False, committer=False):
+    """A new commit is made as IDENTITY; an existing one (pushed or audited) may also carry an earlier identity, and a
+    pull request merged on GitHub has GitHub as its committer."""
+    allowed = {IDENTITY}
+    if history:
+        allowed.update(EARLIER_IDENTITIES)
+        if committer:
+            allowed.add(MERGER)
+    if (name, email) not in allowed:
         problems.append(f"{what} is '{name} <{email}>', must be '{IDENTITY[0]} <{IDENTITY[1]}>'")
 
 
@@ -269,7 +276,7 @@ def check_commit(sha, deny, allow, problems):
     short = sha[:8]
     an, ae, cn, ce = git("show", "-s", "--format=%an%x00%ae%x00%cn%x00%ce", sha).strip().split("\0")
     check_identity(an, ae, f"{short} author", problems, history=True)
-    check_identity(cn, ce, f"{short} committer", problems, history=True)
+    check_identity(cn, ce, f"{short} committer", problems, history=True, committer=True)
     check_message(git("show", "-s", "--format=%B", sha), short, problems)
     for row in git("diff-tree", "-r", "--root", "--no-commit-id", "--diff-filter=ACMR", sha).splitlines():
         meta, path = row.split("\t", 1)
@@ -307,7 +314,7 @@ def audit():
     for row in git("log", "--all", "--format=%h%x00%an%x00%ae%x00%cn%x00%ce").splitlines():
         sha, an, ae, cn, ce = row.split("\0")
         check_identity(an, ae, f"{sha} author", problems, history=True)
-        check_identity(cn, ce, f"{sha} committer", problems, history=True)
+        check_identity(cn, ce, f"{sha} committer", problems, history=True, committer=True)
         check_message(git("show", "-s", "--format=%B", sha), sha, problems, require_format=False)
     for path in filter(None, git("ls-files", "-z").split("\0")):
         full = root() / path
