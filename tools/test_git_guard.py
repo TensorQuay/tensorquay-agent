@@ -1,6 +1,7 @@
 """G-10 internal references: the tree audit refuses internal process references (team roles, internal note names, bug
 labels, team scripts) and the terms of a local list kept outside the repository; history is not checked for them.
-G-10 identity: a new commit is made as the one company identity; history keeps the earlier one.
+G-10 identity: a new commit is made as the one company identity; history keeps the earlier one, and GitHub as
+the committer of a pull request merged there.
 
 Run: python3 -m unittest tools/test_git_guard.py
 """
@@ -115,6 +116,15 @@ class Identity(unittest.TestCase):
         self.assertEqual(problems, [])
         guard.check_identity("TensorQuay", "admin@tensorquay.com", "author", problems)
         self.assertEqual(problems, ["author is 'TensorQuay <admin@tensorquay.com>', must be 'TensorQuay <dev@tensorquay.com>'"])
+
+    def test_github_commits_a_merged_pull_request_and_authors_nothing(self):
+        problems = []
+        guard.check_identity("GitHub", "noreply@github.com", "1234abcd committer", problems, history=True,
+                             committer=True)
+        self.assertEqual(problems, [])
+        guard.check_identity("GitHub", "noreply@github.com", "1234abcd author", problems, history=True)
+        guard.check_identity("GitHub", "noreply@github.com", "committer", problems, committer=True)
+        self.assertEqual(len(problems), 2)
 
     def test_history_keeps_the_earlier_identity_and_nothing_else(self):
         problems = []
