@@ -80,9 +80,6 @@
       "ignoreGhsas": [
         "GHSA-vfj7-8cjw-p6xm"
       ]
-    },
-    "overrides": {
-      "@typescript-eslint/typescript-estree>minimatch": "11.0.1"
     }
   }
 }
