@@ -152,7 +152,6 @@ export function MemberList({
 }
 
 /** An agent's task page. */
-/** An agent's task page. */
 export const taskPath = (id: string) => `/c/${encodeURIComponent(id)}`;
 
 /** The icon for each role a member can be given. */
