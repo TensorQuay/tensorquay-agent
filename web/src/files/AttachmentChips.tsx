@@ -17,7 +17,7 @@ const REFUSALS: Readonly<Record<string, MessageKey>> = {
   files_unavailable: "attach.unavailable",
 };
 
-/** One chip per chosen file: its name, then progress, its size or why it was refused, and a remove button. */
+/** One chip per chosen file: an image's thumbnail, its name, then progress, its size or why it was refused, and a remove button. */
 export function AttachmentChips({
   items,
   onRemove,
@@ -43,7 +43,12 @@ export function AttachmentChips({
             data-status={item.status}
             key={item.key}
           >
-            <Icon glyph={FileText} size={16} />
+            {item.preview ? (
+              // eslint-disable-next-line @next/next/no-img-element -- the person's own image, an object URL; next/image can't serve it
+              <img className="attachment-thumbnail" src={item.preview} alt="" />
+            ) : (
+              <Icon glyph={FileText} size={16} />
+            )}
             <span className="attachment-name" title={item.name}>
               {item.name}
             </span>

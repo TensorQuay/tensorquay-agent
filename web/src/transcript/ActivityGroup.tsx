@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 
 import { useT } from "../i18n/I18nProvider";
 import type { MessageKey } from "../i18n/translate";
@@ -15,6 +15,7 @@ import { RecordedSummary } from "./RecordedSummary";
 import { retryDetails, retryWords } from "./retry-copy";
 import { onReaderClock } from "./run-status";
 import { useKept, useOpenedAny } from "./step-state";
+import { loadedStepWords, loadStepWords } from "./step-words-loader";
 import { warmToolCard } from "./tool-card-loader";
 
 /** After this long with nothing from the model, the live line says the model hasn't started answering (WEB-U-099). */
@@ -53,8 +54,28 @@ export function ActivityGroup({
     stamp === null ? null : now - onReaderClock(stamp, turn.clockOffset);
   const waited = since(turn.waitingSince);
   const waiting = waited !== null && waited >= WAITING_AFTER_MS;
-  const elapsed = since(turn.liveSince);
-  const [thinkingOpen, setThinkingOpen] = useState(false);
+  // The step the run is on: the running call's, timed from its own start (17.3); else the model's, from the step's.
+  const step = turn.liveTool;
+  const elapsed = since(step ? step.startedAt : turn.liveSince);
+  // The step words load as the run goes live, outside the task page's first scripts (WEB-U-014). Until they are here, a
+  // running call's step has no live line, as before they were.
+  const [named, setNamed] = useState(loadedStepWords);
+  useEffect(() => {
+    if (!running || named) return;
+    let active = true;
+    loadStepWords().then(
+      (words) => {
+        if (active) setNamed(() => words);
+      },
+      () => undefined,
+    );
+    return () => {
+      active = false;
+    };
+  }, [running, named]);
+  const stepSaid = step && named ? named(step, t) : null;
+  // The thinking shows itself while the model thinks (17.3); folding it is the person's choice, kept for the turn.
+  const [thinkingOpen, setThinkingOpen] = useState(true);
   // The card's code loads on the intent to open a step (the 13h UI review, #10), never just because the turn shows:
   // that kept it out of every task page's first load (WEB-U-014).
   const warm = turn.activities.length > 0 ? warmToolCard : undefined;
@@ -107,19 +128,27 @@ export function ActivityGroup({
         </span>
       </button>
       <div id={id} className="activity-body" hidden={!open}>
-        {turn.thinking && (
-          <details className="reasoning">
-            {/* A disclosure's chevron, as every other: without it the word read as an empty label (WEB-U-157). */}
-            <summary className="type-small muted">
-              <Icon glyph={ChevronRight} size={16} />
-              {t("activity.thinking")}
-            </summary>
-            <p className="message-text type-small muted">{turn.thinking}</p>
-          </details>
-        )}
         <ol className="activity-lines">
           {turn.work.map((item) =>
-            item.kind === "tool" ? (
+            item.kind === "thought" ? (
+              <li key={item.id} className="activity-thought">
+                <details className="reasoning">
+                  {/* A disclosure's chevron, as every other: without it the word read as an empty label (WEB-U-157). */}
+                  <summary className="type-small muted">
+                    <Icon glyph={ChevronRight} size={16} />
+                    {item.ms === null
+                      ? t("activity.thinking")
+                      : t("activity.thoughtFor", {
+                          duration:
+                            item.ms < 1000
+                              ? t("summary.underSecond")
+                              : secondsLabel(item.ms, t),
+                        })}
+                  </summary>
+                  <p className="message-text type-small muted">{item.text}</p>
+                </details>
+              </li>
+            ) : item.kind === "tool" ? (
               <ActivityLine
                 activity={item.activity}
                 latest={open && item.id === latestTool}
@@ -135,11 +164,8 @@ export function ActivityGroup({
                 })}
               </li>
             ) : (
-              <li
-                key={item.id}
-                className={`activity-narration markdown-body ${item.streaming ? "streaming-text" : ""}`}
-              >
-                <DeferredMarkdown text={item.text} />
+              <li key={item.id} className="activity-narration markdown-body">
+                <DeferredMarkdown text={item.text} caret={item.streaming} />
               </li>
             ),
           )}
@@ -156,27 +182,29 @@ export function ActivityGroup({
           </section>
         )}
         <Retries turn={turn} id={retriesId} />
-        {running &&
-          !turn.activities.some(({ tool }) => tool.status === "running") && (
-            <LiveLine
-              words={t(
-                waiting ? "activity.waitingFirst" : "activity.thinkingLive",
-              )}
-              elapsed={elapsed === null ? null : secondsLabel(elapsed, t)}
-              thinking={turn.liveThinking}
-              open={thinkingOpen}
-              onToggle={() => setThinkingOpen(!thinkingOpen)}
-              id={liveId}
-            />
-          )}
+        {/* While the model writes its words, they stream with their caret: no live line speaks over them (17.3). */}
+        {running && !turn.writing && (!step || stepSaid) && (
+          <LiveLine
+            words={
+              stepSaid ??
+              t(waiting ? "activity.waitingFirst" : "activity.thinkingLive")
+            }
+            elapsed={elapsed === null ? null : secondsLabel(elapsed, t)}
+            thinking={turn.liveThinking}
+            open={thinkingOpen}
+            onToggle={() => setThinkingOpen(!thinkingOpen)}
+            id={liveId}
+          />
+        )}
       </div>
     </section>
   );
 }
 
 /**
- * The model at work (WEB-U-099, WEB-U-123): what it is doing and for how long, live; with thinking to show, the line
- * opens it, so a long think reads as work, not a hang.
+ * The run at work (WEB-U-099, WEB-U-123): the step it is on and for how long, live, a soft shimmer across the words
+ * while it runs (17.3); with thinking to show, its thinking shows open under it (the line folds it), so a long think
+ * reads as work, not a hang.
  */
 function LiveLine({
   words,
@@ -195,7 +223,7 @@ function LiveLine({
 }) {
   const text = (
     <>
-      <span>{words}</span>
+      <span className="shimmer">{words}</span>
       {elapsed && <span className="run-elapsed">{` · ${elapsed}`}</span>}
     </>
   );
@@ -214,15 +242,63 @@ function LiveLine({
         {/* One flex item, so the row's gap doesn't widen the space before the time. */}
         <span>{text}</span>
       </button>
-      <p
-        id={id}
-        className="message-text type-small muted reasoning-live"
-        hidden={!open}
-      >
-        {thinking}
-      </p>
+      <ThinkingPanel id={id} open={open} text={thinking} />
     </div>
   );
+}
+
+/**
+ * The model's thinking while it thinks (17.3): each part fades in as it arrives, and the panel follows its newest line
+ * while the reader is at its end; scrolled up, it stays where they are.
+ */
+function ThinkingPanel({
+  id,
+  open,
+  text,
+}: {
+  id: string;
+  open: boolean;
+  text: string;
+}) {
+  const panel = useRef<HTMLParagraphElement>(null);
+  // How tall the thinking was when last placed: the reader was at its end if their view reached it.
+  const end = useRef(0);
+  useLayoutEffect(() => {
+    const element = panel.current;
+    if (!element) return;
+    if (element.scrollTop + element.clientHeight >= end.current - 2)
+      element.scrollTop = element.scrollHeight;
+    end.current = element.scrollHeight;
+  }, [text]);
+  return (
+    <p
+      ref={panel}
+      id={id}
+      className="message-text type-small muted reasoning-live"
+      hidden={!open}
+    >
+      <Arriving text={text} />
+    </p>
+  );
+}
+
+/**
+ * Text that grows as it arrives (17.3): each new part is its own piece, fading in once, and what was there stays as
+ * it was. A text that starts over (a retry) starts its pieces over.
+ */
+function Arriving({ text }: { text: string }) {
+  const [pieces, setPieces] = useState({ text, starts: [0] });
+  if (pieces.text !== text)
+    setPieces(
+      text.startsWith(pieces.text)
+        ? { text, starts: [...pieces.starts, pieces.text.length] }
+        : { text, starts: [0] },
+    );
+  return pieces.starts.map((start, index) => (
+    <span key={start} className="arriving">
+      {text.slice(start, pieces.starts[index + 1] ?? text.length)}
+    </span>
+  ));
 }
 
 /**

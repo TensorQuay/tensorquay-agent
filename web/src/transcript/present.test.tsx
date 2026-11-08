@@ -289,9 +289,9 @@ describe("WEB-U-016 event river", () => {
     expect(screen.getByText(/The greeting prints hello/)).toBeVisible();
     fireEvent.click(group);
     expect(group).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByText("Thinking").closest("details")).not.toHaveAttribute(
-      "open",
-    );
+    expect(
+      screen.getByText(/^Thought for /).closest("details"),
+    ).not.toHaveAttribute("open");
     fireEvent.click(
       screen.getByRole("button", { name: "Ran a command: python3 hello.py" }),
     );

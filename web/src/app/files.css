@@ -422,6 +422,15 @@ button.file-open:hover {
   flex-shrink: 0;
   color: var(--muted);
 }
+/* An image's chip shows the image itself, 24 px, in place of the file icon (§7 Composer). */
+.attachment-thumbnail {
+  flex-shrink: 0;
+  width: var(--space-6);
+  height: var(--space-6);
+  object-fit: cover;
+  border-radius: var(--space-1);
+  background: var(--line);
+}
 .attachment-name {
   min-width: 0;
   max-width: 24ch;

@@ -62,17 +62,18 @@ for (const width of [1280, 390] as const)
         ).toHaveCount(0);
         await noSideScroll(page);
         await shot("new-task");
-        // A link in the quiet line still reads as one: ink and underlined, like every other (WEB-U-116).
+        // The notice's action is a small ghost button in the ink, its fill only on hover (WEB-E2E-096).
         const allow = page.getByRole("link", { name: "Allow sites" });
         const look = await allow.evaluate((element) => {
           const style = getComputedStyle(element);
           const ink = getComputedStyle(document.body).color;
           return {
-            underlined: style.textDecorationLine.includes("underline"),
+            ghost: element.matches('.button[data-variant="ghost"]'),
             ink: style.color === ink,
+            height: Math.round(element.getBoundingClientRect().height),
           };
         });
-        expect(look).toEqual({ underlined: true, ink: true });
+        expect(look).toEqual({ ghost: true, ink: true, height: 28 });
         await allow.click();
         await expect(page).toHaveURL(/\/settings\/internet-access$/);
         await expect(lists(page).getByRole("group")).toHaveText([

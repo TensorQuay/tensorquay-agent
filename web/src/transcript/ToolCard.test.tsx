@@ -134,7 +134,8 @@ describe("WEB-U-001 tool card behavior", () => {
       { length: 25 },
       (_, index) => `output ${index + 1}`,
     ).join("\n");
-    render(<ToolCard tool={{ ...tool, output }} />);
+    // An ended call's card (a running one shows its latest lines as they come, WEB-U-438).
+    render(<ToolCard tool={{ ...tool, status: "ok", output }} initiallyOpen />);
     const card = screen.getByRole("article", { name: "shell tool call" });
     const argument = within(card).getByLabelText("What it was given");
     const outputBlock = within(card).getByLabelText("Result");

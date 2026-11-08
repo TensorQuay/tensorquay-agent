@@ -27,7 +27,10 @@ async function openDetails(page: Page) {
   const group = page.getByRole("button", { name: /Worked for/ });
   await expect(group).toHaveAttribute("aria-expanded", "false");
   await group.press("Enter");
-  await page.getByText("Thinking", { exact: true }).click();
+  await page
+    .getByText(/^Thought for /)
+    .first()
+    .click();
   // The latest step's card is already open (WEB-U-016): open each line only if it's closed, never toggle it shut.
   for (const name of [
     /^Created hello\/README.md/,
@@ -225,16 +228,24 @@ async function taskPageAndSidebar(page: Page) {
     .click();
   await expect(nine).toHaveCount(0);
 
-  // S8: the rail keeps every task reachable by name; at phone width the drawer closes once a task opens. The newest
-  // task is in the first eight (the older ones wait behind Show more after a reload).
+  // S8: the rail is the global actions and the open task only (17.3, UI-GUIDELINES §7 Sidebar, WEB-E2E-102); at
+  // phone width the drawer keeps every task and closes once one opens. The newest task is in the first eight (the
+  // older ones wait behind Show more after a reload).
   await step(
-    "G4 S8: the rail keeps tasks reachable; the phone drawer closes on a choice",
+    "G4 S8: the rail keeps the open task reachable; the phone drawer closes on a choice",
   );
   await page.goto("/");
+  await page.getByRole("link", { name: /^Sidebar task 8/ }).click();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Sidebar task 8" }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Collapse sidebar" }).click();
   await expect(
     page.getByRole("link", { name: /^Sidebar task 8/ }),
   ).toBeVisible();
+  await expect(page.getByRole("link", { name: /^Sidebar task 7/ })).toHaveCount(
+    0,
+  );
   await page.getByRole("button", { name: "Expand sidebar" }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("button", { name: "Open navigation" }).click();

@@ -7,12 +7,13 @@ import { AttachButton } from "../files/AttachButton";
 import { AttachmentChips } from "../files/AttachmentChips";
 import { MAX_ATTACHMENTS, type Attachments } from "../files/use-attachments";
 import { useDrop } from "../files/use-drop";
+import { usePaste } from "../files/use-paste";
 import { useT } from "../i18n/I18nProvider";
 import type { QueuedMessage } from "../protocol/generated/api";
 import type { SandboxState } from "../protocol/generated/protocol";
 import type { MenuAction } from "../ui/ActionMenu";
 import { Button } from "../ui/Button";
-import { Icon } from "../ui/Icon";
+import { IconAction } from "../ui/IconAction";
 import { Textarea } from "../ui/Textarea";
 import { useCoarsePointer } from "../ui/use-coarse-pointer";
 
@@ -52,6 +53,8 @@ type Props = {
   held?: HeldMessages;
   /** A quiet line over the box about where a message goes (a helper's page: the lead sees it, WEB-U-223). */
   notice?: string | null;
+  /** The person has no tasks yet: the placeholder's second line says how to send, never on a touch screen (WEB-U-431). */
+  keyHint?: boolean;
 };
 export type HeldMessages = {
   held: readonly QueuedMessage[];
@@ -91,6 +94,7 @@ export function Composer({
   chips,
   held,
   notice = null,
+  keyHint = false,
 }: Props) {
   const [localDraft, setLocalDraft] = useState("");
   const draft = value ?? localDraft;
@@ -110,6 +114,8 @@ export function Composer({
     (holds ? null : composerReason(run, sandbox, sending, t, queue, teamWait));
   const attachable = attachments && !sending && reason === null;
   const drop = useDrop(attachable ? attachments.add : null);
+  // A screenshot or a file pasted anywhere in the card attaches as a dropped one does; text pastes as text.
+  const paste = usePaste(attachable ? attachments.add : null);
   const waiting = attachments?.uploading
     ? t("attach.waiting")
     : attachments?.failed
@@ -126,6 +132,14 @@ export function Composer({
   const blocked = active
     ? cancelling
     : reason !== null || waiting !== null || !canSend || !draft.trim();
+  // The disc's tip: Stop's reach, Sending, how to send, or what Send waits for (§5b: a disabled control says why).
+  const tip = active
+    ? (stopHint ?? label)
+    : sending
+      ? label
+      : draft.trim()
+        ? t("composer.sendTip")
+        : t("composer.sendEmptyTip");
   async function send() {
     if (
       reason ||
@@ -150,6 +164,7 @@ export function Composer({
       aria-label={t("composer.region")}
       data-dragging={drop.dragging || undefined}
       {...drop.handlers}
+      {...paste}
       onSubmit={(event) => {
         event.preventDefault();
         void send();
@@ -172,18 +187,17 @@ export function Composer({
           ref={input}
           className="composer-input"
           label={t("composer.message")}
-          rows={3}
+          rows={2}
           maxLength={maximumCharacters}
-          placeholder={t(
-            initial ? "composer.placeholderNew" : "composer.placeholderReply",
-          )}
+          placeholder={
+            t(
+              initial ? "composer.placeholderNew" : "composer.placeholderReply",
+            ) + (keyHint && hint ? `\n${t("composer.hint")}` : "")
+          }
           value={draft}
           disabled={sending || reason !== null}
           aria-describedby={
-            [
-              notice ? noticeId : null,
-              reason || (!draft && hint) ? helpId : null,
-            ]
+            [notice ? noticeId : null, reason ? helpId : null]
               .filter(Boolean)
               .join(" ") || undefined
           }
@@ -306,32 +320,30 @@ export function Composer({
               {t("composer.sendAfter")}
             </Button>
           )}
-          <Button
+          {/* The bar's round icon button, as "+" is: filled with ink only while there is something to send. */}
+          <IconAction
             className="composer-submit"
+            glyph={active ? Square : ArrowUp}
+            round
             variant={active ? "secondary" : "primary"}
             type={active ? "button" : "submit"}
-            aria-label={label}
-            title={active && stopHint ? stopHint : undefined}
-            aria-describedby={active && stopHint ? stopHintId : undefined}
+            name={label}
+            tip={tip}
+            describedBy={active && stopHint ? stopHintId : undefined}
             loading={active ? cancelling : sending}
             disabled={blocked && !focused}
-            aria-disabled={(blocked && focused) || undefined}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
+            ariaDisabled={blocked && focused}
+            fill={active ? undefined : blocked && !sending ? "outline" : "ink"}
+            onFocusChange={setFocused}
             // Stop acts at once, as in the familiar chat apps: the work so far is kept, so there is nothing to confirm.
-            onClick={
-              active
-                ? (event) => {
-                    // Send and Stop are one button: the second click of a double-click on Send (the browser counts
-                    // it) never stops the run it just started; any deliberate click does (the review of ea1e1a3b).
-                    if (event.detail > 1) return;
-                    void onStop();
-                  }
-                : undefined
-            }
-          >
-            <Icon glyph={active ? Square : ArrowUp} size={16} />
-          </Button>
+            onClick={(event) => {
+              if (!active) return;
+              // Send and Stop are one button: the second click of a double-click on Send (the browser counts
+              // it) never stops the run it just started; any deliberate click does (the review of ea1e1a3b).
+              if (event.detail > 1) return;
+              void onStop();
+            }}
+          />
           {active && stopHint && (
             <span id={stopHintId} hidden>
               {stopHint}
@@ -339,15 +351,10 @@ export function Composer({
           )}
         </div>
       </div>
-      {/* §13b: under the card, like the hint, every time: a fact about who reads, not a hint about keys. */}
+      {/* §13b: under the card, every time: a fact about who reads, not a hint about keys. */}
       {notice && (
         <p className="type-small muted composer-notice" id={noticeId}>
           {notice}
-        </p>
-      )}
-      {hint && !draft && !reason && !sending && (
-        <p className="type-small muted composer-hint" id={helpId}>
-          {t("composer.hint")}
         </p>
       )}
     </form>

@@ -3,6 +3,46 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
+## 17.3 (8 November 2026)
+
+A fix release of the web app: no migration, no protocol change, no gateway or runtime change.
+
+### Changed
+
+- **The composer (WEB-U-427, WEB-U-428, WEB-U-431, WEB-U-020).** Its two buttons share one round icon style, and
+  Send is filled only while there is something to send. The box is two lines when empty and grows to eight; the
+  keyboard hint sits in the placeholder until the first message. An image or a file on the clipboard pasted into the
+  box attaches at once (an unnamed image as "pasted-image-N.png"), as a drop does; pasted text stays text. While no
+  sites are allowed, one quiet line under the box says so, with Allow sites for an administrator. Suggestions are
+  chips of one style that wrap.
+- **Live activity (WEB-U-436 to WEB-U-441, WEB-E2E-103 to WEB-E2E-106).** While the agent works, the last line names
+  the step ("Reading README.md…", "Running the tests… · 12 s") with a soft light across its words. Each tool call is
+  its own line from the moment it starts, with a small turning mark, and settles into its done line with how long it
+  took; a running command's output grows in its card. The model's thinking streams in an open panel under the line
+  and folds to "Thought for 12 s" once the answer starts; the caret follows the last word and blinks. One calm mark
+  beside the task's title, in its sidebar row and in the tab title says a run is under way.
+- **Settings read the same everywhere (WEB-E2E-107 to WEB-E2E-113, WEB-U-442 to WEB-U-447).** Every section opens
+  with its name, one line saying what it is and its primary action. Lists have one Edit control, never an underlined
+  link; green is only for a check that passed, a plain state is a muted pill. A table's cells are two lines at most on
+  even rows: a long line is cut with "…", whole in its tooltip and on the item's own page (an environment's check, a
+  route's key, a limit's note); numbers sit on the right; the name column takes the room. Keys has one primary Add;
+  a route's source sits on its own line. The sidebar's Show more is a small button, and the open task, the open
+  helper and the active Settings item share one selected fill. The workspace filter is a picker on a phone.
+- **The pickers and menus (WEB-E2E-102 and the 17.3 rows for the run picker, menus, the route key field, the task
+  menu and check rows).** The run picker, the collapsed sidebar rail, menu heights on short screens, the route's key
+  field, the task menu's "Keep environment on" note and every settings form's check rows follow the guidelines.
+- **UI-GUIDELINES** state the above (§5b, §5c, §7, §8) and the weights the app ships (400 and 700).
+
+### Fixed
+
+- **A click right after a save reaches the next page (WEB-U-105).** A settings page's leave guard could outlive its
+  page for a moment after a save and swallow the first click on the list it returned to.
+
+### Upgrade notes
+
+- No migration, no protocol change. The web app's scripts are new; a browser that holds an old task page reloads it
+  on the next navigation.
+
 ## 17.2 (8 November 2026)
 
 A fix release: no migration, no protocol change.

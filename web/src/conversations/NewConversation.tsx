@@ -1,6 +1,6 @@
 "use client";
 
-import { Bot, FolderOpen, X } from "lucide-react";
+import { Bot, FolderOpen, Info, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 
@@ -14,6 +14,7 @@ import { Composer } from "../transcript/Composer";
 import { OptimisticMessage } from "../transcript/OptimisticMessage";
 import { Button } from "../ui/Button";
 import { ErrorMessage } from "../ui/ErrorMessage";
+import { Icon } from "../ui/Icon";
 import { IconAction } from "../ui/IconAction";
 import { MenuButton } from "../ui/MenuButton";
 import { useWorkspaces } from "../workspaces/use-workspaces";
@@ -24,6 +25,7 @@ import { ConversationBar } from "./ConversationBar";
 import { EnvironmentPicker } from "./EnvironmentPicker";
 import { defaultRoute } from "./model-labels";
 import { ModelPicker } from "./ModelPicker";
+import { useNoTasksYet } from "./use-conversation-list";
 import { useFirstMessage } from "./use-first-message";
 import { useModels } from "./use-models";
 import { useProfiles } from "./use-profiles";
@@ -40,6 +42,8 @@ export function NewConversation({
   workspace?: string | undefined;
 } = {}) {
   const session = useSession();
+  // Until the person's first message makes their first task, the placeholder says how to send (WEB-U-431).
+  const noTasksYet = useNoTasksYet();
   const admin = session.data?.role === "admin";
   const teamsOn = session.data?.features.agent_teams ?? false;
   const workspaces = useWorkspaces();
@@ -223,6 +227,7 @@ export function NewConversation({
         )}
         <Composer
           initial={!shown}
+          keyHint={noTasksYet}
           attachments={attachments}
           value={draft}
           onChange={setDraft}
@@ -388,22 +393,28 @@ export function NewConversation({
             {t("start.desktopBlind")}
           </p>
         )}
-        {/* A fresh install reaches no site (WEB-U-119, the first hour's F20): said before a task fails on it. */}
+        {/* A fresh install reaches no site (WEB-U-119): said before a task fails on it. An administrator gets the way
+            to allow sites (WEB-U-153); a member, who can't, is told to ask one, with no action (§7). */}
         {session.data?.internet === "none" && (
-          <p className="type-small muted start-internet">
-            {/* An administrator can allow sites themselves, so isn't told to ask one (WEB-U-153). */}
-            {t(
-              session.data.role === "admin"
-                ? "start.noInternetAdmin"
-                : "start.noInternet",
-            )}
+          <p className="start-notice">
+            <span className="start-notice-line">
+              <Icon glyph={Info} size={16} />
+              <span className="type-small muted start-notice-text">
+                {t(
+                  session.data.role === "admin"
+                    ? "start.noInternetAdmin"
+                    : "start.noInternetMember",
+                )}
+              </span>
+            </span>
             {session.data.role === "admin" && (
-              <>
-                {" "}
-                <Link href="/settings/internet-access">
-                  {t("start.allowSites")}
-                </Link>
-              </>
+              <Link
+                href="/settings/internet-access"
+                className="button start-notice-action"
+                data-variant="ghost"
+              >
+                {t("start.allowSites")}
+              </Link>
             )}
           </p>
         )}

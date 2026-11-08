@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { ApiError } from "../api/error";
 import type { User } from "../protocol/generated/api";
+import { cellNote } from "../test/cell-note";
 import { showModels } from "../test/models-app";
 import { choose as choosePicked, picker } from "../test/picker";
 import { fakeRoutes, route } from "../test/routes";
@@ -108,9 +109,10 @@ describe("WEB-U-039 model routes", () => {
     expect(within(row(/gateway/)).queryByText(/^secrets\//)).toBeNull();
   });
 
-  // WEB-U-301: on a page-made installation every row would say "Added here" and "Chat Completions". Source shows once
-  // any route comes from the configuration file, and the protocol once the routes differ in it.
-  it("leaves out Source and the protocol when every route was added here with one protocol", async () => {
+  // WEB-U-301: on a page-made installation every row would say "Added here" and "Chat Completions". The source shows
+  // on each route's muted line once any route comes from the configuration file (17.3: no Source column, as Connectors
+  // and Environments say theirs), and the protocol once the routes differ in it.
+  it("leaves out the source and the protocol when every route was added here with one protocol", async () => {
     const same = [route("office"), route("cloud")];
     show(fakeRoutes({ routes: same, secrets: [] }).api);
     await screen.findByRole("table", { name: "Model routes" });
@@ -122,13 +124,13 @@ describe("WEB-U-039 model routes", () => {
     expect(screen.queryByText("Chat Completions")).toBeNull();
   });
 
-  // Review 7 Oct, P2-1: a file-managed list keeps its Source, the only place that says so; and when every route has
-  // left the file, its marker is what says to delete them.
+  // Review 7 Oct, P2-1: a file-managed list keeps its source, the only place that says so; and when every route has
+  // left the file, its marker is what says to delete them. It is each route's muted line (17.3).
   it.each([
     ["current", "Configuration file"],
     ["removed", "No longer in the configuration file"],
   ] as const)(
-    "shows Source when every route is %s in the configuration file",
+    "names the source on each route when every route is %s in the configuration file",
     async (seed, words) => {
       const same = [
         route("office", { seed, last_set_by: "seed" }),
@@ -138,13 +140,13 @@ describe("WEB-U-039 model routes", () => {
       await screen.findByRole("table", { name: "Model routes" });
       expect(
         screen.getAllByRole("columnheader").map((header) => header.textContent),
-      ).toEqual(["Route", "Model", "Key", "Source", "Actions"]);
-      expect(within(row(/office/)).getByText(words)).toBeVisible();
-      expect(within(row(/cloud/)).getByText(words)).toBeVisible();
+      ).toEqual(["Route", "Model", "Key", "Actions"]);
+      expect(cellNote(row(/office/), words)).toHaveTextContent(words);
+      expect(cellNote(row(/cloud/), words)).toHaveTextContent(words);
     },
   );
 
-  it("shows Source and the protocol on every row once the routes differ in them", async () => {
+  it("names each route's source and protocol once the routes differ in them", async () => {
     const mixed = [
       route("office", { seed: "current", last_set_by: "seed" }),
       route("cloud", { protocol: "anthropic_messages" }),
@@ -153,10 +155,10 @@ describe("WEB-U-039 model routes", () => {
     await screen.findByRole("table", { name: "Model routes" });
     expect(
       screen.getAllByRole("columnheader").map((header) => header.textContent),
-    ).toEqual(["Route", "Model", "Key", "Source", "Actions"]);
-    expect(within(row(/office/)).getByText("Configuration file")).toBeVisible();
+    ).toEqual(["Route", "Model", "Key", "Actions"]);
+    expect(cellNote(row(/office/), "Configuration file")).toBeVisible();
     expect(within(row(/office/)).getByText("Chat Completions")).toBeVisible();
-    expect(within(row(/cloud/)).getByText("Added here")).toBeVisible();
+    expect(cellNote(row(/cloud/), "Added here")).toBeVisible();
     expect(within(row(/cloud/)).getByText("Messages")).toBeVisible();
   });
 
@@ -177,9 +179,7 @@ describe("WEB-U-039 model routes", () => {
         name: "Add it under Keys › Shared",
       }),
     ).toHaveAttribute("href", "/settings/keys/shared");
-    expect(
-      within(row(/Local model/)).getByText("Configuration file"),
-    ).toBeVisible();
+    expect(cellNote(row(/Local model/), "Configuration file")).toBeVisible();
     // The display name only (UI-GUIDELINES §10), in what people see and in what a screen reader names: the route's own
     // name stays in its form and the configuration file.
     // (The Key column names its key, `local` here, which is the key's name, not the route's: WEB-U-181.)
@@ -189,11 +189,11 @@ describe("WEB-U-039 model routes", () => {
     expect(
       within(row(/DeepSeek Flash/)).queryByText("deepseek-flash"),
     ).toBeNull();
-    // The table fits the 720 px column: the protocol sits under the model, not in a column of its own. Both routes
-    // speak Chat Completions, so no row names it (WEB-U-301); one comes from the configuration file, so Source shows.
+    // The table fits the 720 px column: the protocol sits under the model and the source under the route, not in
+    // columns of their own. Both routes speak Chat Completions, so no row names it (WEB-U-301).
     expect(
       screen.getAllByRole("columnheader").map((header) => header.textContent),
-    ).toEqual(["Route", "Model", "Key", "Source", "Actions"]);
+    ).toEqual(["Route", "Model", "Key", "Actions"]);
     expect(screen.queryByText("Chat Completions")).toBeNull();
     // One actions column (UI-GUIDELINES §7): Edit, a link to the route's page (WEB-U-115), the rest in the row's menu.
     expect(
@@ -485,9 +485,10 @@ describe("WEB-U-039 model routes", () => {
     expect(fake.writes.at(-1)?.fields?.description).toBe(
       "Fast, for short everyday tasks",
     );
+    // It leads the route's muted line, before its source (17.3).
     expect(
       await within(row(/Local model/)).findByText(
-        "Fast, for short everyday tasks",
+        /^Fast, for short everyday tasks · Configuration file$/,
       ),
     ).toBeVisible();
   });

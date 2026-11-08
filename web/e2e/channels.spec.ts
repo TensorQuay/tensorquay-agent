@@ -389,11 +389,14 @@ for (const width of [1280, 390] as const)
       name: "More actions for colleague",
     });
     await more.hover();
-    const tip = row.locator(".action-tooltip");
+    // The tip is a layer of its own on the page (WEB-U-429), so the panel is found by itself, not as its ancestor.
+    const tip = page.locator(".action-tooltip", { hasText: "More actions" });
     await expect(tip).toBeVisible();
     const inside = await tip.evaluate((element) => {
       const r = element.getBoundingClientRect();
-      const side = element.closest(".channel-side")?.getBoundingClientRect();
+      const side = document
+        .querySelector(".channel-side")
+        ?.getBoundingClientRect();
       return {
         window: r.left >= 0 && r.right <= innerWidth,
         panel: !side || (r.left >= side.left && r.right <= side.right),

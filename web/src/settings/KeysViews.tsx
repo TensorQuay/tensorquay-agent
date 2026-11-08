@@ -13,17 +13,21 @@ export function KeysViews({ current }: { current: "mine" | "shared" }) {
     { id: "shared", label: t("keys.shared"), href: "/settings/keys/shared" },
   ] as const;
   return (
-    <nav className="keys-views" aria-label={t("keys.views")}>
-      {views.map((view) => (
-        <Link
-          key={view.id}
-          href={view.href}
-          className="nav-item"
-          aria-current={view.id === current ? "page" : undefined}
-        >
-          {view.label}
-        </Link>
-      ))}
-    </nav>
+    <>
+      {/* The section's one line, over both its views (17.3). */}
+      <p className="type-small muted">{t("keys.sectionLine")}</p>
+      <nav className="keys-views" aria-label={t("keys.views")}>
+        {views.map((view) => (
+          <Link
+            key={view.id}
+            href={view.href}
+            className="nav-item"
+            aria-current={view.id === current ? "page" : undefined}
+          >
+            {view.label}
+          </Link>
+        ))}
+      </nav>
+    </>
   );
 }

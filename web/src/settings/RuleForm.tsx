@@ -7,6 +7,7 @@ import { ApiError } from "../api/error";
 import { useT } from "../i18n/I18nProvider";
 import type { MessageKey } from "../i18n/translate";
 import { Button } from "../ui/Button";
+import { CheckRow } from "../ui/CheckRow";
 import { Dialog } from "../ui/Dialog";
 import { FormRefusal } from "../ui/FormRefusal";
 import { Input } from "../ui/Input";
@@ -139,16 +140,13 @@ export function RuleForm(props: FormProps) {
         <p id="egress-ports-hint" className="type-small muted">
           {t("egress.portsHint")}
         </p>
-        <label className="check-row">
-          <input
-            type="checkbox"
-            checked={internal && internalAllowed}
-            disabled={!internalAllowed}
-            onChange={(event) => setInternal(event.target.checked)}
-            aria-describedby="egress-internal-hint"
-          />
-          {t("egress.internal")}
-        </label>
+        <CheckRow
+          checked={internal && internalAllowed}
+          disabled={!internalAllowed}
+          onChange={(event) => setInternal(event.target.checked)}
+          aria-describedby="egress-internal-hint"
+          label={t("egress.internal")}
+        />
         <p
           id="egress-internal-hint"
           className={problems.internal ? "field-error" : "type-small muted"}

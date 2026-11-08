@@ -164,11 +164,13 @@ export function FilesPanel({
     setFolder(path);
   };
   return (
+    // Its menus (the Changes tab's run picker) stay inside it, never over the transcript beside it (WEB-U-432).
     <aside
       className="files-panel"
       id={FILES_PANEL_ID}
       aria-label={t("files.title")}
       ref={aside}
+      data-menu-bounds=""
     >
       <div className="files-heading">
         <PanelTabs current={current} onTab={setTab} shown={available} />

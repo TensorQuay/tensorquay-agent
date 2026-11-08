@@ -9,6 +9,7 @@ import {
 import { describe, expect, it } from "vitest";
 
 import type { User } from "../protocol/generated/api";
+import { cellNote } from "../test/cell-note";
 import {
   DESKTOP_LIMITS,
   fakeLimits,
@@ -137,6 +138,26 @@ describe("WEB-U-041 limits", () => {
     ).toBeVisible();
     expect(screen.queryByText(/asks for/)).toBeNull();
     expect(screen.queryByText("Below the usual minimum")).toBeNull();
+  });
+
+  // 17.3 (C4): the list keeps a limit to two lines (a long note whole in the line's tooltip); the limit's own place,
+  // its Edit dialog, says the note in full.
+  it("says the same note in the limit's Edit dialog", async () => {
+    show(fakeLimits().api);
+    await screen.findByRole("table", { name: "Limits" });
+    edit("Tasks running at once");
+    expect(
+      within(dialog()).getByText(
+        "Lowered from 12 tasks when the configuration file changed; 8 tasks is the most allowed.",
+      ),
+    ).toBeVisible();
+    fireEvent.click(within(dialog()).getByRole("button", { name: "Cancel" }));
+    edit("Running tasks per person");
+    expect(
+      within(dialog()).getByText(
+        "The configuration file sets 1 task, below the 2 tasks that can be set here.",
+      ),
+    ).toBeVisible();
   });
 
   it("offers a reset in the edit dialog only for a value set here, confirms it and reports the value", async () => {
@@ -370,7 +391,8 @@ describe("WEB-U-227 the helper limits", () => {
       ["Tell the lead a helper is stuck after", "Applies within seconds"],
       ["Stop an idle team after", "Applies within seconds"],
     ] as const)
-      expect(within(helperRow(name)).getByText(hint)).toBeVisible();
+      // In the value's one muted line (17.3).
+      expect(cellNote(helperRow(name), hint)).toBeVisible();
     expect(screen.queryByText(/next team, helper or check/)).toBeNull();
     for (const [name, whole] of [
       [

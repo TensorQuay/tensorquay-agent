@@ -7,8 +7,9 @@ import { useEffect, useRef, useState } from "react";
 import { capabilities, type Capability } from "../conversations/capabilities";
 import { useLanguage, useT } from "../i18n/I18nProvider";
 import { formatMib } from "../i18n/message";
-import type { MessageKey } from "../i18n/translate";
+import type { MessageKey, Translate } from "../i18n/translate";
 import type { User } from "../protocol/generated/api";
+import { CellNote } from "../ui/CellNote";
 import { Icon } from "../ui/Icon";
 import { Skeleton } from "../ui/Skeleton";
 import { TableScroll } from "../ui/TableScroll";
@@ -35,7 +36,7 @@ import {
 import { EnvironmentRootfsMissing } from "./EnvironmentRootfsMissing";
 import { LoadFailure } from "./LoadFailure";
 import { RowMenu } from "./RowMenu";
-import { hasScanLimit, SecretFiles } from "./SecretFiles";
+import { hasScanLimit, SecretFiles, secretFilesWords } from "./SecretFiles";
 
 const KEY = ENVIRONMENTS_KEY;
 /** While a check is pending, the list asks again: often at first, then less, and not past the checker's own backoff. */
@@ -320,37 +321,42 @@ function EnvironmentRow({
       <td>
         {/* The display name only: the internal name is not the reader's (as on Connectors and Agent profiles). */}
         <div className="stack route-name">
-          <span>{name}</span>
-          {item.description && (
-            <span className="type-small">{item.description}</span>
-          )}
-          {/* Its own size, when it has one (the owner's direction: sizes belong to each environment). */}
-          {(item.cpus !== null || item.memory_mib !== null) && (
-            <span className="type-small muted">
-              {[
-                item.cpus === null
-                  ? null
-                  : lowered("cpus", t("limits.cpus", { cpus: item.cpus })),
-                item.memory_mib === null
-                  ? null
-                  : lowered("memory_mib", formatMib(item.memory_mib, language)),
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-            </span>
-          )}
-          <span className="type-small muted">{`${origin} · ${source}`}</span>
-          {/* WEB-U-098: an edited built-in is the administrator's now; Reset in the menu hands it back. */}
-          {item.customised && (
-            <span className="type-small">{t("environments.customised")}</span>
-          )}
+          <div className="data-name" title={name}>
+            <span>{name}</span>
+          </div>
+          {/* One muted line (17.3): what it is, its size, where it came from, and that it was customised; the
+              environment's page has each in full. */}
+          <CellNote>
+            {[
+              item.description,
+              item.cpus !== null || item.memory_mib !== null
+                ? [
+                    item.cpus === null
+                      ? null
+                      : lowered("cpus", t("limits.cpus", { cpus: item.cpus })),
+                    item.memory_mib === null
+                      ? null
+                      : lowered(
+                          "memory_mib",
+                          formatMib(item.memory_mib, language),
+                        ),
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")
+                : null,
+              `${origin} · ${source}`,
+              item.customised ? t("environments.customised") : null,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </CellNote>
         </div>
       </td>
       <td>
         <ToolList values={known} />
       </td>
       <td>
-        <EnvironmentStatus item={item} />
+        <EnvironmentStatus item={item} compact />
       </td>
       {/* One actions column (UI-GUIDELINES §7, as on Models and Keys): Edit, and the rest in the row's menu. */}
       <td className="data-cell-action">
@@ -415,6 +421,8 @@ function ToolList({ values }: { values: readonly Capability[] }) {
     <ul
       className="environment-tools type-small"
       aria-label={t("environments.tools")}
+      // Every tool, where the row's one line cuts the list (17.3).
+      title={values.map((value) => t(capabilities[value].label)).join(", ")}
     >
       {values.map((value) => (
         <li key={value}>
@@ -426,28 +434,73 @@ function ToolList({ values }: { values: readonly Capability[] }) {
   );
 }
 
-/** The pills, the check's sentence and the two status actions: Check, and Make default on a pickable environment. */
-function EnvironmentStatus({ item }: { item: EnvironmentItem }) {
+/**
+ * The check's words after its pills, as one line of text for a list row (17.3): each reason's own short sentence (a
+ * missing microVM disk image's names its build script; its page gives the whole command), then what follows from it.
+ */
+function statusWords(item: EnvironmentItem, t: Translate): string | null {
+  const state = checkState(item);
+  const words: (string | null)[] = [];
+  if (
+    state === "refused" &&
+    !(item.check.reason === "image_scan_limit" && hasScanLimit(item))
+  )
+    words.push(t(reasonKey(item.check.reason)));
+  if (state !== "checking" && state !== "unchecked")
+    words.push(...secretFilesWords(item, t));
+  if (state === "checking") words.push(t("environments.checkingLine"));
+  if (state === "unchecked") words.push(t("environments.uncheckedLine"));
+  if (item.enabled && !offered(item)) words.push(t("environments.notPickable"));
+  // Parts joined as every row's muted line joins them (as on Limits).
+  const said = words.filter(Boolean).join(" · ");
+  return said || null;
+}
+
+/**
+ * The pills and the check's words: in a list row, kept to two lines; on the environment's own page, its Status section,
+ * in full (17.3).
+ */
+export function EnvironmentStatus({
+  item,
+  compact = false,
+}: {
+  item: EnvironmentItem;
+  /** In a list row: its pills and one muted line, whole in the line's tooltip (17.3). */
+  compact?: boolean;
+}) {
   const t = useT();
   const state = checkState(item);
   const [label, tone] = STATES[state];
+  const pills = (
+    <>
+      {/* A choice, not a check: muted (17.3); green is only for a check that passed. */}
+      {item.is_default && (
+        <span className="status-pill type-label" data-tone="muted">
+          {t("environments.default")}
+        </span>
+      )}
+      {!item.enabled && (
+        <span className="status-pill type-label" data-tone="muted">
+          {t("environments.off")}
+        </span>
+      )}
+      <span className="status-pill type-label" data-tone={tone}>
+        {t(label)}
+      </span>
+    </>
+  );
+  if (compact) {
+    const words = statusWords(item, t);
+    return (
+      <div className="stack route-name">
+        <span className="cell-pills">{pills}</span>
+        {words && <CellNote>{words}</CellNote>}
+      </div>
+    );
+  }
   return (
     <div className="stack route-name">
-      <div className="environment-pills">
-        {item.is_default && (
-          <span className="status-pill type-label" data-tone="ok">
-            {t("environments.default")}
-          </span>
-        )}
-        {!item.enabled && (
-          <span className="status-pill type-label" data-tone="muted">
-            {t("environments.off")}
-          </span>
-        )}
-        <span className="status-pill type-label" data-tone={tone}>
-          {t(label)}
-        </span>
-      </div>
+      <div className="environment-pills">{pills}</div>
       {/* A scan limit with its bound says it more precisely below; otherwise the reason's own sentence. */}
       {state === "refused" && item.check.reason === "rootfs_missing" && (
         <EnvironmentRootfsMissing item={item} />

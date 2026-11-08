@@ -209,6 +209,53 @@ describe("WEB-U-105 a profile's tools", () => {
       expect(tool).not.toBeChecked();
   });
 
+  // A save goes back to the list from a promise, outside any act(): React shows the list first and runs the gone page's
+  // effect clean-ups a moment later. A click in that moment (a quick reader, or a test on a loaded host: the check's load
+  // flake) must reach the list's link, never the gone page's leave guard.
+  it("lets the list's links work the moment it shows after a save", async () => {
+    const fake = fakeProfiles({ profiles: [REVIEW] });
+    showProfiles(
+      fake.api,
+      choices,
+      member,
+      router,
+      `/settings/agent-profiles/${REVIEW.id}`,
+    );
+    await screen.findByRole("heading", { name: "Edit Code review" });
+    fireEvent.click(box("All"));
+    fireEvent.click(box("Read files"));
+    // The moment the list is in the page: before React's own work after it runs.
+    const listed = new Promise<void>((resolve) => {
+      const observer = new MutationObserver(() => {
+        if (!screen.queryByText("Saved agent profile Code review.")) return;
+        observer.disconnect();
+        resolve();
+      });
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+      });
+    });
+    save();
+    const scope = globalThis as {
+      IS_REACT_ACT_ENVIRONMENT?: boolean | undefined;
+    };
+    const acting = scope.IS_REACT_ACT_ENVIRONMENT;
+    scope.IS_REACT_ACT_ENVIRONMENT = false;
+    try {
+      await listed;
+    } finally {
+      scope.IS_REACT_ACT_ENVIRONMENT = acting;
+    }
+    fireEvent.click(
+      screen.getByRole("link", { name: "Edit agent profile Code review" }),
+    );
+    expect(
+      await screen.findByRole("heading", { name: "Edit Code review" }),
+    ).toBeVisible();
+  });
+
   it("saves every tool as no list, some as the list, and refuses none", async () => {
     const fake = fakeProfiles({ profiles: [REVIEW] });
     showProfiles(

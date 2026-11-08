@@ -225,8 +225,9 @@ for (const width of [1024, 1440])
           .locator(".app-sidebar .conversation-row")
           .filter({ hasText: "Hold activity" });
         if (width === 1024) {
-          await row.hover();
-          await expect(row.locator(".button")).toBeHidden();
+          // The collapsed rail shows of the list only the open task (WEB-E2E-102): another task's row is hidden, and
+          // the open task's row has no actions.
+          await expect(row).toBeHidden();
           await expect(
             page.locator(
               '.app-sidebar .conversation-row:has([aria-current="page"]) .button',

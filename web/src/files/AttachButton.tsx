@@ -6,14 +6,14 @@ import { useId, useRef } from "react";
 import { useT } from "../i18n/I18nProvider";
 import { formatSize } from "../i18n/message";
 import { ActionMenu, type MenuAction } from "../ui/ActionMenu";
-import { Button } from "../ui/Button";
-import { Icon } from "../ui/Icon";
+import { IconAction } from "../ui/IconAction";
 
 import { MAX_ATTACHMENTS, MAX_FILE_BYTES } from "./use-attachments";
 
 /**
- * The composer's "+" (the UI standard's composer): it opens the system file chooser, whose limits are its
- * description. Given more (New task's Workspace… and Agent profile…), it opens a menu led by Attach files.
+ * The composer's "+" (the UI standard's composer): the bar's round icon button, as Send is. It opens the system file
+ * chooser, whose limits are its description. Given more (New task's Workspace… and Agent profile…), it opens a menu
+ * led by Attach files, and its tip says so.
  */
 export function AttachButton({
   onFiles,
@@ -47,34 +47,34 @@ export function AttachButton({
         }}
       />
       {more && more.length > 0 ? (
-        <span className="composer-attach">
-          <ActionMenu
-            label={t("attach.add")}
-            glyph={Plus}
-            actions={[
-              {
-                id: "attach",
-                label: t("attach.button"),
-                icon: Paperclip,
-                unavailable: disabled ? t("attach.unavailable") : undefined,
-                onSelect: () => input.current?.click(),
-              },
-              ...more,
-            ]}
-          />
-        </span>
+        <ActionMenu
+          className="composer-attach"
+          label={t("attach.add")}
+          tip={t("attach.addTip")}
+          glyph={Plus}
+          round
+          actions={[
+            {
+              id: "attach",
+              label: t("attach.button"),
+              icon: Paperclip,
+              unavailable: disabled ? t("attach.unavailable") : undefined,
+              onSelect: () => input.current?.click(),
+            },
+            ...more,
+          ]}
+        />
       ) : (
-        <Button
-          variant="ghost"
-          className="icon-button composer-attach"
-          aria-label={t("attach.button")}
-          aria-describedby={limitsId}
-          title={t("attach.button")}
+        <IconAction
+          className="composer-attach"
+          glyph={Plus}
+          round
+          name={t("attach.button")}
+          tip={t("attach.button")}
+          describedBy={limitsId}
           disabled={disabled}
           onClick={() => input.current?.click()}
-        >
-          <Icon glyph={Plus} size={16} />
-        </Button>
+        />
       )}
       <span hidden id={limitsId}>
         {t("attach.limits", {

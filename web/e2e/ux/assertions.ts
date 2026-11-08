@@ -171,8 +171,9 @@ export async function activities(page: Page, scripted: boolean) {
     await thinking.locator("summary").click();
     expect
       .soft(
-        (await thinking.innerText()).replace(/^\s*Thinking\s*/, "").trim()
-          .length,
+        (await thinking.innerText())
+          .replace(/^\s*Thought for [^\n]*\s*/, "")
+          .trim().length,
         "thinking: opens to its reasoning's words",
       )
       .toBeGreaterThan(0);

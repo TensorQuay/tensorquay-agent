@@ -378,7 +378,8 @@ test("WEB-U-168 a long address on a narrow People wraps, and its row's action is
       }),
     ],
     [
-      "people-list",
+      // The People section's heading names its list (17.3).
+      "settings-section-heading",
       page
         .getByRole("row", { name: /colleague@example\.invalid/ })
         .getByRole("button", {

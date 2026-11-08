@@ -8,6 +8,7 @@ import { useT } from "../i18n/I18nProvider";
 import type { MessageKey } from "../i18n/translate";
 import type { SecretRead, SecretReadPage } from "../protocol/generated/api";
 import { Button } from "../ui/Button";
+import { CellNote } from "../ui/CellNote";
 import { Dialog } from "../ui/Dialog";
 import { Skeleton } from "../ui/Skeleton";
 import { TableScroll } from "../ui/TableScroll";
@@ -145,14 +146,14 @@ function ReadsTable({
                   <span className="stack route-name">
                     <DateLabel value={item.last_at} />
                     {item.count > 1 && (
-                      <span className="type-small muted">
+                      <CellNote>
                         {t("reads.since", {
                           count: item.count,
                           date: new Intl.DateTimeFormat(t.locale, {
                             dateStyle: "medium",
                           }).format(new Date(item.first_at)),
                         })}
-                      </span>
+                      </CellNote>
                     )}
                   </span>
                 </td>
@@ -173,19 +174,20 @@ function ReadsTable({
                       )}
                       {/* Run-ID (2): the read named no run, or not the task's own. A connector's never carries one (ADR-0035). */}
                       {unknownRun(item) && (
-                        <span className="type-small muted">
-                          {t("reads.runUnknown")}
-                        </span>
+                        <CellNote>{t("reads.runUnknown")}</CellNote>
                       )}
                     </span>
                   </td>
                 )}
                 {emails && (
                   <td className="read-person">
-                    {item.user_id ? (
-                      (emails[item.user_id] ?? (
-                        <span className="muted">{t("reads.removedUser")}</span>
-                      ))
+                    {/* One line: a long address is cut where the column ends, whole in its tooltip (17.3). */}
+                    {item.user_id && emails[item.user_id] ? (
+                      <span className="cell-cut" title={emails[item.user_id]}>
+                        {emails[item.user_id]}
+                      </span>
+                    ) : item.user_id ? (
+                      <span className="muted">{t("reads.removedUser")}</span>
                     ) : (
                       <span className="muted">{t("reads.noPerson")}</span>
                     )}

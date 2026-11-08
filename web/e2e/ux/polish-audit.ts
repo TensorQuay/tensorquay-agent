@@ -137,11 +137,14 @@ function measure(input: {
   const icons = new Map<string, Set<string>>();
   for (const icon of document.querySelectorAll("svg.lucide")) {
     if (!visible(icon)) continue;
+    // §5: 16 px in text and controls, 20 px in the header and in the composer bar's round buttons (§7 Composer).
     const context = icon.closest("header.app-header")
       ? "header"
-      : icon.closest("button, a, [role=menuitem], [role=menuitemradio]")
-        ? "control"
-        : "text";
+      : icon.closest(".composer-controls")
+        ? "composer bar"
+        : icon.closest("button, a, [role=menuitem], [role=menuitemradio]")
+          ? "control"
+          : "text";
     const box = icon.getBoundingClientRect();
     const size = `${Math.round(box.width)}x${Math.round(box.height)}`;
     icons.set(context, (icons.get(context) ?? new Set()).add(size));
@@ -242,7 +245,11 @@ export async function auditFocus(page: Page, view: string): Promise<Finding[]> {
   return found;
 }
 
-/** Hovers each enabled control; its background, colour, border or underline must change (run with reduced motion). */
+/**
+ * Hovers each enabled control; its background, colour, border or underline must change (run with reduced motion). The
+ * active item of a navigation list (`aria-current="page"`) is the exception: it keeps its selected fill under the
+ * pointer, never darker and with no underline (UI-GUIDELINES §5c, 17.3).
+ */
 export async function auditHover(page: Page, view: string): Promise<Finding[]> {
   const found: Finding[] = [];
   const controls = page.locator(
@@ -262,13 +269,14 @@ export async function auditHover(page: Page, view: string): Promise<Finding[]> {
   for (let index = 0; index < count; index += 1) {
     const control = controls.nth(index);
     // Markdown links keep the prose style; the skip link is off-screen until focused; an open modal makes
-    // everything outside it inert.
+    // everything outside it inert; the active item keeps its look (above).
     if (
       await control.evaluate((element) => {
         const modal = document.querySelector("dialog:modal");
         return (
           element.closest(".markdown, .skip-link") !== null ||
-          (modal !== null && !modal.contains(element))
+          (modal !== null && !modal.contains(element)) ||
+          element.getAttribute("aria-current") === "page"
         );
       })
     )

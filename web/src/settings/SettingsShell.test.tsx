@@ -9,17 +9,18 @@ import { LIMITS } from "../test/user";
 import { SettingsShell } from "./SettingsShell";
 
 const push = vi.hoisted(() => vi.fn<(href: string) => void>());
+const where = vi.hoisted(() => ({ path: "/settings/tokens" }));
 vi.mock("next/navigation", () => ({
-  usePathname: () => "/settings/tokens",
+  usePathname: () => where.path,
   useRouter: () => ({ push }),
 }));
 
-function show(user: User) {
+function show(user: User, section: "tokens" | "keys" = "tokens") {
   const cache = new QueryClient();
   cache.setQueryData(["session"], user);
   render(
     <QueryClientProvider client={cache}>
-      <SettingsShell section="tokens">
+      <SettingsShell section={section}>
         {(me) => <p>Signed in as {me.email}</p>}
       </SettingsShell>
     </QueryClientProvider>,
@@ -196,6 +197,50 @@ describe("WEB-U-023/075 settings", () => {
 
 // WEB-U-362 (the 16f page pass, E17): below 768 px the sidebar is a drawer, so Settings starts with Open navigation,
 // as every page in the shell does; outside the shell there is nothing to open.
+// 17.3: every Settings section opens with its name as the heading (20/1.25), then its one muted line and its primary
+// action; a page inside a section (adding or editing one item) keeps its own title under its way back.
+describe("WEB-U-442 a section opens with its name", () => {
+  const admin: User = {
+    id: "0195d8c0-0000-7000-8000-000000000002",
+    email: "member@example.invalid",
+    role: "admin",
+    internet: "none",
+    limits: LIMITS,
+    features: { agent_teams: false },
+  };
+
+  it("heads the section's own page with its name, before what the section shows", () => {
+    where.path = "/settings/tokens";
+    show(admin);
+    const heading = screen.getByRole("heading", {
+      level: 2,
+      name: "API tokens",
+    });
+    expect(heading).toHaveClass("type-heading");
+    expect(heading.nextElementSibling).toHaveTextContent(
+      "Signed in as member@example.invalid",
+    );
+  });
+
+  it("heads a view of the section too: the shared keys are the Keys section", () => {
+    where.path = "/settings/keys/shared";
+    show(admin, "keys");
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Keys" }),
+    ).toBeInTheDocument();
+    where.path = "/settings/tokens";
+  });
+
+  it("leaves a page inside the section its own title", () => {
+    where.path = "/settings/tokens/new";
+    show(admin);
+    expect(
+      screen.queryByRole("heading", { level: 2, name: "API tokens" }),
+    ).toBeNull();
+    where.path = "/settings/tokens";
+  });
+});
+
 describe("WEB-U-362 Open navigation in Settings", () => {
   const user: User = {
     id: "0195d8c0-0000-7000-8000-000000000002",

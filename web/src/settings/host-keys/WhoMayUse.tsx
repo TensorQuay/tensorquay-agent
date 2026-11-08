@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 import { useId } from "react";
 
 import { useLanguage, useT } from "../../i18n/I18nProvider";
+import { CheckRow } from "../../ui/CheckRow";
 import { IconAction } from "../../ui/IconAction";
 import { MenuButton } from "../../ui/MenuButton";
 import { PageSection } from "../SettingsPage";
@@ -40,24 +41,22 @@ export function WhoMayUse({
         role="radiogroup"
         aria-label={t("hostKeys.whoSection")}
       >
-        <label className="check-row type-small">
-          <input
-            type="radio"
-            name={name}
-            checked={users === "all"}
-            onChange={() => onChange("all")}
-          />
-          {t("hostKeys.everyone")}
-        </label>
-        <label className="check-row type-small">
-          <input
-            type="radio"
-            name={name}
-            checked={users !== "all"}
-            onChange={() => onChange(chosen)}
-          />
-          {t("hostKeys.chosenPeople")}
-        </label>
+        <CheckRow
+          type="radio"
+          className="type-small"
+          name={name}
+          checked={users === "all"}
+          onChange={() => onChange("all")}
+          label={t("hostKeys.everyone")}
+        />
+        <CheckRow
+          type="radio"
+          className="type-small"
+          name={name}
+          checked={users !== "all"}
+          onChange={() => onChange(chosen)}
+          label={t("hostKeys.chosenPeople")}
+        />
       </fieldset>
       {users !== "all" && (
         <div className="stack">

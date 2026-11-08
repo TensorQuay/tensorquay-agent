@@ -58,8 +58,11 @@ export function ChangesView({
   return (
     <div className="changes-view stack">
       <div className="changes-picker">
+        {/* A run is named by its first message: one line each, and Latest on the button only (WEB-E2E-097). */}
         <MenuButton
           label={t("changes.run")}
+          oneLine
+          rowDecorations={false}
           value={run}
           onChange={(value) => {
             setPicked({ run: value, latest: latest ?? "" });

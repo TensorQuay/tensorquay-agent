@@ -1,10 +1,14 @@
 "use client";
 
+import { ChevronDown } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useId, type ReactNode } from "react";
 
 import { useT } from "../i18n/I18nProvider";
 import type { MessageKey } from "../i18n/translate";
 import { Button } from "../ui/Button";
+import { CheckRow } from "../ui/CheckRow";
+import { Icon } from "../ui/Icon";
 import { Input } from "../ui/Input";
 
 import { isKeyShapedName } from "./key-shapes";
@@ -57,15 +61,15 @@ export function WhereItRuns({
     >
       <legend className="type-body-strong">{t("models.where")}</legend>
       {WHERE.map(([value, label]) => (
-        <label key={value} className="check-row type-small">
-          <input
-            type="radio"
-            name="route-where"
-            checked={where === value}
-            onChange={() => onChoose(value)}
-          />
-          {t(label)}
-        </label>
+        <CheckRow
+          key={value}
+          type="radio"
+          className="type-small"
+          name="route-where"
+          checked={where === value}
+          onChange={() => onChoose(value)}
+          label={t(label)}
+        />
       ))}
     </fieldset>
   );
@@ -193,13 +197,35 @@ export function Basics({
   );
 }
 
+/**
+ * The saved route's key as the list says it, where its key is set (17.3): the key store doesn't hold it, with where to
+ * add it; or it must be entered again.
+ */
+function KeyState({ state }: { state: "missing" | "needed" | null }) {
+  const t = useT();
+  if (!state) return null;
+  return (
+    <p className="type-small route-key-state">
+      <span className="status-pill type-label" data-tone="warn">
+        {t(state === "missing" ? "models.keyMissing" : "models.keyNeeded")}
+      </span>
+      {state === "missing" && (
+        <Link href="/settings/keys/shared">{t("models.addKey")}</Link>
+      )}
+    </p>
+  );
+}
+
 export function Credential({
   children,
   mode,
   onMode,
   inline,
+  keyState = null,
   ...section
 }: Section & {
+  /** The saved route's key, missing from the key store or to be entered again; null when it is fine or changed. */
+  keyState?: "missing" | "needed" | null;
   secretRefs: string[];
   /** A server on your network: a key only if it needs one. */
   optional: boolean;
@@ -219,14 +245,12 @@ export function Credential({
     return (
       <Group legend="models.keyGroup">
         {section.optional && (
-          <label className="check-row type-small">
-            <input
-              type="checkbox"
-              checked
-              onChange={() => section.set({ authKind: "none" })}
-            />
-            {t("models.needsKey")}
-          </label>
+          <CheckRow
+            className="type-small"
+            checked
+            onChange={() => section.set({ authKind: "none" })}
+            label={t("models.needsKey")}
+          />
         )}
         <Input
           label={t("models.keyValue")}
@@ -260,6 +284,7 @@ export function Credential({
   )
     return (
       <Group legend="models.keyGroup">
+        <KeyState state={keyState} />
         {mode === "summary" ? (
           <>
             <p className="type-small route-summary">
@@ -291,19 +316,18 @@ export function Credential({
     );
   return (
     <Group legend="models.keyGroup">
+      <KeyState state={keyState} />
       {section.optional && (
-        <label className="check-row type-small">
-          <input
-            type="checkbox"
-            checked={section.draft.authKind !== "none"}
-            onChange={(event) =>
-              section.set({
-                authKind: event.target.checked ? "bearer" : "none",
-              })
-            }
-          />
-          {t("models.needsKey")}
-        </label>
+        <CheckRow
+          className="type-small"
+          checked={section.draft.authKind !== "none"}
+          onChange={(event) =>
+            section.set({
+              authKind: event.target.checked ? "bearer" : "none",
+            })
+          }
+          label={t("models.needsKey")}
+        />
       )}
       {section.draft.authKind === "none" ? (
         section.optional ? null : (
@@ -320,6 +344,12 @@ export function Credential({
               section.set({ key_ref: event.target.value })
             }
             list="route-secrets"
+            // A typed field, so it can refuse a pasted key (SEC-033), that looks like the standard picker: the
+            // browser's own list indicator hidden and the standard chevron in its place (WEB-E2E-099).
+            className="key-ref-input"
+            adornment={
+              <Icon glyph={ChevronDown} size={16} className="key-ref-chevron" />
+            }
             autoComplete="off"
             spellCheck={false}
             {...(section.problems.key_ref

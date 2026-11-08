@@ -36,6 +36,8 @@ const elements = [
   "br",
   "input",
   "img",
+  // Only the streaming caret, which caretAfterLastWord adds: the model's own HTML always stays text.
+  "span",
 ];
 // A cell this short reads as one value ("2,124 B", "Ready"): it never wraps, so the table layout cannot split it
 // (WEB-U-027). Longer cells wrap between words.
@@ -120,13 +122,57 @@ function safeUrl(url: string, key: string): string {
   }
 }
 
-/** Renders a partial answer through an element allow-list; HTML and images remain inert text. */
-export function AssistantMarkdown({ text }: { text: string }) {
+/** The blocks whose last word the caret follows, and those it looks into for a later one. */
+const TEXT_BLOCKS = new Set(["p", "h1", "h2", "h3", "h4", "h5", "h6", "li"]);
+const CONTAINERS = new Set(["ul", "ol", "blockquote"]);
+type Tree = {
+  type: string;
+  tagName?: string;
+  properties?: Record<string, unknown>;
+  children?: Tree[];
+};
+
+/**
+ * Puts the streaming caret after the text's last word (UI-GUIDELINES §8, 17.3): in the last paragraph, heading or list
+ * item, looking into a closing list or quote; after a closing code block or table, on a line of its own.
+ */
+function caretAfterLastWord() {
+  return (tree: Tree) => {
+    let into = tree;
+    for (let node = tree; ;) {
+      const last = node.children?.findLast((child) => child.type === "element");
+      const tag = last?.tagName ?? "";
+      if (!last || !(TEXT_BLOCKS.has(tag) || CONTAINERS.has(tag))) break;
+      if (TEXT_BLOCKS.has(tag)) into = last;
+      node = last;
+    }
+    (into.children ??= []).push({
+      type: "element",
+      tagName: "span",
+      properties: { className: ["stream-caret"], ariaHidden: "true" },
+      children: [],
+    });
+  };
+}
+const noPlugins: [] = [];
+
+/**
+ * Renders a partial answer through an element allow-list; HTML and images remain inert text. While `caret`, the text
+ * is still arriving and the caret follows its last word.
+ */
+export function AssistantMarkdown({
+  text,
+  caret = false,
+}: {
+  text: string;
+  caret?: boolean;
+}) {
   const t = useT();
   const renderers = useMemo(() => components(t), [t]);
   return (
     <Markdown
       remarkPlugins={[remarkGfm]}
+      rehypePlugins={caret ? [caretAfterLastWord] : noPlugins}
       allowedElements={elements}
       unwrapDisallowed
       components={renderers}

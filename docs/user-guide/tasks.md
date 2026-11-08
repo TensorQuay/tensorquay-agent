@@ -44,9 +44,10 @@ If the page says "No model routes are available. Ask your administrator to confi
 available. Ask your administrator to configure one.", ask your administrator. An administrator is shown where to fix it
 instead: "No model routes are set up yet: add one in Settings › Administration › Models.", with **Add a model route**,
 or "No environments are available yet: see Settings › Administration › Environments.", with **Open Environments**. Under
-the message box, "Tasks can't reach the internet: no sites are allowed yet. An administrator can allow them." means the
-installation allows no website yet, so a task can't install packages or read a page; administrators get **Allow
-sites** there, which opens **Internet access** in **Settings**.
+the message box, "Tasks can't reach the internet: no sites are allowed yet. Ask an administrator to allow sites." means
+the installation allows no website yet, so a task can't install packages or read a page. An administrator reads "Tasks
+can't reach the internet: no sites are allowed yet." there instead, with **Allow sites**, which opens **Internet
+access** in **Settings**.
 
 On the Workstation, the agent can search the web when the installation's internet access allows it: ask, for example,
 "find the current Node.js LTS version and give the page you found it on". It searches with the tools in its environment
@@ -68,18 +69,25 @@ The run status in the header, beside the task's title, says what is happening in
 | **Waiting for the workspace** | Another task is using the workspace; your run starts when it is free |
 | **Done**, **Stopped**, **Failed: …** | The run ended; a failed run says why |
 
+While a run is under way, starting and waiting included, a small pulsing dot sits before the status, and the browser
+tab's title starts with "●". Once the run has started, the task's item in the sidebar shows the same dot.
+
 If the environment stops unexpectedly, the status line says so beside the run's status, for example "Environment
 stopped 2 times; restarting in 15 s", and counts down while it is replaced. If it keeps stopping, the installation
 stops replacing it; send a message to try again, and the run carries on where it was.
 
 While the agent works, each thing it does appears as one line in plain words, such as "Read …" for a page or a file,
 "Edited …" or "Ran a command: …", with a mark when a step failed or was interrupted; a command that didn't succeed
-says so. Point at a page's line for its whole address, and select a line to see its output and **Details**. When the
+says so. A line appears as soon as its step starts, with a small turning mark while it runs, and then says how long it
+took. While a command runs, its open line shows its latest output as it comes. Point at a page's line for its whole address, and select a line to see its output and **Details**. When the
 run ends, its lines fold under one line such as "Worked for 2 s · read 2 pages, ran 1 command"; select it to see them
 again. A line you opened yourself stays open, and so does its group. The answer itself is shown as formatted text, with code blocks and tables.
-While the model thinks before its next step, the last line says "Thinking…" and for how long, such as "Thinking… · 92 s";
-when the model shares its thinking, select that line to read it as it goes. A model that has not started
-answering after 10 seconds says "Waiting for the model to start answering…", with its time too.
+The last line says what the agent is doing now and for how long. While a step runs it names the step, such as
+"Reading README.md…" or "Running the tests… · 12 s". While the model thinks before its next step, it says "Thinking…",
+such as "Thinking… · 92 s"; when the model shares its thinking, it shows under that line as it comes, and selecting the
+line folds it. Once the model starts writing, its thinking folds to a line such as "Thought for 12 s"; select it to
+read the thinking again. A model that has not started answering after 10 seconds says "Waiting for the model to start
+answering…", with its time too.
 
 The transcript follows new output while you are at the bottom. If you scroll up to read, it stays where you are, and
 **Jump to latest** takes you back.

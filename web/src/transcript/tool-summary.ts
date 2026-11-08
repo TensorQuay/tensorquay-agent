@@ -84,7 +84,7 @@ const readFile: Summary = (tool, t) => {
  * The words a regular expression looks for: its longest literal run, with escapes, classes, anchors and quantifiers
  * taken out; null when there is none worth saying (finding A4).
  */
-function literal(pattern: unknown): string | null {
+export function literal(pattern: unknown): string | null {
   if (typeof pattern !== "string") return null;
   const text = pattern
     .replace(/\\[dDwWsSbB]/g, " ")
@@ -130,6 +130,11 @@ const grep: Summary = (tool, t) => {
         ? bounded(path, "", 48)
         : t("tool.theWorkspace"),
   };
+  // As a running listing's line does, a running search says what it looks for; done, what it looked for (17.3).
+  if (tool.status === "running")
+    return words
+      ? t("tool.lookingForText", values)
+      : t("tool.lookingForPattern", values);
   return (
     (words ? t("tool.lookedFor", values) : t("tool.lookedForPattern", values)) +
     count(tool, t)
@@ -160,8 +165,15 @@ const glob: Summary = (tool, t) => {
 // language; any other multi-line command, or a script still running, shows its first line that isn't blank, a comment
 // or `set …`, without a heredoc's marker, and "…". Finding A3: "a command" and its first words; a non-zero exit
 // "didn't succeed", its code in the card.
-const shell: Summary = (tool, t) => {
-  const raw = argument(tool, "command");
+/**
+ * A command as its line says it (WEB-U-390): without the workspace's `cd`; of several lines, the first that isn't blank,
+ * a comment or `set …`, without a heredoc's marker; and the language of a script given inline to an interpreter.
+ */
+export function commandParts(raw: unknown): {
+  line: unknown;
+  many: boolean;
+  lang: string | undefined;
+} {
   const text =
     typeof raw === "string"
       ? raw.replace(/^\s*cd \/workspace\s*&&\s*/, "")
@@ -174,16 +186,17 @@ const shell: Summary = (tool, t) => {
         head,
       )?.[1]
     : undefined;
-  let command = leading(
-    many
-      ? (lines.find((line) => !/^\s*(#|set\s|$)/.test(line)) ?? head).replace(
-          /\s*<<-?\s*\S+\s*$/,
-          "",
-        )
-      : text,
-    t("tool.fallbackCommand"),
-    60,
-  );
+  const line = many
+    ? (lines.find((line) => !/^\s*(#|set\s|$)/.test(line)) ?? head).replace(
+        /\s*<<-?\s*\S+\s*$/,
+        "",
+      )
+    : text;
+  return { line, many, lang };
+}
+const shell: Summary = (tool, t) => {
+  const { line, many, lang } = commandParts(argument(tool, "command"));
+  let command = leading(line, t("tool.fallbackCommand"), 60);
   // "Running …" ends in its own "…".
   if (tool.status === "running") return t("tool.running", { command });
   if (many && !command.endsWith("…")) command += " …";

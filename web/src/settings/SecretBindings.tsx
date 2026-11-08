@@ -8,6 +8,7 @@ import { useT } from "../i18n/I18nProvider";
 import type { MessageKey, Translate } from "../i18n/translate";
 import type { SecretConsumer } from "../protocol/generated/api";
 import { Button } from "../ui/Button";
+import { CheckRow } from "../ui/CheckRow";
 import { Dialog } from "../ui/Dialog";
 import { FormRefusal } from "../ui/FormRefusal";
 import { Skeleton } from "../ui/Skeleton";
@@ -226,9 +227,11 @@ function Choice({
   onChange: () => void;
 }) {
   return (
-    <label className="check-row type-small">
-      <input type="checkbox" checked={checked} onChange={onChange} />
-      {label}
-    </label>
+    <CheckRow
+      className="type-small"
+      checked={checked}
+      onChange={onChange}
+      label={label}
+    />
   );
 }

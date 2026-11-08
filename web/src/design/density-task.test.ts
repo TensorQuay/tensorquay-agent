@@ -13,6 +13,7 @@ const read = (file: string) =>
 const conversation = read("conversation.css");
 const files = read("files.css");
 const globals = read("globals.css");
+const teams = read("teams.css");
 
 /** The declarations of every rule whose selector list names `selector` exactly, top level or nested, joined. */
 function rule(css: string, selector: string): string {
@@ -38,13 +39,23 @@ describe("WEB-U-080 the sidebar's tasks", () => {
     expect(declared(link, "line-height")).toBe("var(--nav-line-height)");
   });
 
-  it("marks the open task with a fill and weight 500 only, no accent bar", () => {
+  it("marks the open task and the open helper with the selected fill at the body weight, no accent bar", () => {
     const active = rule(
       conversation,
       '.conversation-row:has([aria-current="page"])',
     );
-    expect(declared(active, "background")).toBe("var(--surface)");
-    expect(declared(active, "font-weight")).toBe("500");
+    expect(declared(active, "background")).toBe("var(--selected-fill)");
+    expect(declared(active, "font-weight")).toBe(undefined);
+    const helper = rule(teams, '.task-helper:has([aria-current="page"])');
+    expect(declared(helper, "background")).toBe("var(--selected-fill)");
+    expect(declared(helper, "font-weight")).toBe(undefined);
+    // Under the pointer it keeps its fill (never darker) and gains no underline.
+    expect(
+      declared(
+        rule(conversation, '.conversation-link[aria-current="page"]:hover'),
+        "text-decoration",
+      ),
+    ).toBe("none");
     expect(conversation).not.toMatch(/border-left[^;]*var\(--accent\)/);
     expect(
       declared(rule(conversation, ".conversation-row"), "border-left"),
@@ -82,9 +93,9 @@ describe("WEB-U-080 the task page's lists", () => {
   });
 });
 
-// The live review of c7 (L1-L3): every task row has one layout, whatever its label: the title in sans on one line with
-// an ellipsis, the muted time right-aligned after it, and the status mark in its own space at the end; "Show more" is
-// a quiet row in the list's style, not a bold button.
+// The live review of c7 (L1-L2): every task row has one layout, whatever its label: the title in sans on one line with
+// an ellipsis, the muted time right-aligned after it, and the status mark in its own space at the end. "Show more" is a
+// small ghost button (17.3, UI-GUIDELINES §7 Conversation list item), so it reads as an action, never as a muted task.
 describe("WEB-U-070 one task row layout", () => {
   it("lets the title take the room and cut with an ellipsis, in every list", () => {
     const text = rule(conversation, ".conversation-link-text");
@@ -107,14 +118,17 @@ describe("WEB-U-070 one task row layout", () => {
     expect(declared(status, "position")).toBe(undefined);
   });
 
-  it("makes Show more a quiet row: normal weight, muted, the rows' size", () => {
-    // Compound, so it outweighs the ghost button's own rule.
+  it("makes Show more a small ghost button at its own width, in the list's text size", () => {
+    // Compound, so it outweighs the button's own rule: §5b's small button, 28 px with 12 px each side.
     const more = rule(conversation, ".button.task-more-button");
-    expect(declared(more, "font-weight")).toBe("400");
-    expect(declared(more, "color")).toBe("var(--muted)");
-    expect(declared(more, "min-height")).toBe("var(--row-height-nav)");
-    expect(declared(more, "padding")).toBe("var(--nav-row-padding)");
+    expect(declared(more, "height")).toBe("var(--min-control-height)");
+    expect(declared(more, "min-height")).toBe("var(--min-control-height)");
+    expect(declared(more, "padding")).toBe("0 var(--space-3)");
+    expect(declared(more, "align-self")).toBe("flex-start");
     expect(declared(more, "font-size")).toBe("var(--nav-font-size)");
+    // The ghost button's own ink and weight: no muted colour or body weight of a row.
+    expect(declared(more, "color")).toBe(undefined);
+    expect(declared(more, "font-weight")).toBe(undefined);
   });
 });
 

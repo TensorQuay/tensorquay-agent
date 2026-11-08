@@ -2,6 +2,7 @@ import { fireEvent, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { ApiError } from "../api/error";
+import { cellNote } from "../test/cell-note";
 import { showEnvironments } from "../test/environment-app";
 import {
   DIGEST,
@@ -80,10 +81,9 @@ describe("WEB-U-047 environment sizes", () => {
       }).api,
     );
     const row = await screen.findByRole("row", { name: /Big data/ });
-    // Lowered at start: the stored size (what tasks get), marked, with what it was (review of the sizes, SHOULD 5).
-    expect(
-      within(row).getByText("8 CPUs, lowered from 100 CPUs · 4 GB"),
-    ).toBeVisible();
+    // Lowered at start: the stored size (what tasks get), marked, with what it was (review of the sizes, SHOULD 5), in
+    // the row's muted line (17.3).
+    expect(cellNote(row, "8 CPUs, lowered from 100 CPUs · 4 GB")).toBeVisible();
     fireEvent.click(
       within(row).getByRole("link", { name: "Edit environment Big data" }),
     );
@@ -109,9 +109,7 @@ describe("WEB-U-047 environment sizes", () => {
       }).api,
     );
     const row = await screen.findByRole("row", { name: /Small/ });
-    expect(
-      within(row).getByText("6 CPUs, lowered from 100 CPUs"),
-    ).toBeVisible();
+    expect(cellNote(row, "6 CPUs, lowered from 100 CPUs")).toBeVisible();
   });
 });
 
@@ -183,9 +181,11 @@ describe("WEB-U-047 the environment page and dialogs", () => {
     expect(fake.writes.at(-1)).toMatchObject({
       fields: { description: "Documents, data and web pages; no build tools" },
     });
+    // On the list again: the description leads the row's muted line (17.3).
+    const row = await screen.findByRole("row", { name: /^Minimal/ });
     expect(
-      await screen.findByText("Documents, data and web pages; no build tools"),
-    ).toBeVisible();
+      cellNote(row, "Documents, data and web pages; no build tools"),
+    ).toHaveTextContent(/^Documents, data and web pages; no build tools · /);
   });
 
   it("leaves the build help out when editing", async () => {

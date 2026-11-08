@@ -219,12 +219,23 @@ export function AdminSharedKeys({
                           <code className="type-code">{item.name}</code>
                         </Link>
                       </td>
-                      <td className="cell-wrap">{formatAddress(item)}</td>
+                      <td>
+                        <span className="cell-cut" title={formatAddress(item)}>
+                          {formatAddress(item)}
+                        </span>
+                      </td>
                       <td>
                         <WhoMayUseCell item={item} />
                       </td>
                       <td>
-                        <span title={use.title ?? undefined}>{use.text}</span>
+                        <span
+                          className="cell-cut"
+                          title={[use.text, use.title]
+                            .filter(Boolean)
+                            .join("\n")}
+                        >
+                          {use.text}
+                        </span>
                       </td>
                     </tr>
                   );
@@ -256,7 +267,11 @@ export function AdminSharedKeys({
                   return (
                     <tr key={item.id}>
                       <td>{item.owner.email}</td>
-                      <td className="cell-wrap">{formatAddress(item)}</td>
+                      <td>
+                        <span className="cell-cut" title={formatAddress(item)}>
+                          {formatAddress(item)}
+                        </span>
+                      </td>
                       <td>{used}</td>
                       <td>
                         <ActionMenu
@@ -426,9 +441,18 @@ export function MemberSharedKeys({
                   <td>
                     <code className="type-code">{item.name}</code>
                   </td>
-                  <td className="cell-wrap">{formatAddress(item)}</td>
                   <td>
-                    <span title={use.title ?? undefined}>{use.text}</span>
+                    <span className="cell-cut" title={formatAddress(item)}>
+                      {formatAddress(item)}
+                    </span>
+                  </td>
+                  <td>
+                    <span
+                      className="cell-cut"
+                      title={[use.text, use.title].filter(Boolean).join("\n")}
+                    >
+                      {use.text}
+                    </span>
                   </td>
                 </tr>
               );

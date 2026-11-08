@@ -22,7 +22,20 @@ export type Attachment = {
   path: string | null;
   /** A gateway error code, or `too_large` when the file was refused before uploading. */
   error: string | null;
+  /** An image's own pixels for its chip's thumbnail (an object URL), freed when the chip goes. */
+  preview: string | null;
 };
+
+/** An object URL for an image's thumbnail; none for other files, or where the browser can't make one. */
+function previewOf(file: File): string | null {
+  if (!file.type.startsWith("image/")) return null;
+  if (typeof URL.createObjectURL !== "function") return null;
+  return URL.createObjectURL(file);
+}
+function freePreview(url: string | null) {
+  if (url && typeof URL.revokeObjectURL === "function")
+    URL.revokeObjectURL(url);
+}
 
 export type Attachments = ReturnType<typeof useAttachments>;
 
@@ -47,10 +60,13 @@ export function useAttachments(
   const running = useRef<{ key: string; controller: AbortController } | null>(
     null,
   );
+  const previews = useRef(new Map<string, string>());
   useEffect(
     () => () => {
       queue.current = [];
       running.current?.controller.abort();
+      previews.current.forEach(freePreview);
+      previews.current.clear();
     },
     [],
   );
@@ -111,7 +127,11 @@ export function useAttachments(
         loaded: 0,
         path: null,
         error: tooLarge ? "too_large" : null,
+        preview: previewOf(file),
       };
+    });
+    added.forEach((item) => {
+      if (item.preview) previews.current.set(item.key, item.preview);
     });
     setItems((previous) => [...previous, ...added]);
     taken.forEach((file, index) => {
@@ -124,6 +144,8 @@ export function useAttachments(
   }
   function remove(key: string) {
     held.current.delete(key);
+    freePreview(previews.current.get(key) ?? null);
+    previews.current.delete(key);
     queue.current = queue.current.filter((waiting) => waiting.key !== key);
     if (running.current?.key === key) {
       running.current.controller.abort();
@@ -136,6 +158,8 @@ export function useAttachments(
   }
   function clear() {
     held.current.clear();
+    previews.current.forEach(freePreview);
+    previews.current.clear();
     queue.current = [];
     count.current = 0;
     setRefused(0);

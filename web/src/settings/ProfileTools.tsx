@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useId, useRef } from "react";
+import { useId } from "react";
 
 import { useT } from "../i18n/I18nProvider";
 import type { MessageKey } from "../i18n/translate";
+import { CheckRow } from "../ui/CheckRow";
 
 import {
   TOOL_GROUPS,
@@ -75,25 +76,19 @@ export function ProfileTools({
 }) {
   const t = useT();
   const id = useId();
-  const all = useRef<HTMLInputElement>(null);
   const every = TOOLS.every((tool) => value.includes(tool));
   const some = !every && value.length > 0;
-  useEffect(() => {
-    if (all.current) all.current.indeterminate = some;
-  }, [some]);
   return (
     // The whole content width (WEB-U-131): All above a grid of group cards, never one narrow column beside the labels'.
     <div className="page-section-list stack profile-tools">
-      <label className="check-row type-body-strong">
-        <input
-          ref={all}
-          type="checkbox"
-          checked={every}
-          disabled={disabled}
-          onChange={(event) => onChange(event.target.checked ? [...TOOLS] : [])}
-        />
-        {t("profiles.allTools")}
-      </label>
+      <CheckRow
+        className="type-body-strong"
+        checked={every}
+        mixed={some}
+        disabled={disabled}
+        onChange={(event) => onChange(event.target.checked ? [...TOOLS] : [])}
+        label={t("profiles.allTools")}
+      />
       <div className="choice-grid">
         {TOOL_GROUPS.map(([group, tools]) => (
           <fieldset key={group} className="tool-group">
@@ -104,24 +99,22 @@ export function ProfileTools({
               const [label, hint] = TOOL_LABELS[tool];
               return (
                 <div key={tool} className="tool-row">
-                  <label className="check-row type-small">
-                    <input
-                      type="checkbox"
-                      checked={value.includes(tool)}
-                      disabled={disabled}
-                      aria-describedby={`${id}-${tool}`}
-                      onChange={(event) =>
-                        onChange(
-                          event.target.checked
-                            ? TOOLS.filter(
-                                (each) => each === tool || value.includes(each),
-                              )
-                            : value.filter((each) => each !== tool),
-                        )
-                      }
-                    />
-                    {t(label)}
-                  </label>
+                  <CheckRow
+                    className="type-small"
+                    checked={value.includes(tool)}
+                    disabled={disabled}
+                    aria-describedby={`${id}-${tool}`}
+                    onChange={(event) =>
+                      onChange(
+                        event.target.checked
+                          ? TOOLS.filter(
+                              (each) => each === tool || value.includes(each),
+                            )
+                          : value.filter((each) => each !== tool),
+                      )
+                    }
+                    label={t(label)}
+                  />
                   <p
                     id={`${id}-${tool}`}
                     className="type-small muted tool-hint"

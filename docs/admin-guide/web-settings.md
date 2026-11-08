@@ -468,8 +468,9 @@ one wasn't sent, without its name (see the [user guide](../user-guide/keys.md#wh
 Egress is the allow-list of hosts and ports that task environments may connect to. Everything not on the list is
 refused, and the person sees a notice in the task, such as "Blocked network access to …: the network allow-list
 doesn't allow it." An empty list means environments can reach nothing outside. A fresh installation starts that
-way, and **New task** says so: "Tasks can't reach the internet: no sites are allowed yet." For an administrator the line
-ends with **Allow sites**, which opens this page.
+way, and **New task** says so under the message box: "Tasks can't reach the internet: no sites are allowed yet." For
+an administrator it comes with **Allow sites**, which opens this page; members are told to ask an administrator to
+allow sites.
 
 A change applies to each environment's next connection, including environments that are already running. A connection
 that is already open is not cut; it ends at its usual idle and lifetime bounds.

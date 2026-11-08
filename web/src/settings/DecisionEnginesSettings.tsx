@@ -2,15 +2,16 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Power, Trash2 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 
 import { newActionKey } from "../api/action-key";
 import { ApiError } from "../api/error";
 import { useT } from "../i18n/I18nProvider";
+import type { Translate } from "../i18n/translate";
 import type { User } from "../protocol/generated/api";
 import { ActionMenu } from "../ui/ActionMenu";
 import { Button } from "../ui/Button";
+import { CellNote } from "../ui/CellNote";
 import { ConfirmDialog } from "../ui/ConfirmDialog";
 import { Skeleton } from "../ui/Skeleton";
 import { TableScroll } from "../ui/TableScroll";
@@ -186,11 +187,10 @@ function EngineTable({ items, ...actions }: { items: Engine[] } & RowActions) {
   );
 }
 
-/** A budget's use over its current count, one line per limit; nothing without a budget. */
-function BudgetUse({ item }: { item: Engine }) {
-  const t = useT();
+/** A budget's use over its current count, a sentence per limit; none without a budget. */
+function budgetWords(item: Engine, t: Translate): string[] {
   const { budget, budget_used: used } = item;
-  if (!budget || !used) return null;
+  if (!budget || !used) return [];
   const period = budget.period ?? "total";
   const date = item.budget_since
     ? new Intl.DateTimeFormat(t.locale, { dateStyle: "medium" }).format(
@@ -216,15 +216,7 @@ function BudgetUse({ item }: { item: Engine }) {
         date,
       }),
     );
-  return (
-    <>
-      {lines.map((line) => (
-        <span key={line} className="type-small muted">
-          {line}
-        </span>
-      ))}
-    </>
-  );
+  return lines;
 }
 
 function EngineRow({
@@ -236,34 +228,42 @@ function EngineRow({
   const label = engineLabel(item);
   const source = item.seed ? ENGINE_SOURCES[item.seed] : undefined;
   const host = engineHost(item.url);
+  const budget = budgetWords(item, t).join(" · ");
   return (
     <tr>
       <td>
         <div className="stack route-name">
           <span>{label}</span>
-          <span className="type-small muted">{host}</span>
-          {source && <span className="type-small muted">{t(source)}</span>}
+          <CellNote>
+            {[host, source ? t(source) : null].filter(Boolean).join(" · ")}
+          </CellNote>
         </div>
       </td>
       <td>{t(EXPOSURE_SHORT[item.exposure ?? "none"])}</td>
       <td>
         <div className="stack route-name">
-          <span
-            className="status-pill type-label"
-            data-tone={item.enabled ? "ok" : "muted"}
-          >
-            {t(item.enabled ? "engines.on" : "engines.off")}
-          </span>
-          <BudgetUse item={item} />
-          {item.key_missing && (
-            <>
+          <span className="cell-pills">
+            <span
+              className="status-pill type-label"
+              // On or off is a setting, said by its word; green is only for a check that passed (17.3).
+              data-tone="muted"
+            >
+              {t(item.enabled ? "engines.on" : "engines.off")}
+            </span>
+            {item.key_missing && (
               <span className="status-pill type-label" data-tone="warn">
                 {t("engines.keyMissing")}
               </span>
-              <Link href="/settings/keys/shared" className="type-small">
-                {t("engines.addKey")}
-              </Link>
-            </>
+            )}
+          </span>
+          {/* One line under them (17.3): where to add a missing key, then the budget's use, whole in its tooltip (no page
+              says the use, so the row is its home). */}
+          {item.key_missing ? (
+            <CellNote href="/settings/keys/shared" after={budget || null}>
+              {t("engines.addKey")}
+            </CellNote>
+          ) : (
+            budget && <CellNote>{budget}</CellNote>
           )}
         </div>
       </td>

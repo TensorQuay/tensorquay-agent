@@ -48,6 +48,8 @@ export function ActionMenu({
   context,
   className,
   glyph = Ellipsis,
+  tip,
+  round = false,
   onOpen,
   ref,
 }: {
@@ -60,6 +62,10 @@ export function ActionMenu({
   className?: string | undefined;
   /** The trigger's icon: ⋯ by default; the composer's "+" (Add) for what a new task can use. */
   glyph?: LucideIcon;
+  /** The trigger's tooltip, where it says more than the name (what "+" offers); the name otherwise. */
+  tip?: string | undefined;
+  /** The composer bar's round trigger (IconAction's `round`). */
+  round?: boolean;
   /** Called as the menu opens. */
   onOpen?: (() => void) | undefined;
   /** The ⋯ itself, for a caller that returns focus to it. */
@@ -98,8 +104,9 @@ export function ActionMenu({
         ref={anchor}
         glyph={glyph}
         name={label}
-        tip={label}
+        tip={tip ?? label}
         className={className}
+        round={round}
         expanded={open}
         onClick={() => (open ? setOpen(false) : show())}
       />

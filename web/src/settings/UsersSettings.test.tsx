@@ -526,18 +526,42 @@ describe("WEB-U-023 users", () => {
 
 // The 13f screen review, #7: People opened on an empty Invite form, the people below it. The people come first, then the
 // pending invitations, then Invite someone.
+// 17.3 (UI-GUIDELINES §7 Table): a table's numbers align on the right, in tabular figures; names and words on the left.
+describe("WEB-U-443 People's counts on the right", () => {
+  it("aligns the task counts and their column's label on the right", async () => {
+    standard();
+    show();
+    await row(colleague.email);
+    expect(screen.getByRole("columnheader", { name: "Tasks" })).toHaveClass(
+      "numeric",
+    );
+    const counts = await screen.findAllByRole("link", {
+      name: /^\d+ tasks?$/,
+    });
+    expect(counts.length).toBeGreaterThan(0);
+    for (const count of counts)
+      expect(count.closest("td")).toHaveClass("numeric");
+  });
+});
+
 describe("WEB-U-156 People lists the people first", () => {
   it("puts the people before invitations and the invite form", async () => {
     standard();
     show();
     await row(colleague.email);
+    // The section's heading, People, is the settings shell's (17.3): here its list, the first table, comes first.
+    const people = screen.getAllByRole("table")[0] as HTMLElement;
+    const invite = screen.getByRole("heading", {
+      level: 2,
+      name: "Invite someone",
+    });
+    expect(
+      people.compareDocumentPosition(invite) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
     const headings = screen
       .getAllByRole("heading", { level: 2 })
       .map((heading) => heading.textContent);
-    const people = headings.indexOf("People");
-    const invite = headings.indexOf("Invite someone");
-    expect(people).toBe(0);
-    expect(invite).toBe(headings.length - 1);
+    expect(headings.at(-1)).toBe("Invite someone");
   });
 });
 

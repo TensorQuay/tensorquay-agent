@@ -1,6 +1,6 @@
 // The environment (template) registry admin API on the fake front (slice 4, ADR-0032): seeded Workstation and Minimal,
 // versions, 409s with in_use, the offered-only default, 400 details, and a checker that answers on the next list.
-import { seededMap, seededSet } from "./state.mjs";
+import { onReset, seededMap, seededSet } from "./state.mjs";
 const NAME = /^[a-z][a-z0-9_-]{0,63}$/;
 const PINNED = /^(?:sha256:[0-9a-f]{64}|[^\s@]+@sha256:[0-9a-f]{64})$/;
 const DIGEST = `sha256:${"a".repeat(64)}`;
@@ -161,6 +161,22 @@ const images = [
     reason: "there is no TensorQuay runtime in it",
   }),
 ];
+
+/** The scenario "many-images" (WEB-E2E-098): a host with two dozen images of its own, a list longer than the window. */
+let many = [];
+onReset((scenarios) => {
+  many = scenarios.includes("many-images")
+    ? Array.from({ length: 24 }, (_, index) =>
+        hostImage("0", {
+          id: `sha256:${(index + 1).toString(16).padStart(64, "e")}`,
+          tags: [`team/project-${index + 1}:1`],
+          capabilities: ["shell"],
+          based_on: "minimal",
+          size_bytes: 400_000_000 + index * 1_000_000,
+        }),
+      )
+    : [];
+});
 
 /** Hands a customised built-in back to its rebuilds (the gateway's reset: its refusals in the same order). */
 function reset(name, input, key, answer) {
@@ -400,7 +416,7 @@ export async function templatesRoute(url, method, read, key, answer) {
     url.pathname === "/api/v1/admin/environment-images" &&
     method === "GET"
   )
-    answer.ok(200, { items: images, limit: 200 });
+    answer.ok(200, { items: [...images, ...many], limit: 200 });
   else if (name && match[2] === "reset" && method === "POST")
     reset(name, await read(), key, answer);
   else if (name && match[2] === "default" && method === "POST")

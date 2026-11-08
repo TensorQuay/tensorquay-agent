@@ -11,10 +11,13 @@ import {
 export function Menu({
   label,
   id,
+  lines,
   children,
 }: {
   label: string;
   id?: string;
+  /** "one": each choice on one line, its name cut by an ellipsis before its muted line (WEB-U-432). */
+  lines?: "one" | undefined;
   children: ReactNode;
 }) {
   const menu = useRef<HTMLDivElement>(null);
@@ -91,6 +94,7 @@ export function Menu({
     <div
       className="menu"
       id={id}
+      data-lines={lines}
       tabIndex={-1}
       role="menu"
       aria-label={label}

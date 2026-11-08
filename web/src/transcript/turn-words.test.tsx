@@ -21,7 +21,7 @@ describe("WEB-U-157 a turn's words", () => {
       frame(7, { type: "run.completed", run_id: runId }),
     ].reduce(apply, emptyTranscript());
     const { container } = render(<TranscriptView transcript={transcript} />);
-    const summary = screen.getByText("Thinking").closest("summary");
+    const summary = screen.getByText(/^Thought for /).closest("summary");
     expect(summary?.parentElement?.tagName).toBe("DETAILS");
     expect(summary?.querySelector("svg")).not.toBeNull();
     expect(container).toHaveTextContent("Look at the files first.");

@@ -4,7 +4,7 @@ import { useId } from "react";
 
 import { useT } from "../i18n/I18nProvider";
 import { formatSize } from "../i18n/message";
-import type { MessageKey } from "../i18n/translate";
+import type { MessageKey, Translate } from "../i18n/translate";
 
 import type { EnvironmentItem } from "./admin/templates";
 
@@ -86,4 +86,44 @@ export function SecretFiles({ item }: { item: EnvironmentItem }) {
       )}
     </div>
   );
+}
+
+/**
+ * The same words as parts of one line, for a list row that keeps them to one line (17.3): the scan bound's sentence, or
+ * the list's title, each file with what it is (acknowledged ones marked) and the count of the rest; none without them.
+ */
+export function secretFilesWords(
+  item: EnvironmentItem,
+  t: Translate,
+): string[] {
+  const check = item.check;
+  const limit = check.scan_limit;
+  if (check.state === "refused" && limit)
+    return [
+      limit.bound === "entries"
+        ? t("environments.scanLimitEntries", {
+            limit: new Intl.NumberFormat(t.locale).format(limit.limit),
+          })
+        : t("environments.scanLimitBytes", {
+            size: formatSize(limit.limit, t.locale),
+          }),
+    ];
+  const found = check.secret_files;
+  if (!found || found.items.length === 0) return [];
+  return [
+    check.state === "refused"
+      ? t("environments.secretFilesFound")
+      : t("environments.secretFilesAcknowledged"),
+    ...found.items.map(
+      (file) =>
+        `${file.path}: ${t(RULES.get(file.rule) ?? "environments.ruleOther")}${
+          check.state === "refused" && file.acknowledged
+            ? ` ${t("environments.secretAcknowledged")}`
+            : ""
+        }`,
+    ),
+    ...(found.more > 0
+      ? [t("environments.secretMore", { count: found.more })]
+      : []),
+  ];
 }

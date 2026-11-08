@@ -8,7 +8,7 @@ import { chooseModel } from "./model";
 import { createConversation, signIn } from "./session";
 import { expect, test } from "./test";
 
-test("WEB-U-007 composer grows from three to twelve lines and keeps Shift+Enter as a newline", async ({
+test("WEB-U-430 composer grows from two to eight lines and keeps Shift+Enter as a newline", async ({
   page,
 }) => {
   await signIn(page);
@@ -29,7 +29,27 @@ test("WEB-U-007 composer grows from three to twelve lines and keeps Shift+Enter 
       };
     });
   const initial = await dimensions();
-  expect(initial.height).toBeCloseTo(initial.line * 3 + initial.padding, 0);
+  expect(initial.height).toBeCloseTo(initial.line * 2 + initial.padding, 0);
+  // The card: 12 px by 16 px of padding (UI-GUIDELINES §5b's table), so empty it is two 24 px lines, the 12 px gap, the
+  // 36 px bar, the padding and its border: 122 px.
+  const card = await input.evaluate((element) => {
+    const box = element.closest(".composer-card");
+    if (!box) throw new Error("The composer has no card");
+    const style = getComputedStyle(box);
+    return {
+      height: Math.round(box.getBoundingClientRect().height),
+      padding: [
+        style.paddingTop,
+        style.paddingRight,
+        style.paddingBottom,
+        style.paddingLeft,
+      ],
+    };
+  });
+  expect(card).toEqual({
+    height: 122,
+    padding: ["12px", "16px", "12px", "16px"],
+  });
   expect(initial.resize).toBe("none");
   await input.fill("First line");
   await input.press("Shift+Enter");
@@ -39,9 +59,27 @@ test("WEB-U-007 composer grows from three to twelve lines and keeps Shift+Enter 
     Array.from({ length: 24 }, (_, index) => `Line ${index}`).join("\n"),
   );
   const grown = await dimensions();
-  expect(grown.height).toBeCloseTo(grown.line * 12 + grown.padding, 0);
+  expect(grown.height).toBeCloseTo(grown.line * 8 + grown.padding, 0);
   await input.fill("");
   expect((await dimensions()).height).toBeCloseTo(initial.height, 0);
+});
+
+// WEB-U-431: a person with no tasks yet finds the keyboard hint in New task's placeholder; their first task ends it.
+test("WEB-U-431 the keyboard hint is New task's placeholder until the person has a task", async ({
+  page,
+}) => {
+  await signIn(page);
+  await page.goto("/");
+  const input = page.getByRole("textbox", { name: "Message", exact: true });
+  await expect(input).toHaveAttribute(
+    "placeholder",
+    "Describe the task…\nEnter to send · Shift+Enter for a new line",
+  );
+  const path = await createConversation(page);
+  await page.goto("/");
+  await expect(input).toHaveAttribute("placeholder", "Describe the task…");
+  await page.goto(path);
+  await expect(input).toHaveAttribute("placeholder", "Reply…");
 });
 
 test("WEB-E2E-004 precursor: sign in, create, stream a tool call, replay, delete and sign out", async ({

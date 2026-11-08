@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  ChevronDown,
-  LoaderCircle,
-  MessageSquare,
-  Pencil,
-  Trash2,
-  X,
-} from "lucide-react";
+import { ChevronDown, MessageSquare, Pencil, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { type ReactNode, useEffect, useRef } from "react";
 
@@ -217,13 +210,6 @@ export function TaskRow({
   );
 }
 
-// Icons the page already loads (the button's spinner, the toast's warning, the dialog's close), so the sidebar adds no
-// script for them (the conversation page's budget, WEB-U-014).
-const GLYPHS = {
-  working: LoaderCircle,
-  failed: X,
-} as const;
-
 /**
  * A task's status in the sidebar (UI-GUIDELINES §7): a shape of its own per status, never colour alone (UI-GUIDELINES §9), with
  * its word on hover; the row's name carries the word for assistive technology. A quiet task (idle, done, stopped)
@@ -239,7 +225,12 @@ function StatusDot({ status }: { status: TaskStatus | null }) {
       title={t(`list.status.${status}`)}
       aria-hidden="true"
     >
-      <Icon glyph={GLYPHS[status]} size={16} />
+      {/* Working, the one run mark (17.3), as the bar's; failed, the dialog's close, an icon the page already loads. */}
+      {status === "working" ? (
+        <span className="run-mark" />
+      ) : (
+        <Icon glyph={X} size={16} />
+      )}
     </span>
   );
 }

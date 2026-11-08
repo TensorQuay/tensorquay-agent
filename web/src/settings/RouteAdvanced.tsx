@@ -5,6 +5,7 @@ import { useEffect, useId, type ReactNode } from "react";
 import { useT } from "../i18n/I18nProvider";
 import type { MessageKey } from "../i18n/translate";
 import { Button } from "../ui/Button";
+import { CheckRow } from "../ui/CheckRow";
 import { Select } from "../ui/Select";
 import { Textarea } from "../ui/Textarea";
 
@@ -175,16 +176,14 @@ export function Check({
   const hintId = useId();
   return (
     <>
-      <label className="check-row type-small">
-        <input
-          type="checkbox"
-          id={id}
-          checked={section.draft[name]}
-          onChange={(event) => section.set({ [name]: event.target.checked })}
-          {...(hintKey ? { "aria-describedby": hintId } : {})}
-        />
-        {t(labelKey)}
-      </label>
+      <CheckRow
+        className="type-small"
+        id={id}
+        checked={section.draft[name]}
+        onChange={(event) => section.set({ [name]: event.target.checked })}
+        {...(hintKey ? { "aria-describedby": hintId } : {})}
+        label={t(labelKey)}
+      />
       {hintKey && (
         <p id={hintId} className="type-small muted">
           {t(hintKey)}

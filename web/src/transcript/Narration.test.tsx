@@ -71,8 +71,10 @@ describe("WEB-U-016 narration belongs with its work", () => {
     ).toEqual([
       "I will check both files.",
       "Read fast.py line 1",
-      "Read slow.pyRunning",
+      "Read slow.py",
     ]);
+    // The running one turns its mark where a word would be (17.3).
+    expect(rows.at(-1)?.querySelector(".activity-working")).not.toBeNull();
   });
   it("streams undecided text in the work group, then shows only the final answer below it", async () => {
     const live = frames.slice(0, 7).reduce(apply, emptyTranscript());

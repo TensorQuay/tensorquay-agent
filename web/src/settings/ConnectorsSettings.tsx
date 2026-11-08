@@ -1,13 +1,13 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
 import { useState } from "react";
 
 import { newActionKey } from "../api/action-key";
 import { useT } from "../i18n/I18nProvider";
 import type { User } from "../protocol/generated/api";
 import { Button } from "../ui/Button";
+import { CellNote } from "../ui/CellNote";
 import { ConfirmDialog } from "../ui/ConfirmDialog";
 import { Skeleton } from "../ui/Skeleton";
 import { TableScroll } from "../ui/TableScroll";
@@ -177,31 +177,34 @@ function ConnectorRow({
         <div className="stack route-name">
           {/* The display name only (UI-GUIDELINES §10); the internal name stands in when there is none. */}
           <span>{name}</span>
-          <span className="type-small muted wrap-line">{`${hostOf(item.url)} · ${source}`}</span>
+          <CellNote>{`${hostOf(item.url)} · ${source}`}</CellNote>
         </div>
       </td>
       <td>{t(tools, values)}</td>
       <td>
         <div className="stack route-name">
-          {!item.enabled && (
-            <span className="status-pill type-label" data-tone="muted">
-              {t("connectors.off")}
-            </span>
-          )}
-          {item.enabled && item.enabled_by_default && (
-            <span className="status-pill type-label" data-tone="ok">
-              {t("connectors.inNewTasks")}
-            </span>
-          )}
-          {item.key_missing && (
-            <>
+          <span className="cell-pills">
+            {!item.enabled && (
+              <span className="status-pill type-label" data-tone="muted">
+                {t("connectors.off")}
+              </span>
+            )}
+            {/* A setting, not a check: muted (17.3). */}
+            {item.enabled && item.enabled_by_default && (
+              <span className="status-pill type-label" data-tone="muted">
+                {t("connectors.inNewTasks")}
+              </span>
+            )}
+            {item.key_missing && (
               <span className="status-pill type-label" data-tone="warn">
                 {t("connectors.keyMissing")}
               </span>
-              <Link href="/settings/keys/shared" className="type-small">
-                {t("connectors.addKey")}
-              </Link>
-            </>
+            )}
+          </span>
+          {item.key_missing && (
+            <CellNote href="/settings/keys/shared">
+              {t("connectors.addKey")}
+            </CellNote>
           )}
         </div>
       </td>

@@ -11,6 +11,7 @@ import type { MessageKey } from "../i18n/translate";
 import type { User } from "../protocol/generated/api";
 import { ActionMenu } from "../ui/ActionMenu";
 import { Button } from "../ui/Button";
+import { CellNote } from "../ui/CellNote";
 import { ConfirmDialog } from "../ui/ConfirmDialog";
 import { Skeleton } from "../ui/Skeleton";
 import { TableScroll } from "../ui/TableScroll";
@@ -285,17 +286,20 @@ function RuleRows({
             <tr key={item.host}>
               <td>
                 <span className="stack route-name">
-                  <code className="type-code">{item.host}</code>
-                  {/* An internal server's rule (WEB-U-188), and why the gateway can't use it yet. */}
-                  {item.internal && (
-                    <span className="status-pill type-label">
-                      {t("egress.internal")}
-                    </span>
-                  )}
+                  {/* An internal server's rule (WEB-U-188) says so beside its host, and why the gateway can't use it
+                      yet in the row's one muted line (17.3). */}
+                  <span className="cell-pills">
+                    <code className="type-code">{item.host}</code>{" "}
+                    {item.internal && (
+                      <span className="status-pill type-label">
+                        {t("egress.internal")}
+                      </span>
+                    )}
+                  </span>
                   {item.internal_state && (
-                    <span className="type-small muted">
+                    <CellNote>
                       {t(INTERNAL_STATES[item.internal_state])}
-                    </span>
+                    </CellNote>
                   )}
                 </span>
               </td>

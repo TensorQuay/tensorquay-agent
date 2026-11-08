@@ -14,6 +14,7 @@ import { formatMib, formatNumber } from "../i18n/message";
 import type { MessageKey } from "../i18n/translate";
 import type { EnvironmentSize, User } from "../protocol/generated/api";
 import { Button } from "../ui/Button";
+import { CheckRow } from "../ui/CheckRow";
 import { Icon } from "../ui/Icon";
 import { Input } from "../ui/Input";
 import { Skeleton } from "../ui/Skeleton";
@@ -37,6 +38,7 @@ import {
 } from "./environment-copy";
 import { ResetEnvironment } from "./EnvironmentDialogs";
 import { ImageChoice, useHostImages } from "./EnvironmentImages";
+import { EnvironmentStatus } from "./EnvironmentsSettings";
 import { LoadFailure } from "./LoadFailure";
 import {
   IdLine,
@@ -359,6 +361,12 @@ function EnvironmentForm(props: FormProps) {
           )}
         </div>
       )}
+      {/* The check in full, which the list keeps to two lines (17.3). */}
+      {item && (
+        <PageSection title={t("environments.status")}>
+          <EnvironmentStatus item={item} />
+        </PageSection>
+      )}
       <PageSection title={t("environments.basics")}>
         {text("displayName", "environments.displayName")}
         {idShown && text("name", "environments.name", "environments.nameHint")}
@@ -421,28 +429,31 @@ function EnvironmentForm(props: FormProps) {
             </p>
             <div className="choice-grid">
               {boxes.map((capability) => (
-                <label key={capability} className="check-row type-small">
-                  <input
-                    type="checkbox"
-                    disabled={locked}
-                    checked={draft.capabilities.includes(capability)}
-                    onChange={(event) =>
-                      set({
-                        capabilities: event.target.checked
-                          ? boxes.filter(
-                              (value) =>
-                                value === capability ||
-                                draft.capabilities.includes(value),
-                            )
-                          : draft.capabilities.filter(
-                              (value) => value !== capability,
-                            ),
-                      })
-                    }
-                  />
-                  <Icon glyph={capabilities[capability].icon} size={16} />
-                  {t(capabilities[capability].label)}
-                </label>
+                <CheckRow
+                  key={capability}
+                  className="type-small"
+                  disabled={locked}
+                  checked={draft.capabilities.includes(capability)}
+                  onChange={(event) =>
+                    set({
+                      capabilities: event.target.checked
+                        ? boxes.filter(
+                            (value) =>
+                              value === capability ||
+                              draft.capabilities.includes(value),
+                          )
+                        : draft.capabilities.filter(
+                            (value) => value !== capability,
+                          ),
+                    })
+                  }
+                  label={
+                    <>
+                      <Icon glyph={capabilities[capability].icon} size={16} />
+                      {t(capabilities[capability].label)}
+                    </>
+                  }
+                />
               ))}
             </div>
           </div>
@@ -468,15 +479,13 @@ function EnvironmentForm(props: FormProps) {
       </PageSection>
       <PageSection title={t("environments.availability")}>
         <div className="field stack">
-          <label className="check-row type-small">
-            <input
-              type="checkbox"
-              checked={draft.enabled}
-              disabled={item?.is_default || frozen}
-              onChange={(event) => set({ enabled: event.target.checked })}
-            />
-            {t("environments.enabled")}
-          </label>
+          <CheckRow
+            className="type-small"
+            checked={draft.enabled}
+            disabled={item?.is_default || frozen}
+            onChange={(event) => set({ enabled: event.target.checked })}
+            label={t("environments.enabled")}
+          />
           <p className="type-small muted">
             {t(
               item?.is_default

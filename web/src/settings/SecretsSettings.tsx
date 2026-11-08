@@ -9,6 +9,7 @@ import { useT } from "../i18n/I18nProvider";
 import type { MessageKey } from "../i18n/translate";
 import type { User } from "../protocol/generated/api";
 import { Button } from "../ui/Button";
+import { CellNote } from "../ui/CellNote";
 import { ConfirmDialog } from "../ui/ConfirmDialog";
 import { Dialog } from "../ui/Dialog";
 import { FormRefusal } from "../ui/FormRefusal";
@@ -290,25 +291,27 @@ function SecretTable({
             return (
               <tr key={item.ref}>
                 <td className="secret-changed">
-                  {/* One line: a long name truncates, with the full name on hover and in the row's name (§7);
-                      a due reminder's pill sits under it, so the name column stays narrow. */}
+                  {/* Its value line: the name (a long one truncates, whole on hover and in the row's name, §7) and a due
+                      reminder's pill beside it; then one muted line, where it came from (17.3). */}
                   <span className="stack route-name">
-                    <span className="secret-ref-line" title={item.ref}>
-                      {name}
-                    </span>{" "}
+                    <span className="cell-pills">
+                      <span className="secret-ref-line" title={item.ref}>
+                        {name}
+                      </span>{" "}
+                      {item.rotation_due && (
+                        <span
+                          className="status-pill type-label"
+                          data-tone="warn"
+                          aria-describedby={dueId}
+                        >
+                          {t("secrets.rotationDue")}
+                        </span>
+                      )}
+                    </span>
                     {item.seed && (
-                      <span className="type-small muted">
+                      <CellNote>
                         {t(SOURCES[item.seed] ?? "secrets.addedHere")}
-                      </span>
-                    )}
-                    {item.rotation_due && (
-                      <span
-                        className="status-pill type-label"
-                        data-tone="warn"
-                        aria-describedby={dueId}
-                      >
-                        {t("secrets.rotationDue")}
-                      </span>
+                      </CellNote>
                     )}
                   </span>
                   {item.rotation_due && (
@@ -331,11 +334,11 @@ function SecretTable({
                     <span className="nowrap">
                       <DateLabel value={changedAt} />
                     </span>
-                    <span className="type-small muted">
+                    <CellNote>
                       {days === null
                         ? t("secrets.noReminder")
                         : t("secrets.reminderEvery", { days })}
-                    </span>
+                    </CellNote>
                   </span>
                 </td>
                 {/* One actions column (UI-GUIDELINES §7, as on Models): Replace, and the rest in the row's menu. */}

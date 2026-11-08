@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useLanguage, useT } from "../i18n/I18nProvider";
 import type { User } from "../protocol/generated/api";
 import { Button } from "../ui/Button";
+import { CellNote } from "../ui/CellNote";
 import { Dialog } from "../ui/Dialog";
 import { Icon } from "../ui/Icon";
 import { Skeleton } from "../ui/Skeleton";
@@ -90,7 +91,9 @@ export function KeysSettings({
         {/* Nothing to add when no connector here takes a person's key. */}
         {(people.isPending || failed || takesKey.length > 0) && (
           <Button
-            variant="primary"
+            // Secondary beside the web services' Add above it, the view's one primary (17.3); the only Add on a page
+            // without them.
+            variant={hostKeys ? "secondary" : "primary"}
             onClick={() => {
               setNotice(null);
               setOpen({ ask: true });
@@ -231,7 +234,7 @@ function ConnectorRow({
           <div className="data-name">
             <span>{name}</span>
           </div>
-          <span className="type-small muted">{t("keys.forConnector")}</span>
+          <CellNote>{t("keys.forConnector")}</CellNote>
         </div>
       </td>
       <td>

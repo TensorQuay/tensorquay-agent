@@ -120,7 +120,7 @@ describe("WEB-U-145 Keys › Shared for administrators", () => {
       within(first as HTMLElement).getByText(/Today, 09:40/),
     ).toHaveAttribute(
       "title",
-      "Used 3 times in Build wheels, last on Sep 30, 2026, 09:40, by sam@acme.test",
+      "Today, 09:40 · Build wheels\nUsed 3 times in Build wheels, last on Sep 30, 2026, 09:40, by sam@acme.test",
     );
     expect(second).toHaveTextContent(
       /JIRA_BOT.*acme\.atlassian\.net.*2 people.*Never used/,
@@ -217,7 +217,9 @@ describe("WEB-U-145 Keys › Shared for administrators", () => {
     );
     expect(second).toHaveTextContent(/sam@acme\.test.*gitlab\.com.*Sep 28/);
     expect(table).not.toHaveTextContent(/Sales report|task|refused|ended/i);
-    expect(table.querySelector("[title]")).toBeNull();
+    // Nothing more on hover either: a tooltip only repeats the words it sits on (a long address cut, 17.3).
+    for (const hint of table.querySelectorAll("[title]"))
+      expect(hint.getAttribute("title")).toBe(hint.textContent);
   });
 
   it("deletes a member's key that changed meanwhile after saying so, as it is now", async () => {

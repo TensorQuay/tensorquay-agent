@@ -3,12 +3,17 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { User } from "../protocol/generated/api";
+import { cellNote } from "../test/cell-note";
+import { showEnvironments } from "../test/environment-app";
 import { environment, fakeTemplates, LISTED } from "../test/templates-admin";
 import { LIMITS } from "../test/user";
 
 import type { TemplatesApi } from "./admin/templates";
 import { EnvironmentsSettings } from "./EnvironmentsSettings";
 
+/** Replaced by the harness once it renders (showEnvironments). */
+const router = vi.hoisted(() => ({ push: vi.fn<(href: string) => void>() }));
+vi.mock("next/navigation", () => ({ useRouter: () => router }));
 vi.mock("next/link", async () => {
   const { createElement } = await import("react");
   return {
@@ -82,14 +87,13 @@ describe("WEB-U-047 the environments list", () => {
       within(data).getByText("Based on Workstation · Added here"),
     ).toBeVisible();
     expect(within(data).getByText("Refused")).toBeVisible();
+    // Under the pills, one muted line: the reason's sentence, then what it means for people (17.3; its page says each
+    // on its own line).
     expect(
-      within(data).getByText(/does not start from Workstation or Minimal/),
-    ).toBeVisible();
-    expect(
-      within(data).getByText(
-        "People cannot pick it until it passes the check.",
-      ),
-    ).toBeVisible();
+      cellNote(data, "People cannot pick it until it passes the check."),
+    ).toHaveTextContent(
+      "The image does not start from Workstation or Minimal. Build it FROM one of them. · People cannot pick it until it passes the check.",
+    );
     expect(within(row(/GPU tools/)).getByText("Checking…")).toBeVisible();
     expect(within(row(/^Old/)).getByText("Off")).toBeVisible();
   });
@@ -177,9 +181,7 @@ describe("WEB-U-047 the environments list", () => {
     await screen.findByText("Checking…");
     fake.answer("gpu", "rootfs_missing");
     await act(() => vi.advanceTimersByTimeAsync(5_000));
-    expect(
-      within(row(/GPU tools/)).getByText(/microVM disk image isn't built yet/),
-    ).toBeVisible();
+    expect(cellNote(row(/GPU tools/), "No VM disk image yet.")).toBeVisible();
   });
 
   it("shows members nothing", () => {
@@ -332,7 +334,8 @@ describe("WEB-U-047 a default people cannot pick", () => {
     );
     await screen.findByRole("table", { name: "Environments" });
     expect(
-      within(row(/^Edited/)).getByText(
+      cellNote(
+        row(/^Edited/),
         "People cannot pick it until it passes the check.",
       ),
     ).toBeVisible();
@@ -371,7 +374,8 @@ describe("WEB-U-235 a built-in the gateway found on this host", () => {
 });
 
 // E2E-VM-013: on a microVM install, a built-in whose disk image isn't built can't be used, so it doesn't become the
-// default; its row says why in plain words, with the command that builds it.
+// default; its row says why in one line, naming the build script, and its page says it in plain words with the command
+// that builds it (17.3).
 describe("WEB-U-163 an environment whose microVM disk image isn't built", () => {
   it("says so in plain words, with the command that builds it", async () => {
     const workstation = environment("workstation", {
@@ -385,25 +389,36 @@ describe("WEB-U-163 an environment whose microVM disk image isn't built", () => 
         scan_limit: null,
       },
     });
-    show(
+    showEnvironments(
       fakeTemplates({
         environments: [
           environment("minimal", { display_name: "Minimal", is_default: true }),
           workstation,
         ],
       }).api,
+      router,
     );
     const line = await screen.findByRole("row", { name: /Workstation/ });
     expect(
-      within(line).getByText(
+      cellNote(
+        line,
+        "No VM disk image yet. Build it with images/rootfs/build_rootfs.py, then check again.",
+      ),
+    ).toBeVisible();
+    fireEvent.click(
+      within(line).getByRole("link", { name: "Edit environment Workstation" }),
+    );
+    const status = await screen.findByRole("region", { name: "Status" });
+    expect(
+      within(status).getByText(
         "Workstation's microVM disk image isn't built yet, so tasks can't use it. On the gateway's host, build it with:",
       ),
     ).toBeVisible();
     expect(
-      within(line).getByText(
+      within(status).getByText(
         `python3 images/rootfs/build_rootfs.py --image ${workstation.image_id ?? ""} --vmm-image tqa-vmm --out <storage.root>/images`,
       ),
     ).toBeVisible();
-    expect(within(line).getByText("Then check it again.")).toBeVisible();
+    expect(within(status).getByText("Then check it again.")).toBeVisible();
   });
 });

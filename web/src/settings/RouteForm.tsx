@@ -331,6 +331,16 @@ export function RouteForm(props: FormProps) {
               : keyMode
           }
           onMode={setKeyMode}
+          // The saved key's state, while the key shown is still the saved one (17.3, as the list says it).
+          keyState={
+            item && section.draft.key_ref.trim() === (item.key_ref ?? "")
+              ? item.key_missing
+                ? "missing"
+                : item.key_ref_invalid
+                  ? "needed"
+                  : null
+              : null
+          }
           inline={{
             value: save.inlineKey,
             onChange: save.setInlineKey,

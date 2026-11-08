@@ -186,8 +186,9 @@ function Preset({
           role="status"
           className="status-pill type-label"
           data-tone={
+            // On is a setting (muted, 17.3); a list only partly on is a warning.
             preset.applied === "all"
-              ? "ok"
+              ? "muted"
               : preset.applied === "partial"
                 ? "warn"
                 : "muted"

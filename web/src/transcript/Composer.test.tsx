@@ -7,6 +7,7 @@ import {
 } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import en from "../i18n/locales/en.json";
 import type { QueuedMessage } from "../protocol/generated/api";
 
 import { Composer, type HeldMessages } from "./Composer";
@@ -27,7 +28,7 @@ describe("WEB-U-001 composer states", () => {
     const onSend = vi.fn(() => Promise.resolve(true));
     render(<Composer {...defaults} onSend={onSend} />);
     const input = screen.getByRole("textbox", { name: "Message" });
-    expect(input).toHaveAttribute("rows", "3");
+    expect(input).toHaveAttribute("rows", "2");
     fireEvent.change(input, { target: { value: "Inspect the workspace" } });
     fireEvent.keyDown(input, { key: "Enter", shiftKey: true });
     fireEvent.keyDown(input, { key: "Enter", isComposing: true });
@@ -177,13 +178,9 @@ describe("WEB-U-017 composer card controls", () => {
       screen.getByRole("button", { name: "Send" }).closest(".composer-card"),
     ).toBe(card);
     expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
-    expect(
-      screen.getByText("Enter to send · Shift+Enter for a new line"),
-    ).toBeVisible();
+    // The keyboard hint is never a line under the card: the placeholder holds it while it's wanted (WEB-U-431).
+    expect(screen.queryByText(en.messages["composer.hint"])).toBeNull();
     fireEvent.change(input, { target: { value: "Please inspect this" } });
-    expect(
-      screen.queryByText("Enter to send · Shift+Enter for a new line"),
-    ).toBeNull();
     expect(screen.getByRole("button", { name: "Send" })).toBeEnabled();
     rerender(<Composer {...defaults} sending />);
     // With a draft, Sending is busy: it keeps its focus but refuses a second send (WEB-U-007).
@@ -386,8 +383,13 @@ describe("WEB-U-154 no keyboard hint on a touch screen", () => {
         }) as unknown as MediaQueryList,
     );
     try {
-      render(<Composer {...defaults} />);
+      // Not even in the placeholder of a person with no tasks yet (WEB-U-431).
+      render(<Composer {...defaults} keyHint />);
       expect(screen.queryByText(/Shift\+Enter/)).toBeNull();
+      expect(screen.getByRole("textbox", { name: "Message" })).toHaveAttribute(
+        "placeholder",
+        en.messages["composer.placeholderReply"],
+      );
       expect(
         screen.getByRole("textbox", { name: "Message" }),
       ).not.toHaveAttribute("aria-describedby");
@@ -436,5 +438,30 @@ describe("WEB-U-273 Send and Stop keep the keyboard's focus", () => {
     // Once the focus moves on, an empty Send is disabled as before.
     fireEvent.blur(send);
     expect(send).toBeDisabled();
+  });
+});
+
+// WEB-U-431: the keyboard hint is the placeholder's second line while the person has no tasks yet (New task tells the
+// composer so), never a line of its own under the card, and never where the pointer is a finger (WEB-U-154, above).
+describe("WEB-U-431 the keyboard hint in the placeholder", () => {
+  const hint = en.messages["composer.hint"];
+  it("puts it under the placeholder's first line for a person with no tasks yet", () => {
+    render(<Composer {...defaults} initial keyHint />);
+    const input = screen.getByRole("textbox", { name: "Message" });
+    expect(input).toHaveAttribute(
+      "placeholder",
+      `${en.messages["composer.placeholderNew"]}\n${hint}`,
+    );
+    expect(screen.queryByText(hint)).toBeNull();
+    expect(input).not.toHaveAttribute("aria-describedby");
+  });
+
+  it("leaves it out once they have a task", () => {
+    render(<Composer {...defaults} initial />);
+    expect(screen.getByRole("textbox", { name: "Message" })).toHaveAttribute(
+      "placeholder",
+      en.messages["composer.placeholderNew"],
+    );
+    expect(screen.queryByText(hint)).toBeNull();
   });
 });

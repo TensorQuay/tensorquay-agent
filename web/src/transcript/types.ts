@@ -73,6 +73,8 @@ export type StepView = {
   waitingSince: string | null;
   /** When its current attempt started, for its live time (WEB-U-123); null before step.started. */
   startedAt: string | null;
+  /** When the model stopped thinking in its current attempt: its first words, its first call or its end (17.3). */
+  thoughtUntil?: string | undefined;
   /** When its first attempt started (a retry restarts `startedAt`), for placing stored key uses; absent before then. */
   firstStartedAt?: string;
   /** Its keyed calls and refusals, each key, address and outcome once (live frames and stored rows; absent when none). */

@@ -1,7 +1,14 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { lazy, Suspense, useRef, useState, type ReactNode } from "react";
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 import type { Action } from "../api/action";
 import { api, ApiError } from "../api/client";
@@ -14,6 +21,7 @@ import type {
   PatchConversation,
 } from "../protocol/generated/api";
 import { TabTitle } from "../shell/TabTitle";
+import { isWorking, runActive } from "../transcript/run-status";
 import { RunStatus } from "../transcript/RunStatus";
 import type { Transcript } from "../transcript/types";
 import type { MenuAction } from "../ui/ActionMenu";
@@ -90,6 +98,19 @@ export function ConversationControls({
   const t = useT();
   const me = useSession().data?.id;
   const [deleting, setDeleting] = useState(false);
+  // The sidebar item carries the same run mark (17.3): its list is read again as this task's run starts and ends,
+  // not on its next quiet round. A replayed run that has ended changes nothing.
+  const working = isWorking(
+    transcript,
+    current.data.run_status,
+    current.data.last_activity_at,
+  );
+  const seen = useRef(working);
+  useEffect(() => {
+    if (seen.current === working) return;
+    seen.current = working;
+    void cache.invalidateQueries({ queryKey: ["conversations"] });
+  }, [cache, working]);
   // What the task's profile set (ADR-0012): its name beside the title.
   const profile = current.data.profile;
   // The workspace it is in, when it is one made or shared rather than the task's own (which has the task's id and
@@ -141,10 +162,17 @@ export function ConversationControls({
   return (
     <>
       <TabTitle>
-        {t("tab.task", {
-          title: taskTitle(current.data, t),
-          product: APP_NAME,
-        })}
+        {/* The one run mark in the tab while the run is under way (17.3): "● Puzzle 17.2 · …". */}
+        {t(
+          runActive(
+            transcript,
+            current.data.run_status,
+            current.data.last_activity_at,
+          )
+            ? "tab.taskWorking"
+            : "tab.task",
+          { title: taskTitle(current.data, t), product: APP_NAME },
+        )}
       </TabTitle>
       <ConversationBar
         title={taskTitle(current.data, t)}

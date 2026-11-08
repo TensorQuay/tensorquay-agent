@@ -150,6 +150,41 @@
 .reasoning[open] > summary svg {
   transform: rotate(90deg);
 }
+/* The live line's words while its step runs (17.3): a soft light crosses them, from the line's colour to the ink and
+   on; the time after them stays still. Reduced motion and forced colours render the end state: the words still, in the
+   line's own colour. */
+.shimmer {
+  background-image: linear-gradient(
+    90deg,
+    var(--muted) 40%,
+    var(--ink) 50%,
+    var(--muted) 60%
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: live-shimmer var(--motion-shimmer) linear infinite;
+}
+@keyframes live-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+@media (prefers-reduced-motion: reduce), (forced-colors: active) {
+  .shimmer {
+    background-image: none;
+    color: inherit;
+    animation: none;
+  }
+}
+/* The live thinking arrives piece by piece, each fading in once (17.3); reduced motion shows it at once. */
+.arriving {
+  animation: fade-in var(--motion-panel) ease-out;
+}
 /* The live line's thinking (WEB-U-123): under the line, as the group's Thinking reads; a long one scrolls in place. */
 .reasoning-live {
   margin-top: var(--space-2);
@@ -229,11 +264,11 @@ textarea.composer-input {
   resize: none;
   line-height: var(--body-leading);
   min-height: calc(
-    var(--body-size) * var(--body-leading) * 3 + var(--space-2) +
+    var(--body-size) * var(--body-leading) * 2 + var(--space-2) +
       var(--border-width) * 2
   );
   max-height: calc(
-    var(--body-size) * var(--body-leading) * 12 + var(--space-2) +
+    var(--body-size) * var(--body-leading) * 8 + var(--space-2) +
       var(--border-width) * 2
   );
   overflow-y: auto;
@@ -249,14 +284,21 @@ textarea.composer-input {
 .composer-controls .row {
   flex-shrink: 0;
 }
-.streaming-text::after {
-  content: "";
+/* §8: the thin caret after the last word while text streams (17.3), blinking about once a second; reduced motion
+   holds it still. */
+.stream-caret {
+  animation: caret-blink var(--motion-blink) steps(1, end) infinite;
   display: inline-block;
   height: 1em;
   width: var(--focus-width);
   background: var(--info);
   margin-left: var(--space-1);
   vertical-align: text-bottom;
+}
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
 }
 @media (max-width: 767px) {
   .conversation-row {
@@ -395,6 +437,19 @@ textarea.composer-input {
 }
 .activity-running {
   color: var(--info);
+}
+/* A running call's mark (17.3): a small loader, turning; reduced motion holds it still. */
+.activity-working {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--info);
+}
+.activity-working svg {
+  animation: spin var(--motion-pulse) linear infinite;
+}
+/* How long an ended call took, after its words and any mark. */
+.activity-duration {
+  flex-shrink: 0;
 }
 .turn-summary {
   line-height: var(--body-leading);
@@ -564,6 +619,11 @@ textarea.composer-input {
 .composer-controls .composer-submit {
   margin-inline-start: auto;
 }
+/* The send arrow's visual weight is in its head: drawn 1 px high it sits at the disc's optical centre (§5b). Stop's
+   square (the secondary variant) is centred as drawn. */
+.composer-submit .button[data-variant="primary"] .button-label > svg {
+  transform: translateY(-1px);
+}
 /* An environment's question to switch, and a choice that failed, float just under the header (WEB-U-031). */
 .choices-notice {
   position: absolute;
@@ -580,7 +640,8 @@ textarea.composer-input {
   border: var(--border-width) solid var(--line);
   border-radius: var(--composer-radius);
   box-shadow: var(--elevation);
-  padding: var(--space-4);
+  /* §5b's table: 12 px by 16 px, so the empty card is two lines and the bar in 122 px (WEB-U-430). */
+  padding: var(--space-3) var(--space-4);
 }
 .composer-card:focus-within {
   outline: var(--focus-width) solid var(--focus);
@@ -602,32 +663,14 @@ textarea.composer-input {
   outline: none;
   box-shadow: none;
   padding: 0;
-  min-height: calc(var(--body-size) * var(--body-leading) * 3);
-  max-height: calc(var(--body-size) * var(--body-leading) * 12);
+  /* Two lines when empty, growing to eight (§7 Composer, WEB-U-430). */
+  min-height: calc(var(--body-size) * var(--body-leading) * 2);
+  max-height: calc(var(--body-size) * var(--body-leading) * 8);
 }
 .composer-controls {
   flex-direction: row;
   align-items: center;
   justify-content: flex-end;
-}
-.composer-submit.button {
-  width: var(--composer-button-size);
-  min-width: var(--composer-button-size);
-  height: var(--composer-button-size);
-  padding: 0;
-  border-radius: var(--pill-radius);
-  flex-shrink: 0;
-}
-/* Unavailable while it has the keyboard's focus (WEB-U-273): it looks as when disabled, and keeps the focus. */
-.composer-submit.button[aria-disabled="true"]:not([aria-busy]),
-.composer-submit.button:disabled {
-  background: var(--line);
-  color: var(--muted);
-  opacity: 1;
-}
-.composer-hint {
-  margin-top: var(--space-3);
-  text-align: center;
 }
 .composer-reason {
   margin-top: var(--space-2);
@@ -847,24 +890,66 @@ textarea.composer-input {
   background: var(--hover-tint);
   box-shadow: 0 0 0 var(--space-1) var(--hover-tint);
 }
+/* §7 New conversation: the suggestions, one chip style in a row from the left that wraps, 8 px apart (WEB-E2E-095). */
 .example-tasks {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--space-3);
+  justify-content: flex-start;
+  gap: var(--space-2);
 }
-/* Suggestions read as body text (review P3), not as bold buttons. */
+/* The secondary button's surface fill and line border, with round ends and small text in the body weight, never bold. */
 .example-tasks .button {
+  border-radius: var(--pill-radius);
+  font-size: var(--small-size);
+  line-height: var(--small-leading);
   font-weight: 400;
   text-align: left;
   white-space: normal;
   height: auto;
   min-height: var(--control-height);
+  padding-block: var(--space-1);
   /* A long suggestion wraps inside a phone's width, never past it (the UI standard: no sideways scroll). */
   max-width: 100%;
 }
 .example-tasks .button-label {
   min-width: 0;
+}
+/* §7 New conversation: the internet notice, an administrator's, an inline note under the composer from its left edge:
+   the info icon, one muted line and its small ghost action (WEB-E2E-096). At a phone's width the line wraps balanced,
+   never leaving a word alone (§12). */
+.start-notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+}
+/* The icon and its line stay together; where the action doesn't fit beside them, it goes under them instead of
+   squeezing the line. */
+.start-notice-line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.start-notice-line > svg {
+  flex-shrink: 0;
+  color: var(--muted);
+}
+.start-notice-text {
+  min-width: 0;
+  text-wrap: balance;
+}
+/* §5b's small button: 28 px tall, 12 px each side. */
+.start-notice .start-notice-action {
+  height: var(--min-control-height);
+  padding: 0 var(--space-3);
+}
+/* Under the composer, the notice and the suggestions start where its card does: the form keeps 8 px around the card
+   for its focus ring. */
+.conversation-start .start-notice,
+.conversation-start .example-tasks {
+  margin-inline: var(--space-2);
 }
 .activity-narration {
   margin-block: var(--space-3);
@@ -890,11 +975,14 @@ textarea.composer-input {
 .conversation-row:hover {
   background: var(--hover-tint);
 }
-/* UI-GUIDELINES §5c: the open task is a fill and weight 500, as the Settings menu's item; no accent bar. */
+/* UI-GUIDELINES §5c: the open task is the selected fill at the body weight, as the Settings menu's item; no accent bar.
+   Under the pointer it keeps the fill (this rule follows the hover's) and its title gains no underline (17.3). */
 .conversation-row:has([aria-current="page"]),
 .conversation-row:has([data-current]) {
-  background: var(--surface);
-  font-weight: 500;
+  background: var(--selected-fill);
+}
+.conversation-link[aria-current="page"]:hover {
+  text-decoration: none;
 }
 /* §5c: a task is a 32 px navigation row with 14/20 text. */
 .conversation-link {
@@ -1037,24 +1125,21 @@ textarea.composer-input {
 .task-status[data-status="working"] {
   color: var(--info);
 }
-.task-status[data-status="working"] svg {
-  animation: spin 1.6s linear infinite;
-}
 .task-status[data-status="needsYou"] {
   color: var(--warn);
 }
 .task-status[data-status="failed"] {
   color: var(--danger);
 }
-/* L3: Show more is a quiet row in the list's style, not a bold button. */
+/* §7 Conversation list item (17.3): Show more reads as an action, never as one more muted task: §5b's small ghost
+   button (28 px, 12 px each side) at its own width, in the ghost's ink and weight and the list's text size, its label
+   starting where the titles do. */
 .button.task-more-button {
-  align-self: stretch;
-  justify-content: flex-start;
-  min-height: var(--row-height-nav);
-  padding: var(--nav-row-padding);
+  align-self: flex-start;
+  height: var(--min-control-height);
+  min-height: var(--min-control-height);
+  padding: 0 var(--space-3);
   font-size: var(--nav-font-size);
-  font-weight: 400;
-  color: var(--muted);
 }
 /* The task's menu button appears over the row's end on hover or keyboard focus, so the title keeps the row's width. */
 .conversation-list .conversation-row {
@@ -1111,6 +1196,9 @@ textarea.composer-input {
   .app-sidebar .task-status svg {
     width: var(--space-3);
     height: var(--space-3);
+  }
+  .app-sidebar .task-status[data-status="working"] {
+    padding: var(--space-half);
   }
 }
 /* §3: a finished turn says what changed, with Open changes beside it; follow-ups that clearly fit sit under it. */

@@ -93,6 +93,8 @@ type Activity = {
 };
 export type WorkItem =
   | { kind: "narration"; id: string; text: string; streaming: boolean }
+  /** A step's thinking once the model has stopped thinking, folded in its place: how long it took, null if unknown. */
+  | { kind: "thought"; id: string; text: string; ms: number | null }
   | { kind: "tool"; id: string; activity: Activity }
   /** A keyed call the gateway saw during the step (ADR-0037), after the step's own commands. */
   | { kind: "key"; id: string; use: KeyUseView }
@@ -106,7 +108,6 @@ export type TurnView = {
   status: RunStatus;
   activities: Activity[];
   work: WorkItem[];
-  thinking: string;
   answer: { id: string; text: string; streaming: boolean }[];
   notices: Extract<Item, { kind: "notice" }>[];
   activityLabel: string;
@@ -119,6 +120,10 @@ export type TurnView = {
   /** While the turn works: when its current step started, and what the model is thinking in it (WEB-U-123). */
   liveSince: string | null;
   liveThinking: string;
+  /** While the turn works: the model is writing its words, so no live line speaks over them (17.3). */
+  writing: boolean;
+  /** While the turn works: the call running now, the latest when several run, whose step the live line names (17.3). */
+  liveTool: ToolView | null;
   /** The reader's clock minus the frames' stamps (WEB-U-122), for live counts. */
   clockOffset: number | null;
   summary: string | null;
@@ -234,7 +239,16 @@ function presentTurn(
       ? last
       : null;
   const retries = turn.steps.flatMap((step) => step.retries);
-  const work = workItems(turn.steps, activities, answer, terminal);
+  // The current step, while its model is still thinking (nothing written or called yet) or writing its words (17.3).
+  const open = !terminal && last && last.durationMs === null ? last : null;
+  const thinkingNow =
+    open && !open.text && open.toolOrder.length === 0 ? open : null;
+  const work = workItems(turn.steps, activities, answer, terminal, thinkingNow);
+  // Calls start in their order, so the last running one is the one started last.
+  const liveTool = terminal
+    ? null
+    : (activities.findLast(({ tool }) => tool.status === "running")?.tool ??
+      null);
   const summary = turnSummary(
     run,
     turn.steps,
@@ -250,19 +264,15 @@ function presentTurn(
     activities,
     work,
     runKeys: run?.keys ?? [],
-    // While the turn works, the current step's thinking is the live line's (WEB-U-123); the rest is here, never twice.
-    thinking:
-      eventTreatment("reasoning.delta") === "Thinking"
-        ? (terminal ? turn.steps : turn.steps.slice(0, -1))
-            .map((step) => step.reasoning)
-            .filter(Boolean)
-            .join("\n\n")
-        : "",
+    // While the model thinks, the current step's thinking is the live line's (WEB-U-123, 17.3); once it writes or calls,
+    // the thinking folds in the step's place (its work item): never twice, never hidden.
     liveThinking:
-      !terminal && eventTreatment("reasoning.delta") === "Thinking"
-        ? (last?.reasoning ?? "")
+      thinkingNow && eventTreatment("reasoning.delta") === "Thinking"
+        ? thinkingNow.reasoning
         : "",
+    writing: !!open?.text && open.toolOrder.length === 0,
     liveSince: terminal ? null : (last?.startedAt ?? null),
+    liveTool,
     clockOffset: transcript.clockOffset,
     answer:
       eventTreatment("text.delta") === "Answer" && answer?.text
@@ -367,14 +377,36 @@ function foldEmptyReads(items: WorkItem[]): WorkItem[] {
   return out;
 }
 
+/** How long a step's model thought: from its attempt's start to its first words, call or end; null if unknown. */
+function thoughtMs(step: StepView): number | null {
+  return step.thoughtUntil && step.startedAt
+    ? Math.max(0, Date.parse(step.thoughtUntil) - Date.parse(step.startedAt))
+    : null;
+}
+
 function workItems(
   steps: StepView[],
   activities: Activity[],
   answer: StepView | null,
   terminal: boolean,
+  thinkingNow: StepView | null,
 ): WorkItem[] {
   const byId = new Map(activities.map((activity) => [activity.id, activity]));
   const items = steps.flatMap((step): WorkItem[] => {
+    // Its thinking, folded where it was once the model stopped thinking (17.3); while it thinks, the live line has it.
+    const thought: WorkItem[] =
+      step.reasoning &&
+      step !== thinkingNow &&
+      eventTreatment("reasoning.delta") === "Thinking"
+        ? [
+            {
+              kind: "thought",
+              id: `${step.id}-${step.attempt}-thought`,
+              text: step.reasoning,
+              ms: thoughtMs(step),
+            },
+          ]
+        : [];
     const narration: WorkItem[] =
       step.text && step !== answer
         ? [
@@ -382,13 +414,20 @@ function workItems(
               kind: "narration",
               id: `${step.id}-${step.attempt}-text`,
               text: step.text,
-              streaming: !terminal && step.durationMs === null,
+              // Its words are done once the step's next call starts (17.3): the caret ends there.
+              streaming:
+                !terminal &&
+                step.durationMs === null &&
+                step.toolOrder.every(
+                  (id) => (step.tools[id]?.status ?? "prepared") === "prepared",
+                ),
             },
           ]
         : [];
+    // A call is a line from the moment it starts (17.3): one only asked for, not started, has none yet.
     const stepTools = step.toolOrder.flatMap((id) => {
       const activity = byId.get(`${step.id}-${step.attempt}-${id}`);
-      return activity
+      return activity && activity.tool.status !== "prepared"
         ? [
             {
               kind: "tool" as const,
@@ -408,7 +447,7 @@ function workItems(
       id: `${step.id}-${step.attempt}-key-${index}`,
       use,
     }));
-    return [...narration, ...stepTools, ...keys];
+    return [...thought, ...narration, ...stepTools, ...keys];
   });
   return foldEmptyReads(items);
 }
