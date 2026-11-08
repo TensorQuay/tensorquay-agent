@@ -158,5 +158,13 @@ class Priming(unittest.TestCase):
             os.kill(pid, 0)
 
 
+class DeadlineScale(unittest.TestCase):
+    def test_the_harness_scale_is_read_as_tqa_testkit_reads_it(self):
+        # tqa_testkit::deadline::parse_scale: a trimmed integer from 1 to 20, else 1.
+        for value, scale in [(None, 1), ("4", 4), (" 4 ", 4), ("20", 20), ("0", 1), ("21", 1), ("x", 1), ("", 1)]:
+            with self.subTest(value=value):
+                self.assertEqual(deadline_scale(value), scale)
+
+
 if __name__ == "__main__":
     unittest.main()
