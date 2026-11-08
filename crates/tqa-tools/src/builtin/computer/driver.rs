@@ -164,7 +164,7 @@ pub trait ScreenDriver: Send + Sync {
         ))
     }
     /// The file input a page asked files for since the last call (an action opened its chooser), taken: the page
-    /// shows no native dialog for it (c16k real-world A12b).
+    /// shows no native dialog for it (real-world use before 17.0).
     async fn take_file_chooser(&self) -> Result<Option<FileInput>, DriverError> {
         Ok(None)
     }

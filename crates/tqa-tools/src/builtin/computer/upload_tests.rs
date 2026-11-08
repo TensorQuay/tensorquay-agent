@@ -1,6 +1,6 @@
-//! TOOL-U-062 (c16k real-world A12b, 17 Oct 2026): a page that asks for a file gets one of the workspace's files through
-//! the `computer` tool, never through a native dialog; a path that resolves anywhere but inside the workspace is
-//! refused before the browser sees it, so an upload never hands a site the runtime's token or the browser's profile.
+//! TOOL-U-062 (real-world use before 17.0, 17 Oct 2026): a page that asks for a file gets one of the workspace's files
+//! through the `computer` tool, never through a native dialog; a path that resolves anywhere but inside the workspace
+//! is refused before the browser sees it, so an upload never hands a site the runtime's token or the browser's profile.
 use std::{
     path::{Path, PathBuf},
     sync::{Arc, Mutex as StdMutex},

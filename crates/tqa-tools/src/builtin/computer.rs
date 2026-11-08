@@ -718,8 +718,8 @@ fn stale(detail: &str) -> ToolError {
     ToolError::screen("stale_ref", detail)
 }
 
-/// A `type` by ref that failed says the address bar's way after its own reason (c16k real-world A5: an address typed
-/// into a page heading, again and again).
+/// A `type` by ref that failed says the address bar's way after its own reason (real-world use before 17.0: an address
+/// typed into a page heading, again and again).
 fn address_bar(error: ToolError) -> ToolError {
     match error {
         ToolError::Screen { code, detail } if code == "action_failed" => ToolError::Screen {
