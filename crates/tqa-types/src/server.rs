@@ -130,7 +130,7 @@ pub enum ServerFrame {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         sent: Option<Vec<String>>,
     },
-    /// Gateway to clients only: the model named the task (its short name after the first completed run, L7); a
+    /// Gateway to clients only: the model named the task (its short name after the first completed run); a
     /// person's rename is not announced here, so a receiver may treat the title as the model's. Unsequenced and never
     /// stored; the conversation record is the durable view. A runtime never sends it.
     #[serde(rename = "task.titled")]

@@ -1933,7 +1933,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Why the call failed, as data for clients (revision 10, C1); absent when it didn't fail or from older\nruntimes."
+              "description": "Why the call failed, as data for clients (revision 10); absent when it didn't fail or from older\nruntimes."
             },
             "status": {
               "allOf": [
@@ -3904,7 +3904,7 @@
         },
         {
           "const": "own_sandbox",
-          "description": "Nothing but the same person's own idle sandbox, retiring to make room (revision 10, F26): from their side the\ntask is starting, not queued behind anyone.",
+          "description": "Nothing but the same person's own idle sandbox, retiring to make room (revision 10, GW-I-158): from their side\nthe task is starting, not queued behind anyone.",
           "type": "string"
         },
         {
@@ -4761,7 +4761,7 @@
           "type": "object"
         },
         {
-          "description": "Gateway to clients only: the model named the task (its short name after the first completed run, L7); a\nperson's rename is not announced here, so a receiver may treat the title as the model's. Unsequenced and never\nstored; the conversation record is the durable view. A runtime never sends it.",
+          "description": "Gateway to clients only: the model named the task (its short name after the first completed run); a\nperson's rename is not announced here, so a receiver may treat the title as the model's. Unsequenced and never\nstored; the conversation record is the durable view. A runtime never sends it.",
           "properties": {
             "title": {
               "description": "The new title: 1 to 200 characters on one line, not blank, without control characters.",
