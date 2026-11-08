@@ -30,13 +30,22 @@ Everything here is written for a stranger reading it on GitHub. In code, comment
 - No screenshots or fixtures containing real user data, secrets or internal hostnames.
 - Plain, professional English. Say what changed and why.
 
-## Git guardrails (enforced by hooks; run `tools/install-guardrails.sh` once per clone)
+## Git guardrails (enforced by hooks; run `tools/install-guardrails.sh` once per clone, with `--maintainer` in a maintainer's)
 
-### 1. One identity
-- Every new commit's author **and** committer is exactly **`TensorQuay <dev@tensorquay.com>`**. The install script
-  sets this in the repository's git config. Commits made before 7 Nov 2026 carry `TensorQuay <admin@tensorquay.com>`;
-  the push and audit checks accept that identity in history, never for a new commit. A pull request merged on
-  GitHub has `GitHub <noreply@github.com>` as its committer, which those checks accept; GitHub never authors one.
+### 1. Identity
+- A maintainer's every new commit has author **and** committer exactly **`TensorQuay <dev@tensorquay.com>`**.
+  `tools/install-guardrails.sh --maintainer` sets this in the repository's git config, with the identity and remote
+  checks. Commits made before 7 Nov 2026 carry `TensorQuay <admin@tensorquay.com>`; the push and audit checks accept
+  that identity in history, never for a new commit.
+- A contributor commits as themselves and pushes to their own fork; they run the install script without
+  `--maintainer`, which marks the clone as a contributor's. Any clone without that mark, and one that commits as
+  `dev@tensorquay.com`, keeps the maintainers' checks. GitHub squash-merges a pull request with its contributor as
+  author and `GitHub <noreply@github.com>` as committer, which the checks accept; GitHub never authors a commit. CI
+  holds the history to these rules, and a pull request's own commits may carry their author's identity.
+- Whoever made a commit, its author and committer never contain a personal identifier from the maintainers' private
+  denylist (a local file outside the repository, described in `tools/git-guard.py`). The commit, push and audit checks
+  refuse one; CI checks it where GitHub gives the job the list: pushes to `main` and pull requests from this
+  repository's own branches.
 
 ### 2. Commit messages
 - Conventional Commits: `type(scope): subject`, first line ≤ 100 characters. Types: `feat fix perf test docs refactor
@@ -60,16 +69,20 @@ Deliberate exceptions go in `.guard-allow`, reviewed in the PR, with a comment g
 - `personal-ok:<glob>`: skip the personal-data and IP checks (never for a public file);
 - `secret-ok:<glob>`: skip the generic "secret-looking value" heuristic (for example test fixtures). Real token
   formats are always blocked;
-- `internal-ok:<glob>`: skip the internal-reference check, only for files that cannot change (applied migrations).
+- `internal-ok:<glob>`: skip the internal-reference check, only for files that cannot change (applied migrations);
+- `identity-ok:<email>`: accept an author or committer whose name or address only resembles a denylist term.
 
 ### 4. Before every push (the pre-push hook checks 1–4 automatically)
-1. The remote is a `github.com/TensorQuay/…` repository.
-2. Every outgoing commit has the TensorQuay identity and a clean, conventional message.
+1. A maintainer pushes only to a `github.com/TensorQuay/…` repository; a contributor pushes to their fork.
+2. Every outgoing commit has a clean, conventional message, and a maintainer's has the TensorQuay identity.
 3. No outgoing commit adds a secret, personal data, an attribution marker, a forbidden file or a file > 2 MB. This is
    checked per commit, because deleting something in a later commit does not remove it from history.
 4. No force-push and no deletion of `main`. Rewriting pushed history needs explicit Product Owner approval; then use
-   `TQ_GUARD_ALLOW_FORCE=1` for that one push only.
-5. Run `python3 tools/git-guard.py audit` and the tier-1 checks (DEV-GUIDELINES §6) locally; both must pass.
+   `TQ_GUARD_ALLOW_FORCE=1` for that one push only. A contributor may force-push their own pull request's branch in
+   their fork (never `main`); a maintainer's branches keep their history.
+5. Run `python3 tools/git-guard.py audit` and the tier-1 checks (DEV-GUIDELINES §6) locally; both must pass. The
+   audit holds every local branch to the identity, so a maintainer reviews a contribution on its own branch with
+   `audit --contributed origin/main` and deletes that branch afterwards.
 6. Re-read the diff as if you were a stranger reading it on GitHub tomorrow.
 
 ### 5. Never bypass

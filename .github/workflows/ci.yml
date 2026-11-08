@@ -102,6 +102,7 @@ jobs:
           # The internal-term list (machine, team and script names); optional until the secret is configured.
           TQ_GUARD_INTERNAL_SECRET: ${{ secrets.TQ_GUARD_INTERNAL }}
           TQ_GUARD_INTERNAL: ${{ runner.temp }}/guard-internal
+          TQ_GUARD_IDENTITY: "1"
         run: |
           set -euo pipefail
           if [[ -z "$TQ_GUARD_SECRET" ]]; then
@@ -118,4 +119,26 @@ jobs:
       # Fork pull requests receive no repository secrets; the public checks still run.
       - name: Audit repository and history on pull request
         if: github.event_name == 'pull_request'
-        run: python3 tools/git-guard.py audit
+        # The pull request's own commits carry their author's identity (GitHub's squash merge keeps it); the
+        # history before them is held to the maintainers' identity rule. A pull request from a branch of this
+        # repository gets the private lists, so its identities are checked against the denylist too; GitHub gives a
+        # fork's none, and the push audit on main checks its identities after the merge.
+        shell: bash
+        env:
+          TQ_GUARD_IDENTITY: "1"
+          BASE: origin/${{ github.base_ref }}
+          TQ_GUARD_SECRET: ${{ secrets.TQ_GUARD_DENYLIST }}
+          TQ_GUARD_DENYLIST: ${{ runner.temp }}/guard-denylist
+          TQ_GUARD_INTERNAL_SECRET: ${{ secrets.TQ_GUARD_INTERNAL }}
+          TQ_GUARD_INTERNAL: ${{ runner.temp }}/guard-internal
+        run: |
+          set -euo pipefail
+          umask 077
+          trap 'rm -f -- "$TQ_GUARD_DENYLIST" "$TQ_GUARD_INTERNAL"' EXIT
+          if [[ -n "$TQ_GUARD_SECRET" ]]; then
+            printf '%s\n' "$TQ_GUARD_SECRET" > "$TQ_GUARD_DENYLIST"
+          fi
+          if [[ -n "$TQ_GUARD_INTERNAL_SECRET" ]]; then
+            printf '%s\n' "$TQ_GUARD_INTERNAL_SECRET" > "$TQ_GUARD_INTERNAL"
+          fi
+          python3 tools/git-guard.py audit --contributed "$BASE"

@@ -7,8 +7,9 @@ small change that can be checked independently.
 ## Getting started
 1. Read [AGENTS.md](AGENTS.md), [the engineering rules](docs/DEV-GUIDELINES.md) and
    [the engineering guardrails](docs/ENGINEERING-GUARDRAILS.md).
-2. Install the repository guardrails with `tools/install-guardrails.sh` and configure the private local denylist
-   described in AGENTS.md.
+2. Install the repository guardrails with `tools/install-guardrails.sh`: its hooks check what you commit and push
+   for secrets, personal data and the message rules. Commit as yourself. Maintainers add `--maintainer`, which sets
+   the TensorQuay identity, and keep the private local lists described in `tools/git-guard.py`.
 3. Read the design documents: [PRD](docs/PRD.md), [ARCHITECTURE](docs/ARCHITECTURE.md), [DEV-PLAN](docs/DEV-PLAN.md),
    [TEST-PLAN](docs/TEST-PLAN.md).
 
@@ -37,8 +38,9 @@ before it, prints a PASS or FAIL line for each, and ends with the list of those 
 build); G-04's 90 % threshold on the pure crates still runs, and the integration run keeps the full set. Environments
 without the private guard denylist can add `--skip-audit` (alone or with `--member`), which skips only the guard audit
 and still runs the secrets scan; CI runs the audit in a separate job: on pushes
-to `main` it requires the `TQ_GUARD_DENYLIST` repository secret; on pull requests it runs without the private denylist,
-so contributions from forks are checked too.
+to `main` it requires the `TQ_GUARD_DENYLIST` repository secret; on a pull request from a branch of this repository it
+uses that list, and on one from a fork it runs without it (GitHub gives forks no secrets), so contributions from forks
+are checked too.
 
 The runner executes these commands in order:
 
@@ -139,5 +141,5 @@ CI on every pull request that changes a catalogue.
 ## Pull requests
 - One concern per PR; tests included; documentation updated in the same PR.
 - Review follows [`REVIEW.md`](REVIEW.md): its risk tier decides who reviews and what evidence the PR carries.
-- Conventional Commits; the TensorQuay identity; no attribution lines (AGENTS.md).
+- Conventional Commits under your own name (maintainers commit as TensorQuay); no attribution lines (AGENTS.md).
 - Describe what changed, why, and how it was verified. The maintainers run independent acceptance for milestones.

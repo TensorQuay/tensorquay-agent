@@ -2,10 +2,21 @@
 """TensorQuay git guardrails. Rules and rationale: AGENTS.md ("Git guardrails").
 
 Subcommands (wired by .githooks/*):
-  pre-commit            identity + staged paths, sizes and added lines
+  pre-commit            staged paths, sizes and added lines; the identity (never a denylisted name; for a
+                        maintainer, the company's)
   commit-msg <file>     message format and banned words
-  pre-push <remote> <url>   (ref updates on stdin) remote, force-push, every outgoing commit
-  audit                 whole tree + full history; exit 1 on any violation
+  pre-push <remote> <url>   (ref updates on stdin) every outgoing commit; force-pushes (except to a contributor's
+                        own branches); the remote (for a maintainer, a TensorQuay one)
+  audit [--contributed <base>]   whole tree + full history; exit 1 on any violation. With --contributed, the
+                        commits in <base>..HEAD are a pull request's own: any identity, everything else checked.
+
+The identity and remote rules are the maintainers'. They are off only in a clone that
+`tools/install-guardrails.sh` (without --maintainer) marked as a contributor's (git config tq.guard.maintainer false)
+and that does not commit as the company identity; every other clone and CI's audits (TQ_GUARD_IDENTITY=1) keep them.
+A contributor commits as themselves, pushes to their own fork and may force-push their own branches there; GitHub's
+squash merge of their pull request keeps them as its author.
+Content and messages are checked for everyone, and no commit, whoever made it, has a personal identifier of the
+denylist as its author or committer.
 
 Personal identifiers are never stored in the repository. They are read from a local denylist file
 (default ~/.config/tensorquay/guard-denylist, or $TQ_GUARD_DENYLIST), one case-insensitive literal per line.
@@ -22,7 +33,10 @@ from pathlib import Path
 IDENTITY = ("TensorQuay", "dev@tensorquay.com")  # every new commit, from 7 Nov 2026
 EARLIER_IDENTITIES = (("TensorQuay", "admin@tensorquay.com"),)  # history made before then; never a new commit
 MERGER = ("GitHub", "noreply@github.com")  # the committer of a pull request merged on GitHub; never an author
-REMOTE_OK = re.compile(r"github\.com[:/]TensorQuay/", re.I)
+# GitHub itself (https, with or without a user, or ssh), never a URL that merely holds github.com/... further on.
+GITHUB = r"^(?:https://(?:[^/@\s]+@)?github\.com/|(?:ssh://)?git@github\.com[:/])"
+REMOTE_OK = re.compile(GITHUB + r"TensorQuay/", re.I)
+PROJECT = re.compile(GITHUB + r"TensorQuay/tensorquay-agent(?:\.git)?/?$", re.I)  # this project's own repository
 MAX_BYTES = 2 * 1024 * 1024
 ZERO = "0" * 40
 PROTECTED_BRANCHES = {"refs/heads/main", "refs/heads/master"}
@@ -142,8 +156,9 @@ def allowlist(entries=None):
     """.guard-allow entries (reviewed in PRs): `<glob>` or `path:<glob>` allows a file type/size;
     `ip:<address>`; `personal-ok:<glob>` skips personal-data and IP checks (private internal docs only);
     `secret-ok:<glob>` skips the generic key=value heuristic (real token formats are always checked);
-    `internal-ok:<glob>` skips the internal-reference check (files that cannot change, such as applied migrations)."""
-    allow = {"path": [], "ip": set(), "personal-ok": [], "secret-ok": [], "internal-ok": []}
+    `internal-ok:<glob>` skips the internal-reference check (files that cannot change, such as applied migrations);
+    `identity-ok:<email>` accepts an author or committer whose name or address only resembles a denylist term."""
+    allow = {"path": [], "ip": set(), "personal-ok": [], "secret-ok": [], "internal-ok": [], "identity-ok": []}
     for entry in load_list(root() / ".guard-allow") if entries is None else entries:
         kind, sep, value = entry.partition(":")
         if sep and kind in allow:
@@ -222,6 +237,26 @@ def scan_patch(patch, deny, allow, problems):
             lineno += 1
 
 
+def maintainer():
+    """Whether the identity and remote rules apply. They are off only in a clone the install script marked as a
+    contributor's (tq.guard.maintainer false) that does not commit as the company identity; a clone set up before
+    contributors could commit, a run outside any set-up clone and CI's audits (TQ_GUARD_IDENTITY=1) keep them."""
+    if os.environ.get("TQ_GUARD_IDENTITY") == "1":
+        return True
+    if git("config", "--get", "--bool", "tq.guard.maintainer", check=False).strip() != "false":
+        return True
+    return git("config", "--get", "user.email", check=False).strip().lower() == IDENTITY[1]
+
+
+def check_identity_terms(name, email, what, deny, allow, problems):
+    """No author or committer, whoever made the commit, has a personal identifier of the denylist (never echoed). A
+    reviewed `identity-ok:<email>` accepts one whose name or address only resembles a listed term."""
+    if email.lower() in (e.lower() for e in allow.get("identity-ok", ())):
+        return
+    if any(word in f"{name} <{email}>".lower() for word in deny):
+        problems.append(f"{what} has a personal identifier from the denylist")
+
+
 def check_identity(name, email, what, problems, history=False, committer=False):
     """A new commit is made as IDENTITY; an existing one (pushed or audited) may also carry an earlier identity, and a
     pull request merged on GitHub has GitHub as its committer."""
@@ -232,6 +267,17 @@ def check_identity(name, email, what, problems, history=False, committer=False):
             allowed.add(MERGER)
     if (name, email) not in allowed:
         problems.append(f"{what} is '{name} <{email}>', must be '{IDENTITY[0]} <{IDENTITY[1]}>'")
+
+
+def check_history_identity(sha, author_name, author_email, committer_name, committer_email, problems):
+    """An existing commit: one GitHub made by merging a pull request keeps that pull request's author, whoever it is
+    (GitHub never authors one); any other commit is a maintainer's."""
+    if (committer_name, committer_email) == MERGER:
+        if (author_name, author_email) == MERGER:
+            problems.append(f"{sha} author is '{MERGER[0]} <{MERGER[1]}>', which never authors a commit")
+        return
+    check_identity(author_name, author_email, f"{sha} author", problems, history=True)
+    check_identity(committer_name, committer_email, f"{sha} committer", problems, history=True, committer=True)
 
 
 def check_message(msg, what, problems, require_format=True):
@@ -255,14 +301,17 @@ def report(problems, stage):
 
 def pre_commit():
     problems = []
+    deny, allow, identity = denylist(), allowlist(), maintainer()
     for var in ("GIT_AUTHOR_IDENT", "GIT_COMMITTER_IDENT"):
         m = re.match(r"(.*) <(.*)>", git("var", var).strip())
-        check_identity(m.group(1), m.group(2), var.split("_")[1].lower(), problems)
-    allow = allowlist()
+        what = var.split("_")[1].lower()
+        if identity:
+            check_identity(m.group(1), m.group(2), what, problems)
+        check_identity_terms(m.group(1), m.group(2), what, deny, allow, problems)
     for entry in filter(None, git("diff", "--cached", "--name-only", "--diff-filter=ACMR", "-z").split("\0")):
         size = int(git("cat-file", "-s", f":{entry}").strip())
         check_path(entry, size, allow["path"], problems)
-    scan_patch(git("diff", "--cached", "-U0", "--no-color", "--no-ext-diff"), denylist(), allow, problems)
+    scan_patch(git("diff", "--cached", "-U0", "--no-color", "--no-ext-diff"), deny, allow, problems)
     report(problems, "pre-commit")
 
 
@@ -272,11 +321,13 @@ def commit_msg(path):
     report(problems, "commit-msg")
 
 
-def check_commit(sha, deny, allow, problems):
+def check_commit(sha, deny, allow, problems, identity=True):
     short = sha[:8]
     an, ae, cn, ce = git("show", "-s", "--format=%an%x00%ae%x00%cn%x00%ce", sha).strip().split("\0")
-    check_identity(an, ae, f"{short} author", problems, history=True)
-    check_identity(cn, ce, f"{short} committer", problems, history=True, committer=True)
+    if identity:
+        check_history_identity(short, an, ae, cn, ce, problems)
+    check_identity_terms(an, ae, f"{short} author", deny, allow, problems)
+    check_identity_terms(cn, ce, f"{short} committer", deny, allow, problems)
     check_message(git("show", "-s", "--format=%B", sha), short, problems)
     for row in git("diff-tree", "-r", "--root", "--no-commit-id", "--diff-filter=ACMR", sha).splitlines():
         meta, path = row.split("\t", 1)
@@ -285,9 +336,26 @@ def check_commit(sha, deny, allow, problems):
     scan_patch(git("show", "--format=", "-U0", "--no-color", "--no-ext-diff", sha), deny, allow, problems)
 
 
+def project_remotes():
+    """The remotes that are this project's own GitHub repository: what they hold is already published there. Another
+    TensorQuay repository's history (private, unguarded) is no such proof."""
+    return [name for name in git("remote").split()
+            if PROJECT.search(git("remote", "get-url", name, check=False).strip())]
+
+
+def outgoing(local_sha, remote_sha, remote):
+    """The commits a push sends: those not on the remote's branch, nor on the pushed remote or this project's own
+    repository (so a contributor's first push to a fork checks their own commits, not all of upstream's history)."""
+    known = remote_sha != ZERO and subprocess.run(
+        ["git", "cat-file", "-e", f"{remote_sha}^{{commit}}"], capture_output=True).returncode == 0
+    exclude = [f"--remotes={name}" for name in sorted({remote, *project_remotes()})]
+    return git("rev-list", local_sha, "--not", *exclude, *([remote_sha] if known else [])).split()
+
+
 def pre_push(remote, url):
     problems = []
-    if not REMOTE_OK.search(url):
+    identity = maintainer()
+    if identity and not REMOTE_OK.search(url):
         problems.append(f"remote '{remote}' ({url}) is not a TensorQuay GitHub repository")
     deny, allow = denylist(), allowlist()
     for line in sys.stdin.read().splitlines():
@@ -296,26 +364,35 @@ def pre_push(remote, url):
             if remote_ref in PROTECTED_BRANCHES:
                 problems.append(f"deleting {remote_ref} is not allowed")
             continue
-        if remote_sha == ZERO:
-            shas = git("rev-list", local_sha, "--not", f"--remotes={remote}").split()
-        else:
-            ancestor = subprocess.run(["git", "merge-base", "--is-ancestor", remote_sha, local_sha]).returncode == 0
-            if not ancestor and os.environ.get("TQ_GUARD_ALLOW_FORCE") != "1":
+        if remote_sha != ZERO:
+            ancestor = subprocess.run(["git", "merge-base", "--is-ancestor", remote_sha, local_sha],
+                                      capture_output=True).returncode == 0
+            # A contributor rewrites their own pull request's branch in their fork; main, and every branch of a
+            # maintainer's, keep their history.
+            guarded = identity or remote_ref in PROTECTED_BRANCHES
+            if not ancestor and guarded and os.environ.get("TQ_GUARD_ALLOW_FORCE") != "1":
                 problems.append(f"{remote_ref}: force-push (history rewrite) needs PM approval; see AGENTS.md")
-            shas = git("rev-list", f"{remote_sha}..{local_sha}", check=False).split()
-        for sha in shas:
-            check_commit(sha, deny, allow, problems)
+        for sha in outgoing(local_sha, remote_sha, remote):
+            check_commit(sha, deny, allow, problems, identity)
     report(problems, "pre-push")
 
 
-def audit():
+def audit(contributed=None):
     problems = []
     deny, allow, terms = denylist(), allowlist(), internal_terms()
-    for row in git("log", "--all", "--format=%h%x00%an%x00%ae%x00%cn%x00%ce").splitlines():
-        sha, an, ae, cn, ce = row.split("\0")
-        check_identity(an, ae, f"{sha} author", problems, history=True)
-        check_identity(cn, ce, f"{sha} committer", problems, history=True, committer=True)
-        check_message(git("show", "-s", "--format=%B", sha), sha, problems, require_format=False)
+    identity = maintainer()
+    if contributed and subprocess.run(["git", "rev-parse", "--verify", "--quiet", f"{contributed}^{{commit}}"],
+                                      capture_output=True).returncode != 0:
+        report([f"audit --contributed: the base '{contributed}' is not a commit here (fetch it first)"], "audit")
+    own = set(git("rev-list", f"{contributed}..HEAD").split()) if contributed else set()
+    for row in git("log", "--all", "--format=%H%x00%an%x00%ae%x00%cn%x00%ce").splitlines():
+        full, an, ae, cn, ce = row.split("\0")
+        sha = full[:10]
+        if identity and full not in own:
+            check_history_identity(sha, an, ae, cn, ce, problems)
+        check_identity_terms(an, ae, f"{sha} author", deny, allow, problems)
+        check_identity_terms(cn, ce, f"{sha} committer", deny, allow, problems)
+        check_message(git("show", "-s", "--format=%B", full), sha, problems, require_format=False)
     for path in filter(None, git("ls-files", "-z").split("\0")):
         full = root() / path
         size = full.stat().st_size if full.exists() else None
@@ -336,8 +413,10 @@ def main(argv):
         commit_msg(argv[2])
     elif cmd == "pre-push" and len(argv) == 4:
         pre_push(argv[2], argv[3])
-    elif cmd == "audit":
+    elif cmd == "audit" and len(argv) == 2:
         audit()
+    elif cmd == "audit" and len(argv) == 4 and argv[2] == "--contributed":
+        audit(argv[3])
     else:
         sys.exit(__doc__)
 
