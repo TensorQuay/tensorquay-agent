@@ -265,7 +265,8 @@ then.
 ## 4a. Where each phase stands (7 Nov 2026)
 **Release 17.0** (3 Nov 2026) is the initial release and carries Phases 0 to 11; **17.1** (7 Nov) is a fix release
 (§7). The builds before 17.0 were internal, the v1.0 candidate of October among them. A gate counts as reached only
-by its evaluation report in `docs/evals/`; the [list](evals/README.md) also explains the build names those pages use.
+by its evaluation report in `docs/evals/` ([the list](evals/README.md)); the build names those pages use are
+explained in [TEST-PLAN](TEST-PLAN.md#build-names-and-ids).
 
 | Phase | Built | Gate |
 |---|---|---|

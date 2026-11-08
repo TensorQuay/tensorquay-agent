@@ -5,6 +5,13 @@ verification plan: principles, environments, the designed test cases with IDs, t
 and traceability to the [PRD](PRD.md). Design: [ARCHITECTURE](ARCHITECTURE.md). Phases: [DEV-PLAN](DEV-PLAN.md).
 Rules: [DEV-GUIDELINES](DEV-GUIDELINES.md).
 
+## Build names and IDs
+Most measurements and history notes in this plan and in the [evaluation pages](evals/README.md) were made before
+release 17.0 (3 November 2026), whose development history is not part of this repository. They name the builds of that
+time: a cycle's release candidate (for example `c15` or `c14b-rc`) and its respins (`15b`, `16y`: cycle 16's build y),
+and `dev` is that history's development branch. The commit and image IDs the evaluation pages quote, such as
+`16589e55`, identify what ran; they don't resolve in this repository. Release 17.0 is cycle 17's build.
+
 ## 1. Principles
 1. **Every test has an oracle.** A fixture, a schema, an invariant or a measured baseline; never "looks right".
 2. **Edge cases are first-class:** boundaries, malformed input, partial writes, cancellation at every await, crashes
