@@ -281,15 +281,19 @@ async fn changed(stream: &mut support::stream::Stream) -> Result<(u64, u64)> {
     Err("no team.changed".into())
 }
 
-/// The first `team.changed` frame whose version is past `before`: a frame for an earlier change may still arrive.
-async fn changed_past(stream: &mut support::stream::Stream, before: u64) -> Result<(u64, u64)> {
-    for _ in 0..8 {
-        let (version, last_seq) = changed(stream).await?;
-        if version > before {
-            return Ok((version, last_seq));
+/// Takes the frames already on their way (the team's creation is flushed within the second after it) until none comes
+/// for `quiet`, so that the next `team.changed` is one a later change sends. A dropped wait loses nothing: what has
+/// arrived stays in the stream's buffer.
+async fn drain(stream: &mut support::stream::Stream, quiet: std::time::Duration) -> Result<()> {
+    for _ in 0..64 {
+        match tokio::time::timeout(quiet, stream.next()).await {
+            Err(_) => return Ok(()),
+            Ok(frame) => {
+                frame?;
+            }
         }
     }
-    Err("no team.changed past the version read".into())
+    Err("the stream never went quiet".into())
 }
 
 // TEST: GW-I-206
@@ -299,25 +303,28 @@ async fn gw_i_206_a_change_reaches_the_streams_as_team_changed(pool: PgPool) -> 
     support::run_configured(pool, None, ON, async |f| {
         let t = team(f).await?;
         let mut stream = f.stream(&t.lead.id, &t.cookie, 0).await?;
-        // A helper's state changes: the version rises.
+        // The team's creation sends frames of its own, which can come after any read made now (the 7 Nov integration,
+        // on a loaded host), and versions rise with time, so a frame past a read proves nothing alone: the stream is
+        // drained first, and the next frame is the change's.
+        drain(&mut stream, std::time::Duration::from_millis(2500)).await?;
         let (_, before) = get(
             f,
             &format!("/api/v1/conversations/{}/team", t.lead.id),
             &t.cookie,
         )
         .await?;
-        // On purpose, any change of state (the reconciler's move to stuck is GW-I-111's): it reaches the streams.
+        let before = before["version"]
+            .as_u64()
+            .ok_or("the team has no version")?;
+        // A helper's state changes, on purpose any change of state (the reconciler's move to stuck is GW-I-111's): it
+        // reaches the streams, and the version rises.
         sqlx::query(
             "UPDATE agent_team_members SET state = 'stuck' WHERE conversation_id = $1::uuid",
         )
         .bind(&t.member)
         .execute(&f.pool)
         .await?;
-        // The team's own creation is flushed within the second after it, so its frame can reach the stream after
-        // the read above, carrying `before` (the 7 Nov integration, on a loaded host): the change's frame is the first
-        // one past that version.
-        let before = before["version"].as_u64().unwrap_or(u64::MAX);
-        let (version, _) = changed_past(&mut stream, before).await?;
+        let (version, _) = changed(&mut stream).await?;
         assert!(version > before, "{version} after {before}");
         let (_, after) = get(
             f,
@@ -325,7 +332,14 @@ async fn gw_i_206_a_change_reaches_the_streams_as_team_changed(pool: PgPool) -> 
             &t.cookie,
         )
         .await?;
-        assert_eq!(after["version"], json!(version));
+        // The read after shows that change, at that version.
+        assert_eq!(
+            (
+                after["version"].clone(),
+                after["helpers"][0]["state"].clone()
+            ),
+            (json!(version), json!("stuck"))
+        );
         // A message: the last seq moves, the version doesn't.
         let seq = message(
             f,
