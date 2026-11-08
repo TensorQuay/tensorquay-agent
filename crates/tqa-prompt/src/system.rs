@@ -193,7 +193,7 @@ fn any_ports(ports: &[u16]) -> String {
 }
 
 /// The network lines: the proxy, then one line per allowed host with its ports, and the rest counted. A blocked site
-/// is for the person to hear in plain words, with who can change it, never as the proxy's status (version 9, C1).
+/// is for the person to hear in plain words, with who can change it, never as the proxy's status (version 9).
 fn network(network: &tqa_types::NetworkSnapshot) -> String {
     if network.allowed.is_empty() && network.more == 0 {
         return "Network: this task has no internet access; nothing outside the sandbox is reachable. If the task needs a \
@@ -207,7 +207,7 @@ fn network(network: &tqa_types::NetworkSnapshot) -> String {
          this task's allowed sites and that an administrator can allow it in Settings > Internet access.\n",
     );
     for entry in &network.allowed {
-        // The open_web preset's any-host rule reads as what it means, never as the pattern (F20, version 10).
+        // The open_web preset's any-host rule reads as what it means, never as the pattern (version 10).
         if entry.host == "*" {
             let _ = writeln!(lines, "- any website on {}", any_ports(&entry.ports));
             continue;

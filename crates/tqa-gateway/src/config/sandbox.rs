@@ -34,7 +34,7 @@ pub(crate) struct SandboxConfig {
     pub network_pool: tqa_sandbox::docker::SubnetPool,
     /// The gateway's container name, attached to every sandbox network as `gateway`.
     pub gateway_container: Option<String>,
-    /// The most a conversation's runtime state directory may hold on Docker before its run is stopped (N4, G1): the
+    /// The most a conversation's runtime state directory may hold on Docker before its run is stopped (GW-I-091): the
     /// runtime's journal lives there, and tools share the runtime's user.
     pub state_bytes: u64,
     /// The installation's ceiling on every environment's size (`[sandbox.ceiling]`, file-only).

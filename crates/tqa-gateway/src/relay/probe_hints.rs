@@ -9,7 +9,7 @@ use std::borrow::Cow;
 pub(super) struct Suggestion {
     /// The route field.
     pub field: &'static str,
-    /// The value to try: fixed, or a number the check read (the server's context, F3).
+    /// The value to try: fixed, or a number the check read (the server's context, GW-U-153).
     pub value: Cow<'static, str>,
     /// Why, in one sentence.
     pub reason: &'static str,

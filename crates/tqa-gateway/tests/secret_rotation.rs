@@ -1,4 +1,4 @@
-//! GW-I-093 (vault slice 1, D1): a rotation reminder. The admin list shows when each value last changed and whether a
+//! GW-I-093: a rotation reminder. The admin list shows when each value last changed and whether a
 //! reminder is due; only a changed value moves `rotated_at`; a due secret logs a WARN and counts in a gauge; nothing
 //! stops working because a reminder is due. The age is set in the store, standing in for a fake clock.
 #[path = "support/log_capture.rs"]

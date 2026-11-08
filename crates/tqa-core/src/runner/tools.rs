@@ -212,7 +212,7 @@ impl Execution<'_> {
                 },
                 error.model_message(),
                 None,
-                // Why, as data: a client words the failure itself, never from the model's text (C1, CORE-U-076).
+                // Why, as data: a client words the failure itself, never from the model's text (CORE-U-076).
                 (error != ToolError::Cancelled)
                     .then(|| {
                         tqa_types::ToolFailure::new(error.failure_code(), error.target().cloned())

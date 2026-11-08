@@ -68,7 +68,8 @@ async fn e2e_resume_005_bounds_checking_recovers_mid_model_and_mid_tool() -> Tes
 #[tokio::test]
 #[ignore = "needs Docker, a Workstation image, TQA_DOCKER_TESTS=1 and TQA_ALLOW_DEV_HOST_GATEWAY=1"]
 async fn sbx_c_018_an_idle_runtime_is_destroyed_within_three_seconds() -> TestResult {
-    // F26: a person's new task waits while their idle sandbox retires; nothing runs in it, so it goes at once.
+    // GW-I-158's case: a person's new task waits while their idle sandbox retires; nothing runs in it, so it goes at
+    // once.
     let elapsed = idle_destroy().await?;
     assert!(elapsed < std::time::Duration::from_secs(3), "{elapsed:?}");
     Ok(())

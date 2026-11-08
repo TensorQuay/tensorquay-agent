@@ -49,7 +49,7 @@ pub(crate) async fn seed(
     Ok(wrote || removed.rows_affected() > 0)
 }
 
-/// A file's route binds the shared secret it names (D10: the file is the operator's declaration).
+/// A file's route binds the shared secret it names (the file is the operator's declaration).
 async fn bind_seeded(
     connection: &mut PgConnection,
     config: &RouteConfig,

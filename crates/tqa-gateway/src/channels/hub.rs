@@ -1,4 +1,4 @@
-//! Wakes readers waiting on a channel when a message is appended (ADR-0014 point 7; G5, and the stream in G8). One
+//! Wakes readers waiting on a channel when a message is appended (ADR-0014 point 7, and point 11 for the stream). One
 //! watch per channel with readers, carrying the last seq; a reader subscribes before it reads, so a post committed in
 //! between is never missed. A channel's watch is dropped once nobody holds it.
 use std::{

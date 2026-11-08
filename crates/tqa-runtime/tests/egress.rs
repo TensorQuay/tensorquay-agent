@@ -83,7 +83,7 @@ async fn sec_001_readme_exfiltration_is_a_durable_denied_tool_result() -> TestRe
     assert_eq!(results.len(), 2);
     let denied = &results[1]["event"];
     assert_eq!(denied["status"], "error");
-    // C1: the model reads plain words; the code and destination are data on the durable tool.end.
+    // The model reads plain words; the code and destination are data on the durable tool.end.
     assert_eq!(
         denied["content"],
         "exfil.invalid isn't on this task's allowed sites. An administrator can allow it in Settings > Internet access."

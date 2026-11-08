@@ -1,4 +1,4 @@
-//! Channels from a run (ADR-0014 points 4 and 6; G4): `/runtime/channels…` with the run's token, bound to the
+//! Channels from a run (ADR-0014 points 4 and 6): `/runtime/channels…` with the run's token, bound to the
 //! sandbox's address.
 //! - GW-I-103: a member conversation lists its channels, posts and reads; a conversation that isn't a member gets
 //!   `not_member`; a removed conversation loses access on its next call; sessions and other credentials get `401`.

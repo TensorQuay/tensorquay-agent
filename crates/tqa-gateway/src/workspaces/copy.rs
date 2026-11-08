@@ -274,7 +274,7 @@ fn copy_file(
 }
 
 /// What one entry costs the workspace's disk: its allocated blocks, and for a regular file at least its length (a
-/// sparse file counts its full length). The same charge applies between runs and during one (N4, D2).
+/// sparse file counts its full length). The same charge applies between runs and during one (GW-U-053).
 fn charged(stat: &sys::Stat) -> u64 {
     let blocks = u64::try_from(stat.st_blocks)
         .unwrap_or(0)

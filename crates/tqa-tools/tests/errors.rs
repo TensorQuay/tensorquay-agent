@@ -150,7 +150,7 @@ fn tool_u_031_an_mcp_failure_carries_its_stable_code_first() {
 #[test]
 fn tool_u_040_a_blocked_site_reaches_the_model_in_plain_words()
 -> Result<(), Box<dyn std::error::Error>> {
-    // C1: the model repeats what it reads, so the refusal says what happened and who can change it, never the proxy's
+    // The model repeats what it reads, so the refusal says what happened and who can change it, never the proxy's
     // code or status. The code stays for the logs and the transcript's structured failure.
     let refused = |host: &str, port| -> Result<ToolError, tqa_types::FrameError> {
         Ok(ToolError::EgressDenied {

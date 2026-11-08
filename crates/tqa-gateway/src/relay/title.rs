@@ -104,7 +104,7 @@ pub(crate) fn request(asked: &str, route: &Route) -> CompletionRequest {
     } else {
         PLAIN_TOKENS
     };
-    // Naming the writing system keeps a small model from answering in another language (F23, GW-U-096).
+    // Naming the writing system keeps a small model from answering in another language (GW-U-096).
     let instruction = script(&asked).map_or_else(
         || "Name this task in 3 to 6 words, in its own language. Reply with the name only.".to_owned(),
         |script| {

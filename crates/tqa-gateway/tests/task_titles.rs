@@ -439,7 +439,7 @@ async fn gw_i_138_another_tasks_request_cancels_the_title_holding_the_only_slot(
 }
 
 // TEST: GW-I-155
-/// F23 (candidate 12, qwen2.5): an English task named in Chinese. The call names the task's writing system, and a title
+/// Found before 17.0 (qwen2.5): an English task named in Chinese. The call names the task's writing system, and a title
 /// in another one is refused, so the task keeps its first words.
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]

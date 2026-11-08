@@ -102,7 +102,7 @@ impl ToolError {
                 return bound(&format!("{code}: {detail}"), MAX_ERROR_CHARS);
             }
             Self::InvalidArgs { path, detail } => format!("{path}: {detail}"),
-            // C1: plain words and who can change it; the code is for the logs and tool.end's failure (TOOL-U-040).
+            // Plain words and who can change it; the code is for the logs and tool.end's failure (TOOL-U-040).
             Self::EgressDenied { target } => {
                 let site = match target.port() {
                     80 | 443 => target.host().to_owned(),

@@ -1,4 +1,4 @@
-//! GW-I-072 (ADR-0031, G6): a conversation starts with the enabled connectors marked `enabled_by_default`, changes its
+//! GW-I-072 (ADR-0031): a conversation starts with the enabled connectors marked `enabled_by_default`, changes its
 //! set by PATCH within the existing connectors and the runtime's bound, and each session gets its catalogue servers and
 //! connectors as `session.config.mcp` entries; a disabled connector is left out of the next session at once.
 #[path = "support/fixture.rs"]

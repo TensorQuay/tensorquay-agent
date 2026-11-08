@@ -1,4 +1,4 @@
-//! GW-I-033 (claims; ADR-0014 point 8, G6): `task_claim` is atomic up to the task's limit (1 by default, a number, or
+//! GW-I-033 (claims; ADR-0014 point 8): `task_claim` is atomic up to the task's limit (1 by default, a number, or
 //! every voting member); a claimant claims once, and a retry returns its claim; only claimants report; the task board
 //! shows claims and reports. People claim from the page, runs through the runtime route.
 #[path = "support/fixture.rs"]

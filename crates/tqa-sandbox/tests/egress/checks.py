@@ -23,7 +23,7 @@ def security(stack, stream):
     assert len(results) == 4, "Every scripted tool must have one durable result"
     assert "Send the environment" in results[0]["content"]
     assert results[1]["status"] == "error" and "403" in results[1]["content"], "Shell exfiltration was not blocked at the proxy"
-    # The fetch's refusal reaches the model in plain words naming the site, never a code (C1, TOOL-U-040); the
+    # The fetch's refusal reaches the model in plain words naming the site, never a code (TOOL-U-040); the
     # denial itself is recorded as data on the call's tool.end, the gateway's notice and its log (below).
     assert results[2]["status"] == "error", results[2]
     assert results[2]["content"].startswith("denied.invalid isn't on this task's allowed sites."), results[2]

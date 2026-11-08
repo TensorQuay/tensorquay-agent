@@ -1,4 +1,4 @@
-//! `GET /api/v1/channels/{id}/events?stream=1` (ADR-0014 point 11; G8): server-sent events like the conversation
+//! `GET /api/v1/channels/{id}/events?stream=1` (ADR-0014 point 11): server-sent events like the conversation
 //! stream. A message is `{"type": "channel.message", …}` with `id:` its seq; `Last-Event-ID` (or `after`) replays every
 //! later message, then the stream goes live on the channel's wake-up. Ending the channel sends the unsequenced
 //! `{"type": "channel.state", "state": "ended"}`.

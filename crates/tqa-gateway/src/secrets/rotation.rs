@@ -1,4 +1,4 @@
-//! Secret rotation reminders (vault slice 1, D1; GW-U-054, GW-I-093). A secret may carry `rotate_after_days`; once its
+//! Secret rotation reminders (GW-U-054, GW-I-093). A secret may carry `rotate_after_days`; once its
 //! value is older than that, it is due: the admin list shows it, a WARN names it once a day, and the gauge
 //! `tqa_secrets_rotation_due` counts it. A due reminder never stops a secret from working.
 use crate::{GatewayError, app::State};
