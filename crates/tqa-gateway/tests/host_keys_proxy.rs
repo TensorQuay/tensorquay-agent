@@ -577,13 +577,13 @@ async fn gw_i_166_a_key_changed_mid_run_is_judged_as_it_is_now(pool: PgPool) -> 
             "/api/v1/admin/host-keys/{}/reads?limit=10",
             added["id"].as_str().ok_or("id")?
         );
-        let (_, rows) = call(f, Method::GET, &reads, &cookie, (None, None)).await?;
-        assert!(
+        // Its row is queued, not awaited: the page is read until its batch is in.
+        page_until(f, &reads, &cookie, |rows| {
             rows["items"]
                 .as_array()
-                .is_some_and(|items| items.iter().any(|row| row["outcome"] == "revoked")),
-            "{rows}"
-        );
+                .is_some_and(|items| items.iter().any(|row| row["outcome"] == "revoked"))
+        })
+        .await?;
         assert!(
             hosts.seen.0.lock().map_err(|_| "lock")?.is_empty(),
             "nothing was sent"

@@ -623,3 +623,27 @@ pub(crate) async fn uses(f: &crate::support::Fixture, outcome: &str) -> Result<u
         .and_then(|count| count.trim().parse().ok())
         .unwrap_or(0))
 }
+
+/// The page at `path` as `cookie` reads it, once `ready` holds for it. A refused use's row is queued, not awaited
+/// (`secrets::reads::refused`), so a test that reads one reads the page until its batch is in, within the deadline.
+pub async fn page_until(
+    f: &crate::support::Fixture,
+    path: &str,
+    cookie: &str,
+    ready: impl Fn(&serde_json::Value) -> bool,
+) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+    tokio::time::timeout(
+        tqa_testkit::deadline::scaled(crate::support::DEADLINE),
+        async {
+            loop {
+                let (status, page) = call(f, Method::GET, path, cookie, (None, None)).await?;
+                assert_eq!(status, 200, "{page}");
+                if ready(&page) {
+                    return Ok(page);
+                }
+                tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+            }
+        },
+    )
+    .await?
+}
