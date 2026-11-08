@@ -70,7 +70,7 @@ pub(super) async fn dispatch_copying(
         if let tqa_types::ClientFrame::UserMessage { attachments, .. } = &action.frame {
             // Boxed: its filesystem walk would otherwise enlarge every action future (clippy::large_futures).
             Box::pin(crate::files::check_attachments(state, user, id, attachments)).await?;
-            // A new run needs a ready workspace within its quota (066c): refused, nothing is queued.
+            // A new run needs a ready workspace within its quota: refused, nothing is queued.
             let workspace = sqlx::query!("SELECT w.state, w.size_bytes, w.quota_bytes FROM workspaces w JOIN conversations c ON c.workspace_id=w.id WHERE c.id=$1", conversation)
                 .fetch_one(&mut *transaction).await?;
             if workspace.state != "ready" { return Err(GatewayError::Conflict("workspace_not_ready")); }
@@ -89,7 +89,7 @@ pub(super) async fn dispatch_copying(
         }
         // A new sandbox's slot comes with its admission and is held until its worker is scheduled (PERF-020).
         let (admission, _slot) = state.manager.admit(&mut transaction,conversation).await?;
-        // `refuse`: a task that would wait for another task's running sandbox on its workspace is refused (066b).
+        // `refuse`: a task that would wait for another task's running sandbox on its workspace is refused.
         if let crate::manager::Admission::WaitingForWorkspace(block) = admission
             && !block.handoff
             && !action.always_wait

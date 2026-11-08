@@ -894,7 +894,7 @@ fn start_background(gateway: &Gateway, own_backend: bool) {
     }
 }
 
-/// The periodic sweeps: idempotency retention, and workspace retention when it is on (066c).
+/// The periodic sweeps: idempotency retention, and workspace retention when it is on.
 /// Runs one named start-up step. A failure is logged at ERROR with the step's name and cause, and a timeout names the
 /// step: the gateway exits with this error, and "operation timed out" alone would not say which of its many bounded
 /// calls did not answer (GW-U-060, GW-U-071).
@@ -948,7 +948,7 @@ async fn build_manager(
         Some(backend) => crate::manager::Backend::injected(backend),
         None => step("sandbox backend", crate::manager::Backend::connect(config)).await?,
     };
-    // A fork the gateway was copying when it stopped has failed (066c).
+    // A fork the gateway was copying when it stopped has failed.
     step(
         "fork recovery",
         crate::io::bounded(

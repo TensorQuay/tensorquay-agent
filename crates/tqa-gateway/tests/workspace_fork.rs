@@ -1,4 +1,4 @@
-//! GW-I-030 and SEC-014 (066c): a fork is an owned, independent copy that never follows links, is marked when taken
+//! GW-I-030 and SEC-014: a fork is an owned, independent copy that never follows links, is marked when taken
 //! from a running workspace, and fails within the quota instead of filling the disk.
 #[path = "support/fixture.rs"]
 mod support;

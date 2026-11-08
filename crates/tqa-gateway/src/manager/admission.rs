@@ -172,7 +172,7 @@ impl SandboxManager {
                 leased.push(entry.conversation);
                 continue;
             }
-            // Waiting for the workspace, not for a slot: hand over from an idle or dead holder (066b).
+            // Waiting for the workspace, not for a slot: hand over from an idle or dead holder.
             if let Some(block) = self.lease_block(entry.conversation).await? {
                 self.hand_over(block)?;
                 leased.push(entry.conversation);
@@ -422,7 +422,7 @@ impl SandboxManager {
         )
     }
 
-    /// Another task's sandbox holds this conversation's workspace (066b).
+    /// Another task's sandbox holds this conversation's workspace.
     ///
     /// # Errors
     /// A bounded store failure.

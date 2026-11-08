@@ -10,7 +10,7 @@ struct Context {
     timestamp: OffsetDateTime,
     /// The run lifecycle event type, recorded apart from the frame so blob-stored frames count too.
     lifecycle: Option<&'static str>,
-    /// A `tool.call`'s call id, so the Git relay finds the exact approved call (065g).
+    /// A `tool.call`'s call id, so the Git relay finds the exact approved call.
     call_id: Option<String>,
 }
 

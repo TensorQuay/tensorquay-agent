@@ -196,7 +196,7 @@ impl Inbox<'_> {
     }
 }
 
-/// A running holder keeps its workspace lease alive (066b), bounded by `io_timeout`.
+/// A running holder keeps its workspace lease alive, bounded by `io_timeout`.
 async fn renew(state: &State, conversation: &ConversationId) -> Result<(), GatewayError> {
     let id = crate::conversations::uuid(conversation)?;
     tokio::time::timeout(

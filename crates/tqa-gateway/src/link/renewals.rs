@@ -1,4 +1,4 @@
-//! The workspace lease renewals a running holder's heartbeats make (066b).
+//! The workspace lease renewals a running holder's heartbeats make.
 use crate::GatewayError;
 use std::time::Duration;
 use tokio::time::Instant;

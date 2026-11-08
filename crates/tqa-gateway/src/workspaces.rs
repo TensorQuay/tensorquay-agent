@@ -86,7 +86,7 @@ pub(crate) async fn bind(
                 "a write share is required to bind a task",
             ));
         }
-        // A fork still being copied, or one that failed, holds no usable files (066c).
+        // A fork still being copied, or one that failed, holds no usable files.
         let state = sqlx::query_scalar!("SELECT state FROM workspaces WHERE id=$1", workspace)
             .fetch_one(&mut *connection)
             .await?;

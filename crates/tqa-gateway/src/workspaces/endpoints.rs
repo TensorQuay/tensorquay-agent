@@ -42,10 +42,10 @@ pub(crate) struct Workspace {
     size_measured_at: Option<time::OffsetDateTime>,
     /// What it is (GW-I-215): `helper_copy` for an agent team member's own copy, else `standard`.
     kind: crate::workspaces::Kind,
-    /// For a fork: its source, and whether the source had no live sandbox while it was copied (066c).
+    /// For a fork: its source, and whether the source had no live sandbox while it was copied.
     #[serde(skip_serializing_if = "Option::is_none")]
     fork: Option<Fork>,
-    /// Task 076g: who owns it, its quota, and whether a task holds it now.
+    /// Who owns it, its quota, and whether a task holds it now.
     owner: Owner,
     quota_bytes: Option<u64>,
     lease: Option<Lease>,
@@ -569,7 +569,7 @@ pub(crate) async fn delete(
         owned(&state, &user, workspace).await?;
         let mut transaction = state.pool.begin().await?;
         let current = sqlx::query_scalar!("SELECT state FROM workspaces WHERE id=$1 FOR UPDATE", workspace).fetch_one(&mut *transaction).await?;
-        // A fork still copying into this directory finishes (or fails) first (066c).
+        // A fork still copying into this directory finishes (or fails) first.
         if current == "forking" {
             return Err(GatewayError::Conflict("workspace_not_ready"));
         }

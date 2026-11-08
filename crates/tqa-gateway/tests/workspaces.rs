@@ -1,4 +1,4 @@
-//! GW-I-030 and SEC-014 (066a): workspaces as owned entities that conversations bind to, shared read or write.
+//! GW-I-030 and SEC-014: workspaces as owned entities that conversations bind to, shared read or write.
 #[path = "support/fixture.rs"]
 mod support;
 

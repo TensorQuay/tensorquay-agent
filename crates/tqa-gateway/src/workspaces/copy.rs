@@ -1,4 +1,4 @@
-//! Bounded workspace walks (066c): the fork copy and the size measurement. Blocking; callers run them on the
+//! Bounded workspace walks: the fork copy and the size measurement. Blocking; callers run them on the
 //! blocking pool. The source is a directory a sandbox writes to, so it is walked one directory descriptor at a time
 //! with `O_NOFOLLOW`: a link (or anything swapped in for an entry while the walk runs) is never followed. A link is
 //! copied as a link; other special files are skipped. Each file is written under a temporary name and renamed, so a
