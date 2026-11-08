@@ -33,7 +33,7 @@ one administrator. The full argument is in [PRD §1](docs/PRD.md#1-mission).
   API: MCP is the plugin protocol. The core ships no connectors; each is an MCP server the user registers. The
   decision engine is pluggable too: the model decides by default, an external engine can be configured.
 - **Agents talk through channels:** a shared, ordered forum at the gateway where agents and humans post, propose,
-  vote, decide and claim tasks. No broker, no point-to-point links. Swarms are built on it.
+  vote, decide and claim tasks. No broker, no point-to-point links. Agent swarms, a later phase, will build on it.
 - **Lean Rust harness, TypeScript web UI, Apache-2.0.**
 
 ## Try it
@@ -44,9 +44,10 @@ local model works but slowly, minutes a step, too slow for helpers or the deskto
 without a GPU](docs/user-guide/tasks.md#running-without-a-gpu) section.
 
 ## Status
-**Pre-release.** The one-box install runs end to end: accounts, tasks in isolated sandboxes, models through the
-gateway, workspaces, connectors and channels (the [development plan](docs/DEV-PLAN.md) has what is done and what is
-next). There is no published release yet, so the images are built locally, and interfaces will still change.
+**Releases are listed in the [changelog](CHANGELOG.md).** The one-box install runs end to end: accounts, tasks in
+isolated sandboxes, models through the gateway, workspaces, connectors and channels (the
+[development plan](docs/DEV-PLAN.md) has what is done and what is next). There are no prebuilt images, so the images
+are built locally, and interfaces will still change.
 
 ## How it fits together
 ```text

@@ -4,7 +4,8 @@
 
 Accepted (2026-10-02; the open points were decided that day, under "Decisions (2 Oct 2026)"). Built now, test-first
 and slice by slice (DEV-PLAN Phase 10), behind an install switch, `[agent_teams] enabled`, off by default; it merges
-into dev behind that switch, and the 13h release and the next keep first call on testing time. Point 14a is in v1.0.
+into the development branch behind that switch, and the internal releases then in testing keep first call on
+testing time. Point 14a is in v1.0.
 Revised on 2026-10-02 for the owner's decisions of that morning, which replace the 2026-09-28 design ("team runs on
 channels": team profiles, `quorum` and `lead` votes, git bundles and `agent_spawn`). What changed, and why, is under "Changes from the
 28 Sep version". The file name is kept so that links stay valid.
@@ -272,8 +273,8 @@ of that forum, with every member reading the channel and the team deciding by vo
      `-` and sanitised as an upload's name (`researcher-src-report.md`); a name already taken gets the next free one,
      so nothing in the workspace is ever overwritten. The answer maps each file to where it went, and the lead moves
      it where it belongs with its own shell. Taking a file again places another copy.
-   - **A helper stopped before it reported is handed back by the gateway** (GW-I-311, 18 Oct 2026, the 16o live run's
-     W1: two helpers stopped at their budget share mid-run, never having seen the 80 % ask, and their files stayed in
+   - **A helper stopped before it reported is handed back by the gateway** (GW-I-311, 18 Oct 2026, a live run before 17.0:
+     two helpers stopped at their budget share mid-run, never having seen the 80 % ask, and their files stayed in
      their own copies). When a helper stops, at its share of the budget or by its team's end, with no report since its
      last assignment, the gateway writes a report for it in the team's log, in the gateway's words ("The gateway hands
      back <name>'s work: <name> stopped before it reported (<why>). …"), never the helper's voice. It attaches the files
@@ -332,9 +333,9 @@ of that forum, with every member reading the channel and the team deciding by vo
      member gets one asking it to report now with what it has (GW-I-304, 17 Oct 2026, the c16k campaign's B9b: a
      budget end handed nothing back). While a member is queued, starting or working, the lead's notice doesn't wake
      it: the members' reports do, and it reads the notice with them, so it doesn't finish before they come (18 Oct
-     2026, the 16n review). Members already past their share aren't asked: they can't answer. At `agent_teams.helpers_stop_percent` (default 90, 1–99, `gateway.toml` only)
+     2026, found in review). Members already past their share aren't asked: they can't answer. At `agent_teams.helpers_stop_percent` (default 90, 1–99, `gateway.toml` only)
      the working members are stopped through the stop path (their runs cancelled, `stopped`, never `failed`; a failed
-     member past the share isn't woken, since each run would fail again: the 16o run's `member_failed` every 15 s),
+     member past the share isn't woken, since each run would fail again: a live run's `member_failed` every 15 s),
      each is handed back (point 6, GW-I-311), a call already on its way is refused `team_budget_helpers`, and the lead
      is told (`budget_helpers_stopped`); the rest is the lead's, to write up. At 100 %, or at the deadline, the agent team stops (point 10).
    - Each run's own limits still apply. The team budget is a ceiling above them.
@@ -388,7 +389,7 @@ of that forum, with every member reading the channel and the team deciding by vo
    - **A lead's turn that ends without `done`** (GW-I-306, 17 Oct 2026, the c16k campaign's B2): while its team runs, a
      completed lead run posts a fixed `lead_unfinished` notice to the lead, which wakes on it: call done (the finish
      check runs then) or keep leading. Only when nothing else can wake the lead: no helper queued, starting or working
-     (each will run and report, and the read tool tells a lead to end its turn and wait for that; the 16n integration,
+     (each will run and report, and the read tool tells a lead to end its turn and wait for that; an integration run of
      17 Oct 2026, where a reminder came first and the lead finished early), no question to its person still open (the
      answer wakes it), no turn on its way to it (queued, sending, or taken and not yet started), and nothing unread but
      its reminders. So it is also checked when a helper's run ends after the lead's last run did (not after a person's
@@ -441,8 +442,8 @@ of that forum, with every member reading the channel and the team deciding by vo
         (one still waiting for a slot, the lead's lease or its copy), so no helper starts after the stop;
       - each task whose turns it dropped leaves the queue on its open pages, as a person's cancel withdraws it, and a
         helper whose first turn it dropped and that never ran has its sandbox retired (`team_stopped`), started or
-        still starting, instead of holding a slot and the lead's lease for its idle time (amended 18 Oct 2026, the
-        16p live checks' W3, GW-I-312);
+        still starting, instead of holding a slot and the lead's lease for its idle time (amended 18 Oct 2026 after a
+        live check, GW-I-312);
       - it stores the end note and sets `ended` in one transaction.
 
       Each step is idempotent, so a restart part way through finishes on the next pass with one note. A log over its
@@ -523,8 +524,8 @@ of that forum, with every member reading the channel and the team deciding by vo
 ## Decisions (2 Oct 2026)
 
 The owner left the open points to the technical lead, who decided them on 2 Oct 2026:
-1. **Build now,** test-first and slice by slice, behind `[agent_teams] enabled` (off by default); it merges into dev
-   behind the switch, and the 13h release and the next keep first call on testing time.
+1. **Build now,** test-first and slice by slice, behind `[agent_teams] enabled` (off by default); it merges into the
+   development branch behind the switch, and the internal releases then in testing keep first call on testing time.
 2. **Members per lead:** 3 by default, at most 8, and never more than the slots minus one (point 3).
 3. **Deleting the lead's task** removes the team's messages, the helpers' tasks and their copies; the lead's workspace
    stays (point 5). A goal deletes its teams the same way (ADR-0038).
@@ -746,7 +747,7 @@ revision 12, which no release has carried yet):
 | `read_reports` | lead | `GET /runtime/teams/messages` | `wait` (0–30 s), `limit` | `200 {"messages": […], "last_seq", "more", "hint"?}`. `hint` is `{"kind": "yield_slot"}` or `{"kind": "yield_files", "member"}` (above), and the tool then tells the model to end its turn. Each message is one block, marked by its author |
 | `take_files` | lead | `POST /runtime/teams/files` | `{"report_seq", "files"?: [path]}`: paths as the report lists them, at most 32; all of the report's files when absent. `Idempotency-Key` required | `200 {"placed": [{"name": path in the report, "path": "uploads/<member>-<path>", "size"}]}`. "Placed 2 files from report 9 in uploads/: src/report.md as uploads/researcher-src-report.md (2,104 bytes), … Move them where they belong with your shell." (built in slice 5) |
 | `stop_member` | lead | `POST /runtime/teams/members/{name}/stop` | `{"reason"}` (≤ 1 KiB) | `200 {"member": {"name", "state": "stopped"}}`; stopping a stopped member answers the same |
-| `read_helper` | lead | `GET /runtime/teams/members/{name}/transcript` | `since` (a seq of that helper's events), `limit` (1–200) | `200 {"now", "events": […], "last_seq", "more"}`: `now` is where the helper is (its state and, mid-step, the step, the running tool, since when and for how many seconds, and about how many tokens of thinking and text the step has streamed; the tool shows it first, so a lead can tell slow from stuck: c16, GW-I-277, TOOL-U-058); then the helper's messages, tool calls and results in order, each one block marked untrusted; the gateway's wake is `{"type": "wake", "from", "after"}`, never a message (revision 13). An event's text, content or arguments past 8 KiB are cut and marked `truncated` with their full `bytes`, and a page holds at most 64 KiB (slice 4). Read-only; built in slice 4 (GW-I-197) |
+| `read_helper` | lead | `GET /runtime/teams/members/{name}/transcript` | `since` (a seq of that helper's events), `limit` (1–200) | `200 {"now", "events": […], "last_seq", "more"}`: `now` is where the helper is (its state and, mid-step, the step, the running tool, since when and for how many seconds, and about how many tokens of thinking and text the step has streamed; the tool shows it first, so a lead can tell slow from stuck: 17.0, GW-I-277, TOOL-U-058); then the helper's messages, tool calls and results in order, each one block marked untrusted; the gateway's wake is `{"type": "wake", "from", "after"}`, never a message (revision 13). An event's text, content or arguments past 8 KiB are cut and marked `truncated` with their full `bytes`, and a page holds at most 64 KiB (slice 4). Read-only; built in slice 4 (GW-I-197) |
 | `done` | lead | `POST /runtime/teams/done` | `{"summary", "check"?}` (≤ 8 KiB); `check` is the acceptance check's report, sent when one is set (point 10), after `GET /runtime/teams/acceptance` (`200 {"check": command or null}`, the lead only) | `200 {"team": {"state": "stopping"}}`; a repeat answers the same. A refused check comes back as the tool's result: "acceptance_failed: the acceptance check failed (exit 1), so the team goes on. Fix what it found, then call done again. Its last output: …" |
 | `send_to_lead` | member | `POST /runtime/teams/messages` | `{"type": "answer", "question_seq", "text"}`, `{"type": "report", "text", "files"?: [path]}` (at most 32 paths, each relative to the workspace, without `..`, at most 1,024 bytes, each a regular file within `files.upload_bytes`, together within `files.uploads_bytes`) or `{"type": "ask", "text"}` | `201 {"seq"}`. "Sent to your lead as message 9." |
 | `wait_for_lead` | member | `GET /runtime/teams/messages` | `wait` (0–30 s, default 30), `limit` | as `read_reports`; `hint` is only ever `{"kind": "yield_slot"}`. With nothing new, the text tells the model to end its turn: "Nothing yet; end your turn, and you'll be woken by your lead's next message." |
@@ -857,7 +858,7 @@ shows team parts only while it is true.
 |---|---|
 | `state` | the team's: `running`, `stopping` or `ended`. An ended team's tasks keep `team` (the list still groups them), with no tools (point 10) |
 | `helpers` | the lead's helpers now, deleted ones not counted (§13b: the count drops) |
-| `attention` | how many are `stuck` and `failed` while the team runs; the list says "1 stuck" or "1 failed" in the count's place. Once the team is `stopping` or `ended` it is 0 and 0: nothing in an ended team waits on anyone (GW-U-169; the c16 UX review) |
+| `attention` | how many are `stuck` and `failed` while the team runs; the list says "1 stuck" or "1 failed" in the count's place. Once the team is `stopping` or `ended` it is 0 and 0: nothing in an ended team waits on anyone (GW-U-169) |
 | `waiting_for_you` | a `person_question` is unanswered (point 4) while the team runs; the task's status word is "Waiting for you". A stopping or ended team waits for no one: an answer would be `team_stopped` (corrected in the review of 2 Oct 2026) |
 | `lead.title` | the lead task's title as its person sees it (`null` when untitled) |
 | `helper_state` | as in the team below |

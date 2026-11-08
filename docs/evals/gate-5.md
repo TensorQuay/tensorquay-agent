@@ -2,18 +2,18 @@
 
 **State:** **reached on release candidate 15b**, by the technical lead's verdict (11 Oct 2026): every local-model run passed, M6 is met, and the phase
 demo was accepted by the technical lead on 10 Oct (151 steps, 2.1 M tokens, 690 s, its check passed; the report's 49
-part lines and its reference line "Audit reference: KESTREL-4471"). **10 Oct 2026, release candidate 15b** (dev `23112f6b`; the release continues as 15c, which changes
+part lines and its reference line "Audit reference: KESTREL-4471"). **10 Oct 2026, release candidate 15b** (the release continues as 15c, which changes
 only the web, so these runs on 15b's server and runtime stand): the local-model rows ran on 15b's images on 10 Oct.
 **E2E-WAVE-001 passed (60/60)**, **E2E-FALLBACK-004 passed its row (24/30 reported, no harness failure)**, and **the
 phase demo completed** with six compactions and the task statement intact (below, "The local-model runs on 15b").
 E2E-WAVE-002 (60/60) and E2E-CMP-003 (ours 50/50, reference 50/50) ran in the same window. **11 Oct 2026:** 15c is on
 main as `1586fd9f` (its tree `release/c15` at `bf85085f`).
-Before that, **8 Oct 2026, release candidate c15** (C15 = dev `b5caac76`): every unit, contract and edge row,
+Before that, **8 Oct 2026, release candidate c15**: every unit, contract and edge row,
 the coverage clause, PERF-030 and PERF-040 pass in c15's integration, on c15's own server, runtime and web. **Not
 reached** until the three local-model runs rerun on c15's images (not scheduled yet; the GPU is after the soak).
 Earlier: refreshed for release candidate **c14b-rc** (5 to 7 Oct 2026). **Not reached.** Every unit, contract
-and edge row, the coverage clause and PERF-030 pass on candidate 14b's integration (dev `16589e55`, c14b-rc's gateway
-and runtime images); PERF-040 passed there too, on 14b's web code, and reruns on c14b-rc's (dev `101ffeca`). The
+and edge row, the coverage clause and PERF-030 pass on candidate 14b's integration (c14b-rc's gateway
+and runtime images); PERF-040 passed there too, on 14b's web code, and reruns on c14b-rc's. The
 local-model rows ran on c14b-rc's images on 7 Oct: **E2E-WAVE-001 passed (60/60)**; **E2E-FALLBACK-004 passed its row
 (26/30 reported, no harness failure)**; **the phase demo did not (0/1)**, stopped by our `read_file`'s strictness before it was summarised, which
 c15 fixes. c15 reruns all three. The two fixes 13h left open (the retry of an unreadable answer, CORE-E-040; a null-word
@@ -26,7 +26,7 @@ pure crates; PERF-030 and PERF-040; E2E-WAVE-001 and E2E-FALLBACK-004; and the p
 model with a visible compaction and the task statement intact).
 
 ## Release candidate c15 (8 Oct 2026)
-**Source:** the integration of C15 = dev `b5caac76` (8 Oct 01:23 to 04:24 +08:00, logs `int-b5caac76-*`), on the
+**Source:** the integration of C15 (8 Oct 01:23 to 04:24 +08:00, logs `int-b5caac76-*`), on the
 images built from that commit (`candidate15-tags.txt`), web included. A row passes only if each of its test IDs ran and
 none failed.
 - **Method:** each ID's Rust tests were found by the ID in a `TEST:` line or comment above the test, or in the file's
@@ -61,7 +61,7 @@ All three are tested in the steps above. Their effect on a real model is what th
 
 ### The local-model runs on 15b (run 10 Oct 2026, 20:00 to 22:44)
 **Pre-drafted 8 Oct, retargeted 9 Oct, filled 10 Oct from the night's logs and records** (each cell's source is named
-beside it). c15 was respun as **15b** (dev `23112f6b`: c15 plus two heap fixes, the metrics upkeep
+beside it). c15 was respun as **15b** (c15 plus two heap fixes, the metrics upkeep
 GW-U-177 and the event hub's sweep GW-U-178), so these runs are on 15b's images (gateway, runtime and Workstation from
 `23112f6b`; the web page is never used). The unit, contract, coverage and PERF rows above are c15's integration
 (`b5caac76`). One model server for all runs, one attempt at a time. Planned window 20:00 to 01:00 (latest start
@@ -122,9 +122,9 @@ passed), REPORT.md 49 part lines + 'Audit reference: KESTREL-4471'. Accepted." *
 reached on 15b**: every run passed, M6 is met, and the phase demo is accepted.
 
 ## Release candidate c14b-rc (5 to 7 Oct 2026)
-**Source:** candidate 14b's integration on dev `16589e55` (4 to 5 Oct 2026, logs `int-16589e55-*`), each row checked
+**Source:** candidate 14b's integration (4 to 5 Oct 2026, logs `int-16589e55-*`), each row checked
 against the logs: a row passes only if each of its test IDs ran and none failed. c14b-rc is those images with the web
-image rebuilt from dev `101ffeca`. The TEST-PLAN §17 Gate 5 row is unchanged since 13h.
+image rebuilt from a later commit. The TEST-PLAN §17 Gate 5 row is unchanged since 13h.
 
 | Rows | c14b-rc | Evidence |
 |---|---|---|
@@ -172,13 +172,13 @@ checkout of `16589e55`.
   earlier read_file; to read by lines, leave cursor out") and the run ended (`model.tool_args`). The model guessed the
   paging cursor beside a line range. The refusal was our tool's strictness, and the tool is the product's, so this
   stays a product failure of c14b-rc, not a harness failure (unlike 13h's demo, which was reclassified): c15 reads the
-  lines and says the cursor was ignored (dev `bc8114f1`, TOOL-U-051). **Compaction never
+  lines and says the cursor was ignored (TOOL-U-051). **Compaction never
   began**, and that is a finding too: the last request was 26,205 tokens by the server's count on a 32,768-token
   route, past where compaction begins (85 % of the 24,576-token input room, about 20,890 tokens, with the route's
   8,192-token Max output) and past the input room itself; the model server accepted it only because it serves a
   65,536-token context. The task's own estimate undercounts dense text such as the demo's ledger (1.64 times on a
   Qwen model, as measured for CORE-U-084), so it never asked for a compaction.
-  c15 also triggers on the server's count (dev `5fffc930`, CORE-U-084).
+  c15 also triggers on the server's count (CORE-U-084).
 
 **What c15 must rerun before the gate can be reached, and why:**
 1. **The phase demo** (`local-32k`, `compaction-50`) on c15's images: the run must show a compaction and the task
@@ -239,7 +239,7 @@ E2E-WAVE-002 (Gate 9) last, the server restarted at 8 sequences.
   TEST-PLAN §16's rule it is `model.tool_args`, reviewed by hand, and this refusal was our strictness: **reclassified
   as a harness failure.** Fixed for the next release: an empty optional string argument counts as absent for every
   builtin tool (TOOL-U-001, TOOL-U-034), and a refusal names the field and the way out.
-- **The demo rerun on dev `cc252a78` (2 Oct, 15:40–15:46): fail, on our tool again, later.** With the empty-argument
+- **The demo rerun (2 Oct, 15:40–15:46): fail, on our tool again, later.** With the empty-argument
   fix it went 69 steps (18 before) and then ended `repeated_failure` on three refusals of
   `grep {"cursor": "None", "file_type": "None", "glob": "None", …}`: this model fills optional fields with the word
   "None". The harness classed it `model.tool_args`, the refused call in the evidence; the hand review finds our
@@ -467,7 +467,7 @@ text protocol on `local-text`.
 
 ### E2E-FALLBACK-004 on candidate 6 (2026-09-29, 06:49–06:59), and what swallows the calls
 - **Configuration:** candidate 6 (a14afc0), `local-text` with `tqa_call` and thinking off, the review stack, one GPU
-  window (Team B's 06:34 release).
+  window (from 06:34, when the shared GPU was free).
 - **Result:** **fail, 19/30 = 63.3 %** (Wilson 45.5–78.1 %), with 1 harness failure. That follows the precedent of
   E2E-WAVE-001 on 26 Sep, which failed on one harness failure whose rerun passed. The 30 final attempts are 19
   `pass`, 7 `model.wrong_work` and 4 `model.budget` (all four `fallback_parse`: `model.unreadable` since 7 Oct):

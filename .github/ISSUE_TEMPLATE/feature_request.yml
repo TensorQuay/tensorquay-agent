@@ -1,0 +1,24 @@
+name: Feature request
+description: A change to what TensorQuay Agent does.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A concrete case helps most: the task you were doing and what got in the way. A new tool, provider, runtime
+        backend or protocol change is agreed with the maintainers before anyone implements it (CONTRIBUTING.md).
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What you are trying to do, and what stops you.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you propose
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you tried instead

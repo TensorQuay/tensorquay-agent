@@ -6,10 +6,10 @@ under "Release candidate 15b"): the 24 h soak passed by the owner's rule of 9 Oc
 owner accepted; Gate 9's rerun passed; PERF-021, REL-I-001…003 and PERF-012's Docker half passed; PERF-012's microVM
 half failed and was waived. The v1.0 candidate became **15c** (15b's server with a new web image) and is on main as
 `1586fd9f` (11 Oct). **9 Oct 2026:
-c15 was respun as 15b** (dev `23112f6b`):
+c15 was respun as 15b**:
 c15's soak showed the gateway's memory growing (two leaks, both fixed in 15b), so the product owner chose a new
 candidate. 15b's 24 h soak runs from 9 Oct 12:48, and its Gate 9 runs follow it; see "Release candidate 15b". Before
-that, **8 Oct 2026: release candidate c15** (C15 = dev `b5caac76`) was in its 24 h soak; its Gate 9 reruns were to
+that, **8 Oct 2026: release candidate c15** was in its 24 h soak; its Gate 9 reruns were to
 follow on a quiet host. The integration's
 values and the release dry run are recorded below, under "Release candidate c15". Refreshed 6 Oct 2026 with release
 candidate c14b-rc's Gate 9 runs, and 7 Oct with its GPU rows. Gate 9 was not reached then: M1 was met on c14b-rc (60/60 and 59/60, the one miss the
@@ -65,7 +65,7 @@ Candidates named here: candidate 5 `545c3d0` (2026-09-28 08:05), candidate 6 `a1
 - **PRD:** "≤ 50 ms p50, ≤ 200 ms p99 (PERF-001)" per model turn, excluding model time.
 - **Evidence:** the measuring test (`tqa-core/tests/performance.rs`, `perf_001_harness_overhead`) is ignored by design
   (release mode, idle host) and runs only when invoked. Candidate 6's integration ran only its five helper tests. No
-  recorded p50/p99 exists on any candidate; the one recorded run in the integration logs (dev `6bc56bc`) failed.
+  recorded p50/p99 exists on any candidate; the one recorded run in the integration logs failed.
 - **Verdict:** not yet. Candidate 13h measured it for the first time (journal p50 1.90 ms, p99 28.7 ms; release mode)
   but at load 25, not on an idle host, so it is indicative only. The verdict comes from PERF-001 on an idle host on the
   next candidate (`gate9_run.py`, step a).
@@ -73,7 +73,7 @@ Candidates named here: candidate 5 `545c3d0` (2026-09-28 08:05), candidate 6 `a1
 ### M3: Sandbox start
 - **PRD:** "Docker on Linux: ≤ 3 s p50 warm image. Firecracker: ≤ 2 s cold boot p50; ≤ 500 ms from a warm snapshot
   (Phase 4 stretch) (PERF-010/011)."
-- **Evidence:** Docker: PERF-010 p50 413 ms, p99 694 ms, in the Gate 4 audit (dev `4d4e020`, 2026-09-26). Firecracker:
+- **Evidence:** Docker: PERF-010 p50 413 ms, p99 694 ms, in the Gate 4 audit (2026-09-26). Firecracker:
   PERF-011 cold boot p50 136 ms, max 364 ms over 31 boots (`gate-8.md`, still a draft, 2026-09-26/27). On candidate 6
   PERF-011 first failed on a rootfs build under load, then passed its ≤ 2 s assertion on the rerun (17:07), which keeps
   no value.
@@ -92,7 +92,7 @@ Candidates named here: candidate 5 `545c3d0` (2026-09-28 08:05), candidate 6 `a1
 
 ### M4: Concurrency
 - **PRD:** "16 live conversations on one gateway host with 2 vCPU / 4 GB and no dropped events (PERF-020)."
-- **Evidence:** PERF-020 in the Gate 4 audit (dev `4d4e020`, 2026-09-26): the gateway capped at 2 vCPU / 4 GB by its
+- **Evidence:** PERF-020 in the Gate 4 audit (2026-09-26): the gateway capped at 2 vCPU / 4 GB by its
   cgroup (`deploy/tests/perf_concurrency.py`), 16 conversations, 0 dropped events, CPU p95 24.2 %, RSS 12 MB.
 - **Verdict:** met on candidate 13h: 16 conversations, three runs of 4,800 events, 0 dropped or repeated, CPU p95 19.2 %
   of 2 vCPU, RSS peak 12.2 MB (`perf-020-152130.json`). Confirmed by the next candidate's PERF-020 (step b).
@@ -183,7 +183,7 @@ Candidates named here: candidate 5 `545c3d0` (2026-09-28 08:05), candidate 6 `a1
   names each result and its SHA-256.
 
 ## Release candidate 15b (9 to 11 Oct 2026)
-**15b = dev `23112f6b`**: c15 (`b5caac76`) and its soak-harness fixes, plus the two heap fixes below. Tag file
+**15b**: c15 (`b5caac76`) and its soak-harness fixes, plus the two heap fixes below. Tag file
 `candidate15b-tags.txt`, built 9 Oct 12:41 at runtime protocol revision 13:
 - gateway `040068250224`, web `9caeb9309fc8`, runtime `62d8588edbfa`, Workstation `1648c896cdc4`, fake model
   `f54d5c74cacc`, VM host `466fccc57357`.
@@ -263,7 +263,7 @@ Candidates named here: candidate 5 `545c3d0` (2026-09-28 08:05), candidate 6 `a1
 ### 15b's runs
 | Run | Result | When / evidence |
 |---|---|---|
-| SOAK-001…004, 24 h (from 9 Oct 12:48, evidence `r2-soak-24h-20261009-1248`) | **Passes PRD §12 item 25's rule**, judged on the 12.06 h lifetime (2,864 samples, 12 restart windows): gateway RSS 37.4 MB → 37.9 MB, **+1.2 %**, projected **+0.7 %** over 24 h; descriptors other than the gateway's database connections 51 → 51, 0.0 %, projected −1.7 %; the gateway's database connections at most **16** against a ceiling of 16, at the maximum in **0 %** of the last hour, floor (10th percentile) **6 → 6**. **The gap, accepted by the product owner (10 Oct):** the harness signed in once, and at hour 24 its sign-in had expired (the server's 24 h session limit, HTTP 401), so the end-of-run receipt and run checks of the last 8 of its 72 conversations didn't run; `result.json` says `failed` for that reason. Orphans: 0, checked by hand. The harness now renews its sign-in (dev's merge `06f384e8`; a 2 h rehearsal on dev `298fddf1` with 60 s sessions passed on 11 Oct, every end-of-run check run); c16's soak must complete every end-of-run check | The offline judge on the soak's samples (`offline-judge.json`: "all_checks_pass": true); the soak ended 10 Oct about 12:48 |
+| SOAK-001…004, 24 h (from 9 Oct 12:48, evidence `r2-soak-24h-20261009-1248`) | **Passes PRD §12 item 25's rule**, judged on the 12.06 h lifetime (2,864 samples, 12 restart windows): gateway RSS 37.4 MB → 37.9 MB, **+1.2 %**, projected **+0.7 %** over 24 h; descriptors other than the gateway's database connections 51 → 51, 0.0 %, projected −1.7 %; the gateway's database connections at most **16** against a ceiling of 16, at the maximum in **0 %** of the last hour, floor (10th percentile) **6 → 6**. **The gap, accepted by the product owner (10 Oct):** the harness signed in once, and at hour 24 its sign-in had expired (the server's 24 h session limit, HTTP 401), so the end-of-run receipt and run checks of the last 8 of its 72 conversations didn't run; `result.json` says `failed` for that reason. Orphans: 0, checked by hand. The harness now renews its sign-in (a 2 h rehearsal with 60 s sessions passed on 11 Oct, every end-of-run check run); c16's soak must complete every end-of-run check | The offline judge on the soak's samples (`offline-judge.json`: "all_checks_pass": true); the soak ended 10 Oct about 12:48 |
 | Gate 9 steps a, b, d against c14b-rc (`16589e55`), ABBA | **Passed** (11 Oct 00:22 to 02:17). Candidate rounds (two each): PERF-001 journal p50 0.80 / 0.83 ms, p99 4.70 / 1.04 ms, memory p99 0.094 ms both; PERF-003 added p50 0.69 / 0.81 ms, p99 2.18 / 1.85 ms; PERF-010 p50 452 / 448 ms, p99 630 / 626 ms; PERF-011 new task p50 501 / 510 ms (the owner's 3 s met), returning 377 / 375 ms; PERF-020 CPU p95 18.9 / 18.4 %, RSS 12 MB, events ≥ 4,800. **PERF-002:** the run flagged its p99 against c14b-rc ("regression over 10 %"), at p99 30.5 / 11.6 ms against the baseline's 28.1 / 7.5 ms, the baseline's own rounds 3.7× apart. Run alone on the quiet host straight after (02:18 to 02:26, ABBA): baseline p99 9.22 / 7.41 ms, candidate 8.07 / 7.64 ms, **no regression** (exit 0); PRD's bound is p99 ≤ 100 ms | The run's index and every row's JSON, kept: `tree-results-20261011-021714` (`gate9-2026-10-10T16-23-09Z.json`); PERF-002 alone: `perf002-only/`. **Why a rerun:** the first run, 10 Oct, kept only its log; its script's final clean-up removed the tree that held the JSONs. The script now copies them out first |
 | PERF-021 (step c), alone on the quiet host | **Passed** (11 Oct, 03:33 to 04:33): CPU 261.55 s an hour (p50 3.149 s a minute), 58 bytes a stream a minute | `perf-021-203350.json` (the U00 step's results) |
 | PERF-012, Docker | **Passed** in the rerun's window (11 Oct 02:16): sequential write 0.927, read 0.998; random write 0.976, read 0.961 (bound ≥ 0.8). On 10 Oct a run by hand straight after the first Gate 9 run gave sequential write 0.653; an ABA rerun then (15b, c14b-rc, 15b) gave 0.923, 0.879, 0.922, so that value was recorded as an outlier | `perf-012-181650.json`; the ABA's JSONs in `perf-012/` |
@@ -277,7 +277,7 @@ owner waives it in writing (the technical lead, 9 Oct). **PERF-012's microVM hal
 was pushed to main the same day (`1586fd9f`, its tree `release/c15` at `bf85085f`).
 
 ## Release candidate c15 (8 to 9 Oct 2026; respun as 15b)
-**C15 = dev `b5caac76`**, the tag file `candidate15-tags.txt`, built 8 Oct 01:22 at runtime protocol revision 13:
+**C15**, the tag file `candidate15-tags.txt`, built 8 Oct 01:22 at runtime protocol revision 13:
 - gateway `8fe72138b44c`, web `c21dae74e9d7`, runtime `489ab9525b4c`, Workstation `797499325f94`, fake model
   `03718db2e50f`, VM host `d6a37e4c360a`.
 
@@ -338,7 +338,7 @@ G-13-suites, on SBX-F-009's host memory.
   fix).
 
 ## Release candidate c14b-rc, Gate 9 runs (5 to 7 Oct 2026)
-Candidate 14b's images (dev `16589e55`) with the web image from dev `101ffeca`, the tag file
+Candidate 14b's images with the rebuilt web image, the tag file
 `candidate14b-rc-tags.txt` (gateway `fde0b91bf88b`, web `83a8d1ad493f`, runtime `347b895b203d`, Workstation
 `84ff9c47aa24`, fake model `272dfcee3718`, VM host `c8a54cf8f5ea`). Measured by `deploy/tests/gate9_run.py` from
 `2b0ff0bd` (`101ffeca` plus the harness fixes of that run) in ABBA order against 13h (`5b79a932`), each job under the

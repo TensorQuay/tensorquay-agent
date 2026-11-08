@@ -1,7 +1,7 @@
 # Gate 11: Computer use
 
 **State:** **draft, not reached** (21 Oct 2026, for the technical lead). The Evaluation below is the technical lead's
-to write. The release candidate is 16y (dev `5a59ad1d5`). In the 16y integration (20 Oct), every row in this gate's
+to write. The release candidate is 16y. In the 16y integration (20 Oct), every row in this gate's
 scope passed, among them the sandbox's Desktop tests (SEC-059's sign-in by hand included), the Desktop suite's 7 tests
 and the 18 rows added on 21 Oct. No computer-use test has failed in an integration since 16u.
 
@@ -80,7 +80,7 @@ criterion: it is every strict tool's rule for null optional arguments, and only 
 tool's (16k's null-word ref). ADR-0039's security review maps each threat T1…T15 to a test; the P0 rows above carry
 them.
 
-## The 16y integration (dev `5a59ad1d5`, 20 Oct 2026, its summary from 20:08 to 23:16 +08:00)
+## The 16y integration (20 Oct 2026, its summary from 20:08 to 23:16 +08:00)
 **Source:** the integration's summary `int-5a59ad1d5-summary.log`, with each step's log in `int-5a59ad1d5-*.log`.
 Failed gates 0, cut 0; one failed step, release-mode performance, outside this gate.
 
@@ -107,7 +107,7 @@ Failed gates 0, cut 0; one failed step, release-mode performance, outside this g
 ## The real-world campaign (16k, 17 Oct 2026)
 The Product Owner asked for real-world end-to-end use: give the Desktop a task a person would set and see whether it
 finishes it.
-- **Setup:** a fresh 16k install (dev `8c3db93a8`), the real local model (Qwen3.8 27B, with images), the Desktop at 2
+- **Setup:** a fresh 16k install, the real local model (Qwen3.8 27B, with images), the Desktop at 2
   CPUs and 4 GB, and seven public sites allowed. Every case was a task typed in the browser as a person would. Each was
   judged on its screens, its files and the run's own records.
 - **The Desktop cases:**

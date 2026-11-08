@@ -1,7 +1,7 @@
 # Gate 10: Agent teams
 
 **State:** **draft, not reached** (21 Oct 2026, for the technical lead). The Evaluation below is the technical lead's
-to write. The release candidate is 16y (dev `5a59ad1d5`). In the 16y integration (20 Oct), every row in this gate's
+to write. The release candidate is 16y. In the 16y integration (20 Oct), every row in this gate's
 scope passed. That includes the agents suite on the real stack, 17 of 17 (16j's 12 and the five added since), and
 SEC-046 with its team case.
 
@@ -73,7 +73,7 @@ tests, and each passed in the 16y integration:
   - GW-I-298…301, GW-I-303, GW-I-304, GW-I-306, GW-I-307, GW-I-312;
   - the team rows among WEB-U-387…416.
 
-## The 16y integration (dev `5a59ad1d5`, 20 Oct 2026, its summary from 20:08 to 23:16 +08:00)
+## The 16y integration (20 Oct 2026, its summary from 20:08 to 23:16 +08:00)
 **Source:** the integration's summary `int-5a59ad1d5-summary.log`, with each step's log in `int-5a59ad1d5-*.log`.
 Failed gates 0, cut 0; one failed step, release-mode performance (below).
 

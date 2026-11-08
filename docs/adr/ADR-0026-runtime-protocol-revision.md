@@ -117,7 +117,7 @@ other task keeps linking runtimes from the floor, 10, up. The Desktop template i
 carries a Desktop image below 14.
 
 ## Note 2026-10-29: the label goes with the binary
-The runtime binary is each image's last layer (c17, REL-U-011), so a change to the program alone reuses every
+The runtime binary is each image's last layer (17.0, REL-U-011), so a change to the program alone reuses every
 package layer. The label moves with it: every stage that copies the binary sets it, every copy equal to the
 constant, and `runtime-base` sets neither (SBX-U-001). Images built from `tqa-runtime:base` still inherit it.
 

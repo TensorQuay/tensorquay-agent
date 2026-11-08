@@ -42,7 +42,7 @@ baseline.
 - **Guards:** each task's own budgets, and a run cap of 10 million tokens per wave.
 
 ## Setup
-- **Candidate:** dev `a14afc0`. The gateway, runtime and Workstation images are pinned by image ID:
+- **Candidate:** the release candidate of 28 Sep. The gateway, runtime and Workstation images are pinned by image ID:
   gateway `c580e6b4b246`, runtime `47fea18da874`, Workstation `8ccb9b88a291`.
 - **Harness:** `tqa-e2e` built in release mode from `a14afc0`, with that commit's task set.
 - **c14b-rc (7 Oct):** gateway `fde0b91bf88b`, runtime `347b895b203d`, Workstation `84ff9c47aa24`; the runner from a

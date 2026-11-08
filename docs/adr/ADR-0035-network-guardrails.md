@@ -2,7 +2,7 @@
 
 ## Status
 Accepted (8 Oct 2026). The owner decided the removal of the per-call policy and approvals (§1, §3 to §7), the git
-push variant (§5) and, on 8 Oct, the network extras in §2: point 1 confirmed, point 3 built after c16, point 2 when
+push variant (§5) and, on 8 Oct, the network extras in §2: point 1 confirmed, point 3 built after 17.0, point 2 when
 someone asks for it, point 4 dropped ("The owner's decision on the network extras", at the end).
 
 ## Date
@@ -319,7 +319,7 @@ tagged, so nothing is deprecated for a release first: what goes is removed outri
   - the Gate 9 and FR-10 traceability rows.
 - **ADR-0034** (team runs): a spawned member's reach is at most the caller's tools, connectors and network list, in
   place of "the stricter policy" (§1).
-- **PRD:** already amended (1b7f7f6b). If the owner agrees to §2's points 2 to 4, FR-15 and FR-22 gain per-profile
+- **PRD:** already amended. If the owner agrees to §2's points 2 to 4, FR-15 and FR-22 gain per-profile
   lists and observe mode.
 
 ## Tests that go or change
@@ -381,7 +381,7 @@ nothing asks a person to approve, and it stays simple. §2's points 1 to 4:
 1. **The host:port allow-list with wildcards, default deny: confirmed** as v1.0's design, as built.
 2. **Per-profile network lists: when someone asks for them**, not planned now. They would add a second place where the
    rules live. Until then, an administrator who wants one kind of task to reach a site allows it for every task.
-3. **Recent refusals with "Allow this site": built after c16** (DEV-PLAN §4b), as point 3 describes: an
+3. **Recent refusals with "Allow this site": a later release** (DEV-PLAN §4b), as point 3 describes: an
    administrator's tidy-up of the list, never a gate.
 4. **Observe mode: dropped.** It would switch the only guardrail off, if only for a while; point 3 builds a list from
    real refusals without opening anything.

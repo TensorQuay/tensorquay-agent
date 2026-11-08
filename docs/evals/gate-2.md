@@ -1,9 +1,9 @@
 # Gate 2: Robustness
 
-**State:** **reached, on one condition**: SOAK-002 closes when c16's soak completes every end-of-run check (the technical lead's evaluation below, 12 Oct 2026, dev `8fa48152`). Until then the page was a draft. Phase 2 was built and imported on 23 and 24 Sep 2026,
+**State:** **reached, on one condition**: SOAK-002 closes when c16's soak completes every end-of-run check (the technical lead's evaluation below, 12 Oct 2026). Until then the page was a draft. Phase 2 was built and imported on 23 and 24 Sep 2026,
 before this folder had pages; its short soak (SOAK-002) ran on 24 Sep (`3781de25`), and no Gate 2 report was
-written then. This page assesses the gate on the v1.0 release's evidence: 15b's full integration (dev `23112f6b`,
-10 Oct 2026, 14:56 to 17:51), 15c's web run (15b's server with the web image `28c0f621…`; 15c is on main as
+written then. This page assesses the gate on the v1.0 release's evidence: 15b's full integration (10 Oct 2026,
+14:56 to 17:51), 15c's web run (15b's server with the web image `28c0f621…`; 15c is on main as
 `1586fd9f`) and 15b's 24-hour soak. On that evidence **49 of the 50 live IDs pass on their tests; SOAK-002 passes
 with the gap the product owner accepted for 15b's soak**, and each part of the phase demo passed in its own test.
 
@@ -16,7 +16,7 @@ bar); SOAK-002 (short run). **GW-I-036 is void** (29 Sep 2026: parking for an ap
 ADR-0035), so 50 IDs are live: 28 P0 and 22 P1. Plus the phase demo (DEV-PLAN Phase 2).
 
 ## How it was checked
-- **The references:** `tools/gate-evidence.py 2`, the offline listing (no test run), on dev `3940a08d`, which names
+- **The references:** `tools/gate-evidence.py 2`, the offline listing (no test run), on the tree of 12 Oct 2026, which names
   each ID's tests: 213 references for the 49 IDs that have tests. SOAK-002 is a harness run, not a named test.
 - **The results:** each reference's result line in 15b's integration logs (`int-23112f6b-*.log`, the coverage logs
   left out): a nextest `PASS` line for a Rust test; the test file's line in the vitest step, where 2,462 of 2,462
@@ -37,7 +37,7 @@ ADR-0035), so 50 IDs are live: 28 P0 and 22 P1. Plus the phase demo (DEV-PLAN Ph
 |---|---|---|
 | 24 Sep 2026, 2 h, the Gate 2 shape (`3781de25`) | The commit records it passed: "108 runs completed, all eight receipt logs equal stored history" | **No result file was kept** |
 | 15b's 24 h soak, from 9 Oct 12:48 (SOAK-001…004) | Passed by the owner's rule (PRD §12 item 25), **with the gap the owner accepted**: at hour 24 the harness's sign-in had expired (HTTP 401), so "the end-of-run receipt and run checks of the last 8 of its 72 conversations didn't run" (`gate-9.md`) | `gate-9.md`, M5 row; the soak's `result.json` says `failed` for that reason |
-| 11 Oct 2026, 2 h, the sign-in renewal rehearsal (dev `298fddf1`, 15c's images) | Every end-of-run check ran and passed. **Not gate evidence** by design: it shortens the session to 60 s to exercise the renewal | the rehearsal's result (`gate_evidence` false) |
+| 11 Oct 2026, 2 h, the sign-in renewal rehearsal (15c's images) | Every end-of-run check ran and passed. **Not gate evidence** by design: it shortens the session to 60 s to exercise the renewal | the rehearsal's result (`gate_evidence` false) |
 
 ## Phase demo
 DEV-PLAN Phase 2: "kill the sandbox mid-run, close the browser mid-run, restart the gateway; the run finishes and the

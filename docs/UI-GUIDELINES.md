@@ -476,7 +476,7 @@ to the leads. It reuses §13b's parts; this section adds only what is new. Words
 | Team rows | Skeleton rows | Not possible once the goal starts | One row says "Couldn't load this team" with Try again; the others stay |
 | Conversation | Skeleton lines | "No messages yet. The coordinator writes first." | The transcript's error line with Try again; a filter that fails keeps All |
 
-## 13d. Computer use (c16, ADR-0039)
+## 13d. Computer use (17.0, ADR-0039)
 A task on an environment that declares `desktop` works on a graphical desktop: the agent looks at the screen and acts
 on it, and the task's owner can watch it live and take over to sign in. This section is how that looks, as the panel
 ships. It follows the UI standard's controls and adds none of its own. Words are the catalogue's (`screen.*`,

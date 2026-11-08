@@ -1,10 +1,10 @@
 # Gate 3: Safety
 
-**State:** **reached for the 20 live IDs, Docker mode**, by the technical lead's evaluation below (12 Oct 2026, dev `8fa48152`). Until then the page was a draft. Phase 3 was built and imported on 23 and 24 Sep 2026
+**State:** **reached for the 20 live IDs, Docker mode**, by the technical lead's evaluation below (12 Oct 2026). Until then the page was a draft. Phase 3 was built and imported on 23 and 24 Sep 2026
 (its gateway security tests `d1c94f47`, its runtime posture checks in CI `002b9f5b`), before this folder had pages,
 and no Gate 3 report was written then. Since then the product owner removed per-call permissions and approvals
 (29 Sep 2026, ADR-0035), which voids six of the gate's IDs and half of its demo. This page assesses what is left on
-the v1.0 release's evidence: 15b's full integration (dev `23112f6b`, 10 Oct 2026, 14:56 to 17:51; 15c, its server
+the v1.0 release's evidence: 15b's full integration (10 Oct 2026, 14:56 to 17:51; 15c, its server
 with a new web image, is on main as `1586fd9f`). On that evidence **all 20 live IDs pass, and the demo's network half
 passed**, in a real sandbox and on the real stack.
 
@@ -21,7 +21,7 @@ SEC-009, SEC-012, SEC-014 on docker.
 Plus the phase demo (DEV-PLAN Phase 3).
 
 ## How it was checked
-- **The references:** `tools/gate-evidence.py 3`, the offline listing (no test run), on dev `3940a08d`, which names
+- **The references:** `tools/gate-evidence.py 3`, the offline listing (no test run), on the tree of 12 Oct 2026, which names
   each ID's tests: 95 references for the 20 live IDs.
 - **The results:** each reference's result line in 15b's integration logs (`int-23112f6b-*.log`, the coverage logs
   left out): a nextest `PASS` line for a Rust test; the test file's line in the vitest step, where 2,462 of 2,462
@@ -59,7 +59,7 @@ workspace, whatever the decision)."
 - **Docker mode only,** as the row says. The same suites on the microVM are Gate 8's; SEC-001's and SEC-005's Desktop
   clauses come with Phase 11.
 - **ADR-0004 (egress enforcement) and ADR-0008 (prepared-action binding)** are named by Phase 3; neither existed in
-  `docs/adr/` when this page was drafted. *Updated 12 Oct 2026 (dev `939bcb1a`):* both are recorded, ADR-0004 as
+  `docs/adr/` when this page was drafted. *Updated 12 Oct 2026:* both are recorded, ADR-0004 as
   accepted from the shipped code, ADR-0008 as superseded by ADR-0035 and ADR-0037 §7. Not a §17 criterion.
 - **By test name, not clause by clause** (How it was checked).
 - **The references are dev's (`3940a08d`), the results 15b's (`23112f6b`).** All but the one above have a result
@@ -75,7 +75,7 @@ workspace, whatever the decision)."
   old approval renders nothing.
 - **SEC-001's and SEC-005's Desktop clauses** belong to Phase 11 and are not part of this verdict. SEC-001's
   Desktop run (SEC-057/058) does not pass yet in c16's integration and is being fixed there.
-- **ADR-0004 and ADR-0008** were still to write. *Updated 12 Oct 2026 (dev `939bcb1a`):* both are written.
+- **ADR-0004 and ADR-0008** were still to write. *Updated 12 Oct 2026:* both are written.
   ADR-0004 (egress enforcement) describes what ships, with the code it cites; ADR-0008 (prepared-action binding) is
   recorded as superseded, approvals by ADR-0035 and the push's binding by ADR-0037 §7. The docs-completeness gate,
   G-09-complete, now fails if a cited ADR has no record.

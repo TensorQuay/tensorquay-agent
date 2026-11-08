@@ -2,7 +2,7 @@
 
 **State:** **reached on release candidate c15**, by the technical lead's verdict (8 Oct 2026 06:12). **Every row
 passed on c15 itself**: the
-integration of C15 = dev `b5caac76` ran every row on the candidate's own images, its web image included, with nothing
+integration of C15 ran every row on the candidate's own images, its web image included, with nothing
 failed. That closes c14b-rc's one open item, which was the page's evidence on the candidate's own web image (c14b-rc's
 server came from 14b). The verdict and its limits are below.
 c14b-rc's refresh, 13h's, 13g's and the history from 28 Sep follow.
@@ -13,7 +13,7 @@ SEC-015, SEC-035; WEB-E2E-012. Also the Phase 7 build list and demo (DEV-PLAN §
 that waits on a channel (GW-I-104) is deferred by ADR-0014 point 7 and is not part of this gate.
 
 ## Release candidate c15 (8 Oct 2026)
-**Source:** the integration of C15 = dev `b5caac76` (8 Oct 2026, 01:23 to 04:24 +08:00, logs `int-b5caac76-*`), on
+**Source:** the integration of C15 (8 Oct 2026, 01:23 to 04:24 +08:00, logs `int-b5caac76-*`), on
 the candidate's images from its tag file `candidate15-tags.txt`:
 - gateway `8fe72138b44c`, web `c21dae74e9d7`, runtime `489ab9525b4c`, Workstation `797499325f94`, fake model
   `03718db2e50f`;
@@ -54,12 +54,12 @@ own images, the demo both over the API and from the page.
   and Internet access.
 
 ## Release candidate c14b-rc (5 to 6 Oct 2026)
-**Source:** candidate 14b's integration on dev `16589e55` (5 Oct 2026, its unit step to its Gate 7 runs 00:02 to 01:18 +08:00,
+**Source:** candidate 14b's integration (5 Oct 2026, its unit step to its Gate 7 runs 00:02 to 01:18 +08:00,
 logs `int-16589e55-*`; its tag file names
 gateway `fde0b91bf88b`, runtime `347b895b203d`, Workstation `84ff9c47aa24`, fake model `272dfcee3718`, web
 `488858e9b918`), each row checked against the logs: a row passes only if each of its test IDs ran and none failed.
-c14b-rc is those images with the web image rebuilt from dev `101ffeca` (`83a8d1ad493f`). The channel code is the same
-in both: none of the 46 files changed from `16589e55` to `101ffeca` is channel code. 13h's open
+c14b-rc is those images with the web image rebuilt from a later commit (`83a8d1ad493f`). The channel code is the same
+in both: none of the 46 files changed between the two commits is channel code. 13h's open
 changes (`d1dae839`, `ae236763`) are in `16589e55`, so they are measured here.
 
 | ID | c14b-rc | Evidence |

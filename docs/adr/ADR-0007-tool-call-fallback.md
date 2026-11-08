@@ -87,14 +87,14 @@ The recovery for a reply the model server swallowed (CORE-U-065, built 29 Sep) s
 `native_tools = false` route, which the context above calls the old failure. It does so only on the server's own
 evidence that it parses calls natively: it withheld the reply's chunks, or the reply is empty with tokens counted.
 That step is asked again once with the tools declared; once native calls come back, every later request of the run
-declares them (on the 13h Gate 5 capture, 15 of 55 requests on `local-text`). A server that refuses declared tools
+declares them (on a Gate 5 capture before 17.0, 15 of 55 requests on `local-text`). A server that refuses declared tools
 keeps the route text-only for the run. So `native_tools = false` means the text protocol is the route's protocol, not
 that native tools are never sent; PRD FR-2 says so.
 
 ## Amendment 2026-10-22: the retry names the problem
 
 The one retry's prompt was fixed per failure code, and for `malformed` it said the block "is not valid JSON". On the
-16x model-fallback night (20 Oct 2026) that was wrong for 13 of the 20 malformed replies, which were valid JSON
+model-fallback night of 20 Oct 2026 that was wrong for 13 of the 20 malformed replies, which were valid JSON
 without `name`, and the `schema` sentence named neither the tool nor the field. The retry request doesn't hold the
 rejected reply, so the sentence is the model's only clue, and 10 of 18 retries failed again.
 
