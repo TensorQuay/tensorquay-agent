@@ -2,7 +2,8 @@
 labels, team scripts) and the terms of a local list kept outside the repository; history is not checked for them.
 G-10 identity: a maintainer's new commit is made as the one company identity; history keeps the earlier one, and a
 pull request GitHub merged keeps its contributor as author, GitHub as committer. A contributor's clone checks
-content and messages but no identity, and pushes to the contributor's fork.
+content and messages but no identity, pushes to the contributor's fork and force-pushes the contributor's own
+branches. No commit, whoever made it, has a personal identifier of the denylist as its author or committer.
 
 Run: python3 -m unittest tools/test_git_guard.py
 """
@@ -137,6 +138,7 @@ class Identity(unittest.TestCase):
 
 
 JANE = ("Jane Doe", "jane@example.com")
+PAT = ("Pat Quinlan", "pat.quinlan@example.org")  # a name the scratch denylist below holds
 TOOLS = Path(__file__).resolve().parent
 
 
@@ -179,6 +181,18 @@ def scratch_repository(settings=None):
                 yield work
             finally:
                 os.chdir(previous)
+
+
+def deny(*terms):
+    """Writes the scratch repository's personal denylist (case-insensitive literals)."""
+    (Path.cwd().parent / "lists" / "deny").write_text("".join(f"{term}\n" for term in terms))
+
+
+def push(remote, url, local, remote_sha=None, ref="refs/heads/fix"):
+    """Runs the pre-push check for one ref update; returns its problems."""
+    line = f"{ref} {local} {ref} {remote_sha or guard.ZERO}\n"
+    with mock.patch.object(guard.sys, "stdin", io.StringIO(line)):
+        return quiet(guard.pre_push, remote, url)
 
 
 def quiet(check, *arguments):
@@ -287,6 +301,87 @@ class Contributors(unittest.TestCase):
                                     text=True, check=False)
             self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
             self.assertIn("usage:", result.stderr)
+
+
+class ContributorLimits(unittest.TestCase):
+    """What a contributor's freedom does not loosen: no commit carries a personal identifier of the denylist as its
+    author or committer, whoever made it; a clone that commits as the company keeps the maintainers' rules; main is
+    never force-pushed. And what it needs: a contributor force-pushes their own branch, and a first push to their
+    fork checks only the commits TensorQuay's repositories do not already hold."""
+
+    def test_no_commit_carries_a_denylisted_identity_whoever_made_it(self):
+        for settings in ({}, {"TQ_GUARD_IDENTITY": "1"}):
+            with self.subTest(settings=settings), scratch_repository(settings):
+                deny("quinlan")
+                commit(guard.IDENTITY)
+                commit(PAT, guard.MERGER, "fix: a pull request GitHub merged")
+                git("switch", "-q", "-c", "contribution")
+                commit(PAT, message="fix: the pull request's own commit")
+                problems = quiet(guard.audit, "main")
+                self.assertEqual(len(problems), 3, problems)
+                self.assertTrue(all("personal identifier from the denylist" in p for p in problems), problems)
+                self.assertFalse(any("quinlan" in p.lower() for p in problems), "the term is never echoed")
+                Path(".guard-allow").write_text(f"# a contributor whose name resembles a listed term\n"
+                                                f"identity-ok:{PAT[1]}\n")
+                self.assertEqual(quiet(guard.audit, "main"), [])
+
+    def test_a_denylisted_identity_is_refused_at_commit_and_push_in_any_clone(self):
+        with scratch_repository():
+            deny("quinlan")
+            commit(JANE, message="fix: a contributor's change")
+            Path("notes.md").write_text("another note\n")
+            git("add", "notes.md")
+            with mock.patch.dict(os.environ, {"GIT_AUTHOR_NAME": PAT[0], "GIT_AUTHOR_EMAIL": PAT[1],
+                                              "GIT_COMMITTER_NAME": PAT[0], "GIT_COMMITTER_EMAIL": PAT[1]}):
+                self.assertEqual(len(quiet(guard.pre_commit)), 2)
+            commit(PAT, message="fix: a change made under a listed name")
+            problems = push("origin", "https://github.com/pat/tensorquay-agent.git", git("rev-parse", "HEAD"))
+            self.assertEqual(len(problems), 2, problems)
+
+    def test_a_contributor_force_pushes_their_own_branch_but_never_main(self):
+        with scratch_repository():
+            commit(JANE, message="fix: a contributor's change")
+            base = git("rev-parse", "HEAD")
+            commit(JANE, message="fix: the first version")
+            old = git("rev-parse", "HEAD")
+            git("reset", "-q", "--hard", base)
+            commit(JANE, message="fix: the version after review")
+            new = git("rev-parse", "HEAD")
+            fork = "https://github.com/jane/tensorquay-agent.git"
+            for ref, refused in (("refs/heads/fix", False), ("refs/heads/main", True)):
+                with self.subTest(ref=ref):
+                    problems = push("origin", fork, new, old, ref)
+                    self.assertEqual(any("force-push" in p for p in problems), refused, problems)
+            git("config", "tq.guard.maintainer", "true")
+            problems = push("origin", "https://github.com/TensorQuay/tensorquay-agent.git", new, old)
+            self.assertTrue(any("force-push" in p for p in problems), problems)
+
+    def test_a_clone_that_commits_as_the_company_keeps_the_maintainers_rules(self):
+        with scratch_repository():
+            git("config", "user.name", guard.IDENTITY[0])
+            git("config", "user.email", guard.IDENTITY[1])
+            commit(guard.IDENTITY)
+            problems = push("origin", "https://github.com/someone/tensorquay-agent.git", git("rev-parse", "HEAD"))
+            self.assertTrue(any("not a TensorQuay GitHub repository" in p for p in problems), problems)
+
+    def test_a_first_push_to_a_fork_checks_only_what_tensorquay_does_not_hold(self):
+        with scratch_repository():
+            commit(guard.IDENTITY, message="Bump a dependency from 1.0 to 1.1")
+            git("remote", "add", "upstream", "https://github.com/TensorQuay/tensorquay-agent.git")
+            git("update-ref", "refs/remotes/upstream/main", "HEAD")
+            git("switch", "-q", "-c", "fix")
+            commit(JANE, message="fix: a contributor's change")
+            fork = "https://github.com/jane/tensorquay-agent.git"
+            self.assertEqual(push("fork", fork, git("rev-parse", "HEAD")), [])
+            commit(JANE, message="a change without a type")
+            self.assertEqual(len(push("fork", fork, git("rev-parse", "HEAD"))), 1, "the new commits are checked")
+
+    def test_the_audit_names_a_base_it_cannot_find(self):
+        with scratch_repository({"TQ_GUARD_IDENTITY": "1"}):
+            commit(guard.IDENTITY)
+            problems = quiet(guard.audit, "origin/main")
+            self.assertEqual(len(problems), 1, problems)
+            self.assertIn("origin/main", problems[0])
 
 
 if __name__ == "__main__":
