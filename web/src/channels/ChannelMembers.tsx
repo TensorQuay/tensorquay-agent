@@ -152,7 +152,7 @@ export function MemberList({
 }
 
 /** An agent's task page. */
-const taskPath = (id: string) => `/c/${encodeURIComponent(id)}`;
+export const taskPath = (id: string) => `/c/${encodeURIComponent(id)}`;
 
 /** The icon for each role a member can be given. */
 const ROLE_ICONS: Readonly<Record<ChannelRole, LucideIcon>> = {

@@ -469,6 +469,24 @@
   border-inline-start: var(--border-width) solid var(--line);
   background: var(--surface);
 }
+/* WEB-U-426: the channel's agents that aren't running, above its message box; the first step's quiet panel. */
+.channel-idle {
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) dashed var(--line);
+  border-radius: var(--control-radius);
+}
+.channel-idle h2,
+.channel-idle p {
+  margin: 0;
+}
+.channel-idle-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
 /* WEB-U-063: Propose and Add a task on the left of the composer's Post. */
 .channel-composer-actions {
   display: flex;
