@@ -60,7 +60,8 @@ impl Tool for ReadFile {
     }
     async fn call(&self, args: Value, cx: &ToolContext) -> Result<ToolOutput, ToolError> {
         let mut args: Args = arguments(args)?;
-        // An empty or null-word cursor is no cursor: small models fill an optional string with "" or "None" (13h Gate 5).
+        // An empty or null-word cursor is no cursor: small models fill an optional string with "" or "None" (the Gate 5
+        // demo before 17.0).
         args.cursor = super::absent(args.cursor);
         // A cursor this tool didn't issue: next to a line range it's a model's guess (cursor "1" with start_line 1, the
         // c14b-rc demo), so the lines are read and the result says the cursor was ignored. Alone it's refused first,

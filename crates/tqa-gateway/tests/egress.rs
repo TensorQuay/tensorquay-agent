@@ -279,7 +279,7 @@ async fn gw_i_315_a_tunnel_with_traffic_outlives_the_idle_bound_and_an_idle_one_
         tokio::time::timeout(support::DEADLINE, tunnel.read_exact(&mut answer)).await??;
         assert_eq!(answer, established);
         // Three seconds of a byte every quarter second, each echoed: three idle bounds, and the tunnel stays open.
-        // Before the fix it was cut one second in, whatever moved (the c16y review's E1).
+        // Before the fix it was cut one second in, whatever moved (a review before 17.0).
         let mut byte = [0_u8; 1];
         for count in 0..12_u8 {
             tokio::time::sleep(Duration::from_millis(250)).await;

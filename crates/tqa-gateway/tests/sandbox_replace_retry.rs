@@ -1,4 +1,4 @@
-//! GW-I-208, the full-disk P0 (the 8 h soak on candidate 13h, 3 Oct 2026): a sandbox lost mid-run whose replacement can't be
+//! GW-I-208 (a full disk in an 8 h soak before 17.0, 3 Oct 2026): a sandbox lost mid-run whose replacement can't be
 //! created (a full disk fails the create) is retried while the disk stays full, and the run resumes in the
 //! replacement once space is back. It never ends with neither a retry nor a terminal event (the run hung). Only a failed
 //! create is retried: a replacement whose runtime dies at start ends the run failed, as before (candidate 14a).

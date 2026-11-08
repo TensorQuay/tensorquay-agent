@@ -210,7 +210,7 @@ impl Browser {
             .call("Page.enable", json!({}), Some(&session))
             .await?;
         // A file input's chooser is the driver's to answer, never GTK's native dialog, which the tool can't reach
-        // (c16k real-world A12b, TOOL-U-062).
+        // (real-world use before 17.0, TOOL-U-062).
         self.client
             .call(
                 "Page.setInterceptFileChooserDialog",

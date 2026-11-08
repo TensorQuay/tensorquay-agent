@@ -414,7 +414,7 @@ async fn tool_u_141_on_a_desktop_an_application_opened_from_the_shell_reaches_th
 #[tokio::test]
 async fn tool_u_064_on_a_desktop_the_shell_points_screen_input_to_the_computer_tool() -> TestResult
 {
-    // c16k real-world A10 and A12b (17 Oct 2026): the model drove its desktop with xdotool from the shell, outside the
+    // Real-world use before 17.0 (17 Oct 2026): the model drove its desktop with xdotool from the shell, outside the
     // computer tool's action cap, settle check and step pictures. Opening an application from the shell stays fine; a
     // command that names an X input tool still runs, and its result says where screen input belongs.
     const NOTE: &str = "[the desktop's screen is the computer tool's: input sent from the shell isn't checked, \

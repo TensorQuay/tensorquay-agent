@@ -231,7 +231,7 @@ mod tests {
     // TEST: GW-U-197
     #[test]
     fn gw_u_197_the_image_list_says_a_built_ins_own_size() -> Result<(), crate::GatewayError> {
-        // The lead's 16j hand check: Desktop added again from its card took the defaults (1 CPU, 512 MiB), since the
+        // A hand check before 17.0: Desktop added again from its card took the defaults (1 CPU, 512 MiB), since the
         // list never said Desktop's own size. A deleted Desktop's build says it; Workstation and own images say null.
         let images = [
             image(

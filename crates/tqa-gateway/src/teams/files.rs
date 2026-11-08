@@ -132,8 +132,8 @@ pub(crate) async fn collect(
 
 /// The hand-back's copies (GW-I-311): `wanted` (path and size, from the member's workspace directory `root`) read in
 /// order while each is within `files.upload_bytes` and all within `files.uploads_bytes`. Those over a limit, and those
-/// that can't be read, are answered apart, each for what it is (16p live W1: an unreadable file was said to be over
-/// the limits), never refused.
+/// that can't be read, are answered apart, each for what it is (a live check before 17.0: an unreadable file was said
+/// to be over the limits), never refused.
 ///
 /// # Errors
 /// A storage failure.

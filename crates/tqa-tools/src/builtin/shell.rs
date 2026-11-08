@@ -170,7 +170,8 @@ impl Tool for Shell {
             for name in ["HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy"] {
                 command.env(name, proxy.as_str());
             }
-            // Loopback never goes through the proxy: a task reaches its own local servers (TOOL-U-060, c16k B10).
+            // Loopback never goes through the proxy: a task reaches its own local servers (TOOL-U-060, real-world use
+            // before 17.0).
             let bypass = format!("{},{LOOPBACK_BYPASS}", proxy.host());
             command.env("NO_PROXY", &bypass);
             command.env("no_proxy", &bypass);

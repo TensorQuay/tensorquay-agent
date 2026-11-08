@@ -1,6 +1,7 @@
-//! TOOL-U-066: a `type` refused for its ref or its text says what to do instead (16o live W11, A5: the model put the
-//! address in `keys`, sent `text` "None" and a ref carried over from an earlier call; three refusals named only "a ref
-//! from the latest snapshot", the opposite of the address bar's way, and its run ended by the loop guard).
+//! TOOL-U-066: a `type` refused for its ref or its text says what to do instead (a live check before 17.0, as in
+//! TOOL-U-061: the model put the address in `keys`, sent `text` "None" and a ref carried over from an earlier call;
+//! three refusals named only "a ref from the latest snapshot", the opposite of the address bar's way, and its run ended
+//! by the loop guard).
 use serde_json::json;
 
 use super::{Computer, Screen, TestResult, context, form, refusal, state};

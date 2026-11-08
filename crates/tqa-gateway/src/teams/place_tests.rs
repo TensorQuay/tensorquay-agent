@@ -156,8 +156,9 @@ fn gw_u_169_an_ended_teams_lead_counts_no_stuck_or_failed_helper() {
 }
 
 // TEST: GW-U-199
-// 16n T5 (c16k real-world B10b): a helper on the lead's files waiting for its turn on them read "Waiting for a slot
-// (next)". Its place counts from 1 in the slot queue only; a wait for the workspace, its own sandbox or a Desktop has none.
+// A review before 17.0 (GW-I-303's real-world case): a helper on the lead's files waiting for its turn on them read
+// "Waiting for a slot (next)". Its place counts from 1 in the slot queue only; a wait for the workspace, its own
+// sandbox or a Desktop has none.
 #[test]
 fn gw_u_199_a_helper_has_a_place_only_in_the_slot_queue() -> Result<(), tqa_types::FrameError> {
     use tqa_types::{QueuePosition, QueueReason};

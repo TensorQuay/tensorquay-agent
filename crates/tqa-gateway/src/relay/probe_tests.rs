@@ -659,7 +659,7 @@ fn gw_u_092_a_local_route_gets_longer_to_answer_its_check() -> TestResult {
     // A model on this computer (loopback, localhost, the container host), on the owner's network, or one without a key:
     // a CPU model can take tens of seconds to answer (seen with a local 4B model), so each answer's first byte waits 2
     // minutes by default (`[relay] local_check_timeout`), and the whole check may run 10 minutes while the model keeps
-    // answering (the c16d first hour, F2; probe_slow_tests.rs).
+    // answering (a first-hour check before 17.0; probe_slow_tests.rs).
     let config = RelayConfig::default();
     for (base_url, keyed) in [
         ("http://127.0.0.1:11434/v1", true),

@@ -116,7 +116,8 @@ async fn may_hand_over(
         _ => None,
     };
     // A turn in flight is one still to deliver, or one its runtime took whose run hasn't started (delivered after the
-    // holder's latest lifecycle event; 16o live V4, GW-U-201): handed over then, the turn is lost with the sandbox.
+    // holder's latest lifecycle event; a live check before 17.0, GW-U-201): handed over then, the turn is lost with the
+    // sandbox.
     let undelivered = sqlx::query_scalar!(
         "SELECT EXISTS(SELECT 1 FROM idempotency h WHERE h.conversation_id=$1 AND (h.execution_status='sending' OR \
          (h.execution_status='delivered' AND h.updated_at > CURRENT_TIMESTAMP - make_interval(secs => $3) \
@@ -140,9 +141,9 @@ async fn may_hand_over(
 /// whose run hasn't started (delivered after its latest lifecycle event, which isn't a run's start: a run that started
 /// is active, which every retirement already waits for). The runtime journals the message when it takes it and starts
 /// the run from its journal within seconds; a sandbox retired in between strands the turn, which nothing sends again
-/// (16o live V4: a helper handed over 70 ms after its first turn reached it, GW-U-201, GW-I-309). Past `taken` (3 x
-/// `io_timeout`) it is no longer in flight: a runtime that took a turn and never started it is `reclaim`'s, never kept
-/// forever.
+/// (a live check before 17.0: a helper handed over 70 ms after its first turn reached it, GW-U-201, GW-I-309). Past
+/// `taken` (3 x `io_timeout`) it is no longer in flight: a runtime that took a turn and never started it is
+/// `reclaim`'s, never kept forever.
 ///
 /// # Errors
 /// A store failure.

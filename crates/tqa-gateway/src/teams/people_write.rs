@@ -316,8 +316,8 @@ fn invalid(field: &'static str) -> GatewayError {
 }
 
 /// A copy, for the lead, of what the person typed to the lead itself while its team runs and its run is active
-/// (GW-I-307, c16k real-world B5): a `person_message` naming no member, which the lead reads at its next check of the
-/// team instead of after its whole team. In the message's own transaction; the message names the copy, so it is
+/// (GW-I-307, real-world use before 17.0): a `person_message` naming no member, which the lead reads at its next check
+/// of the team instead of after its whole team. In the message's own transaction; the message names the copy, so it is
 /// delivered when read and the copy is never read once the message no longer waits. `None` for any other task, or
 /// when the day's channel limit is reached: the message then waits as before.
 ///

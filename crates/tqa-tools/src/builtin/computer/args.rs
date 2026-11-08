@@ -218,7 +218,8 @@ fn add_points(schema: &mut Value) {
 pub fn parse(args: Value, offer: Offer) -> Result<Action, ToolError> {
     let mut raw: Raw = super::super::arguments(args)?;
     // A ref is e7 or a mark's number, never a null-word: like a cursor, a blank or null-word one ("null", "\nnull",
-    // " None ") is no ref (TOOL-U-034; c16k A7: a type meant for the focus came with ref "\nnull" and was refused).
+    // " None ") is no ref (TOOL-U-034; real-world use before 17.0: a type meant for the focus came with ref "\nnull"
+    // and was refused).
     raw.element = super::super::absent(raw.element.take());
     if !offer.pixels && (raw.x.is_some() || raw.y.is_some() || raw.to.is_some()) {
         return Err(ToolError::invalid(
@@ -334,10 +335,10 @@ fn valid_ref(value: &str) -> Result<String, ToolError> {
 pub(super) const TYPE_NO_REF: &str =
     "leave out ref to type into the focus (after ctrl+l for an address)";
 
-/// A `type`: an optional ref and its text. A refusal says what to do instead (TOOL-U-066; 16o live W11, A5: the address
-/// sat in `keys` beside text "None" and a ref carried over from an earlier call, and three refusals named only a ref
-/// from the snapshot). The text counts as missing when it is none or blank, or a null-word while `keys` holds a real
-/// string; with `keys` empty, "None" is typed as given, since a person may mean the word.
+/// A `type`: an optional ref and its text. A refusal says what to do instead (TOOL-U-066; a live check before 17.0, as
+/// in TOOL-U-061: the address sat in `keys` beside text "None" and a ref carried over from an earlier call, and three
+/// refusals named only a ref from the snapshot). The text counts as missing when it is none or blank, or a null-word
+/// while `keys` holds a real string; with `keys` empty, "None" is typed as given, since a person may mean the word.
 fn typed(raw: &Raw) -> Result<Action, ToolError> {
     let element = raw.element.as_deref().map(valid_ref).transpose().map_err(|_| {
         ToolError::invalid(

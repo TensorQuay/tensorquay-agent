@@ -1,4 +1,4 @@
-//! GW-I-305 (ADR-0039 section 10, amended 17 Oct 2026; c16k real-world A4 and A6: desktop tasks waited 3 min 20 s and
+//! GW-I-305 (ADR-0039 section 10, amended 17 Oct 2026; real-world use before 17.0: desktop tasks waited 3 min 20 s and
 //! 9.5 min for desktops whose tasks had finished): with `desktop.max_sessions` reached, an idle desktop gives way to a
 //! waiting desktop task, but only while its browser's profile is known empty (a clean run-end reset, no Take over
 //! since), and never while a run is active or it is pinned. A desktop whose reset this gateway hasn't seen keeps its

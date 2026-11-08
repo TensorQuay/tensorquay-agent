@@ -181,8 +181,8 @@ pub(crate) fn environment(spec: &SandboxSpec) -> Vec<String> {
         env.push(format!("HTTP_PROXY={proxy}"));
         env.push(format!("HTTPS_PROXY={proxy}"));
         // Loopback never goes through the proxy, in both spellings (curl reads the lower case first, wget only it): a task
-        // reaches its own local servers (SBX-U-018, c16k B10: "Blocked network access to 127.0.0.1"), the rest still
-        // goes through the proxy.
+        // reaches its own local servers (SBX-U-018, real-world use before 17.0: "Blocked network access to 127.0.0.1"),
+        // the rest still goes through the proxy.
         let bypass = format!(
             "{},{LOOPBACK_BYPASS}",
             spec.gateway_url.host_str().unwrap_or_default()

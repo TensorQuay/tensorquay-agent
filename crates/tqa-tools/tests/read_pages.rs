@@ -198,8 +198,8 @@ async fn tool_u_001_stale_cursors_reject_size_and_mtime_changes() -> TestResult 
     Ok(())
 }
 
-/// An empty cursor is no cursor: small models fill an optional string with `""`, and a 13h Gate 5 demo ended on three
-/// refusals of exactly this call (2 Oct 2026). Its line range is read as if the cursor were left out.
+/// An empty cursor is no cursor: small models fill an optional string with `""`, and a Gate 5 demo before 17.0 ended on
+/// three refusals of exactly this call (2 Oct 2026). Its line range is read as if the cursor were left out.
 #[tokio::test]
 async fn tool_u_001_an_empty_cursor_counts_as_absent() -> TestResult {
     let fixture = workspace_fixture()?;

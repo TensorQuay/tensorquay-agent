@@ -1,4 +1,4 @@
-//! GW-I-160 (the R2 soak on candidate 13b): a sandbox that stops unexpectedly is removed before it is replaced. When
+//! GW-I-160 (a soak before 17.0): a sandbox that stops unexpectedly is removed before it is replaced. When
 //! that removal fails (an engine stalled or erring under load), the person's task never fails for it: the removal is
 //! retried in the background (after 5, 15 and 45 seconds) while the task shows it is starting, nothing starts beside the
 //! old sandbox until it is gone, and the run then resumes in the replacement. Only when every retry fails does the owner
@@ -145,7 +145,7 @@ async fn gw_i_160_an_engine_outage_longer_than_a_minute_recovers_while_the_task_
     pool: PgPool,
 ) -> TestResult {
     support::run(pool, async |f| {
-        // The R2 soak on candidate 13d: an engine erring for about 150 s. A killed container stays listed, and its
+        // A soak before 17.0: an engine erring for about 150 s. A killed container stays listed, and its
         // removal fails at once and after 5, 20 and 65 s; the retry at 155 s removes it.
         let (mut stream, created, conversation) = lose_with_failing_removal(f, 4, true).await?;
         let starting = until_state(&mut stream, SandboxState::Creating).await?;

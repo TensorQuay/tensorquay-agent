@@ -821,7 +821,7 @@ mod type_words;
 // TEST: TOOL-U-034
 #[tokio::test]
 async fn tool_u_034_a_null_word_ref_is_absent_and_the_text_goes_to_the_focus() -> TestResult {
-    // c16k real-world A7 (17 Oct 2026): a `type` meant for the focus came with ref "\nnull" and was refused as
+    // Real-world use before 17.0 (17 Oct 2026): a `type` meant for the focus came with ref "\nnull" and was refused as
     // invalid_args. A ref can never be a null-word (it is e7 or a mark's number), so, as with a cursor, a null-word or
     // blank one, after trimming, is no ref at all.
     let directory = tempfile::tempdir()?;
@@ -865,8 +865,8 @@ async fn tool_u_034_a_null_word_ref_is_absent_and_the_text_goes_to_the_focus() -
 // TEST: TOOL-U-061
 #[tokio::test]
 async fn tool_u_061_the_tool_says_how_to_open_a_web_address() -> TestResult {
-    // c16k real-world A5 and A7 (17 Oct 2026): the model typed a web address into the page with a ref (a heading), over
-    // and over, and never used the address bar. The description says the way, and a `type` into an element that
+    // Real-world use before 17.0 (17 Oct 2026): the model typed a web address into the page with a ref (a heading),
+    // over and over, and never used the address bar. The description says the way, and a `type` into an element that
     // fails says it again.
     for view in [View::default(), vision(1280)] {
         let tool = Computer::with_view(Screen::with(vec![form()], vec![state("w1", 1)]), view);

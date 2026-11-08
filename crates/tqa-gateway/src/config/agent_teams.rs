@@ -19,7 +19,7 @@ const DEFAULT_MEMBER_STUCK_MINUTES: u32 = 15;
 const DEFAULT_IDLE_STOP_MINUTES: u32 = 30;
 const MAX_LIVENESS_MINUTES: u32 = 24 * 60;
 /// The share of the budget, in percent, past which helpers are refused and the lead has the rest to write up
-/// (GW-I-304, c16k B9b): 1 through 99.
+/// (GW-I-304, real-world use before 17.0): 1 through 99.
 const DEFAULT_HELPERS_STOP_PERCENT: u32 = 90;
 
 #[derive(Clone, Default, Deserialize)]

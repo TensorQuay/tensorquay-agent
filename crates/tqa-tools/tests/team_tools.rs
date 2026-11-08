@@ -5,8 +5,8 @@
 //! neither closable by a body); a hint that ends the turn; and once the team has ended, what the lead hadn't read (the
 //! end note among it) as the tool's result, shown as a read shows it, marked and whole; otherwise `team_ended`.
 //! TOOL-U-058: `read_helper`'s first line says where the helper is now, so a lead can tell slow from stuck.
-//! TOOL-U-065 (c16k real-world B5): what the person typed to the lead while its team works reaches the lead's read in
-//! fixed words, in the signed-in-person block; a copy of what was typed to a helper reads as before.
+//! TOOL-U-065 (real-world use before 17.0): what the person typed to the lead while its team works reaches the lead's
+//! read in fixed words, in the signed-in-person block; a copy of what was typed to a helper reads as before.
 #[path = "support/context.rs"]
 mod support;
 use async_trait::async_trait;

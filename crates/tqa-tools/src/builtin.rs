@@ -87,7 +87,8 @@ pub(crate) fn null_word(text: &str) -> bool {
 }
 
 /// An optional closed or opaque field (a cursor, a closed list), with blank and null-word values taken as absent: a
-/// model fills an optional string with `""` or `"None"` (13h Gate 5, 2 Oct 2026; TOOL-U-001, TOOL-U-034).
+/// model fills an optional string with `""` or `"None"` (the Gate 5 demo before 17.0, 2 Oct 2026; TOOL-U-001,
+/// TOOL-U-034).
 pub(crate) fn absent(value: Option<String>) -> Option<String> {
     value.filter(|text| !text.trim().is_empty() && !null_word(text))
 }

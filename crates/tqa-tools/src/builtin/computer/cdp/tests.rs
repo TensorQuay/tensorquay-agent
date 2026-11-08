@@ -566,8 +566,9 @@ fn tool_u_059_text_becomes_one_key_per_character() {
 // TEST: TOOL-U-059
 #[tokio::test]
 async fn tool_u_059_text_typed_into_a_heading_is_an_error_not_ok() -> TestResult {
-    // c16k real-world A5 (17 Oct 2026): the model typed a URL six times with ref=e1, the 404 page's heading; each said
-    // "ok ... no visible change". A heading takes no text: it reads the same after inserted text and after keys.
+    // Real-world use before 17.0 (17 Oct 2026): the model typed a URL six times with ref=e1, the 404 page's heading;
+    // each said "ok ... no visible change". A heading takes no text: it reads the same after inserted text and after
+    // keys.
     let heading = "[null,null,\"This httpbin.org page can't be found\",null]";
     let (endpoint, browser) = fake_browser(typing_answers(vec![
         json!({"segmented": false, "same": false, "shown": heading}),

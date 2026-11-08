@@ -1,4 +1,4 @@
-//! GW-I-310 (the 16o live checks, W12, 18 Oct 2026): an eviction whose destroy fails doesn't stick. On a loaded engine
+//! GW-I-310 (a live check before 17.0, 18 Oct 2026): an eviction whose destroy fails doesn't stick. On a loaded engine
 //! the evicted sandbox's destroy timed out, and so did the start-failure cleanup after it; the slot stayed with its
 //! sandbox unconfirmed, the remembered eviction kept "in flight" for as long as that slot existed, and no other sandbox
 //! was evicted for anyone: a waiting task got in only when an unrelated sandbox idled out, 6.5 minutes later, and the

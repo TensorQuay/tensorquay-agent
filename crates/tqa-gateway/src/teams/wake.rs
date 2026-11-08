@@ -55,10 +55,11 @@ fn turn(lead: bool, after: i64) -> Result<ClientFrame, GatewayError> {
 
 /// Wakes each reader of `team` that has a message it hasn't read, no active run and no turn already queued: the lead
 /// and its live members (a failed one not past the helpers' share of the budget: its every run would be refused and
-/// fail again, 16o W1's `member_failed` every 15 s), while the team runs, a done one too (a new assignment is how the lead gives it more work). A
-/// member still starting gets its brief as its first turn instead. The 80 % notice (`budget_80`) doesn't wake the lead
-/// while a helper is queued, starting or working: their reports, which it asks for, do, and it reads it with them, so it
-/// doesn't finish before they come (GW-I-304, the 16n review); with no helper working it wakes the lead as any notice.
+/// fail again, `member_failed` every 15 s in a live check before 17.0), while the team runs, a done one too (a new
+/// assignment is how the lead gives it more work). A member still starting gets its brief as its first turn instead.
+/// The 80 % notice (`budget_80`) doesn't wake the lead while a helper is queued, starting or working: their reports,
+/// which it asks for, do, and it reads it with them, so it doesn't finish before they come (GW-I-304, a review
+/// before 17.0); with no helper working it wakes the lead as any notice.
 ///
 /// # Errors
 /// Storage failure, or the message route's refusals.

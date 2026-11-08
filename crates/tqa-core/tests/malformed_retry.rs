@@ -1,5 +1,6 @@
 //! CORE-E-040: an answer that couldn't be read (an unparsable chunk, an inconsistent tool call) is asked again once, as
-//! a cut stream is; a second fails the run; a refused request is never retried (13h Gate 5, 2 Oct 2026).
+//! a cut stream is; a second fails the run; a refused request is never retried (the Gate 5 demo before 17.0,
+//! 2 Oct 2026).
 mod support;
 use support::*;
 use tokio_util::sync::CancellationToken;

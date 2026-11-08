@@ -90,7 +90,7 @@ impl Desktop {
         };
         Ok(match (active.pid, &self.browser) {
             // Only the page's own window is the page: any other window of the browser is read as an application's,
-            // so the page's refs and marks never stand over it (TOOL-U-063, c16k real-world A12b).
+            // so the page's refs and marks never stand over it (TOOL-U-063, real-world use before 17.0).
             (Some(pid), Some(browser))
                 if pid == browser.pid && active.title.ends_with(PAGE_WINDOW_SUFFIX) =>
             {

@@ -550,8 +550,8 @@ async fn gw_u_196_the_due_mark_goes_with_the_sandbox_or_the_task()
 }
 
 // TEST: GW-U-200
-/// c16k real-world A4/A6 (17 Oct 2026): desktop tasks waited minutes for desktops whose tasks had finished. An idle
-/// desktop may give way to a waiting one only while its browser's profile is known empty: a clean run-end reset or
+/// Real-world use before 17.0 (17 Oct 2026): desktop tasks waited minutes for desktops whose tasks had finished. An
+/// idle desktop may give way to a waiting one only while its browser's profile is known empty: a clean run-end reset or
 /// sign-out came, and no Take over since (a hand sign-in serves the run after it, ADR-0039 section 6). Unknown is
 /// never empty: a task this gateway hasn't seen reset (after a restart too) or a new sandbox keeps its desktop.
 #[test]

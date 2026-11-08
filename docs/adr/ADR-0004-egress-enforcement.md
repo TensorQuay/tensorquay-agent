@@ -55,7 +55,8 @@ the cloud metadata service or the gateway's own networks, and it can be re-point
 - **Docker Desktop:** the same backend, internal networks and proxy run inside Docker Desktop's Linux VM. What is
   best-effort there is not yet written down: SBX-D-002 (a Mac, run by hand) expects its test output to state those
   limits, and it has not run for v1.0.
-- **The microVM backend's keyed path** has no test of its own (TEST-PLAN §19a, the host-key entry; a case planned for 17.0).
+- **The microVM backend's keyed path** has its own case: SEC-047 and SEC-049 on the microVM
+  (`crates/tqa-sandbox/tests/egress/host_keys_microvm.py`) passed on 12 Oct 2026 (TEST-PLAN §19a, the host-key entry).
 
 ## Links
 

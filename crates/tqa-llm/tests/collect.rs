@@ -236,7 +236,8 @@ async fn llm_e_009_call_identity_must_be_complete_and_stable() {
 }
 
 /// An answer that couldn't be read is `Malformed`, which the loop asks again once (CORE-E-040); a refused request
-/// stays `Protocol` and is never retried. The 13h Gate 5 failure that couldn't be reproduced ended on such an answer.
+/// stays `Protocol` and is never retried. The failure in the Gate 5 demo before 17.0 that couldn't be reproduced ended
+/// on such an answer.
 #[tokio::test]
 async fn llm_u_050_an_unreadable_answer_is_malformed_not_protocol() {
     let nameless = StreamChunk::ToolCallDelta {

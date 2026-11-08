@@ -1,4 +1,4 @@
-//! GW-I-159 (candidate 13's first-hour check, P0): Workstation registers from the labels its image really carries. Its
+//! GW-I-159 (a first-hour check before 17.0): Workstation registers from the labels its image really carries. Its
 //! six capabilities once passed the protocol's bound but not the database's, so the start-up refresh failed as
 //! `store_unavailable` and only Minimal was offered. The label is read from `images/runtime/Dockerfile`, so a fixture
 //! can't drift from the image again. A built-in the database refuses is logged as what it is, naming the environment,

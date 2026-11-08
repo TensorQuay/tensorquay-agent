@@ -286,9 +286,10 @@ async fn stalled(timeout: bool) -> TestResult {
 // TEST: TOOL-U-060
 #[tokio::test]
 async fn tool_u_060_a_shell_reaches_its_own_loopback_server_past_the_proxy() -> TestResult {
-    // c16k real-world B10 (17 Oct 2026): a team's page served on 127.0.0.1 inside the sandbox; curl and Python sent it
-    // to the egress proxy (NO_PROXY named only the gateway) and got "Blocked network access to 127.0.0.1:46765". A task
-    // must reach its own local servers: loopback never goes through the proxy, everything else still does.
+    // Real-world use before 17.0 (17 Oct 2026): a team's page served on 127.0.0.1 inside the sandbox; curl and Python
+    // sent it to the egress proxy (NO_PROXY named only the gateway) and got
+    // "Blocked network access to 127.0.0.1:46765". A task must reach its own local servers: loopback never goes through
+    // the proxy, everything else still does.
     let listener = std::net::TcpListener::bind("127.0.0.1:0")?;
     let port = listener.local_addr()?.port();
     // Never joined: a request the proxy swallowed leaves it waiting, and the test's own process ends it.

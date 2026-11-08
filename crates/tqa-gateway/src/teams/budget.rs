@@ -12,8 +12,9 @@ use tqa_types::{ConversationId, NoticeKind};
 use uuid::Uuid;
 
 /// The notices at 80 %, in the gateway's fixed words: the lead is asked to collect the work and each working helper to
-/// report it now (GW-I-304, c16k B9b: a budget end handed nothing back). The lead's doesn't wake it while a helper works
-/// (`wake.rs`): it reads it with their reports, so it doesn't finish before they come (the 16n review).
+/// report it now (GW-I-304, real-world use before 17.0: a budget end handed nothing back). The lead's doesn't wake it
+/// while a helper works (`wake.rs`): it reads it with their reports, so it doesn't finish before they come (a review
+/// before 17.0).
 const AT_80: &str = "The team has used 80 % of its budget. Each helper was asked to report what it has now. As their \
                      reports come, take their files, then finish with what you have.";
 const AT_80_HELPER: &str = "The team has used 80 % of its budget. Report to your lead now with what you have and any \
@@ -57,7 +58,7 @@ pub(crate) async fn check(
         // The whole budget or the deadline first: everyone's refusal.
         "running" if team.spent || team.late => Err(GatewayError::Conflict("team_budget")),
         // Past the helpers' share the rest is the lead's, to write up (GW-I-304); a code of its own, so a helper's page
-        // says what happened to it (c16k B9b-3).
+        // says what happened to it (real-world use before 17.0).
         "running" if !team.lead && team.helpers_out => {
             Err(GatewayError::Conflict("team_budget_helpers"))
         }

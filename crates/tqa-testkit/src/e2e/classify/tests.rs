@@ -168,7 +168,7 @@ fn model_rows() -> Result<Vec<Case>, serde_json::Error> {
             ..case(vec![cancelled()?], None, Class::ModelBudget, Some(9))
         },
         // The same tool call failed three times, each refused by our own tool's argument check: its own class, for the
-        // hand review, not the model's budget (the 13h Gate 5 demo, 2 Oct 2026).
+        // hand review, not the model's budget (the Gate 5 demo before 17.0, 2 Oct 2026).
         case(
             vec![
                 tool_error(

@@ -168,7 +168,7 @@ impl Services {
     /// Starts or restarts the session's MCP servers for this run, registers their tools and journals each transition.
     /// The session's MCP servers, ready for this run, and their `mcp.server` events journaled. Each event is also added
     /// to `history`, the run's view of the journal, as the workspace's events are: the run's first event follows them, and
-    /// a view that ended before them would see a gap and stop the run (the c14a connector P0, RT-I-043).
+    /// a view that ended before them would see a gap and stop the run (a connector failure before 17.0, RT-I-043).
     async fn prepare_mcp(
         &self,
         input: &Invocation,
@@ -351,8 +351,9 @@ impl Services {
     }
 }
 /// The core's failure as the runtime's: a gap between the core's view of the journal and the sequence it was given is a
-/// history fault, not storage (its log said "storage I/O failed" in the c14a connector P0); any other sink failure names
-/// the journal's own cause (the WAL write, its sync, a closed channel), which the core's sink keeps only as a code.
+/// history fault, not storage (its log said "storage I/O failed" in a connector failure before 17.0); any other sink
+/// failure names the journal's own cause (the WAL write, its sync, a closed channel), which the core's sink keeps only
+/// as a code.
 fn core_error(error: &tqa_core::CoreError, journal: &Journal) -> RuntimeError {
     match error {
         tqa_core::CoreError::Sink(sink) if sink.code == tqa_types::ErrorCode::SeqGap => {

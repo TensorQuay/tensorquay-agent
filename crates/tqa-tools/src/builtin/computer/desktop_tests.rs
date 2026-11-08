@@ -436,8 +436,9 @@ async fn tool_u_057_keys_and_text_go_to_the_display_with_the_browser_focused() -
 // TEST: TOOL-U-057
 #[tokio::test]
 async fn tool_u_057_the_tool_takes_ctrl_l_a_url_and_return_to_the_address_bar() -> TestResult {
-    // c16k real-world A5 and A7 (17 Oct): the agent's URL into the browser's address bar. Through the tool, not only the
-    // driver: each step answers as done, and all of it goes to the display as a person's keys, none through the page.
+    // Real-world use before 17.0 (17 Oct): the agent's URL into the browser's address bar. Through the tool, not only
+    // the driver: each step answers as done, and all of it goes to the display as a person's keys, none through the
+    // page.
     let display = Display::focused("62914563", Some(4_000), "httpbin.org/status/404 - Chromium");
     let page = Arc::new(Page::default());
     let (desktop, _) = desktop(&display, mousepad(), Some(&page));
@@ -745,9 +746,9 @@ async fn tool_u_055_a_display_that_doesnt_answer_is_still_unavailable() {
 // TEST: TOOL-U-063
 #[tokio::test]
 async fn tool_u_063_a_browser_window_that_isnt_the_page_is_an_application() -> TestResult {
-    // c16k real-world A12b (17 Oct 2026): ctrl+o opened GTK's Open File, a window of the browser's own process. Routed
-    // by its pid, it read as the page: the page's refs, and in a screenshot the page's marks drawn over the dialog. Only
-    // the page's window ("<title> - Chromium") is the page; any other is read as an application's.
+    // Real-world use before 17.0 (17 Oct 2026): ctrl+o opened GTK's Open File, a window of the browser's own process.
+    // Routed by its pid, it read as the page: the page's refs, and in a screenshot the page's marks drawn over the
+    // dialog. Only the page's window ("<title> - Chromium") is the page; any other is read as an application's.
     let display = Display::focused("71303171", Some(4_000), "Open File");
     let page = Arc::new(Page::default());
     let dialog = Tree {

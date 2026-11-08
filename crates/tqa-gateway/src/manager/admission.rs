@@ -165,8 +165,9 @@ impl SandboxManager {
             // Turns on one workspace go in acceptance order: never admitted, nor handed the workspace, ahead of an older
             // waiter its owner's cap would admit. Admission's fairness between owners otherwise disagreed with the
             // hand-over's order, and two tasks took the workspace from each other every pass (GW-I-258).
-            // It waits for its turn on the workspace, not for a slot: said as the workspace's wait (GW-I-303; a lead
-            // behind its own helper read "Waiting for a free slot · next" with slots free, c16k B10b).
+            // It waits for its turn on the workspace, not for a slot: said as the workspace's wait (GW-I-303; in
+            // real-world use before 17.0, a lead behind its own helper read "Waiting for a free slot · next" with slots
+            // free).
             if entry.behind && self.still_behind(entry.conversation, admission).await? {
                 leased.push(entry.conversation);
                 continue;
@@ -204,7 +205,7 @@ impl SandboxManager {
         }
         let starting = self.make_room(free, &queue, &capped).await?;
         // A desktop task waits: an idle Desktop whose browser holds no sign-in gives way (ADR-0039 section 10, amended
-        // 17 Oct 2026; c16k real-world A4 and A6 waited minutes behind finished tasks).
+        // 17 Oct 2026; in real-world use before 17.0, two desktop tasks waited minutes behind finished tasks).
         if !desktop_waiting.is_empty() {
             self.evict_one(None, true).await?;
         }
@@ -503,7 +504,7 @@ impl SandboxManager {
                 .map_err(|_| GatewayError::StoreUnavailable)?;
             // One eviction at a time, but only while it is really under way: a victim whose destroy failed (its slot
             // kept, unconfirmed, the retire retried in the background) no longer holds every other eviction back
-            // (GW-I-310, the 16o live checks' W12: a waiter got in only when an unrelated sandbox idled out).
+            // (GW-I-310, a live check before 17.0: a waiter got in only when an unrelated sandbox idled out).
             if let Some((victim, of, asked)) = evicting.as_ref()
                 && still_evicting(self.victim_unconfirmed(victim)?, asked.elapsed())
             {
