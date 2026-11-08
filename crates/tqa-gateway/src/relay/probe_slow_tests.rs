@@ -117,6 +117,33 @@ async fn gw_u_092_a_local_model_out_of_time_after_its_round_trip_passes_slowly()
 
 // TEST: GW-U-092
 #[tokio::test]
+async fn gw_u_092_a_local_model_that_stops_answering_after_its_round_trip_still_times_out()
+-> TestResult {
+    // Silent past the idle limit in the strict-lines step: tasks meet the same gap (the relay cuts it on their
+    // requests too), so the check fails with `timeout` there as in any step, never "Verified, but slowly".
+    let config = RelayConfig {
+        idle_timeout: 1,
+        ..RelayConfig::default()
+    };
+    let mut scripts = answers(0, Duration::ZERO, 64);
+    scripts[2] = slowly(
+        1,
+        Duration::from_secs(3),
+        lines(&format!("{NONCE}\n{NONCE}")),
+        64,
+    );
+    let observed = check(scripts, &config).await?;
+    assert_eq!(code(&observed), Some("timeout"), "{observed:?}");
+    assert!(!observed.ok, "{observed:?}");
+    assert!(
+        !observed.warnings.contains(&"line_breaks_unverified"),
+        "{observed:?}"
+    );
+    Ok(())
+}
+
+// TEST: GW-U-092
+#[tokio::test]
 async fn gw_u_092_a_fast_local_model_reports_its_speed_without_the_warning() -> TestResult {
     let observed = check(answers(0, Duration::ZERO, 64), &RelayConfig::default()).await?;
     assert!(observed.ok, "{observed:?}");
