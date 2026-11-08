@@ -235,7 +235,7 @@ pub(crate) async fn put(
     })
     .await?;
     refresh(&state).await?;
-    // Open tasks on this route, or falling back to it, use it from their next message (F12).
+    // Open tasks on this route, or falling back to it, use it from their next message (GW-I-157).
     crate::conversations::route_changed(&state, &route).await;
     Ok((status, Json(response)).into_response())
 }

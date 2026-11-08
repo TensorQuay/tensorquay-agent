@@ -457,7 +457,7 @@ impl SandboxManager {
     /// Makes room when work waits: on a full host, the least recently active idle sandbox; for an owner at its cap
     /// (task 048b), one of its own, since a busy or pinned own sandbox is never evicted and that owner's work stays
     /// queued. Returns the task whose only wait is then its owner's own idle sandbox retiring: from that person's side
-    /// it is starting (F26).
+    /// it is starting (GW-I-158).
     async fn make_room(
         self: &Arc<Self>,
         free: i64,
@@ -577,7 +577,7 @@ fn slot_position(ahead: u32) -> Option<QueuePosition> {
         .map(|position| position.with_reason(QueueReason::Slot))
 }
 
-/// Waiting only for the same person's own idle sandbox to retire: starting, from their side (F26).
+/// Waiting only for the same person's own idle sandbox to retire: starting, from their side (GW-I-158).
 fn own_position() -> Option<QueuePosition> {
     QueuePosition::new(0)
         .ok()

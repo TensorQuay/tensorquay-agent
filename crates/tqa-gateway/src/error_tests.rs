@@ -32,7 +32,7 @@ fn workspace_cases() -> Vec<(GatewayError, &'static str, u16, bool)> {
     ]
 }
 
-/// The secret store's failures, and a key not used because its use couldn't be recorded (D4).
+/// The secret store's failures, and a key not used because its use couldn't be recorded (GW-I-147).
 fn secret_cases() -> Vec<(GatewayError, &'static str, u16, bool)> {
     vec![
         (

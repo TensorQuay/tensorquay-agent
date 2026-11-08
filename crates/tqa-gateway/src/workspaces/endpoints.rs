@@ -41,7 +41,7 @@ pub(crate) struct Workspace {
     size_bytes: Option<i64>,
     #[serde(with = "time::serde::rfc3339::option")]
     size_measured_at: Option<time::OffsetDateTime>,
-    /// What it is (H4): `helper_copy` for an agent team member's own copy, else `standard`.
+    /// What it is (GW-I-215): `helper_copy` for an agent team member's own copy, else `standard`.
     kind: crate::workspaces::Kind,
     /// For a fork: its source, and whether the source had no live sandbox while it was copied (066c).
     #[serde(skip_serializing_if = "Option::is_none")]

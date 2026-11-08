@@ -37,8 +37,8 @@ pub(crate) struct SignedIn {
     #[serde(flatten)]
     user: User,
     limits: UploadLimits,
-    /// Whether this person's tasks reach anything outside (F20): `none` with no rule or egress off, else `some`. It
-    /// never lists hosts; New task says when a task has no internet.
+    /// Whether this person's tasks reach anything outside (GW-I-156): `none` with no rule or egress off, else `some`.
+    /// It never lists hosts; New task says when a task has no internet.
     internet: Internet,
     /// The install's switches the page reads at start (ADR-0034 S6).
     features: Features,

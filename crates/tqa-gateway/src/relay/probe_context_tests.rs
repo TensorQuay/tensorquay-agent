@@ -1,4 +1,4 @@
-//! GW-U-153 (F3): where Ollama's own API is, and which loaded model is the route's.
+//! GW-U-153: where Ollama's own API is, and which loaded model is the route's.
 use super::{listed, origin};
 use serde_json::json;
 

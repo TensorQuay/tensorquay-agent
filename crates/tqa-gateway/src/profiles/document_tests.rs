@@ -141,7 +141,7 @@ fn gw_u_049_each_list_has_its_reason() {
         ("mcp_servers", json!(["docs", "docs"]), ListInvalid),
         ("connectors", many(65, "c"), ListInvalid),
         ("connectors", json!([""]), ListInvalid),
-        // A conversation holds at most eight servers and connectors together (G6), so a profile does too.
+        // A conversation holds at most eight servers and connectors together (GW-I-072), so a profile does too.
         (
             "connectors",
             json!(["c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8"]),

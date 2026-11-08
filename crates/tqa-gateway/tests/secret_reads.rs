@@ -3,7 +3,7 @@
 //!   outcome, never with a value; an administrator sees a shared secret's reads, a user sees their own credential's
 //!   reads.
 //! - GW-I-095: read records past `read_audit_days` and administration records past `admin_audit_days` are swept.
-//! - GW-I-147: no key is used without its audit row (D4): the row is committed before the key is returned, a full
+//! - GW-I-147: no key is used without its audit row: the row is committed before the key is returned, a full
 //!   queue makes the read wait and never drops it, and a read whose row can't be written fails and the key isn't used.
 #[path = "support/fixture.rs"]
 mod support;

@@ -1,6 +1,6 @@
-//! Internet-access presets (F20): built-in, named rule sets an administrator applies in one step. They are code, reviewed
-//! like code, never configuration. Applying one adds its missing rules tagged with it and keeps a host that already
-//! has a rule; removing one deletes the rules still tagged. An administrator's edit makes a rule theirs
+//! Internet-access presets (GW-I-156): built-in, named rule sets an administrator applies in one step. They are code,
+//! reviewed like code, never configuration. Applying one adds its missing rules tagged with it and keeps a host that
+//! already has a rule; removing one deletes the rules still tagged. An administrator's edit makes a rule theirs
 //! (`preset_edited`), so removal keeps it. `open_web` is the only way the any-host rule '*' is stored.
 use super::{Change, audit, egress::MAX_RULES};
 use crate::{GatewayError, egress::ANY_HOST};

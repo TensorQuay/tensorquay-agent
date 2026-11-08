@@ -2,7 +2,7 @@
 //! secret's value by the gateway (a model route's key, a connector credential, a host key) is recorded:
 //! which consumer read which reference, for which conversation, user and run, and with what outcome. Never a value, a
 //! hash or a length. Records go through a bounded queue to one writer that aggregates them into one row per key with a
-//! count (a group commit). No key is used without its row (D4): a read that found a value waits for its batch to
+//! count (a group commit). No key is used without its row (GW-I-147): a read that found a value waits for its batch to
 //! commit before the value is returned, a full queue makes the read wait for room rather than dropping the record, and
 //! a read whose row can't be written within the bound fails with `key_use_unrecorded`. Records and administration
 //! audit rows are swept past their retention.
@@ -138,7 +138,7 @@ impl ReadAudit {
 }
 
 /// Reads `reference` for `consumer` and records the read. A value is returned only once its read's row is committed
-/// (D4); a failed read is recorded too, without waiting for the commit.
+/// (GW-I-147); a failed read is recorded too, without waiting for the commit.
 ///
 /// # Errors
 /// The store's failure, unchanged (it is recorded as `unavailable`); `key_use_unrecorded` when a value was found but

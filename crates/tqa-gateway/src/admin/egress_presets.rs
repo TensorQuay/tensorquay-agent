@@ -1,6 +1,7 @@
-//! `/api/v1/admin/egress/presets` (F20): the built-in internet-access presets. The list says how much of each is applied;
-//! applying one adds its missing rules tagged with it, removing one deletes the rules still tagged. Both take an
-//! Idempotency-Key, are audited per rule and apply from each sandbox's next new connection, as a rule's own write does.
+//! `/api/v1/admin/egress/presets` (GW-I-156): the built-in internet-access presets. The list says how much of each is
+//! applied; applying one adds its missing rules tagged with it, removing one deletes the rules still tagged. Both take
+//! an Idempotency-Key, are audited per rule and apply from each sandbox's next new connection, as a rule's own write
+//! does.
 use super::{
     egress::{refresh, writable},
     keyed, require_admin,

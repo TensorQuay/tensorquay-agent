@@ -291,8 +291,8 @@ fn snapshot(
 }
 
 /// The keys of a run in progress, newly minted for the runtime registering now, which gives them to the run when it
-/// resumes (G4b); none for a runtime below revision 11. Keys are a convenience, never a condition: when they can't be
-/// minted the configuration goes without them.
+/// resumes (GW-I-165); none for a runtime below revision 11. Keys are a convenience, never a condition: when they can't
+/// be minted the configuration goes without them.
 async fn run_host_keys(
     state: &State,
     conversation: &ConversationId,

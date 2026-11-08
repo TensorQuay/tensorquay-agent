@@ -49,7 +49,7 @@ async fn gw_i_166_a_placeholder_in_its_place_is_swapped_and_the_answer_scrubbed(
             .await?,
             (200, "ok".to_owned())
         );
-        // An answer that sends the key back carries the placeholder in its place, in a header and the body (G7).
+        // An answer that sends the key back carries the placeholder in its place, in a header and the body.
         let (header, body) = echo(&mut client, get(HOST, "/echo", Some(&bearer))?).await?;
         assert_eq!(
             (header.as_str(), body),

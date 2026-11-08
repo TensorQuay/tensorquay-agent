@@ -66,7 +66,7 @@ pub(crate) async fn mint(
 }
 
 /// Mints new placeholders for the keys of `run`, already going, in `sandbox`: what its runtime gives the run when it
-/// resumes after registering again (G4b). The run's earlier placeholders stay bound to it.
+/// resumes after registering again (GW-I-165). The run's earlier placeholders stay bound to it.
 ///
 /// # Errors
 /// Storage failure, or no randomness.

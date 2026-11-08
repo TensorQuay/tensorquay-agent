@@ -1,4 +1,4 @@
-//! CORE-U-076 (C1): a refused tool call reaches the model in plain words, and its failure reaches clients as data: the
+//! CORE-U-076: a refused tool call reaches the model in plain words, and its failure reaches clients as data: the
 //! `tool.end` of a call the proxy refused carries the code `egress_denied` and the destination, so a client words it
 //! itself without reading the model's text.
 mod support;

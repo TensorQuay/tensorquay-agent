@@ -2,12 +2,12 @@
 //! GW-I-096, SEC-032). A route or connector may read a shared secret only when the secret is bound to it:
 //! - an administrator binds them (versioned and audited), and a write naming an unbound secret is refused;
 //! - a file (models.toml, gateway.toml) binds the secret of each route or connector it seeds: the file is the
-//!   operator's declaration (D10);
+//!   operator's declaration;
 //! - the upgrade bound each secret to the consumers that used it then (the migration), and a secret created later
-//!   allows none until bound (D8).
+//!   allows none until bound.
 //!
 //! A read for a consumer the secret is not bound to fails closed. Users' own credentials are not bound: only their
-//! owner's calls use them (F1, F2).
+//! owner's calls use them.
 use crate::{GatewayError, InvalidReason, settings::Change};
 use sqlx::PgConnection;
 use std::collections::BTreeSet;
@@ -69,7 +69,7 @@ pub(crate) async fn read(connection: &mut PgConnection) -> Result<Bindings, Gate
 }
 
 /// Refuses an administrator's write of a route or connector naming an existing shared secret not bound to it. A
-/// secret that does not exist yet is bound to it instead (D11): there is nothing to protect yet, and the route is
+/// secret that does not exist yet is bound to it instead: there is nothing to protect yet, and the route is
 /// shown as missing its key until an administrator sets a value, who then sees the binding.
 ///
 /// # Errors
@@ -115,7 +115,7 @@ pub(crate) async fn require(
     crate::settings::audit(connection, &change).await
 }
 
-/// Binds the secret a file's route or connector names to it (D10), audited as the seed when it is new.
+/// Binds the secret a file's route or connector names to it, audited as the seed when it is new.
 ///
 /// # Errors
 /// Storage failure.

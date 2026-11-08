@@ -22,7 +22,7 @@ use tqa_types::{
     MAX_PROFILE_TOOLS as MAX_TOOLS, valid_profile_name, valid_skill_name,
 };
 const MAX_ROUTE_NAME_BYTES: usize = 128;
-/// A conversation holds at most this many servers and connectors together (G6), so a profile names no more.
+/// A conversation holds at most this many servers and connectors together (GW-I-072), so a profile names no more.
 const MAX_SERVERS_AND_CONNECTORS: usize = tqa_types::MAX_MCP_SERVERS;
 
 /// Which discovered skills a profile's runs see.

@@ -72,7 +72,7 @@ pub(crate) struct Relay {
     listings: probe_api::Guard,
     /// The tasks told that an engine's budget is spent (ADR-0013, the adapter amendment).
     budget_notices: budget::Notices,
-    /// Title calls a person's next message cancels (L7).
+    /// Title calls a person's next message cancels.
     titles: title::Calls,
 }
 impl Relay {

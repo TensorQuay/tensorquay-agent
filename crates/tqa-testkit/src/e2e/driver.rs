@@ -1,5 +1,5 @@
 //! The task-set driver behind `tqa-e2e` (design 085 §2): seeds a workspace per attempt, follows the run,
-//! checks a copy of the workspace, classifies, records, and reruns once after a provider failure (D2).
+//! checks a copy of the workspace, classifies, records, and reruns once after a provider failure.
 use super::{
     attempt::{self, Followed, Plan},
     classify::{self, CheckOutcome, Observation},

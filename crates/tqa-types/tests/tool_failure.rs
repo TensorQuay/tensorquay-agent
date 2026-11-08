@@ -1,4 +1,4 @@
-//! PROTO-U-031 (C1): a failed tool call's `tool.end` says why as data, a stable code and for a refused destination
+//! PROTO-U-031: a failed tool call's `tool.end` says why as data, a stable code and for a refused destination
 //! where, so a client words the failure itself. The field is optional, and the Rust parser and the schema agree on it.
 use serde_json::{Value, json};
 use tqa_types::{ErrorTarget, Event, ServerFrame, ToolFailure, protocol_schema};

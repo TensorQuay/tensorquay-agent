@@ -35,7 +35,7 @@ pub(super) async fn dispatch_copying(
     conversations::authorize(state, user, id, false).await?;
     // Outside the transaction below, which holds the task's row: a sandbox for the check may be started here.
     if let tqa_types::ClientFrame::UserMessage { attachments, .. } = &action.frame {
-        // The person comes first: a title call holding the route's only slot gives it up (L7).
+        // The person comes first: a title call holding the route's only slot gives it up.
         crate::relay::title::interrupt(state, id);
         Box::pin(crate::files::prepare_attachments(
             state,

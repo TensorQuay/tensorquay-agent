@@ -170,7 +170,7 @@ impl SandboxManager {
             Box::pin(self.deliver_held(id, slot)).await?;
         }
         let activity = self.observe_activity(id, idle).await?;
-        // On Docker a running workspace is measured, and its run stopped past the quota plus a margin (N4).
+        // On Docker a running workspace is measured, and its run stopped past the quota plus a margin.
         if self.live_quota(id, slot, idle).await? {
             return Ok(true);
         }

@@ -137,7 +137,7 @@ async fn sec_033_every_admin_write_refuses_a_key_where_a_name_belongs(pool: PgPo
 async fn sec_033_a_readable_name_is_still_taken(pool: PgPool) -> TestResult {
     support::run(pool, async |f| {
         let (_, cookie) = f.admin().await?;
-        // The route first: naming a secret that doesn't exist yet binds it to the route (D11); naming an existing,
+        // The route first: naming a secret that doesn't exist yet binds it to the route; naming an existing,
         // unbound one would be `secret_not_allowed`.
         let body = json!({"protocol": "openai_chat", "base_url": "https://models.example/v1", "model": "m",
                           "auth": {"kind": "bearer"}, "key_ref": "secrets/hf_token"});

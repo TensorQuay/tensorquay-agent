@@ -225,7 +225,7 @@ async fn gw_i_076_templates_are_offered_by_state_and_provenance(pool: sqlx::PgPo
         until_offered(f, &cookie, &["workstation", "again"]).await?;
         assert_eq!(create(f, &cookie, "verified", Some("again")).await?.0, 201);
 
-        // A disabled default: every create without a template is refused, and the readiness detail says why (D1).
+        // A disabled default: every create without a template is refused, and the readiness detail says why.
         set(
             f,
             "UPDATE templates SET enabled=false WHERE name='workstation'",

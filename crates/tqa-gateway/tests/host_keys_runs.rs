@@ -154,7 +154,7 @@ async fn gw_i_165_the_run_binds_its_keys_a_restart_keeps_them_and_its_end_ends_t
             sqlx::query_scalar("SELECT ended_at IS NOT NULL FROM host_key_placeholders")
                 .fetch_all(&f.pool)
                 .await?;
-        // Two: the first placeholder and the one the registration after the restart minted for the run (G4b).
+        // Two: the first placeholder and the one the registration after the restart minted for the run.
         assert_eq!(ended, [true, true]);
         Ok(())
     })

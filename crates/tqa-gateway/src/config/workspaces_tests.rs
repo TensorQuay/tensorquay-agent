@@ -1,4 +1,4 @@
-//! GW-U-052: the live workspace quota's settings (N4): defaults and bounds.
+//! GW-U-052: the live workspace quota's settings: defaults and bounds.
 use crate::{GatewayConfig, GatewayError};
 use std::{error::Error, time::Duration};
 

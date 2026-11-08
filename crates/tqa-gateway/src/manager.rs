@@ -74,7 +74,7 @@ pub(crate) enum Teardown {
     Unconfirmed,
     /// The link refused its runtime.
     Refused,
-    /// Its workspace passed the quota (N4).
+    /// Its workspace passed the quota.
     Quota,
     /// Its start failed.
     StartFailed,
@@ -161,7 +161,7 @@ struct Slot {
     // Set when the link refused the sandbox's runtime (a `Refused` code; 0 is none): the worker retires it without a
     // replacement, since a new sandbox would be refused again.
     refused: std::sync::atomic::AtomicU8,
-    // The live workspace quota's state for this sandbox (N4); never held across I/O.
+    // The live workspace quota's state for this sandbox; never held across I/O.
     usage: Mutex<live_quota::LiveState>,
     // Set when the sandbox's destroy failed and it may still exist: nothing new starts for the conversation until a
     // destroy succeeds (a microVM's state image must never be used by two instances). The slot and its record are kept.
@@ -287,7 +287,7 @@ pub struct SandboxManager {
     slots: Mutex<HashMap<ConversationId, Arc<Slot>>>,
     admission: admission::Queue,
     networks: networks::Sweeper,
-    // At most this many live workspace measurements at once, gateway-wide (N4).
+    // At most this many live workspace measurements at once, gateway-wide.
     measurements: Arc<Semaphore>,
 }
 

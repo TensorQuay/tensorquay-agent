@@ -180,7 +180,7 @@ pub enum GitPushFailure {
     #[serde(rename = "timeout")]
     #[error("The push deadline elapsed.")]
     Timeout,
-    /// The push's key was not used, because its use could not be recorded (D4); retryable.
+    /// The push's key was not used, because its use could not be recorded (GW-I-147); retryable.
     #[serde(rename = "key_use_unrecorded")]
     #[error("The push didn't run: the key's use couldn't be recorded. Try again in a moment.")]
     KeyUseUnrecorded,

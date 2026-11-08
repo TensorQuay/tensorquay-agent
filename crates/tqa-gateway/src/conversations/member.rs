@@ -186,7 +186,7 @@ async fn place(
         }
         WorkspaceMode::OwnCopy => {
             let copy = Uuid::now_v7();
-            // The task's own title: the kind says it is a helper's copy, and the page words that (H4).
+            // The task's own title: the kind says it is a helper's copy, and the page words that (GW-I-215).
             let name: String = title.chars().take(100).collect();
             let (stored, consistent) = crate::workspaces::fork::begin(
                 connection,

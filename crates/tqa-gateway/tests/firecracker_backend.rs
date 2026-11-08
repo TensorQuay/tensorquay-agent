@@ -1,5 +1,5 @@
 //! GW-I-056: with `[runtime] backend = "firecracker"` the gateway gives sandboxes ext4 image paths for the workspace
-//! and the runtime state, the workspace sized by the workspace quota (D6), and creates no workspace directory on the
+//! and the runtime state, the workspace sized by the workspace quota, and creates no workspace directory on the
 //! host.
 
 #[path = "support/fixture.rs"]

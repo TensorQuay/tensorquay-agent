@@ -11,7 +11,7 @@ const SWEEP: Duration = Duration::from_hours(1);
 /// Workspaces one sweep deletes at most.
 const SWEEP_BATCH: i64 = 100;
 
-/// The bytes charged for the tree at `path` while a sandbox writes to it (N4): `Some` within `bytes`, `None` past it
+/// The bytes charged for the tree at `path` while a sandbox writes to it: `Some` within `bytes`, `None` past it
 /// (or past the entry or depth bound; the walk stops there). Blocking: run it on the blocking pool.
 ///
 /// # Errors

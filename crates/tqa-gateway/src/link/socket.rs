@@ -137,7 +137,7 @@ async fn inbound(
                 )
             }
             super::Received::Transition { sandbox, completed } => {
-                // A completed run may be the task's first: it may then get a short title (L7).
+                // A completed run may be the task's first: it may then get a short title (GW-I-138).
                 if completed {
                     crate::relay::title::after_first_run(state, conversation);
                 }

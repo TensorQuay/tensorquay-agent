@@ -196,7 +196,7 @@ pub enum GatewayError {
     /// A secret could not be read, authenticated or persisted.
     #[error("secret store is unavailable")]
     SecretUnavailable,
-    /// A key was read but its use could not be recorded, so it was not used (D4).
+    /// A key was read but its use could not be recorded, so it was not used (GW-I-147).
     #[error("The key could not be used: its use could not be recorded. Try again.")]
     KeyUseUnrecorded,
     /// Host storage could not complete an operation.
