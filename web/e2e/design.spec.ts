@@ -100,11 +100,18 @@ test("dialog traps keyboard focus and returns it to the trigger", async ({
 test("loading buttons retain their width", async ({ page }) => {
   await page.goto("/design");
   const reference = page.getByTestId("design-light");
-  // Measured once drawn: the reference page is long, and a box read before it is drawn is null.
+  // Measured once drawn: the reference page is long, and a box read before it is drawn is null. A box read while the
+  // page still settles can be null too (CI's runner), so both are read again until they exist; a real difference in
+  // width still fails.
   await expect(reference.getByTestId("primary-loading")).toBeVisible();
-  const ready = await reference.getByTestId("primary-default").boundingBox();
-  const loading = await reference.getByTestId("primary-loading").boundingBox();
-  expect(ready?.width).toBe(loading?.width);
+  await expect(async () => {
+    const ready = await reference.getByTestId("primary-default").boundingBox();
+    const loading = await reference
+      .getByTestId("primary-loading")
+      .boundingBox();
+    expect(ready?.width).toBeGreaterThan(0);
+    expect(loading?.width).toBe(ready?.width);
+  }).toPass();
 });
 
 test("theme choice survives navigation and overrides the system preference", async ({

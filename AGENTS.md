@@ -35,7 +35,8 @@ Everything here is written for a stranger reading it on GitHub. In code, comment
 ### 1. One identity
 - Every new commit's author **and** committer is exactly **`TensorQuay <dev@tensorquay.com>`**. The install script
   sets this in the repository's git config. Commits made before 7 Nov 2026 carry `TensorQuay <admin@tensorquay.com>`;
-  the push and audit checks accept that identity in history, never for a new commit.
+  the push and audit checks accept that identity in history, never for a new commit. A pull request merged on
+  GitHub has `GitHub <noreply@github.com>` as its committer, which those checks accept; GitHub never authors one.
 
 ### 2. Commit messages
 - Conventional Commits: `type(scope): subject`, first line ≤ 100 characters. Types: `feat fix perf test docs refactor

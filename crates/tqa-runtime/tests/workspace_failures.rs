@@ -118,19 +118,27 @@ async fn rt_i_015_clone_deadline_cancels_transport_and_records_a_plain_failure()
         tqa_testkit::deadline::scaled(Duration::from_secs(5)),
         fake.entered.notified(),
     )
-    .await?;
-    f.wait_event("workspace.clone").await?;
+    .await
+    .map_err(|_| "the clone never reached its transport")?;
+    f.wait_event("workspace.clone")
+        .await
+        .map_err(|error| format!("no workspace.clone event: {error}"))?;
     wait_for(|| {
         f.sleeper
             .pending_durations()
             .contains(&Duration::from_mins(2))
     })
-    .await?;
-    f.clock.advance(Duration::from_mins(2))?;
+    .await
+    .map_err(|error| format!("the clone's deadline never started: {error}"))?;
+    // Past the deadline only once no journal or link write is in flight: a jump past their io_timeout would end
+    // such a write as a timeout instead (the fixture's advance_when_idle).
+    f.advance_when_idle(Duration::from_mins(2))
+        .await
+        .map_err(|error| format!("a write stayed in flight: {error}"))?;
     f.gateway.send(user()).await?;
     let result = wait_for(|| failed_runs(&f, ErrorCode::Io) == 1).await;
     stop(shutdown, task).await?;
-    result?;
+    result.map_err(|error| format!("no run failed after the deadline: {error}"))?;
     assert!(
         f.gateway
             .stored()

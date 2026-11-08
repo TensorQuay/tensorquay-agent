@@ -413,12 +413,24 @@ async fn gw_i_030_delete_refuses_bound_tasks_and_live_sandboxes_and_removes_the_
         let _runtime = f.runtime_for(&bound).await?;
         let directory = f.backend.mounted(&bound).ok_or("mounted")?;
         assert!(directory.is_dir());
+        // A delete whose statement waits past lock_timeout answers 503 store_unavailable, retryable by the error
+        // contract: on CI's loaded runner the first one did (round 10 of the runner work, after 1,457 contracts), so each
+        // delete here is sent again until it answers anything else.
+        let delete = async |path: &str| -> Result<(u16, String)> {
+            tokio::time::timeout(tqa_testkit::deadline::scaled(support::DEADLINE), async {
+                loop {
+                    let answer = code(call(f, &cookie, Method::DELETE, path).send().await?).await?;
+                    if answer != (503, "store_unavailable".to_owned()) {
+                        return Ok::<_, Box<dyn std::error::Error>>(answer);
+                    }
+                    tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+                }
+            })
+            .await?
+        };
         // A bound task refuses it. (With its tasks, a kept, idle environment is retired for the delete and a run going
         // refuses it: GW-I-199, since the 13h review.)
-        assert_eq!(
-            code(call(f, &cookie, Method::DELETE, &base).send().await?).await?,
-            (409, "workspace_in_use".into())
-        );
+        assert_eq!(delete(&base).await?, (409, "workspace_in_use".into()));
         let with_tasks = format!("{base}?with_conversations=true");
         // The idle sandbox retires after the idle window; the task stays. The clock moves on until it has: the worker
         // may take its idle start after any single advance, so one advance alone would race it.
@@ -435,18 +447,9 @@ async fn gw_i_030_delete_refuses_bound_tasks_and_live_sandboxes_and_removes_the_
             }
         })
         .await??;
-        assert_eq!(
-            code(call(f, &cookie, Method::DELETE, &base).send().await?).await?,
-            (409, "workspace_in_use".into())
-        );
+        assert_eq!(delete(&base).await?, (409, "workspace_in_use".into()));
         // With its task: both go, and the host directory with them.
-        assert_eq!(
-            call(f, &cookie, Method::DELETE, &with_tasks)
-                .send()
-                .await?
-                .status(),
-            204
-        );
+        assert_eq!(delete(&with_tasks).await?.0, 204);
         assert!(!directory.exists(), "the host directory is removed");
         assert_eq!(
             code(call(f, &cookie, Method::GET, &base).send().await?)

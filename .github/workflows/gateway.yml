@@ -51,20 +51,26 @@ permissions:
 jobs:
   gateway:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    # A 2-core runner builds three images and the coverage report after the contracts: on 7 Nov the job took 97 minutes
+    # to the contracts' end, and the browser suites and the instrumented rerun of every contract come after.
+    timeout-minutes: 300
     # The runner's disk holds the build without debug information (tests and coverage don't need it).
     env:
       CARGO_INCREMENTAL: "0"
       CARGO_PROFILE_DEV_DEBUG: "0"
       CARGO_PROFILE_TEST_DEBUG: "0"
+      # A 2-core runner is slower than a workstation: the harness scales its deadlines, as tools/check.sh does.
+      TQA_TEST_DEADLINE_SCALE: "4"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Free the runner's disk for the build
         run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
-          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache \
+            /usr/share/swift /usr/local/share/boost /usr/local/share/powershell /usr/lib/jvm /opt/az
+          docker image prune --all --force > /dev/null
+          df -h / /mnt 2>/dev/null || df -h /
       - name: Install pinned Rust toolchain
         run: rustup show
       - name: Cache Cargo registry and build output
@@ -122,6 +128,19 @@ jobs:
           docker build --target base -f images/runtime/Dockerfile -t tqa-runtime:base .
           docker build --target workstation -f images/runtime/Dockerfile -t tqa-runtime:workstation .
           docker build -f images/fake-model/Dockerfile -t tqa-fake-model:local .
+      - name: Name the images under test by their IDs
+        # The stack harness refuses bare tags (deploy/tests/compose.py): on a shared engine a tag may name another
+        # build. Every later step gets the IDs; a step that sets one itself keeps its own.
+        run: |
+          set -euo pipefail
+          image() { docker image inspect --format '{{.Id}}' "$1"; }
+          {
+            printf 'TQA_GATEWAY_IMAGE=%s\n' "$(image tqa-gateway:local)"
+            printf 'TQA_WEB_IMAGE=%s\n' "$(image tqa-web:local)"
+            printf 'TQA_RUNTIME_IMAGE=%s\n' "$(image tqa-runtime:base)"
+            printf 'TQA_WORKSTATION_IMAGE=%s\n' "$(image tqa-runtime:workstation)"
+            printf 'TQA_FAKE_MODEL_IMAGE=%s\n' "$(image tqa-fake-model:local)"
+          } >> "$GITHUB_ENV"
       - name: Check repository cloning through the policy proxy
         env:
           SQLX_OFFLINE: "true"
@@ -130,7 +149,6 @@ jobs:
         run: |
           set -euo pipefail
           docker build --target clone-probe -f images/runtime/Dockerfile -t tqa-runtime:clone-probe .
-          export TQA_GATEWAY_IMAGE="$(docker image inspect --format '{{.Id}}' tqa-gateway:local)"
           export TQA_CLONE_PROBE_IMAGE="$(docker image inspect --format '{{.Id}}' tqa-runtime:clone-probe)"
           cargo nextest run -p tqa-sandbox --test workspace_clone --run-ignored all --retries 0
       - name: Install the pinned browser test tools
@@ -145,7 +163,9 @@ jobs:
           SQLX_OFFLINE: "true"
           TQA_DOCKER_TESTS: "1"
           TQA_GATEWAY_IMAGE: tqa-gateway:local
-        run: cargo nextest run -p tqa-gateway --run-ignored all
+        # Every failure in one run: the job takes over an hour on the runner. PERF-002 and PERF-003 measure a release
+        # build and refuse this debug one; a shared 2-core runner's timings would measure the runner anyway.
+        run: cargo nextest run -p tqa-gateway --run-ignored all --no-fail-fast -E 'not test(/^perf_/)'
       - name: Test the deployment harness failures without Docker
         run: python3 -m unittest discover -s deploy/tests -p 'test_*.py' -v
       - name: Run the full-stack browser and workspace contract
@@ -174,7 +194,7 @@ jobs:
             cat missing-database.log
             exit 1
           fi
-          rg 'PostgreSQL tests require TQA_DATABASE_URL' missing-database.log
+          grep -F 'PostgreSQL tests require TQA_DATABASE_URL' missing-database.log
       - name: Prove explicitly selected Docker tests fail without opt-in
         shell: bash
         env:
@@ -185,18 +205,30 @@ jobs:
             cat missing-docker.log
             exit 1
           fi
-          rg 'Docker tests require TQA_DOCKER_TESTS=1' missing-docker.log
-      - name: Report crate coverage
-        env:
-          SQLX_OFFLINE: "true"
-          TQA_DOCKER_TESTS: "1"
-          TQA_GATEWAY_IMAGE: tqa-gateway:local
-        run: cargo llvm-cov nextest -p tqa-gateway --run-ignored all
+          grep -F 'Docker tests require TQA_DOCKER_TESTS=1' missing-docker.log
       - name: Check crate documentation
         env:
           SQLX_OFFLINE: "true"
           RUSTDOCFLAGS: -D warnings
         run: cargo doc -p tqa-gateway --no-deps
+      - name: Free the disk for the coverage build
+        # The runner had 14 GB left here on 7 Nov and the instrumented build's linker died of it (ld: Bus error). The
+        # debug test build goes (its tests are done; the cache saves whatever is rebuilt), and so do the image build
+        # layers; the images under test stay (the instrumented contracts run them with --no-build).
+        run: |
+          rm -rf target/debug
+          docker builder prune -af > /dev/null
+          df -h /
+      - name: Report crate coverage
+        env:
+          SQLX_OFFLINE: "true"
+          TQA_DOCKER_TESTS: "1"
+          TQA_GATEWAY_IMAGE: tqa-gateway:local
+        # The same contracts as above, instrumented (the release-only PERF tests left out as there). The coverage
+        # build goes once the report is printed.
+        run: |
+          cargo llvm-cov nextest -p tqa-gateway --run-ignored all --no-fail-fast -E 'not test(/^perf_/)'
+          rm -rf target/llvm-cov-target
       - name: Stop the ephemeral database
         if: always()
         run: docker compose -f deploy/compose/dev.yml down --volumes

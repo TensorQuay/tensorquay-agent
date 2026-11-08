@@ -192,8 +192,12 @@ describe("WEB-U-066 channel membership", () => {
     await vi.waitFor(() =>
       expect(remove).toHaveBeenCalledWith("conversation", CODER.id),
     );
-    expect(await screen.findByRole("status")).toHaveTextContent(
-      "Removed Coder · Ana.",
+    // The note follows the removal's own round trip, so it is read until it is in: the status region already holds
+    // the role change's note, and a read right after the call saw that one (CI's runner).
+    await vi.waitFor(() =>
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "Removed Coder · Ana.",
+      ),
     );
   });
 

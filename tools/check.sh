@@ -90,6 +90,13 @@ fi
 run_gate G-01 cargo fmt --all --check
 run_gate G-02 cargo clippy --workspace --all-targets -- -D warnings
 run_gate G-03 env TQA_TEST_DEADLINE_SCALE=4 cargo nextest run --workspace
+# A runner whose disk holds one workspace build at a time (CI's: G-03's alone is 39 GB without debug information)
+# sets TQA_CHECK_LOW_DISK=1: G-03's build goes once its tests are done. The coverage gates build into their own
+# directory (llvm-cov-target), and the two small builds after them (G-08, G-09-catalog) start again.
+if [[ ${TQA_CHECK_LOW_DISK:-} == 1 ]]; then
+    rm -rf -- "${CARGO_TARGET_DIR:-target}/debug"
+    printf 'FREED %s/debug (TQA_CHECK_LOW_DISK=1)\n' "${CARGO_TARGET_DIR:-target}"
+fi
 # G-04: the 90 % line threshold applies to the pure crates (DEV-GUIDELINES section 4); the host-facing crates
 # (runtime, sandbox, gateway, testkit) report coverage without a threshold because their integration tests need
 # Docker or a KVM host and are skipped in tier 1.

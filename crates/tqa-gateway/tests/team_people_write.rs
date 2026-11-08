@@ -271,13 +271,18 @@ async fn deleting_a_lead_with_helpers(f: &Fixture) -> TestResult {
         "a refused delete stops nothing"
     );
     assert_eq!(delete("?with_helpers=true").await?.status().as_u16(), 204);
-    let states: Vec<String> = sqlx::query_scalar(
-        "SELECT state FROM conversations WHERE id = ANY($1::uuid[]) ORDER BY id",
+    // Both are deleted: marked so, or already gone, since the purge removes a deleted task with no sandbox in its
+    // next cycle, which can come before this read (the 7 Nov instrumented run on CI's runner saw one row of two).
+    let remaining: Vec<String> = sqlx::query_scalar(
+        "SELECT state FROM conversations WHERE id = ANY($1::uuid[]) AND state <> 'deleted' ORDER BY id",
     )
     .bind(vec![t.lead.clone(), t.member.clone()])
     .fetch_all(&f.pool)
     .await?;
-    assert_eq!(states, ["deleted", "deleted"], "the lead and its helper");
+    assert!(
+        remaining.is_empty(),
+        "the lead and its helper: {remaining:?}"
+    );
     let (state, reason) = team_state(f, t.id).await?;
     assert_eq!(
         (state.as_str(), reason.as_deref()),

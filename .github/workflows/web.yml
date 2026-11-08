@@ -17,7 +17,9 @@ defaults:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # On a 2-core runner the checks take about 13 minutes and the browser suite 25 to 31, more on a slow day: a
+    # 45-minute limit cut one run at its last test.
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

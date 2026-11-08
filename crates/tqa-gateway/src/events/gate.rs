@@ -19,7 +19,8 @@ pub(crate) struct OpenGate {
     held: Mutex<Option<(OpenPoint, StreamOpenHold)>>,
 }
 
-/// A held [`OpenGate`]: a test waits until a stream open reaches it, does what it needs, then releases it.
+/// A held `OpenGate` (crate-private): a test waits until a stream open reaches it, does what it needs, then releases
+/// it.
 #[derive(Clone)]
 pub struct StreamOpenHold {
     reached: Arc<Notify>,

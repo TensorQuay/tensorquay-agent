@@ -13,14 +13,18 @@ jobs:
       CARGO_INCREMENTAL: "0"
       CARGO_PROFILE_DEV_DEBUG: "0"
       CARGO_PROFILE_TEST_DEBUG: "0"
+      # A 2-core runner is slower than a workstation: the harness scales its deadlines, as tools/check.sh does.
+      TQA_TEST_DEADLINE_SCALE: "4"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Free the runner's disk for the build
         run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
-          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache \
+            /usr/share/swift /usr/local/share/boost /usr/local/share/powershell /usr/lib/jvm /opt/az
+          docker image prune --all --force > /dev/null
+          df -h / /mnt 2>/dev/null || df -h /
       - name: Install pinned Rust toolchain
         run: rustup show active-toolchain || rustup toolchain install
       - uses: taiki-e/install-action@9114bf4d891761788c546334fd37538eae1bf8b3 # v2.87.16
@@ -42,14 +46,19 @@ jobs:
           docker build --target workstation -f images/runtime/Dockerfile -t tqa-runtime:workstation .
           python3 -m unittest discover -s images/runtime -p 'test_*.py'
           python3 images/runtime/packages.py --check
+      # The image tests make the runtime's state directory uid 1000's, as the gateway does: as root on this
+      # runner's rootful engine (tools/rootless-test.sh is the way on a rootless one).
       - name: Check base hardening, process cleanup and links
-        env:
-          TQA_RUNTIME_TEST_IMAGE: tqa-runtime:dev
-        run: cargo nextest run -p tqa-runtime --test docker_image --test link_runs --run-ignored all --retries 0 -E 'not test(rt_i_012) and not test(sbx_c_017)'
+        run: |
+          sudo env "PATH=$PATH" "RUSTUP_HOME=$HOME/.rustup" "CARGO_HOME=$HOME/.cargo" \
+            TQA_TEST_DEADLINE_SCALE="$TQA_TEST_DEADLINE_SCALE" TQA_RUNTIME_TEST_IMAGE=tqa-runtime:dev \
+            cargo nextest run -p tqa-runtime --test docker_image --test link_runs --run-ignored all --retries 0 \
+            -E 'not test(rt_i_012) and not test(sbx_c_017)'
       - name: Check Workstation tools and offline browser
-        env:
-          TQA_RUNTIME_TEST_IMAGE: tqa-runtime:workstation
-        run: cargo nextest run -p tqa-runtime --test docker_image --test link_runs --run-ignored all --retries 0
+        run: |
+          sudo env "PATH=$PATH" "RUSTUP_HOME=$HOME/.rustup" "CARGO_HOME=$HOME/.cargo" \
+            TQA_TEST_DEADLINE_SCALE="$TQA_TEST_DEADLINE_SCALE" TQA_RUNTIME_TEST_IMAGE=tqa-runtime:workstation \
+            cargo nextest run -p tqa-runtime --test docker_image --test link_runs --run-ignored all --retries 0
       - name: Check both runtime images through sandbox admission
         env:
           TQA_DOCKER_TESTS: "1"
@@ -63,5 +72,15 @@ jobs:
               TQA_DOCKER_TESTS=1 TQA_ALLOW_DEV_HOST_GATEWAY=1 TQA_RUNTIME_TEST_IMAGE="$image" \
               cargo nextest run -p tqa-sandbox "${runtime_tests[@]}" --run-ignored all --retries 0
           done
+      - name: Check the sandbox tests that start a runtime image
+        # docker.yml has no runtime image: the process storm at the pids limit (SEC-010), the loopback server in
+        # proxy mode (SBX-C-023) and the template checks on the real engine (template_files) run here, with the base
+        # image as the runtime under test and Workstation as the test image, as the integration names them.
+        run: |
+          sudo env "PATH=$PATH" "RUSTUP_HOME=$HOME/.rustup" "CARGO_HOME=$HOME/.cargo" \
+            TQA_DOCKER_TESTS=1 TQA_TEST_DEADLINE_SCALE="$TQA_TEST_DEADLINE_SCALE" \
+            TQA_RUNTIME_TEST_IMAGE=tqa-runtime:workstation TQA_RUNTIME_IMAGE=tqa-runtime:dev \
+            cargo nextest run -p tqa-sandbox --run-ignored all --retries 0 \
+            -E 'binary(template_files) | test(sec_010_a_process_storm_stops_at_the_pids_limit) | test(sbx_c_023_a_sandbox_reaches_its_own_loopback)'
       - name: Report image identity and size
         run: docker image inspect tqa-runtime:dev tqa-runtime:workstation --format '{{.Id}} {{.Size}}'
