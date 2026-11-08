@@ -135,7 +135,7 @@ async fn core_u_067_a_retry_after_a_refusal_completes() -> TestResult {
 
 // TEST: CORE-U-079
 /// A helper stopped at its team's helpers' share of the budget (GW-I-304's `team_budget_helpers`) ends its run as a
-/// budget stop too, final, with the gateway's code in its reason, so its page can say why (c16k B9b-3).
+/// budget stop too, final, with the gateway's code in its reason, so its page can say why (real-world use before 17.0).
 #[tokio::test]
 async fn core_u_079_a_helpers_share_refusal_fails_the_run_as_budget_too() -> TestResult {
     let h = Harness::new(
