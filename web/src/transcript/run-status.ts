@@ -159,7 +159,7 @@ export function runEnded(
 
 /**
  * Before the stream replays a frame, the task's stored run status says how it ended, so an opened task never reads
- * "Ready" for a moment before "Done" (page pass 14b, T rows; WEB-U-249). A failure's reason waits for the replay.
+ * "Ready" for a moment before "Done" (WEB-U-249). A failure's reason waits for the replay.
  */
 function beforeReplay(stored: StoredRunStatus, t: Translate): Presentation {
   switch (stored) {

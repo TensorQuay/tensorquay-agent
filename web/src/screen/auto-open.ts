@@ -119,7 +119,7 @@ export function useScreenAutoOpen({
     };
   }, [open, tab]);
   // Not "when the run ends" but "while no run is going": a quick run's first desktop action and its end can arrive
-  // together, so the panel may open after the run has already ended (the page pass's fake front, Z25 at 390).
+  // together, so the panel may open after the run has already ended (seen on the fake front at 390).
   const running = ["queued", "running"].includes(transcript.run.status);
   useEffect(() => {
     if (running || docks || !open || tab !== "screen" || !untouched.current)

@@ -111,7 +111,7 @@ describe("WEB-U-330 a desktop cap reads as a limit, consequence first", () => {
     expect(summary).toHaveClass("tool-disclosure");
   });
 
-  // The page pass's P3: an opened cap card had a "Result" heading with nothing under it.
+  // A pass over the pages before 17.0: an opened cap card had a "Result" heading with nothing under it.
   it("shows no empty Result in its opened card", async () => {
     render(<TranscriptView transcript={refused("screenshot_too_large")} />);
     await settleLazy();
