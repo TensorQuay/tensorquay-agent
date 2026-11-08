@@ -92,7 +92,7 @@ struct Helper {
     channel: Uuid,
     /// Where its work since its last assignment begins: the latest of its first run's start (the copy leaves no older
     /// time), its last assignment and its own last report. A file of its copy changed after it is that work; what it
-    /// reported before, which the lead may have taken and changed, is never handed back again (the peer review).
+    /// reported before, which the lead may have taken and changed, is never handed back again.
     since: Option<time::OffsetDateTime>,
 }
 

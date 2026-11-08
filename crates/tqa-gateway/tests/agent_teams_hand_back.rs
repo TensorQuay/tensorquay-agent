@@ -189,7 +189,7 @@ async fn gw_i_311_a_team_end_hands_back_what_an_unreported_helper_changed(
 async fn gw_i_311_only_the_work_since_its_last_assignment_is_handed_back(
     pool: PgPool,
 ) -> TestResult {
-    // The peer review of 18 Oct: counted from its first run, a reassigned helper's hand-back attached what it had
+    // Found on 18 Oct: counted from its first run, a reassigned helper's hand-back attached what it had
     // already reported, which the lead may have taken and changed since; taking it again would overwrite that.
     support::run_configured(pool, None, CONFIG, async |f| {
         let t = team(f).await?;
