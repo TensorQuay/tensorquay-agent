@@ -1,4 +1,4 @@
-//! CORE-E-041 (backlog #18, the lead's decision of 7 Oct 2026): the repeated-failure guard lets a model that is still
+//! CORE-E-041 (decided on 7 Oct 2026): the repeated-failure guard lets a model that is still
 //! changing files try again. A call's count starts again after a successful call of a tool that changes the workspace
 //! (`shell`, `write_file`, `edit_file`); three failures with no change between still stop the run, and six failures of
 //! the same call stop it whatever happens between. CORE-E-012's own cases (`failures.rs`) are unchanged.

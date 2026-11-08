@@ -1,7 +1,7 @@
 //! A member's first turn (ADR-0034 point 3, slice 2; protocol revision 12): the gateway's fixed frame as the turn's
 //! text and the lead's brief beside it, sent on the member task as its person's message would go, under one key per
 //! member, so sending it again (after a restart, or from the copy's end and the start-up pass both) never sends a
-//! second turn. It waits for the lead's sandbox whatever the busy policy (the lead's decision of 2 Oct 2026). An own
+//! second turn. It waits for the lead's sandbox whatever the busy policy (ADR-0034's decision of 2 Oct 2026). An own
 //! copy's turn goes once the copy is ready; a copy that failed fails the member, with a notice to the lead.
 use crate::{GatewayError, app::State};
 use tqa_types::{

@@ -109,7 +109,7 @@ impl Supervisor {
         tqa_tools::builtin::computer::cdp::profile_dir()
     }
 
-    /// Every run of a desktop session starts signed out (ADR-0039 section 6, the lead's decision of 7 Oct 2026): when a
+    /// Every run of a desktop session starts signed out (ADR-0039 section 6, amended 7 Oct 2026): when a
     /// run ends, the browser closes and its profile is emptied. A sign-in made during a Take over, after the run it
     /// cancelled has ended, so serves the run that follows it, and no later one. Once the reset is over the gateway is
     /// told (`screen.reset`), and only then gives a Take over control (RT-I-051).

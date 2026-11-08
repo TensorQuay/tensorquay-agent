@@ -207,7 +207,7 @@ fn tool_u_015_parallel_flags_match_the_builtin_contract() {
 
 // TEST: CORE-E-041
 /// Of these builtins exactly `shell`, `write_file` and `edit_file` say a success may have changed the workspace
-/// (backlog #18, the lead's decisions of 7 Oct 2026): the repeated-failure count starts again only after one of them,
+/// (decided on 7 Oct 2026): the repeated-failure count starts again only after one of them,
 /// never after a read, a note or a fetch. Of the team tools only `take_files` does, and no channel tool
 /// (`team_tools.rs` and the channel tools' own test).
 #[test]

@@ -287,7 +287,7 @@ fn send(pid: Pid, signal: Signal) {
     }
 }
 
-/// Stops every process holding `profile` (the lead's decision of 7 Oct 2026: fail safe): SIGTERM, `grace` to exit,
+/// Stops every process holding `profile` (ADR-0039 section 6, 7 Oct 2026: fail safe): SIGTERM, `grace` to exit,
 /// then SIGKILL. Only a holder that outlives SIGKILL leaves the profile in use, and each one is logged. `send` is the
 /// signal sender ([`send`]; a test's own to model a holder no signal reaches).
 ///

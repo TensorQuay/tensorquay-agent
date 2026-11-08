@@ -225,7 +225,7 @@ async fn tool_u_001_an_empty_cursor_counts_as_absent() -> TestResult {
 }
 
 /// A refused cursor says what to drop. A cursor of `"None"` with a line range (a real model's call, verbatim) was refused
-/// here until 2 Oct 2026; the lead's decision that day makes a null-word in a cursor absent, so it now reads as the same
+/// here until 2 Oct 2026; a decision that day makes a null-word in a cursor absent, so it now reads as the same
 /// range without a cursor (TOOL-U-034), and only a cursor that isn't this tool's is refused.
 #[tokio::test]
 async fn tool_u_001_a_refused_cursor_says_what_to_drop() -> TestResult {
@@ -391,7 +391,7 @@ fn eof_notice(total: u64, start: u64) -> String {
     }
 }
 
-/// A null-word cursor is no cursor (the lead's decision, 2 Oct 2026): the call reads as without it.
+/// A null-word cursor is no cursor (decided on 2 Oct 2026): the call reads as without it.
 #[tokio::test]
 async fn tool_u_001_a_null_word_cursor_counts_as_absent() -> TestResult {
     let fixture = workspace_fixture()?;
