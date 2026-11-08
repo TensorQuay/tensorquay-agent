@@ -60,7 +60,7 @@ describe("WEB-U-008 the browser's schemas cover what it validates", () => {
       expect(shared, requestOnly).not.toContain(requestOnly);
   });
 
-  it("holds every protocol definition the API schemas refer to, and no frame it never receives (T2)", () => {
+  it("holds every protocol definition the API schemas refer to, and no frame it never receives", () => {
     const protocol = Object.keys(protocolSchema.definitions);
     const referred = [
       ...JSON.stringify([apiSchema, adminSchema]).matchAll(

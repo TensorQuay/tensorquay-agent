@@ -348,7 +348,7 @@ EOF`;
   const shell = (command: string, overrides: Partial<ToolView> = {}) =>
     toolSummary(tool("shell", { command }, overrides));
 
-  it("names B9's heredoc a Python script, in each state", () => {
+  it("names a real-world heredoc a Python script, in each state", () => {
     expect(shell(b9)).toBe("Ran a Python script");
     // Still running or stopped, it shows its first line (the strings these share keep the conversation page's
     // first load within WEB-U-014).

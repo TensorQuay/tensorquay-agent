@@ -141,7 +141,7 @@ describe("WEB-U-016 a finished task: what it wrote, and what could follow", () =
     expect(onOpenFile).toHaveBeenCalledExactlyOnceWith("out/chart.png");
   });
 
-  it("L8: more files than two named buttons can cover: one Open changes, no names", () => {
+  it("more files than two named buttons can cover: one Open changes, no names", () => {
     const { onOpenChanges } = show(
       turn(1, ["data/clean.csv", "out/chart.png", "brief.md"]),
     );
@@ -153,7 +153,7 @@ describe("WEB-U-016 a finished task: what it wrote, and what could follow", () =
     expect(screen.queryByRole("group", { name: "What next" })).toBeNull();
   });
 
-  it("L8: a file the panel can't show isn't covered by a name: one Open changes", () => {
+  it("a file the panel can't show isn't covered by a name: one Open changes", () => {
     show(turn(1, ["report.docx", "data/clean.csv"]));
     expect(screen.getByRole("button", { name: "Open changes" })).toBeVisible();
     expect(screen.queryByRole("button", { name: "Open clean.csv" })).toBeNull();
