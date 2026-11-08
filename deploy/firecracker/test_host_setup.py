@@ -12,7 +12,7 @@ USER, UID, SUBUID_START, SUBGID_START = "svc", 1500, 200000, 300000
 # Container uid and gid 10000 map to the subordinate ranges' starts plus 9999 under rootless Docker.
 VMM_HOST_UID, VMM_HOST_GID = SUBUID_START + 9999, SUBGID_START + 9999
 UNIT_DIR = "etc/systemd/system"
-# The oracle for what --apply installs: the lead-reviewed units, with neutral descriptions. logind resets device ACLs at
+# The oracle for what --apply installs: the reviewed units, with neutral descriptions. logind resets device ACLs at
 # seat setup, after tmpfiles and udev, so the grant runs after logind and is re-applied by a timer.
 SERVICE = f"""[Unit]
 Description=TensorQuay Agent: grant /dev/kvm to the Firecracker VMM uid {VMM_HOST_UID} (ADR-0006)

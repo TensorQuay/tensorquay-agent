@@ -92,7 +92,7 @@ class ChaosTests(unittest.TestCase):
         have been so for over STALE_SECONDS. The probe's own session never counts."""
         query = DATABASE_QUERY.lower()
         # The pool's own bound with no traffic: sqlx's idle_timeout (600 s) plus its reaper's period (600 s, and a
-        # re-release resets sqlx's idle clock, not Postgres's state_change), plus 5 min (the review of 10 Oct).
+        # re-release resets sqlx's idle clock, not Postgres's state_change), plus 5 min.
         self.assertEqual(STALE_SECONDS, 1500)
         self.assertIn("now() - state_change", query)
         self.assertIn(f"interval '{STALE_SECONDS} seconds'", query)

@@ -1,4 +1,4 @@
-# L7 short task titles: the scripted model answers each task by its first message and the gateway's tool-less title
+# Short task titles: the scripted model answers each task by its first message and the gateway's tool-less title
 # call with the scenario's summary reply.
 services:
   fake-model:

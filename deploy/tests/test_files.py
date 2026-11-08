@@ -27,7 +27,7 @@ class FilesDriverTests(unittest.TestCase):
         self.assertEqual(calls[0][0], "Summarise the attached sales file")
         self.assertIn("uploads/sales.csv", calls[0][1])
         self.assertIn("> report.md", calls[1][1])
-        # The feature matrix (G2): a task of its own writes a chart and a hidden note, leaving the first task's files.
+        # The feature matrix: a task of its own writes a chart and a hidden note, leaving the first task's files.
         self.assertEqual(calls[2][0], "Add a chart and a note")
         self.assertIn("> chart.png", calls[2][1])
         self.assertIn("> .notes", calls[2][1])

@@ -39,7 +39,7 @@ FLOOR_QUANTILE = 0.10
 FLOOR_WINDOW = 3 * HOUR
 FLOOR_MIN_LIFETIME = 11 * HOUR
 FLOOR_RISE = 2
-# D4: a gateway connection idle in Postgres for longer than this has been taken out of the pool (the probe counts
+# A gateway connection idle in Postgres for longer than this has been taken out of the pool (the probe counts
 # them). The pool's own bound with no traffic at all: sqlx's idle_timeout (600 s) plus its reaper's period (600 s;
 # a re-release resets sqlx's idle clock, not Postgres's state_change), plus 5 min. It rests on sqlx 0.9's defaults
 # for idle_timeout and max_lifetime, which db.rs doesn't set: if it ever sets them, this moves with them.

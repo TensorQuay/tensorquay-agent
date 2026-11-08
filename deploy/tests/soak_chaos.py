@@ -15,10 +15,10 @@ def restart_times(seconds, rehearsal):
     if seconds >= 24 * 3600:
         return list(range(7200, 12 * 3600 + 1, 7200))
     if seconds >= 8 * 3600:
-        # The microVM run (R3): hours 4–8 are one gateway lifetime.
+        # The microVM run: hours 4–8 are one gateway lifetime.
         return list(range(7200, 4 * 3600 + 1, 7200))
     if seconds >= 4 * 3600:
-        # The real-model run (R4): a restart every hour.
+        # The real-model run: a restart every hour.
         return list(range(3600, int(seconds) + 1, 3600))
     return list(range(1800, int(seconds) + 1, 1800))
 
@@ -91,8 +91,8 @@ PROCESS_HELPER = ("import os; from pathlib import Path; print(next(line.split()[
                   "len(os.listdir('/proc/1/fd')))")
 # The database's size, every backend on it (this probe and autovacuum workers included: the count before 9 Oct 2026),
 # and every client backend but the probe's own: today, the gateway's (SOAK-001's rule judges it as the gateway's).
-# Then, of those, the oldest idle one's age in seconds, and how many have been so for over STALE_SECONDS (D4, 9 Oct
-# 2026): a pool's connection goes back into use, while one taken and never used again idles for good. Idle is any of
+# Then, of those, the oldest idle one's age in seconds, and how many have been so for over STALE_SECONDS (9 Oct 2026): a
+# pool's connection goes back into use, while one taken and never used again idles for good. Idle is any of
 # Postgres's three idle states, 'idle in transaction (aborted)' included: a guard leaked on an error path holds that.
 # A stack-readings poll (readings.py, application_name tqa-stack-readings) is never counted: soak stacks start no
 # reader, and if one ever ran beside a soak its brief backend must not read as a gateway connection.
