@@ -543,12 +543,12 @@ async fn told_it_left(stream: &mut support::stream::Stream) -> TestResult {
 }
 
 // TEST: GW-I-312
-// The 16p live W3 check: a person's Stop team dropped the lead's waiting wake, but the lead's open page went on reading
-// "Waiting for the workspace" until reloaded, as the stop never withdrew the task from the queue (GW-I-173's notice);
-// and a helper whose sandbox was starting when its first turn was dropped kept that sandbox, and its lease, up for its
-// whole idle time. Here the lead's wake waits for a slot, and the helper's first turn has the only free one, its runtime
-// not yet registered. After the stop the lead's open stream is told it left the queue, a stream opened then reads no
-// queue, and the helper's sandbox goes without waiting for its readiness bound (30 s, past the test's 10 s).
+// A live check before 17.0: a person's Stop team dropped the lead's waiting wake, but the lead's open page went on
+// reading "Waiting for the workspace" until reloaded, as the stop never withdrew the task from the queue (GW-I-173's
+// notice); and a helper whose sandbox was starting when its first turn was dropped kept that sandbox, and its lease, up
+// for its whole idle time. Here the lead's wake waits for a slot, and the helper's first turn has the only free one,
+// its runtime not yet registered. After the stop the lead's open stream is told it left the queue, a stream opened then
+// reads no queue, and the helper's sandbox goes without waiting for its readiness bound (30 s, past the test's 10 s).
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
 async fn gw_i_312_a_stop_withdraws_the_teams_waiting_turns_and_retires_a_starting_helper(

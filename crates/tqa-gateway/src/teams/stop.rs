@@ -63,8 +63,8 @@ pub(crate) async fn finish(state: &State, team: Uuid) -> Result<bool, GatewayErr
     let reason = reason(row.stop_reason.as_deref());
     // The helpers the end stops, read before their runs go: each that hasn't reported is handed back (GW-I-311).
     let stopping = stopping(state, team).await?;
-    // A person's Stop team stops the lead's own run too (c16k real-world B6b: it worked on alone); every other reason
-    // leaves it to read the end note (after `done`, its closing words).
+    // A person's Stop team stops the lead's own run too (real-world use before 17.0: it worked on alone); every other
+    // reason leaves it to read the end note (after `done`, its closing words).
     cancel_members(state, team, reason == EndReason::Stopped).await?;
     // Before the note, which lists the files handed back.
     hand_back(state, team, &stopping, reason).await;
@@ -159,8 +159,8 @@ async fn hand_back(state: &State, team: Uuid, stopping: &[Uuid], reason: EndReas
 /// Ends each helper still at work: a helper that reported since its last assignment is done (its own report, not the
 /// gateway's hand-back, GW-I-311), as a run that ends after a
 /// report makes it (`member_state.rs`), so its cancelled run's event, which comes after this and no longer changes it,
-/// can't leave it stopped (GW-I-301, c16k B1: one finishing its turn when the lead called done showed Stopped, like a
-/// failure). Any other is stopped.
+/// can't leave it stopped (GW-I-301, real-world use before 17.0: one finishing its turn when the lead called done
+/// showed Stopped, like a failure). Any other is stopped.
 async fn end_members(connection: &mut sqlx::PgConnection, team: Uuid) -> Result<(), GatewayError> {
     sqlx::query!(
         "UPDATE agent_team_members m SET state = CASE WHEN EXISTS (SELECT 1 FROM agent_teams t \
@@ -273,10 +273,10 @@ async fn drop_queued_turns(
 }
 
 /// After [`drop_queued_turns`] committed: each task whose turns it dropped leaves the queue on its open pages, as a
-/// person's cancel withdraws it (GW-I-173), or a page went on reading it waiting until reloaded (16p live W3, GW-I-312).
-/// A helper whose first turn it dropped, and that never ran, has its sandbox retired, started or still starting: it
-/// held a slot and the workspace's lease for its whole idle time. A failed notice or retirement is logged; the idle
-/// timeout still ends the sandbox.
+/// person's cancel withdraws it (GW-I-173), or a page went on reading it waiting until reloaded (a live check
+/// before 17.0, GW-I-312). A helper whose first turn it dropped, and that never ran, has its sandbox retired, started
+/// or still starting: it held a slot and the workspace's lease for its whole idle time. A failed notice or retirement
+/// is logged; the idle timeout still ends the sandbox.
 async fn withdraw(state: &State, dropped: &[(Uuid, bool)]) {
     let mut done: Vec<Uuid> = Vec::new();
     for &(conversation, _) in dropped {

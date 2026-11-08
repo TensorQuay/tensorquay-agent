@@ -520,9 +520,9 @@ async fn gw_i_263_a_restart_mid_hand_over_keeps_the_holders_turns_queued(
 }
 
 // TEST: GW-I-303
-// c16k real-world B10b (17 Oct 2026): a lead waiting for its turn on its own files, behind a helper that queued first,
-// read "Waiting for a free slot · next" with 4 of 8 slots free. A task behind an older waiter on its workspace waits for
-// the workspace, not for a slot: its stream and its place say so, as the waiter's do.
+// Real-world use before 17.0 (17 Oct 2026): a lead waiting for its turn on its own files, behind a helper that queued
+// first, read "Waiting for a free slot · next" with 4 of 8 slots free. A task behind an older waiter on its workspace
+// waits for the workspace, not for a slot: its stream and its place say so, as the waiter's do.
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
 async fn gw_i_303_a_task_behind_an_older_waiter_waits_for_the_workspace_not_a_slot(

@@ -284,8 +284,8 @@ async fn gw_i_261_done_ends_the_team_at_once_not_at_the_next_pass(pool: PgPool) 
 }
 
 // TEST: GW-I-302
-/// c16k real-world B6b (17 Oct 2026): Stop team stopped the helpers, and the lead went on working alone until its person
-/// stopped it too. A person's stop is the whole team's, the lead's own run included.
+/// Real-world use before 17.0 (17 Oct 2026): Stop team stopped the helpers, and the lead went on working alone until
+/// its person stopped it too. A person's stop is the whole team's, the lead's own run included.
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
 async fn gw_i_302_a_persons_stop_team_cancels_the_leads_run_too(pool: PgPool) -> TestResult {

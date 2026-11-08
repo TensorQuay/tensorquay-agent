@@ -1,7 +1,8 @@
-//! GW-I-319 (c17 3a; the c16k wake review's S2): after a person stops a lead, the team's messages to it wait unread and
-//! nothing said so. The person's team read now gives the lead's read place, `lead.read_seq` (the place its wake reads
-//! from: what it has read, in a finished run or in one still going), and `lead.unread`, the team's messages after that
-//! place that are for the lead (to it or to the whole team), never its own.
+//! GW-I-319 (17.0's release candidate; a review of the team wake before 17.0): after a person stops a lead, the team's
+//! messages to it wait unread and nothing said so. The person's team read now gives the lead's read place,
+//! `lead.read_seq` (the place its wake reads from: what it has read, in a finished run or in one still going), and
+//! `lead.unread`, the team's messages after that place that are for the lead (to it or to the whole team), never its
+//! own.
 #[path = "support/agent_team.rs"]
 mod agent_team;
 #[path = "support/fixture.rs"]

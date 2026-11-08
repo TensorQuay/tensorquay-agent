@@ -1,6 +1,6 @@
-//! GW-I-307 (c16k real-world B5, 17 Oct 2026): a person couldn't steer a running team. A message on a leading lead's
-//! page waited "until the agent finishes", which for a lead is after its whole team. Now, while the lead's run is
-//! active, the message is kept as before (held, cancellable) and also copied into the team's log for the lead, who
+//! GW-I-307 (real-world use before 17.0, 17 Oct 2026): a person couldn't steer a running team. A message on a leading
+//! lead's page waited "until the agent finishes", which for a lead is after its whole team. Now, while the lead's run
+//! is active, the message is kept as before (held, cancellable) and also copied into the team's log for the lead, who
 //! reads it at its next check of the team; read, the message is delivered and never starts a run of its own; cancelled
 //! first, or sent as a run first (the lead's run ended before it read), the copy is never read: once, never twice.
 #[path = "support/agent_team.rs"]

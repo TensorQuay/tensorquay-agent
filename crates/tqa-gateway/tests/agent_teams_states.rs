@@ -360,8 +360,9 @@ async fn until_ended(f: &Fixture, team: Uuid) -> TestResult {
 async fn gw_i_301_a_helper_that_reported_is_done_when_the_teams_end_stops_it(
     pool: PgPool,
 ) -> TestResult {
-    // c16k real-world B1 (17 Oct 2026): postgresql reported (39 % of the work, in compare.md) and was finishing its turn
-    // when the lead called done; the team's end stopped it and All helpers showed it Stopped, grey, like a failure.
+    // Real-world use before 17.0 (17 Oct 2026): postgresql reported (39 % of the work, in compare.md) and was finishing
+    // its turn when the lead called done; the team's end stopped it and All helpers showed it Stopped, grey, like a
+    // failure.
     support::run_configured(pool, None, ENABLED, async |f| {
         let t = team(f).await?;
         assign(f, &t, "r-1:c-1", "researcher").await?;
@@ -487,7 +488,8 @@ async fn gw_i_306_the_last_helper_going_quiet_after_the_leads_turn_reminds_it(
     pool: PgPool,
 ) -> TestResult {
     // A helper reports, the lead reads it and ends its turn while the helper is still finishing its own: when that
-    // helper's run ends, nothing else can wake the lead, so the reminder comes then (c16k B2's case, reached later).
+    // helper's run ends, nothing else can wake the lead, so the reminder comes then (the case real-world use found
+    // before 17.0, reached later).
     support::run_configured(pool, None, ENABLED, async |f| {
         let t = team(f).await?;
         lead_turn(f, &t, 2, "r-1").await?;
@@ -652,8 +654,8 @@ async fn gw_i_306_no_reminder_with_an_unread_person_message_when_all_are_quiet(
 async fn gw_i_306_a_lead_that_ends_its_turn_while_its_team_runs_is_reminded_twice_at_most(
     pool: PgPool,
 ) -> TestResult {
-    // c16k real-world B2 (17 Oct 2026): the lead ended its turn with a full summary and never called done; the page
-    // said Done, the team ran on, and the finish check never ran.
+    // Real-world use before 17.0 (17 Oct 2026): the lead ended its turn with a full summary and never called done; the
+    // page said Done, the team ran on, and the finish check never ran.
     support::run_configured(pool, None, ENABLED, async |f| {
         let t = team(f).await?;
         quiet(f, &t).await?;

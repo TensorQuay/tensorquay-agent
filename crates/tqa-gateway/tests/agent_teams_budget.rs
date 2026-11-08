@@ -545,9 +545,9 @@ async fn notice_texts(
 async fn gw_i_304_at_80_percent_everyone_is_asked_for_the_work_and_the_last_10_is_the_leads(
     pool: PgPool,
 ) -> TestResult {
-    // c16k real-world B9b (17 Oct 2026): two helpers spent the budget and nothing came back. At 80 % the lead and each
-    // working helper are asked for the work; at 90 % the helpers stop and the lead has the rest to write up; 100 % is
-    // still the end for everyone.
+    // Real-world use before 17.0 (17 Oct 2026): two helpers spent the budget and nothing came back. At 80 % the lead
+    // and each working helper are asked for the work; at 90 % the helpers stop and the lead has the rest to write up;
+    // 100 % is still the end for everyone.
     let model = server(4).await?;
     let result = support::run_configured(pool, Some(registry(&model)?), ENABLED, async |f| {
         f.gateway.agent_teams_hold(true);
@@ -651,9 +651,10 @@ async fn report(f: &Fixture, member: &tqa_types::ConversationId, run: &str) -> R
 async fn gw_i_304_a_lead_waiting_on_a_working_helper_reads_the_80_notice_with_its_report(
     pool: PgPool,
 ) -> TestResult {
-    // The 16n review (T3's class): the 80 % notice woke a lead that was waiting on its helpers, before the reports it
-    // asks for, and told it to finish; `done` would then stop the helpers before they reported. While a helper works,
-    // the notice doesn't wake the lead: the helper's report does, and the lead's next turn reads both.
+    // A review before 17.0 found this class of fault: the 80 % notice woke a lead that was waiting on its helpers,
+    // before the reports it asks for, and told it to finish; `done` would then stop the helpers before they reported.
+    // While a helper works, the notice doesn't wake the lead: the helper's report does, and the lead's next turn reads
+    // both.
     let model = server(1).await?;
     let result = support::run_configured(pool, Some(registry(&model)?), ENABLED, async |f| {
         f.gateway.agent_teams_hold(true);

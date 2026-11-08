@@ -77,8 +77,8 @@ async fn ended(connection: &mut PgConnection, conversation: Uuid) -> Result<(), 
     Ok(())
 }
 
-/// The reminder a lead gets when its turn ends without done while its team runs (GW-I-306, c16k B2: the page said
-/// Done, the team ran on and the finish check never ran).
+/// The reminder a lead gets when its turn ends without done while its team runs (GW-I-306, real-world use before 17.0:
+/// the page said Done, the team ran on and the finish check never ran).
 const REMINDER: &str = "Your team is still running and your turn ended without done. If the work is finished, call \
                         done: your finish check runs then. Otherwise keep leading: read your helpers or assign.";
 /// At most this many unanswered reminders: a lead that ignores them can't loop (its own post resets the count).

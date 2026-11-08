@@ -1,7 +1,7 @@
-//! A stopped helper's work, handed back by the gateway (GW-I-311; 16o live W1, 18 Oct 2026: two helpers stopped at
-//! their budget share mid-run, never having seen the 80 % ask, and their files stayed in their own copies). A helper
-//! that stops before it reported since its last assignment, at its share of the budget or by its team's end, gets a
-//! report in the team's log written by the gateway: its changed files from its own copy are attached, within the
+//! A stopped helper's work, handed back by the gateway (GW-I-311; a live check before 17.0, 18 Oct 2026: two helpers
+//! stopped at their budget share mid-run, never having seen the 80 % ask, and their files stayed in their own copies).
+//! A helper that stops before it reported since its last assignment, at its share of the budget or by its team's end,
+//! gets a report in the team's log written by the gateway: its changed files from its own copy are attached, within the
 //! attachment limits, and the rest named, so the lead takes them with `take_files` as any report's, after the end too,
 //! and the end note lists them. The model isn't needed for any of it. A helper on the lead's own files has nothing to
 //! attach: its writes are already there.
@@ -42,8 +42,8 @@ const SCANNED: usize = 1000;
 const NAMED: usize = 20;
 
 /// Stops `team`'s working helpers at the helpers' share of its budget, through the one stop path (their runs
-/// cancelled, their queued team turns dropped), as `stopped`, never `failed` (16o W1: failed, they were woken again
-/// every 15 s), then hands back what each changed.
+/// cancelled, their queued team turns dropped), as `stopped`, never `failed` (a live check before 17.0: failed, they
+/// were woken again every 15 s), then hands back what each changed.
 ///
 /// # Errors
 /// A store failure, or a step past its bound.
@@ -279,8 +279,9 @@ fn listed(paths: &[String]) -> String {
 }
 
 /// Directories a hand-back never walks: the runtime's own `.tqa` (its tool-output spill and fetched copies, which the
-/// files API hides; 16p live W1 named 28 of them), a repository's own store, and build or package caches, whose files
-/// a command changes as a side effect (the peer review: `git` in a copy would attach `.git/index`).
+/// files API hides; a hand-back named 28 of them in a live check before 17.0), a repository's own store, and build or
+/// package caches, whose files a command changes as a side effect (the peer review: `git` in a copy would attach
+/// `.git/index`).
 const SKIPPED: [&str; 6] = [
     ".tqa",
     ".git",

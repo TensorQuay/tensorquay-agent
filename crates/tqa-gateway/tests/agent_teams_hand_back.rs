@@ -1,10 +1,10 @@
-//! GW-I-311 (16o live W1, 18 Oct 2026: two helpers were stopped at their budget share mid-run, never having seen the
-//! 80 % ask, and their 33 files stayed in their own copies, B9b's loss again): a helper stopped before it reported, at
-//! its budget share or by its team's end, is handed back by the gateway. A report in the team's log, in the gateway's
-//! words, carries the files it changed in its own copy (within the attachment limits, the rest named), so the lead takes
-//! them as any report's, after the team's end too, and the end note lists them. A helper that reported is left alone; a
-//! helper on the lead's own files has nothing to attach. Stopped at its share, a helper is `stopped`, never `failed`,
-//! and isn't woken again (W1's `member_failed` every 15 s).
+//! GW-I-311 (a live check before 17.0, 18 Oct 2026: two helpers were stopped at their budget share mid-run, never
+//! having seen the 80 % ask, and their 33 files stayed in their own copies, GW-I-304's case again): a helper stopped
+//! before it reported, at its budget share or by its team's end, is handed back by the gateway. A report in the team's
+//! log, in the gateway's words, carries the files it changed in its own copy (within the attachment limits, the rest
+//! named), so the lead takes them as any report's, after the team's end too, and the end note lists them. A helper that
+//! reported is left alone; a helper on the lead's own files has nothing to attach. Stopped at its share, a helper is
+//! `stopped`, never `failed`, and isn't woken again (that check's `member_failed` every 15 s).
 #[path = "support/agent_team.rs"]
 mod agent_team;
 #[path = "support/fixture.rs"]
@@ -232,9 +232,9 @@ async fn gw_i_311_only_the_work_since_its_last_assignment_is_handed_back(
 async fn gw_i_311_the_runtimes_own_files_are_never_handed_back_and_each_file_left_says_why(
     pool: PgPool,
 ) -> TestResult {
-    // 16p live W1 (18 Oct 2026): the hand-back attached nothing and named 28 files of the runtime's own `.tqa` (its
-    // tool-output spill, fetched copies) as "over the attachment limits of 25 MB": neither the helper's work nor over
-    // any limit.
+    // A live check before 17.0 (18 Oct 2026): the hand-back attached nothing and named 28 files of the runtime's own
+    // `.tqa` (its tool-output spill, fetched copies) as "over the attachment limits of 25 MB": neither the helper's
+    // work nor over any limit.
     use std::os::unix::fs::PermissionsExt as _;
     support::run_configured(pool, None, CONFIG, async |f| {
         let t = team(f).await?;
