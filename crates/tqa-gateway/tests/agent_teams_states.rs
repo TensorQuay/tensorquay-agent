@@ -488,7 +488,7 @@ async fn gw_i_306_the_last_helper_going_quiet_after_the_leads_turn_reminds_it(
     pool: PgPool,
 ) -> TestResult {
     // A helper reports, the lead reads it and ends its turn while the helper is still finishing its own: when that
-    // helper's run ends, nothing else can wake the lead, so the reminder comes then (the case real-world use found
+    // helper's run ends, nothing else can wake the lead, so the reminder comes then (a case found in real-world use
     // before 17.0, reached later).
     support::run_configured(pool, None, ENABLED, async |f| {
         let t = team(f).await?;
