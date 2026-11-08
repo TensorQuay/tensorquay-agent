@@ -183,6 +183,17 @@ def scratch_repository(settings=None):
                 os.chdir(previous)
 
 
+def as_person(person):
+    """The environment that makes git author and commit as `person`."""
+    return mock.patch.dict(os.environ, {"GIT_AUTHOR_NAME": person[0], "GIT_AUTHOR_EMAIL": person[1],
+                                        "GIT_COMMITTER_NAME": person[0], "GIT_COMMITTER_EMAIL": person[1]})
+
+
+def contributor():
+    """Makes the scratch repository a contributor's clone, as the install script without --maintainer does."""
+    git("config", "tq.guard.maintainer", "false")
+
+
 def deny(*terms):
     """Writes the scratch repository's personal denylist (case-insensitive literals)."""
     (Path.cwd().parent / "lists" / "deny").write_text("".join(f"{term}\n" for term in terms))
@@ -248,6 +259,7 @@ class Contributors(unittest.TestCase):
 
     def test_a_contributors_clone_holds_no_identity_and_a_maintainers_does(self):
         with scratch_repository():
+            contributor()
             commit(JANE, message="fix: a contributor's change")
             self.assertEqual(quiet(guard.audit), [])
             git("config", "tq.guard.maintainer", "true")
@@ -255,6 +267,7 @@ class Contributors(unittest.TestCase):
 
     def test_pre_commit_holds_only_a_maintainers_commit_to_the_identity(self):
         with scratch_repository():
+            contributor()
             Path("notes.md").write_text("a note\n")
             git("add", "notes.md")
             with mock.patch.dict(os.environ, {"GIT_AUTHOR_NAME": JANE[0], "GIT_AUTHOR_EMAIL": JANE[1],
@@ -265,6 +278,7 @@ class Contributors(unittest.TestCase):
 
     def test_a_contributor_pushes_to_their_fork_and_a_maintainer_only_to_tensorquay(self):
         with scratch_repository():
+            contributor()
             commit(JANE, message="fix: a contributor's change")
             refs = f"refs/heads/fix {git('rev-parse', 'HEAD')} refs/heads/fix {guard.ZERO}\n"
             fork = "https://github.com/jane/tensorquay-agent.git"
@@ -275,7 +289,7 @@ class Contributors(unittest.TestCase):
                 problems = quiet(guard.pre_push, "origin", fork)
             self.assertTrue(any("not a TensorQuay GitHub repository" in p for p in problems), problems)
 
-    def test_the_install_sets_the_company_identity_only_for_a_maintainer(self):
+    def test_the_install_sets_the_company_identity_only_for_a_maintainer_and_marks_a_contributors_clone(self):
         for arguments, maintainer in (([], False), (["--maintainer"], True)):
             with self.subTest(arguments=arguments), scratch_repository():
                 Path("tools").mkdir()
@@ -289,7 +303,7 @@ class Contributors(unittest.TestCase):
                 local = subprocess.run(["git", "config", "--local", "--get-regexp", r"^(user\.|tq\.)"],
                                        capture_output=True, text=True, check=False).stdout.split("\n")
                 expected = ["tq.guard.maintainer true", f"user.email {guard.IDENTITY[1]}",
-                            f"user.name {guard.IDENTITY[0]}"] if maintainer else []
+                            f"user.name {guard.IDENTITY[0]}"] if maintainer else ["tq.guard.maintainer false"]
                 self.assertEqual(sorted(filter(None, local)), expected)
                 self.assertEqual(git("config", "--local", "--get", "core.hooksPath"), ".githooks")
 
@@ -312,6 +326,8 @@ class ContributorLimits(unittest.TestCase):
     def test_no_commit_carries_a_denylisted_identity_whoever_made_it(self):
         for settings in ({}, {"TQ_GUARD_IDENTITY": "1"}):
             with self.subTest(settings=settings), scratch_repository(settings):
+                if not settings:
+                    contributor()
                 deny("quinlan")
                 commit(guard.IDENTITY)
                 commit(PAT, guard.MERGER, "fix: a pull request GitHub merged")
@@ -327,6 +343,7 @@ class ContributorLimits(unittest.TestCase):
 
     def test_a_denylisted_identity_is_refused_at_commit_and_push_in_any_clone(self):
         with scratch_repository():
+            contributor()
             deny("quinlan")
             commit(JANE, message="fix: a contributor's change")
             Path("notes.md").write_text("another note\n")
@@ -340,6 +357,7 @@ class ContributorLimits(unittest.TestCase):
 
     def test_a_contributor_force_pushes_their_own_branch_but_never_main(self):
         with scratch_repository():
+            contributor()
             commit(JANE, message="fix: a contributor's change")
             base = git("rev-parse", "HEAD")
             commit(JANE, message="fix: the first version")
@@ -358,6 +376,7 @@ class ContributorLimits(unittest.TestCase):
 
     def test_a_clone_that_commits_as_the_company_keeps_the_maintainers_rules(self):
         with scratch_repository():
+            contributor()
             git("config", "user.name", guard.IDENTITY[0])
             git("config", "user.email", guard.IDENTITY[1])
             commit(guard.IDENTITY)
@@ -366,6 +385,7 @@ class ContributorLimits(unittest.TestCase):
 
     def test_a_first_push_to_a_fork_checks_only_what_tensorquay_does_not_hold(self):
         with scratch_repository():
+            contributor()
             commit(guard.IDENTITY, message="Bump a dependency from 1.0 to 1.1")
             git("remote", "add", "upstream", "https://github.com/TensorQuay/tensorquay-agent.git")
             git("update-ref", "refs/remotes/upstream/main", "HEAD")
@@ -382,6 +402,79 @@ class ContributorLimits(unittest.TestCase):
             problems = quiet(guard.audit, "origin/main")
             self.assertEqual(len(problems), 1, problems)
             self.assertIn("origin/main", problems[0])
+
+    def test_a_clone_not_marked_as_a_contributors_keeps_the_maintainers_rules(self):
+        # A clone set up before contributors could commit has no mark: it stays a maintainer's, as does any audit
+        # outside a set-up clone.
+        with scratch_repository():
+            commit(JANE, message="fix: a change")
+            self.assertEqual(len(quiet(guard.audit)), 2)
+            problems = push("origin", "https://github.com/jane/tensorquay-agent.git", git("rev-parse", "HEAD"))
+            self.assertTrue(any("not a TensorQuay GitHub repository" in p for p in problems), problems)
+            contributor()
+            self.assertEqual(quiet(guard.audit), [])
+
+    def test_a_maintainers_push_holds_each_outgoing_commit_to_the_identity(self):
+        with scratch_repository():
+            git("config", "tq.guard.maintainer", "true")
+            commit(guard.IDENTITY)
+            commit(JANE, guard.MERGER, "fix: a contribution GitHub merged")
+            tensorquay = "https://github.com/TensorQuay/tensorquay-agent.git"
+            self.assertEqual(push("origin", tensorquay, git("rev-parse", "HEAD")), [])
+            commit(JANE, message="fix: made under another name")
+            problems = push("origin", tensorquay, git("rev-parse", "HEAD"))
+            self.assertTrue(any("author is 'Jane Doe" in p for p in problems), problems)
+
+    def test_a_contributors_commits_are_checked_for_secrets_personal_data_and_attribution(self):
+        token = "ghp_" + "x1Y2z3" * 6  # built here, so this file holds no token
+        home = "/" + "home/jane/notes.txt"
+        with scratch_repository():
+            contributor()
+            commit(JANE, message="fix: a contributor's change")
+            Path("config.md").write_text(f"token {token}\nsee {home}\n")
+            git("add", "config.md")
+            with as_person(JANE):
+                problems = quiet(guard.pre_commit)
+                git("commit", "-q", "-m", "fix: a change\n\nCo-Authored-By: a helper <helper@example.com>")
+            self.assertTrue(any("possible secret" in p for p in problems), problems)
+            self.assertTrue(any("personal path" in p for p in problems), problems)
+            problems = push("fork", "https://github.com/jane/tensorquay-agent.git", git("rev-parse", "HEAD"))
+            for kind in ("possible secret", "personal path", "attribution"):
+                self.assertTrue(any(kind in p.lower() for p in problems), (kind, problems))
+            problems = quiet(guard.audit)
+            for kind in ("possible secret", "personal path", "attribution"):
+                self.assertTrue(any(kind in p.lower() for p in problems), (kind, problems))
+
+    def test_a_push_checks_what_another_tensorquay_repository_holds(self):
+        # Only this project's own repository counts as already checked: another TensorQuay repository's history
+        # (private, unguarded) is checked like any other commit before it can reach this one.
+        with scratch_repository():
+            git("config", "tq.guard.maintainer", "true")
+            commit(guard.IDENTITY)
+            git("switch", "-q", "-c", "sibling")
+            commit(JANE, message="a commit of another repository")
+            git("remote", "add", "engine", "https://github.com/TensorQuay/another-project.git")
+            git("update-ref", "refs/remotes/engine/main", "HEAD")
+            git("switch", "-q", "main")
+            with as_person(guard.IDENTITY):
+                git("merge", "-q", "--no-ff", "-m", "fix: brings in the other history", "sibling")
+            problems = push("origin", "https://github.com/TensorQuay/tensorquay-agent.git", git("rev-parse", "HEAD"))
+            self.assertTrue(any("author is 'Jane Doe" in p for p in problems), problems)
+
+    def test_a_maintainer_pushes_only_to_github_itself(self):
+        with scratch_repository():
+            git("config", "tq.guard.maintainer", "true")
+            commit(guard.IDENTITY)
+            head = git("rev-parse", "HEAD")
+            for url, refused in (("https://github.com/TensorQuay/tensorquay-agent.git", False),
+                                 ("git@github.com:TensorQuay/tensorquay-agent.git", False),
+                                 ("ssh://git@github.com/TensorQuay/tensorquay-agent.git", False),
+                                 ("https://mirror.example/https://github.com/TensorQuay/tensorquay-agent.git", True),
+                                 ("https://github.com.example/TensorQuay/tensorquay-agent.git", True)):
+                with self.subTest(url=url):
+                    problems = push("origin", url, head)
+                    self.assertEqual(any("not a TensorQuay GitHub repository" in p for p in problems), refused,
+                                     problems)
 
 
 if __name__ == "__main__":
