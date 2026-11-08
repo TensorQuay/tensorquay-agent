@@ -292,7 +292,7 @@ print(openpyxl.load_workbook('t.xlsx').active['A1'].value, open('t.png', 'rb').r
     Ok(())
 }
 
-/// RT-I-050 (the c14b first hour, F10; PROMPT-U-020): the command the system prompt gives for a PDF, as it is written
+/// RT-I-050 (a first-hour check before 17.0; PROMPT-U-020): the command the system prompt gives for a PDF, as it is written
 /// there, makes one in the Workstation's documented sandbox: Chromium headless, its inner sandbox off as the image runs
 /// it, printing HTML from the working folder. A model that follows the prompt gets a PDF, not "no PDF library".
 #[tokio::test]

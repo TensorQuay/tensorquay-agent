@@ -8,7 +8,7 @@ use tqa_llm::Route;
 
 /// The whole probe's bound.
 const DEADLINE: Duration = Duration::from_mins(1);
-/// A local route's whole check: bounded by progress, not by its total (the c16d first hour, F2). Each answer's first
+/// A local route's whole check: bounded by progress, not by its total (a first-hour check before 17.0). Each answer's first
 /// byte waits up to `[relay] local_check_timeout`, then a gap of `[relay] idle_timeout` without a token ends it; a
 /// model that keeps answering may finish within this outer cap, however slowly it thinks.
 const LOCAL_OUTER_CAP: Duration = Duration::from_mins(10);

@@ -280,7 +280,7 @@ async fn core_e_041_fix_and_rerun_goes_on_while_the_model_edits() -> TestResult 
 }
 
 // TEST: CORE-E-041
-/// The 13h first hour's F11 shape: the same edit fails three times with nothing changed between: it stops at three.
+/// A shape a first-hour check before 17.0 found: the same edit fails three times with nothing changed between: it stops at three.
 #[tokio::test]
 async fn core_e_041_the_same_failing_edit_three_times_still_stops() -> TestResult {
     let editor = fake("edit_file", false, vec![failed(), failed(), failed()])?;

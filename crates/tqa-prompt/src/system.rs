@@ -54,7 +54,7 @@ alternatives. Save charts to files.\n"
         ""
     };
     // Version 12: with a browser, how to make a PDF without a PDF library, which small models look for and give up
-    // without (the c14b first hour, F10). Kept to one short line for the Workstation's prompt budget.
+    // without (a first-hour check before 17.0). Kept to one short line for the Workstation's prompt budget.
     let documents = if capabilities.contains(&tqa_types::Capability::Browser) {
         "Documents: PDF from HTML with chromium --headless --no-sandbox --print-to-pdf=out.pdf in.html.\n"
     } else {

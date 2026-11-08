@@ -269,7 +269,7 @@ fn prompt_u_017_the_data_capability_says_the_python_data_libraries_are_installed
     Ok(())
 }
 
-/// PROMPT-U-020 (the c14b first hour, F10): asked for a PDF, a small model said no PDF library was installed and gave up,
+/// PROMPT-U-020 (a first-hour check before 17.0): asked for a PDF, a small model said no PDF library was installed and gave up,
 /// though the Workstation's Chromium prints HTML to PDF. With the browser capability the prompt says how, in one line;
 /// without it, nothing.
 #[test]
