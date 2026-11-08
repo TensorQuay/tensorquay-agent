@@ -52,7 +52,7 @@ for (const width of [1024, 1280] as const)
       await axe(page);
       await capture(page, `channel-log-${width}-${colorScheme}`);
 
-      // A post from elsewhere arrives on the channel's stream, without a reload (G8).
+      // A post from elsewhere arrives on the channel's stream, without a reload (ADR-0014 point 11).
       const channelId = new URL(page.url()).pathname.split("/").at(-1) ?? "";
       const elsewhere = "The 2.4 build is green on main.";
       const posted = await page.request.post(
