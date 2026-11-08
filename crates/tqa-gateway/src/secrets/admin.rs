@@ -22,7 +22,7 @@ pub struct SecretEntry {
     pub last_set_by: String,
     /// `current` while the seed file lists it, `removed` after it no longer does; `None` if never seeded.
     pub seed_state: Option<String>,
-    /// When the value last changed: a write of the same value does not count (vault slice 1).
+    /// When the value last changed: a write of the same value does not count.
     pub rotated_at: time::OffsetDateTime,
     /// The rotation reminder's interval in days, if one is set.
     pub rotate_after_days: Option<i32>,

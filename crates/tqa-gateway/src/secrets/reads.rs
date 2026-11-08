@@ -149,8 +149,8 @@ pub(crate) async fn read(
     (kind, consumer): (ConsumerKind, &str),
     context: &ReadContext,
 ) -> Result<Option<SecretString>, GatewayError> {
-    // A shared secret is read only for a consumer it is bound to (vault slice 3); users' own credentials are only
-    // ever read for their owner (F1, F2).
+    // A shared secret is read only for a consumer it is bound to; users' own credentials are only ever read for their
+    // owner.
     let bound = match kind {
         // A host key's use is decided by the proxy's rules before its value is read (ADR-0037 §3).
         ConsumerKind::Host => true,

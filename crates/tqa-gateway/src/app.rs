@@ -52,9 +52,9 @@ pub(crate) struct State {
     pub upstream_roots: std::sync::RwLock<Arc<rustls::RootCertStore>>,
     /// What internal egress rules may not reach (ADR-0035 amendment), renewed by the manager.
     pub internal: Arc<crate::egress::internal::Guard>,
-    /// When each secret due for rotation was last named in the log (vault slice 1).
+    /// When each secret due for rotation was last named in the log.
     pub reminders: crate::secrets::rotation::Reminders,
-    /// The queue of secret read records to their writer (vault slice 2).
+    /// The queue of secret read records to their writer.
     pub read_audit: crate::secrets::reads::ReadAudit,
     pub relay: crate::relay::Relay,
     /// The MCP proxy's resolver for connector hosts (ADR-0031).
@@ -613,7 +613,7 @@ impl Gateway {
         crate::secrets::rotation::check(&self.state).await
     }
 
-    /// Waits until every secret read recorded so far is written (vault slice 2). For tests; there is no endpoint.
+    /// Waits until every secret read recorded so far is written. For tests; there is no endpoint.
     ///
     /// # Errors
     /// The writer has stopped.

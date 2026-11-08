@@ -82,7 +82,7 @@ pub trait SecretStore: Send + Sync {
         Err(UNSUPPORTED)
     }
     /// Sets or clears the rotation reminder of an existing reference at version `expected`, in the caller's
-    /// transaction; versioned and audited (vault slice 1).
+    /// transaction; versioned and audited.
     ///
     /// # Errors
     /// `404` when absent, `409 conflict` for a stale version, storage failure.

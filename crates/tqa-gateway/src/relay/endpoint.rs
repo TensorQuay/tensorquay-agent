@@ -296,7 +296,7 @@ pub(super) async fn credential(
     Ok(Some(value))
 }
 
-/// Whose read a relayed request's key is (vault slice 2).
+/// Whose read a relayed request's key is.
 fn reader(
     caller: &Authorized,
     run: Option<&RunId>,

@@ -485,7 +485,7 @@ pub(crate) async fn write(
         _ => return Err(GatewayError::Conflict("conflict")),
     };
     validated(connection, &write.config).await?;
-    // A shared secret must be bound to the route first (vault slice 3).
+    // A shared secret must be bound to the route first.
     if let Some(reference) = write.config.key_ref.as_deref() {
         crate::secrets::bindings::require(
             connection,
