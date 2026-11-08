@@ -17,3 +17,9 @@ overrides:
   # GHSA-mrhx-c7xc-m3w5 (high): zod 4 before 4.6.6, reached only through eslint-plugin-react-hooks 7.1.1 (^3.25.0 ||
   # ^4.0.0) in lint. 4.6.6 is the first fixed release and in that range.
   "zod@>=4.0.0 <4.6.6": "4.6.6"
+  # GHSA-g3hv-75wg-m249 (medium): minimatch 7.0.0 to 11.0.0, reached only through @typescript-eslint/typescript-estree
+  # 8.70.1 in lint, which asks for ^10.2.2 (so does its newest release, 8.72.1). 11.0.1 is the first fixed release;
+  # eslint's own minimatch 3.1.5 is outside the advisory's range and stays. Forcing 11 past that range is safe here:
+  # typescript-estree's one call, minimatch(path, pattern, { dot: true }) for allowDefaultProject, is unchanged in 11.
+  # Remove this override once typescript-estree asks for ^11.
+  "@typescript-eslint/typescript-estree>minimatch": "11.0.1"
