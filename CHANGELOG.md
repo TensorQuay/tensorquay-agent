@@ -10,8 +10,9 @@ A fix release: no migration, no protocol change.
 ### Fixed
 
 - **A slow local model passes its check (GW-U-092).** A local route whose model passed the check's tool call and
-  round trip, and then ran out of time in the check's last step, failed with "timeout". It now passes, with
-  "Verified, but slowly" and the step it didn't finish named (`line_breaks_unverified`). Running out of time before
+  round trip, and was still answering when the check's own time ran out in its last step, failed with "timeout". It
+  now passes, with "Verified, but slowly" and the step it didn't finish named (`line_breaks_unverified`). A model that
+  goes silent past the relay's idle limit still fails, in any step, as its tasks would; running out of time before
   the round trip still fails; hosted routes keep their minute.
 - **Applications opened from a Desktop session's shell reach the display (TOOL-U-141).** The shell cleared its
   commands' environment, so the desktop's `DISPLAY` and session bus never reached them and an application failed with
