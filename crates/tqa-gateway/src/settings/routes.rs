@@ -15,7 +15,8 @@ pub(crate) async fn seed(
     seed: &Registry,
     digest: &KeyedDigest,
 ) -> Result<bool, GatewayError> {
-    // Each with the display name the file gave it (N2), checked by the API's rule before anything is written.
+    // Each with the display name the file gave it (ADR-0028's N2), checked by the API's rule before anything is
+    // written.
     let configs: Vec<RouteConfig> = seed
         .names()
         .filter_map(|name| seed.get(name))
