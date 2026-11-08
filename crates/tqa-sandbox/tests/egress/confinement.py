@@ -11,7 +11,7 @@ def vectors():
             ("nul\0path", "path_invalid"), ("x" * 5000, "path_invalid")]
 
 
-# ADR-0035 (8c7c2d8d): the file tools may write inside the workspace's .git, as TOOL-U-004 expects; hooks and the
+# ADR-0035 (29 Sep 2026): the file tools may write inside the workspace's .git, as TOOL-U-004 expects; hooks and the
 # file-system monitor stay off for every git the tools start (SEC-045). So a .git/config write is a positive control
 # here, not an escape: the path contract (nothing outside the workspace) is what these vectors test.
 GIT_CONFIG = "git-config-by-file-tool"

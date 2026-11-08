@@ -56,7 +56,7 @@ class Script(unittest.TestCase):
 
 
 class MicrovmNetwork(unittest.TestCase):
-    """The microVM half draws its sandbox network as the microVM stack does (f2c83ac2), and pins that network's gateway
+    """The microVM half draws its sandbox network as the microVM stack does, and pins that network's gateway
     address in gateway.toml; for 11 days it read a fixed subnet that no longer existed, unseen without KVM."""
 
     def test_the_network_is_drawn_first_and_its_gateway_pinned(self):

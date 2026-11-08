@@ -86,7 +86,7 @@ async fn sbx_f_003_the_vmm_runs_unprivileged_and_confined() -> TestResult {
         (field("NoNewPrivs"), field("Seccomp")),
         ("1".to_owned(), "2".to_owned())
     );
-    // The guest's memory plus the configured VM host overhead (512 MiB by default since the G-13-full fix, 6ba51da).
+    // The guest's memory plus the configured VM host overhead (512 MiB by default since the G-13-full fix).
     assert_eq!(
         inspect?,
         format!("true {} false", memory + host.vmm_overhead)

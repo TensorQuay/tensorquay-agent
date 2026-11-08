@@ -136,7 +136,7 @@ pub(crate) async fn binding(
 /// switch. A run in progress keeps the image it started with, and a template that is not offered
 /// keeps the old pin. Legacy bindings without a pin follow the runtime image already. The template is read from its
 /// table, not the settings snapshot, on purpose: in the same transaction as the conversation's lock and its run
-/// activity, so the move and the facts it rests on cannot disagree (review of 41ddaef).
+/// activity, so the move and the facts it rests on cannot disagree.
 ///
 /// # Errors
 /// Storage failures.

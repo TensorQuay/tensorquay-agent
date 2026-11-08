@@ -639,7 +639,7 @@ class DriverTests(unittest.TestCase):
         self.assertFalse(driver.owes_io_recovery(0))
 
     def test_a_probed_conversation_with_a_step_but_no_run_fails_when_it_closes(self):
-        # Review of 03df8fda: a conversation considered only through the probe (or a disk resume) has no io notice,
+        # A conversation considered only through the probe (or a disk resume) has no io notice,
         # so judging its close as final only on io notices let "a step, no run" pass silently.
         driver = soak.Soak.__new__(soak.Soak)
         driver.slots, driver.conversations, driver.recovered = 2, ["c0", "c1"], set()
@@ -659,7 +659,7 @@ class DriverTests(unittest.TestCase):
         self.assertEqual(driver.recovered, {"c0"})
 
     def test_closing_a_probed_conversation_that_owes_its_run_fails(self):
-        # The call site itself (review of 03df8fda): close_conversation judges its own slot final, with no io notice.
+        # The call site itself: close_conversation judges its own slot final, with no io notice.
         driver = soak.Soak.__new__(soak.Soak)
         driver.slots, driver.conversations, driver.recovered = 1, ["c0"], set()
         driver.probed, driver.disk_windows = {"c0": [100.0, 150.0]}, [[100.0, 150.0]]
