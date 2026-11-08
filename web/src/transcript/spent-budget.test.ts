@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { failureCode, failureNext, failureReason } from "./failure-copy";
 
-// WEB-U-374 (the lead's live session on 16e, L25): a lead's run ended by its team's spent budget (the gateway's
+// WEB-U-374 (a live check before 17.0): a lead's run ended by its team's spent budget (the gateway's
 // `team_budget`, run code `budget`, CORE: failure_code) read "The task reached one of its limits", while the team's
 // end note said "The team used its whole budget." The run's line names the team's budget too, and says what a message
 // does now: the team has stopped, so the task carries on without its helpers. A task's own limit keeps its words.

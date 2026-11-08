@@ -216,7 +216,7 @@ function Report({
     value === null ? t("usage.notReportedShort") : number(value);
   return (
     <div className="stack">
-      {/* The one number first (the owner's redesign): the period's tokens and their change. */}
+      {/* The one number first: the period's tokens and their change. */}
       <section className="usage-headline" aria-label={t("usage.total")}>
         {/* Written as every other number on the page (found before 17.0: no "59.2K" above "59 200"). */}
         <p className="type-display">

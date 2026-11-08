@@ -171,8 +171,8 @@ function answers(
     );
 }
 
-// Task 090 (FR-21) and the owner's redesign: the period's total and its change first, then who and which model use it,
-// largest first; each day only on demand, newest first (WEB-U-034).
+// FR-21: the period's total and its change first, then who and which model use it, largest first; each day only on
+// demand, newest first (WEB-U-034).
 describe("WEB-U-034 usage", () => {
   it("leads with this month's tokens and their change against the same days of last month", async () => {
     const { api, usage } = fake(answers());

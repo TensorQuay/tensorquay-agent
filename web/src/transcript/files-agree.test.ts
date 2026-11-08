@@ -63,7 +63,7 @@ describe("WEB-U-365 a run's summary and its files line agree", () => {
   });
 });
 
-// WEB-U-373 (the lead's live session on 16e, L25): a lead task whose team used its budget said "No files changed"
+// WEB-U-373 (a live check before 17.0): a lead task whose team used its budget said "No files changed"
 // right above the end note's "Handed back: primes.py (coder), test_primes.py (test-writer)". Files a helper handed
 // back that the turn took count, as many as it placed, even when its recorded changes leave them out (they land under
 // uploads/, GW-I-048); and a turn its run didn't finish says nothing of files when it changed none: its failure says

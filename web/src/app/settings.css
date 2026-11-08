@@ -1129,7 +1129,7 @@ tr[data-expired] td:not(.data-cell-action) {
   display: block;
   margin: 0;
 }
-/* One column, as ChatGPT's and Claude's settings (the owner's review, WEB-U-131): each field's label above it at every
+/* One column, as ChatGPT's and Claude's settings (WEB-U-131): each field's label above it at every
    width, a field at most --field-width wide; a list of choices takes the whole column. */
 .page-section .field {
   max-width: var(--field-width);

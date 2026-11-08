@@ -767,7 +767,7 @@ describe("WEB-U-039 checking a route from the list", () => {
   });
 });
 
-// WEB-U-111 (the lead's first hour, F14): the README's quick-start route has no display name. It is shown by its
+// WEB-U-111 (a first-hour check): the README's quick-start route has no display name. It is shown by its
 // model's name, as the model picker shows it, and editing any other field saves; a display name is asked for only when
 // adding a route.
 describe("WEB-U-111 a route without a display name", () => {

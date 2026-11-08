@@ -73,7 +73,7 @@ describe("WEB-U-222 the team's end note", () => {
   });
 });
 
-// WEB-U-375 (the lead's live session on 16e, L48/L49): the handed-back files are joined in the reader's language, "、"
+// WEB-U-375 (a live check before 17.0): the handed-back files are joined in the reader's language, "、"
 // in Chinese, never the comma each file's own parentheses already use ("…（401 B，coder）, test_primes.py…" before).
 describe("WEB-U-375 the handed-back list's separator", () => {
   it("joins files with the catalogue's separator", () => {

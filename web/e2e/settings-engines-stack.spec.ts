@@ -8,7 +8,7 @@ import { signedIn } from "./ux/flow";
 // Decision engines, a gap in the feature matrix before 17.0 (WEB-E2E-061): what had a unit test and a fake-front spec
 // but no real-stack test. On the settings suite's stack: an engine added, edited, turned off and on, and deleted in
 // Settings › Decision engines, through the real gateway; and a task whose profile names an engine that can't be
-// reached, which falls back and says so once (WEB-U-093). An engine that answers is the lead's live check (c16 brings
+// reached, which falls back and says so once (WEB-U-093). An engine that answers is checked live (c16 brings
 // a fake engine service). It writes no result, and leaves no engine or profile behind.
 test.skip(
   process.env.TQA_STACK_SUITE !== "settings",

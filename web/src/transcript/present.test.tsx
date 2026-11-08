@@ -570,4 +570,4 @@ describe("SEC-001 one sentence per refusal", () => {
   });
 });
 
-// The lead's decision: a decided approval reads on its own tool's line, in the order it happened
+// A decided approval reads on its own tool's line, in the order it happened

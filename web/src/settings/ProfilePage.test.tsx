@@ -146,7 +146,7 @@ describe("WEB-U-104 the Agent profile page", () => {
   });
 });
 
-// WEB-U-105 (the owner's review): a profile's tools are never hidden. Every tool is listed in its group, ticked by
+// WEB-U-105: a profile's tools are never hidden. Every tool is listed in its group, ticked by
 // default, with one plain line on what it lets the agent do; All ticks or clears them at once.
 describe("WEB-U-105 a profile's tools", () => {
   it("lists every tool in its group, ticked, each with what it does", async () => {

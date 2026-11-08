@@ -14,7 +14,7 @@ import { signedIn } from "./ux/flow";
 // - A server without the route's protocol endpoint: the stack's own web server (on the gateway's `web` network)
 //   answers POST /v1/chat/completions with a 404 that names no model, so the check reports the missing endpoint.
 // The usage setting (WEB-U-289) needs a model server refusing `stream_options`, which the stack's fake model can't do
-// yet: the lead checks it live for c15 (page pass V6, V8).
+// yet: it is checked live.
 
 test.skip(!process.env.TQA_STACK_URL, "Requires the owned settings stack");
 test.describe.configure({ mode: "serial" });

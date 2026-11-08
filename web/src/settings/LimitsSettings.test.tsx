@@ -405,7 +405,7 @@ describe("WEB-U-227 the helper limits", () => {
       ],
       [
         "Stop an idle team after",
-        // WEB-U-376 (the lead's live session on 16e): what a person can act on, not "the gateway's next check".
+        // WEB-U-376 (a live check before 17.0): what a person can act on, not "the gateway's next check".
         "A change applies within seconds, to teams already running too.",
       ],
     ] as const) {

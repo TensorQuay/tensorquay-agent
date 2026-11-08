@@ -1,5 +1,5 @@
 // @vitest-environment node
-// WEB-U-110 (the lead's first hour, F14): every settings form shows where a refused save needs fixing. A settings form
+// WEB-U-110 (a first-hour check): every settings form shows where a refused save needs fixing. A settings form
 // is a <form> under src/settings; it carries FormRefusal by its Save, or is a page on the Settings page frame, which does.
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";

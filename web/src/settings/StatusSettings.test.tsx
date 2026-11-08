@@ -67,7 +67,7 @@ const failing = (checks: Partial<typeof ready.checks>, extra = {}) => ({
   checks: { ...ready.checks, ...checks },
 });
 
-// Task 090 (FR-22) and the owner's review: can new tasks start, and if not, what to do; passing checks in one line.
+// FR-22: can new tasks start, and if not, what to do; passing checks in one line.
 describe("WEB-U-033 status", () => {
   it("says in one line that new tasks can start, with the passing checks quietly under it", async () => {
     fetch.mockImplementationOnce(() => json(ready));

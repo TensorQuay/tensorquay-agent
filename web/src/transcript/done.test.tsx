@@ -201,7 +201,7 @@ describe("WEB-U-016 a finished task: what it wrote, and what could follow", () =
     expect(screen.queryByRole("group", { name: "What next" })).toBeNull();
   });
 
-  // The owner's principle: a general-purpose agent. A document or data file in a spec/ or tests/ folder is not a test.
+  // A general-purpose agent. A document or data file in a spec/ or tests/ folder is not a test.
   it.each(["spec/requirements.md", "tests/plan.txt", "test_results.csv"])(
     "offers no Run all the tests for %s",
     (path) => {

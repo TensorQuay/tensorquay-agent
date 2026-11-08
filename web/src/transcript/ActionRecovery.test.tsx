@@ -286,8 +286,7 @@ describe("WEB-U-001 accepted action failure recovery", () => {
       );
       return Promise.resolve();
     });
-    // E1's failed start, the page the owner wanted seen (a pass over the pages before 17.0): what happened and the way
-    // on.
+    // A failed start (a pass over the pages before 17.0): what happened and the way on.
     expect(
       within(screen.getByRole("article", { name: "Your message" })).getByText(
         "Not sent. The task's environment couldn't be started. Send the message again; if it fails again, choose another environment or ask an administrator.",

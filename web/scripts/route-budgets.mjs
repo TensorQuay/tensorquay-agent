@@ -24,7 +24,7 @@ import { join, relative, sep } from "node:path";
 import { gzipSync } from "node:zlib";
 
 const KIB = 1024;
-/** The approved budgets, about twice the review stack's p95 (the measurements in the team's perf notes, candidate 6). */
+/** The approved budgets, about twice the review stack's p95 (measured on candidate 6). */
 export const CLASSES = {
   signedOut: 280 * KIB,
   list: 300 * KIB,

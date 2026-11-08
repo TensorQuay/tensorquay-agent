@@ -315,8 +315,8 @@ describe("WEB-U-363 a tool card without the model's marker lines", () => {
   });
 });
 
-// WEB-U-368 (the lead's live session on 16e): a desktop step's output read "Typed 17 characters into e8; the screen
-// changed." A ref is the model's handle, meaningless to a person: the output names the element as the step's title
+// WEB-U-368 (a live check before 17.0): a desktop step's output read "Typed 17 characters into e8; the screen changed."
+// A ref is the model's handle, meaningless to a person: the output names the element as the step's title
 // does (its name quoted, else its role in words), and a snapshot's element list after it keeps its refs.
 describe("WEB-U-368 a desktop step's output names its element, never its ref", () => {
   const id = "0123456789abcdef";

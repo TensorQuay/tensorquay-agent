@@ -91,7 +91,7 @@ function Status({ environments }: { environments?: TemplatesApi | undefined }) {
   return (
     <div className="stack">
       <p className="type-small muted">{t("health.intro")}</p>
-      {/* The one line first (the owner's review): can new tasks start right now. */}
+      {/* The one line first: can new tasks start right now. */}
       <div className="stack status-verdict">
         {/* Polite and live, so a change after Check again or a 30 s read is heard; a read that leaves it as it was says
             nothing (an accessibility review before 17.0). Checked at, below, isn't live. */}

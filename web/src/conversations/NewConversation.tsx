@@ -420,9 +420,8 @@ export function NewConversation({
         )}
         {!shown && (
           <div className="example-tasks">
-            {/* A general-purpose agent: examples for data, writing and code, not only code (the owner's principle). On
-                 files the task has (a chosen workspace that holds some), else from nothing (found before 17.0,
-                 WEB-U-128). */}
+            {/* A general-purpose agent: examples for data, writing and code, not only code. On files the task has (a
+                 chosen workspace that holds some), else from nothing (found before 17.0, WEB-U-128). */}
             {(chosen && (chosen.size_bytes ?? 0) > 0
               ? [
                   t("start.exampleExplain"),

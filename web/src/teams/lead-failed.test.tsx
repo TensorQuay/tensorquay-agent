@@ -29,10 +29,10 @@ const failed = [
   }),
 ].reduce(apply, emptyTranscript());
 
-// WEB-U-401 (a review before 17.0, the lead's approved design; real-world use before 17.0, 17 Oct 2026): the lead's
-// header turned red "Failed" while both helpers worked; a helper's report woke it 15 s later and it finished. While its
-// team runs and a helper works, a failed lead waits for its helpers: the header says so in the attention tone, the
-// failure stays in the transcript with what happens next. Red Failed when nothing will wake it.
+// WEB-U-401 (a review and real-world use before 17.0, 17 Oct 2026): the lead's header turned red
+// "Failed" while both helpers worked; a helper's report woke it 15 s later and it finished. While its team runs and a
+// helper works, a failed lead waits for its helpers: the header says so in the attention tone, the failure stays in
+// the transcript with what happens next. Red Failed when nothing will wake it.
 describe("WEB-U-401 a lead's failed run while its helpers work", () => {
   it("is waiting only while its team runs and a helper works, whatever its run (WEB-U-415)", () => {
     const carries = (over: Partial<Parameters<typeof leadCarriesOn>[0]>) =>

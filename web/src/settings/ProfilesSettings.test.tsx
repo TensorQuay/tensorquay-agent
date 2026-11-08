@@ -124,7 +124,7 @@ function setId(id: string) {
 
 // Settings → Profiles (ADR-0012, WEB-U-049): a person's own profiles and the shared ones, narrowing only.
 describe("WEB-U-049 the profiles list", () => {
-  // The owner's review: say in one line what a profile is for, with an example that isn't only coding, and how it
+  // Say in one line what a profile is for, with an example that isn't only coding, and how it
   // differs from a model or an environment.
   it("says what an agent profile is for, with a general example", async () => {
     show(fakeProfiles({ profiles: LISTED }).api);

@@ -95,7 +95,7 @@ const error = (status: number, code: string): Answer => ({
   body: { error: { code, message: code, retryable: false } },
 });
 
-// The file previews design, the lead's decision 1: scripts run, in a sandbox that keeps them from the app.
+// Scripts run, in a sandbox that keeps them from the app.
 describe("WEB-U-087 a web page in the Files panel", () => {
   it("frames the page from the sandboxed view, with only allow-scripts, the note, Reload and Download", async () => {
     files["out/report.html"] = content("out/report.html", 900, "<p>hi</p>");
