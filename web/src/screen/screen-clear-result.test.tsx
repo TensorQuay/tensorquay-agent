@@ -24,8 +24,9 @@ const failed = (reason: "not_cleared" | "unconfirmed") => ({
   reason,
 });
 
-// WEB-U-331 (the 16d page pass, Z17): a clear asked from the warning about earlier sign-ins answers where it was asked,
-// right under its button, before the help paragraphs (at 390 the help pushed the answer below the panel's fold).
+// WEB-U-331 (a pass over the pages before 17.0): a clear asked from the warning about earlier sign-ins answers where it
+// was asked, right under its button, before the help paragraphs (at 390 the help pushed the answer below the panel's
+// fold).
 describe("WEB-U-331 a clear's result sits under the button that asked for it", () => {
   it.each([
     [

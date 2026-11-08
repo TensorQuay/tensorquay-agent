@@ -156,7 +156,8 @@ describe("WEB-U-185 a size reads back as it was set", () => {
 });
 
 // WEB-U-354: a grouped number never breaks across lines: thousands are grouped with U+202F NARROW NO-BREAK SPACE,
-// which looks like a thin space but doesn't let a line wrap inside the number ("4 / 096" at 390, the 16f page pass).
+// which looks like a thin space but doesn't let a line wrap inside the number ("4 / 096" at 390, a pass over the pages
+// before 17.0).
 describe("WEB-U-354 grouped numbers never break", () => {
   it.each([
     ["en", 4096, "4 096"],

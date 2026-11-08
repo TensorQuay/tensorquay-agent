@@ -281,10 +281,11 @@ async function runsStarted(page: Page, task: string) {
     .length;
 }
 
-// E2E-AGENTS-031 (16n T2, GW-I-307; c16k real-world B5: "Add MySQL as a fourth database" waited until the whole team
-// ended): while the lead's run is active, a person's message is held as before, cancellable, and copied into the team's
-// log; the lead reads it at its next check of the team, and it then never starts a run of its own. EDGE-K's lead starts
-// a helper, and its next model call holds a minute before it reads its team, so the message arrives during its run.
+// E2E-AGENTS-031 (a review before 17.0, GW-I-307; real-world use before 17.0: "Add MySQL as a fourth database" waited
+// until the whole team ended): while the lead's run is active, a person's message is held as before, cancellable, and
+// copied into the team's log; the lead reads it at its next check of the team, and it then never starts a run of its
+// own. EDGE-K's lead starts a helper, and its next model call holds a minute before it reads its team, so the message
+// arrives during its run.
 test("E2E-AGENTS-031 a message to a leading lead: held, read at its next check of the team, never a run of its own", async ({
   page,
   baseURL,
@@ -357,11 +358,12 @@ test("E2E-AGENTS-031 a message to a leading lead: held, read at its next check o
   await expect(page.locator("body")).not.toContainText(RAW_KEY);
 });
 
-// E2E-AGENTS-032 (16n T3, GW-I-306, WEB-U-398; c16k real-world B2: the lead ended its turn without done and its header
-// said Done while the team ran on): EDGE-L's lead starts a helper that reports and finishes, reads its report, and ends
-// every turn without done. The gateway reminds it only once nothing else can wake it (its helper quiet, nothing
-// unread; the 16n integration), twice, never more; its header is never Done while the team runs, and after the second
-// reminder says the lead stopped without finishing, with what to do. The team keeps running.
+// E2E-AGENTS-032 (a review before 17.0, GW-I-306, WEB-U-398; real-world use before 17.0: the lead ended its turn
+// without done and its header said Done while the team ran on): EDGE-L's lead starts a helper that reports and
+// finishes, reads its report, and ends every turn without done. The gateway reminds it only once nothing else can wake
+// it (its helper quiet, nothing unread; the 16n integration), twice, never more; its header is never Done while the
+// team runs, and after the second reminder says the lead stopped without finishing, with what to do. The team keeps
+// running.
 test("E2E-AGENTS-032 a lead that ends its turns without done: two reminders, never Done, then the lead stopped", async ({
   page,
   baseURL,
@@ -470,8 +472,8 @@ test("E2E-AGENTS-033 two helpers on the lead's files: each waits its turn on the
   if (!baseURL) throw new Error("The driver must supply the stack origin");
   test.setTimeout(budget(3, 300_000));
   await bootstrap(page);
-  // Room for the lead and both helpers at once: what they wait for is the lead's files, never a slot (c16k B10b read
-  // "Waiting for a free slot · next" with slots free).
+  // Room for the lead and both helpers at once: what they wait for is the lead's files, never a slot (in real-world use
+  // before 17.0 it read "Waiting for a free slot · next" with slots free).
   for (const key of ["admission.slots", "admission.per_user"])
     expect(await limitValue(page, key), key).toBeGreaterThanOrEqual(3);
   const leadId = await edgeLead(
@@ -536,10 +538,11 @@ test("E2E-AGENTS-033 two helpers on the lead's files: each waits its turn on the
   await stopIfRunning(page, baseURL, leadId);
 });
 
-// E2E-AGENTS-036 (c17 U1, U3, U4 on the real stack; WEB-U-407, 408, 409): EDGE-Q's lead starts a helper on its own
-// files, then calls `shell` with `exit 3` at every step (the last reply repeats), so the runtime stops its run as a
-// repeated failure while the helper, which then holds the lead's files, keeps working. 45 s in, the helper reports and
-// keeps the files (its next reply waits 10 min), so the lead's wake waits for them and its composer takes no message.
+// E2E-AGENTS-036 (17.0's release candidate on the real stack; WEB-U-407, 408, 409): EDGE-Q's lead starts a helper on
+// its own files, then calls `shell` with `exit 3` at every step (the last reply repeats), so the runtime stops its run
+// as a repeated failure while the helper, which then holds the lead's files, keeps working. 45 s in, the helper reports
+// and keeps the files (its next reply waits 10 min), so the lead's wake waits for them and its composer takes no
+// message.
 test("E2E-AGENTS-036 a lead whose step keeps failing while its helper works: one short word, no offer the composer can't take, no red row", async ({
   page,
   baseURL,
@@ -609,7 +612,7 @@ test("E2E-AGENTS-036 a lead whose step keeps failing while its helper works: one
   await expect.soft(row).not.toHaveAccessibleName(/Failed/);
   // ... and none once the helper's report has woken the lead and its run waits for the files the helper holds: the
   // gateway lists the lead's wake as waiting (read from the API, so a page without c17's words still gets here), the
-  // composer says so (WEB-U-410), and takes no message (16p T4 offered one there).
+  // composer says so (WEB-U-410), and takes no message (a live check before 17.0 found one offered there).
   await expect
     .poll(
       async () =>
@@ -738,7 +741,8 @@ test("E2E-AGENTS-034 a team's ends in words: Markdown end card, a failed start, 
   await expect(page.getByLabel("Run status")).toHaveText(/^Done/, {
     timeout: afterStart(60_000),
   });
-  // The end card formats the lead's summary as its replies are: bold, never the marks (WEB-U-396, c16k B9c).
+  // The end card formats the lead's summary as its replies are: bold, never the marks (WEB-U-396, real-world use
+  // before 17.0).
   const end = page.locator(".team-end");
   await expect(end.locator("strong")).toHaveText("Sights table");
   await expect(end).toContainText(
@@ -746,14 +750,15 @@ test("E2E-AGENTS-034 a team's ends in words: Markdown end card, a failed start, 
     READ,
   );
   await expect(end).not.toContainText("**", READ);
-  // A run past a minute says minutes, never "61 s" (WEB-U-395, c16k B9: "Worked for 837 s").
+  // A run past a minute says minutes, never "61 s" (WEB-U-395, real-world use before 17.0: "Worked for 837 s").
   const worked = page.getByRole("button", { name: /^Worked for/ }).first();
   await expect(worked).toHaveAccessibleName(
     /^Worked for 1 min( \d+ s)?( · .+)?$/,
   );
   if ((await worked.getAttribute("aria-expanded")) === "false")
     await worked.click();
-  // A helper that couldn't start says so and why, in words (WEB-U-399, c16k B5: "unknown_reference: …").
+  // A helper that couldn't start says so and why, in words (WEB-U-399, real-world use before 17.0:
+  // "unknown_reference: …").
   await expect(
     page.getByText("Couldn't start a helper: profiled"),
   ).toBeVisible();
@@ -768,7 +773,8 @@ test("E2E-AGENTS-034 a team's ends in words: Markdown end card, a failed start, 
       await line.click();
   }
   await expect(why).toBeVisible();
-  // The lead's failed script reads as its error until Show more (WEB-U-400, c16k B9: ~20 frames before the error).
+  // The lead's failed script reads as its error until Show more (WEB-U-400, real-world use before 17.0: ~20 frames
+  // before the error).
   const step = page.getByRole("button", { name: /python3 -c/ }).first();
   if ((await step.getAttribute("aria-expanded")) === "false")
     await step.click();
@@ -790,7 +796,7 @@ test("E2E-AGENTS-034 a team's ends in words: Markdown end card, a failed start, 
   await expect(body).not.toContainText(RAW_KEY, READ);
 });
 
-// E2E-AGENTS-035 (16p T1c, GW-I-311, WEB-U-403; 16o live W1: two helpers stopped mid-run, and their files stayed in
+// E2E-AGENTS-035 (GW-I-311, WEB-U-403; a live check before 17.0: two helpers stopped mid-run, and their files stayed in
 // their own copies): EDGE-O's helper writes notes.md and ends its turn without reporting; when the team is stopped,
 // the gateway hands back what it changed, as its own report in the log, and the end note lists the file.
 test("E2E-AGENTS-035 a helper stopped before it reported is handed back by the gateway", async ({

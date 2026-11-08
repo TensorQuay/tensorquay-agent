@@ -162,7 +162,8 @@ describe("WEB-U-001 sequence and replay", () => {
     );
   });
 
-  // WEB-U-234: the gateway's shutdown frame is the reconnect it announces (UI-GUIDELINES §14; the 14b page pass, E4).
+  // WEB-U-234: the gateway's shutdown frame is the reconnect it announces (UI-GUIDELINES §14; a pass over the pages
+  // before 17.0).
   it("reads a restarting gateway as a reconnect, not a banner", () => {
     const state = apply(apply(emptyTranscript(), ready), {
       type: "error",
@@ -247,7 +248,8 @@ describe("WEB-U-013 attempts and interleaved calls", () => {
     expect(apply(state, warning)).toEqual(state);
   });
 
-  // WEB-U-252 (the 14b page pass, H7): "Time budget: 1530 of 1800 s used" read raw beside "Worked for 1 643 s".
+  // WEB-U-252 (a pass over the pages before 17.0): "Time budget: 1530 of 1800 s used" read raw beside
+  // "Worked for 1 643 s".
   it.each([
     ["wall_clock", "Time budget: 1\u202f530 of 1\u202f800 s used"],
     ["steps", "Step budget: 1\u202f200 of 1\u202f500 steps used"],

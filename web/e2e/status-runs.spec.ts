@@ -2,9 +2,9 @@ import { HOLD } from "./front/stream.mjs";
 import { createConversation, signIn } from "./session";
 import { expect, test, type Page } from "./test";
 
-// WEB-E2E-038 (GW-I-229, WEB-U-292; first-hour F7's follow-up): Settings › Status counts the tasks working on a step, so
-// an administrator restarts in a gap. Two tasks held mid-step read "2 tasks are working on a step"; once both runs have
-// ended, Check again reads the quiet line. A count only: no task's name reaches the section.
+// WEB-E2E-038 (GW-I-229, WEB-U-292; a first-hour check's follow-up): Settings › Status counts the tasks working on a
+// step, so an administrator restarts in a gap. Two tasks held mid-step read "2 tasks are working on a step"; once both
+// runs have ended, Check again reads the quiet line. A count only: no task's name reaches the section.
 
 /** Starts a run that holds after its narration, mid-step, on a new task; its id. */
 async function holdMidStep(page: Page): Promise<string> {

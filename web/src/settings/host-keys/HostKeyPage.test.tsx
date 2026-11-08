@@ -276,9 +276,9 @@ describe("WEB-U-142 the Add a key page", () => {
   );
 });
 
-// WEB-U-266 (the c14b first hour, F2): an http address was refused only on Save. It is now refused once the person
-// leaves the field, then checked as they type; an empty field left on the way through says nothing, and nothing else
-// is checked before Save.
+// WEB-U-266 (a first-hour check before 17.0): an http address was refused only on Save. It is now refused once the
+// person leaves the field, then checked as they type; an empty field left on the way through says nothing, and nothing
+// else is checked before Save.
 describe("WEB-U-266 the address is checked when its field is left", () => {
   it("refuses http on leaving the field, and clears as it becomes https", async () => {
     const { api, calls } = fakeHostKeys();

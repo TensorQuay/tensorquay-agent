@@ -127,7 +127,7 @@ beforeEach(() => {
 });
 afterEach(() => vi.restoreAllMocks());
 
-// WEB-U-422 (c17, the first-load levers' L1): the Desktop tool's step words (a click, a key, a scroll, an element's
+// WEB-U-422 (17.0's release candidate): the Desktop tool's step words (a click, a key, a scroll, an element's
 // role) are only ever shown on a Desktop task, so they load with the screen area, off the conversation page's first
 // load; a Desktop task asks for them as the page opens, so its steps never show an empty, raw or stand-in label.
 describe("WEB-U-422 the Desktop tool's step words leave the first load", () => {

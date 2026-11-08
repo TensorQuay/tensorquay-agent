@@ -218,8 +218,8 @@ describe("WEB-U-023 a person's tasks", () => {
   });
 });
 
-// WEB-U-357 (the 16f page pass, E4): an id that isn't one of this installation's people reads as not found, with the
-// way back, never an endless skeleton.
+// WEB-U-357 (a pass over the pages before 17.0): an id that isn't one of this installation's people reads as not found,
+// with the way back, never an endless skeleton.
 describe("WEB-U-357 a person who isn't here", () => {
   it("says so once the people are read", async () => {
     serve([]);

@@ -18,9 +18,10 @@ const queued = (id: string, text: string, email: string): QueuedMessage =>
     created_at: "2026-10-17T12:00:00Z",
   }) as unknown as QueuedMessage;
 
-// WEB-U-402 (c16k real-world B5, 17 Oct 2026): a message typed to a leading lead said "Sends when the agent finishes",
-// which for a lead is after its whole team. While its team runs and its run is active, the lead reads it at its next
-// check of the team (GW-I-307), and the page says so; the team's log shows it as told to the lead.
+// WEB-U-402 (real-world use before 17.0, 17 Oct 2026): a message typed to a leading lead said
+// "Sends when the agent finishes", which for a lead is after its whole team. While its team runs and its run is active,
+// the lead reads it at its next check of the team (GW-I-307), and the page says so; the team's log shows it as told to
+// the lead.
 describe("WEB-U-402 a message to a leading lead goes at its next check of the team", () => {
   it("words the held line only for a lead whose run is active while its team runs", () => {
     const line = (over: Partial<Parameters<typeof heldForLead>[0]>) =>

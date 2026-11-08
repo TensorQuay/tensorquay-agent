@@ -53,9 +53,9 @@ function page(docks: boolean) {
   return { close, end: () => hook.rerender(props(done, true)) };
 }
 
-// WEB-U-332 (the 16d page pass, Z25 at 390): where the panel lies over the conversation, a Screen panel that opened by
-// itself and that the person hasn't touched closes when the run ends, so the run's outcome is in sight; one the person
-// touched, or opened, stays; where the panel docks beside the conversation, nothing changes.
+// WEB-U-332 (a pass over the pages before 17.0, at 390): where the panel lies over the conversation, a Screen panel
+// that opened by itself and that the person hasn't touched closes when the run ends, so the run's outcome is in sight;
+// one the person touched, or opened, stays; where the panel docks beside the conversation, nothing changes.
 describe("WEB-U-332 a self-opened Screen panel gives the conversation back at the run's end", () => {
   it("closes, untouched, over the conversation", () => {
     const { close, end } = page(false);

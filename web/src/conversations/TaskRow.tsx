@@ -27,7 +27,8 @@ export type LeadRow = {
 
 /**
  * One task in the sidebar: its title (never a slug) and its status. Its group heading says when; the tooltip holds the
- * full title, the workspace and the full time (the live review of c8, L9, revised), and a shared title's name adds the time. Rename and Delete sit in a menu that appears on hover or focus.
+ * full title, the workspace and the full time (a live check before 17.0, revised), and a shared title's name adds the
+ * time. Rename and Delete sit in a menu that appears on hover or focus.
  */
 export function TaskRow({
   conversation,

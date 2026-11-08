@@ -107,8 +107,9 @@ describe("WEB-U-375 the handed-back list's separator", () => {
   });
 });
 
-// WEB-U-396 (16n T7; c16k real-world B9c, 17 Oct 2026): the end card showed the lead's summary with its Markdown marks
-// ("**Day-by-day plan**", "**Cost estimate table**"). It reads as the lead's reply does: formatted, never raw marks.
+// WEB-U-396 (a review and real-world use before 17.0, 17 Oct 2026): the end card showed the lead's summary with its
+// Markdown marks ("**Day-by-day plan**", "**Cost estimate table**"). It reads as the lead's reply does: formatted,
+// never raw marks.
 describe("WEB-U-396 the end note's summary is formatted", () => {
   it("renders the lead's Markdown, with no raw marks", async () => {
     render(
@@ -129,9 +130,9 @@ describe("WEB-U-396 the end note's summary is formatted", () => {
   });
 });
 
-// WEB-U-394 (c16k real-world B9b, 17 Oct 2026): a team that ran out of budget said only "The team used its whole
-// budget." under a green Done, with no word that the goal wasn't met or what to do. Its end note says so and gives the
-// next step; the team's own lines say what the 80 % and helpers' notices asked.
+// WEB-U-394 (real-world use before 17.0, 17 Oct 2026): a team that ran out of budget said only
+// "The team used its whole budget." under a green Done, with no word that the goal wasn't met or what to do. Its end
+// note says so and gives the next step; the team's own lines say what the 80 % and helpers' notices asked.
 describe("WEB-U-394 a budget end and the budget notices say what happens next", () => {
   it("gives a budget end its next step", () => {
     render(<TeamEndNote note={note({ reason: "budget", summary: null })} />);

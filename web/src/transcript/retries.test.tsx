@@ -69,8 +69,8 @@ describe("WEB-U-016 a model retry is part of its step, not a transcript notice",
   });
 
   // CORE-U-062, the link-aware retry: the runtime waited for its own link to the gateway, spending no attempt, and reports it
-  // once the link is back. The model call was lost with the link, so the line says the step starts over (first-hour F7):
-  // whole seconds, at least 1; never "Model request failed", and never a bare "Reconnected".
+  // once the link is back. The model call was lost with the link, so the line says the step starts over (a first-hour
+  // check): whole seconds, at least 1; never "Model request failed", and never a bare "Reconnected".
   it("says a retry after the gateway link came back asks the model again from the start, in whole seconds", () => {
     const words =
       "The connection to the server dropped for 1 s, so the model was asked again and this step started over.";
@@ -154,8 +154,9 @@ describe("WEB-U-304 a retry's tooltip says it in words before the runtime's code
     expect(screen.getAllByText(words)).toHaveLength(1);
   });
 
-  // The 16d page pass (Z27): the summary already says the reason ("… · the model's reply couldn't be read, retried
-  // once"), so the line under it, and the toggle's description, never say it again: only the codes after "Details:".
+  // A pass over the pages before 17.0: the summary already says the reason
+  // ("… · the model's reply couldn't be read, retried once"), so the line under it, and the toggle's description, never
+  // say it again: only the codes after "Details:".
   it("says the summary's reason once: the step's line keeps only what the summary doesn't say", () => {
     show([
       ...start,

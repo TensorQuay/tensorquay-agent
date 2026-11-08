@@ -303,7 +303,8 @@ function Arriving({ text }: { text: string }) {
 
 /**
  * The retries' tooltip: their words, then their codes after a "Details:" label (WEB-U-304). `said`, the words the
- * done step's summary already says, are left out, and with none left only the codes remain (the 16d page pass, Z27).
+ * done step's summary already says, are left out, and with none left only the codes remain (a pass over the pages
+ * before 17.0).
  */
 function retriesTitle(
   t: ReturnType<typeof useT>,
@@ -347,7 +348,8 @@ function Retries({ turn, id }: { turn: TurnView; id: string }) {
         {last.reason === "gateway_link"
           ? // The runtime's link to the gateway dropped (a restart, say) and came back. The model call it was waiting on
             // is gone with it, so the step is asked again from the start: the line says so, never a bare "reconnected"
-            // that hides the work starting over (first-hour F7). No attempt was spent, so it isn't a failure either.
+            // that hides the work starting over (a first-hour check). No attempt was spent, so it isn't a failure
+            // either.
             t("notice.askedAgain", {
               seconds: Math.max(1, Math.round(last.delayMs / 1000)),
             })

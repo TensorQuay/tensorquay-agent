@@ -202,8 +202,8 @@ test("WEB-U-145 administrators see who may use each shared key", async ({
   await axe(page);
 });
 
-// WEB-U-262 (the c14b first hour, F1): the Keys page heads each kind of key and says what it is for; right after a key
-// for a web service is saved, the connectors' section never reads as "no keys", and with a connector that takes a
+// WEB-U-262 (a first-hour check before 17.0): the Keys page heads each kind of key and says what it is for; right after
+// a key for a web service is saved, the connectors' section never reads as "no keys", and with a connector that takes a
 // person's key it offers its own add.
 for (const width of [1280, 390] as const)
   test(`WEB-U-262 each kind of key is headed and says what it is for ${width}`, async ({

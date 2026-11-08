@@ -92,7 +92,7 @@ export function ToolCard({
       : tool.output
         ? null
         : tool.result;
-  // A blank result has nothing to show: no Result heading over nothing (the 16d page pass, Z25).
+  // A blank result has nothing to show: no Result heading over nothing (a pass over the pages before 17.0).
   const shown = given === null ? null : namedRef(unmarked(given), tool, t);
   const folded = shown?.trim() ? shown : null;
   // A failed step's Python traceback reads as its last line until Show more (WEB-U-400).

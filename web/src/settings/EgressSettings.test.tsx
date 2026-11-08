@@ -119,7 +119,7 @@ describe("WEB-U-040 egress rules", () => {
     ).toBeNull();
   });
 
-  // WEB-U-421 (c16k real-world p02): Add a site opened with Ports empty, so the usual site needed 443 typed in.
+  // WEB-U-421 (real-world use before 17.0): Add a site opened with Ports empty, so the usual site needed 443 typed in.
   it("starts a new site at port 443", async () => {
     const fake = fakeEgress({ rules: listed });
     show(fake.api);
@@ -267,7 +267,7 @@ describe("WEB-U-040 egress rules", () => {
   });
 });
 
-// WEB-U-118 (the first hour's F20): a fresh install reaches nothing; ready-made lists let an administrator allow what
+// WEB-U-118 (a first-hour check): a fresh install reaches nothing; ready-made lists let an administrator allow what
 // tasks usually need in one step, each saying what it allows, with Open web asked first and never called read-only.
 describe("WEB-U-118 ready-made lists", () => {
   const lists = () => screen.getByRole("region", { name: "Ready-made lists" });

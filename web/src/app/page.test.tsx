@@ -400,7 +400,7 @@ describe("WEB-U-017 composer-first start", () => {
     expect(
       within(choices).getByRole("button", { name: "Model: Second model" }),
     ).toBeVisible();
-    // WEB-U-128 (candidate12 F2): a new task's workspace is new and empty, so its suggestions need nothing in it.
+    // WEB-U-128 (found before 17.0): a new task's workspace is new and empty, so its suggestions need nothing in it.
     for (const example of [
       "Make a sample sales spreadsheet and chart the totals by region",
       "Draft a one-page plan for launching a newsletter",

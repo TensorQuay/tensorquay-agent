@@ -71,7 +71,8 @@
   min-width: 0;
 }
 /* Time-placed lines (a team's log) between turns: close together, as one log (the S6 web review). One column as wide as
-   the transcript, so a long team line ends in "…" rather than widening every turn past it (the 14b page pass, H7). */
+   the transcript, so a long team line ends in "…" rather than widening every turn past it (a pass over the pages
+   before 17.0). */
 .transcript-lines {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -417,7 +418,7 @@ textarea.composer-input {
   text-overflow: ellipsis;
   min-width: 0;
 }
-/* An open step shows its whole line (the 16d page pass, Z25: a cut line lost what happens next). */
+/* An open step shows its whole line (a pass over the pages before 17.0: a cut line lost what happens next). */
 .activity-line[data-open] .activity-label {
   white-space: normal;
   overflow-wrap: anywhere;
@@ -762,7 +763,7 @@ textarea.composer-input {
  * (UX review 0927b, item 7).
  */
 /* The title gives way first, down to a few words; then the status truncates, whole in its tooltip, and never the
-   controls after it (c12 F18b, WEB-U-112). Nothing waits for the reader now, so no status must stay whole. */
+   controls after it (found before 17.0, WEB-U-112). Nothing waits for the reader now, so no status must stay whole. */
 .conversation-status {
   display: flex;
   align-items: center;
@@ -785,7 +786,7 @@ textarea.composer-input {
 }
 /*
  * Where the header is narrow (a phone, or beside the Files panel) the status keeps its word and gives up the rest
- * (c12 F18): a failure reads "Failed", its reason being the turn's outcome and still read here by assistive
+ * (found before 17.0): a failure reads "Failed", its reason being the turn's outcome and still read here by assistive
  * technology; the elapsed time is the transcript's. The title gives way to a few letters first.
  */
 /*
@@ -994,7 +995,7 @@ textarea.composer-input {
   font-size: var(--nav-font-size);
   line-height: var(--nav-line-height);
 }
-/* The live review of c7 (L1-L2): one row layout everywhere: the title takes the room and cuts with an ellipsis, the
+/* A live check before 17.0: one row layout everywhere: the title takes the room and cuts with an ellipsis, the
    time follows at the end, and the status has its own space after it. */
 .conversation-link-text {
   flex: 1;

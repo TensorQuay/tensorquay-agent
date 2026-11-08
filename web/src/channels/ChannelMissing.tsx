@@ -14,8 +14,8 @@ import { Button } from "../ui/Button";
  * A channel that couldn't be opened, as a task that couldn't is (UI-GUIDELINES §14: a visible message with a next step):
  * the page's bar keeps its place, and the message is centred under it with a way on. One that doesn't exist, or that
  * the reader isn't in (404, or 403), says so in the same words and leads back to the channels; trying again wouldn't
- * help. Any other failure offers Try again. Before, a bare grey line stood where the bar's title goes (the 16f page
- * pass, F-P07-1; WEB-U-381).
+ * help. Any other failure offers Try again. Before, a bare grey line stood where the bar's title goes (a pass over the
+ * pages before 17.0; WEB-U-381).
  */
 export function ChannelMissing({
   error,

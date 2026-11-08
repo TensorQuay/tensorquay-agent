@@ -321,8 +321,8 @@ export function useTeamPage({
     leadCarriesOn: carriesOn,
     stoppedByPerson,
     workspaceWait: teamWaitWords(place, t, holder),
-    // A helper stopped before it ever ran: its workspace may be the lead's files, and it was stopped (WEB-U-412, c17
-    // U7; it read "Send a message to begin. Your workspace starts empty.").
+    // A helper stopped before it ever ran: its workspace may be the lead's files, and it was stopped (WEB-U-412, 17.0's
+    // release candidate; it read "Send a message to begin. Your workspace starts empty.").
     stoppedLine:
       place?.role === "member" && place.helper_state === "stopped"
         ? t("team.stoppedUnstarted")

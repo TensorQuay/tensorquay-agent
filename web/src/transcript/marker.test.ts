@@ -6,7 +6,7 @@ const ID = "c0fa72a57fe9b250";
 const OPEN = `<untrusted-content source="screen" snapshot="1" kind="dom" id="${ID}">`;
 const CLOSE = `</untrusted-content id="${ID}">`;
 
-// WEB-U-363 (the 16e first hour, v01 and v02): the marker that tells the model a tool's text came from outside the
+// WEB-U-363 (a first-hour check before 17.0): the marker that tells the model a tool's text came from outside the
 // conversation (tqa-tools untrusted.rs) is the model's, never the person's: a card shows the text inside it, without
 // the tag lines.
 describe("WEB-U-363 a tool's text without the model's marker lines", () => {

@@ -14,10 +14,10 @@ const messages = (file: string): Record<string, string> =>
 const reference = messages(join("src", "i18n", "locales", "en.json"));
 const IO = reference["fail.io"];
 
-// WEB-U-392 (16n P0-budget): the copy a run's failure shows (fail, retry, retryShort, quota and the server's refusals)
-// loads on its first use, so the conversation page's first scripts stay within 245,760 B (WEB-U-014) with room for
-// fixes. The browser's own refusals (no connection, a timeout) and the request errors stay core: they show when a
-// download may not work.
+// WEB-U-392 (a review before 17.0): the copy a run's failure shows (fail, retry, retryShort, quota and the server's
+// refusals) loads on its first use, so the conversation page's first scripts stay within 245,760 B (WEB-U-014) with
+// room for fixes. The browser's own refusals (no connection, a timeout) and the request errors stay core: they show
+// when a download may not work.
 describe("WEB-U-392 run-failure copy loads on its first use", () => {
   it("keeps the failure copy out of the core catalogue, except what shows when the network may be down", async () => {
     const { FAILURE_KEYS } = await import("./translate");

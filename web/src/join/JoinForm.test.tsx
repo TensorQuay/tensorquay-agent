@@ -127,7 +127,7 @@ describe("WEB-U-023 join", () => {
     );
   });
 });
-// WEB-U-355 (the 16f page pass, E1): a short password is said under the field in the app's words, never the
+// WEB-U-355 (a pass over the pages before 17.0): a short password is said under the field in the app's words, never the
 // browser's own bubble, and nothing is sent.
 describe("WEB-U-355 join's password, said by the page", () => {
   it("says a short password and sends nothing", async () => {

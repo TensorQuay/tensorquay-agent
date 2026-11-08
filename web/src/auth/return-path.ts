@@ -1,8 +1,8 @@
 /** One path segment of an app page: letters, digits, `-`, `_` and `.`, never starting with a dot. */
 const SEGMENT = "[A-Za-z0-9_-][A-Za-z0-9._-]*";
 /**
- * The app's own pages a person may come back to after signing in again (UI-GUIDELINES §14; the 14b page pass, E6;
- * WEB-U-257): a task, Channels and a channel, Workspaces, and Settings with its sections and their pages.
+ * The app's own pages a person may come back to after signing in again (UI-GUIDELINES §14; a pass over the pages
+ * before 17.0; WEB-U-257): a task, Channels and a channel, Workspaces, and Settings with its sections and their pages.
  */
 const APP_PAGE = new RegExp(
   `^/(?:c/[A-Za-z0-9-]+|channels(?:/[A-Za-z0-9-]+)?|workspaces|settings(?:/${SEGMENT}){0,3})$`,

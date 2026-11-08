@@ -82,7 +82,7 @@ function fake(answer: (query: UsageQuery) => Promise<UsageReport>) {
   };
   return { api, usage };
 }
-/** The routes the model picker knows: "local" has no display name (the quick-start route, candidate12 F14). */
+/** The routes the model picker knows: "local" has no display name (the quick-start route, found before 17.0). */
 const catalogue = {
   items: [
     {

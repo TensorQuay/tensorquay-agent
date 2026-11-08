@@ -114,7 +114,7 @@ export function HostKeyList({
       <h2 id={heading} className="type-body-strong">
         {t("hostKeys.title")}
       </h2>
-      {/* What the section is for, beside the connectors' keys below it (the c14b first hour, F1; WEB-U-262). */}
+      {/* What the section is for, beside the connectors' keys below it (a first-hour check before 17.0; WEB-U-262). */}
       <p className="type-small muted">{t("hostKeys.intro")}</p>
       {notice && (
         <p className="type-small" role="status">

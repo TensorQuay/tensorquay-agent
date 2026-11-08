@@ -111,8 +111,8 @@ describe("WEB-U-018 environment picker", () => {
     );
   });
 
-  // The 16d page pass (Z09): without a description the line lists the tools, and a desktop was one more of its commas
-  // ("Shell, Browser, Desktop · 2 CPUs"); it is marked as a described one is, after the tools.
+  // A pass over the pages before 17.0: without a description the line lists the tools, and a desktop was one more of
+  // its commas ("Shell, Browser, Desktop · 2 CPUs"); it is marked as a described one is, after the tools.
   it("marks an undescribed desktop environment as a Desktop after its tools", () => {
     render(
       <EnvironmentPicker
@@ -147,7 +147,7 @@ describe("WEB-U-018 environment picker", () => {
     ).toHaveTextContent(/^Screen only Desktop$/);
   });
 
-  // The 16d page pass (Z09's zh capture): the tools were joined with ", " in every language; Chinese and Japanese list
+  // A pass over the pages before 17.0: the tools were joined with ", " in every language; Chinese and Japanese list
   // with 、 (as limits.ceiling does), and a language without its own separator keeps English's.
   it("joins the tools with the reader's own list separator", () => {
     const tools = ["shell", "python", "build"] as const;

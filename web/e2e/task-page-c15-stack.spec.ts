@@ -8,7 +8,7 @@ import { chooseModel } from "./model";
 import { afterStart, budget, scaled } from "./stack-start";
 import { bootstrap } from "./ux/flow";
 
-// The c15 feature matrix's gaps on the task page (feature-matrix-c15, A7, A11, T15 and T21): what had a unit test and a
+// The feature matrix's gaps on the task page before 17.0 (A7, A11, T15 and T21): what had a unit test and a
 // fake-front spec but no real-stack test, now on the task-page suite's stack with the scripted model in
 // deploy/tests/fixtures/task-page.json. Each case makes its own tasks and leaves the suite's own spec and result alone.
 test.skip(

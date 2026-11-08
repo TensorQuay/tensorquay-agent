@@ -44,8 +44,9 @@ describe("WEB-U-066 an icon button's tooltip", () => {
   });
 });
 
-// WEB-U-267 (the c14b first hour, F4): with the Files panel open, the task header's ⋯ sits at its page's right edge and
-// its tooltip ran under the panel. Inside a bounded page it ends at the page's edge, whatever room the window has.
+// WEB-U-267 (a first-hour check before 17.0): with the Files panel open, the task header's ⋯ sits at its page's right
+// edge and its tooltip ran under the panel. Inside a bounded page it ends at the page's edge, whatever room the window
+// has.
 describe("WEB-U-267 a tooltip stays inside its page", () => {
   it("ends at the page's right edge, not the window's", () => {
     render(

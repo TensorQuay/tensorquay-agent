@@ -64,7 +64,7 @@ async function checkHeader(page: Page, origin: string | null) {
   expect(moreShown.width).toBeCloseTo(moreBox.width, 0);
   // The title keeps some room: at least a few characters, with the rest in its tooltip.
   expect((await shown(title)).width).toBeGreaterThan(40);
-  // The run status gives way after the title and before the controls (c12 F18b, WEB-U-112, superseding finding T1):
+  // The run status gives way after the title and before the controls (found before 17.0, WEB-U-112):
   // it keeps room for its first word ("Done"), and has its tooltip (the whole text, or how long a finished run took).
   expect((await shown(status)).width).toBeGreaterThan(20);
   await expect(status).toHaveAttribute("title", /\S/);

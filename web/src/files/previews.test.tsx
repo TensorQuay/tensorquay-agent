@@ -135,8 +135,8 @@ describe("WEB-U-087 a web page in the Files panel", () => {
     expect(second.getAttribute("sandbox")).toBe("allow-scripts");
   });
 
-  // WEB-U-254 (the 14b page pass, F4): a link followed inside the page leaves the frame blank (the sandbox blocks it);
-  // its second load says why, and Reload brings the page back without the note.
+  // WEB-U-254 (a pass over the pages before 17.0): a link followed inside the page leaves the frame blank (the sandbox
+  // blocks it); its second load says why, and Reload brings the page back without the note.
   it("says why the frame went blank after a link, until Reload", async () => {
     files["page.htm"] = content("page.htm", 10, '<a href="/">x</a>');
     show("page.htm");
@@ -462,7 +462,8 @@ describe("WEB-U-088 a spreadsheet in the Files panel", () => {
     expect(screen.queryByRole("button", { name: "Expand" })).toBeNull();
   });
 
-  // WEB-U-255 (the 14b page pass, F8): a file too large to preview shows only a note, so it offers no Expand.
+  // WEB-U-255 (a pass over the pages before 17.0): a file too large to preview shows only a note, so it offers no
+  // Expand.
   it.each([
     ["big.html", LIMITS.preview_html_bytes, "This page is too large"],
     ["huge.xlsx", LIMITS.preview_sheet_bytes, "This spreadsheet is too large"],

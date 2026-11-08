@@ -650,8 +650,8 @@ describe("WEB-U-280 the computer-use caps per run", () => {
       within(section).getByRole("row", {
         name: /Screenshots a run may send the model/,
       }),
-      // WEB-U-372 (16e's first hour, live): a running desktop keeps the caps it linked with, so the row says when it
-      // applies as it works: to desktops that start after the change, never "the next run".
+      // WEB-U-372 (a live first-hour check before 17.0): a running desktop keeps the caps it linked with, so the row
+      // says when it applies as it works: to desktops that start after the change, never "the next run".
     ).toHaveTextContent(
       /200 screenshots.*Applies to desktops that start after the changeEdit$/,
     );
@@ -678,8 +678,8 @@ describe("WEB-U-280 the computer-use caps per run", () => {
   });
 });
 
-// WEB-U-361 (the 16f page pass, E11): on a phone each limit is a card, and its value needs no "Value" label above it:
-// the limit's name says what it is (the column header stays for screen readers and wide screens).
+// WEB-U-361 (a pass over the pages before 17.0): on a phone each limit is a card, and its value needs no "Value" label
+// above it: the limit's name says what it is (the column header stays for screen readers and wide screens).
 describe("WEB-U-361 a limit's card names no Value", () => {
   it("leaves the value cells unlabelled", async () => {
     show(fakeLimits().api);

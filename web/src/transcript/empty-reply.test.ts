@@ -5,9 +5,9 @@ import { english } from "../i18n/translate";
 import { failureCode, failureNext, failureReason } from "./failure-copy";
 import { retryShort, retryWords } from "./retry-copy";
 
-// WEB-U-364 (the 16e first hour, s26): a model that answers with nothing (the runtime's `empty_response`, CORE-U) was
-// said as "The model provider refused the request". Nothing refused it: the run and its retries say the model answered
-// with nothing, and that sending again usually helps. A real refusal keeps its words.
+// WEB-U-364 (a first-hour check before 17.0): a model that answers with nothing (the runtime's `empty_response`,
+// CORE-U) was said as "The model provider refused the request". Nothing refused it: the run and its retries say the
+// model answered with nothing, and that sending again usually helps. A real refusal keeps its words.
 describe("WEB-U-364 an empty model reply says so", () => {
   it("words a run ended by empty replies, on a native route and on a text route", () => {
     for (const reason of [

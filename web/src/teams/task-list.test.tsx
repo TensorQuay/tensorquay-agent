@@ -302,8 +302,8 @@ describe("WEB-U-226 deleting a lead task", () => {
   });
 });
 
-// WEB-U-409 (c17 U4; 16p live T4, c16p-W3-01-t4-header (b)): the sidebar showed the red failed mark on a lead whose
-// last step had failed while its team ran on; its page said it waits for its helpers, who wake it. While its team
+// WEB-U-409 (17.0's release candidate; a live check before 17.0): the sidebar showed the red failed mark on a lead
+// whose last step had failed while its team ran on; its page said it waits for its helpers, who wake it. While its team
 // runs, a lead's failed run is not the task's outcome: no red mark until the team has ended.
 describe("WEB-U-409 no red failure mark on a lead whose team still runs", () => {
   it("shows none while the team runs", async () => {

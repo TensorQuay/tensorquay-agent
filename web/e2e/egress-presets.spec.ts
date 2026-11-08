@@ -4,7 +4,7 @@ import { signIn } from "./session";
 import { axe, capture, fitsColumn } from "./settings-page";
 import { expect, test, type Page } from "./test";
 
-// WEB-E2E-034 (the first hour's F20): a fresh install reaches no site, so New task says so and leads an administrator
+// WEB-E2E-034 (a first-hour check): a fresh install reaches no site, so New task says so and leads an administrator
 // to Internet access, whose ready-made lists allow what tasks usually need in one step (WEB-U-118/119), at 1280 and
 // 390 in both themes. Each run puts the shared fake store's lists back as it found them.
 const PRESETS = "/api/v1/admin/egress/presets";

@@ -24,8 +24,9 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-// The 14b page pass, E5: offline, the files panel's error replaced the whole panel, its header too: no name, no close,
-// the text flush at its top edge. The failure keeps the panel's frame, its name and its close, and Try again loads it.
+// A pass over the pages before 17.0: offline, the files panel's error replaced the whole panel, its header too: no
+// name, no close, the text flush at its top edge. The failure keeps the panel's frame, its name and its close, and Try
+// again loads it.
 describe("WEB-U-253 the files panel keeps its header above an error", () => {
   it("names the panel, closes it, and loads it again", async () => {
     const onClose = vi.fn();

@@ -27,7 +27,7 @@ export const ROUTE_CHECK_NEXT_KEY = ["admin-routes-check-next"];
 export const ROUTE_OPEN_KEY = ["admin-routes-open"];
 export type RouteOpening = { name: string; paste?: boolean; preset?: Preset };
 
-/** Adds (`name` null) or edits a model route, as a page of its own (WEB-U-115, the first hour's F9). */
+/** Adds (`name` null) or edits a model route, as a page of its own (WEB-U-115, a first-hour check). */
 export function RoutePage({
   me,
   api,

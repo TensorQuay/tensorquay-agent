@@ -228,7 +228,7 @@ describe("WEB-U-122 the live count on the reader's clock", () => {
   });
 });
 
-// WEB-U-414 (c17 U9; 16u live L2, c16u-L2 pages.json b-mid-2, b-mid-3): a fresh page on an ended lead task read
+// WEB-U-414 (17.0's release candidate; a live check before 17.0): a fresh page on an ended lead task read
 // "Working… · 4 min 46 s" for a moment while the stream replayed, before Done: the replay had its run's start but
 // not yet its end. A run that started before the task's record was last active ended as the record says; a run that
 // started after it is new, and works.

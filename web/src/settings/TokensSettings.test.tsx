@@ -163,8 +163,8 @@ describe("WEB-U-023 API tokens", () => {
   });
 });
 
-// WEB-U-355 (the 16f page pass, E1): an empty name is said under the field in the app's words, never by the browser's
-// own bubble (UI-GUIDELINES §5, input errors), and nothing is sent.
+// WEB-U-355 (a pass over the pages before 17.0): an empty name is said under the field in the app's words, never by the
+// browser's own bubble (UI-GUIDELINES §5, input errors), and nothing is sent.
 describe("WEB-U-355 the token's name, said by the page", () => {
   it("says an empty name under the field and sends nothing", async () => {
     fetch.mockImplementation(() => json({ items: [] }));

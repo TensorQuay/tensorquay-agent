@@ -148,7 +148,7 @@ describe("WEB-U-068 the recovery countdown", () => {
   });
 });
 
-// c12 F18/F18b: the header's status gives way before its controls. The stylesheet truncates it (whole in its
+// Found before 17.0: the header's status gives way before its controls. The stylesheet truncates it (whole in its
 // tooltip) and, under 768 px, shows a failure's short word; its reason is also the turn's outcome in the transcript.
 describe("WEB-U-112 a status that gives way", () => {
   const failed = [
@@ -209,10 +209,10 @@ describe("WEB-U-155 the header's status is one short word", () => {
     expect(screen.getByRole("status")).toHaveTextContent(/^Working…$/);
   });
 
-  // The 16d page pass (Z24): at 390 the desktop wait's sentence was cut mid-word ("…using them a…"), when it frees lost;
-  // a longer short squeezed the title to a few letters. The header says "Waiting…"; the composer says when it frees.
-  // WEB-U-397 (c16k real-world A4/A6): a finished task's desktop now gives way to a waiting one (GW-I-305), so the
-  // line no longer promises an idle wait.
+  // A pass over the pages before 17.0: at 390 the desktop wait's sentence was cut mid-word ("…using them a…"), when it
+  // frees lost; a longer short squeezed the title to a few letters. The header says "Waiting…"; the composer says when
+  // it frees. WEB-U-397 (real-world use before 17.0): a finished task's desktop now gives way to a waiting one
+  // (GW-I-305), so the line no longer promises an idle wait.
   it("words a wait for a free desktop short, the whole in its tooltip and read", () => {
     const whole =
       "Waiting for a free desktop: other tasks are using them all. One frees soon after another task finishes.";

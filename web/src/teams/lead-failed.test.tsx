@@ -29,10 +29,10 @@ const failed = [
   }),
 ].reduce(apply, emptyTranscript());
 
-// WEB-U-401 (16n T4, the lead's approved design; c16k real-world B9c, 17 Oct 2026): the lead's header turned red
-// "Failed" while both helpers worked; a helper's report woke it 15 s later and it finished. While its team runs and a
-// helper works, a failed lead waits for its helpers: the header says so in the attention tone, the failure stays in
-// the transcript with what happens next. Red Failed when nothing will wake it.
+// WEB-U-401 (a review before 17.0, the lead's approved design; real-world use before 17.0, 17 Oct 2026): the lead's
+// header turned red "Failed" while both helpers worked; a helper's report woke it 15 s later and it finished. While its
+// team runs and a helper works, a failed lead waits for its helpers: the header says so in the attention tone, the
+// failure stays in the transcript with what happens next. Red Failed when nothing will wake it.
 describe("WEB-U-401 a lead's failed run while its helpers work", () => {
   it("is waiting only while its team runs and a helper works, whatever its run (WEB-U-415)", () => {
     const carries = (over: Partial<Parameters<typeof leadCarriesOn>[0]>) =>
@@ -90,9 +90,9 @@ describe("WEB-U-401 a lead's failed run while its helpers work", () => {
   });
 });
 
-// WEB-U-407 (c17 U1; 16p live T4, c16p-W3-01-t4-header): under the failed step the page said "You can also send it a
-// message" while the composer below said "You can reply once it starts." and took nothing: the lead's files were a
-// helper's turn. The next step offers a message only when the composer takes one.
+// WEB-U-407 (17.0's release candidate; a live check before 17.0): under the failed step the page said
+// "You can also send it a message" while the composer below said "You can reply once it starts." and took nothing: the
+// lead's files were a helper's turn. The next step offers a message only when the composer takes one.
 describe("WEB-U-407 a failed lead's next step offers a message only when the composer takes one", () => {
   const carries = leadCarriesOn(
     { lead: true, state: "running", helpersWorking: true },
@@ -123,7 +123,7 @@ describe("WEB-U-407 a failed lead's next step offers a message only when the com
   });
 });
 
-// WEB-U-408 (c17 U3; c16p-W3-01-t4-header): at 1280 the header's short word was cut, "Waiting for its …". WEB-U-155
+// WEB-U-408 (17.0's release candidate): at 1280 the header's short word was cut, "Waiting for its …". WEB-U-155
 // promises one short word at every width: "Waiting…", the whole in its tooltip, read, and under the failed step.
 describe("WEB-U-408 the failed lead's header short word is one word", () => {
   it("reads Waiting… with the whole in its tooltip and read", () => {

@@ -155,8 +155,8 @@ describe("WEB-U-071 sidebar task list", () => {
     expect(quiet.querySelector(".conversation-workspace")).toBeNull();
   });
 
-  // The live review of c8 (L9), revised: a row shows no time (its group heading says when); its tooltip holds the full title,
-  // the workspace and the full time.
+  // A live check before 17.0, revised: a row shows no time (its group heading says when); its tooltip holds the full
+  // title, the workspace and the full time.
   it("shows no time on a row, and the full title and time in its tooltip", async () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     vi.setSystemTime(now);

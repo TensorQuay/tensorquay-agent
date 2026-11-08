@@ -202,8 +202,8 @@ function KeyForm({
       };
   const [replacing, setReplacing] = useState(false);
   const [tried, setTried] = useState(false);
-  // The address is checked once the person leaves its field with something in it, then as they type (the c14b first
-  // hour, F2; WEB-U-266): "Keys are sent only over https." shouldn't wait for Save.
+  // The address is checked once the person leaves its field with something in it, then as they type (a first-hour check
+  // before 17.0; WEB-U-266): "Keys are sent only over https." shouldn't wait for Save.
   const [addressLeft, setAddressLeft] = useState(false);
   const [refused, setRefused] = useState<Problems>({});
   const [failure, setFailure] = useState<string | null>(null);

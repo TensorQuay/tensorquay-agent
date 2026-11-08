@@ -41,7 +41,8 @@ const marks = {
 
 /**
  * A desktop call refused by a per-run cap (or a screen too detailed to send) is the limit doing its job, not a failure
- * (the 16d page pass, Z25; WEB-U-330): its line says what happens next, and its mark is a muted "Limit reached".
+ * (a pass over the pages before 17.0; WEB-U-330): its line says what happens next, and its mark is a muted
+ * "Limit reached".
  */
 const LIMITS = new Set([
   "screenshot_limit",

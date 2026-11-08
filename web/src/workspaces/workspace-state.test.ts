@@ -130,9 +130,9 @@ describe("WEB-U-025 workspace state", () => {
   });
 });
 
-// The 14b page pass (H4): a helper's own copy (kind helper_copy, named by its task's title) says so in the reader's
-// words, renamed or not, and searches as shown; a person's own workspace shows its name as it is, even one that ends
-// in "(helper copy)".
+// A pass over the pages before 17.0: a helper's own copy (kind helper_copy, named by its task's title) says so in the
+// reader's words, renamed or not, and searches as shown; a person's own workspace shows its name as it is, even one
+// that ends in "(helper copy)".
 describe("WEB-U-025 a helper's copy is named in the reader's words", () => {
   const chinese = translator("zh-Hans", catalogue(zh));
   const copy = workspace({ name: "researcher", kind: "helper_copy" });

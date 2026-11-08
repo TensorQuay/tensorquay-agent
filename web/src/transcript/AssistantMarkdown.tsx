@@ -101,7 +101,7 @@ function components(t: Translate): Components {
         .map((child) => (child.type === "text" ? child.value : ""))
         .join("");
       // An empty fence (the model opened a block and wrote nothing in it) is no code to copy: no box at all, while
-      // the text around it stays (the c14b first hour, F9; WEB-U-296).
+      // the text around it stays (a first-hour check before 17.0; WEB-U-296).
       if (!text.trim()) return null;
       const language =
         String(code.properties.className ?? "").match(

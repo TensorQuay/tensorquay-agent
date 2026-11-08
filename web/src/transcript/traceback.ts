@@ -4,9 +4,9 @@ const START = /^(\[std(?:out|err)\] )?Traceback \(most recent call last\):\s*$/;
 const INSIDE = /^(\[std(?:out|err)\] )?\s/;
 
 /**
- * A step's output with each Python traceback folded to its last line, the error itself (WEB-U-400; c16k real-world B9:
- * ~20 lines of `File "/usr/lib/python3.13/urllib/request.py"` before "HTTP Error 429: Too Many Requests"). Whatever
- * is around a trace stays; `folded` says whether anything was left out.
+ * A step's output with each Python traceback folded to its last line, the error itself (WEB-U-400; real-world use
+ * before 17.0: ~20 lines of `File "/usr/lib/python3.13/urllib/request.py"` before "HTTP Error 429: Too Many Requests").
+ * Whatever is around a trace stays; `folded` says whether anything was left out.
  */
 export function foldTraceback(text: string): { text: string; folded: boolean } {
   const lines = text.split("\n");

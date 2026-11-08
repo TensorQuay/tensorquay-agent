@@ -200,8 +200,8 @@ describe("WEB-U-014 assistant Markdown", () => {
     expect(document.querySelector("textarea")).toBeNull();
   });
 
-  // WEB-U-296 (the c14b first hour, F9): a model's empty fenced block, its opening fence alone or with only blank lines
-  // inside, shows no code box with Copy code; the answer's own text before and after it stays.
+  // WEB-U-296 (a first-hour check before 17.0): a model's empty fenced block, its opening fence alone or with only
+  // blank lines inside, shows no code box with Copy code; the answer's own text before and after it stays.
   it.each([
     ["an opening fence with nothing after it", "Done.\n\n```json\n"],
     [

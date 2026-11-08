@@ -301,7 +301,8 @@ function EnvironmentRow({
   const origin = base
     ? t("environments.derivedFrom", { base })
     : t("environments.builtIn");
-  // A built-in the gateway registered itself was found on this host, not added here (the 14b page pass, D04).
+  // A built-in the gateway registered itself was found on this host, not added here (a pass over the pages
+  // before 17.0).
   const source = t(
     item.seed === null && item.last_set_by === "builtin"
       ? "environments.foundOnHost"

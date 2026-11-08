@@ -103,7 +103,7 @@ for (const [width, colorScheme] of [
     await expect(
       page.getByRole("img", { name: /Tokens per day/ }),
     ).toBeVisible();
-    // WEB-U-127 (candidate12 F21): the chart has its dates and its busiest day in words; numbers are written one way.
+    // WEB-U-127 (found before 17.0): the chart has its dates and its busiest day in words; numbers are written one way.
     const chart = page.locator("figure.usage-chart");
     await expect(chart.locator(".usage-axis span").first()).toBeVisible();
     await expect(chart.locator("figcaption")).toHaveText(

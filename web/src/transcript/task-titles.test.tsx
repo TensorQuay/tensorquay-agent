@@ -99,7 +99,7 @@ function page(
   return { cache, view };
 }
 
-// The live review of c8 (L7): the gateway names a task in 3 to 6 words after its first completed run; the page shows
+// A live check before 17.0: the gateway names a task in 3 to 6 words after its first completed run; the page shows
 // the name at once, and a person's rename is never replaced.
 describe("WEB-U-081 short task titles", () => {
   it("records the name from task.titled without moving the sequence or the transcript", () => {

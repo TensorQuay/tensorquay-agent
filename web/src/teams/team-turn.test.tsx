@@ -10,7 +10,7 @@ import { RunStatus } from "../transcript/RunStatus";
 import { teamView } from "./binding";
 import { helperStateWords } from "./team-words";
 
-// WEB-U-393 (16n T5; c16k real-world B10b and B8, 17 Oct 2026): a lead waiting for its own helpers to finish on its
+// WEB-U-393 (a review and real-world use before 17.0, 17 Oct 2026): a lead waiting for its own helpers to finish on its
 // files read "Waiting for a free slot · next", then "Waiting for the workspace", with 4 of 8 slots free; the strip said
 // a my_files helper waited "for a slot"; and at 1280 with the files panel open the header was cut to "Waiting for th…".
 // A team's turn on the lead's files says so, and the header shows "Waiting…", the whole in its tooltip and read.

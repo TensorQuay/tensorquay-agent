@@ -53,7 +53,7 @@ export function EnvironmentPicker({
       </>
     );
   // Undescribed, the line lists the tools, and a desktop is marked after them as a described one is, never one more
-  // of their commas (the 16d page pass, Z09).
+  // of their commas (a pass over the pages before 17.0).
   const tools = (values: readonly Capability[]) => {
     const others = values.filter((value) => value !== "desktop");
     if (others.length === values.length) return capabilityNames(values, t);

@@ -143,7 +143,7 @@ describe("WEB-U-025 starting a task on a workspace", () => {
     expect(document.querySelector(".start-hint")).toBeNull();
   });
 
-  // WEB-U-128 (candidate12 F2): with a workspace that holds files, the suggestions work on its files.
+  // WEB-U-128 (found before 17.0): with a workspace that holds files, the suggestions work on its files.
   it("suggests work on the files of a chosen workspace that has some", async () => {
     const sales = workspace({ name: "Sales analysis" });
     show([sales], sales.id);

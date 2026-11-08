@@ -43,7 +43,7 @@ const INVITATION_TONES = {
 } as const;
 
 /**
- * An email that may break only after its @ or a dot, never inside a word (WEB-U-117, the first hour's F19): read whole,
+ * An email that may break only after its @ or a dot, never inside a word (WEB-U-117, a first-hour check): read whole,
  * on one line wherever the table has room.
  */
 function breakable(email: string) {
@@ -221,7 +221,7 @@ function Administration({ me, clock }: { me: User; clock: () => Date }) {
                           }))}
                           value={account.role}
                           disabled={change.pending}
-                          // Your own role is another administrator's to change (WEB-U-117, the first hour's F19).
+                          // Your own role is another administrator's to change (WEB-U-117, a first-hour check).
                           disabledReason={own ? t("users.ownRole") : undefined}
                           onChange={(role) =>
                             void update(account, {

@@ -553,7 +553,8 @@ describe("WEB-U-299 Status's sections and verdict", () => {
       await vi.advanceTimersByTimeAsync(STATUS_REFRESH_MS);
       const line = await screen.findByText(failed);
       expect(line).toHaveAttribute("role", "status");
-      // WEB-U-361 (the 16f page pass, E15): an older read shown is quiet, never the danger tone under a green answer.
+      // WEB-U-361 (a pass over the pages before 17.0): an older read shown is quiet, never the danger tone under a
+      // green answer.
       expect(line).toHaveClass("muted");
       expect(line).not.toHaveClass("field-error");
       expect(screen.queryByText("The status could not be loaded.")).toBeNull();

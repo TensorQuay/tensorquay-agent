@@ -28,7 +28,7 @@ function remember(value: "open" | "closed") {
 }
 
 /**
- * Closed until the person opens it (candidate12 F6, WEB-U-124: it never opens by itself, even on a new, empty task).
+ * Closed until the person opens it (found before 17.0, WEB-U-124: it never opens by itself, even on a new, empty task).
  * Where it docks beside the conversation (`docks`, use-task-layout: the layout's own width, WEB-U-170) their choice is
  * remembered per browser; where it would lie over the whole column it opens on request only. Closing returns focus to
  * the bar's toggle.

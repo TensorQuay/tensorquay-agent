@@ -124,7 +124,8 @@ test("WEB-E2E-024 a lead task and its helpers: list, strip, question, helper pag
   await task.getByRole("button", { name: "More actions for writer" }).click();
   await page.getByRole("menuitem", { name: "Stop helper" }).click();
   const stopHelper = page.getByRole("dialog", { name: "Stop writer?" });
-  // A person's Stop means "not this part" (the c16 live check, LC-08): the dialog says the lead won't be asked to redo it.
+  // A person's Stop means "not this part" (a live check before 17.0): the dialog says the lead won't be asked to redo
+  // it.
   await expect(stopHelper).toContainText(
     "writer stops now. Its task and files stay. The lead is told not to redo its part.",
   );
@@ -190,7 +191,7 @@ test("WEB-E2E-024 the strip appears live on the page that started the team", asy
   ).toBeVisible();
 });
 
-// WEB-U-327 on the fake front (the c16 live check, LC-04): the lead's read of a person's step-in says how many
+// WEB-U-327 on the fake front (a live check before 17.0): the lead's read of a person's step-in says how many
 // messages it read; the model's marked block, "your person" and the message's words never show in the step.
 test("WEB-E2E-024 a team read's step says how many messages, never the block for the model", async ({
   page,
@@ -237,8 +238,8 @@ test("WEB-E2E-024 at 390 px the strip is one line that opens All helpers", async
   await expect(sheet.getByText("Waiting for a slot (1 ahead)")).toBeVisible();
 });
 
-// The 14b page pass (H7): a team line is one line ending in "…", so a long report never widens the lead's transcript;
-// before, every turn grew to that line's width and the end note ran off a phone's screen.
+// A pass over the pages before 17.0: a team line is one line ending in "…", so a long report never widens the lead's
+// transcript; before, every turn grew to that line's width and the end note ran off a phone's screen.
 for (const width of [390, 1280] as const)
   test(`WEB-E2E-024 at ${width} px a long team line never scrolls the lead's transcript sideways`, async ({
     page,
@@ -283,8 +284,9 @@ test("WEB-E2E-024 with agent teams off there is no trace of them", async ({
   );
 });
 
-// WEB-U-369 (16e's first hour, s21/s22): at 1280 with three helpers of long names, the chips give way (each name cut
-// with "…", whole in its tooltip) and never run under the budget, and "All helpers" stays on one line; in en and zh.
+// WEB-U-369 (a first-hour check before 17.0): at 1280 with three helpers of long names, the chips give way (each name
+// cut with "…", whole in its tooltip) and never run under the budget, and "All helpers" stays on one line; in en and
+// zh.
 for (const language of ["en", "zh-Hans"] as const)
   test(`WEB-U-369 three long-named helpers at 1280 keep the strip on one line (${language})`, async ({
     page,
@@ -337,8 +339,9 @@ for (const language of ["en", "zh-Hans"] as const)
     ).toBe(true);
   });
 
-// WEB-U-401 (16n T4; c16k real-world B9c): a lead whose run failed while a helper works waits for its helpers in the
-// attention tone, the failure in its transcript with what happens next; once no helper works, it reads Failed again.
+// WEB-U-401 (a review and real-world use before 17.0): a lead whose run failed while a helper works waits for its
+// helpers in the attention tone, the failure in its transcript with what happens next; once no helper works, it reads
+// Failed again.
 test("WEB-U-401 a lead's failed run while its helpers work waits for them", async ({
   page,
 }) => {

@@ -350,7 +350,8 @@ describe("WEB-U-047 a default people cannot pick", () => {
   });
 });
 
-// The 14b page pass (D04): a built-in the gateway registered itself, found on this host, says so; nobody added it here.
+// A pass over the pages before 17.0: a built-in the gateway registered itself, found on this host, says so; nobody
+// added it here.
 describe("WEB-U-235 a built-in the gateway found on this host", () => {
   it("reads Found on this host, not Added here", async () => {
     show(

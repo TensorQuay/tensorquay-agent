@@ -75,8 +75,8 @@ export function FilePreview({
   }
   const file = content.data;
   const kind = previewKind(name);
-  // A page, PDF or sheet opens wide; one over its preview limit shows only a note, so it has nothing to expand (the
-  // 14b page pass, F8; WEB-U-255).
+  // A page, PDF or sheet opens wide; one over its preview limit shows only a note, so it has nothing to expand (a pass
+  // over the pages before 17.0; WEB-U-255).
   const previewLimit =
     kind === "page"
       ? limits.preview_html_bytes

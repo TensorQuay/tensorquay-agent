@@ -31,7 +31,7 @@ export const PRESET_COPY: Readonly<
 };
 
 /**
- * Ready-made lists (WEB-U-118, the first hour's F20): what tasks usually need, allowed in one step. Each says what it
+ * Ready-made lists (WEB-U-118, a first-hour check): what tasks usually need, allowed in one step. Each says what it
  * allows and whether it is in the allow-list, and Custom opens Add rule for any other site; Open web asks first, and is never called read-only (the proxy can't
  * tell a read from a write inside TLS).
  */

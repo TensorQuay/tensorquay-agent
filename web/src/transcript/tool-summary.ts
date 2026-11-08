@@ -287,11 +287,11 @@ function connectorCall(
     values,
   );
 }
-// The agent-team tools in plain words (ADR-0034; the 14b page pass, H02): what the lead or helper did, naming the
-// helper where the call does, never the tool's name.
+// The agent-team tools in plain words (ADR-0034; a pass over the pages before 17.0): what the lead or helper did,
+// naming the helper where the call does, never the tool's name.
 const helper = (tool: ToolView, key: string, t: Translate) =>
   bounded(argument(tool, key), t("tool.aHelper"), 48);
-// A start that failed never says "Started" beside its Failed mark (WEB-U-399, c16k B5).
+// A start that failed never says "Started" beside its Failed mark (WEB-U-399, real-world use before 17.0).
 const startMember: Summary = (tool, t) =>
   t(tool.status === "error" ? "tool.startHelperFailed" : "tool.startedHelper", {
     name: helper(tool, "role", t),

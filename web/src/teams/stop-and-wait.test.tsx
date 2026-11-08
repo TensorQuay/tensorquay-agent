@@ -41,9 +41,9 @@ describe("WEB-U-224 the Waiting for you card", () => {
   });
 });
 
-// WEB-U-411 (c17 U6; c16k W6-09): after Stop team a question to the person read a bare "No longer needed", which
-// said neither what was dropped nor why. The card says why: the person stopped the team, the team ended or is
-// stopping, or the lead asked something else.
+// WEB-U-411 (17.0's release candidate; real-world use before 17.0): after Stop team a question to the person read a
+// bare "No longer needed", which said neither what was dropped nor why. The card says why: the person stopped the team,
+// the team ended or is stopping, or the lead asked something else.
 describe("WEB-U-411 a closed question says why it is no longer needed", () => {
   const question = teamMessage(4, "person_question", {
     to: { kind: "person" },
@@ -139,7 +139,8 @@ describe("WEB-U-225 stopping a team or a helper", () => {
   });
 });
 
-// WEB-U-391 (c16k real-world B6b): Stop team stops the lead too, and the dialog says so, with or without helpers.
+// WEB-U-391 (real-world use before 17.0): Stop team stops the lead too, and the dialog says so, with or without
+// helpers.
 describe("WEB-U-391 the Stop team dialog names the lead", () => {
   it.each([
     [0, "The lead stops now. Their tasks and files stay."],

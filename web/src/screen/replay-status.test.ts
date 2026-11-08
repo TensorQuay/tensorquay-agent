@@ -6,9 +6,9 @@ import { statusKey } from "./ScreenPanel";
 
 const watching = { kind: "watching" as const, takeOverFailed: false };
 
-// WEB-U-366 (the 16e first hour, v03): with Replay showing a past step while the desktop is live, the status line still
-// said "Watching." It says what the panel shows, and that Live has the desktop as it is now; switched back to Live, the
-// usual words.
+// WEB-U-366 (a first-hour check before 17.0): with Replay showing a past step while the desktop is live, the status
+// line still said "Watching." It says what the panel shows, and that Live has the desktop as it is now; switched back
+// to Live, the usual words.
 describe("WEB-U-366 the Screen panel's status line during Replay", () => {
   it("says the panel shows past steps, with the agent working or not", () => {
     expect(english(statusKey(watching, true, false, false, true))).toBe(

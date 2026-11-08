@@ -103,7 +103,8 @@ describe("WEB-U-104 the Agent profile page", () => {
       router,
       `/settings/agent-profiles/${TEAM.id}`,
     );
-    // WEB-U-359 (the 16f page pass, E6): a page that can't be edited is titled by the profile's name, never "Edit".
+    // WEB-U-359 (a pass over the pages before 17.0): a page that can't be edited is titled by the profile's name, never
+    // "Edit".
     await screen.findByRole("heading", { name: "Team default" });
     expect(screen.queryByRole("heading", { name: /^Edit / })).toBeNull();
     expect(page()).toHaveTextContent(

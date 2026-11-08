@@ -176,7 +176,7 @@ for (const width of [1024, 1280] as const)
       const exported = await page.request.get(`${ROUTES}/export`);
       expect(await exported.text()).toContain('name = "local"');
       await fitsColumn(page, /^More actions for route /);
-      // F8 (the first hour): a real description wraps under its route, and the key's name stays on one line.
+      // From a first-hour check: a real description wraps under its route, and the key's name stays on one line.
       const mac = table.getByRole("row", { name: /Local, small Mac/ });
       await expect(mac).toContainText(
         "as Ollama gives a Mac with little memory",
@@ -406,7 +406,7 @@ for (const width of [1024, 1280] as const)
       await capture(page, `route-max-output-${width}-${colorScheme}`);
       await form.getByRole("button", { name: "Save" }).click();
       await expect(page.getByText(`Saved route Route ${name}.`)).toBeVisible();
-      // With room there is nothing to do: neither the advice nor the click shows (the 14b page pass, N3).
+      // With room there is nothing to do: neither the advice nor the click shows (a pass over the pages before 17.0).
       await rowAction(page, `Route ${name}`, `Check route Route ${name}`);
       check = page.getByRole("dialog", { name: `Check route Route ${name}` });
       await check.getByRole("button", { name: "Run check" }).click();
@@ -422,9 +422,9 @@ for (const width of [1024, 1280] as const)
       await deleteRoute(page, `Route ${name}`);
     });
 
-// WEB-U-264 (the c14b first hour, F6): a check that runs out of time says what to do next. A local model may be busy or
-// slow on this computer, and an administrator can give local checks longer; another server may be busy for a moment.
-// A route with no key reads as local wherever it is, so the hosted one has its key.
+// WEB-U-264 (a first-hour check before 17.0): a check that runs out of time says what to do next. A local model may be
+// busy or slow on this computer, and an administrator can give local checks longer; another server may be busy for a
+// moment. A route with no key reads as local wherever it is, so the hosted one has its key.
 test("WEB-U-264 a check that times out says what to do next", async ({
   page,
 }) => {

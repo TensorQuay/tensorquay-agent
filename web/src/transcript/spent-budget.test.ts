@@ -26,9 +26,10 @@ describe("WEB-U-374 a run ended by its team's budget says so", () => {
   });
 });
 
-// WEB-U-394 (c16k real-world B9b-3, 17 Oct 2026): a helper's page showed the lead's "Its helpers have stopped. Send a
-// message to carry on without them." A helper stopped at its team's helpers' share (the gateway's `team_budget_helpers`)
-// says what happened to it and who writes up; the lead's own line stays as it was.
+// WEB-U-394 (real-world use before 17.0, 17 Oct 2026): a helper's page showed the lead's
+// "Its helpers have stopped. Send a message to carry on without them." A helper stopped at its team's helpers' share
+// (the gateway's `team_budget_helpers`) says what happened to it and who writes up; the lead's own line stays as it
+// was.
 describe("WEB-U-394 a helper stopped by its team's budget says so on its own page", () => {
   it("says the helper stopped and its lead writes up", () => {
     const run = { code: "budget", reason: "gateway.team_budget_helpers 409" };

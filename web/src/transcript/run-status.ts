@@ -27,10 +27,10 @@ export function isWorking(
 }
 
 /**
- * The stream is replaying a run the task's record already says ended (WEB-U-414, c17 U9; 16u live L2: a fresh page on
- * an ended lead read "Working… · 4 min 46 s" while its replay had the run's start but not yet its end). The record's
- * last activity is the gateway's time of its last saved event, so a run that started by then ended as the record says;
- * one that started after it is new, and works.
+ * The stream is replaying a run the task's record already says ended (WEB-U-414, 17.0's release candidate; a live check
+ * before 17.0: a fresh page on an ended lead read "Working… · 4 min 46 s" while its replay had the run's start but not
+ * yet its end). The record's last activity is the gateway's time of its last saved event, so a run that started by then
+ * ended as the record says; one that started after it is new, and works.
  */
 function replayingEnded(
   { run, runs }: Transcript,
@@ -214,10 +214,11 @@ export function runPresentation(
   if (sandbox === "queued") {
     const waiting = status(queued(queue, t, team), "warn");
     // The wait for a free desktop is a sentence: the header shows its first clause, the whole in its tooltip and read
-    // (WEB-U-155; at 390 the sentence was cut mid-word, the 16d page pass's Z24).
+    // (WEB-U-155; at 390 the sentence was cut mid-word, a pass over the pages before 17.0).
     if (queue?.reason === "desktop_sessions" && !(queue.ahead > 0))
       return { ...waiting, short: t("run.desktopSessionsShort") };
-    // So is the workspace's: at 1280 beside the files panel it read "Waiting for th…" (WEB-U-393, c16k B8).
+    // So is the workspace's: at 1280 beside the files panel it read "Waiting for th…" (WEB-U-393, real-world use
+    // before 17.0).
     return queue?.reason === "workspace"
       ? { ...waiting, short: t("run.waitingShort") }
       : waiting;

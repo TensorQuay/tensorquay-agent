@@ -128,8 +128,8 @@ export function restartStreams(conversation) {
 
 /**
  * After a restart under a step, as the runtime does once its link is back (CORE-U-062): the model call was lost with the
- * gateway, so the step's attempt is given back as a `provider.retry` with reason `gateway_link` (first-hour F7). Stored
- * in the history, so the page's reconnect replays it.
+ * gateway, so the step's attempt is given back as a `provider.retry` with reason `gateway_link` (a first-hour check).
+ * Stored in the history, so the page's reconnect replays it.
  */
 export function askAgain(conversation, delayMs) {
   const step = conversation.history.findLast(

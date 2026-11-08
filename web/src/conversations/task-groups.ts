@@ -39,7 +39,7 @@ export function groupTasks(
 
 /**
  * The tasks whose title another task in the same group shares, by id: their rows carry the full time in their names,
- * so two rows never read the same (the live review of c8, L9, revised). Withheld titles are never compared.
+ * so two rows never read the same (a live check before 17.0, revised). Withheld titles are never compared.
  */
 export function sharedTitles(items: readonly Conversation[]): Set<string> {
   const counts = new Map<string, number>();

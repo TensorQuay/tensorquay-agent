@@ -240,7 +240,7 @@ function useRouteSave({
 }
 
 /**
- * Adds or edits one model route on its own page (WEB-U-115, the first hour's F9; design: models page); a replace
+ * Adds or edits one model route on its own page (WEB-U-115, a first-hour check; design: models page); a replace
  * sends the version read.
  */
 export function RouteForm(props: FormProps) {

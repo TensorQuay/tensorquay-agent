@@ -29,7 +29,7 @@ const write = (path: string): ToolView => ({
   exitCode: null,
 });
 
-// WEB-U-365 (the 16e first hour, s26): a run that wrote uploads/report_generator.py said "created 1 file" in its
+// WEB-U-365 (a first-hour check before 17.0): a run that wrote uploads/report_generator.py said "created 1 file" in its
 // summary and "No files changed" under it. The run's recorded changes leave out any file new under uploads/, taking it
 // for the person's own upload (GW-I-048), so the files line counts what the run itself wrote too: both lines agree.
 describe("WEB-U-365 a run's summary and its files line agree", () => {
@@ -114,7 +114,7 @@ describe("WEB-U-373 handed-back files and a failed turn's files line", () => {
   });
 });
 
-// WEB-U-389 (c16k real-world D2, 17 Oct 2026): in a my_files team the helpers write straight into the
+// WEB-U-389 (real-world use before 17.0, 17 Oct 2026): in a my_files team the helpers write straight into the
 // shared workspace, so the lead's own run records no change. Its finished reply said "No files changed" right above the
 // end note's "Handed back: a.txt (alpha), b.txt (beta)". A turn that led the team (used a team tool) and changed no file
 // itself says nothing of files: the end note says what the team handed back. A turn that changed files still counts them.

@@ -235,7 +235,7 @@ describe("WEB-U-221/222/224 a lead task's page", () => {
     );
   });
 
-  // WEB-U-411 (c17 U6): with why it is no longer needed.
+  // WEB-U-411 (17.0's release candidate): with why it is no longer needed.
   it.each([
     ["has ended", "ended", null, "the team has ended"],
     ["is stopping", "stopping", null, "the team is stopping"],
@@ -645,9 +645,9 @@ describe("WEB-U-228 agent teams switched off", () => {
   });
 });
 
-// WEB-U-239 (the 14b page pass, H4 at 390): a helper's header says each thing once. "Helper of" is one line whose lead
-// title gives way with "…" (whole in its tooltip) while the helper's name stays; and the helper's own copy, named by
-// its role like the helper, isn't said again as "In researcher (helper copy)".
+// WEB-U-239 (a pass over the pages before 17.0, at 390): a helper's header says each thing once. "Helper of" is one
+// line whose lead title gives way with "…" (whole in its tooltip) while the helper's name stays; and the helper's own
+// copy, named by its role like the helper, isn't said again as "In researcher (helper copy)".
 describe("WEB-U-239 a helper's header says each thing once", () => {
   const long =
     "You lead a small team. Start two helpers with start_member: a researcher…";
@@ -689,7 +689,7 @@ describe("WEB-U-239 a helper's header says each thing once", () => {
   });
 });
 
-// WEB-U-388 (the c16j team demo, finding 1, as for the wake; GW-I-300): a helper's first turn waiting to go (for a slot,
+// WEB-U-388 (a team demo before 17.0, as for the wake; GW-I-300): a helper's first turn waiting to go (for a slot,
 // or for its turn on the lead's files) is the gateway's, named in the team's own words once its layer is loaded, never
 // a raw key before; and once the turn goes, the brief's card takes its place: the page never names the brief twice.
 describe("WEB-U-388 a helper's first turn waiting to go", () => {

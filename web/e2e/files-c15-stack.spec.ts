@@ -6,7 +6,7 @@ import { openFilesPanel } from "./files-panel";
 import { afterStart, budget } from "./stack-start";
 import { bootstrap } from "./ux/flow";
 
-// The c15 feature matrix's gap in the Files panel (feature-matrix-c15, F7): what had a unit test and a fake-front spec
+// The feature matrix's gap in the Files panel before 17.0 (F7): what had a unit test and a fake-front spec
 // but no real-stack test. On the files suite's stack, beside its own spec, whose result it leaves alone.
 test.skip(
   process.env.TQA_STACK_SUITE !== "files",

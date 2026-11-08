@@ -165,7 +165,7 @@ function Status({ environments }: { environments?: TemplatesApi | undefined }) {
 
 /**
  * How many tasks are working on a step (GW-I-229), so an administrator restarts in a gap: a restart starts each of those
- * steps over (first-hour F7; the admin guide's Restarting the gateway). A count only, never which tasks or whose;
+ * steps over (a first-hour check; the admin guide's Restarting the gateway). A count only, never which tasks or whose;
  * nothing when it couldn't be read.
  */
 function ActiveRuns({ active }: { active: ReadyDetail["runs_active"] }) {

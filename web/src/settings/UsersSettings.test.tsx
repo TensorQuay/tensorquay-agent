@@ -316,7 +316,7 @@ describe("WEB-U-023 users", () => {
     expect(item).toHaveAttribute("aria-disabled", "true");
   });
 
-  // WEB-U-117 (the first hour's F19): a role is chosen with the standard picker, at once; the gateway's
+  // WEB-U-117 (a first-hour check): a role is chosen with the standard picker, at once; the gateway's
   // last-administrator rule still reads plainly if a race brings it.
   it("changes a role at once with the standard picker, and shows the last-administrator rule plainly", async () => {
     standard();
@@ -565,8 +565,8 @@ describe("WEB-U-156 People lists the people first", () => {
   });
 });
 
-// WEB-U-355 (the 16f page pass, E1): Invite says an empty or malformed email under the field in the app's words, never
-// the browser's own bubble, and sends nothing.
+// WEB-U-355 (a pass over the pages before 17.0): Invite says an empty or malformed email under the field in the app's
+// words, never the browser's own bubble, and sends nothing.
 describe("WEB-U-355 the invitee's email, said by the page", () => {
   it.each([
     ["", "Enter the person's email."],

@@ -64,7 +64,8 @@ describe("WEB-U-001 composer states", () => {
       run: { id: null, status: "queued" as const },
       reason: "You can reply once it starts.",
     },
-    // A wait for a free desktop says when one frees, which the header's "Waiting…" leaves out (the 16d page pass, Z24).
+    // A wait for a free desktop says when one frees, which the header's "Waiting…" leaves out (a pass over the pages
+    // before 17.0).
     {
       sending: false,
       sandbox: "queued" as const,

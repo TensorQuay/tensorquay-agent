@@ -83,8 +83,8 @@ export function KeysSettings({
     <div className="stack">
       <KeysViews current="mine" />
       {hostKeys && <HostKeyList api={hostKeys} admin={me.role === "admin"} />}
-      {/* Its own heading and what it is for, so it never reads as part of the web services' list above (the c14b
-          first hour, F1; WEB-U-262). */}
+      {/* Its own heading and what it is for, so it never reads as part of the web services' list above (a first-hour
+          check before 17.0; WEB-U-262). */}
       <h2 className="type-body-strong">{t("keys.title")}</h2>
       <div className="settings-bar">
         <p className="type-small muted">{t("keys.intro")}</p>

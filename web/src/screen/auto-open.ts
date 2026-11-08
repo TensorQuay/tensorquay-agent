@@ -88,8 +88,8 @@ export function useScreenAutoOpen({
   const acted = desktop && actedOnDesktop(transcript);
   const visit = useRef({ opened: false, closed: false });
   // Opened by itself in this visit, and not touched by the person since (a press or a key inside the panel, or another
-  // tab): such a panel gives the conversation back at the run's end where it lies over it (the 16d page pass, Z25 at
-  // 390; WEB-U-332), so the run's outcome is in sight. One the person touched or opened stays as it is.
+  // tab): such a panel gives the conversation back at the run's end where it lies over it (a pass over the pages
+  // before 17.0, at 390; WEB-U-332), so the run's outcome is in sight. One the person touched or opened stays as it is.
   const untouched = useRef(false);
   const { open, tab, show, close } = panel;
   useEffect(() => {

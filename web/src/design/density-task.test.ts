@@ -93,7 +93,7 @@ describe("WEB-U-080 the task page's lists", () => {
   });
 });
 
-// The live review of c7 (L1-L2): every task row has one layout, whatever its label: the title in sans on one line with
+// A live check before 17.0: every task row has one layout, whatever its label: the title in sans on one line with
 // an ellipsis, the muted time right-aligned after it, and the status mark in its own space at the end. "Show more" is a
 // small ghost button (17.3, UI-GUIDELINES §7 Conversation list item), so it reads as an action, never as a muted task.
 describe("WEB-U-070 one task row layout", () => {

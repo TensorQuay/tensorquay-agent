@@ -44,7 +44,7 @@ describe("WEB-U-141 the Mine list of host keys", () => {
         level: 2,
       }),
     ).toBeVisible();
-    // WEB-U-262 (the c14b first hour, F1): what the section is for, beside the connectors' keys below it.
+    // WEB-U-262 (a first-hour check before 17.0): what the section is for, beside the connectors' keys below it.
     expect(
       screen.getByText(
         "For a service your tasks call over the web, such as GitHub or a package registry. A task uses the key by its name and never sees it.",

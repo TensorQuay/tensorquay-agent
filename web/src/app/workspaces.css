@@ -344,7 +344,7 @@
   .workspace-filter-picker {
     display: inline-flex;
   }
-  /* The 14b page pass, W4 (WEB-U-251): on a phone the email takes its own row; access and Share go under it. */
+  /* WEB-U-251: on a phone the email takes its own row; access and Share go under it. */
   .share-form {
     flex-wrap: wrap;
   }

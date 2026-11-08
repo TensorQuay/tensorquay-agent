@@ -5,8 +5,8 @@ import { describe, expect, it } from "vitest";
 
 import { sentenceGap } from "./sentences";
 
-// WEB-U-361 (the 16f page pass, E12): two sentences side by side take a space in English, nothing in Chinese or
-// Japanese, so the token dialog never reads "…查看。 到期时间…".
+// WEB-U-361 (a pass over the pages before 17.0): two sentences side by side take a space in English, nothing in Chinese
+// or Japanese, so the token dialog never reads "…查看。 到期时间…".
 describe("WEB-U-361 the gap between two sentences", () => {
   it.each([
     ["en", " "],

@@ -104,8 +104,8 @@ test("WEB-U-007 the Workspaces page and its dialogs pass the accessibility check
   await remove.getByRole("button", { name: "Cancel" }).click();
 });
 
-// The 14b page pass (W4): on a phone the share dialog gives the email its own row, wide enough for an address, with
-// the access and Share on the row below.
+// A pass over the pages before 17.0: on a phone the share dialog gives the email its own row, wide enough for an
+// address, with the access and Share on the row below.
 test("WEB-U-007 at 390 the share dialog's email has its own row", async ({
   page,
 }) => {

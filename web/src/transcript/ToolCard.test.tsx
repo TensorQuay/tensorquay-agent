@@ -193,7 +193,7 @@ describe("a called command that has not started reads as starting (no approvals,
   });
 });
 
-// The c16 live check (LC-04): a step-in reached the lead as a read whose Output was the raw block for the model.
+// A live check before 17.0: a step-in reached the lead as a read whose Output was the raw block for the model.
 describe("WEB-U-327 a team read's card", () => {
   const block =
     '<signed-in-person source="person" seq="5" type="person_message" from="your person" id="b332b4cc72cc104b">\n' +
@@ -260,7 +260,7 @@ describe("WEB-U-327 a team read's card", () => {
   });
 });
 
-// WEB-U-363 (the 16e first hour, v01 and v02): a desktop step's output and a web page's result never show the
+// WEB-U-363 (a first-hour check before 17.0): a desktop step's output and a web page's result never show the
 // model's marker lines, open or folded; what's inside them stays.
 describe("WEB-U-363 a tool card without the model's marker lines", () => {
   const id = "c0fa72a57fe9b250";

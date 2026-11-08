@@ -208,7 +208,7 @@ function CheckResult({
         : t("models.milliseconds", { n: observed.first_byte_ms }),
     ],
     ["models.obsTotal", t("models.milliseconds", { n: observed.total_ms })],
-    // The model's speed, from a gateway that measures it (the c16d first hour, F2).
+    // The model's speed, from a gateway that measures it (a first-hour check before 17.0).
     ...(observed.output_tokens_per_second === undefined
       ? []
       : ([
@@ -229,7 +229,7 @@ function CheckResult({
   ];
   const failure = observed.failure;
   // A model that thinks unasked needs room only when a Max output below it is set: blank or 16384 and up, there is
-  // nothing to do, so neither the advice nor the action shows (WEB-U-133; the 14b page pass, N3).
+  // nothing to do, so neither the advice nor the action shows (WEB-U-133; a pass over the pages before 17.0).
   const needsRoom =
     observed.warnings.includes("thinks_unasked") &&
     maxOutput !== null &&
@@ -261,7 +261,7 @@ function CheckResult({
       {failure?.code === "endpoint_missing" && protocol && (
         <EndpointMissing protocol={protocol} />
       )}
-      {/* A timeout says what to do next (the c14b first hour, F6; WEB-U-264). */}
+      {/* A timeout says what to do next (a first-hour check before 17.0; WEB-U-264). */}
       {failure?.code === "timeout" && (
         <p className="type-small">
           {t(local ? "models.timeoutNextLocal" : "models.timeoutNext")}
@@ -380,9 +380,9 @@ function Suggestion({
 const ELAPSED_TICK_MS = 15_000;
 
 /**
- * The running check's visible line. A local model may answer for minutes while the check waits on its progress (the
- * c16d first hour, F2), so after the first minute the line says how long it has run, and that it is still waiting.
- * The status line above announces the check once; this one changes quietly.
+ * The running check's visible line. A local model may answer for minutes while the check waits on its progress (a
+ * first-hour check before 17.0), so after the first minute the line says how long it has run, and that it is still
+ * waiting. The status line above announces the check once; this one changes quietly.
  */
 function CheckingLine({ local }: { local: boolean }) {
   const t = useT();
@@ -406,8 +406,8 @@ function CheckingLine({ local }: { local: boolean }) {
 }
 
 /**
- * The check's verdict in one line: verified (slowly, with the model's speed, when a local model answers slowly: the c16d
- * first hour, F2), or failed and why.
+ * The check's verdict in one line: verified (slowly, with the model's speed, when a local model answers slowly: a
+ * first-hour check before 17.0), or failed and why.
  */
 function verdict(result: ProbeResult, t: ReturnType<typeof useT>): string {
   const {

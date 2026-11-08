@@ -181,8 +181,8 @@ export function turnSummary(
             chart: charts.length === 1 && charts[0] === path,
           }))
       : [];
-  // At most two, and Run all the tests always keeps its place: it is the one step that sends something. The live
-  // review of c8 (L8): named Open buttons only when they cover every file the run changed, and then no Open changes;
+  // At most two, and Run all the tests always keeps its place: it is the one step that sends something. A live check
+  // before 17.0: named Open buttons only when they cover every file the run changed, and then no Open changes;
   // otherwise one Open changes and no names.
   const room = testChanged ? 1 : 2;
   const covered = files > 1 && opens.length === files && files <= room;
@@ -204,7 +204,8 @@ export function turnSummary(
     // A turn its run didn't finish says nothing of files when it changed none: its failure says what happened, and
     // the files may have come in an earlier run (WEB-U-373, a lead whose team used its budget). Nor does a turn that
     // led the team and changed none itself: its helpers' changes are on their own runs, and the team's end note says
-    // what they handed back (WEB-U-389, c16k D2: "No files changed" right above "Handed back: a.txt, b.txt").
+    // what they handed back (WEB-U-389, real-world use before 17.0: "No files changed" right above
+    // "Handed back: a.txt, b.txt").
     summary:
       files === 0 &&
       (run?.status === "failed" ||

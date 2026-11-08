@@ -28,9 +28,9 @@ const message = (
     ...(kind ? { kind } : {}),
   }) as unknown as TeamMessage;
 
-// WEB-U-398 (c16k real-world B2, 17 Oct 2026): the lead ended its turn without done, and its header said Done while
-// the team ran on. While a lead's run is over and its team still runs, the header says the team waits for the lead;
-// after two unanswered reminders (GW-I-306) it says the lead stopped without finishing, with what to do.
+// WEB-U-398 (real-world use before 17.0, 17 Oct 2026): the lead ended its turn without done, and its header said Done
+// while the team ran on. While a lead's run is over and its team still runs, the header says the team waits for the
+// lead; after two unanswered reminders (GW-I-306) it says the lead stopped without finishing, with what to do.
 describe("WEB-U-398 a lead whose turn ended while its team runs isn't Done", () => {
   it("counts the gateway's reminders since the lead's own last post", () => {
     expect(
@@ -99,7 +99,8 @@ describe("WEB-U-398 a lead whose turn ended while its team runs isn't Done", () 
   });
 });
 
-// WEB-U-410 (c17 U5): the team's words for a wait for the workspace, a turn on the lead's files, as a helper and a lead.
+// WEB-U-410 (17.0's release candidate): the team's words for a wait for the workspace, a turn on the lead's files, as a
+// helper and a lead.
 describe("WEB-U-410 a team's words for a wait for the workspace", () => {
   const place = (role: "lead" | "member", state: "running" | "ended") => ({
     role,

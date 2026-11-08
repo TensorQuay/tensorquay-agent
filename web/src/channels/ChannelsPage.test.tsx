@@ -398,7 +398,8 @@ describe("WEB-U-062 the channels list", () => {
   });
 });
 
-// WEB-U-362 (the 16f page pass, E17): Channels starts its bar with Open navigation, for the drawer below 768 px.
+// WEB-U-362 (a pass over the pages before 17.0): Channels starts its bar with Open navigation, for the drawer below
+// 768 px.
 describe("WEB-U-362 Open navigation on Channels", () => {
   it("opens the shell's navigation", async () => {
     const openNavigation = vi.fn<() => void>();

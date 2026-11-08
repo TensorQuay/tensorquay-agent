@@ -6,7 +6,7 @@ import type {
   EgressRule,
 } from "../settings/admin/egress";
 
-/** The gateway's presets (the first hour's F20; docs/admin-guide/web-settings.md): each a fixed list of rules, `*` only through open_web. */
+/** The gateway's presets (docs/admin-guide/web-settings.md): each a fixed list of rules, `*` only through open_web. */
 export const PRESET_RULES: Readonly<
   Record<EgressPresetId, { host: string; ports: number[] }[]>
 > = {

@@ -311,7 +311,7 @@ export function ScreenPanel({
     element.toggleAttribute("data-away", dimmed);
     element.toggleAttribute("data-control", typing);
     // No picture is drawn until the screen client connects, and none once it drops (it takes its canvas with it): no
-    // empty box then (the 16d page pass, Z26; WEB-U-334).
+    // empty box then (a pass over the pages before 17.0; WEB-U-334).
     element.toggleAttribute("data-empty", !drawn);
   }, [label, state.kind, dimmed, typing, helpId, drawn]);
 
@@ -369,7 +369,7 @@ export function ScreenPanel({
   // The status line, and what goes under the picture: one set, with the picture where it is shown, so the expanded
   // screen (the size a person signs in at) has the same words and controls (the c16 UX review's second pass, #19).
   // Control granted while the agent may still be stopping: a state to wait out, in the attention tone with a clock,
-  // until the line changes as it says (the 16d page pass, Z12; WEB-U-333).
+  // until the line changes as it says (a pass over the pages before 17.0; WEB-U-333).
   const late = status === "screen.controlNotReady";
   const statusLine = (
     <p
@@ -457,7 +457,7 @@ export function ScreenPanel({
           </p>
           {/* The action the warning names, where it names it (the c16 UX review's second pass, #26). */}
           {/* Always with the warning (a reset that wasn't clean is itself why a sign-in may remain): disabled while the
-              agent is still stopping, saying why (the 16d page pass, Z17; WEB-U-335). */}
+              agent is still stopping, saying why (a pass over the pages before 17.0; WEB-U-335). */}
           <div className="screen-actions">
             <Button
               variant="secondary"
@@ -473,7 +473,7 @@ export function ScreenPanel({
               {t("screen.signOutWhileWorking")}
             </p>
           )}
-          {/* Its answer, under the button that asked (the 16d page pass, Z17; WEB-U-331). */}
+          {/* Its answer, under the button that asked (a pass over the pages before 17.0; WEB-U-331). */}
           {result}
         </div>
       )}

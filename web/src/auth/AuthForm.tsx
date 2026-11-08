@@ -57,7 +57,7 @@ export function AuthForm({ mode }: { mode: "login" | "setup" }) {
     token?: FieldProblem | Refusal | null;
   }>({});
   // The field a refusal is about; it gets focus once the form is enabled again (the request disables it, and the
-  // browser then drops focus to the page: the 16f page pass, F-P01-1/F-P02-1).
+  // browser then drops focus to the page: a pass over the pages before 17.0).
   const refocus = useRef<"token" | "password" | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const setup = mode === "setup";

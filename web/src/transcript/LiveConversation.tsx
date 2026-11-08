@@ -333,8 +333,8 @@ export function LiveConversation({
   );
   return (
     <div className="conversation-layout" data-panel={panel.open} ref={layout}>
-      {/* Its icon buttons' tooltips stay inside the page, never under the Files panel beside it (the c14b first hour,
-          F4; WEB-U-267). */}
+      {/* Its icon buttons' tooltips stay inside the page, never under the Files panel beside it (a first-hour check
+          before 17.0; WEB-U-267). */}
       <section
         className="conversation-page"
         aria-label={t("live.region")}

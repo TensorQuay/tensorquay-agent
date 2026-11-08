@@ -294,7 +294,7 @@
 .data-name .status-pill {
   flex-shrink: 0;
 }
-/* An email on People is read whole (WEB-U-117, the first hour's F19): not held to the name width, on one line wherever
+/* An email on People is read whole (WEB-U-117, a first-hour check): not held to the name width, on one line wherever
    its column has room (the 13f screens, #7, WEB-U-156), and broken only at the <wbr> after its @ and dots, never inside
    a word. */
 .data-name-wrap {
@@ -307,7 +307,8 @@
   overflow-wrap: normal;
   word-break: normal;
   /* The table sizes the column by the address's <wbr>s, so the address may break at them: kept on one line, a long one
-     ran under the next column (the 16f page pass, F3; WEB-U-382). Where the column has room it stays on one line. */
+     ran under the next column (a pass over the pages before 17.0; WEB-U-382). Where the column has room it stays on one
+     line. */
   white-space: normal;
   max-width: 100%;
   /* Never squeezed below its text by the row's flex: Chromium breaks at a <wbr> once the item is narrower than its
@@ -924,8 +925,8 @@ button.model-option:focus-visible {
   border-radius: var(--pill-radius);
   background: var(--muted);
 }
-/* A row's action is a link, and looks like every other link in the app: the text's colour, underlined (WEB-U-116, the
-   first hour's F22), with room to hit. */
+/* A row's action is a link, and looks like every other link in the app: the text's colour, underlined (WEB-U-116, a
+   first-hour check), with room to hit. */
 .overview-line > a {
   display: inline-flex;
   align-items: center;

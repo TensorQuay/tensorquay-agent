@@ -403,9 +403,9 @@ test("WEB-U-168 a long address on a narrow People wraps, and its row's action is
   await capture(page, "users-narrow-long-800");
 });
 
-// WEB-U-382 (the 16f page pass, F3): at 1280 a 41-character address ran under its row's Role menu. Kept on one line
-// and unsqueezed, it was still measured by the table as if it could break at its <wbr>s, so its column came out
-// narrower than its text. It now breaks at its <wbr>s wherever the column needs it, at 1280 as on a phone; its full
+// WEB-U-382 (a pass over the pages before 17.0): at 1280 a 41-character address ran under its row's Role menu. Kept on
+// one line and unsqueezed, it was still measured by the table as if it could break at its <wbr>s, so its column came
+// out narrower than its text. It now breaks at its <wbr>s wherever the column needs it, at 1280 as on a phone; its full
 // text stays in the cell (and its title).
 for (const size of [
   { width: 1280, height: 800 },

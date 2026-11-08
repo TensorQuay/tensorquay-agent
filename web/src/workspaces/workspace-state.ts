@@ -74,7 +74,7 @@ export function recentFirst(a: Workspace, b: Workspace) {
 
 /**
  * The name shown for a workspace; an administrator's metadata view has none. A helper's own copy of its lead's files
- * (kind helper_copy) says so in the reader's words, whatever its name (the 14b page pass, H4).
+ * (kind helper_copy) says so in the reader's words, whatever its name (a pass over the pages before 17.0).
  */
 export function workspaceName(
   workspace: Workspace,

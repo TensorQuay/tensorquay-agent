@@ -123,7 +123,7 @@ describe("WEB-U-016 a finished task: what it wrote, and what could follow", () =
     },
   );
 
-  // The live review of c8 (L8): one way to what a run made. Named Open buttons when they cover every file it changed,
+  // A live check before 17.0: one way to what a run made. Named Open buttons when they cover every file it changed,
   // else one Open changes; never both.
   it("D1: two files it made open by name, and Open changes goes", () => {
     const { onOpenFile } = show(turn(1, ["out/chart.png", "brief.md"]));

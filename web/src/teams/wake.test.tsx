@@ -19,9 +19,9 @@ const wake = (seq: number) =>
 const mine = (seq: number, text: string) =>
   frame(seq, { type: "message.user", text, attachments: [] });
 
-// WEB-U-237 (the 14b page pass, H7; protocol revision 13): the gateway's wake is its notice, "New team messages", in
-// the reader's words; never the person's message, never the model's sentence with its tool names. Who wrote is in the
-// team's log, so the notice names no one.
+// WEB-U-237 (a pass over the pages before 17.0; protocol revision 13): the gateway's wake is its notice,
+// "New team messages", in the reader's words; never the person's message, never the model's sentence with its tool
+// names. Who wrote is in the team's log, so the notice names no one.
 describe("WEB-U-237 the gateway's wake", () => {
   it("reads as the gateway's notice", () => {
     const state = [wake(1)].reduce(apply, emptyTranscript());

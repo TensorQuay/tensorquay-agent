@@ -41,9 +41,10 @@ export function composerReason(
   if (sending) return null;
   if (sandbox === "creating") return t("composer.starting");
   // The waiting itself is the header's to say (WEB-U-161); here, what the person can do. A wait for a free desktop also
-  // says when one frees, which the header's short "Waiting…" leaves out (the 16d page pass, Z24); so does a wait for the
-  // workspace, its reason in the header's tooltip alone (WEB-U-410, c17 U5). In a team, the team's words (a turn on the
-  // lead's files), from its lazily loaded layer: none (null) until it has loaded, none at all (undefined) in no team.
+  // says when one frees, which the header's short "Waiting…" leaves out (a pass over the pages before 17.0); so does a
+  // wait for the workspace, its reason in the header's tooltip alone (WEB-U-410, 17.0's release candidate). In a team,
+  // the team's words (a turn on the lead's files), from its lazily loaded layer: none (null) until it has loaded, none
+  // at all (undefined) in no team.
   if (sandbox === "queued" || run.status === "queued")
     return queue?.reason === "desktop_sessions"
       ? t("composer.desktopWait", { ahead: queue.ahead })
@@ -58,8 +59,8 @@ export function composerReason(
 
 /**
  * A failed lead's next step under its failed turn: it offers a message only while the composer takes one (WEB-U-407,
- * c17 U1: on 16p T4 it offered one while the composer, the lead's files a helper's turn, said "You can reply once it
- * starts.").
+ * 17.0's release candidate: in a live check before 17.0 it offered one while the composer, the lead's files a helper's
+ * turn, said "You can reply once it starts.").
  */
 export function carriesOnNext(
   carries: CarriesOn | null,
@@ -70,9 +71,9 @@ export function carriesOnNext(
 }
 
 /**
- * A lead whose team its person stopped, its last run started before the stop (WEB-U-413, c17 U8): that run's end is the
- * stop's, so the header reads Stopped, not Done; a run the person starts after it reads as its own. A stop not yet in
- * the team's log (`at` null: still stopping) came after every run so far.
+ * A lead whose team its person stopped, its last run started before the stop (WEB-U-413, 17.0's release candidate):
+ * that run's end is the stop's, so the header reads Stopped, not Done; a run the person starts after it reads as its
+ * own. A stop not yet in the team's log (`at` null: still stopping) came after every run so far.
  */
 export function stoppedBefore(
   transcript: Transcript,
