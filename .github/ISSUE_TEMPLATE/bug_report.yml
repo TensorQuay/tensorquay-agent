@@ -45,6 +45,11 @@ body:
       label: Host
       description: Operating system and Docker version; the GPU if it matters.
   - type: input
+    id: browser
+    attributes:
+      label: Browser
+      description: The browser and its version, for a problem in the web app.
+  - type: input
     id: model
     attributes:
       label: Model and server
