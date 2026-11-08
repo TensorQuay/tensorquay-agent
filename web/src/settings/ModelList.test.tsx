@@ -100,7 +100,7 @@ describe("WEB-U-067 List models in the route form", () => {
     ).toEqual(["deepseek-chatDeepSeek ChatCurrent", "deepseek-reasoner"]);
     const current = within(box).getByRole("option", { name: /deepseek-chat/ });
     expect(current).toHaveAttribute("aria-selected", "true");
-    // Not by colour alone (UI-GUIDELINES §9, F5b): the current model says so in words.
+    // Not by colour alone (UI-GUIDELINES §9): the current model says so in words.
     expect(within(current).getByText("Current")).toBeVisible();
     fireEvent.change(screen.getByLabelText("Filter models"), {
       target: { value: "reason" },
@@ -226,7 +226,7 @@ describe("WEB-U-067 List models in the route form", () => {
     expect(screen.getByText("data is not an array")).toBeVisible();
   });
 
-  // F5: exploring hits the 30 s wait; the last list stays useful, so it shows with the wait, not an error in its place.
+  // Exploring hits the 30 s wait; the last list stays useful, so it shows with the wait, not an error in its place.
   it("shows the last list while the gateway asks to wait, even after the form was closed", async () => {
     const models = vi
       .fn<RoutesApi["models"]>()

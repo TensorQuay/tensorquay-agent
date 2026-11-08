@@ -6,7 +6,7 @@ import { pick } from "./choices";
 import { axe, type } from "./settings-page";
 import { signedIn } from "./ux/flow";
 
-// WEB-E2E-060, D6 on the real stack (WEB-E2E-039 and WEB-U-281/-287 back it up on the fake front): the Models check
+// WEB-E2E-060 on the real stack (WEB-E2E-039 and WEB-U-281/-287 back it up on the fake front): the Models check
 // run by the real gateway against real addresses.
 // - A route at localhost: inside the gateway's container localhost is the gateway itself, so nothing answers. This
 //   stack's gateway has no host.docker.internal entry (deploy/compose/docker.yml), the plain-Linux case, so the

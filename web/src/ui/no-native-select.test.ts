@@ -1,5 +1,5 @@
 // @vitest-environment node
-// WEB-U-134 (F19's rest): one design system: every choice in the app is the standard picker (the shared Select in a
+// WEB-U-134: one design system: every choice in the app is the standard picker (the shared Select in a
 // form, MenuButton elsewhere, grouped for the Settings sections on a phone), never a native <select>.
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";

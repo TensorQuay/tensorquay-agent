@@ -301,7 +301,7 @@ function change(now: number, then: number, locale: string) {
 
 /**
  * Every day of the period as a bar, newest on the right; a day with no tokens is a gap, never a zero-height bar. Its
- * first and last dates sit under it and its busiest day is its caption, so one day's bar reads on day one (F21).
+ * first and last dates sit under it and its busiest day is its caption, so one day's bar reads on day one.
  */
 function DayBars({ report, range }: { report: UsageReport; range: Range }) {
   const t = useT();

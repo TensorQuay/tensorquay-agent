@@ -11,7 +11,7 @@ import { expect, resetFront, test, type Page } from "./test";
 // below, and fails by name until it has one.
 
 const APP = fileURLToPath(new URL("../src/app/(app)/", import.meta.url));
-/** Not a product page: the design reference exists only in test builds (P37). */
+/** Not a product page: the design reference exists only in test builds. */
 const SKIP = new Set(["/design"]);
 
 function routes(directory = APP): string[] {

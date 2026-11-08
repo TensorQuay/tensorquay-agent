@@ -89,7 +89,7 @@ const HEIGHT = 200;
 const UPDATE_MS = 100;
 const BACKLOG = 1 << 20;
 /** How long a late grant waits before the stopped run's reset lands: long enough to capture the waiting line, at 390 px
- * under load too (the gallery's Z12). */
+ * under load too. */
 const LATE_GRANT_MS = 8_000;
 const GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 

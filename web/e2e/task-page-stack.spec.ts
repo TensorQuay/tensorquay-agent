@@ -9,7 +9,7 @@ import { bootstrap, signIn } from "./ux/flow";
 /** A named step in the run's log (the list reporter prints steps): the log shows every part the test reached. */
 const step = (title: string) => test.step(title, () => undefined);
 
-// The feature matrix (G6, and G1's copy and follow): the task page on the real stack, with the scripted model in
+// The feature matrix, and its copy and follow: the task page on the real stack, with the scripted model in
 // deploy/tests/fixtures/task-page.json. One reply is held until Stop (wait_ms), so the run stays active while a
 // message waits; another streams a long answer slowly, so the page can be scrolled away from it and brought back.
 test.skip(
@@ -63,7 +63,7 @@ test("WEB-U-079 on the real stack: Stop ends a run, a message sent meanwhile wai
     timeout: START_MS,
   });
 
-  // T5: a message sent while it works waits, and can be taken back.
+  // A message sent while it works waits, and can be taken back.
   await step("G6 T5: a message sent while it works waits, and is cancelled");
   await input.fill("Never mind this one.");
   await page.getByRole("button", { name: "Send after this" }).click();
@@ -74,7 +74,7 @@ test("WEB-U-079 on the real stack: Stop ends a run, a message sent meanwhile wai
   await expect(waiting(page)).toHaveCount(0);
   await expect(page.getByLabel("Run status")).toHaveText(/^Working…/);
 
-  // T3: Stop ends the held run; the message still waiting is dropped, to send again or dismiss.
+  // Stop ends the held run; the message still waiting is dropped, to send again or dismiss.
   await step("G6 T3: Stop ends the held run and drops the waiting message");
   await input.fill("Then summarise it.");
   await input.press("Enter");
@@ -124,7 +124,7 @@ test("WEB-U-014/015 on the real stack: a long answer streams, its code copies, a
   await input.fill("Write a long answer with code.");
   await input.press("Enter");
 
-  // T10: scrolled away while it streams, the page stops following: it offers Jump to latest and stays where the
+  // Scrolled away while it streams, the page stops following: it offers Jump to latest and stays where the
   // reader is when the answer ends. A third of the way in, the answer is taller than the transcript, so there is
   // somewhere to scroll to. (How many new lines the button counts depends on how the stack batches the stream; the
   // fake front checks the count.)
@@ -146,7 +146,7 @@ test("WEB-U-014/015 on the real stack: a long answer streams, its code copies, a
   });
   expect(await region.evaluate((element) => element.scrollTop)).toBe(0);
 
-  // T9: the code block copies exactly, over plain HTTP.
+  // The code block copies exactly, over plain HTTP.
   await step("G1 T9: the code block copies exactly");
   const code = page.locator(".markdown-code").first();
   await code.scrollIntoViewIfNeeded();

@@ -71,7 +71,7 @@ async function deleteRule(page: Page, host: string) {
 async function addRoute(page: Page) {
   await page.goto("/settings/models");
   await page.getByRole("link", { name: "Add route" }).click();
-  // The route's name waits under Advanced, made from the display name until typed (F4).
+  // The route's name waits under Advanced, made from the display name until typed.
   await page
     .locator("form.settings-form-page")
     .locator("summary", { hasText: "Advanced" })

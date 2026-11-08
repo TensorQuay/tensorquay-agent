@@ -1002,7 +1002,7 @@ button.model-option:focus-visible {
   height: var(--space-16);
   border-bottom: var(--border-width) solid var(--line);
 }
-/* The chart, its first and last dates under it and its caption (F21). */
+/* The chart, its first and last dates under it and its caption. */
 .usage-chart {
   display: flex;
   flex-direction: column;
@@ -1067,7 +1067,7 @@ tr[data-expired] td:not(.data-cell-action) {
   font-weight: 700;
 }
 
-/* The route form's one-line summaries while editing (F4): the text, then its Change or Replace. */
+/* The route form's one-line summaries while editing: the text, then its Change or Replace. */
 .route-summary {
   margin: 0;
   display: flex;
@@ -1082,7 +1082,7 @@ tr[data-expired] td:not(.data-cell-action) {
   margin-inline-start: calc(-1 * var(--space-4));
 }
 
-/* The environment form's build help (F9): its starter file and commands, wrapped rather than widen the dialog. */
+/* The environment form's build help: its starter file and commands, wrapped rather than widen the dialog. */
 .build-help-code {
   margin: 0;
   padding: var(--space-2) var(--space-3);

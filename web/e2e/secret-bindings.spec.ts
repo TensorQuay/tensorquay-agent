@@ -39,7 +39,7 @@ for (const width of [1024, 1280] as const)
       const dialog = page.getByRole("dialog", {
         name: `Who may use shared key ${name}`,
       });
-      // Grouped by kind, so each box reads its plain name (F8).
+      // Grouped by kind, so each box reads its plain name.
       const local = dialog
         .getByRole("group", { name: "Model routes" })
         .getByRole("checkbox", { name: "local" });

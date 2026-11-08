@@ -41,7 +41,7 @@ const limits = seededMap(
       max: 604800,
       unit: "seconds",
     }),
-    // G5: each person's connector calls per minute, applied at the next proxied call.
+    // Each person's connector calls per minute, applied at the next proxied call.
     seeded("mcp.calls_per_minute", {
       value: 60,
       default: 60,

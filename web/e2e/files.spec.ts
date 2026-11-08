@@ -45,7 +45,7 @@ for (const width of [1024, 1440])
       await page.goto(await createConversation(page));
       const toggle = page.getByRole("button", { name: "Files", exact: true });
       const panel = page.getByRole("complementary", { name: "Files" });
-      // Candidate12 F6 (WEB-U-124): closed until the person opens it, at every width.
+      // WEB-U-124 (found before 17.0): closed until the person opens it, at every width.
       await expect(toggle).toHaveAttribute("aria-expanded", "false");
       await toggle.click();
       await expect(panel.getByRole("button", { name: "src" })).toBeVisible();

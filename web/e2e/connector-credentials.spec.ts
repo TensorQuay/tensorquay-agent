@@ -2,7 +2,7 @@ import { signIn } from "./session";
 import { axe, capture, fitsColumn, rowMenu, type } from "./settings-page";
 import { expect, test } from "./test";
 
-// A person's own connector keys (G3, ADR-0031; WEB-U-044 browser part), keyboard first, at the widths
+// A person's own connector keys (ADR-0031; WEB-U-044 browser part), keyboard first, at the widths
 // UI-GUIDELINES §17.2 asks for in both themes. The value is typed once and never appears in the page again.
 const VALUE = "tok-e2e-5f4e3d2c1b";
 

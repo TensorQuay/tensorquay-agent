@@ -173,7 +173,7 @@ function NewChannel({
     notAdded: NotAdded[];
   } | null>(null);
   const name = typedTitle ?? suggestTitle(purpose);
-  /** A field's error goes as soon as the field changes (F1). */
+  /** A field's error goes as soon as the field changes. */
   const clear = (field: keyof Problems) => {
     setProblems((current) => {
       const rest = { ...current };

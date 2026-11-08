@@ -113,7 +113,7 @@ test("WEB-E2E-063 a done step's retry reasons are a line in the step, its toggle
     });
 
     // The done step folds; its toggle counts the retry by its reason and is described by the codes, as the summary
-    // already says the reason (Z27).
+    // already says the reason.
     const words = "Details: fallback_parse: malformed";
     const step = page.getByRole("group", { name: "Activity" }).last();
     const toggle = step.getByRole("button", { name: /Worked for/ });

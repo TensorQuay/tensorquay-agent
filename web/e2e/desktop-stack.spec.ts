@@ -241,7 +241,7 @@ async function takeOver(page: Page, atGrant?: () => Promise<void>) {
 const HANDED_BACK =
   "You handed back the desktop. Send a message to let the agent carry on.";
 
-// U1, U2, U8, U9 and the toggle (#14; WEB-U-241/243/246/247/282): Desktop chosen on New task, the agent's desktop
+// WEB-U-241/243/246/247/282, and the toggle: Desktop chosen on New task, the agent's desktop
 // actions with the panel opening by itself, the toggle saying the agent is on the desktop, each action's line in words,
 // its pictures stored and shown, and Replay.
 test("WEB-E2E-071 a Desktop task: the live screen, its step lines and pictures, and Replay", async ({
@@ -305,8 +305,8 @@ test("WEB-E2E-071 a Desktop task: the live screen, its step lines and pictures, 
   await picturesChecked(id);
 });
 
-// U3, U4, U11, #19, #22, #27 (WEB-U-242/270/306): Take over stops the held run, control's lines, the expanded screen
-// with its controls and the desktop's Escape, Hand back and its line after a reload, then a message held during a second
+// WEB-U-242/270/306: Take over stops the held run, control's lines, the expanded screen with its controls and the
+// desktop's Escape, Hand back and its line after a reload, then a message held during a second
 // Take over that goes at the hand-back.
 test("WEB-E2E-072 Take over and Hand back: control, Expand, the keyboard, a reload and a held message", async ({
   page,
@@ -416,7 +416,7 @@ test("WEB-E2E-072 Take over and Hand back: control, Expand, the keyboard, a relo
   ).toBeVisible();
 });
 
-// U5 (WEB-U-279): a gateway restart during Take over hands the desktop back, and the transcript says why, with no time.
+// WEB-U-279: a gateway restart during Take over hands the desktop back, and the transcript says why, with no time.
 test("WEB-E2E-073 a gateway restart during Take over hands the desktop back, and says so", async ({
   page,
   baseURL,
@@ -436,7 +436,7 @@ test("WEB-E2E-073 a gateway restart during Take over hands the desktop back, and
   });
 });
 
-// U6 (WEB-U-244/259; #6, #16): Clear the browser's sign-ins: unavailable while the agent works; after a Take over and
+// WEB-U-244/259: Clear the browser's sign-ins: unavailable while the agent works; after a Take over and
 // Hand back, asked, then cleared by the desktop, said in the panel and the transcript.
 test("WEB-E2E-074 Clear the browser's sign-ins after a Take over, not while the agent works", async ({
   page,
@@ -481,7 +481,7 @@ test("WEB-E2E-074 Clear the browser's sign-ins after a Take over, not while the 
   ).toBeVisible();
 });
 
-// U13 (WEB-U-241, GW-I-228): the per-run cap on desktop actions, at 1: the second action is refused and its line says
+// WEB-U-241, GW-I-228: the per-run cap on desktop actions, at 1: the second action is refused and its line says
 // so in words; the run carries on.
 test("WEB-E2E-075 a run past its desktop actions cap is told so, in words", async ({
   page,

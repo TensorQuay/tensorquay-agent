@@ -527,7 +527,7 @@ describe("WEB-U-098 a customised built-in", () => {
   });
 });
 
-// 17.3 (C4): the list keeps an environment's check to two lines (its words whole in the line's tooltip); its own page
+// 17.3: the list keeps an environment's check to two lines (its words whole in the line's tooltip); its own page
 // says the check in full.
 describe("WEB-U-445 an environment's page says its check in full", () => {
   it("shows the check's state, why, and what it means for people", async () => {

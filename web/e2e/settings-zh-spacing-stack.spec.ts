@@ -4,7 +4,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { afterStart, budget } from "./stack-start";
 import { signedIn } from "./ux/flow";
 
-// WEB-E2E-064 (R2; backs up WEB-U-305 and WEB-U-185): Simplified Chinese spaces its numbers on the real stack. With the
+// WEB-E2E-064 (backs up WEB-U-305 and WEB-U-185): Simplified Chinese spaces its numbers on the real stack. With the
 // language set to 简体中文 from the Account menu, Settings › Limits shows its durations as "N 秒", "N 分钟" or "N 小时",
 // never attached, and a real task's summary attaches no time to its number either. The language lives in this
 // browser's storage, so the next spec's fresh browser starts in English whatever happens here.

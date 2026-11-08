@@ -331,7 +331,7 @@ function Retries({ turn, id }: { turn: TurnView; id: string }) {
   const last = turn.retries.at(-1);
   if (!last) return null;
   // Done, they are counted on the step's summary line by the last reason; the other reasons and the codes
-  // are read here, by any means, and the summary's reason isn't said twice (Z27).
+  // are read here, by any means, and the summary's reason isn't said twice.
   if (turn.status === "completed")
     return (
       <p id={id} className="type-small muted activity-retries">

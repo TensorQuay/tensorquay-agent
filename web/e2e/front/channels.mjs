@@ -1,4 +1,4 @@
-// Channels on the fake front (ADR-0014), as the gateway's human API serves them (G3): the channels a person can see,
+// Channels on the fake front (ADR-0014), as the gateway's human API serves them: the channels a person can see,
 // newest first, and create. One seeded channel, open to everyone signed in; a person's own ones are theirs.
 import { randomUUID } from "node:crypto";
 

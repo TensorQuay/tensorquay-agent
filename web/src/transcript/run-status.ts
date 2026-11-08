@@ -81,7 +81,7 @@ function status(
 /**
  * What a queued run waits for: a free slot (also when an older gateway sends no reason) or the workspace another
  * task holds; a reason from a newer gateway reads simply as queued. Waiting only for the person's own idle sandbox to
- * make room is starting, from their side (F26); waiting for a free Desktop says so (ADR-0039).
+ * make room is starting, from their side; waiting for a free Desktop says so (ADR-0039).
  */
 function queued(
   queue: Transcript["queue"],

@@ -165,7 +165,7 @@ describe("WEB-U-039 model routes", () => {
   it("lists routes with their key, source and fallbacks, and explains a blocked delete", async () => {
     show(fakeRoutes({ routes: listed, secrets: ["secrets/local"] }).api);
     await screen.findByRole("table", { name: "Model routes" });
-    // A change reaches open tasks from their next message (F12, GW-I-157), in the product's words.
+    // A change reaches open tasks from their next message (GW-I-157), in the product's words.
     expect(
       screen.getByText(
         "Each route is one model on one server, with its key; people pick routes by their display names. A change applies to new tasks, and to open tasks from their next message; a message already running keeps its route.",
@@ -253,7 +253,7 @@ describe("WEB-U-039 model routes", () => {
     expect(within(row(/Fast/)).queryByText("Check failed")).toBeNull();
   });
 
-  // F4, part 1: what most routes need comes first, in plain headings; the tuning waits under Advanced, closed.
+  // What most routes need comes first, in plain headings; the tuning waits under Advanced, closed.
   it("puts what most routes need first, and the rest under Advanced, closed", async () => {
     show(fakeRoutes({ routes: listed, secrets: ["secrets/local"] }).api);
     await screen.findByRole("table", { name: "Model routes" });
@@ -270,7 +270,7 @@ describe("WEB-U-039 model routes", () => {
       expect(advanced.contains(within(dialog).getByLabelText(label))).toBe(
         false,
       );
-    // Adding takes the key inline (F4, part 2c).
+    // Adding takes the key inline.
     expect(
       within(
         within(dialog).getByRole("region", { name: "Key" }),
@@ -322,7 +322,7 @@ describe("WEB-U-039 model routes", () => {
     }
   });
 
-  // F4, part 2: the first question is where the model runs; the form fits the answer (no vendor presets).
+  // The first question is where the model runs; the form fits the answer (no vendor presets).
   it("asks where the model runs first, and fits the form to the answer", async () => {
     const fake = fakeRoutes({ routes: listed, secrets: ["secrets/local"] });
     show(fake.api);
@@ -394,7 +394,7 @@ describe("WEB-U-039 model routes", () => {
     });
   });
 
-  // F4, part 2b: editing a route says in one line where it connects and which key it uses; each opens on request.
+  // Editing a route says in one line where it connects and which key it uses; each opens on request.
   it("sums up an existing route's connection and key, and opens each to change it", async () => {
     show(fakeRoutes({ routes: listed, secrets: ["secrets/local"] }).api);
     await screen.findByRole("table", { name: "Model routes" });
@@ -628,7 +628,7 @@ describe("WEB-U-039 model routes", () => {
     ).toBeVisible();
     expect(fake.writes).toEqual([]);
     field("Extra body (JSON object)", "{}");
-    // The model is named here before anything is sent (F4, part 2c: no key is stored for a refused route).
+    // The model is named here before anything is sent (no key is stored for a refused route).
     fireEvent.click(
       within(page()).getByRole("button", {
         name: "Save",

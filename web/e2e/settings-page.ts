@@ -70,7 +70,7 @@ export async function rowMenu(page: Page, menu: string, item: string) {
   await page.keyboard.press("Enter");
 }
 
-/** Adds a shared key from its dialog by keyboard (K2): Add a shared key, Name, Value, then Add key. */
+/** Adds a shared key from its dialog by keyboard: Add a shared key, Name, Value, then Add key. */
 export async function addSharedKey(page: Page, name: string, value: string) {
   await page.getByRole("button", { name: "Add a shared key" }).focus();
   await page.keyboard.press("Enter");

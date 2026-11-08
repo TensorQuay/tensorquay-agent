@@ -182,7 +182,7 @@ describe("WEB-U-016 a finished task: what it wrote, and what could follow", () =
     const { onFollowUp } = show(
       turn(1, ["tests/test_range.py", "out/chart.png", "brief.md"]),
     );
-    // L8: one named button can't cover three files, so Open changes stays and the names go.
+    // One named button can't cover three files, so Open changes stays and the names go.
     const follow = screen.getByRole("group", { name: "What next" });
     expect(
       [...follow.querySelectorAll("button")].map(
@@ -268,7 +268,7 @@ describe("WEB-U-083 files a finished task names by their absolute path", () => {
     expect(onOpenFile).toHaveBeenCalledExactlyOnceWith("notes/brief.md");
   });
 
-  // Two files, both offered by name (the L8 rule: named Opens only when they cover every file the run changed).
+  // Two files, both offered by name (the rule: named Opens only when they cover every file the run changed).
   it("opens a chart it named absolutely by its workspace path", () => {
     const { onOpenFile } = show(
       turn(1, ["/workspace/out/chart.png", "brief.md"]),

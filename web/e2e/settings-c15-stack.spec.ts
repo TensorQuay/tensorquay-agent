@@ -5,9 +5,10 @@ import { expect, test, type BrowserContext, type Page } from "@playwright/test";
 import { afterStart, budget } from "./stack-start";
 import { signedIn } from "./ux/flow";
 
-// The feature matrix's gaps in Settings before 17.0 (N8, D13 and D7): what had a unit test and a fake-front
-// spec but no real-stack test. On the settings suite's stack, before its own spec (files run in name order), so the
-// installation still has no internet access rule when N8 looks; D13 takes off what it adds. It writes no result.
+// The feature matrix's gaps in Settings before 17.0: what had a unit test and a fake-front spec but no real-stack test.
+// On the settings suite's stack, before its own spec (files run in name order), so the installation still has no
+// internet access rule when the no-internet case looks; the ready-made list's case takes off what it adds. It writes no
+// result.
 test.skip(
   process.env.TQA_STACK_SUITE !== "settings",
   "Requires the settings stack suite",
@@ -41,7 +42,7 @@ const lists = (page: Page) =>
 const card = (page: Page, name: string) =>
   lists(page).getByRole("group", { name });
 
-// N8 (WEB-U-119, WEB-U-153): with no site allowed, New task says tasks can't reach the internet, in words for an
+// WEB-U-119, WEB-U-153: with no site allowed, New task says tasks can't reach the internet, in words for an
 // administrator, with the way to allow sites.
 test("WEB-E2E-057 New task says tasks can't reach the internet, and how to allow sites", async ({
   page,
@@ -58,7 +59,7 @@ test("WEB-E2E-057 New task says tasks can't reach the internet, and how to allow
   await expect(page).toHaveURL(/\/settings\/internet-access$/);
 });
 
-// D13 (WEB-U-118, WEB-U-162): a ready-made list added through the real gateway: its sites in the allow-list marked
+// WEB-U-118, WEB-U-162: a ready-made list added through the real gateway: its sites in the allow-list marked
 // with its name, its card On, then removed, leaving the list as it was.
 test("WEB-E2E-058 a ready-made list is added, marked and removed", async ({
   page,
@@ -94,7 +95,7 @@ test("WEB-E2E-058 a ready-made list is added, marked and removed", async ({
   );
 });
 
-// D7 (WEB-U-294, WEB-U-295, WEB-U-303): a key pasted where a key's name belongs is refused on the page and never
+// WEB-U-294, WEB-U-295, WEB-U-303: a key pasted where a key's name belongs is refused on the page and never
 // sent, in the route form's Shared key and as a new shared key's Name; the gateway refuses the name too (SEC-033).
 test("WEB-E2E-059 a pasted or key-shaped key is refused where a name belongs, and never sent", async ({
   page,

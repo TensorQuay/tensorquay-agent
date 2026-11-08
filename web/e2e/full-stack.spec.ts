@@ -154,13 +154,12 @@ async function verifyTranscript(page: Page) {
 }
 
 /**
- * The feature matrix (G1, G4, and G5 on candidate 9): the task page and the sidebar on the real stack, after the
- * replay check. The first
+ * The feature matrix: the task page and the sidebar on the real stack, after the replay check. The first
  * task stays whole (the driver checks its workspace); the tasks made here through the API are the ones deleted.
  */
 async function taskPageAndSidebar(page: Page) {
   await page.setViewportSize({ width: 1440, height: 900 });
-  // T8: the one file it wrote, by name; Open shows it in the files panel as a document.
+  // The one file it wrote, by name; Open shows it in the files panel as a document.
   await step(
     "G1 T8: the done footer names the file it wrote, and Open shows it",
   );
@@ -169,7 +168,7 @@ async function taskPageAndSidebar(page: Page) {
   const panel = page.getByRole("complementary", { name: "Files" });
   await expect(panel.getByRole("heading", { name: "Hello" })).toBeVisible();
 
-  // T6: renamed from the header; the sidebar's row follows, one line in Today (S2).
+  // Renamed from the header; the sidebar's row follows, one line in Today.
   await step(
     "G1 T6, S2: renamed from the header; its row is one line in Today",
   );
@@ -186,7 +185,7 @@ async function taskPageAndSidebar(page: Page) {
   await expect(row).toHaveAttribute("aria-current", "page");
   expect((await row.boundingBox())?.height).toBeLessThanOrEqual(44);
 
-  // S4: nine more tasks make ten in Today: eight, then Show more.
+  // Nine more tasks make ten in Today: eight, then Show more.
   await step("G4 S4: ten tasks in Today show eight, then Show more");
   for (let n = 1; n <= 9; n += 1) {
     const made = await page.request.post("/api/v1/conversations", {
@@ -203,7 +202,7 @@ async function taskPageAndSidebar(page: Page) {
   await today.getByRole("button", { name: "Show more" }).click();
   await expect(today.getByRole("link")).toHaveCount(10);
 
-  // S5: a search over every task on the server, from the Ctrl/Cmd K overlay; choosing a match opens it.
+  // A search over every task on the server, from the Ctrl/Cmd K overlay; choosing a match opens it.
   await step("G5 S5: the search finds a task and opens it");
   await page.keyboard.press("Control+k");
   const search = page.getByRole("dialog", { name: "Search tasks" });
@@ -213,7 +212,7 @@ async function taskPageAndSidebar(page: Page) {
   await expect(search).toHaveCount(0);
   await expect(page).toHaveTitle("Sidebar task 9 · TensorQuay Agent");
 
-  // S6, T17: deleted from its row's menu, after confirming; it leaves the list.
+  // Deleted from its row's menu, after confirming; it leaves the list.
   await step("G1 S6, T17: a task deleted from its row's menu leaves the list");
   const nine = page.getByRole("link", { name: /^Sidebar task 9/ });
   await nine.hover();
@@ -228,7 +227,7 @@ async function taskPageAndSidebar(page: Page) {
     .click();
   await expect(nine).toHaveCount(0);
 
-  // S8: the rail is the global actions and the open task only (17.3, UI-GUIDELINES §7 Sidebar, WEB-E2E-102); at
+  // The rail is the global actions and the open task only (17.3, UI-GUIDELINES §7 Sidebar, WEB-E2E-102); at
   // phone width the drawer keeps every task and closes once one opens. The newest task is in the first eight (the
   // older ones wait behind Show more after a reload).
   await step(
@@ -256,7 +255,7 @@ async function taskPageAndSidebar(page: Page) {
     page.getByRole("heading", { level: 1, name: "Sidebar task 8" }),
   ).toBeVisible();
 
-  // N2: a suggestion on New task fills the box, ready to send.
+  // A suggestion on New task fills the box, ready to send.
   await step("G1 N2: a suggestion fills the message box");
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.getByRole("link", { name: "New task" }).click();
@@ -350,7 +349,7 @@ async function screenshots(page: Page, name = "full-stack") {
 test("WEB-E2E-004: create a project, inspect tools and replay the real transcript", async ({
   page,
 }) => {
-  // The feature matrix's task page and sidebar steps (G1, G4, G5) follow the replay check.
+  // The feature matrix's task page and sidebar steps follow the replay check.
   test.setTimeout(budget(1, 150_000));
   await setup(page);
   const stream = await observeStream(page);

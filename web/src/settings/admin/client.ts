@@ -198,7 +198,7 @@ function egressRequests(client: ApiClient) {
         query: new URLSearchParams({ version: String(version) }),
         key,
       }),
-    /** The ready-made lists and whether each is in the allow-list (F20). */
+    /** The ready-made lists and whether each is in the allow-list. */
     egressPresets: (signal?: AbortSignal) =>
       client.request(
         settingsEndpoint("adminEgressPresets"),
@@ -309,7 +309,7 @@ function engineRequests(client: ApiClient) {
   };
 }
 
-/** The connector registry (G2, ADR-0031): credentials are named by secret ref, never sent or returned. */
+/** The connector registry (ADR-0031): credentials are named by secret ref, never sent or returned. */
 function connectorRequests(client: ApiClient) {
   return {
     connectors: (signal?: AbortSignal) =>

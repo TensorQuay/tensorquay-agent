@@ -19,7 +19,7 @@ const DATE_TIME =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/i;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // An absolute URI (RFC 3986): a scheme, then no whitespace or control characters, and one the browser can parse (a
-// connector's MCP server address, G2).
+// connector's MCP server address).
 const URI = /^[a-z][a-z0-9+.-]*:[^\s\p{Cc}]+$/iu;
 
 export const formats: Readonly<Record<string, Format>> = {

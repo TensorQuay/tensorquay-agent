@@ -94,7 +94,7 @@ function Secrets({ api }: { api: AdminApi }) {
   const { items, limit } = list.data;
   return (
     <div className="stack">
-      {/* One main action, as on Mine (K2): the add form is a dialog, not a form under the table. */}
+      {/* One main action, as on Mine: the add form is a dialog, not a form under the table. */}
       <div className="settings-bar">
         <p className="type-small muted">{t("secrets.intro")}</p>
         <Button
@@ -393,7 +393,7 @@ function SecretTable({
   );
 }
 
-/** Adds a shared key in a dialog (K2), checked before sending; the value is sent once and never kept. */
+/** Adds a shared key in a dialog, checked before sending; the value is sent once and never kept. */
 function AddSecret({
   api,
   limit,
@@ -440,7 +440,7 @@ function AddSecret({
     setPending(true);
     try {
       const item = await api.putSecret(write, newActionKey());
-      // Who may use it, in the same step (F8): with any that already name it, which the gateway allowed on its own.
+      // Who may use it, in the same step: with any that already name it, which the gateway allowed on its own.
       let saved = true;
       if (chosen.size > 0) {
         const consumers = [

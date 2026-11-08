@@ -7,7 +7,7 @@ import { settingsEndpoint } from "../settings/operations";
 import type { ChannelsApi } from "./contract";
 import "../protocol/generated/validators.channels";
 
-/** The channel pages' API on one client (the gateway's human channels API, G3; ADR-0014). */
+/** The channel pages' API on one client (the gateway's human channels API; ADR-0014). */
 export function gatewayChannelsFor(client: ApiClient): ChannelsApi {
   return {
     channels: (signal) =>

@@ -49,7 +49,7 @@ afterEach(() => {
 });
 /**
  * A task layout wide enough for the panel to dock beside the conversation, or not (WEB-U-170: the
- * layout's own width decides, not the window's): narrower, the panel lies over the column and starts closed (T1).
+ * layout's own width decides, not the window's): narrower, the panel lies over the column and starts closed.
  */
 function wide(docks: boolean, width = docks ? 1176 : 716) {
   // The layout is measured where the browser observes sizes, as every supported one does.
@@ -126,7 +126,7 @@ describe("WEB-U-022 files panel placement", () => {
   });
 
   // TEST: WEB-U-124
-  // Candidate12 F6 (WEB-U-124): the panel never opens by itself; on a wide screen the person's own choice is kept.
+  // WEB-U-124 (found before 17.0): the panel never opens by itself; on a wide screen the person's own choice is kept.
   it("starts closed on wide screens, and keeps the person's choice there", () => {
     wide(true);
     const first = show();

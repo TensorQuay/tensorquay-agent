@@ -4,10 +4,10 @@ import { clearTasks } from "./queue-stack";
 import { afterStart } from "./stack-start";
 import { bootstrap, signIn } from "./ux/flow";
 
-// T22, Keep environment on (WEB-U-204), on the real one-slot admission stack: a task's kept environment stays running
-// and counts toward the tasks running at once, so with one slot it isn't made room for. The same person's next task
-// waits for a free slot while it's kept, and starts once it isn't. The control first: a task that isn't kept is made
-// room for (the gateway retires the owner's own idle sandbox, F26), so the wait is the keeping's alone.
+// Keep environment on (WEB-U-204), on the real one-slot admission stack: a task's kept environment stays running and
+// counts toward the tasks running at once, so with one slot it isn't made room for. The same person's next task waits
+// for a free slot while it's kept, and starts once it isn't. The control first: a task that isn't kept is made room for
+// (the gateway retires the owner's own idle sandbox), so the wait is the keeping's alone.
 // Each task's first message contains the queue fixture's "Wait for a free slot", whose reply answers at once.
 
 test.skip(

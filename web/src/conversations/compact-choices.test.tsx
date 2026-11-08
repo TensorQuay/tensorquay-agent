@@ -57,7 +57,7 @@ const resize = (width: number) =>
     for (const notify of observers) notify();
   });
 
-// The lead's F6 note: beside the Files panel at 1280 the header fell back to icons although the names fitted. The
+// Beside the Files panel at 1280 the header fell back to icons although the names fitted. The
 // icons are for when the names don't fit beside the title's and status's least room (8rem and 4rem).
 describe("WEB-U-125 the header's pickers show their names whenever they fit", () => {
   it("shows the names when they fit, and the icons when they don't", () => {

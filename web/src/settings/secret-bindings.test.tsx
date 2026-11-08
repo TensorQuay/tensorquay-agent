@@ -49,7 +49,7 @@ const routePage = () => {
   if (!form) throw new Error("The page is a form");
   return form;
 };
-/** A route, connector or engine's box, under its kind's group: the kind is the group's name, not each box's (F8). */
+/** A route, connector or engine's box, under its kind's group: the kind is the group's name, not each box's. */
 const KINDS = {
   route: "Model routes",
   connector: "Connectors",
@@ -209,7 +209,7 @@ describe("WEB-U-054 who may use a secret", () => {
       within(routePage()).getByLabelText("Shared key", { exact: true }),
       { target: { value: "secrets/shared" } },
     );
-    // Display name is required before a save (F4).
+    // Display name is required before a save.
     fireEvent.change(within(routePage()).getByLabelText("Display name"), {
       target: { value: "Local" },
     });
@@ -228,7 +228,7 @@ describe("WEB-U-054 who may use a secret", () => {
     expect(fake.allowCalls).toEqual([
       { ref: "secrets/shared", consumer: { kind: "route", name: "local" } },
     ]);
-    // Display name is required before a save (F4).
+    // Display name is required before a save.
     fireEvent.change(within(routePage()).getByLabelText("Display name"), {
       target: { value: "Local" },
     });
@@ -289,7 +289,7 @@ describe("WEB-U-054 who may use a secret", () => {
     );
     await screen.findByRole("group", { name: "Save or cancel" });
     const paste = (name: string) => {
-      // Paste key under the Secret field, or Replace key once the key reads as one line (F4).
+      // Paste key under the Secret field, or Replace key once the key reads as one line.
       const button =
         within(routePage()).queryByRole("button", { name: "Paste key" }) ??
         within(routePage()).queryByRole("button", { name: "Replace key" });

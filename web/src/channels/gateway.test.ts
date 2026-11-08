@@ -30,7 +30,7 @@ function setup(...answers: Response[]) {
   return { channels: gatewayChannelsFor(client), sent };
 }
 
-// The channels list and create on the gateway's human API (G3; WEB-U-062).
+// The channels list and create on the gateway's human API (WEB-U-062).
 describe("WEB-U-062 the channels client", () => {
   it("lists, creates with an Idempotency-Key, and refuses a malformed answer", async () => {
     const made = channel("release");

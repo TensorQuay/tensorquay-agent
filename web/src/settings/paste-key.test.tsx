@@ -45,7 +45,7 @@ async function openEdit(name: string) {
     await screen.findByRole("link", { name: `Edit route ${name}` }),
   );
   await screen.findByRole("group", { name: "Save or cancel" });
-  // Editing sums the key up in one line (F4); these tests work with the Secret field and Paste key under it.
+  // Editing sums the key up in one line; these tests work with the Secret field and Paste key under it.
   const another = within(dialog()).queryByRole("button", {
     name: "Use another shared key",
   });
@@ -146,12 +146,12 @@ describe("WEB-U-056 the route's key is always a stored secret", () => {
       ),
     ).toBeVisible();
     expect(fake.secretWrites).toEqual([{ name: "local-key", value: KEY }]);
-    // The reference is filled: the key reads as one line again, naming it (F4).
+    // The reference is filled: the key reads as one line again, naming it.
     expect(
       within(dialog()).getByText("Uses the shared key local-key."),
     ).toBeVisible();
     expect(container.innerHTML).not.toContain(KEY);
-    // Display name is required before a save (F4).
+    // Display name is required before a save.
     fireEvent.change(within(dialog()).getByLabelText("Display name"), {
       target: { value: "Local" },
     });
@@ -215,7 +215,7 @@ describe("WEB-U-056 the route's key is always a stored secret", () => {
     paste(null, KEY);
     await within(dialog()).findByText(/^Stored the key as local-key/);
     fake.touch("local");
-    // Display name is required before a save (F4).
+    // Display name is required before a save.
     fireEvent.change(within(dialog()).getByLabelText("Display name"), {
       target: { value: "Local" },
     });
@@ -260,7 +260,7 @@ describe("WEB-U-056 the route's key is always a stored secret", () => {
   });
 });
 
-// F4, part 2c: adding a route takes its key inline, and stores it as a shared key when the route is saved.
+// Adding a route takes its key inline, and stores it as a shared key when the route is saved.
 describe("WEB-U-056 a new route's key, typed in the form", () => {
   const start = async (fake: ReturnType<typeof fakeRoutes>) => {
     const container = show(fake.api);

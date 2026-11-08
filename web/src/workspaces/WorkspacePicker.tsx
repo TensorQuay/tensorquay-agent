@@ -25,7 +25,7 @@ const MATCHES = 20;
 
 /**
  * The workspace choice in the task bar: "New workspace" (the value "") first, then recent workspaces with
- * their owner and state. A read-only share or a fork being copied is listed but disabled, with the reason (Q7).
+ * their owner and state. A read-only share or a fork being copied is listed but disabled, with the reason.
  */
 export function WorkspacePicker({
   workspaces,

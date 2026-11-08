@@ -78,7 +78,7 @@ test("WEB-U-066 channel membership, end and delete on the real stack", async ({
   await expect(page.getByRole("heading", { level: 1, name })).toBeVisible();
   const id = new URL(page.url()).pathname.split("/").at(-1) ?? "";
 
-  // The feature matrix (G3, C3): the owner posts a message; the gateway keeps it, so it is there after a reload.
+  // The feature matrix: the owner posts a message; the gateway keeps it, so it is there after a reload.
   const note = "The owner's first note on this channel.";
   const composer = page.getByRole("form", { name: "Post to the channel" });
   await composer.getByLabel("Your message").fill(note);

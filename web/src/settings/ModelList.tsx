@@ -28,7 +28,7 @@ const failureWords = (failure: Failure): MessageKey =>
 
 /**
  * Each route's last usable listing, for the page's life, per API client (so tests don't share it): while the gateway
- * asks to wait, it shows instead of an error (F5), even after the form was closed and opened again.
+ * asks to wait, it shows instead of an error, even after the form was closed and opened again.
  */
 const lastListings = new WeakMap<RoutesApi, Map<string, RouteModels>>();
 

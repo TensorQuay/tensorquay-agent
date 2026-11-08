@@ -3,7 +3,7 @@ import { expect, test, type Page } from "./test";
 
 // WEB-U-022: at 1280 the files panel floated over the answer and cut it mid-word. It docks
 // beside the transcript, which narrows, wherever the task's layout has room (WEB-U-170); it opens when the person opens
-// it (F6).
+// it.
 async function done(page: Page) {
   await signIn(page);
   await page.goto(await createConversation(page));

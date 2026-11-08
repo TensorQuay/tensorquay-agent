@@ -31,7 +31,7 @@ export function connector(
   };
 }
 
-/** The gateway's checks that the fake repeats (G2, document.rs): enough to drive each refusal the page explains. */
+/** The gateway's checks that the fake repeats (document.rs): enough to drive each refusal the page explains. */
 function problem(name: string, fields: ConnectorFields): ApiError | null {
   if (
     !/^[a-z](?:[a-z0-9]|_(?!_))*$/.test(name) ||
@@ -55,7 +55,7 @@ function problem(name: string, fields: ConnectorFields): ApiError | null {
 }
 
 /**
- * An in-memory registry with the gateway's semantics (G2): versions, `409 conflict`, `name_taken` (also a name an
+ * An in-memory registry with the gateway's semantics: versions, `409 conflict`, `name_taken` (also a name an
  * [[mcp.servers]] entry holds), `connector_limit`, 400 `details[]` and Idempotency-Key replay.
  */
 export function fakeConnectors({

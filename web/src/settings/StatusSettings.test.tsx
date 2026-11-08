@@ -216,7 +216,7 @@ describe("WEB-U-033 status", () => {
   });
 });
 
-// ADR-0032 (D1): the default environment's state from readiness, with why people cannot pick it (WEB-U-047).
+// ADR-0032: the default environment's state from readiness, with why people cannot pick it (WEB-U-047).
 describe("WEB-U-047 the default environment in status", () => {
   const section = () =>
     screen.getByRole("region", { name: "Default environment" });
@@ -393,8 +393,8 @@ describe("WEB-U-265 Git credentials kept in status", () => {
   });
 });
 
-// First-hour F7's follow-up (GW-I-229): how many tasks are working on a step, a count only, so a restart can wait for a
-// gap; the page reads it again every 30 s while it is open.
+// A first-hour check's follow-up (GW-I-229): how many tasks are working on a step, a count only, so a restart can wait
+// for a gap; the page reads it again every 30 s while it is open.
 describe("WEB-U-292 tasks working on a step in status", () => {
   it("says no task is working on a step, so restarting now starts no step over", async () => {
     fetch.mockImplementationOnce(() => json(ready));

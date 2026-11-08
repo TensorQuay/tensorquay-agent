@@ -115,7 +115,7 @@ export function ChannelTimeline({
   messages: readonly ChannelMessage[];
   members: readonly Member[];
   onReply?: (seq: number) => void;
-  /** Extra content under a post, by seq: a proposal's tally and controls, a task's claim state (W3, W4). */
+  /** Extra content under a post, by seq: a proposal's tally and controls, a task's claim state. */
   after?: (message: ChannelMessage) => ReactNode;
 }) {
   const t = useT();

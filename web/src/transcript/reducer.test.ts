@@ -107,7 +107,7 @@ describe("WEB-U-001 sequence and replay", () => {
     expect(stale.team).toEqual({ id: team, version: 10, lastSeq: 16 });
   });
 
-  // Storage quotas (N4): each notice says what happened to the run and what to do, never "something went wrong".
+  // Storage quotas: each notice says what happened to the run and what to do, never "something went wrong".
   it.each([
     [
       "workspace_quota",

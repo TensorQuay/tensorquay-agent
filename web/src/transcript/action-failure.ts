@@ -86,7 +86,7 @@ export function actionFailure(code: string): Failure {
 }
 
 /**
- * A storage quota notice's sentence (N4): the workspace over quota while the run goes on (retryable), or past the
+ * A storage quota notice's sentence: the workspace over quota while the run goes on (retryable), or past the
  * margin so the run stopped; the task's saved state over quota (an administrator must act). Null for any other code.
  */
 export function quotaKey(code: string, retryable: boolean): MessageKey | null {

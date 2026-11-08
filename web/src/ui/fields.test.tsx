@@ -35,7 +35,7 @@ describe.each([
   });
 });
 
-// WEB-U-134 (F19's rest): the shared Select is the standard picker, never a native <select>: a labelled field-looking
+// WEB-U-134: the shared Select is the standard picker, never a native <select>: a labelled field-looking
 // button that opens the standard menu, keyboard operable, its error announced and marked for FormRefusal.
 describe("WEB-U-134 Select is the standard picker", () => {
   function Chosen({ onChange }: { onChange?: (value: string) => void }) {

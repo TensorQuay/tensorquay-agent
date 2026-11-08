@@ -139,7 +139,7 @@ export function NewConversation({
       });
   }, [action, attachments, held, loading, ready]);
   const shown = action.text ?? held;
-  // The UI standard's composer on New task (step 2 B2): the model and environment are its pickers; a workspace and an
+  // The UI standard's composer on New task: the model and environment are its pickers; a workspace and an
   // agent profile come from its "+" as chips, each opening its picker at once and going back to the default by its ×.
   const id = useId();
   const [addingWorkspace, setAddingWorkspace] = useState(false);

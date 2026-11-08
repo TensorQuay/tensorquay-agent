@@ -64,7 +64,7 @@ describe("WEB-U-332 a self-opened Screen panel gives the conversation back at th
     expect(close).toHaveBeenCalledOnce();
   });
 
-  // A quick run's first desktop action and its end can arrive together (the fake front's Z25 at 390): the panel opens
+  // A quick run's first desktop action and its end can arrive together (on the fake front at 390): the panel opens
   // after the run has ended, and still gives the conversation back.
   it("closes when the run ended before the panel was open", () => {
     const close = vi.fn();

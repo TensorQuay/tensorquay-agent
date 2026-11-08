@@ -1,5 +1,5 @@
 /**
- * The channels contract as the web uses it (ADR-0014): the generated API types for people (G3), with the names the
+ * The channels contract as the web uses it (ADR-0014): the generated API types for people, with the names the
  * pages use. The pages depend on `ChannelsApi`; tests pass an in-memory fake.
  */
 import type {

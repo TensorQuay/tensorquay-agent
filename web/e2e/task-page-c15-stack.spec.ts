@@ -8,9 +8,9 @@ import { chooseModel } from "./model";
 import { afterStart, budget, scaled } from "./stack-start";
 import { bootstrap } from "./ux/flow";
 
-// The feature matrix's gaps on the task page before 17.0 (A7, A11, T15 and T21): what had a unit test and a
-// fake-front spec but no real-stack test, now on the task-page suite's stack with the scripted model in
-// deploy/tests/fixtures/task-page.json. Each case makes its own tasks and leaves the suite's own spec and result alone.
+// The feature matrix's gaps on the task page before 17.0: what had a unit test and a fake-front spec but no real-stack
+// test, now on the task-page suite's stack with the scripted model in deploy/tests/fixtures/task-page.json. Each case
+// makes its own tasks and leaves the suite's own spec and result alone.
 test.skip(
   process.env.TQA_STACK_SUITE !== "task-page",
   "Requires the task-page stack suite",
@@ -153,7 +153,7 @@ async function send(page: Page, text: string) {
   await box.press("Enter");
 }
 
-// A7 (WEB-U-218): Ctrl K finds a task by its title on the server's search, and Enter opens it.
+// WEB-U-218: Ctrl K finds a task by its title on the server's search, and Enter opens it.
 test("WEB-E2E-050 Ctrl K finds a task by its title and opens it", async ({
   page,
   baseURL,
@@ -183,7 +183,7 @@ test("WEB-E2E-050 Ctrl K finds a task by its title and opens it", async ({
   await expect(search).toHaveCount(0);
 });
 
-// A11 (WEB-U-273, WEB-U-084, WEB-U-089): the keyboard on a real run. Stop from the keyboard keeps the focus on the
+// WEB-U-273, WEB-U-084, WEB-U-089: the keyboard on a real run. Stop from the keyboard keeps the focus on the
 // composer's button; Esc closes a menu and gives the focus back to what opened it, with the one focus ring showing.
 test("WEB-E2E-051 Stop from the keyboard keeps the focus, and Esc closes a menu back to its button", async ({
   page,
@@ -223,7 +223,7 @@ test("WEB-E2E-051 Stop from the keyboard keeps the focus, and Esc closes a menu 
   expect(outline).not.toBe("none");
 });
 
-// T15 (WEB-U-304): a route whose model server answers 503 every time; the runtime retries, then the run fails. The
+// WEB-U-304: a route whose model server answers 503 every time; the runtime retries, then the run fails. The
 // retry's reasons are words, with the codes only after "Details:", and no code shows as the explanation.
 test("WEB-E2E-052 a retry's reasons are words, the codes after Details", async ({
   page,
@@ -264,7 +264,7 @@ test("WEB-E2E-052 a retry's reasons are words, the codes after Details", async (
   }
 });
 
-// N3 (WEB-U-018, WEB-U-103): the model chosen on New task is the one its task runs on. A second route of the stack's
+// WEB-U-018, WEB-U-103: the model chosen on New task is the one its task runs on. A second route of the stack's
 // model server is chosen in the composer's picker; the task the message makes uses it.
 test("WEB-E2E-054 the model chosen on New task is the task's", async ({
   page,
@@ -303,7 +303,7 @@ test("WEB-E2E-054 the model chosen on New task is the task's", async ({
   }
 });
 
-// T21 (WEB-U-046): the Context tab shows what the latest run loaded. The first run writes AGENTS.md at the
+// WEB-U-046: the Context tab shows what the latest run loaded. The first run writes AGENTS.md at the
 // workspace's root; the second run loads it, and the tab lists it under Instructions.
 test("WEB-E2E-053 the Context tab lists the instructions the run loaded", async ({
   page,
@@ -360,7 +360,7 @@ async function restartGateway(reason: string) {
   }
 }
 
-// T13 (WEB-U-234, WEB-U-304): a gateway restart while a step waits on the model. The page reconnects by itself, the
+// WEB-U-234, WEB-U-304: a gateway restart while a step waits on the model. The page reconnects by itself, the
 // step is asked again and finishes; the step's summary says the connection dropped, and its tooltip says why in words.
 test("WEB-E2E-055 a gateway restart mid-step reconnects, starts the step over and says so", async ({
   page,

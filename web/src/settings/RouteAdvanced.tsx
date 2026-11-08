@@ -13,7 +13,7 @@ import { ROLES, type Draft, type Problems } from "./route-copy";
 import { Group, Text, type Preset, type Section } from "./route-form-fields";
 import { localRoute } from "./route-local";
 
-/** How the route reaches its server: the protocol and how the key is sent (under Advanced; F4). */
+/** How the route reaches its server: the protocol and how the key is sent (under Advanced). */
 export function Connection(section: Section) {
   const t = useT();
   const kind = section.draft.authKind;
@@ -83,7 +83,7 @@ export function Limits({
     );
     return () => cancelAnimationFrame(frame);
   }, [focused]);
-  // An empty limit says what it means (F4): the model server's own, or no limit from this gateway. An empty Max output
+  // An empty limit says what it means: the model server's own, or no limit from this gateway. An empty Max output
   // sends no limit on Chat Completions and Responses; Anthropic Messages requires one (WEB-U-108).
   const own = t("models.serversOwn");
   const output =
@@ -430,7 +430,7 @@ export function applyPreset(draft: Draft, preset: Preset | undefined): Draft {
   return draft;
 }
 
-/** The problems of the sections under Advanced, so a refusal there opens it (F4). */
+/** The problems of the sections under Advanced, so a refusal there opens it. */
 export const MOVED_PROBLEMS = [
   "name",
   "protocol",
@@ -451,7 +451,7 @@ export function Advanced({
   ...section
 }: Section & {
   preset: Preset | undefined;
-  /** Something else: every setting shown, Advanced open (F4). */
+  /** Something else: every setting shown, Advanced open. */
   everything: boolean;
   children: ReactNode;
 }) {

@@ -13,7 +13,7 @@ import { humanChrome } from "./chrome";
 export const scripted = process.env.TQA_UX_REAL_MODEL !== "1";
 /**
  * How long a real stack may take from a message to its run's end, "Starting…" included: under load a start
- * legitimately takes longer (WEB-E2E-018 stalled at "Starting…" during the R2 soak, 2026-09-30, from CPU starvation,
+ * legitimately takes longer (WEB-E2E-018 stalled at "Starting…" during a soak on 2026-09-30, from CPU starvation,
  * not a product race). The fake front keeps its own, shorter timeouts.
  */
 /** A task's first run on the stack: its environment's start, then the run (e2e/stack-start.ts). */

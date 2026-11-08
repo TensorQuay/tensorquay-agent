@@ -5,7 +5,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 import { signedIn } from "./ux/flow";
 
-// WEB-E2E-067 (U12; backs up WEB-E2E-037's Limits case, WEB-U-280 and GW-U-146): Settings › Limits › Desktop against
+// WEB-E2E-067 (backs up WEB-E2E-037's Limits case, WEB-U-280 and GW-U-146): Settings › Limits › Desktop against
 // the real gateway, which needs no Desktop environment to show them. The section lists the gateway's own defaults
 // (config/desktop.rs, tqa-types screen.rs): 2 Desktop environments at once, screenshots kept 30 days, and per run 200
 // screenshots and 1 000 actions, the last two saying when a change applies (the hint's words from the catalogue). A

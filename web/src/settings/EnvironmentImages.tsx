@@ -249,7 +249,7 @@ export function ImageChoice({
   );
 }
 
-/** A starter image build (F9): Workstation plus packages, as root, then back to the runtime user. Code, not copy. */
+/** A starter image build: Workstation plus packages, as root, then back to the runtime user. Code, not copy. */
 const STARTER = `FROM tqa-runtime:workstation
 USER 0:0
 RUN apt-get update \\
@@ -259,7 +259,7 @@ USER 1000:1000`;
 const COMMANDS = `docker build -t my-environment .
 docker image inspect --format '{{.Id}}' my-environment`;
 
-/** How to build an environment's image and what the Image ID field wants, closed until asked for (F9, the UI part). */
+/** How to build an environment's image and what the Image ID field wants, closed until asked for. */
 function BuildHelp() {
   const t = useT();
   return (

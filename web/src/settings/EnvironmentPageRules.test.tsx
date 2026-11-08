@@ -138,7 +138,7 @@ describe("WEB-U-047 a lowered default environment", () => {
 });
 
 describe("WEB-U-047 the environment page and dialogs", () => {
-  // F9, the UI-only part: how to build an image from Workstation or Minimal, and what the Image field wants, in the
+  // How to build an image from Workstation or Minimal, and what the Image field wants, in the
   // form, closed until asked for.
   it("explains how to build an environment's image, on request, when adding one", async () => {
     show(fakeTemplates({ environments: LISTED }).api);

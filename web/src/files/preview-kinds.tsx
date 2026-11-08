@@ -53,7 +53,7 @@ function base64(buffer: ArrayBuffer): string {
 }
 
 /**
- * An image drawn from its bytes, typed by its extension (F1): the download is octet-stream and never rendered. The
+ * An image drawn from its bytes, typed by its extension: the download is octet-stream and never rendered. The
  * query keeps the bytes; each mount makes and revokes its own object URL, so a remount never meets a revoked one. An
  * SVG shows from a data: URL instead: a blob: URL has the page's origin, and an SVG opened
  * from one in a new tab would run its script there, with the session. A data: document has an opaque origin, so even
@@ -121,7 +121,7 @@ function rememberedSource(): boolean {
   }
 }
 
-/** A Markdown document rendered (F2), its source a toggle away; the choice is remembered in this browser. */
+/** A Markdown document rendered, its source a toggle away; the choice is remembered in this browser. */
 export function DocumentPreview({
   name,
   text,
@@ -158,7 +158,7 @@ export function DocumentPreview({
   );
 }
 
-/** A CSV or TSV file as a table (F3): the first rows, how many there are, and the text on request. */
+/** A CSV or TSV file as a table: the first rows, how many there are, and the text on request. */
 export function TablePreview({
   name,
   text,

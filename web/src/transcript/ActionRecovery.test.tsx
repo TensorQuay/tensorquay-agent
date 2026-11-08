@@ -146,7 +146,7 @@ describe("WEB-U-001 accepted action failure recovery", () => {
     );
   });
 
-  // WEB-U-121 (F26): waiting only for the person's own idle sandbox to make room is starting, never a queue.
+  // WEB-U-121: waiting only for the person's own idle sandbox to make room is starting, never a queue.
   it("WEB-U-121 says Starting… while the person's own idle sandbox makes room", async () => {
     const update = page("Start it");
     update(

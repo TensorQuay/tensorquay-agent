@@ -8,7 +8,7 @@ import { unwrapAnswer } from "./answer-wrapper";
 import { apply, emptyTranscript } from "./reducer";
 import { TranscriptView } from "./TranscriptView";
 
-// C2: some models (qwen) wrap their final answer, or its closing paragraph, in <result>…</result> or <note>…</note>.
+// Some models (qwen) wrap their final answer, or its closing paragraph, in <result>…</result> or <note>…</note>.
 // The page shows the inner text; a tag anywhere else is the model's own text and stays as it is.
 describe("WEB-U-135 a final answer's wrapper tag", () => {
   it.each([

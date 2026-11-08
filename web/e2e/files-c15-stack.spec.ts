@@ -6,7 +6,7 @@ import { openFilesPanel } from "./files-panel";
 import { afterStart, budget } from "./stack-start";
 import { bootstrap } from "./ux/flow";
 
-// The feature matrix's gap in the Files panel before 17.0 (F7): what had a unit test and a fake-front spec
+// The feature matrix's gap in the Files panel before 17.0: what had a unit test and a fake-front spec
 // but no real-stack test. On the files suite's stack, beside its own spec, whose result it leaves alone.
 test.skip(
   process.env.TQA_STACK_SUITE !== "files",
@@ -24,7 +24,7 @@ const BIG_PNG = Buffer.concat([
   Buffer.alloc(11 * 1024 * 1024 - 8),
 ]);
 
-// F7 (WEB-U-255): an image over the preview's limit (10 MiB), uploaded through the real gateway, says it is too large
+// WEB-U-255: an image over the preview's limit (10 MiB), uploaded through the real gateway, says it is too large
 // with its size and how to open it, and offers no Expand, which would have nothing to show.
 test("WEB-E2E-056 a file too large to preview says so, with no Expand", async ({
   page,

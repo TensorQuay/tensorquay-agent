@@ -94,7 +94,7 @@ describe("WEB-U-077 settings overview", () => {
       ["Allow sites", "/settings/internet-access"],
       ["Review keys", "/settings/keys/shared"],
     ]);
-    // WEB-U-116 (F22): connectors are optional, so an install without any needs no attention for it.
+    // WEB-U-116: connectors are optional, so an install without any needs no attention for it.
     expect(attention).not.toHaveTextContent(/connector/i);
     expect(
       within(attention).getByText(

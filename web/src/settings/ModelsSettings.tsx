@@ -340,7 +340,7 @@ function RouteRow({
           </span>
         ) : (
           // The key's name, as Keys › Shared shows it: one line, never broken inside it; a long one shortens, and the full
-          // reference is on hover (F8; WEB-U-181: `secrets/` is the configuration's notation, not part of the name).
+          // reference is on hover (WEB-U-181: `secrets/` is the configuration's notation, not part of the name).
           <code
             className="type-code secret-ref-line"
             title={item.key_ref ?? undefined}
