@@ -4,6 +4,8 @@
 //! sends strict tools, up to two more check that a strict tool's string argument keeps its line breaks (GW-U-064). No
 //! user data, at most four upstream requests, and the whole probe within 60 s.
 
+use super::probe_slow::steps_until;
+pub(super) use super::probe_slow::{deadline, first_byte, longest_deadline};
 use super::{
     RelayConfig,
     request::{self, Operation},
@@ -23,12 +25,6 @@ use tqa_llm::{
     Protocol, Role, Route, RouteLimiter, StreamLimits, ToolCall, ToolSpec,
 };
 
-/// The whole probe's bound.
-const DEADLINE: Duration = Duration::from_mins(1);
-/// A local route's whole check: bounded by progress, not by its total (the c16d first hour, F2). Each answer's first
-/// byte waits up to `[relay] local_check_timeout`, then a gap of `[relay] idle_timeout` without a token ends it; a
-/// model that keeps answering may finish within this outer cap, however slowly it thinks.
-const LOCAL_OUTER_CAP: Duration = Duration::from_mins(10);
 /// Below this output speed a local route's check passes with [`SLOW_ANSWERS`]: a task's step takes minutes there.
 const SLOW_TOKENS_PER_SECOND: u64 = 15;
 /// The warning for a local model that works but answers slowly, with its speed (`output_tokens_per_second`).
@@ -43,35 +39,6 @@ pub(crate) fn local_route(route: &Route) -> bool {
         || crate::route_place::place(&route.base_url) != crate::route_place::Place::Hosted
 }
 
-/// The longest any route's check may take: a local route's outer cap, or its first-byte wait if that is longer.
-pub(super) fn longest_deadline(config: &RelayConfig) -> Duration {
-    DEADLINE.max(local_deadline(config))
-}
-
-/// A local route's whole check: [`LOCAL_OUTER_CAP`], or `[relay] local_check_timeout` when that is longer.
-fn local_deadline(config: &RelayConfig) -> Duration {
-    LOCAL_OUTER_CAP.max(Duration::from_secs(config.local_check_timeout))
-}
-
-/// How long the whole check may take on this route: a local model may keep answering up to [`local_deadline`], as long
-/// as it makes progress (GW-U-092); a hosted one gets the minute.
-pub(super) fn deadline(route: &Route, config: &RelayConfig) -> Duration {
-    if local_route(route) {
-        local_deadline(config)
-    } else {
-        DEADLINE
-    }
-}
-
-/// How long one request of the check waits for its answer's first byte: the relay's own wait, or on a local route as
-/// long as the whole check (a local model may think for a while before its first byte).
-pub(super) fn first_byte(route: &Route, config: &RelayConfig) -> Duration {
-    Duration::from_secs(if local_route(route) {
-        config.local_check_timeout
-    } else {
-        config.header_timeout
-    })
-}
 /// Output tokens per request, beyond any thinking budget.
 const OUTPUT_TOKENS: u32 = 64;
 /// Output tokens per request on a route that declares no reasoning: room for a model that reasons unasked before its
@@ -341,6 +308,17 @@ pub(super) async fn run(
     probe: Probe<'_>,
     cancel: &CancellationToken,
 ) -> Observation {
+    let until = deadline(route, probe.config);
+    run_until(route, probe, cancel, until).await
+}
+
+/// [`run`] with the whole check's deadline given: the tests' way to reach it while a model is still answering.
+pub(super) async fn run_until(
+    route: &Route,
+    probe: Probe<'_>,
+    cancel: &CancellationToken,
+    until: Duration,
+) -> Observation {
     let started = Instant::now();
     let declared = |yes: bool| {
         if yes {
@@ -368,12 +346,14 @@ pub(super) async fn run(
         server_context: None,
         usage_refusal: None,
     };
-    let outcome = tokio::select! {biased;
-        () = cancel.cancelled() => Err(fail("cancelled")),
-        result = tokio::time::timeout(deadline(route, probe.config), steps(route, &probe, &mut observed)) => {
-            result.unwrap_or_else(|_| Err(fail("timeout")))
-        }
-    };
+    let (mut outcome, reached_deadline) =
+        steps_until(route, &probe, &mut observed, cancel, until).await;
+    let out_of_time = super::probe_slow::out_of_time_after_round_trip(
+        route,
+        reached_deadline,
+        &mut outcome,
+        &mut observed,
+    );
     // Only after the model answered: Ollama lists a model once it's loaded.
     if outcome.is_ok() && local_route(route) {
         observed.server_context = tokio::select! {biased;
@@ -400,9 +380,10 @@ pub(super) async fn run(
                 observed.warnings.push("usage_missing");
             }
             if local_route(route)
-                && observed
-                    .output_tokens_per_second
-                    .is_some_and(|speed| speed < SLOW_TOKENS_PER_SECOND)
+                && (out_of_time
+                    || observed
+                        .output_tokens_per_second
+                        .is_some_and(|speed| speed < SLOW_TOKENS_PER_SECOND))
             {
                 observed.warnings.push(SLOW_ANSWERS);
             }
@@ -443,7 +424,7 @@ fn context_too_small(observed: &Observation) -> Option<Failure> {
     })
 }
 
-async fn steps(
+pub(super) async fn steps(
     route: &Route,
     probe: &Probe<'_>,
     observed: &mut Observation,

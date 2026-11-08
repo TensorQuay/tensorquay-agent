@@ -5,8 +5,10 @@
 //! tokens a second it passes with `slow_answers`.
 
 use super::RelayConfig;
-use super::probe::{Observation, deadline, longest_deadline};
-use super::probe_tests::{NONCE, TestResult, call, lines, probe_with, route, start_model};
+use super::probe::{Check, Observation, deadline, longest_deadline};
+use super::probe_tests::{
+    NONCE, TestResult, call, lines, probe_until, probe_with, route, start_model,
+};
 use std::time::Duration;
 use tokio_util::sync::CancellationToken;
 use tqa_llm::Usage;
@@ -84,6 +86,72 @@ async fn gw_u_092_a_local_model_that_stops_answering_still_times_out() -> TestRe
     let observed = check(answers(1, Duration::from_secs(3), 20), &config).await?;
     assert_eq!(code(&observed), Some("timeout"), "{observed:?}");
     assert!(!observed.warnings.contains(&"slow_answers"));
+    Ok(())
+}
+
+// TEST: GW-U-092
+#[tokio::test]
+async fn gw_u_092_a_local_model_out_of_time_after_its_round_trip_passes_slowly() -> TestResult {
+    // The 7 Nov 2026 first hour: the README's CPU model passed the call and the round trip, then was still thinking in
+    // the strict-lines step when the check's outer cap ended it (5,078 tokens of thinking at 12 a second). It works for
+    // tasks, slowly: the check passes, says so, and says the line breaks went unverified. Here the strict-lines answer
+    // keeps streaming, each gap well inside the idle limit, past a check deadline of 2 s. Silent past the idle limit,
+    // or out of time before its round trip, a model still fails with `timeout` (the tests beside this one).
+    let config = RelayConfig {
+        idle_timeout: 2,
+        ..RelayConfig::default()
+    };
+    let mut scripts = answers(0, Duration::ZERO, 64);
+    scripts[2] = slowly(
+        20,
+        Duration::from_millis(300),
+        lines(&format!("{NONCE}\n{NONCE}")),
+        64,
+    );
+    let server = start_model(scripts).await?;
+    let local = route("openai_chat", server.base_url(), "")?;
+    let observed = probe_until(
+        &local,
+        &config,
+        None,
+        &CancellationToken::new(),
+        Duration::from_secs(2),
+    )
+    .await?;
+    server.shutdown().await?;
+    assert!(observed.ok, "{observed:?}");
+    assert_eq!(observed.round_trip, Check::Passed, "{observed:?}");
+    assert_eq!(observed.strict_line_breaks, Check::NotRun, "{observed:?}");
+    for warning in ["line_breaks_unverified", "slow_answers"] {
+        assert!(observed.warnings.contains(&warning), "{observed:?}");
+    }
+    Ok(())
+}
+
+// TEST: GW-U-092
+#[tokio::test]
+async fn gw_u_092_a_local_model_that_stops_answering_after_its_round_trip_still_times_out()
+-> TestResult {
+    // Silent past the idle limit in the strict-lines step: tasks meet the same gap (the relay cuts it on their
+    // requests too), so the check fails with `timeout` there as in any step, never "Verified, but slowly".
+    let config = RelayConfig {
+        idle_timeout: 1,
+        ..RelayConfig::default()
+    };
+    let mut scripts = answers(0, Duration::ZERO, 64);
+    scripts[2] = slowly(
+        1,
+        Duration::from_secs(3),
+        lines(&format!("{NONCE}\n{NONCE}")),
+        64,
+    );
+    let observed = check(scripts, &config).await?;
+    assert_eq!(code(&observed), Some("timeout"), "{observed:?}");
+    assert!(!observed.ok, "{observed:?}");
+    assert!(
+        !observed.warnings.contains(&"line_breaks_unverified"),
+        "{observed:?}"
+    );
     Ok(())
 }
 

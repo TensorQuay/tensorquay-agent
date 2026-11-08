@@ -504,6 +504,18 @@ pub(super) async fn probe_with(
     secret: Option<&str>,
     cancel: &CancellationToken,
 ) -> Result<super::probe::Observation, Box<dyn std::error::Error>> {
+    let until = super::probe::deadline(route, config);
+    probe_until(route, config, secret, cancel, until).await
+}
+
+/// [`probe_with`] with the whole check's deadline given, to reach it while a model is still answering.
+pub(super) async fn probe_until(
+    route: &Route,
+    config: &RelayConfig,
+    secret: Option<&str>,
+    cancel: &CancellationToken,
+    until: std::time::Duration,
+) -> Result<super::probe::Observation, Box<dyn std::error::Error>> {
     let client = reqwest::Client::builder()
         .redirect(reqwest::redirect::Policy::none())
         .no_proxy()
@@ -515,7 +527,7 @@ pub(super) async fn probe_with(
         secret: secret.map(|value| secrecy::SecretString::from(value.to_owned())),
         nonce: NONCE.into(),
     };
-    Ok(run(route, probe, cancel).await)
+    Ok(super::probe::run_until(route, probe, cancel, until).await)
 }
 
 #[tokio::test]

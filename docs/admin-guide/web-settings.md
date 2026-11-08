@@ -145,7 +145,10 @@ A local model that works but answers slowly (under 15 tokens a second) passes wi
 "Verified, but slowly: this model answers at about … tokens a second here, so a task's step can take minutes, and
 helpers or a Desktop task far longer. A computer with a suitable GPU, or a hosted model, is much faster. See the user
 guide's Running without a GPU section." The check's
-details show the speed of every check that had usage.
+details show the speed of every check that had usage. A local model that answered the tool call and the round trip
+and was still answering when the check's time ran out in the last step, the two-line test value, passes the same way,
+with that step's warning: it works for tasks, slowly. A model that stops answering for longer than the relay's idle
+limit fails the check in any step, as its tasks would.
 
 The result starts with a verdict, "Verified: this route works for tasks." or "The check failed." with the reason, and
 the button then reads **Run again**. What was observed is folded under **Details**: **Streaming**, **Tool call**, **Tool result round trip**, **Strict tools keep line breaks**,
