@@ -1,4 +1,4 @@
-//! One live scan per workspace at a time (review of 068c): the latest run's changes compare with the live workspace,
+//! One live scan per workspace at a time: the latest run's changes compare with the live workspace,
 //! and readers may ask in parallel. A request waits for the scan in progress and reuses its result only when that scan
 //! finished after the request began waiting, so nobody gets a result older than their own question.
 use super::manifest::Manifest;

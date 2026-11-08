@@ -429,7 +429,7 @@ async fn gw_i_030_delete_refuses_bound_tasks_and_live_sandboxes_and_removes_the_
             .await?
         };
         // A bound task refuses it. (With its tasks, a kept, idle environment is retired for the delete and a run going
-        // refuses it: GW-I-199, since the 13h review.)
+        // refuses it: GW-I-199, since before 17.0.)
         assert_eq!(delete(&base).await?, (409, "workspace_in_use".into()));
         let with_tasks = format!("{base}?with_conversations=true");
         // The idle sandbox retires after the idle window; the task stays. The clock moves on until it has: the worker

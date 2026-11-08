@@ -161,7 +161,7 @@ async fn gw_i_259_a_sandbox_create_and_teardown_log_when_they_begin_with_the_rea
 
 // TEST: GW-I-259
 // A sandbox lost with its run going: what the engine still holds of it is torn down (`lost`), then a replacement is
-// created (`replacement`), each logged as it begins (the review of GW-I-259: destroys outside `retire` say it too).
+// created (`replacement`), each logged as it begins (GW-I-259: destroys outside `retire` say it too).
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
 async fn gw_i_259_a_lost_sandbox_logs_its_teardown_and_its_replacement(pool: PgPool) -> TestResult {

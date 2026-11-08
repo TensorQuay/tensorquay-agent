@@ -120,7 +120,7 @@ async fn gw_i_222_sign_out_everywhere_empties_the_profile_and_starts_the_browser
 // TEST: RT-I-056
 /// Sign out everywhere answers once the browser has started again, and says whether it is ready for a person's keys,
 /// as a run's end reset does (RT-I-055). Before, it answered first and started the browser after, so a Take over right
-/// after it was granted plain control over a desktop with no browser yet (the 16v integration's `sec_059_a` review).
+/// after it was granted plain control over a desktop with no browser yet (found before 17.0).
 #[tokio::test]
 async fn rt_i_056_sign_out_everywhere_answers_after_the_browser_is_back_with_its_ready()
 -> TestResult {

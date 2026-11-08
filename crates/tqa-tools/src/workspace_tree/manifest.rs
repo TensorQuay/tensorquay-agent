@@ -24,8 +24,8 @@ mod tests;
 /// changed it. Which of their files a run's changes list is decided when two manifests are compared: a file added
 /// under the uploads directory is the person's own upload (uploads never overwrite), never the run's change.
 const SKIPPED_AT_ROOT: [&str; 1] = [".tqa"];
-/// Left out at any depth: version-control internals, installed packages and well-known generated caches (review of
-/// 068c: they are noise in every task's changes).
+/// Left out at any depth: version-control internals, installed packages and well-known generated caches (they are noise
+/// in every task's changes).
 const SKIPPED: [&str; 8] = [
     ".git",
     "node_modules",

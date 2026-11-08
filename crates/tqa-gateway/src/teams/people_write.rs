@@ -265,8 +265,8 @@ pub(crate) async fn before_delete(
     id: &ConversationId,
     with_helpers: bool,
 ) -> Result<Vec<ConversationId>, GatewayError> {
-    // Whatever the switch says: it stops new team activity, not what deleting a team made before removes (M3 of the
-    // slice 6 review; "delete means gone", ADR-0034 point 4).
+    // Whatever the switch says: it stops new team activity, not what deleting a team made before removes
+    // ("delete means gone", ADR-0034 point 4).
     let lead = crate::conversations::uuid(id)?;
     let rows = crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
         Ok(sqlx::query!(

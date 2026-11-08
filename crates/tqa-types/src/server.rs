@@ -207,7 +207,7 @@ pub enum ServerFrame {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         reason: Option<crate::SignOutFailure>,
         /// Whether the browser started again and its window took the focus, as `screen.reset`'s (`false`: a Take over
-        /// after it says a sign-in now may not last; the 16v integration's `sec_059_a` review). Absent from a runtime
+        /// after it says a sign-in now may not last). Absent from a runtime
         /// that doesn't say: true.
         #[serde(
             default = "crate::server::yes",

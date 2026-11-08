@@ -134,7 +134,7 @@ pub(crate) fn can_stop(team_running: bool, stored: &str, failed_run: bool) -> bo
 }
 
 /// A lead's helpers that need its person, as the task list shows them: stuck and failed ones while the team runs, none
-/// once it has stopped, since nothing in an ended team waits on anyone (GW-U-169; the c16 UX review: an ended team's
+/// once it has stopped, since nothing in an ended team waits on anyone (GW-U-169; before 17.0, an ended team's
 /// "1 failed" stayed red in the list for good).
 pub(crate) fn attention(team_running: bool, stuck: u32, failed: u32) -> Attention {
     if team_running {

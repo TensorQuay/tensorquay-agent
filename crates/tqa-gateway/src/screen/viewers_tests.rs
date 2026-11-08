@@ -345,7 +345,7 @@ fn gw_u_156_a_new_sandbox_or_a_deleted_task_forgets_the_unclean_mark()
 // TEST: GW-U-155
 /// A late grant (the run's end reset unconfirmed within the wait) is taken back when that reset lands: the holder's
 /// control turns into plain control after a clean reset, or says earlier sign-ins may remain after one that couldn't
-/// empty the profile (the CU review, #20). Only a late grant changes; an on-time one, or no holder, gets nothing new.
+/// empty the profile. Only a late grant changes; an on-time one, or no holder, gets nothing new.
 #[test]
 fn gw_u_155_a_late_grant_is_settled_when_the_reset_lands() -> Result<(), Box<dyn std::error::Error>>
 {
@@ -658,8 +658,8 @@ fn gw_u_203_a_reset_without_a_ready_browser_keeps_control_not_ready()
 
 // TEST: GW-U-204
 /// Sign out everywhere closes the browser and starts it again, as a run's end does, so a Take over meanwhile waits for
-/// its answer, and one after an answer whose browser wasn't back in time is granted not ready (the 16v integration's
-/// `sec_059_a` review: the answer came before the browser, and control was plain over a desktop with none yet).
+/// its answer, and one after an answer whose browser wasn't back in time is granted not ready (found before 17.0: the
+/// answer came before the browser, and control was plain over a desktop with none yet).
 #[test]
 fn gw_u_204_a_take_over_around_sign_out_everywhere_waits_and_is_not_plain_without_a_browser()
 -> Result<(), Box<dyn std::error::Error>> {

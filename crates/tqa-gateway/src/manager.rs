@@ -117,7 +117,7 @@ impl Teardown {
     }
 }
 
-/// Logs a teardown's beginning: every destroy, through `retire` or not, says it (the review of GW-I-259).
+/// Logs a teardown's beginning: every destroy, through `retire` or not, says it (GW-I-259).
 pub(crate) fn teardown_begun(conversation_id: &dyn std::fmt::Display, reason: Teardown) {
     tracing::info!(conversation_id = %conversation_id, reason = reason.as_str(), "sandbox teardown begun");
 }

@@ -187,7 +187,7 @@ impl<T> Screen<T> {
 
     /// The run's end reset has landed: a late grant still held turns into plain control, or into control that says
     /// earlier sign-ins may remain when that reset couldn't empty the profile (`unclean`). Anything else is left as it
-    /// is, so nobody is sent anything new (the CU review, #20).
+    /// is, so nobody is sent anything new.
     pub(super) fn settle_late(&mut self, unclean: bool) {
         let Holder::Late(viewer) = *self.control.borrow() else {
             return;
@@ -379,7 +379,7 @@ impl<T> Screens<T> {
 
     /// Sign out everywhere's answer, given once the browser has started again: as a run's end reset, an emptied profile
     /// leaves nothing to warn of and a failure leaves the task unclean, and with `ready` false a Take over is granted not
-    /// ready until a reset or sign-out says the browser is back (GW-U-204; the 16v integration's `sec_059_a` review).
+    /// ready until a reset or sign-out says the browser is back (GW-U-204).
     pub(super) fn signed_out(&self, conversation: &ConversationId, ok: bool, ready: bool) {
         self.reset_done(conversation, ok, ready);
     }

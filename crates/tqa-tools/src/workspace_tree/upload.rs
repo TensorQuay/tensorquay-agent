@@ -154,7 +154,7 @@ pub fn open_part(directory: BorrowedFd<'_>, name: &str) -> Result<(File, u64), T
         _ => TreeError::Io,
     })?;
     let stat = sys::fstat(&fd).map_err(|_| TreeError::Io)?;
-    // One link only: a part hard-linked to another file would write the upload into that file (review note 1).
+    // One link only: a part hard-linked to another file would write the upload into that file.
     if FileType::from_raw_mode(stat.st_mode) != FileType::RegularFile || stat.st_nlink != 1 {
         return Err(TreeError::PathInvalid);
     }
