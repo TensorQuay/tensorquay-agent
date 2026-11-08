@@ -13,7 +13,7 @@ use std::sync::Arc;
 
 /// Live tokens one user may hold at once.
 const MAX_TOKENS: i64 = 50;
-/// The longest lifetime a token may have (answers-063 Q3).
+/// The longest lifetime a token may have.
 const MAX_DAYS: u32 = 365;
 
 #[derive(Deserialize)]

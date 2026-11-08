@@ -1,5 +1,5 @@
 //! HTTP handlers: one directory level, one file's preview, a download, and an upload (GW-I-045 / GW-I-047).
-//! Authorization is workspace access (answers-066 Q7, answers-068 Q5): a read share may list and read, uploads need
+//! Authorization is workspace access: a read share may list and read, uploads need
 //! write, and the administrator role grants nothing. Filesystem work runs on the blocking pool. On microVM installs
 //! the same views are read through the workspace's runtime (ADR-0030); uploads there still answer `files_unavailable`.
 use super::path::{self, Kind, WorkspacePath};

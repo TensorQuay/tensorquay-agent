@@ -1,4 +1,4 @@
-//! A real authenticated TLS smart-HTTP Git server for the Git relay tests (065g, answers-065g Q5): the Python
+//! A real authenticated TLS smart-HTTP Git server for the Git relay tests: the Python
 //! standard library serving `git http-backend` as CGI for a temporary bare repository, with a certificate for
 //! 127.0.0.1 from a throwaway test CA that only the gateway under test trusts. Needs `git`, `openssl` and `python3`.
 //! One CA serves a whole test-binary run (066a4). Every blocking step runs off the test's current-thread runtime,

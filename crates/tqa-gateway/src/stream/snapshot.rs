@@ -1,4 +1,4 @@
-//! The client-facing sandbox snapshot a stream opens with, and re-sends after replay (answers-050).
+//! The client-facing sandbox snapshot a stream opens with, and re-sends after replay.
 use crate::{GatewayError, app, conversations};
 use tqa_sandbox::ReadinessSource;
 use tqa_types::{

@@ -1,5 +1,5 @@
 //! Gate 3 security evidence on the gateway's HTTP surface: SEC-004, SEC-005, SEC-009, SEC-012 (HTTP half), and
-//! NUL in stored text fields (answers-056). SEC-026: runtime workspace replies never reach clients (ADR-0030).
+//! NUL in stored text fields. SEC-026: runtime workspace replies never reach clients (ADR-0030).
 #[path = "support/fixture.rs"]
 mod support;
 

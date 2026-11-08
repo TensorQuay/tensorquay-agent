@@ -1,6 +1,6 @@
 //! What changed between two manifests: one entry per added, modified or deleted file with line counts, and a unified
 //! diff of one file from the stored copies. Binary and uncopied files are listed without a diff. Line diffs are
-//! bounded by a deadline (answers-068 Q8), after which `similar` returns a coarser but valid diff.
+//! bounded by a deadline, after which `similar` returns a coarser but valid diff.
 use super::blobs::Blobs;
 use super::manifest::{Manifest, Record};
 use serde::Serialize;

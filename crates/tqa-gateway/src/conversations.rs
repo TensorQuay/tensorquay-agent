@@ -27,8 +27,7 @@ pub struct Conversation {
     pub owner_id: uuid::Uuid,
     /// The workspace this conversation is bound to for its whole life.
     pub workspace_id: uuid::Uuid,
-    /// The bounded display title; absent when an administrator views another user's task (titles are content,
-    /// answers-063 Q1).
+    /// The bounded display title; absent when an administrator views another user's task (titles are content).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
     /// Where the title came from: `message` (the first message, until the task is named), `model` (named after its

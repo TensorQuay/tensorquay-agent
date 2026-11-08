@@ -111,7 +111,7 @@ fn llm_c_023_an_image_on_a_non_vision_route_is_refused_before_sending()
 }
 
 /// Bytes captured from the encoder before `extra_body` objects were deep-merged; Chat requests
-/// must not change (answers-077 Q3).
+/// must not change.
 #[test]
 fn llm_u_019_chat_request_bytes_are_unchanged_by_the_deep_merge()
 -> Result<(), Box<dyn std::error::Error>> {

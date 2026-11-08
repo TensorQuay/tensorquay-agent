@@ -316,7 +316,7 @@ async fn boundary(State(state): State<Arc<AppState>>, request: Request, next: Ne
     // So are the agent-team routes (ADR-0034), with a runtime token too.
     let channels = request.uri().path().starts_with("/runtime/channels")
         || request.uri().path().starts_with("/runtime/teams/");
-    // A personal API token is never an ambient credential, so a bearer API request needs no Origin (answers-063 Q4);
+    // A personal API token is never an ambient credential, so a bearer API request needs no Origin;
     // the extractor then authenticates it by the token alone, never by a cookie on the same request.
     let bearer = request.uri().path().starts_with("/api/v1/")
         && request

@@ -1,4 +1,4 @@
-//! Task 076g (answers-076): what the web shows on a workspace card - GW-I-030 addendum (owner, quota, share and task
+//! What the web shows on a workspace card - GW-I-030 addendum (owner, quota, share and task
 //! counts, the lease) - and GW-I-049, sharing by exact email without ever listing accounts.
 #[path = "support/fixture.rs"]
 mod support;

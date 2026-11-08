@@ -1,4 +1,4 @@
-//! Slots, eviction and the fair queue (ARCHITECTURE §4.4, ADR-0016, answers-048).
+//! Slots, eviction and the fair queue (ARCHITECTURE §4.4, ADR-0016).
 //! A conversation waits when it has accepted work but no sandbox record: derived from the store, never stored.
 use super::SandboxManager;
 use crate::GatewayError;
@@ -352,7 +352,7 @@ impl SandboxManager {
         }
     }
 
-    /// Publishes `queued` with the position, only when it changed (answers-050).
+    /// Publishes `queued` with the position, only when it changed.
     fn publish_positions(&self, positions: &[(Uuid, QueuePosition)]) -> Result<(), GatewayError> {
         let mut published = self
             .admission

@@ -230,7 +230,7 @@ async fn gw_i_045_access_is_workspace_access_and_administrators_get_no_content(
                 .status(),
             201
         );
-        // The administrator role grants metadata only, never files (answers-066 Q7).
+        // The administrator role grants metadata only, never files.
         for cookie in [&admin, &reader_cookie] {
             assert_eq!(code(files(f, cookie, &id, "").send().await?).await?.0, 403);
             assert_eq!(

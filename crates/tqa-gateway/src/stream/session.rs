@@ -94,7 +94,7 @@ impl Session {
             self.cursor.finish_replay()?;
             self.replay = false;
             if self.replayed {
-                // Replayed history may end in an old state; close it with the current snapshot (answers-050).
+                // Replayed history may end in an old state; close it with the current snapshot.
                 let (ready, _) =
                     super::snapshot::ready(&self.state, &self.conversation, self.backend, true)
                         .await?;
