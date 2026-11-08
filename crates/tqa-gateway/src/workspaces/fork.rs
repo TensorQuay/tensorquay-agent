@@ -1,4 +1,4 @@
-//! `POST /api/v1/workspaces/{id}/fork {name}` (task 066c, answers-066 Q5): anyone who may read a workspace copies it
+//! `POST /api/v1/workspaces/{id}/fork {name}`: anyone who may read a workspace copies it
 //! into a new workspace of their own. The copy runs in the background (202, `forking`, then `ready` or `failed`),
 //! bounded by the quota and never waiting for the write lease; a copy taken while a sandbox had the source mounted
 //! is marked `consistent: false`, as files may have been mid-change. On the microVM backend the copy is of the

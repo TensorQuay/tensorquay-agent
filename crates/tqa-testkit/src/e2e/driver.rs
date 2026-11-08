@@ -1,4 +1,4 @@
-//! The task-set driver behind `tqa-e2e` (design 085 §2): seeds a workspace per attempt, follows the run,
+//! The task-set driver behind `tqa-e2e`: seeds a workspace per attempt, follows the run,
 //! checks a copy of the workspace, classifies, records, and reruns once after a provider failure.
 use super::{
     attempt::{self, Followed, Plan},
@@ -42,7 +42,7 @@ pub struct Options {
     pub only: Vec<String>,
     /// Attempts per task.
     pub repeat: u32,
-    /// Attempts run at once (design 085; 1 when unset).
+    /// Attempts run at once (1 when unset).
     pub concurrency: usize,
     /// The run directory; it must not exist yet.
     pub out: PathBuf,
@@ -97,7 +97,7 @@ impl Default for RouteFacts {
     }
 }
 
-/// The cost guards for routes that may cost money (design 085 §6).
+/// The cost guards for routes that may cost money.
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct Guards {
     /// The route is the fake model: no guard applies and the summary is not a gate result.

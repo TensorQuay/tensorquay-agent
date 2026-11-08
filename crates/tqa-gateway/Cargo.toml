@@ -50,12 +50,12 @@ quick-xml = { version = "=0.41.0", features = ["encoding"] }
 zip = { version = "=9.0.5", default-features = false, features = ["deflate"] }
 url = { version = "=2.5.8", features = ["serde"] }
 
-# Directory-fd path walking with O_NOFOLLOW for workspace files (task 068).
+# Directory-fd path walking with O_NOFOLLOW for workspace files.
 rustix = { version = "~1.1", features = ["fs"] }
-# Line diffs of a run's changed text files (task 068c, answers-068 Q8); bounded by a deadline.
+# Line diffs of a run's changed text files (GW-I-048); bounded by a deadline.
 similar = "~3.2"
 reqwest = { version = "=0.12.28", default-features = false, features = ["rustls-tls", "json", "stream"] }
-# The Git relay serves its routes on the egress listener's connections (task 065g); all already in the lock file.
+# The Git relay serves its routes on the egress listener's connections; all already in the lock file.
 bytes = "=1.12.1"
 http-body-util = "=0.1.5"
 hyper = { version = "=1.11.1", features = ["server", "client", "http1"] }

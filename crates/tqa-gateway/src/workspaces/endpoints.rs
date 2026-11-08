@@ -1,5 +1,4 @@
-//! `/api/v1/workspaces` (task 066a). Personal API tokens may call every operation: this is user work, not account
-//! administration (answers-063 Q3).
+//! `/api/v1/workspaces`. Personal API tokens may call every operation: this is user work, not account administration.
 use super::{Access, access, valid_name};
 use crate::{
     GatewayError,
@@ -212,7 +211,7 @@ pub(crate) struct ShareBody {
     access: ShareAccess,
 }
 
-/// `PUT .../shares {email, access}` (task 076g): share by exact email, never by listing accounts.
+/// `PUT .../shares {email, access}`: share by exact email, never by listing accounts.
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct ShareByEmail {
@@ -670,7 +669,7 @@ pub(crate) async fn share(
     }).await
 }
 
-/// `PUT /api/v1/workspaces/{id}/shares {email, access}` (owner, task 076g, GW-I-049): shares with the one active
+/// `PUT /api/v1/workspaces/{id}/shares {email, access}` (owner, GW-I-049): shares with the one active
 /// account whose email matches exactly (case-insensitive). Unknown and inactive addresses run the same lookup and get
 /// the same `404 user_not_found`, and attempts are limited per caller, so nothing enumerates accounts.
 ///

@@ -147,7 +147,7 @@ async fn record(
         .execute(&mut *transaction)
         .await?;
     }
-    // Exact bytes: a message may contain U+0000, which `jsonb` cannot hold (task 056).
+    // Exact bytes: a message may contain U+0000, which `jsonb` cannot hold.
     let frame = serde_json::to_vec(&action.frame)?;
     let ordinal = sqlx::query_scalar!("INSERT INTO idempotency (key,user_id,route,response_status,response_body,body_hash,conversation_id,queued_frame,execution_status,held) VALUES ($1,$2,$3,202,$4,$5,$6,$7,'queued',$8) RETURNING ordinal AS \"ordinal!\"", action.key, user.id, action.route, serde_json::to_vec(&response)?,action.fingerprint.as_slice(),conversation,frame,held)
             .fetch_one(&mut *transaction).await?;

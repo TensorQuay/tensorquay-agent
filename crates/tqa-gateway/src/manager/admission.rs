@@ -339,7 +339,7 @@ impl SandboxManager {
         match self.admit_waiting_work(&id).await {
             Ok(true) => {
                 self.forget_position(&id)?;
-                // An open stream moves from `queued` to `creating` before the worker starts the sandbox (task 048c).
+                // An open stream moves from `queued` to `creating` before the worker starts the sandbox.
                 self.state_notice(&id, tqa_types::SandboxState::Creating)?;
                 self.schedule(&id)?;
                 Ok(Grant::Admitted)
@@ -454,8 +454,8 @@ impl SandboxManager {
         self.retire_for_switch(&id, super::Teardown::HandOver)
     }
 
-    /// Makes room when work waits: on a full host, the least recently active idle sandbox; for an owner at its cap
-    /// (task 048b), one of its own, since a busy or pinned own sandbox is never evicted and that owner's work stays
+    /// Makes room when work waits: on a full host, the least recently active idle sandbox; for an owner at its cap, one
+    /// of its own, since a busy or pinned own sandbox is never evicted and that owner's work stays
     /// queued. Returns the task whose only wait is then its owner's own idle sandbox retiring: from that person's side
     /// it is starting (GW-I-158).
     async fn make_room(

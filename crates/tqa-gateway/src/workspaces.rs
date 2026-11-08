@@ -1,4 +1,4 @@
-//! Workspaces as owned entities (task 066a, FR-30, ARCHITECTURE §4.6). A conversation binds to one workspace for
+//! Workspaces as owned entities (FR-30, ARCHITECTURE §4.6). A conversation binds to one workspace for
 //! its whole life; the sandbox mounts that workspace's directory. The owner may share it `read` (see, read files,
 //! fork) or `write` (also bind one's own conversations and run on it). Administrators see metadata only.
 mod copy;

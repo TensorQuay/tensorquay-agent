@@ -1,4 +1,4 @@
-//! Workspace upkeep (task 066c): measuring a workspace once no sandbox has it mounted, the retention sweep, and
+//! Workspace upkeep: measuring a workspace once no sandbox has it mounted, the retention sweep, and
 //! recovering forks a stopped gateway left half-copied.
 use super::copy::{self, Limits};
 use crate::{GatewayError, app::State, storage::Storage};

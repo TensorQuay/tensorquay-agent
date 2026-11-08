@@ -121,7 +121,7 @@ pub(super) async fn encode(
     let route = route_snapshot(state, &settings.registry, &name)?;
     let fallback_routes = fallback_snapshots(state, &settings.registry, &name)?;
     let last_stored_seq = state.events.watermark(conversation).await?;
-    // A workspace created from git is cloned by the runtime into the empty workspace (057, task 066a).
+    // A workspace created from git is cloned by the runtime into the empty workspace.
     let workspace = crate::io::bounded(
         state.config.io_timeout(),
         &state.cancel,

@@ -208,7 +208,7 @@ async fn gw_e_019_a_full_host_queues_new_conversations_and_allows_reuse(
             .await?;
         assert_eq!(accepted.status(), 202);
         runtime.action().await?;
-        // GW-I-034 (task 048): a full host accepts and queues the work instead of refusing it.
+        // GW-I-034: a full host accepts and queues the work instead of refusing it.
         let queued = fixture
             .action(
                 &format!("/api/v1/conversations/{}/messages", second.id),

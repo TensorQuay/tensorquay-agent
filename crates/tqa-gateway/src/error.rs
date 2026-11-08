@@ -113,7 +113,7 @@ pub enum GatewayError {
     /// and forks wait for the runtime file service.
     #[error("workspace files are not available on the microVM backend yet")]
     FilesUnavailable,
-    /// No active account has that email (task 076g); the same answer for unknown and inactive accounts.
+    /// No active account has that email; the same answer for unknown and inactive accounts.
     #[error("no account uses that email")]
     UserNotFound,
     /// A named thing this caller may address doesn't exist, under its own code (an agent team's `unknown_member`).

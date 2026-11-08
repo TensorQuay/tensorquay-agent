@@ -1,4 +1,4 @@
-//! Personal API tokens (task 063): a program acts as its user until the token expires or is revoked. Only the
+//! Personal API tokens (GW-I-023): a program acts as its user until the token expires or is revoked. Only the
 //! SHA-256 of a token is stored; the token itself is returned once, at creation. Management needs a session.
 use super::{SessionAuthz, TOKEN_PREFIX, token};
 use crate::{GatewayError, app::State, request::ApiJson};

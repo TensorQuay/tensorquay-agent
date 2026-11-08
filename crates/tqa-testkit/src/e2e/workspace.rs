@@ -1,4 +1,4 @@
-//! The workspace copy the check runs on (design 085 §1): downloaded through the files API, never read
+//! The workspace copy the check runs on: downloaded through the files API, never read
 //! from the sandbox, and compared with the seed for protected paths before the check restores them.
 use crate::client::{ApiClient, ClientError, FileEntry};
 use std::{

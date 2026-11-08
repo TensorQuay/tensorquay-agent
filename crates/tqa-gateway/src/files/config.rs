@@ -1,5 +1,4 @@
-//! `[files]`: the workspace file view and upload limits (task 068, answers-068 Q4) and the run-changes snapshot
-//! bounds (task 068c). Bytes and seconds in TOML.
+//! `[files]`: the workspace file view and upload limits and the run-changes snapshot bounds. Bytes and seconds in TOML.
 use crate::GatewayError;
 use serde::Deserialize;
 

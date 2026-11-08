@@ -11,11 +11,11 @@ use axum_extra::extract::{
 use secrecy::ExposeSecret;
 use std::{net::SocketAddr, sync::Arc};
 
-/// The caller, by session cookie or by personal API token (task 063). A request with an `Authorization` header is
+/// The caller, by session cookie or by personal API token. A request with an `Authorization` header is
 /// authenticated only by that token: a cookie on the same request is ignored, and a bad token is `401`.
 pub(crate) struct Authz(pub User);
 
-/// The caller by session cookie only: token and user administration (task 063, answers-063 Q3).
+/// The caller by session cookie only: token and user administration.
 pub(crate) struct SessionAuthz(pub User);
 
 /// Personal API tokens carry this prefix; runtime tokens never do, so neither can stand in for the other.

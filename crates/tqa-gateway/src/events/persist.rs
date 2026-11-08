@@ -270,7 +270,7 @@ fn run_end(frame: &ServerFrame) -> Option<String> {
 }
 
 /// `PostgreSQL` `jsonb` cannot hold U+0000, which serialized JSON always writes as the escape `\u0000`. Such frames
-/// go to the blob store unchanged (task 056); an escaped backslash followed by `u0000` only matches harmlessly.
+/// go to the blob store unchanged; an escaped backslash followed by `u0000` only matches harmlessly.
 fn contains_nul(bytes: &[u8]) -> bool {
     bytes.windows(6).any(|window| window == br"\u0000")
 }

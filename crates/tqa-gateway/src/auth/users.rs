@@ -1,5 +1,5 @@
-//! User administration (task 063, GW-I-046): list, change role, disable or enable. Users are never deleted, and
-//! the last enabled administrator can be neither demoted nor disabled. Session only (answers-063 Q3).
+//! User administration (GW-I-046): list, change role, disable or enable. Users are never deleted, and the last enabled
+//! administrator can be neither demoted nor disabled. Session only.
 use super::{Role, SessionAuthz};
 use crate::{GatewayError, app::State, request::ApiJson};
 use axum::{

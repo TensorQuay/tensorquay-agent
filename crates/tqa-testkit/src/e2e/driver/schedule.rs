@@ -1,4 +1,4 @@
-//! `--concurrency N` scheduling (design 085): which attempt starts next, and its number. Pure, so the rules are tested
+//! `--concurrency N` scheduling: which attempt starts next, and its number. Pure, so the rules are tested
 //! without a stack (TK-U-024).
 //!
 //! - At most N attempts run at once, and they start in task and round order.

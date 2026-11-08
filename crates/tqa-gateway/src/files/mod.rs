@@ -1,4 +1,4 @@
-//! Workspace files and uploads (task 068, FR-36, GW-I-045/047): list, read and download a task's workspace files and
+//! Workspace files and uploads (FR-36, GW-I-045/047): list, read and download a task's workspace files and
 //! upload into `/workspace/uploads/`, through the gateway and never through the model. On Firecracker installs the
 //! views are read through the workspace's runtime (ADR-0030); uploads and run changes there answer `files_unavailable`
 //! until their slices land.

@@ -40,7 +40,7 @@ impl LoginRate {
     }
 }
 
-/// Failed personal-token authentications per transport address (task 063): after `ATTEMPTS` failures in a minute
+/// Failed personal-token authentications per transport address: after `ATTEMPTS` failures in a minute
 /// the address is refused for the rest of that minute, even with a valid token, so a guesser learns nothing.
 pub(crate) struct TokenFailures {
     windows: Mutex<BTreeMap<IpAddr, (Instant, u32)>>,

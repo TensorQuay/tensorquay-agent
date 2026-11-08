@@ -30,7 +30,7 @@ pub(crate) struct State {
     pub passwords: Passwords,
     pub dummy_hash: String,
     pub login_rate: LoginRate,
-    /// Failed personal-token authentications per address (task 063).
+    /// Failed personal-token authentications per address.
     pub token_failures: TokenFailures,
     pub storage: Storage,
     pub events: EventStore,
