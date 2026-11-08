@@ -475,7 +475,7 @@ impl TakeFiles {
             ),
         ]);
         Self {
-            // It places files in the lead's workspace: a success may have changed it (backlog #18).
+            // It places files in the lead's workspace: a success may have changed it (CORE-E-041).
             spec: ToolSpec {
                 changes_workspace: true,
                 ..super::super::specification(

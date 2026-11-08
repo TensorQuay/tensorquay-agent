@@ -22,7 +22,7 @@ impl EditFile {
     pub fn new() -> Self {
         Self {
             spec: ToolSpec {
-                // A success may have changed files: a repeated failure counts afresh after it (backlog #18).
+                // A success may have changed files: a repeated failure counts afresh after it (CORE-E-041).
                 changes_workspace: true,
                 ..specification(
                     "edit_file",

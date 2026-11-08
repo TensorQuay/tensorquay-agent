@@ -147,7 +147,7 @@ pub(super) struct Failures {
 }
 /// Failures of one call with no change between that stop the run.
 pub(super) const REPEATED_FAILURES: u32 = 3;
-/// Failures of one call in a run that stop it whatever changed between (backlog #18).
+/// Failures of one call in a run that stop it whatever changed between (CORE-E-041).
 pub(super) const RUN_FAILURES: u32 = 6;
 /// Why a run stops when one call has failed too often: three times with no change between, or six times in all.
 /// `changes` says whether a tool's successful call may have changed the workspace.

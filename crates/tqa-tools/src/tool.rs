@@ -81,7 +81,7 @@ pub struct ToolSpec {
     pub parallel_safe: bool,
     /// Whether a successful call may have changed the workspace's files: true only for `shell`, `write_file`,
     /// `edit_file` and the team lead's `take_files` (which places a helper's files in the workspace). Such a success
-    /// between two failures of the same call starts that call's repeated-failure count again (backlog #18); MCP tools
+    /// between two failures of the same call starts that call's repeated-failure count again (CORE-E-041); MCP tools
     /// and every other builtin, reads, notes, posts and fetches included, never do.
     pub changes_workspace: bool,
 }
