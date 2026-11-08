@@ -280,7 +280,7 @@ fn listed(paths: &[String]) -> String {
 
 /// Directories a hand-back never walks: the runtime's own `.tqa` (its tool-output spill and fetched copies, which the
 /// files API hides; a hand-back named 28 of them in a live check before 17.0), a repository's own store, and build or
-/// package caches, whose files a command changes as a side effect (the peer review: `git` in a copy would attach
+/// package caches, whose files a command changes as a side effect (for example, `git` in a copy would attach
 /// `.git/index`).
 const SKIPPED: [&str; 6] = [
     ".tqa",
