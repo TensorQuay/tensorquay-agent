@@ -319,7 +319,7 @@ tagged, so nothing is deprecated for a release first: what goes is removed outri
   - the Gate 9 and FR-10 traceability rows.
 - **ADR-0034** (team runs): a spawned member's reach is at most the caller's tools, connectors and network list, in
   place of "the stricter policy" (§1).
-- **PRD:** already amended. If the owner agrees to §2's points 2 to 4, FR-15 and FR-22 gain per-profile
+- **PRD:** already amended. If the Product Owner agrees to §2's points 2 to 4, FR-15 and FR-22 gain per-profile
   lists and observe mode.
 
 ## Tests that go or change
