@@ -135,9 +135,10 @@ impl ToolRegistry {
     /// For a tool whose `null` means absent ([`Tool::null_means_absent`], our strict-valid builtins), drops each `null`
     /// member the schema marks nullable, at every depth it describes: a strict model sends `null` for an optional
     /// argument it doesn't use. An empty or blank string for an optional string argument is dropped the same way: small
-    /// models fill an optional string with `""` (a 13h Gate 5 demo ended on three refusals of `cursor: ""`). Any other tool's arguments are left exactly as sent. The run records the normalised
-    /// call, so `tool.call`, approvals, policy matching and dispatch see the tool's real arguments (TOOL-U-034). A
-    /// `null` for a non-nullable property stays, for validation to refuse; an unknown tool is left as it is.
+    /// models fill an optional string with `""` (a Gate 5 demo before 17.0 ended on three refusals of `cursor: ""`).
+    /// Any other tool's arguments are left exactly as sent. The run records the normalised call, so `tool.call`,
+    /// approvals, policy matching and dispatch see the tool's real arguments (TOOL-U-034). A `null` for a non-nullable
+    /// property stays, for validation to refuse; an unknown tool is left as it is.
     pub fn normalize_arguments(&self, name: &str, args: &mut Value) {
         if let Some(entry) = self
             .entries

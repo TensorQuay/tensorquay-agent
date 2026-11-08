@@ -1,9 +1,9 @@
 //! TOOL-U-034: a strict model sends `null` for an optional argument it doesn't use; the registry normalises that to
 //! absent, at every depth the schema describes, so a call's recorded arguments are the tool's real ones. An empty or
-//! blank string for an optional string argument is absent too (small models fill one with `""`; a 13h Gate 5 demo
-//! ended on three refusals of `read_file`'s `cursor: ""`), swept over every tool family's schema. So is a null-word
-//! (`None`, `null`, `undefined`, any case) where the field can't really hold that word: a cursor (an opaque token) and
-//! a closed list (an `enum`); a free string keeps it (the lead's decision of 2 Oct, after the demo rerun ended on
+//! blank string for an optional string argument is absent too (small models fill one with `""`; a Gate 5 demo
+//! before 17.0 ended on three refusals of `read_file`'s `cursor: ""`), swept over every tool family's schema. So is a
+//! null-word (`None`, `null`, `undefined`, any case) where the field can't really hold that word: a cursor (an opaque
+//! token) and a closed list (an `enum`); a free string keeps it (decided on 2 Oct, after the demo rerun ended on
 //! `grep`'s `cursor: "None"`).
 use serde_json::json;
 use std::{error::Error, sync::Arc};
