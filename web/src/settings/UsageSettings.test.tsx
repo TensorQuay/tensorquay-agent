@@ -457,7 +457,7 @@ describe("WEB-U-034 usage", () => {
   });
 });
 
-// Candidate12 F21: on day one the chart was one unlabelled bar at the right edge, the Model column read "local", and
+// Found before 17.0: on day one the chart was one unlabelled bar at the right edge, the Model column read "local", and
 // "59.2K" sat above "59 200".
 describe("WEB-U-127 usage reads the same on day one as later", () => {
   it("dates the chart at both ends and says its busiest day in words", async () => {

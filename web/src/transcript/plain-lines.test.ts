@@ -336,7 +336,7 @@ describe("WEB-U-016 no git words", () => {
 // label): a script given inline reads as a script in its language, any other multi-line command as its first line and
 // "…", and a one-line command as before. The whole command stays in the card's Details.
 describe("WEB-U-390 a multi-line command's step label", () => {
-  // B9's first step, as the lead sent it (cut after its first lines).
+  // The first step of a real-world case before 17.0, as the lead sent it (cut after its first lines).
   const b9 = `python3 - <<'EOF'
 import re, urllib.request, html
 
@@ -348,7 +348,7 @@ EOF`;
   const shell = (command: string, overrides: Partial<ToolView> = {}) =>
     toolSummary(tool("shell", { command }, overrides));
 
-  it("names B9's heredoc a Python script, in each state", () => {
+  it("names a real-world heredoc a Python script, in each state", () => {
     expect(shell(b9)).toBe("Ran a Python script");
     // Still running or stopped, it shows its first line (the strings these share keep the conversation page's
     // first load within WEB-U-014).
@@ -384,7 +384,7 @@ EOF`;
   });
 
   it("shows any other multi-line command as its first meaningful line and …", () => {
-    // A12b's xdotool step.
+    // An xdotool step from real-world use before 17.0.
     expect(
       shell(
         `export DISPLAY=:0\nWID=$(xdotool search --name "Open File" | head -1)\nxdotool windowactivate "$WID"`,

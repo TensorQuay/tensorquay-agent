@@ -53,7 +53,7 @@ export type Party =
   | { kind: "person"; you?: boolean; name?: string }
   | { kind: "gateway" };
 
-/** One message of the team's log (the S1 read shape, as the page needs it). */
+/** One message of the team's log (ADR-0034's S1 read shape, as the page needs it). */
 export type TeamMessageView = {
   seq: number;
   type:
@@ -80,7 +80,7 @@ export type TeamMessageView = {
   notice?: { kind: string; member?: string; position?: number } | undefined;
 };
 
-/** The team's end note (the S6 contract's `ended`, from the one stop path). */
+/** The team's end note (`ended` in ADR-0034's S6 contract, from the one stop path). */
 export type TeamEndView = {
   reason: string;
   /** The lead's own summary, when it said it was done. */

@@ -361,7 +361,7 @@ describe("WEB-U-062 the channels list", () => {
     ).toBeVisible();
   });
 
-  // F1, P1: the errors stayed red after both fields were filled. Each now shows only after Create and goes as soon as
+  // The errors stayed red after both fields were filled. Each now shows only after Create and goes as soon as
   // its field changes; a gateway refusal of the title opens the title field to fix it.
   it("shows errors only after Create, clears each as its field changes, and names a refused title", async () => {
     const fake = fakeChannels({

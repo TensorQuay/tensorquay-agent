@@ -170,7 +170,7 @@ describe("SEC-001 denied fetch activity line", () => {
       `Blocked network access to ${shown}: the network allow-list doesn't allow it. An administrator can change the list under Settings › Administration › Internet access.`,
     );
   });
-  // WEB-U-126 (C1): the card is keyed on tool.end's failure, never on the result's words, so they can change freely.
+  // WEB-U-126: the card is keyed on tool.end's failure, never on the result's words, so they can change freely.
   it("WEB-U-126 reads a denial from the failure, never from the result's words", () => {
     for (const words of [
       plain,

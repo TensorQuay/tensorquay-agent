@@ -44,7 +44,7 @@ const WHERE: readonly [Where, MessageKey][] = [
   ["other", "models.whereOther"],
 ];
 
-/** Where the model runs, the first question when adding a route (F4): generic answers, no vendor presets. */
+/** Where the model runs, the first question when adding a route: generic answers, no vendor presets. */
 export function WhereItRuns({
   where,
   onChoose,
@@ -118,7 +118,7 @@ export function Basics({
   where = null,
   ...section
 }: Section & {
-  /** Editing: the address as one line with Change, until opened (F4); null shows the field. */
+  /** Editing: the address as one line with Change, until opened; null shows the field. */
   summary: { onOpen: () => void } | null;
   /** A check's suggestion: an address it changed is said beside the field, which takes the focus once. */
   preset?: Preset | undefined;
@@ -138,7 +138,7 @@ export function Basics({
   }, [suggested, addressId]);
   return (
     <Group legend="models.basics">
-      {/* What people pick the route by comes first; it is required (F4). */}
+      {/* What people pick the route by comes first; it is required. */}
       <Text
         section={section}
         name="display_name"

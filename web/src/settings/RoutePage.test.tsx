@@ -88,7 +88,7 @@ describe("WEB-U-115 the model route page", () => {
     ).toBeVisible();
   });
 
-  // F9: the key's actions read as buttons, not as plain text beside it.
+  // The key's actions read as buttons, not as plain text beside it.
   it("shows the key's actions as buttons", async () => {
     showModels(
       fakeRoutes({ routes: [LOCAL], secrets: ["secrets/local"] }).api,
@@ -119,7 +119,7 @@ describe("WEB-U-115 the model route page", () => {
   });
 });
 
-// 17.3 (C4): the list keeps a route's key to two lines; its page says the key's state where its key is set.
+// 17.3: the list keeps a route's key to two lines; its page says the key's state where its key is set.
 describe("WEB-U-446 a route's page says its key's state", () => {
   it("says a missing key, with where to add it", async () => {
     showModels(

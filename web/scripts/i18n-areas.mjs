@@ -17,7 +17,7 @@ export const AREAS = [
     lazyOwned: false,
   },
   { name: "context", folders: ["src/context/"], lazyOwned: true },
-  // Static areas (proposal-core-trim C2, C4): no loader. Each file that shows the copy imports the area's registration
+  // Static areas: no loader. Each file that shows the copy imports the area's registration
   // module, so the copy travels in that file's own chunk and is registered before it renders; a file on the
   // conversation page never imports it, so the page never loads it.
   { name: "workspaces", registration: "src/workspaces/catalogue.ts" },

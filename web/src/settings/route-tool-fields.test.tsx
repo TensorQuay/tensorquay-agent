@@ -182,7 +182,7 @@ describe("WEB-U-057 tool calls and instructions in the route form", () => {
     choose("Strict tool schemas", "Never");
     choose("Schema keywords", "Basic only");
     choose("Instructions go as", "A developer message");
-    // Display name is required before a save (F4).
+    // Display name is required before a save.
     fireEvent.change(within(dialog()).getByLabelText("Display name"), {
       target: { value: "Local" },
     });
@@ -311,7 +311,7 @@ describe("WEB-U-058 the route check's suggestion", () => {
   });
 });
 
-// WEB-U-133 (F16): the one click for a model that thinks unasked fills Max output in, unsaved, like any suggestion.
+// WEB-U-133: the one click for a model that thinks unasked fills Max output in, unsaved, like any suggestion.
 describe("WEB-U-133 room for a model that thinks", () => {
   it("opens the route with Max output 16384 filled in and focused, unsaved", async () => {
     const fake = fakeRoutes({

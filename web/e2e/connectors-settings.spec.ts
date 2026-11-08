@@ -5,7 +5,7 @@ import { signIn } from "./session";
 import { axe, capture, fitsColumn, rowMenu, type } from "./settings-page";
 import { expect, test, type Page } from "./test";
 
-// The Connectors page on the registry admin API (G2, ADR-0031; WEB-U-043 browser part), keyboard first, at the widths
+// The Connectors page on the registry admin API (ADR-0031; WEB-U-043 browser part), keyboard first, at the widths
 // UI-GUIDELINES §17.2 asks for in both themes. Each run adds and deletes its own connector in the shared fake store.
 const CONNECTORS = "/api/v1/admin/connectors";
 

@@ -50,14 +50,14 @@ async function addRoute(
   await expect(
     routePage(page).getByRole("heading", { level: 2, name: "Add a route" }),
   ).toBeVisible();
-  // The route's name waits under Advanced, made from the display name until typed (F4).
+  // The route's name waits under Advanced, made from the display name until typed.
   await routePage(page).locator("summary", { hasText: "Advanced" }).click();
   await type(page, "Route name", name, routePage(page));
   await type(page, "Display name", `Route ${name}`, routePage(page));
   await type(page, "Address", address, routePage(page));
   await type(page, "Model", "qwen2.5-coder", routePage(page));
   if (maxOutput) await type(page, "Max output", maxOutput, routePage(page));
-  // How the key is sent is under Advanced, already open for the route's name (F4).
+  // How the key is sent is under Advanced, already open for the route's name.
   await pick(page, "Send the key", "No key", routePage(page));
   await axe(page);
   await routePage(page).getByLabel("Model", { exact: true }).focus();
@@ -224,7 +224,7 @@ for (const width of [1024, 1280] as const)
       await page.keyboard.press("Enter");
       const dialog = routePage(page);
       await type(page, "Display name", `Paste ${name}`, routePage(page));
-      // The route's name waits under Advanced, made from the display name until typed (F4).
+      // The route's name waits under Advanced, made from the display name until typed.
       await routePage(page).locator("summary", { hasText: "Advanced" }).click();
       await type(page, "Route name", name, routePage(page));
       await type(
@@ -234,7 +234,7 @@ for (const width of [1024, 1280] as const)
         routePage(page),
       );
       await type(page, "Model", "qwen2.5-coder", routePage(page));
-      // Adding takes a key inline; the Shared key field is for an existing shared key (F4, part 2c).
+      // Adding takes a key inline; the Shared key field is for an existing shared key.
       await dialog
         .getByRole("button", { name: "Use an existing shared key" })
         .click();
@@ -363,7 +363,7 @@ for (const width of [1024, 1280] as const)
       await deleteRoute(page, `Route ${name}`);
     });
 
-// F16 (WEB-U-133): a model that thinks before every answer is offered room, never a switch: when a lower Max output is
+// WEB-U-133: a model that thinks before every answer is offered room, never a switch: when a lower Max output is
 // set, the Check note says so and one click fills 16384 in on the route's form, unsaved. Each run adds, then
 // deletes, its own route.
 for (const width of [1024, 1280] as const)
@@ -622,7 +622,7 @@ for (const [width, colorScheme] of [
     await expect(form.getByLabel("Model", { exact: true })).toHaveValue(
       "qwen3-coder-32b",
     );
-    // An existing route's address is one line until opened (F4).
+    // An existing route's address is one line until opened.
     await form.getByRole("button", { name: "Change the address" }).click();
     await form.getByLabel("Address").fill("https://other.example.invalid/v1");
     await expect(

@@ -552,7 +552,7 @@ describe("WEB-U-039 the route check client", () => {
   });
 });
 
-// The Connectors page on the gateway's registry API (G2, ADR-0031; WEB-U-043).
+// The Connectors page on the gateway's registry API (ADR-0031; WEB-U-043).
 describe("WEB-U-043 the connectors admin client", () => {
   it("lists, creates without a version and replaces with the version read", async () => {
     const stored = connector("tracker");

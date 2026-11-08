@@ -4,7 +4,7 @@ const OPENER = /(^|\n\n)<(result|note)>/g;
 const FENCE = /^(?:```|~~~)/gm;
 
 /**
- * A final answer as the reader should see it (C2, WEB-U-135): when its whole text, or its whole trailing paragraph,
+ * A final answer as the reader should see it (WEB-U-135): when its whole text, or its whole trailing paragraph,
  * is wrapped in `<result>…</result>` or `<note>…</note>`, the inner text without the tag. A tag anywhere else (inline,
  * a paragraph that isn't the last, inside a code block, unclosed or mismatched) is the model's own text and stays.
  */

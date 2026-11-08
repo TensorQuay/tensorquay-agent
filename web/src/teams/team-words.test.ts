@@ -70,7 +70,8 @@ describe("WEB-U-221 a helper's state and the team's budget, in words", () => {
     expect(line(0, "2026-10-02T10:09:30Z").short).toBe(
       "Budget 0 % used · 9 min left",
     );
-    // Spent may pass the budget by the calls in flight (the S6 contract): the line stops at 100 %, the figures don't.
+    // Spent may pass the budget by the calls in flight (ADR-0034's S6 contract): the line stops at 100 %, the figures
+    // don't.
     expect(line(2_100_000, "2026-10-02T09:00:00Z")).toMatchObject({
       short: "Budget 100 % used · No time left",
       percent: 100,

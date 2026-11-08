@@ -5,9 +5,9 @@ import { expect, test, type Page } from "@playwright/test";
 import { afterStart, budget } from "./stack-start";
 import { signedIn } from "./ux/flow";
 
-// WEB-E2E-070, D11's positive path on the real stack (WEB-E2E-061 has the engines' settings and the unreachable
-// fallback): a task under a decision engine that answers. The settings suite's fake model serves two engines
-// (TK-U-048), declared in its gateway.toml (deploy/tests/demo_decision_engines.py: plain http is file-only):
+// WEB-E2E-070, the decision engines' positive path on the real stack (WEB-E2E-061 has the engines' settings and the
+// unreachable fallback): a task under a decision engine that answers. The settings suite's fake model serves two
+// engines (TK-U-048), declared in its gateway.toml (deploy/tests/demo_decision_engines.py: plain http is file-only):
 // - `stopper` stops the run at its first step: the page says the engine stopped the task, once, with its reason;
 // - `passer` lets the run go on as without an engine: the task finishes, and each step's decision is recorded.
 // Neither falls back. Each task runs under a profile naming its engine; the spec leaves no profile or task behind.

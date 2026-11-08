@@ -136,7 +136,7 @@ export function SecretBindings({
       }}
     >
       <form className="stack" onSubmit={(event) => void submit(event)}>
-        {/* The one place the page states the reference (K3): what configuration files name it by. */}
+        {/* The one place the page states the reference: what configuration files name it by. */}
         <p className="type-small muted">
           {t("secrets.reference", { ref: item.ref })}
         </p>
@@ -169,7 +169,7 @@ const GROUPS: readonly [SecretConsumer["kind"], MessageKey][] = [
 
 /**
  * The routes, connectors and engines a key may be used for, as boxes grouped by kind: the group names the kind, so each
- * box reads the plain name (F8). One no longer there stays listed, ticked, until unticked.
+ * box reads the plain name. One no longer there stays listed, ticked, until unticked.
  */
 export function ConsumerChoices({
   legend,

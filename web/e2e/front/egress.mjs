@@ -50,7 +50,7 @@ export function egressAllows(host, port) {
           (rule.host.startsWith("*.") && host.endsWith(rule.host.slice(1))))));
   return [...rules.values()].some(covers);
 }
-/** The built-in presets (F20), as the gateway lists them; like PRESET_RULES in src/test/egress.ts. */
+/** The built-in presets, as the gateway lists them; like PRESET_RULES in src/test/egress.ts. */
 const on443 = (hosts) => hosts.map((host) => ({ host, ports: [443] }));
 const PRESETS = {
   package_registries: on443([
@@ -107,7 +107,7 @@ function put(raw, input, key, answer) {
     version: (existing?.version ?? 0) + 1,
     seed: existing?.seed ?? null,
     last_set_by: "admin",
-    // An edit makes a rule the administrator's own (F20).
+    // An edit makes a rule the administrator's own.
     preset: null,
     internal: input.internal === true,
     updated_at: new Date().toISOString(),

@@ -8,10 +8,10 @@ import { signedIn } from "./ux/flow";
 
 // The Models check's findings about the model server itself, on the real stack, with the fake model presenting as
 // the server would (crates/tqa-testkit/scenarios/demo.json, TK-U-046/047):
-// - WEB-E2E-068 (D5; backs up WEB-U-269 and WEB-U-290): as Ollama, `ollama-small` is loaded with 4 096 tokens of
+// - WEB-E2E-068 (backs up WEB-U-269 and WEB-U-290): as Ollama, `ollama-small` is loaded with 4 096 tokens of
 //   context and `ollama-roomy` with 32 768. Below the minimum the check fails with both sizes and the fixes, and offers
 //   no shortcut; with room it passes and "Set Context window" fills the route's form in.
-// - WEB-E2E-069 (D6's usage setting; backs up WEB-U-289): `no-usage` refuses `stream_options`. The check passes
+// - WEB-E2E-069 (the usage setting; backs up WEB-U-289): `no-usage` refuses `stream_options`. The check passes
 //   without it and says to turn usage reporting off; the suggestion lands on its box, and once saved the check passes.
 // Each route is the stack's own `local` route (its address and key) under another model, made through the admin API,
 // then checked from the Models page as a person does, and removed.

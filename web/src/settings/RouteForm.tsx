@@ -82,7 +82,7 @@ function useRouteSave({
   loadSecretRefs,
   inlineActive,
 }: FormProps & {
-  /** Adding with the key typed inline (F4, part 2c): it is stored as a shared key when the route is saved. */
+  /** Adding with the key typed inline: it is stored as a shared key when the route is saved. */
   inlineActive: boolean;
 }) {
   /** The route as loaded: unsaved changes are anything that differs from it (a suggestion applied is one). */
@@ -247,8 +247,7 @@ export function RouteForm(props: FormProps) {
   const { item, names, secretRefs, api } = props;
   const t = useT();
   const creating = props.item === null;
-  // Editing: the connection and the key are one line each until someone opens them (F4, part 2b); adding types the
-  // key inline (part 2c).
+  // Editing: the connection and the key are one line each until someone opens them; adding types the key inline.
   const [keyMode, setKeyMode] = useState<KeyMode>(
     creating ? "inline" : props.pasteOpen ? "replace" : "summary",
   );
@@ -262,7 +261,7 @@ export function RouteForm(props: FormProps) {
     kept,
     onStored,
   } = save;
-  // Where the model runs (F4, part 2): the first question when adding, which fits the form to the answer.
+  // Where the model runs: the first question when adding, which fits the form to the answer.
   const [where, setWhere] = useState<Where>("hosted");
   // The route's name follows the display name until someone edits it.
   const [nameEdited, setNameEdited] = useState(false);
@@ -370,7 +369,7 @@ export function RouteForm(props: FormProps) {
             )}
           </p>
         )}
-        {/* The tuning most routes never touch, closed until needed (F4): it opens for a suggestion or a problem. */}
+        {/* The tuning most routes never touch, closed until needed: it opens for a suggestion or a problem. */}
         <Advanced
           {...section}
           preset={props.preset}

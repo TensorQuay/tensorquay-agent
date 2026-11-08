@@ -23,7 +23,7 @@ export type ToolView = {
   startedAt: string | null;
   durationMs: number | null;
   exitCode: number | null;
-  /** Why the call failed, as data from its tool.end (C1); absent for a call that didn't fail or an older runtime. */
+  /** Why the call failed, as data from its tool.end; absent for a call that didn't fail or an older runtime. */
   failure?: ToolFailure | undefined;
   /** A desktop action's element, as the snapshot showed it (revision 14, ADR-0039): screen text, shown as text only. */
   target?: ScreenTarget | undefined;

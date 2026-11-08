@@ -72,7 +72,7 @@ describe("WEB-U-001 transient queue position", () => {
     expect(() => queued({ ahead: 0, reason: 5 })).toThrow();
   });
 
-  // WEB-U-121 (F26): the only wait is the person's own idle sandbox retiring, so nothing is queued from their side.
+  // WEB-U-121: the only wait is the person's own idle sandbox retiring, so nothing is queued from their side.
   it("WEB-U-121 reads Starting… while the person's own idle sandbox makes room", () => {
     const state = apply(
       emptyTranscript(),

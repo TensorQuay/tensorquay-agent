@@ -66,8 +66,8 @@ const ended = (data: unknown) => {
 };
 
 /**
- * A channel's log: read page by page from the start, then followed on the channel's stream from the last seq (G8,
- * ADR-0014 point 11). A reconnect replays from the last event id, and a message the page already has is not added
+ * A channel's log: read page by page from the start, then followed on the channel's stream from the last seq (ADR-0014
+ * point 11). A reconnect replays from the last event id, and a message the page already has is not added
  * twice; a post the page made joins at once.
  */
 function useChannelLog(api: ChannelsApi, id: string, onEnded: () => void) {
@@ -169,7 +169,7 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
           void cache.invalidateQueries({
             queryKey: proposalKey(id, message.body.proposal_seq),
           });
-        // A task, claim or report changes the board (G6).
+        // A task, claim or report changes the board (ADR-0014 point 8).
         if (["task", "claim", "report"].includes(message.body.type))
           void cache.invalidateQueries({ queryKey: tasksKey(id) });
       }

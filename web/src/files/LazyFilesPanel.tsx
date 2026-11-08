@@ -15,7 +15,7 @@ import { FILES_PANEL_ID } from "./use-files-panel";
 const load = () => import("./FilesPanel");
 const lazyPanel = () =>
   lazy(() => load().then(({ FilesPanel }) => ({ default: FilesPanel })));
-/** React keeps a failed load; Try again starts a new one (offline, then back online: E5). */
+/** React keeps a failed load; Try again starts a new one (offline, then back online). */
 let Panel = lazyPanel();
 
 /**

@@ -7,7 +7,7 @@ import { isKeyShapedName } from "./key-shapes";
 const NAME = /^[A-Za-z0-9_-]{1,120}$/;
 const REFERENCE = "secrets/";
 
-/** A shared key's name as the page shows it: its reference without `secrets/`, which only Who may use states (K3). */
+/** A shared key's name as the page shows it: its reference without `secrets/`, which only Who may use states. */
 export const keyName = (ref: string) =>
   ref.startsWith(REFERENCE) ? ref.slice(REFERENCE.length) : ref;
 

@@ -18,8 +18,8 @@ import { PROTOCOL_NAMES } from "./RouteBasics";
 import type { Preset } from "./RouteForm";
 
 /**
- * The Max output a model that thinks before answering needs (the F16 check): 4096 is what candidate 12's qwen3:4b spent
- * thinking on its first step (CORE-U-072), and thinking runs past it at 16384 still.
+ * The Max output a model that thinks before answering needs (WEB-U-133's check): 4096 is what candidate 12's qwen3:4b
+ * spent thinking on its first step (CORE-U-072), and thinking runs past it at 16384 still.
  */
 const THINKING_ROOM = 16384;
 
@@ -268,7 +268,7 @@ function CheckResult({
           {t(local ? "models.timeoutNextLocal" : "models.timeoutNext")}
         </p>
       )}
-      {/* The verdict speaks first; what was observed is for whoever wants it (F7). */}
+      {/* The verdict speaks first; what was observed is for whoever wants it. */}
       <details className="check-details">
         <summary className="type-small">{t("models.checkDetails")}</summary>
         <dl className="check-list type-small">

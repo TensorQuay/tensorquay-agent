@@ -18,7 +18,7 @@ export type EgressPresetId = EgressPreset["id"];
 export type EgressPresetApplied = AdminEgressPresetApplied;
 export type EgressPresetRemoved = AdminEgressPresetRemoved;
 
-/** The presets in the order the page offers them (F20): installing first, then code, then the open web. */
+/** The presets in the order the page offers them: installing first, then code, then the open web. */
 export const PRESET_ORDER: readonly EgressPresetId[] = [
   "package_registries",
   "code_hosting",
@@ -40,7 +40,7 @@ export type EgressApi = {
     key: string,
   ): Promise<EgressRule>;
   deleteRule(host: string, version: number, key: string): Promise<void>;
-  /** The gateway's ready-made lists (F20): each preset's rules and whether they are in the allow-list. */
+  /** The gateway's ready-made lists: each preset's rules and whether they are in the allow-list. */
   presets(signal?: AbortSignal): Promise<EgressPresets>;
   /** Adds a preset's missing rules; a host that already has a rule keeps it and is named in `kept`. */
   applyPreset(id: EgressPresetId, key: string): Promise<EgressPresetApplied>;

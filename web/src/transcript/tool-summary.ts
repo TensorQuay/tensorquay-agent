@@ -211,7 +211,7 @@ const shell: Summary = (tool, t) => {
   );
 };
 // The page it read, never the tool's name; a refusal keeps the allow-list's words, read from the call's
-// failure, never from the result's words (C1, WEB-U-126).
+// failure, never from the result's words (WEB-U-126).
 const fetchUrl: Summary = (tool, t) => {
   const target =
     tool.status === "error" && tool.failure?.code === "egress_denied"

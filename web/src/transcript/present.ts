@@ -131,7 +131,7 @@ export type TurnView = {
   summaryDetails: string | null;
   /** How many files the turn changed. */
   changed: number;
-  /** Whether the footer offers Open changes: files changed, and no named Open covers them (L8). */
+  /** Whether the footer offers Open changes: files changed, and no named Open covers them. */
   openChanges: boolean;
   /** Follow-ups that clearly follow from what happened (at most two), as copy keys. */
   followUps: readonly FollowUp[];
@@ -279,7 +279,7 @@ function presentTurn(
         ? [
             {
               id: `${answer.id}-${answer.attempt}`,
-              // A model's <result>/<note> wrapper around its answer is not the reader's (C2, WEB-U-135).
+              // A model's <result>/<note> wrapper around its answer is not the reader's (WEB-U-135).
               text: unwrapAnswer(answer.text),
               streaming: false,
             },

@@ -98,7 +98,7 @@ export function helperShare(
  * The team's budget and time in one quiet line, and the exact figures for its tooltip and the All helpers sheet (§13b):
  * the share used to one decimal and the time the team ends, never tokens ("the word 'tokens' never appears"). Both
  * round down, so "100 %" shows only once the budget is spent. The line's share stops at 100 %; the exact one may pass
- * it by the calls in flight (the S6 contract), which is true.
+ * it by the calls in flight (ADR-0034's S6 contract), which is true.
  */
 /**
  * How a team that no longer runs ended, in the strip's place for the budget and the time left (a UX review

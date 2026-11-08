@@ -195,7 +195,7 @@ describe("WEB-U-047 the environments list", () => {
   });
 });
 
-// ADR-0032: a default that people cannot pick leaves new tasks without it; the page says so first, and why (D1).
+// ADR-0032: a default that people cannot pick leaves new tasks without it; the page says so first, and why.
 describe("WEB-U-047 a default people cannot pick", () => {
   const withDefault = (extra: Parameters<typeof environment>[1]) =>
     LISTED.map((item) =>

@@ -25,7 +25,7 @@ function setup(...answers: Response[]) {
   return { credentials: gatewayCredentialsFor(client), sent };
 }
 
-// The credentials page on the gateway's per-user API (G3; WEB-U-044): values go out once and never come back.
+// The credentials page on the gateway's per-user API (WEB-U-044): values go out once and never come back.
 describe("WEB-U-044 the connector credentials client", () => {
   it("lists, sets and deletes by connector name, and refuses a malformed list", async () => {
     const item = {

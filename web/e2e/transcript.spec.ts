@@ -306,7 +306,7 @@ test("WEB-U-016 recovered retries fold into the step", async ({ page }) => {
   await expect(page.getByTestId("transcript")).not.toContainText(
     /Model request failed|trying again/,
   );
-  // The summary says the last reason; the step's line, the other one and the codes (Z27).
+  // The summary says the last reason; the step's line, the other one and the codes.
   await expect(page.locator(".activity-retries")).toHaveText(
     "The model took too long to answer. Details: timeout, fallback_parse: schema",
   );

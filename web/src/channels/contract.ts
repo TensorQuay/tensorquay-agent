@@ -1,5 +1,5 @@
 /**
- * The channels contract as the web uses it (ADR-0014): the generated API types for people (G3), with the names the
+ * The channels contract as the web uses it (ADR-0014): the generated API types for people, with the names the
  * pages use. The pages depend on `ChannelsApi`; tests pass an in-memory fake.
  */
 import type {
@@ -69,16 +69,17 @@ export type ChannelsApi = {
     signal?: AbortSignal,
   ): Promise<ChannelMessagePage>;
   post(id: string, write: ChannelPost, key: string): Promise<ChannelMessage>;
-  /** The task board (G6). */
+  /** The task board (ADR-0014 point 8). */
   tasks(id: string, signal?: AbortSignal): Promise<ChannelTaskBoard>;
-  /** Claims a task for the caller (G6); a repeat answers the existing claim. */
+  /** Claims a task for the caller (ADR-0014 point 8); a repeat answers the existing claim. */
   claim(id: string, seq: number, key: string): Promise<ChannelMessage>;
   /**
-   * The channel's live messages past `after` (G8): server-sent events, `channel.message` frames with their seq as the
-   * event id (so a reconnect replays from the last one) and an unsequenced `channel.state` when the channel ends.
+   * The channel's live messages past `after` (ADR-0014 point 11): server-sent events, `channel.message` frames with
+   * their seq as the event id (so a reconnect replays from the last one) and an unsequenced `channel.state` when the
+   * channel ends.
    */
   stream(id: string, after: number): ChannelStream;
-  /** A proposal's state (G7). */
+  /** A proposal's state (ADR-0014 point 9). */
   proposal(
     id: string,
     seq: number,
@@ -114,8 +115,8 @@ export type MemberKind = Member["kind"];
 /** One of the caller's own tasks, which the caller may add as an agent; when it was last active tells same-named ones apart. */
 export type OwnTask = { id: string; title?: string; active_at?: string };
 
-/** A proposal's state as the gateway computes it (G7), the one place the decision rules live. */
+/** A proposal's state as the gateway computes it (ADR-0014 point 9), the one place the decision rules live. */
 export type ProposalState = ChannelProposalState;
 
-/** A task's claims and reports for the board (G6). */
+/** A task's claims and reports for the board (ADR-0014 point 8). */
 export type TaskState = ChannelTaskBoard["items"][number];

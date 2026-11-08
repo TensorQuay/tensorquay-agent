@@ -1,5 +1,5 @@
 /**
- * The connector registry contract (G2, ADR-0031): the gateway's generated types. The Connectors page depends on the
+ * The connector registry contract (ADR-0031): the gateway's generated types. The Connectors page depends on the
  * `ConnectorsApi` interface; the gateway client implements it and tests pass an in-memory fake.
  */
 import type {

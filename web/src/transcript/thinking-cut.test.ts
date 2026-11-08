@@ -14,8 +14,8 @@ describe("WEB-U-109 a reply cut while the model was still thinking", () => {
     expect(failureReason(run)).toBe(
       "The model spent its whole output limit thinking and wrote no answer",
     );
-    // WEB-U-132 (F16): only advice that works. A thinking model on Ollama can't be made to stop thinking (the F16
-    // live check), and such a cut is often a one-off, so the way on is sending again, then more room above the limit
+    // WEB-U-132: only advice that works. A thinking model on Ollama can't be made to stop thinking (a live check
+    // before 17.0), and such a cut is often a one-off, so the way on is sending again, then more room above the limit
     // it hit: never a fixed number (already met at 16384), and never a blank limit, which lets a runaway thinker run
     // to the context window. A thinking budget is the other way, where the model server has one; its field's name is
     // that server's own, so it stays in the routes guide, not here.

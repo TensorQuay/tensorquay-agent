@@ -68,7 +68,7 @@ async function choose(page: Page, name: string, action: string) {
   await page.getByRole("menuitem", { name: action, exact: true }).click();
 }
 
-/** New task names the workspace a task will use on its chip in the composer (the UI standard's composer, B2). */
+/** New task names the workspace a task will use on its chip in the composer (the UI standard's composer). */
 function chosenWorkspace(page: Page, name: string) {
   return page
     .getByRole("form", { name: "Message composer" })

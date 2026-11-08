@@ -23,7 +23,7 @@ export function userConnector(
   };
 }
 
-/** The gateway's semantics (G3): write-only values, `credential_not_used` for scheme none, 404 for an unknown one. */
+/** The gateway's semantics: write-only values, `credential_not_used` for scheme none, 404 for an unknown one. */
 export function fakeCredentials(
   connectors: UserConnector[] = [],
   { reads = {} }: { reads?: Record<string, SecretReadPage> } = {},

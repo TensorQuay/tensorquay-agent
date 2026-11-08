@@ -173,7 +173,7 @@ describe("WEB-U-049 the profiles list", () => {
     expect(
       within(shared).getByRole("row", { name: /Team default/ }),
     ).toHaveTextContent("Ready");
-    // The display name and description only: the internal name is not the reader's (as for connectors, S6).
+    // The display name and description only: the internal name is not the reader's (as for connectors).
     for (const name of ["review", "team", "legacy"])
       expect(screen.queryByText(name, { exact: true })).toBeNull();
   });

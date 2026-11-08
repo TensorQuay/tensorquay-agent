@@ -216,12 +216,12 @@ export function fromDraft(
     draft.authKind === "none" ? null : draft.key_ref.trim() || null;
   if (keyRef !== null && !REFERENCE.test(keyRef))
     problems.key_ref = "models.keyRefNotReference";
-  // Named here, so a key typed inline is never stored for a route the gateway refuses for want of it (F4).
+  // Named here, so a key typed inline is never stored for a route the gateway refuses for want of it.
   if (!draft.model.trim()) problems.model = "models.modelEmpty";
   // One line of up to 160 characters, as the gateway checks it (description_invalid); surrounding spaces are trimmed.
   if (!descriptionFits(draft.description))
     problems.description = "models.descriptionInvalid";
-  // The name people pick the route by: required for a new route, though the gateway allows none (F4). A route stored
+  // The name people pick the route by: required for a new route, though the gateway allows none. A route stored
   // without one is shown by its model's name, and saving another field never asks for one (WEB-U-111).
   if (creating && !draft.display_name.trim())
     problems.display_name = "models.displayNameRequired";

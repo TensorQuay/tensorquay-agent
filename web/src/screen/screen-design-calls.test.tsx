@@ -106,7 +106,7 @@ describe("WEB-U-335 the sign-ins warning always comes with its button", () => {
     ).toBeEnabled();
   });
 
-  // The page's order (the fake front's Z17 capture): the grant's warning shows before the take-over notice that tells
+  // The page's order, as the fake front showed it: the grant's warning shows before the take-over notice that tells
   // the page a sign-in may remain. A reset that wasn't clean is itself that news, so the button doesn't wait for it.
   it("comes with the warning even before the page knows a sign-in may remain", async () => {
     const { ScreenPanel } = await import("./ScreenPanel");

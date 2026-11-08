@@ -2,7 +2,7 @@ import { WRAPPED } from "./front/stream.mjs";
 import { createConversation, signIn } from "./session";
 import { expect, test } from "./test";
 
-// WEB-U-135 on the page (C2): a final answer whose closing paragraph a model wrapped in <result>…</result> shows the
+// WEB-U-135 on the page: a final answer whose closing paragraph a model wrapped in <result>…</result> shows the
 // inner text; a tag quoted in a code block stays as written.
 test("WEB-U-135 a wrapped final answer shows without its tag", async ({
   page,

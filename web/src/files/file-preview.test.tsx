@@ -79,7 +79,7 @@ const downloads = () =>
 
 // The files panel shows what the agent made, not only code.
 describe("WEB-U-022 previews by kind", () => {
-  it("F1: shows a PNG as an image, from its bytes typed by the file's extension", async () => {
+  it("shows a PNG as an image, from its bytes typed by the file's extension", async () => {
     answers["out/chart.png"] = content("out/chart.png", null);
     show("out/chart.png");
     const image = await screen.findByRole("img", { name: "chart.png" });
@@ -92,7 +92,7 @@ describe("WEB-U-022 previews by kind", () => {
   // A blob: URL has the page's origin, so an SVG opened from it in a new tab would run its script with the session. An
   // SVG shows from a data: URL: a data: document has an opaque origin, so its script can't reach this origin or the
   // session.
-  it("F1: shows an SVG only as an image from a data: URL, never blob: and never as markup", async () => {
+  it("shows an SVG only as an image from a data: URL, never blob: and never as markup", async () => {
     answers["logo.svg"] = content(
       "logo.svg",
       '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>',
@@ -108,7 +108,7 @@ describe("WEB-U-022 previews by kind", () => {
     expect(container.querySelector("svg script")).toBeNull();
   });
 
-  it("F1: doesn't fetch an image too large to preview, and says so", async () => {
+  it("doesn't fetch an image too large to preview, and says so", async () => {
     answers["scan.jpg"] = content("scan.jpg", null, { size: 11 * 1024 * 1024 });
     show("scan.jpg");
     expect(
@@ -120,7 +120,7 @@ describe("WEB-U-022 previews by kind", () => {
     expect(screen.queryByRole("img")).toBeNull();
   });
 
-  it("F2: renders a Markdown document, with its source a toggle away, remembered", async () => {
+  it("renders a Markdown document, with its source a toggle away, remembered", async () => {
     answers["brief.md"] = content(
       "brief.md",
       "# Findings\n\n**Three** points for the team.\n",
@@ -146,7 +146,7 @@ describe("WEB-U-022 previews by kind", () => {
     expect(screen.getByRole("heading", { name: "Findings" })).toBeVisible();
   });
 
-  it("F3: shows a CSV as a table, with its size, and as text on request", async () => {
+  it("shows a CSV as a table, with its size, and as text on request", async () => {
     answers["clean.csv"] = content(
       "clean.csv",
       "region,total\nNorth,1204\nSouth,98\nEast,7\n",
@@ -168,7 +168,7 @@ describe("WEB-U-022 previews by kind", () => {
     ).toHaveTextContent("North,1204");
   });
 
-  it("F3: shows the first 200 rows of a long table and says how many there are", async () => {
+  it("shows the first 200 rows of a long table and says how many there are", async () => {
     const rows = Array.from(
       { length: 250 },
       (_, index) => `r${index},${index}`,
@@ -185,7 +185,7 @@ describe("WEB-U-022 previews by kind", () => {
     expect(screen.getByText("Showing 200 of 250 rows")).toBeVisible();
   });
 
-  it("F3: falls back to text when the file isn't a table", async () => {
+  it("falls back to text when the file isn't a table", async () => {
     answers["broken.csv"] = content("broken.csv", 'a,b\n1,"never closed\n');
     show("broken.csv");
     expect(
@@ -196,7 +196,7 @@ describe("WEB-U-022 previews by kind", () => {
     ).toBeVisible();
   });
 
-  it("F3: keeps the cells of a row wider than its header", async () => {
+  it("keeps the cells of a row wider than its header", async () => {
     answers["wide.csv"] = content("wide.csv", "a,b\n1,2,3\n");
     show("wide.csv");
     const table = await screen.findByRole("table", {
@@ -206,7 +206,7 @@ describe("WEB-U-022 previews by kind", () => {
   });
 
   // A remount (closing and reopening the panel) gets a fresh object URL, never a revoked one.
-  it("F1: makes a fresh image URL when it shows again, and lets go of the old one", async () => {
+  it("makes a fresh image URL when it shows again, and lets go of the old one", async () => {
     answers["out/chart.png"] = content("out/chart.png", null);
     const first = show("out/chart.png");
     await waitFor(() => expect(createObjectURL).toHaveBeenCalledTimes(1));

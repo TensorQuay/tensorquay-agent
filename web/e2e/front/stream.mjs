@@ -665,7 +665,7 @@ export const HOLD = "Summarize the workspace, then wait.";
 export const HOLD_START = "Start a researcher, then wait.";
 
 const blockedTarget = { host: "example.invalid", port: 443 };
-// The tool's own words for the model (C1); the page reads the failure on tool.end, never these words.
+// The tool's own words for the model; the page reads the failure on tool.end, never these words.
 const deniedResult =
   "example.invalid isn't on this task's allowed sites. An administrator can allow it in Settings > Internet access.";
 

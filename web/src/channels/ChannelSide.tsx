@@ -52,7 +52,7 @@ export function TaskClaims({
 
 /**
  * The channel page's side: the task board and the members, as two tabs (ADR-0014; WEB-U-065). The board is the
- * gateway's (G6), refetched when a task, claim or report reaches the log.
+ * gateway's (ADR-0014 point 8), refetched when a task, claim or report reaches the log.
  */
 export function ChannelSide({
   api,

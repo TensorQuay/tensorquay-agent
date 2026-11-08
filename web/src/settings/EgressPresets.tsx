@@ -18,7 +18,7 @@ import {
 
 export const PRESETS_KEY = ["admin-egress-presets"];
 
-/** Each preset's name and one plain line, keyed by the gateway's id (the web owns the words, F20). */
+/** Each preset's name and one plain line, keyed by the gateway's id (the web owns the words). */
 export const PRESET_COPY: Readonly<
   Record<EgressPresetId, { name: MessageKey; line: MessageKey }>
 > = {

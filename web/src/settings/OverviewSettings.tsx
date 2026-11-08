@@ -66,7 +66,7 @@ function Overview({ api, teams }: { api: OverviewApi; teams: boolean }) {
       action: t("overview.allowSites"),
       href: "/settings/internet-access",
     });
-  // Connectors are optional: an install without any needs no attention for it (WEB-U-116, F22).
+  // Connectors are optional: an install without any needs no attention for it (WEB-U-116).
   if (rotation.data)
     missing.push({
       text: t("overview.rotationDue", { count: rotation.data }),

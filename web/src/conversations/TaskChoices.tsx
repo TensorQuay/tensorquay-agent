@@ -71,7 +71,7 @@ function Choices({
     transcript.sandbox === "queued" ||
     transcript.sandbox === "creating";
   // What must happen first; each language words the whole sentence around it.
-  // Waiting only for the person's own idle sandbox to make room reads as starting (F26).
+  // Waiting only for the person's own idle sandbox to make room reads as starting.
   const blockedBy =
     transcript.sandbox === "queued" &&
     transcript.queue?.reason === "own_sandbox"

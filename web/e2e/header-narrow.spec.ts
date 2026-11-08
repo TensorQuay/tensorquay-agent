@@ -219,7 +219,7 @@ test("WEB-U-106 a long task title at 390 truncates beside ⋯", async ({
   await capture(page, "narrow-task-long-title-390");
 });
 
-// WEB-U-125 (the lead's F6 note): beside the Files panel at 1280 the names still fit, so they show, whole.
+// WEB-U-125: beside the Files panel at 1280 the names still fit, so they show, whole.
 test("WEB-U-125 a task header beside the Files panel at 1280 keeps its names", async ({
   page,
 }) => {

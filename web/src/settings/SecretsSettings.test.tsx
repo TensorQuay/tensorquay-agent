@@ -204,7 +204,7 @@ describe("WEB-U-035 shared keys", () => {
     ).toBeVisible();
   });
 
-  // K2: one main action, as on Mine: a button opens the add dialog; no form sits under the table.
+  // One main action, as on Mine: a button opens the add dialog; no form sits under the table.
   it("adds from an Add a shared key dialog, not a form under the table", async () => {
     show(fakeAdmin({ secrets: seeded }).api);
     await screen.findByRole("table", { name: "Shared keys" });
@@ -249,7 +249,7 @@ describe("WEB-U-035 shared keys", () => {
     expect(document.body.textContent).not.toContain(VALUE);
   });
 
-  // F8: who may use a new key is chosen as it is added, in the same dialog, not in a second one afterwards.
+  // Who may use a new key is chosen as it is added, in the same dialog, not in a second one afterwards.
   it("adds a key and who may use it in one step", async () => {
     const admin = fakeAdmin({
       secrets: seeded,

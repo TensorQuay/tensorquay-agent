@@ -21,8 +21,8 @@ const show = (frames: ReturnType<typeof frame>[]) =>
 
 afterEach(() => vi.useRealTimers());
 
-// Candidate12 F13: "Thinking…" alone for 90 s looks hung. The live line says how long the model has been at it, on the
-// reader's clock, and opens what it is thinking.
+// Found before 17.0: "Thinking…" alone for 90 s looks hung. The live line says how long the model has been at it, on
+// the reader's clock, and opens what it is thinking.
 describe("WEB-U-123 a long think shows its time and its thinking", () => {
   it("counts the current step's time live", async () => {
     vi.useFakeTimers({ now: after(4, 90) });

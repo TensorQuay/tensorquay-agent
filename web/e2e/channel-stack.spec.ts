@@ -163,7 +163,7 @@ test("WEB-E2E-012 two agents and a person decide, veto and share a task on a cha
     }),
   );
 
-  // The feature matrix (G3, C6): each agent's run reads in words beside its dot; none failed or unknown.
+  // The feature matrix: each agent's run reads in words beside its dot; none failed or unknown.
   await page.getByRole("tab", { name: "Members" }).click();
   const members = page.getByRole("list", { name: "Members" });
   // An agent's row carries its run's dot; a person's doesn't.

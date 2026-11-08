@@ -1,5 +1,5 @@
 /**
- * A person's own connector credentials (G3, ADR-0031): the connectors their tasks can use and whether they hold a
+ * A person's own connector credentials (ADR-0031): the connectors their tasks can use and whether they hold a
  * credential for each; values are write-only. The page depends on `CredentialsApi`; tests pass an in-memory fake.
  */
 import { api, type ApiClient } from "../api/client";

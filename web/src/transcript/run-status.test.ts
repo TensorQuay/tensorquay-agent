@@ -197,8 +197,8 @@ describe("WEB-U-068 sandbox recovery in the run status", () => {
   });
 });
 
-// Candidate12 F5: "Working… · 4 s" after a minute. The run's start is stamped by the runtime's clock, the count by the
-// reader's; when they differ the count stalls or races. The transcript learns the difference from live frames.
+// Found before 17.0: "Working… · 4 s" after a minute. The run's start is stamped by the runtime's clock, the count by
+// the reader's; when they differ the count stalls or races. The transcript learns the difference from live frames.
 describe("WEB-U-122 the live count on the reader's clock", () => {
   const started = frame(1, { type: "run.started", run_id: runId });
   const stamp = Date.parse(started.ts);

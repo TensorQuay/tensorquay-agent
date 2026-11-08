@@ -6,7 +6,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { afterStart } from "./stack-start";
 import { bootstrap, signIn } from "./ux/flow";
 
-// WEB-E2E-042, T12 on the real stack (WEB-U-068 backs it up on the fake front): the environment recovers after a
+// WEB-E2E-042 on the real stack (WEB-U-068 backs it up on the fake front): the environment recovers after a
 // failure. The driver (deploy/tests/demo_task_page_recovery.py) kills the task's own sandbox container mid-run when
 // asked, twice. The gateway replaces it at once the first time and after 5 s the second (manager/losses.rs), the page
 // says so and counts down, and the replacement's runtime resumes the run, which answers once. The scripted reply

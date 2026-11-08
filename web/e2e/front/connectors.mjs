@@ -1,4 +1,4 @@
-// The connector registry admin API on the fake front (G2, ADR-0031): a seeded store with versions, 409s, 400 details
+// The connector registry admin API on the fake front (ADR-0031): a seeded store with versions, 409s, 400 details
 // from the closed reason list and Idempotency-Key replay, like src/test/connectors.ts for the unit tests.
 import { seededMap } from "./state.mjs";
 const NAME = /^[a-z](?:[a-z0-9]|_(?!_))*$/;
@@ -36,7 +36,7 @@ const connectors = seededMap(
 );
 const replies = seededMap();
 
-/** The field problems the gateway reports first (G2, document.rs), enough for the page's refusals. */
+/** The field problems the gateway reports first (document.rs), enough for the page's refusals. */
 function problems(name, input) {
   const found = [];
   if (!NAME.test(name) || name.length > 16 || name.endsWith("_"))
@@ -113,7 +113,7 @@ export async function connectorsRoute(url, method, read, key, answer) {
   return true;
 }
 
-// Each person's own connector credentials (G3): the enabled connectors with whether the caller holds a credential;
+// Each person's own connector credentials: the enabled connectors with whether the caller holds a credential;
 // a value is accepted and dropped at once, never returned.
 const credentials = new WeakMap();
 const PRINTABLE = /^[\x21-\x7e]{1,4096}$/;

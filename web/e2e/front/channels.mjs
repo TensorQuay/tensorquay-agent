@@ -1,4 +1,4 @@
-// Channels on the fake front (ADR-0014), as the gateway's human API serves them (G3): the channels a person can see,
+// Channels on the fake front (ADR-0014), as the gateway's human API serves them: the channels a person can see,
 // newest first, and create. One seeded channel, open to everyone signed in; a person's own ones are theirs.
 import { randomUUID } from "node:crypto";
 
@@ -25,7 +25,7 @@ const channels = seededMap([
   ],
 ]);
 const replies = seededMap();
-/** Each channel's open streams (G8): a new message goes to every one. */
+/** Each channel's open streams (ADR-0014 point 11): a new message goes to every one. */
 const listeners = new Map();
 const frame = (message) =>
   `id: ${message.seq}\ndata: ${JSON.stringify({ type: "channel.message", ...message })}\n\n`;
@@ -168,7 +168,7 @@ const refused = (reply, status, code) =>
 const voting = (id) =>
   (members.get(id) ?? []).filter((one) => one.role !== "observer").length;
 
-/** The task board from the log (G6): each task's resolved limit, its claims and its reports. */
+/** The task board from the log (ADR-0014 point 8): each task's resolved limit, its claims and its reports. */
 function board(id) {
   const log = logs.get(id) ?? [];
   return log
@@ -194,7 +194,7 @@ function board(id) {
     }));
 }
 
-/** A proposal's state from the log (G7): each voting member's latest vote, and its decision if any. */
+/** A proposal's state from the log (ADR-0014 point 9): each voting member's latest vote, and its decision if any. */
 function proposal(member, id, seq, reply) {
   const item = channels.get(id);
   if (!item || !visible(item, member)) return refused(reply, 404, "not_found");
@@ -234,7 +234,7 @@ function proposal(member, id, seq, reply) {
   });
 }
 
-/** A person's claim (G6): a repeat answers the held claim; a full task is already_claimed. */
+/** A person's claim (ADR-0014 point 8): a repeat answers the held claim; a full task is already_claimed. */
 function claim(member, id, seq, reply) {
   const item = channels.get(id);
   if (!item || !visible(item, member)) return refused(reply, 404, "not_found");
@@ -276,7 +276,7 @@ async function oneChannel(member, url, method, read, key, reply, raw) {
       refused(reply, 404, "not_found");
       return true;
     }
-    // Server-sent events (G8): every message past Last-Event-ID (or `after`), then live.
+    // Server-sent events (ADR-0014 point 11): every message past Last-Event-ID (or `after`), then live.
     const { request, response } = raw;
     response.writeHead(200, {
       "content-type": "text/event-stream",

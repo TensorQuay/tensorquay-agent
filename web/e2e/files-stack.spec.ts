@@ -111,9 +111,9 @@ async function capture(page: Page, name: string) {
 }
 
 /**
- * The feature matrix (G2): on a second task, the run writes a chart and a hidden note (files.json's last two replies).
- * The chart shows as an image and downloads, the note waits behind Show hidden files, and a created file opens from
- * Changes as the file itself, not a diff (T21-T23, T25). A task of its own, so the first task's two snapshots stay
+ * The feature matrix: on a second task, the run writes a chart and a hidden note (files.json's last two replies). The
+ * chart shows as an image and downloads, the note waits behind Show hidden files, and a created file opens from Changes
+ * as the file itself, not a diff. A task of its own, so the first task's two snapshots stay
  * what demo_files.py checks.
  */
 async function madeFiles(page: Page, baseURL: string) {
@@ -132,12 +132,12 @@ async function madeFiles(page: Page, baseURL: string) {
   });
   const panel = await openFilesPanel(page);
   await panel.getByRole("button", { name: /^Refresh/ }).click();
-  // T22: the note is hidden until asked for.
+  // The note is hidden until asked for.
   await step("G2 T22: a hidden note waits behind Show hidden files");
   await expect(panel.getByRole("button", { name: /^\.notes/ })).toHaveCount(0);
   await panel.getByRole("button", { name: /^Show hidden files/ }).click();
   await expect(panel.getByRole("button", { name: /^\.notes/ })).toBeVisible();
-  // T21, T23: the chart as an image the browser decoded, and its download under its own name.
+  // The chart as an image the browser decoded, and its download under its own name.
   await step("G2 T21, T23: the chart shows as an image and downloads");
   await panel.getByRole("button", { name: /^chart\.png/ }).click();
   const chart = panel.getByRole("img", { name: "chart.png" });
@@ -149,7 +149,7 @@ async function madeFiles(page: Page, baseURL: string) {
   await panel.getByRole("link", { name: "Download" }).click();
   expect((await download).suggestedFilename()).toBe("chart.png");
   await capture(page, "chart");
-  // T25: from Changes, a created file opens as itself.
+  // From Changes, a created file opens as itself.
   await step("G2 T25: from Changes, the chart opens as itself");
   await panel.getByRole("tab", { name: "Changes" }).click();
   await panel
@@ -305,7 +305,7 @@ test("WEB-E2E-021 uploads, workspace files and run changes on the real stack", a
       .getByText("Regions: north, south"),
   ).toBeVisible();
   await capture(page, "preview");
-  // The feature matrix (G2, T21): a Markdown file shows as a document, the uploaded CSV as a table.
+  // The feature matrix: a Markdown file shows as a document, the uploaded CSV as a table.
   await step(
     "G2 T21: a Markdown file shows as a document, the uploaded CSV as a table",
   );

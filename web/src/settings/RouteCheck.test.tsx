@@ -53,7 +53,7 @@ describe("WEB-U-039 checking a route", () => {
       name: "Check result",
     });
     expect(result).toHaveTextContent("Verified: this route works for tasks.");
-    // The verdict first; what was observed is folded under Details (F7), and the button offers to run it again.
+    // The verdict first; what was observed is folded under Details, and the button offers to run it again.
     const details = within(result).getByText("Details").closest("details");
     expect(details).not.toHaveAttribute("open");
     expect(
@@ -372,7 +372,7 @@ describe("WEB-U-271 a route check's outcome is announced", () => {
   });
 });
 
-// WEB-U-133 (F16): a model that thinks before every answer needs room, never a switch that can't turn it off; the advice
+// WEB-U-133: a model that thinks before every answer needs room, never a switch that can't turn it off; the advice
 // shows only when a set Max output is below 16384 (4096 was the room candidate 12's qwen3:4b spent thinking on step 1,
 // CORE-U-072), and the one click that fills Max output in on the route's form, unsaved, only when what it offers is
 // above that limit: 16384, or half a smaller Context window, which Max output must fit.

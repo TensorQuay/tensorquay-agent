@@ -206,7 +206,7 @@ export function fakeChannels({
       : body.claims === "all"
         ? voting(id)
         : body.claims;
-  /** The task board from the log (G6): each task's resolved limit, its claims and its reports. */
+  /** The task board from the log (ADR-0014 point 8): each task's resolved limit, its claims and its reports. */
   const board = (id: string) => {
     const log = logs.get(id) ?? [];
     return log.flatMap((task) => {
@@ -242,7 +242,7 @@ export function fakeChannels({
       find(id);
       return { items: board(id) };
     });
-  /** A claim by `me` (G6): a repeat answers the existing claim; a full task is already_claimed. */
+  /** A claim by `me` (ADR-0014 point 8): a repeat answers the existing claim; a full task is already_claimed. */
   api.claim = (id, seq) =>
     settle(() => {
       find(id);
