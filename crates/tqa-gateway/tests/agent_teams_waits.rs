@@ -16,6 +16,22 @@ use std::time::Duration;
 use support::TestResult;
 use uuid::Uuid;
 
+/// GW-I-196's waits need a task that really waits for its turn: once the team's four sandboxes are up, its owner's
+/// cap is set to the three that stay when `queue` takes one away, so admission (each second) can neither start the
+/// queued task nor evict another for it (each has an active run), and the hint holds however slowly the test runs.
+async fn owner_at_cap(f: &support::Fixture, t: &Team) -> TestResult {
+    let (status, body) = support::call(
+        f,
+        reqwest::Method::PUT,
+        "/api/v1/admin/limits/admission.per_user",
+        &t.cookie,
+        (Some(json!({"value": 3, "version": 1})), None),
+    )
+    .await?;
+    assert_eq!(status, 200, "{body}");
+    Ok(())
+}
+
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
 async fn gw_i_109_a_read_with_nothing_to_read_holds_its_whole_wait_and_answers_empty(
@@ -105,6 +121,7 @@ async fn gw_i_109_a_wait_with_nothing_new_ends_at_its_bound(pool: PgPool) -> Tes
 async fn gw_i_196_a_waiting_read_yields_to_a_task_queued_for_a_slot(pool: PgPool) -> TestResult {
     support::run_configured(pool, None, ENABLED, async |f| {
         let t = team(f).await?;
+        owner_at_cap(f, &t).await?;
         queue(f, t.id, &t.outsider.0).await?;
         let started = std::time::Instant::now();
         let (status, answer) = read_waiting(f, &t.reviewer.1, ("r-3:c-1", "r-3"), 20).await?;
@@ -131,6 +148,7 @@ async fn gw_i_196_a_lead_yields_its_files_to_a_queued_my_files_helper(pool: PgPo
         )
         .execute(&f.pool)
         .await?;
+        owner_at_cap(f, &t).await?;
         queue(f, t.id, &t.researcher.0).await?;
         let (status, answer) = read_waiting(f, &t.lead.1, ("r-1:c-1", "r-1"), 20).await?;
         assert_eq!(status, 200, "{answer}");
