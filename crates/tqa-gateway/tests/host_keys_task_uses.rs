@@ -39,22 +39,13 @@ async fn gw_i_192_a_tasks_key_uses_are_read_by_run_with_the_name_for_its_sender(
             403
         );
         let path = format!("/api/v1/conversations/{}/key-uses", run.conversation);
-        // A refusal's row is queued, not awaited (secrets::reads::refused): the page is read until its batch is in.
-        let page = tokio::time::timeout(tqa_testkit::deadline::scaled(support::DEADLINE), async {
-            loop {
-                let (status, page) =
-                    call(f, Method::GET, &path, &run.owner.1, (None, None)).await?;
-                assert_eq!(status, 200, "{page}");
-                let refused = page["items"].as_array().is_some_and(|items| {
-                    items.iter().any(|item| item["outcome"] == "wrong_position")
-                });
-                if refused {
-                    return Ok::<Value, Box<dyn std::error::Error>>(page);
-                }
-                tokio::time::sleep(std::time::Duration::from_millis(50)).await;
-            }
+        // A refusal's row is queued, not awaited: the page is read until its batch is in.
+        let page = page_until(f, &path, &run.owner.1, |page| {
+            page["items"]
+                .as_array()
+                .is_some_and(|items| items.iter().any(|item| item["outcome"] == "wrong_position"))
         })
-        .await??;
+        .await?;
         let items = page["items"].as_array().ok_or("items")?;
         let row = |outcome: &str| {
             items
@@ -164,11 +155,15 @@ async fn teammates_run(
     Ok((theirs, client))
 }
 
-/// The one row of `conversation`'s key uses as `cookie` reads it.
+/// The one row of `conversation`'s key uses as `cookie` reads it, once it is in: a refused use's row is queued.
 async fn only_row(f: &support::Fixture, conversation: &str, cookie: &str) -> Result<Value, Error> {
     let path = format!("/api/v1/conversations/{conversation}/key-uses");
-    let (status, page) = call(f, Method::GET, &path, cookie, (None, None)).await?;
-    assert_eq!(status, 200, "{page}");
+    let page = page_until(f, &path, cookie, |page| {
+        page["items"]
+            .as_array()
+            .is_some_and(|items| !items.is_empty())
+    })
+    .await?;
     let items = page["items"].as_array().ok_or("items")?;
     assert_eq!(items.len(), 1, "{page}");
     Ok(items[0].clone())
