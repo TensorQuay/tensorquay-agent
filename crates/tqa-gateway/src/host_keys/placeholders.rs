@@ -167,7 +167,7 @@ pub(crate) async fn find(
     connection: &mut PgConnection,
     placeholder: &str,
 ) -> Result<Option<Bound>, GatewayError> {
-    // The key as it is now, not as it was at minting (the second review's M2): its address and form, and whether the
+    // The key as it is now, not as it was at minting: its address and form, and whether the
     // sender may still use it (its owner, or one of a shared key's people). A key gone or no longer the sender's reads
     // as gone (no `key_id`), so a use is `revoked`; while the key exists its value's reference stays, so that refusal
     // is still a counted row (R4). The value itself is never read for it.

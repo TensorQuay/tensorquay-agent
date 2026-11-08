@@ -207,7 +207,7 @@ async fn gw_u_118_an_existing_directory_others_can_read_is_refused()
 
 // TEST: GW-U-105
 /// The install CA is found in a bundle that holds it, alone or among others, so `egress.ca_file` can be refused when it
-/// does: the install CA must never become an upstream root (the second review's L6).
+/// does: the install CA must never become an upstream root.
 #[tokio::test]
 async fn gw_u_105_the_install_ca_is_found_in_a_bundle_that_holds_it() -> TestResult {
     let temporary = tempfile::tempdir()?;

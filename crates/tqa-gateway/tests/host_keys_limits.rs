@@ -1,6 +1,6 @@
 //! GW-I-193 and GW-I-194 (ADR-0037 §4, point 4): the first slice's limits on a keyed host, held so the next slice knows
 //! what it lifts. A client offering HTTP/2 is answered over HTTP/1.1, and an upgrade (WebSocket) never opens: the
-//! proxy drops `Upgrade` and `Connection`, so the host answers the request as a plain one (the second review's L8).
+//! proxy drops `Upgrade` and `Connection`, so the host answers the request as a plain one.
 #[path = "support/keyed.rs"]
 mod keyed;
 #[path = "support/fixture.rs"]

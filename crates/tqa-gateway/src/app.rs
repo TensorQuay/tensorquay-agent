@@ -347,8 +347,7 @@ impl Gateway {
             )),
             None => None,
         };
-        // The install CA signs leaves for sandboxes; it must never verify a keyed host upstream (ADR-0037 §4, T7; the
-        // second review's L6).
+        // The install CA signs leaves for sandboxes; it must never verify a keyed host upstream (ADR-0037 §4, T7).
         if let (Some(host_ca), Some(pem)) = (&host_ca, &config.egress.ca_pem)
             && host_ca.among(pem)
         {

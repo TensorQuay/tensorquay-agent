@@ -23,7 +23,7 @@ const MAX_SCRUBBERS: usize = 4096;
 const MIN_FRAGMENT: usize = 16;
 
 /// The values a person's swaps taught, by person, host and port: every keyed connection of that person to that address
-/// scrubs them from its first byte, whichever of their runs or tasks swapped them (the second review's H2). Only in
+/// scrubs them from its first byte, whichever of their runs or tasks swapped them. Only in
 /// memory, bounded; a key's change or deletion forgets its address. What it can't cover: a host sending back a value it
 /// stored before that person's first swap since the gateway started (ADR-0037 §6).
 #[derive(Default)]
@@ -83,7 +83,7 @@ impl Scrubber {
         };
         add(value.to_vec(), placeholder.as_bytes().to_vec());
         add(url_encoded(value), placeholder.as_bytes().to_vec());
-        // Its other common spellings (the second review's L7): lowercase percent-encoding, JSON's escaped slash, and
+        // Its other common spellings: lowercase percent-encoding, JSON's escaped slash, and
         // its own base64, each replaced with the placeholder in the same spelling. Inside a longer base64 blob (an echo
         // of the request, encoded whole) the value sits at one of three byte alignments: the characters only it decides
         // at each, when there are enough of them, become the placeholder's at the same alignment.
@@ -125,7 +125,7 @@ impl Scrubber {
     }
 
     /// An answer's headers, each value scrubbed; a header whose scrubbed value isn't a valid one is dropped, every
-    /// value of its name, never sent on as it came (the second review's L1: fail closed).
+    /// value of its name, never sent on as it came (fail closed).
     pub(super) fn headers(&self, headers: &mut hyper::HeaderMap) {
         let mut unscrubbable = Vec::new();
         for (name, value) in headers.iter_mut() {
@@ -220,7 +220,7 @@ fn url_encoded(value: &[u8]) -> Vec<u8> {
 }
 
 /// Learns a swapped value into a connection's shared scrubber; whether it could. A poisoned lock can't learn, and the
-/// swap is then refused, never sent unscrubbable (the second review's L2).
+/// swap is then refused, never sent unscrubbable.
 pub(super) fn learn_shared(
     shared: &Mutex<Scrubber>,
     value: &[u8],

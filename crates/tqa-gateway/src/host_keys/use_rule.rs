@@ -267,7 +267,7 @@ fn inside(prefix: Option<&str>, path: &str) -> bool {
     };
     let path = path.split(['?', '#']).next().unwrap_or_default();
     let lowered = path.to_ascii_lowercase();
-    // An encoded separator, and any `%25`, which a server that decodes twice turns into one (the second review's L3).
+    // An encoded separator, and any `%25`, which a server that decodes twice turns into one.
     if lowered.contains("%2f") || lowered.contains("%5c") || lowered.contains("%25") {
         return false;
     }

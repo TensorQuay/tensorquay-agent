@@ -8,7 +8,7 @@ type TestResult = Result<(), Box<dyn std::error::Error>>;
 
 // TEST: GW-U-106
 /// A plain-http head holding a placeholder's mark is caught raw, percent-encoded and percent-encoded twice, in either
-/// case of hex (the second review's L4; `%25` is suspect, as in a prefixed path); a head without one isn't.
+/// case of hex (ADR-0037 §4; `%25` is suspect, as in a prefixed path); a head without one isn't.
 #[test]
 fn gw_u_106_a_placeholder_over_plain_http_is_caught_in_any_spelling() {
     for head in [

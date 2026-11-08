@@ -428,7 +428,7 @@ impl<T: AsyncWrite + Unpin + ?Sized> AsyncWrite for Active<'_, T> {
     }
 }
 
-/// Whether a plain-http request's head holds a placeholder's mark, raw or percent-encoded (the second review's L4). A
+/// Whether a plain-http request's head holds a placeholder's mark, raw or percent-encoded (ADR-0037 §4). A
 /// body after the head streams unread here: only an inert placeholder could leave that way, never a value (ADR-0037
 /// §4).
 fn holds_placeholder(bytes: &[u8]) -> bool {
