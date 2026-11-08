@@ -58,7 +58,7 @@ function shareError(error: Error, t: Translate): string | null {
 }
 
 /**
- * The owner's share dialog (answers-076 Q4, mockup change 4): an exact email and an access level, never a
+ * The owner's share dialog (mockup change 4): an exact email and an access level, never a
  * directory of accounts; the members with the app's picker for their access and a named Remove.
  */
 export function ShareDialog({

@@ -8,7 +8,7 @@ import { settled } from "./motion";
 import { createConversation, signIn } from "./session";
 import { expect, test, type Page } from "./test";
 
-// Task 076 on the fake front: the Workspaces page, its dialogs and the picker (WEB-U-007 accessibility and keyboard,
+// On the fake front: the Workspaces page, its dialogs and the picker (WEB-U-007 accessibility and keyboard,
 // WEB-U-025 behaviour end to end). The real stack runs WEB-E2E-011 in workspaces-stack.spec.ts.
 async function serious(page: Page) {
   // Measure the settled layer: an open menu's entrance fade would lower contrast mid-way.

@@ -101,7 +101,7 @@ afterEach(() => {
   for (const entry of toastStore.snapshot()) toastStore.dismiss(entry.id);
 });
 
-// Task 076: the Workspaces page (UI-GUIDELINES §6 and §7).
+// The Workspaces page (UI-GUIDELINES §6 and §7).
 describe("WEB-U-025 workspaces page", () => {
   it("loads with skeleton cards, never a spinner", () => {
     show(() => new Promise<Response>(() => undefined));
@@ -369,7 +369,7 @@ describe("WEB-U-025 workspaces page", () => {
   });
 });
 
-// Task 076 Q9: the confirmation follows the gateway's delete rules.
+// The confirmation follows the gateway's delete rules.
 describe("WEB-U-025 deleting a workspace", () => {
   const answer = (status: number) =>
     status === 204

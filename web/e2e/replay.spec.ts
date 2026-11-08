@@ -3,7 +3,7 @@ import { createConversation, signIn } from "./session";
 import { expect, test, type Page } from "./test";
 import { snapshot } from "./ux/assertions";
 
-// Task 093: WEB-E2E-004 compared transcript snapshots taken while an opened tool card was still loading its lazily
+// WEB-E2E-004 compared transcript snapshots taken while an opened tool card was still loading its lazily
 // loaded code, so the comparison failed at random (it showed on the Messages route first). Replay snapshots must wait
 // until nothing in the transcript is loading (WEB-U-037).
 const prompt = "Create a hello project and show it";

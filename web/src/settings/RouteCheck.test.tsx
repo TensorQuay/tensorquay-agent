@@ -40,7 +40,7 @@ function show(probes = {}, extra = {}, local = false) {
 const run = (dialog: HTMLElement) =>
   fireEvent.click(within(dialog).getByRole("button", { name: "Run check" }));
 
-// A route check runs only when asked, and reports what it observed in plain words (WEB-U-039, 099b-2).
+// A route check runs only when asked, and reports what it observed in plain words (WEB-U-039).
 describe("WEB-U-039 checking a route", () => {
   it("says what a check does, runs it once on request, and reports a verified route", async () => {
     const { fake, dialog } = show();

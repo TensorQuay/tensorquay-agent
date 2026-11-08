@@ -136,7 +136,7 @@ export async function userConnectorRoute(
   if (url.pathname !== "/api/v1/connectors" && !name && !reads) return false;
   if (!credentials.has(member)) credentials.set(member, new Map());
   const held = credentials.get(member);
-  // The reads of the caller's own credential (vault slice 2): 404 when they hold none there.
+  // The reads of the caller's own credential: 404 when they hold none there.
   if (reads) {
     const connector = decodeURIComponent(reads);
     if (!held.has(connector)) refuse(404, "not_found", "Not found.");

@@ -17,7 +17,7 @@ import { TableScroll } from "../ui/TableScroll";
 import { DateLabel } from "./DateLabel";
 import { allTasks } from "./team-queries";
 
-/** One person's tasks for an administrator (task 067 Q4): metadata rows only, each opening the private view. */
+/** One person's tasks for an administrator: metadata rows only, each opening the private view. */
 export function UserTasks({ me, id }: { me: User; id: string }) {
   const t = useT();
   if (me.role !== "admin")

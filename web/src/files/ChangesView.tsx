@@ -21,7 +21,7 @@ import { previewKind } from "./file-kind";
 /** A run by its message's first line and when it started. */
 export type RunChoice = { id: string; label: string; startedAt: string | null };
 
-/** The files runs of this task changed (task 068c): the latest run by default, any earlier one on request. */
+/** The files runs of this task changed: the latest run by default, any earlier one on request. */
 export function ChangesView({
   conversationId,
   runs,

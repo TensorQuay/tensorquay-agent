@@ -26,7 +26,7 @@ async function serious(page: Page) {
     .map((violation) => violation.id);
 }
 
-// Task 090 (FR-22 runtime backend status) on the fake front: the Status section for administrators (WEB-U-033).
+// FR-22's runtime backend status on the fake front: the Status section for administrators (WEB-U-033).
 for (const [width, colorScheme] of [
   [1440, "light"],
   [1024, "dark"],
@@ -77,7 +77,7 @@ for (const [width, colorScheme] of [
     await capture(page, `status-not-ready-${width}-${colorScheme}`);
   });
 
-// Task 090: token usage for administrators, from the admin usage API (WEB-U-034).
+// Token usage for administrators, from the admin usage API (WEB-U-034).
 for (const [width, colorScheme] of [
   [1440, "light"],
   [1024, "dark"],
@@ -121,7 +121,7 @@ for (const [width, colorScheme] of [
     await expect(total).toContainText("vs July");
   });
 
-// Task 090: shared secrets for administrators, write-only, from the admin secrets API (WEB-U-035).
+// Shared secrets for administrators, write-only, from the admin secrets API (WEB-U-035).
 for (const [width, colorScheme] of [
   [1440, "light"],
   [1024, "dark"],

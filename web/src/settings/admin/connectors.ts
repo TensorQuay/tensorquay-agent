@@ -34,6 +34,6 @@ export type ConnectorsApi = {
   deleteConnector(name: string, version: number, key: string): Promise<void>;
   /** The shared secrets' refs, offered as a connector's shared credential. */
   secretRefs(signal?: AbortSignal): Promise<string[]>;
-  /** Adds this connector to who may use a secret, on the secret's current version (vault slice 3). */
+  /** Adds this connector to who may use a secret, on the secret's current version. */
   allowSecret(ref: string, connector: string): Promise<void>;
 };

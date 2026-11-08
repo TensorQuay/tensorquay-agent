@@ -270,7 +270,7 @@ async function barState(page: Page) {
   });
 }
 
-// Review of 059a: at 1024 the bar cut the status mid-word. The status is never cut; the title truncates.
+// At 1024 the bar cut the status mid-word. Now the status is never cut; the title truncates.
 test("WEB-U-007 the bar keeps the status whole and truncates the title", async ({
   page,
 }) => {

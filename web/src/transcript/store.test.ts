@@ -143,7 +143,7 @@ describe("WEB-U-002 reconnect and disposal", () => {
 
   it("stops malformed input, ignores detached sources, and exposes an error banner", () => {
     const { store, sources } = setup();
-    // A known kind with a bad field; an unknown kind is ignored instead (task 069b).
+    // A known kind with a bad field; an unknown kind is ignored instead.
     sources[0]?.send({ type: "heartbeat", run_id: 5 });
     expect(sources[0]?.close).toHaveBeenCalledOnce();
     const banner = store.getSnapshot().transcript.banner;

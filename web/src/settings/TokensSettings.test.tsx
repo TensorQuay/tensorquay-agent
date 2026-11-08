@@ -42,7 +42,7 @@ function show(clock: () => Date = march) {
   );
 }
 
-// Task 067 / FR-26: personal API tokens - listed without their secret, shown once on creation, revoked with a confirm.
+// FR-26: personal API tokens - listed without their secret, shown once on creation, revoked with a confirm.
 describe("WEB-U-023 API tokens", () => {
   it("explains Bearer use and shows the empty state", async () => {
     fetch.mockImplementationOnce(() => json({ items: [] }));

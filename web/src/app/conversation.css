@@ -346,7 +346,7 @@ textarea.composer-input {
 .activity-heading[aria-expanded="false"] > svg {
   transform: rotate(-90deg);
 }
-/* A step's row and its card are one item (the review of 049): one surface while open, the chevron turned with it. The
+/* A step's row and its card are one item: one surface while open, the chevron turned with it. The
    border is there while closed too, transparent, so opening moves nothing. */
 .activity-line {
   border: var(--border-width) solid transparent;

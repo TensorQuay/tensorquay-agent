@@ -121,7 +121,7 @@ for (const width of [1024, 1440])
     });
   }
 
-// Task 088 (D5): the idle switch confirmation was inserted above the transcript and pushed it down (UI-GUIDELINES §5b).
+// The idle switch confirmation was inserted above the transcript and pushed it down (UI-GUIDELINES §5b).
 for (const width of [1024, 1440])
   test(`WEB-U-031 the switch confirmation floats without moving the transcript ${width}`, async ({
     page,

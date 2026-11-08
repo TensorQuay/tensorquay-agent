@@ -37,7 +37,7 @@ async function openSettings(page: Page) {
   await expect(page).toHaveURL(/\/settings(\/account)?$/);
 }
 
-// Task 067 / WEB-U-023: team accounts in the web, every state at 1024 and 1440 in both themes.
+// WEB-U-023: team accounts in the web, every state at 1024 and 1440 in both themes.
 for (const width of [1024, 1440])
   for (const colorScheme of ["light", "dark"] as const) {
     const suffix = `${width}-${colorScheme}`;
@@ -312,7 +312,7 @@ test("WEB-U-023 members see their tokens, not user administration", async ({
   expect(response.status()).toBe(200);
   await openSettings(page);
   const sections = page.getByRole("navigation", { name: "Settings sections" });
-  // Task 095, WEB-U-044 and WEB-U-049: every signed-in user also keeps their own Git and connector credentials and
+  // WEB-U-044 and WEB-U-049: every signed-in user also keeps their own Git and connector credentials and
   // their own task profiles; administration stays hidden (WEB-U-075: Your account only; a member lands on Account).
   await expect(page).toHaveURL(/\/settings\/account$/);
   await expect(sections.getByRole("link")).toHaveText([

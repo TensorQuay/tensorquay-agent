@@ -1,7 +1,7 @@
 import { english, type Translate } from "../i18n/translate";
 import type { Workspace } from "../protocol/generated/api";
 
-/** The size meter's colour: warning from 80 % of the quota, danger from 95 % (task 076). */
+/** The size meter's colour: warning from 80 % of the quota, danger from 95 %. */
 export type MeterLevel = "ok" | "warn" | "danger";
 const WARN_SHARE = 0.8;
 const DANGER_SHARE = 0.95;
@@ -24,7 +24,7 @@ export function leaseState(workspace: Workspace): LeaseState {
 }
 
 /**
- * The delete confirmation, from the gateway's rules (answers-076 Q9): refused while a task's run works in it or
+ * The delete confirmation, from the gateway's rules: refused while a task's run works in it or
  * while it is being copied; bound tasks go with it only when all are the owner's. `mine` is the reader's own active tasks on it,
  * or `null` when the task list is not fully loaded (the gateway still refuses other people's tasks).
  */

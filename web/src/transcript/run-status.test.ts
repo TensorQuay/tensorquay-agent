@@ -77,7 +77,7 @@ describe("WEB-U-001 human run and environment status", () => {
     expect(runPresentation(failed, 0).label).toBe(
       "Failed: The task's environment couldn't be reached",
     );
-    // Task 072: a failure code with its own plain copy replaces the runtime's wording.
+    // A failure code with its own plain copy replaces the runtime's wording.
     const unreadable = apply(
       state,
       frame(2, {

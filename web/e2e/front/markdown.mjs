@@ -25,7 +25,7 @@ export const markdownFrames = events.map((event, index) => {
   return frame(index + 1, event, step);
 });
 
-// Task 084: a final answer with a files table (short path and size columns beside a long prose column) and a table
+// A final answer with a files table (short path and size columns beside a long prose column) and a table
 // too wide for the transcript column, which must scroll inside its own container.
 const wideColumns = Array.from(
   { length: 12 },

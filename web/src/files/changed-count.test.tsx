@@ -45,7 +45,7 @@ const change = (path: string) => ({
   too_large: false,
 });
 
-// Review of 068c: the turn summary counts the files the run changed, shell writes included, once they were recorded.
+// The turn summary counts the files the run changed, shell writes included, once they were recorded.
 describe("WEB-U-024 files changed in the turn summary", () => {
   it("uses the run's recorded changes, which include files written by shell commands", async () => {
     const fetch = show(
@@ -80,7 +80,7 @@ describe("WEB-U-024 files changed in the turn summary", () => {
   });
 });
 
-// answers-076 item 0: the hook is bounded - the gateway keeps 20 snapshots per workspace, and a closed run's answer
+// The hook is bounded - the gateway keeps 20 snapshots per workspace, and a closed run's answer
 // never changes.
 describe("WEB-U-024 the files-changed hook is bounded", () => {
   const runs = Array.from({ length: 50 }, (_, index) => `run-${index + 1}`);

@@ -9,7 +9,7 @@ import { Button } from "../ui/Button";
 import { keyName } from "./secret-copy";
 
 /**
- * A save refused because the secret it names may not be used here yet (vault slice 3: 409 secret_not_allowed). It
+ * A save refused because the secret it names may not be used here yet (409 secret_not_allowed). It
  * offers to allow it; the person then saves again themselves (WEB-U-054).
  */
 export function AllowSecret({

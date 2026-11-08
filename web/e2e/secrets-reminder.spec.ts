@@ -9,7 +9,7 @@ import {
 } from "./settings-page";
 import { expect, test } from "./test";
 
-// Vault slice 1 on the fake front (WEB-U-052 browser part): when each secret last changed, a due badge that blocks
+// WEB-U-052's browser part, on the fake front: when each secret last changed, a due badge that blocks
 // nothing, and a reminder set and cleared by keyboard, at the widths UI-GUIDELINES §17.2 asks for in both themes. Each
 // run adds, then deletes, its own secret.
 for (const width of [1024, 1280] as const)

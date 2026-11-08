@@ -12,9 +12,9 @@ import { Icon } from "../ui/Icon";
 import "./changes-catalogue";
 
 /**
- * An agent's web page, framed from `/files/view` (the file previews design). The gateway's headers sandbox it (an
- * opaque origin, no network, no forms, popups or top-level navigation) even if the URL is opened on its own; the frame
- * repeats the sandbox. Scripts run, since a dashboard without them is blank: `allow-scripts` and nothing else, so they
+ * An agent's web page, framed from `/files/view`. The gateway's headers sandbox it (an opaque origin, no network, no
+ * forms, popups or top-level navigation) even if the URL is opened on its own; the frame repeats the sandbox. Scripts
+ * run, since a dashboard without them is blank: `allow-scripts` and nothing else, so they
  * never reach this page, the session or the API. Never add `allow-same-origin` (with `allow-scripts` the page could
  * lift its own sandbox), `allow-popups`, `allow-top-navigation`, `allow-forms`, `allow-modals` or `allow-downloads`.
  * A page over the preview limit isn't framed: the gateway would answer with an error, not the page.

@@ -28,7 +28,7 @@
 [data-theme="light"] {
   color-scheme: light;
   --paper: #ffffff;
-  /* An agent's web page is drawn on white in either theme, as a browser would (the file previews design). */
+  /* An agent's web page is drawn on white in either theme, as a browser would. */
   --page-canvas: #ffffff;
   --surface: #f7f7f7;
   --surface-raised: #ffffff;
@@ -205,7 +205,7 @@
   --channel-side-width: 18rem;
   /* §6: the right panel for files and changes. */
   --panel-width: 360px;
-  /* Task 076: workspace cards fill the row from this width; the size meter and the lease dot. */
+  /* Workspace cards fill the row from this width; the size meter and the lease dot. */
   --workspace-card-width: 360px;
   --meter-height: 4px;
   --dot-size: 8px;

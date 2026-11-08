@@ -197,7 +197,7 @@ button.file-open:hover {
   top: 0;
   background: var(--surface);
 }
-/* The file previews design: an agent's web page in a sandboxed frame, on the white a browser gives a page. */
+/* An agent's web page in a sandboxed frame, on the white a browser gives a page. */
 .file-page {
   display: block;
   width: 100%;
@@ -477,7 +477,7 @@ button.file-open:hover {
 .files-body:focus:not(:focus-visible) {
   outline: none;
 }
-/* Task 068c: the Files and Changes tabs, the changed-file list and a run's diff (§7 tool-card diff tints). */
+/* The Files and Changes tabs, the changed-file list and a run's diff (§7 tool-card diff tints). */
 .files-tabs {
   display: flex;
   flex: 1;
@@ -541,7 +541,7 @@ button.file-open:hover {
   border-radius: var(--control-radius);
   background: var(--code-bg);
 }
-/* Review of 068c: long lines wrap inside the panel; the +/- marker keeps its own first column. */
+/* Long lines wrap inside the panel; the +/- marker keeps its own first column. */
 .diff-line {
   display: flex;
   padding: 0 var(--space-3);
@@ -573,7 +573,7 @@ button.file-open:hover {
 .diff-section {
   min-width: 0;
 }
-/* Review of 068c: the run picker in the app's menu style; the diff headed like its list row. */
+/* The run picker in the app's menu style; the diff headed like its list row. */
 .changes-picker .picker-button {
   max-width: 100%;
 }

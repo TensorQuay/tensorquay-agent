@@ -46,7 +46,7 @@ for (const width of [1024, 1440, 1920])
       await page.setViewportSize({ width, height: 900 });
       await page.emulateMedia({ colorScheme: theme });
       // The reviewed baselines record the transcript at its full column width, so the files panel (open by default
-      // from 1280 px, task 068b) starts closed here; the files suites cover the panel itself.
+      // from 1280 px) starts closed here; the files suites cover the panel itself.
       await page.addInitScript(() => {
         localStorage.setItem("tensorquay-files-panel", "closed");
       });

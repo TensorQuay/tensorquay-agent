@@ -1,4 +1,4 @@
-/** One page of reads: 50 at a time, older than `before` (the previous page's `next`) when given (vault slice 2). */
+/** One page of reads: 50 at a time, older than `before` (the previous page's `next`) when given. */
 export function readsQuery(
   before?: string,
   extra: Record<string, string> = {},

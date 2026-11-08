@@ -91,7 +91,7 @@ export function ActivityLine({
       ? durationLabel(tool.durationMs, t)
       : null;
   return (
-    // The row and its card are one item: one surface while open, and the chevron turns with it (the review of 049).
+    // The row and its card are one item: one surface while open, and the chevron turns with it.
     <li className="activity-line" data-open={open || undefined}>
       <button
         type="button"

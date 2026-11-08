@@ -489,7 +489,7 @@
   grid-template-columns: var(--settings-nav-width) minmax(0, 1fr);
   gap: var(--space-3);
 }
-/* Task 090: the Usage page's period and grouping sit side by side; figures align on the right in tabular digits. */
+/* The Usage page's period and grouping sit side by side; figures align on the right in tabular digits. */
 .settings-controls {
   display: flex;
   flex-wrap: wrap;
@@ -645,7 +645,7 @@ details.route-group > summary::-webkit-details-marker {
 .limits-table td:nth-child(2) {
   width: 100%;
 }
-/* 099b-2: a route check's observations as term and value rows, and the server's answer as wrapped inert text. */
+/* A route check's observations as term and value rows, and the server's answer as wrapped inert text. */
 .check-list {
   display: grid;
   gap: var(--space-1);

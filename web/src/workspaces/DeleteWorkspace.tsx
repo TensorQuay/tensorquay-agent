@@ -15,7 +15,7 @@ import { taskFilter } from "./task-filter";
 import { deletePlan, workspaceName } from "./workspace-state";
 
 /**
- * The delete confirmation from the gateway's rules (answers-076 Q9): it names the workspace and how many tasks go
+ * The delete confirmation from the gateway's rules: it names the workspace and how many tasks go
  * with it; when it cannot be deleted, only the reason and no delete button.
  */
 export function DeleteWorkspace({

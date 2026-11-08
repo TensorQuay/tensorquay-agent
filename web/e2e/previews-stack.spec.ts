@@ -7,11 +7,11 @@ import { openFilesPanel } from "./files-panel";
 import { afterStart, budget } from "./stack-start";
 import { bootstrap, signIn } from "./ux/flow";
 
-// WEB-E2E-032 (the file previews design): on the real stack, the agent writes an HTML report, PDFs and spreadsheets
-// (deploy/tests/demo_previews.py builds them; the scripted model's one shell call writes them), and the Files panel
-// shows each as what it is, with each failure in plain words. The report's script tries every way out it has against a
-// witness server the browser can reach; the witness must see nothing but this spec's control request. The same suite
-// runs on the Docker and the microVM backend (demo.py --backend firecracker).
+// WEB-E2E-032: on the real stack, the agent writes an HTML report, PDFs and spreadsheets (deploy/tests/demo_previews.py
+// builds them; the scripted model's one shell call writes them), and the Files panel shows each as what it is, with
+// each failure in plain words. The report's script tries every way out it has against a witness server the browser can
+// reach; the witness must see nothing but this spec's control request. The same suite runs on the Docker and the
+// microVM backend (demo.py --backend firecracker).
 test.skip(!process.env.TQA_STACK_URL, "Requires the owned previews demo stack");
 test.beforeAll(async ({ browser, baseURL }) => {
   if (!baseURL) throw new Error("The driver must supply the stack origin");

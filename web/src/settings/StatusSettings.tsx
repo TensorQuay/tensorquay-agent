@@ -42,7 +42,7 @@ const CHECKS: readonly { key: string; label: MessageKey; fix: MessageKey }[] = [
 /** How often an open Status page reads the readiness detail again. */
 export const STATUS_REFRESH_MS = 30_000;
 
-/** Runtime status for administrators (FR-22, task 090): the gateway's readiness checks and its sandbox backend. */
+/** Runtime status for administrators (FR-22): the gateway's readiness checks and its sandbox backend. */
 export function StatusSettings({
   me,
   environments,

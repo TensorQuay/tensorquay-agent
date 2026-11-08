@@ -143,7 +143,7 @@ async function deleteRoute(page: Page, name: string) {
   );
 }
 
-/** 099b-2: a route check runs only on request and reports what it saw; axe covers the result (WEB-U-039). */
+/** A route check runs only on request and reports what it saw; axe covers the result (WEB-U-039). */
 async function checkRoute(page: Page) {
   await rowAction(page, "Local model", "Check route Local model");
   const dialog = page.getByRole("dialog", { name: "Check route Local model" });

@@ -209,7 +209,7 @@ export function ToolCard({
           ))}
         {hasArguments && (
           <>
-            {/* Quiet, like the Output label it lines up with (the review of 078). */}
+            {/* Quiet, like the Output label it lines up with. */}
             <button
               type="button"
               className="tool-disclosure type-label muted"

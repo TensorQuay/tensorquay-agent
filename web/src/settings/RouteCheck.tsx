@@ -32,7 +32,7 @@ type State =
   | { kind: "refused"; copy: [MessageKey, MessageValues]; keyMissing: boolean };
 
 /**
- * Checks one stored route the way a task will use it (099b-2): nothing runs, or spends tokens, until the
+ * Checks one stored route the way a task will use it: nothing runs, or spends tokens, until the
  * administrator asks. A failed check is a result to read, and a refusal says what to do.
  */
 export function RouteCheck({

@@ -68,7 +68,7 @@ describe("WEB-U-014 assistant Markdown", () => {
     expect(screen.getByText("const value = 1;")).toBeVisible();
   });
 
-  // Task 084: a value such as "2,124 B" stays on one line; prose cells keep wrapping between words.
+  // A value such as "2,124 B" stays on one line; prose cells keep wrapping between words.
   it("WEB-U-027 keeps short table cells whole and preserves column alignment", async () => {
     render(
       <TranscriptView

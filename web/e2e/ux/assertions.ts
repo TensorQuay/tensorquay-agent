@@ -259,7 +259,7 @@ export async function fixedShell(page: Page) {
 /**
  * The transcript's markup for replay comparisons, taken once nothing in it is still loading: a lazily loaded part (a
  * tool card, formatted Markdown) shows a skeleton for a moment, and a snapshot in that moment differs from one taken a
- * frame later (task 093, WEB-U-037).
+ * frame later (WEB-U-037).
  */
 export async function snapshot(page: Page) {
   const transcript = page.getByTestId("transcript");

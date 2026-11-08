@@ -65,9 +65,9 @@ describe("WEB-U-019 message format", () => {
   });
 });
 
-// Review of 059: durations use each language's own unit (Intl), with narrow no-break space thousands as every number (§10).
-// A fractional count reads in the reader's language, in the plural `#` and in a plain number argument alike (1.5 is
-// "1,5" in French).
+// Durations use each language's own unit (Intl), with narrow no-break space thousands as every number (§10). A
+// fractional count reads in the reader's language, in the plural `#` and in a plain number argument alike (1.5 is "1,5"
+// in French).
 describe("WEB-U-019 fractional counts", () => {
   it("formats half CPUs for the language, in a plural and in a plain argument", () => {
     const cpus = "{cpus, plural, one {# CPU} other {# CPUs}}";
@@ -115,7 +115,7 @@ describe("WEB-U-019 durations", () => {
   });
 });
 
-// Task 068b: file sizes in binary steps with each language's own short unit; English and Japanese write "B".
+// File sizes in binary steps with each language's own short unit; English and Japanese write "B".
 describe("WEB-U-020 file sizes", () => {
   it.each([
     ["en", 0, "0 B"],

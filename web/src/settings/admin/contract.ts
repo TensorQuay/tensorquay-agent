@@ -30,7 +30,7 @@ export type AdminApi = {
   /** Creates (no version) or replaces (the version the page read); resolves to the stored item, never a value. */
   putSecret(write: SecretWrite, key: string): Promise<SecretItem>;
   deleteSecret(name: string, version: number, key: string): Promise<void>;
-  /** A shared secret's reads, newest first, 50 a page; `before` is the previous page's `next` (vault slice 2). */
+  /** A shared secret's reads, newest first, 50 a page; `before` is the previous page's `next`. */
   secretReads(
     name: string,
     before?: string,
@@ -38,7 +38,7 @@ export type AdminApi = {
   ): Promise<SecretReadPage>;
   /** The people an administrator can see, as email by user id, to name who a read was for. */
   people(signal?: AbortSignal): Promise<Record<string, string>>;
-  /** Replaces who may use a secret, with the version the page read (vault slice 3). */
+  /** Replaces who may use a secret, with the version the page read. */
   setConsumers(
     name: string,
     consumers: SecretConsumer[],
@@ -46,7 +46,7 @@ export type AdminApi = {
   ): Promise<SecretItem>;
   /** Every route and connector a secret can be allowed for. */
   consumerChoices(signal?: AbortSignal): Promise<SecretConsumer[]>;
-  /** Sets (whole days, 1-3650) or clears (null) the rotation reminder, with the version the page read (vault slice 1). */
+  /** Sets (whole days, 1-3650) or clears (null) the rotation reminder, with the version the page read. */
   setReminder(
     name: string,
     rotateAfterDays: number | null,

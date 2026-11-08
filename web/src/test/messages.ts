@@ -2,7 +2,7 @@ import type { Event } from "../protocol/generated/protocol";
 
 import { frame } from "./frames";
 
-// Task 093: the demo scenario (crates/tqa-testkit/scenarios/demo.json) as a Messages route records it: signed thinking
+// The demo scenario (crates/tqa-testkit/scenarios/demo.json) as a Messages route records it: signed thinking
 // adds a `reasoning.state` (its size only, never the item) before each step's tool calls, in the order the core emits.
 const state: Event = {
   type: "reasoning.state",

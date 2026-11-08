@@ -180,7 +180,7 @@ test("WEB-U-020 a message naming a missing upload is refused", async ({
   });
 });
 
-// WEB-U-024 (task 068c): the Changes tab shows what each run added, modified or deleted, with a tinted diff.
+// WEB-U-024: the Changes tab shows what each run added, modified or deleted, with a tinted diff.
 for (const [width, theme] of [
   [1440, "light"],
   [1024, "dark"],
@@ -195,7 +195,7 @@ for (const [width, theme] of [
     const status = page.getByLabel("Run status");
     const message = page.getByLabel("Message", { exact: true });
     const panel = page.getByRole("complementary", { name: "Files" });
-    // Review of 068c: below 1280 px the floating panel ends above the composer, so sending works with it open.
+    // Below 1280 px the floating panel ends above the composer, so sending works with it open.
     async function send(text: string) {
       await message.fill(text);
       await page.getByRole("button", { name: "Send" }).click({ trial: true });
@@ -216,7 +216,7 @@ for (const [width, theme] of [
     await page.getByRole("button", { name: "Send" }).click();
     await expect(status).toHaveText(/^Done/, { timeout: 30_000 });
 
-    // Review of 068c: the turn summary counts the run's recorded changes, not only file-edit tools; finding T-b: the
+    // The turn summary counts the run's recorded changes, not only file-edit tools; it says the
     // count alone, and Open changes (WEB-U-016) shows them in the files panel at any width.
     await expect(page.locator(".turn-summary")).toHaveText("1 file changed");
     await page.getByRole("button", { name: "Open changes" }).click();
@@ -263,7 +263,7 @@ for (const [width, theme] of [
     await expect(diff.locator('[data-kind="hunk"]').first()).toHaveText(
       /^Lines? 1\b/,
     );
-    // Review of 068c (walk-through): a long line wraps inside the panel, its marker kept, nothing clipped.
+    // A long line wraps inside the panel, its marker kept, nothing clipped.
     const long = diff.locator("li", { hasText: /deliberately long line/ });
     await expect(long).toBeVisible();
     expect(

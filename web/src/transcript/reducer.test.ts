@@ -517,7 +517,7 @@ describe("SEC-001 blocked network attempts", () => {
   });
 });
 
-// Task 069b: an event kind the web does not know advances the cursor, dedups and replays like any event, renders
+// An event kind the web does not know advances the cursor, dedups and replays like any event, renders
 // nothing and never raises the error banner.
 describe("WEB-U-001 unknown event kinds", () => {
   const unknown = (seq: number) =>
@@ -574,7 +574,7 @@ describe("WEB-U-001 unknown event kinds", () => {
   });
 });
 
-// Task 070: the context was compacted before a model call; the activity log says so once, quietly.
+// The context was compacted before a model call; the activity log says so once, quietly.
 describe("WEB-U-001 compaction", () => {
   const compaction = (seq: number) =>
     frame(seq, {
@@ -614,7 +614,7 @@ describe("WEB-U-001 compaction", () => {
   });
 });
 
-// Task 072: the fallback tool-call parser gave up; the transcript says so in plain words, once.
+// The fallback tool-call parser gave up; the transcript says so in plain words, once.
 describe("WEB-U-001 run failure copy", () => {
   it("shows the plain copy for fallback_parse in the notice and the turn outcome", () => {
     const state = replay([
@@ -634,7 +634,7 @@ describe("WEB-U-001 run failure copy", () => {
   });
 });
 
-// Task 076 (074's event): the model route switched to its fallback; one quiet status line says which and why.
+// The model route switched to its fallback; one quiet status line says which and why.
 describe("WEB-U-025 route fallback line", () => {
   const fallback = (seq: number) =>
     frame(seq, {

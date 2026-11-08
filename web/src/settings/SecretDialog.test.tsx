@@ -7,7 +7,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-// Task 067: a token or invitation link is shown once, whole, with a copy button.
+// A token or invitation link is shown once, whole, with a copy button.
 describe("WEB-U-023 secret shown once", () => {
   it("shows the whole value read-only, copies it and closes once the person has copied it", async () => {
     const writeText = vi.fn<(text: string) => Promise<void>>();

@@ -54,7 +54,7 @@ describe("WEB-U-001 starting and failed work", () => {
     ).not.toMatch(/environment couldn't be reached|Send the message again/);
   });
 
-  // Task 072: a failure code with its own copy is said once, as the turn's outcome, in plain words.
+  // A failure code with its own copy is said once, as the turn's outcome, in plain words.
   it("says a fallback_parse failure once in plain words", () => {
     const transcript = [
       frame(1, { type: "message.user", text: "Build it", attachments: [] }),

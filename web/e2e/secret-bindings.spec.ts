@@ -8,7 +8,7 @@ import {
 } from "./settings-page";
 import { expect, test } from "./test";
 
-// Vault slice 3 on the fake front (WEB-U-054 browser part): who may use a secret, changed by keyboard in its dialog, at
+// WEB-U-054's browser part, on the fake front: who may use a secret, changed by keyboard in its dialog, at
 // the widths UI-GUIDELINES §17.2 asks for in both themes. Each run adds, binds, then deletes its own secret.
 for (const width of [1024, 1280] as const)
   for (const colorScheme of ["light", "dark"] as const)

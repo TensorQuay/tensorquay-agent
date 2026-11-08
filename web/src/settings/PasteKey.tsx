@@ -33,7 +33,7 @@ export function PasteKey({
   api: RoutesApi;
   route: string;
   open: boolean;
-  /** `allowed` is false when the secret was stored but could not yet be allowed for the route (vault slice 3). */
+  /** `allowed` is false when the secret was stored but could not yet be allowed for the route. */
   onStored: (ref: string, allowed: boolean) => void;
 }) {
   const t = useT();

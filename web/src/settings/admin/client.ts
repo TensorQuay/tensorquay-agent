@@ -118,7 +118,7 @@ function secretRequests(client: ApiClient) {
 /** Model routes (slice 3). */
 function routeRequests(client: ApiClient) {
   return {
-    /** Checks one stored route as a task would use it (099b-2); a failed check is still a result. */
+    /** Checks one stored route as a task would use it; a failed check is still a result. */
     /** The saved route's upstream models (WEB-U-067); the server's refusal is in `failure`. */
     routeModels: (name: string, signal?: AbortSignal) =>
       client.request(

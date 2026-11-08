@@ -169,11 +169,10 @@ function remove(name, url, answer) {
 
 /** Answers /api/v1/admin/routes*; returns false for any other path. */
 /**
- * A route check (099b-2): "local" is verified, any other route fails as unreachable; a route without its key is 409.
- * A "schema-" route stands for a provider refusing JSON Schema keywords: its check fails with a 400
- * and suggests Schema keywords basic, and passes once the route keeps basic keywords only. A "thinker-" route passes
- * but its model thinks unasked (WEB-U-133). A "slow-" route's check runs out of time (a first-hour check before 17.0;
- * WEB-U-264).
+ * A route check: "local" is verified, any other route fails as unreachable; a route without its key is 409. A "schema-"
+ * route stands for a provider refusing JSON Schema keywords: its check fails with a 400 and suggests Schema keywords
+ * basic, and passes once the route keeps basic keywords only. A "thinker-" route passes but its model thinks unasked
+ * (WEB-U-133). A "slow-" route's check runs out of time (a first-hour check before 17.0; WEB-U-264).
  */
 /**
  * An Ollama-like local route (WEB-U-269): an "ollama-small-" route's server gives the model 4,096 tokens, under the

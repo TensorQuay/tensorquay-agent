@@ -16,7 +16,7 @@ import {
   workspaceName,
 } from "./workspace-state";
 
-// Task 076: the rules behind the workspace card, the picker and the delete confirmation.
+// The rules behind the workspace card, the picker and the delete confirmation.
 describe("WEB-U-025 workspace state", () => {
   it("warns at 80 % of the quota and turns danger at 95 %; no meter without a quota or a size", () => {
     expect(meterLevel(7.9 * GB, 10 * GB)).toBe("ok");

@@ -18,7 +18,7 @@ export type CacheHint = AdminRoute["cache_hint"];
 export type RouteItem = AdminRoute;
 export type RouteList = AdminRoutes;
 export type RouteProbe = AdminRoute["probe"];
-/** One route check's observation (099b-2): passing or not, it is a result, never an error. */
+/** One route check's observation: passing or not, it is a result, never an error. */
 export type ProbeResult = RouteProbeResult["probe"];
 
 /** Every editable route field: a listed route without the gateway's own fields (`AdminRouteWrite` less `version`). */
@@ -49,7 +49,7 @@ export type RoutesApi = {
   secretRefs(signal?: AbortSignal): Promise<string[]>;
   /** Stores a pasted key as a new shared secret (never a replace: an existing name is a 409) and answers its ref. */
   createSecret(name: string, value: string, key: string): Promise<string>;
-  /** Adds this route to who may use a secret, on the secret's current version (vault slice 3). */
+  /** Adds this route to who may use a secret, on the secret's current version. */
   allowSecret(ref: string, route: string): Promise<void>;
   /** A link to download every route as models.toml. */
   exportUrl(): string;

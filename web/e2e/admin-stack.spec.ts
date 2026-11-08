@@ -108,7 +108,7 @@ async function addRoute(page: Page) {
   await axe(page);
   const save = page.getByRole("button", { name: "Save" });
   await save.click();
-  // Vault slice 3: the seeded secret is bound to its own route only, so the gateway refuses a new route naming it
+  // The seeded secret is bound to its own route only, so the gateway refuses a new route naming it
   // (409 secret_not_allowed) and the form offers to allow it; the admin does, then saves again (WEB-U-054).
   const dialog = page.locator("form.settings-form-page");
   await expect(

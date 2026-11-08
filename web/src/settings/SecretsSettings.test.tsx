@@ -68,7 +68,7 @@ async function add(name: string, value: string) {
   await Promise.resolve();
 }
 
-// Task 090 (FR-22, FR-28): shared secrets for administrators, write-only (WEB-U-035).
+// FR-22, FR-28: shared secrets for administrators, write-only (WEB-U-035).
 // One word on the page, "key" (the owner's ask): names without the secrets/ reference, which Who may use states.
 describe("WEB-U-035 shared keys", () => {
   // As on the Models page, a file-managed list still says where its keys come from, and when every key
@@ -187,7 +187,7 @@ describe("WEB-U-035 shared keys", () => {
     ).toBeVisible();
   });
 
-  it("says shared keys serve connectors as well as model routes, and gives the reference in Who may use (vault slice 3)", async () => {
+  it("says shared keys serve connectors as well as model routes, and gives the reference in Who may use", async () => {
     show(fakeAdmin({ secrets: seeded }).api);
     await screen.findByRole("table", { name: "Shared keys" });
     expect(

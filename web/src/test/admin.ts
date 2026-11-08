@@ -29,7 +29,7 @@ function check(write: SecretWrite) {
   if (problems.length) throw refuse(400, "invalid_request", problems);
 }
 
-/** A listed shared secret with the gateway's fields, vault slice 1's included (never a value). */
+/** A listed shared secret with the gateway's fields, the rotation reminder's included (never a value). */
 export function secretItem(
   name: string,
   extra: Partial<SecretItem> = {},

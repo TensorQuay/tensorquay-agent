@@ -108,7 +108,7 @@ function show(user: User = me) {
   );
 }
 
-// Task 067 Q4: a person's tasks as metadata rows, each opening the private view; nothing from the tasks' content.
+// A person's tasks as metadata rows, each opening the private view; nothing from the tasks' content.
 describe("WEB-U-023 a person's tasks", () => {
   it("lists only that person's tasks as metadata with links to the private view", async () => {
     serve([

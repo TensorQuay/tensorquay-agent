@@ -84,7 +84,7 @@ const busy = workspace({
   },
 });
 
-// Task 076: a new task on a chosen workspace; a busy one says once that the task will wait (mockup change 3).
+// A new task on a chosen workspace; a busy one says once that the task will wait (mockup change 3).
 describe("WEB-U-025 starting a task on a workspace", () => {
   it("starts on a new workspace by default, with no hint", async () => {
     const { calls } = show([busy]);

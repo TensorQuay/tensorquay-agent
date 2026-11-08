@@ -31,7 +31,7 @@ describe("WEB-U-001 transient queue position", () => {
     },
   );
 
-  // 066b / task 068a: the queue says what the run waits for; a reason from a newer gateway is shown neutrally.
+  // The queue says what the run waits for; a reason from a newer gateway is shown neutrally.
   it("says whether the run waits for a slot or for the workspace", () => {
     const queued = (queue: object) =>
       apply(

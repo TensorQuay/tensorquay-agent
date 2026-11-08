@@ -66,7 +66,7 @@ describe("WEB-U-016 one item per call, in words", () => {
     expect(
       within(card).getByText("Output", { selector: ".type-label" }),
     ).toBeVisible();
-    // The arguments are a closed Details toggle after the output, never a bare label (the review of 049/054).
+    // The arguments are a closed Details toggle after the output, never a bare label.
     const details = within(card).getByRole("button", { name: "Details" });
     expect(details).toHaveAttribute("aria-expanded", "false");
     expect(

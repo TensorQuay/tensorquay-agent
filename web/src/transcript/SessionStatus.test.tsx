@@ -78,7 +78,7 @@ describe("WEB-U-001 queued, sleeping and waking copy", () => {
       />,
     );
     const input = screen.getByRole("textbox", { name: "Message" });
-    // review-050: one queued message - the helper line - and the ordinary placeholder.
+    // One queued message - the helper line - and the ordinary placeholder.
     expect(input).toHaveAttribute("placeholder", "Reply…");
     // WEB-U-161: the composer says what to do; the state itself is the header's.
     expect(screen.getByText("You can reply once it starts.")).toBeVisible();

@@ -18,7 +18,7 @@ const language = (code: string) =>
     ),
   );
 
-// Review of 059: the run status, "Worked for" and tool durations use the reader's own units.
+// The run status, "Worked for" and tool durations use the reader's own units.
 describe("WEB-U-019 duration labels", () => {
   it("rounds run and turn durations to whole seconds", () => {
     expect(secondsLabel(5_400, english)).toBe("5 s");

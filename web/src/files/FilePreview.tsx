@@ -27,7 +27,7 @@ import {
 import { SheetPreview } from "./SheetPreview";
 import "./changes-catalogue";
 
-/** The gateway's preview bound (answers-068 Q4); the note names it when a preview stops early. */
+/** The gateway's preview bound; the note names it when a preview stops early. */
 const PREVIEW_BYTES = 512 * 1024;
 /** The gateway's default preview limits, until sign-in's own arrive (the gateway enforces them either way). */
 const PREVIEW_LIMITS = {
@@ -37,8 +37,8 @@ const PREVIEW_LIMITS = {
 };
 
 /**
- * One file, shown as what it is (the file previews design): an image, a rendered document, a table, a
- * web page in a sandboxed frame, a PDF's pages, a spreadsheet's sheet, or text with line numbers; a plain note for other binary,
+ * One file, shown as what it is: an image, a rendered document, a table, a web page in a sandboxed frame, a PDF's
+ * pages, a spreadsheet's sheet, or text with line numbers; a plain note for other binary,
  * empty and cut-short files; always a download link.
  */
 export function FilePreview({

@@ -32,7 +32,7 @@ function daysOf(choice: string, other: string): number | null | undefined {
 }
 
 /**
- * Sets or clears one secret's rotation reminder with the version the page read (vault slice 1; WEB-U-052). A due
+ * Sets or clears one secret's rotation reminder with the version the page read (WEB-U-052). A due
  * reminder is a badge only; nothing here blocks the secret's use.
  */
 export function SecretReminder({

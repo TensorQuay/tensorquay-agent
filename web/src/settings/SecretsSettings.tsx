@@ -45,7 +45,7 @@ const SOURCES: Readonly<Record<string, MessageKey>> = {
   none: "secrets.addedHere",
 };
 
-/** Shared secrets for administrators (FR-22, FR-28, task 090): names only; values are write-only. */
+/** Shared secrets for administrators (FR-22, FR-28): names only; values are write-only. */
 export function SecretsSettings({ me, api }: { me: User; api: AdminApi }) {
   const t = useT();
   if (me.role !== "admin")
@@ -285,7 +285,7 @@ function SecretTable({
             const used = item.routes.length > 0;
             const dueId = `due-${item.ref}`;
             const name = keyName(item.ref);
-            // When the value last changed (vault slice 1): a same-value write or a reminder change does not count.
+            // When the value last changed: a same-value write or a reminder change does not count.
             const changedAt = item.rotated_at ?? item.updated_at;
             const days = item.rotate_after_days ?? null;
             return (
@@ -326,7 +326,7 @@ function SecretTable({
                   )}
                 </td>
                 <td className="secret-changed">
-                  {/* Who may use it (vault slice 3) is in the row's menu, Who may use: not repeated here. */}
+                  {/* Who may use it is in the row's menu, Who may use: not repeated here. */}
                   <UsedBy routes={item.routes} />
                 </td>
                 <td className="secret-changed">

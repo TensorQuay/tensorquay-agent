@@ -199,9 +199,9 @@ describe("protocol frame validation", () => {
   });
 });
 
-// Task 069 / ARCHITECTURE §15: consumers ignore unknown fields and stay strict about known ones. The gateway may add
-// fields (as 066a added Conversation.workspace_id) without breaking a web built before them.
-// Task 090: the admin usage report brought the first `format: date`, which the validator did not know, so every answer
+// ARCHITECTURE §15: consumers ignore unknown fields and stay strict about known ones. The gateway may add fields (as
+// Conversation.workspace_id was added) without breaking a web built before them.
+// The admin usage report brought the first `format: date`, which the validator did not know, so every answer
 // failed as invalid. Every definition must compile; data errors are the only way a valid schema may refuse (WEB-U-036).
 describe("WEB-U-036 generated schema formats", () => {
   it("knows every format the generated schemas use", () => {
@@ -426,7 +426,7 @@ describe("forward-compatible server input", () => {
   });
 });
 
-// Task 069b / ARCHITECTURE §15: a frame or event kind the web does not know is accepted as an opaque, sequenced marker;
+// ARCHITECTURE §15: a frame or event kind the web does not know is accepted as an opaque, sequenced marker;
 // known kinds stay strictly validated.
 describe("unknown frame and event kinds", () => {
   const envelope = {

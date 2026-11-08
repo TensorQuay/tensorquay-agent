@@ -10,7 +10,7 @@ import { afterStart, budget } from "./stack-start";
 import { bootstrap, signIn } from "./ux/flow";
 import { auditView, type Finding } from "./ux/polish-audit";
 
-// WEB-E2E-011 (task 076): on the real stack, a task on an existing workspace holds its lease while its scripted model
+// WEB-E2E-011: on the real stack, a task on an existing workspace holds its lease while its scripted model
 // call is held (the workspaces fixture); a fork of that workspace runs at once in its own copy; a second task on the
 // workspace waits for the lease and runs when the first is stopped. demo_workspaces.py then checks both workspaces on
 // disk: the stopped task wrote no mark.

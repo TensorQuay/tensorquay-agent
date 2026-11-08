@@ -6,7 +6,7 @@ import { ApiError } from "../api/error";
 import { uploadFile } from "../api/upload";
 
 /**
- * The gateway's default per-file limit (answers-068 Q4), used until the signed-in account's own arrives (GW-I-142);
+ * The gateway's default per-file limit, used until the signed-in account's own arrives (GW-I-142);
  * the gateway still answers upload_too_large for anything larger.
  */
 export const MAX_FILE_BYTES = 25 * 1024 * 1024;

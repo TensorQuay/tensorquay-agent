@@ -69,7 +69,7 @@ export function apply(state: Transcript, frame: ParsedFrame): Transcript {
     case "screen.upload":
     case "screen.sign_out.done":
     case "screen.reset":
-    // An unknown frame or event kind only moves the cursor (task 069b).
+    // An unknown frame or event kind only moves the cursor.
     case "ignored":
       return state;
     // The task's held messages changed (GW-I-129): the composer reads them again; the transcript shows nothing.

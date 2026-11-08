@@ -27,7 +27,7 @@ const lease = (title: string | null, running: boolean) => ({
   pinned: false,
 });
 
-// Task 076 (UI-GUIDELINES §7 Workspace card): name, owner, size against the quota, last use, the lease, the badge.
+// UI-GUIDELINES §7 Workspace card: name, owner, size against the quota, last use, the lease, the badge.
 describe("WEB-U-025 workspace card", () => {
   it("shows an idle workspace of mine with its size against the quota", () => {
     const { card } = show(workspace({ name: "Website copy" }));

@@ -178,7 +178,7 @@ describe("WEB-U-001 accepted action failure recovery", () => {
       "Waiting for a free slot · 2 ahead",
     );
     expect(screen.queryByRole("button", { name: "Sending" })).toBeNull();
-    // review-050: the composer carries one queued message, the helper line.
+    // The composer carries one queued message, the helper line.
     expect(screen.getByRole("textbox", { name: "Message" })).toHaveAttribute(
       "placeholder",
       "Reply…",

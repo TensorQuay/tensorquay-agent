@@ -84,7 +84,7 @@ function ranges(period: Period, now: Date) {
 const tokens = (values: UsageFigures) =>
   values.prompt_tokens + values.completion_tokens;
 
-/** Token usage for administrators (FR-21, task 090): the period's total and its change, then who and which model. */
+/** Token usage for administrators (FR-21): the period's total and its change, then who and which model. */
 export function UsageSettings({
   me,
   api,

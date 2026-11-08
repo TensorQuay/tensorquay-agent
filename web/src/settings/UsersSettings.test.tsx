@@ -149,7 +149,7 @@ const row = async (email: string) => {
   return within(found);
 };
 
-// Task 067 / GW-I-046: user administration for administrators, in plain words, with the gateway's guards.
+// GW-I-046: user administration for administrators, in plain words, with the gateway's guards.
 describe("WEB-U-023 users", () => {
   it("tells members this is for administrators and asks nothing", () => {
     show({ ...me, role: "member" });

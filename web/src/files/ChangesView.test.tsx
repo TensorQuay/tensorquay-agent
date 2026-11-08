@@ -146,7 +146,7 @@ describe("WEB-U-024 opening a changed file", () => {
 describe("WEB-U-024 run changes", () => {
   it("shows the latest run's changes with status, counts and plain notes", async () => {
     show();
-    // Review of 068c: the app's picker, the whole message, "Latest" as a badge rather than a prefix.
+    // The app's picker, the whole message, "Latest" as a badge rather than a prefix.
     const picker = screen.getByRole("button", { name: "Run: Tidy the report" });
     expect(within(picker).getByText("Latest")).toBeVisible();
     expect(await rows()).toEqual([
@@ -207,7 +207,7 @@ describe("WEB-U-024 run changes", () => {
     );
   });
 
-  // Task 088 (D1): an open diff belongs to its run. When a new run becomes the latest, the view follows it to its list
+  // An open diff belongs to its run. When a new run becomes the latest, the view follows it to its list
   // (the rule for a picked run) instead of asking the new run for the old path.
   it("WEB-U-028 returns from an open diff to the new run's list when a newer run starts", async () => {
     diffs["run-2:report.md"] = {
@@ -258,7 +258,7 @@ describe("WEB-U-024 run changes", () => {
     show();
     fireEvent.click(await screen.findByRole("button", { name: /report\.md/ }));
     const diff = await screen.findByRole("region", { name: "report.md" });
-    // Review of 068c: the diff says which file it shows, as its list row does.
+    // The diff says which file it shows, as its list row does.
     const heading = within(diff).getByRole("heading", { level: 2 });
     expect(heading).toHaveTextContent("Modifiedreport.md+1−2");
     expect(within(heading).getByTitle("report.md")).toBeVisible();
