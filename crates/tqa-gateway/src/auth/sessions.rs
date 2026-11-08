@@ -52,7 +52,7 @@ impl FromRequestParts<Arc<State>> for SessionAuthz {
     }
 }
 
-/// Records that the account was active, at most once a minute (066a addendum): a no-op update otherwise.
+/// Records that the account was active, at most once a minute: a no-op update otherwise.
 async fn active(state: &State, user: uuid::Uuid) -> Result<(), GatewayError> {
     crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
         sqlx::query!("UPDATE users SET last_active_at=CURRENT_TIMESTAMP WHERE id=$1 AND (last_active_at IS NULL OR last_active_at<CURRENT_TIMESTAMP-INTERVAL '1 minute')", user)

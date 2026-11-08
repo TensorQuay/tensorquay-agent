@@ -119,7 +119,7 @@ pub(super) struct Failure {
     pub container_host: Option<bool>,
 }
 
-/// What the probe observed; stored as the route's latest probe (099b-2).
+/// What the probe observed; stored as the route's latest probe.
 #[derive(Debug, Serialize)]
 pub(super) struct Observation {
     pub ok: bool,

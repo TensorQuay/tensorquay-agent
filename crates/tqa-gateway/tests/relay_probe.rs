@@ -1,4 +1,4 @@
-//! GW-I-037 (API and storage, 099b-2): `POST /api/v1/admin/routes/{name}/probe` tests a configured route through the
+//! GW-I-037 (API and storage): `POST /api/v1/admin/routes/{name}/probe` tests a configured route through the
 //! relay against the scripted fake model, stores the latest observation per route with the digest of the document it
 //! tested, audits it without values, and never shows the credential. The engine's own cases are in
 //! `relay/probe_tests.rs`; admission (running and rate limits) is unit-tested in `relay/probe_api_tests.rs`.

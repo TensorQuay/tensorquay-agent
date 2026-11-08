@@ -122,8 +122,8 @@ async fn gw_i_030_tasks_bind_to_a_workspace_and_its_directory_is_what_the_sandbo
         let mounted = f.backend.mounted(&first).ok_or("mounted")?;
         assert!(mounted.ends_with(&id), "{}", mounted.display());
         f.forget_runtime(&first)?;
-        // The second task mounts the same directory once the first's sandbox is gone (the lease, 066b;
-        // workspace_lease.rs). A task on another workspace mounts another directory, alongside.
+        // The second task mounts the same directory once the first's sandbox is gone (the lease; workspace_lease.rs). A
+        // task on another workspace mounts another directory, alongside.
         let _ = &second;
         f.gateway.sandboxes().ensure(&own).await?;
         assert_ne!(f.backend.mounted(&own), Some(mounted));
