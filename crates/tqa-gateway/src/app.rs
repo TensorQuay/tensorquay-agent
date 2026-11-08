@@ -347,8 +347,7 @@ impl Gateway {
             )),
             None => None,
         };
-        // The install CA signs leaves for sandboxes; it must never verify a keyed host upstream (ADR-0037 §4, T7; the
-        // second review's L6).
+        // The install CA signs leaves for sandboxes; it must never verify a keyed host upstream (ADR-0037 §4, T7).
         if let (Some(host_ca), Some(pem)) = (&host_ca, &config.egress.ca_pem)
             && host_ca.among(pem)
         {
@@ -912,7 +911,7 @@ fn start_sweeps(state: &Arc<State>) {
     crate::actions::start_retention(state);
     crate::telemetry::start_upkeep(state.telemetry.clone(), state.cancel.clone(), &state.tasks);
     state.events.start_hub_sweep(&state.tasks);
-    // Agent team members whose first turn a restart or a failed send cut short (ADR-0034, review M1): at start-up,
+    // Agent team members whose first turn a restart or a failed send cut short (ADR-0034): at start-up,
     // then every few seconds; a turn already sent replays, and one overdue fails with a notice.
     let owned = state.clone();
     state.tasks.spawn(async move {

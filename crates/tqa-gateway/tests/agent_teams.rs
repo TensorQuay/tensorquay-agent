@@ -393,7 +393,7 @@ async fn sec_038_a_member_addressee_is_only_ever_a_member_row(pool: PgPool) -> T
 async fn gw_i_195_a_second_read_before_the_first_result_never_answers_the_same(
     pool: PgPool,
 ) -> TestResult {
-    // Review H1: two reads with different keys, neither result stored yet.
+    // Two reads with different keys, neither result stored yet.
     support::run_configured(pool, None, ENABLED, async |f| {
         let t = team(f).await?;
         send(
@@ -427,7 +427,7 @@ async fn gw_i_195_a_second_read_before_the_first_result_never_answers_the_same(
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
 async fn gw_i_109_a_reads_run_and_key_are_checked(pool: PgPool) -> TestResult {
-    // Review H2 and H3: the run header is a run id and the conversation's current run; the key is a bounded value.
+    // The run header is a run id and the conversation's current run; the key is a bounded value.
     support::run_configured(pool, None, ENABLED, async |f| {
         let t = team(f).await?;
         let long_run = "r".repeat(65);
@@ -466,7 +466,7 @@ async fn gw_i_109_a_reads_run_and_key_are_checked(pool: PgPool) -> TestResult {
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
 async fn gw_i_109_two_reads_with_one_key_at_once_answer_the_same(pool: PgPool) -> TestResult {
-    // Review M2: neither is a 500.
+    // Neither is a 500.
     support::run_configured(pool, None, ENABLED, async |f| {
         let t = team(f).await?;
         send(
@@ -492,7 +492,7 @@ async fn gw_i_109_two_reads_with_one_key_at_once_answer_the_same(pool: PgPool) -
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
 async fn gw_i_109_a_malformed_post_names_its_field(pool: PgPool) -> TestResult {
-    // Review M3: the contract's invalid_request with details naming the field.
+    // The contract's invalid_request with details naming the field.
     support::run_configured(pool, None, ENABLED, async |f| {
         let t = team(f).await?;
         for (n, (body, field)) in [
@@ -527,7 +527,7 @@ async fn gw_i_109_a_malformed_post_names_its_field(pool: PgPool) -> TestResult {
 async fn gw_i_109_an_empty_answer_never_reports_a_seq_below_an_earlier_one(
     pool: PgPool,
 ) -> TestResult {
-    // Re-review N1: with an answer outstanding, a new read is empty and its last_seq is where it started, not behind.
+    // With an answer outstanding, a new read is empty and its last_seq is where it started, not behind.
     support::run_configured(pool, None, ENABLED, async |f| {
         let t = team(f).await?;
         send(
@@ -592,8 +592,8 @@ async fn gw_i_195_a_result_stored_right_after_its_answer_finds_its_read(
 async fn gw_i_109_reads_left_from_an_ended_run_are_pruned_at_the_next_start(
     pool: PgPool,
 ) -> TestResult {
-    // Re-review N2: a read recorded for a run that ended while it couldn't be pruned (agent teams switched off, say)
-    // goes at the next start with agent teams on; a read of the current run stays.
+    // A read recorded for a run that ended while it couldn't be pruned (agent teams switched off, say) goes at the next
+    // start with agent teams on; a read of the current run stays.
     support::run_restarting_with(pool, None, ENABLED, async |f| {
         let (reviewer, team_id) = {
             let t = team(f).await?;

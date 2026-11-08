@@ -211,7 +211,7 @@ async fn gw_i_012_private_answers_are_refused_and_names_are_resolved_once(
         let (user, _) = f.admin().await?;
         let conversation = f.conversation(user.id).await?;
         let _runtime = f.runtime(&conversation).await?;
-        // An exact host-name rule never exempts a reserved answer: DNS may be poisoned (review-045 m1).
+        // An exact host-name rule never exempts a reserved answer: DNS may be poisoned.
         for name in ["loop.wild.test", "ten.wild.test", "internal.test"] {
             let answer = through(proxy, &format!("CONNECT {name}:{port} HTTP/1.1\r\n\r\n")).await?;
             assert!(answer.starts_with("HTTP/1.1 403"), "{name}: {answer}");

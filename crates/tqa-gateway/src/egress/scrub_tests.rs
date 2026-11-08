@@ -1,6 +1,6 @@
 //! GW-U-107 (ADR-0037 §6, response scrubbing): a key's value and its common encodings are replaced in answers, in
 //! headers and across any split of a streamed body.
-//! GW-U-121 (the second review's H2): the shared scrubbers, one per person and address, forgotten with a key's change,
+//! GW-U-121 (ADR-0037 §6): the shared scrubbers, one per person and address, forgotten with a key's change,
 //! bounded.
 use super::{Scrubber, Scrubbers};
 use base64::Engine as _;
@@ -164,7 +164,7 @@ fn gw_u_121_the_shared_scrubbers_are_bounded_and_drop_the_unheld_first() -> Resu
 }
 
 // TEST: GW-U-107
-/// The value's other common spellings in an answer are scrubbed too (the second review's L7): percent-encoding in
+/// The value's other common spellings in an answer are scrubbed too: percent-encoding in
 /// lowercase hex, JSON's escaped slash, and the value's own base64 (standard and URL-safe).
 #[test]
 fn gw_u_107_the_values_other_spellings_are_scrubbed() {
@@ -196,8 +196,7 @@ fn gw_u_107_the_values_other_spellings_are_scrubbed() {
 }
 
 // TEST: GW-U-107
-/// A header whose scrubbed value isn't a valid header value is dropped, never sent on as it came (the second
-/// review's L1: fail closed).
+/// A header whose scrubbed value isn't a valid header value is dropped, never sent on as it came (fail closed).
 #[test]
 fn gw_u_107_a_header_that_cant_be_scrubbed_is_dropped() -> Result<(), Box<dyn std::error::Error>> {
     let mut scrubber = Scrubber::default();
@@ -219,7 +218,7 @@ fn gw_u_107_a_header_that_cant_be_scrubbed_is_dropped() -> Result<(), Box<dyn st
 
 // TEST: GW-U-121
 /// A swap's value is learned into its shared scrubber, or the swap doesn't happen: a poisoned lock reports that it
-/// couldn't learn, so the proxy refuses rather than sending a value it couldn't scrub back (the second review's L2).
+/// couldn't learn, so the proxy refuses rather than sending a value it couldn't scrub back.
 #[test]
 fn gw_u_121_a_value_that_cant_be_learned_is_reported() -> Result<(), &'static str> {
     let shared = std::sync::Arc::new(std::sync::Mutex::new(Scrubber::default()));

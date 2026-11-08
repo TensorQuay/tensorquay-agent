@@ -34,7 +34,7 @@ impl Shell {
             ca_bundle: None,
             desktop: false,
             spec: ToolSpec {
-                // A success may have changed files: a repeated failure counts afresh after it (backlog #18).
+                // A success may have changed files: a repeated failure counts afresh after it (CORE-E-041).
                 changes_workspace: true,
                 ..specification(
                     "shell",

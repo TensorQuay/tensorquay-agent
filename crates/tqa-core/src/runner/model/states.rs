@@ -66,7 +66,7 @@ fn replays(state: &ReasoningStateRecord, route: &RouteSnapshot) -> bool {
 /// only the states replayed to this route, so the window counts exactly what goes (CORE-U-074). While the request would
 /// need more than `limit`, the oldest replayed states go first, message by message: a provider accepts a history
 /// without them and loses only that turn's thinking. The latest assistant message's states always stay, since its tool
-/// calls need them (the lead's decision (a), CORE-U-044).
+/// calls need them (CORE-U-044).
 /// `needed` and `scale` count at the route's density (CORE-U-084): a dropped message's states come off the total at
 /// that density too, so no more go than the limit needs.
 pub(super) fn sendable(

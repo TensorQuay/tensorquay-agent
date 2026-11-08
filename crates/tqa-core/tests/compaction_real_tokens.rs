@@ -562,7 +562,7 @@ fn page(index: usize, bytes: usize) -> String {
 }
 
 // TEST: CORE-U-073
-/// The low-water mark holds at any density (the lead's call, 7 Oct 2026: one rule). At 1x, with no usage reported, four
+/// The low-water mark holds at any density (decided on 7 Oct 2026: one rule). At 1x, with no usage reported, four
 /// runs of large pages (about 2,400 estimated tokens each) pass the threshold; the usual six turns would keep two pages,
 /// landing between 70 % and 85 %, where the next step would cross 85 % again. So the compaction keeps fewer turns: one
 /// page, under 70 %.

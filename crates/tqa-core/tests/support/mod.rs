@@ -268,7 +268,7 @@ pub fn spec(name: &str, parallel: bool) -> Result<ToolSpec, ToolError> {
         description: format!("Test {name}"),
         parameters: json!({"type":"object","required":["path"],"properties":{"path":{"type":"string"}},"additionalProperties":false}),
         parallel_safe: parallel,
-        // A fake of a tool that writes files says so, as the real one does (backlog #18).
+        // A fake of a tool that writes files says so, as the real one does (CORE-E-041).
         changes_workspace: matches!(name, "shell" | "write_file" | "edit_file" | "take_files"),
     })
 }

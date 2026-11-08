@@ -1,4 +1,4 @@
-//! Internal rules through the real proxy (ADR-0035 amendment, the owner's decision of 1 Oct 2026):
+//! Internal rules through the real proxy (ADR-0035's amendment of 1 Oct 2026):
 //! - SEC-050: an internal rule never reaches the engine's networks, the sandbox pool, the gateway's own addresses,
 //!   `internal_never`, loopback or cloud metadata.
 //! - SEC-051: DNS rebinding: each connection is judged on its own answer, which must be wholly allowed.

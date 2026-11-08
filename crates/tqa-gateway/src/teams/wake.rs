@@ -12,7 +12,7 @@ use uuid::Uuid;
 /// The idempotency key of `reader`'s wake for what follows `after`, and since its failure `failed`: a helper's count of
 /// failures once it has one (a stored run.failed or a give-up, each counted once), a lead's run.failed seq while its
 /// latest run failed. Keyed on the place alone, a woken run that failed before reading would leave the key where it
-/// was, and the lead's next message would replay that wake and queue nothing (the review of 7 Oct 2026, P2).
+/// was, and the lead's next message would replay that wake and queue nothing (GW-I-260).
 fn key(reader: Uuid, after: i64, failed: Option<i64>) -> String {
     match failed {
         Some(failed) => format!("team-wake:{reader}:{after}:failed-{failed}"),

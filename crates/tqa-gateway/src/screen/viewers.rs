@@ -385,7 +385,7 @@ impl<T> Screens<T> {
     }
 
     /// Forgets that `conversation`'s profile may hold sign-ins: a new sandbox starts with an empty profile (it lives
-    /// inside the sandbox), and a deleted task has none (the takeover pair's review, P3).
+    /// inside the sandbox), and a deleted task has none.
     pub(super) fn forget(&self, conversation: &ConversationId) {
         self.mark(conversation, false);
         self.set_due(conversation, false);

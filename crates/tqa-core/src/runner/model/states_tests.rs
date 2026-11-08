@@ -1,6 +1,6 @@
 //! CORE-U-084 with CORE-U-044: older replayed states go at the route's density, one by one, and no more than the
-//! limit needs (the review of 7 Oct, P3-A: subtracting them unscaled from a scaled total dropped about the
-//! density's multiple too many).
+//! limit needs (found on 7 Oct: subtracting them unscaled from a scaled total dropped about the density's multiple too
+//! many).
 use super::{sendable, states_tokens};
 use tqa_context::{Message, ReasoningStateRecord, Role};
 use tqa_types::{CacheHint, RouteSnapshot, WireProtocol};

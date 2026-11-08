@@ -1,5 +1,5 @@
 //! How many tasks are mid-step right now, for Settings › Status: a restart now would start each of those steps over
-//! (first-hour F7). A count only, never which tasks or whose. A task counts while its runtime is linked and sent a
+//! (a first-hour check). A count only, never which tasks or whose. A task counts while its runtime is linked and sent a
 //! run's heartbeat lately (a supervisor sends them only while a run is active, every 30 s) and its journal's latest
 //! lifecycle event says its run is going: a run that ended since its last heartbeat doesn't count, nor does one whose
 //! runtime is gone.

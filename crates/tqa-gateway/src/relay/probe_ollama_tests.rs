@@ -1,4 +1,4 @@
-//! GW-U-153 (first-hour finding F3): on a local route whose server is Ollama, the check reads the context the loaded
+//! GW-U-153 (a first-hour check): on a local route whose server is Ollama, the check reads the context the loaded
 //! model runs with. Below 16,384 it fails, suggesting the route's Context window be set to the server's number; above,
 //! a route whose Context window says otherwise gets a warning; any other server is as before.
 use super::probe_tests::{

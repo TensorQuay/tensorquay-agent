@@ -203,7 +203,7 @@ async fn gw_i_076_templates_are_offered_by_state_and_provenance(pool: sqlx::PgPo
         assert_eq!(conversation["template"], "extra");
 
         // Stored values that are no longer the file's (an administrator's, as re-creating a seeded name after a delete
-        // leaves them, with the old seed digest): offered only once verified (review R2).
+        // leaves them, with the old seed digest): offered only once verified.
         set(
             f,
             "UPDATE templates SET last_set_by='admin' WHERE name='again'",

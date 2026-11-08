@@ -362,7 +362,7 @@ async fn gw_i_176_an_address_without_its_rule_or_another_address_never_gets_the_
 // TEST: GW-I-166
 /// A request inside a keyed tunnel names its host only in `Host`: a target with a scheme and authority, which a server
 /// or a shared front may route by over `Host` (RFC 9112 §3.2.2), is refused before anything is judged, recorded or
-/// sent, whatever host it names (the second review's H1, domain fronting).
+/// sent, whatever host it names (ADR-0037 §4: domain fronting).
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
 async fn gw_i_166_an_absolute_target_is_refused_and_never_reaches_a_host(
@@ -395,7 +395,7 @@ async fn gw_i_166_an_absolute_target_is_refused_and_never_reaches_a_host(
 // TEST: GW-I-166
 /// A key's value never comes back on any keyed connection of a run that holds the key: not on another connection
 /// than the one that swapped it, not on a connection's first request, before any swap of its own, and not to another
-/// task of the same person (the second review's H2): what a person's runs swapped is scrubbed on every keyed
+/// task of the same person (ADR-0037 §6): what a person's runs swapped is scrubbed on every keyed
 /// connection of theirs to that host. The host here sends back the credential it saw last, as a session or a "show my
 /// token" page does.
 #[sqlx::test]
@@ -449,7 +449,7 @@ async fn gw_i_166_a_value_sent_back_on_another_connection_is_scrubbed(pool: PgPo
 
 // TEST: GW-I-166
 /// A placeholder in a request body is refused like one anywhere else but the Authorization header: in words, counted
-/// and told as `wrong_position`, and never sent (the second review's M1). A body streams, so the head and the body
+/// and told as `wrong_position`, and never sent (ADR-0037 §4). A body streams, so the head and the body
 /// before it may have gone; when the same request swapped its header's placeholder, that swap stands, counted `ok`.
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
@@ -495,9 +495,9 @@ async fn gw_i_166_a_placeholder_in_a_body_is_a_counted_refusal_in_words(
 }
 
 // TEST: GW-I-166
-/// A running run's placeholder is judged against its key as it is now, not as it was when the run began (the second
-/// review's M2): a key its owner moved to another address is refused at the old one, `wrong_host` naming the new; a
-/// shared key whose person was taken off its users is `revoked`. Nothing is sent either way.
+/// A running run's placeholder is judged against its key as it is now, not as it was when the run began: a key its
+/// owner moved to another address is refused at the old one, `wrong_host` naming the new; a shared key whose person was
+/// taken off its users is `revoked`. Nothing is sent either way.
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
 async fn gw_i_166_a_key_changed_mid_run_is_judged_as_it_is_now(pool: PgPool) -> TestResult {

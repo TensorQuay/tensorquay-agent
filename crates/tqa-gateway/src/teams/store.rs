@@ -704,8 +704,8 @@ pub(crate) struct Answer {
 
 /// The caller's read under `key`: the recorded answer when there is one; otherwise the messages addressed to it after
 /// its last-read seq and after every answer of its still outstanding, in order, at most `limit`, recorded for `run`.
-/// The reader's row is locked first, so two reads at once take turns: neither answers the other's seqs (review H1),
-/// and two with one key answer the same (M2). The seq doesn't move here (see [`result_stored`]).
+/// The reader's row is locked first, so two reads at once take turns: neither answers the other's seqs (GW-I-195), and
+/// two with one key answer the same (GW-I-109). The seq doesn't move here (see [`result_stored`]).
 ///
 /// # Errors
 /// Storage failure.
@@ -725,7 +725,7 @@ pub(crate) async fn read(
     .fetch_optional(&mut *connection)
     .await?;
     // `start` is the seq the answer starts after: an empty answer reports it, so last_seq never goes behind an earlier
-    // answer's (re-review N1).
+    // answer's (GW-I-109).
     let (seqs, more, start) = if let Some(recorded) = recorded {
         (recorded.seqs, recorded.more, last)
     } else {

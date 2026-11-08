@@ -283,7 +283,7 @@ async fn gw_i_260_a_failed_run_makes_a_helper_failed_until_the_leads_next_messag
         .await?;
         assert!(failed_run);
         // The failed run r-3 was itself a wake and failed before reading, so its place hasn't moved: the lead's next
-        // message still wakes it, as a new wake (the review of 7 Oct 2026, P2).
+        // message still wakes it, as a new wake.
         assign(f, &t, "r-1:c-4", "researcher").await?;
         let woken = wakes_settle(f, &t.researcher.0, 2).await?;
         assert_eq!(woken.len(), 2, "a second wake: {woken:?}");

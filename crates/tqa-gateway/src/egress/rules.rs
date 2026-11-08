@@ -309,7 +309,7 @@ pub(super) fn reserved(address: IpAddr) -> bool {
 }
 
 /// The IPv4 address an IPv6 address carries: mapped `::ffff:a.b.c.d`, IPv4-compatible `::a.b.c.d`,
-/// NAT64 `64:ff9b::/96` and 6to4 `2002:AABB:CCDD::/48` (review-045 l1).
+/// NAT64 `64:ff9b::/96` and 6to4 `2002:AABB:CCDD::/48`.
 fn embedded_v4(address: Ipv6Addr) -> Option<Ipv4Addr> {
     let segments = address.segments();
     let low = || Ipv4Addr::from((u32::from(segments[6]) << 16) | u32::from(segments[7]));

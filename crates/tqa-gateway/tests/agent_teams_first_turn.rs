@@ -166,7 +166,7 @@ async fn gw_i_106_an_own_copys_first_turn_is_the_lead_brief_once_the_copy_is_rea
             text.contains("researcher") && text.contains("send_to_lead"),
             "{text}"
         );
-        // The copy was taken from the lead's live files, and the member is told (review M2); no title in the frame (L1).
+        // The copy was taken from the lead's live files, and the member is told; no title in the frame.
         assert_eq!(started["member"]["consistent"], false);
         assert!(text.contains("may be partial"), "{text}");
         assert!(
@@ -394,7 +394,7 @@ async fn gw_i_106_a_first_turn_that_failed_to_send_is_sent_by_the_sweep(
         let started = start(f, &token, "c-1", "my_files").await?;
         let member = member_id(&started)?;
         until(async || Ok(first_turns(f, &member).await?.0 == 1)).await?;
-        // As if the send after the start had failed (review M1): no turn stored, and no restart.
+        // As if the send after the start had failed: no turn stored, and no restart.
         unsent(f, &member).await?;
         until(async || Ok(first_turns(f, &member).await?.0 == 1)).await?;
         Ok(())

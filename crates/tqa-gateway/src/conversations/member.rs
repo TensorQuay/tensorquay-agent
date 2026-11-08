@@ -18,7 +18,7 @@ pub(crate) struct MemberTask {
     /// An own copy being made: its source and quota, copied by `workspaces::fork::copy` after the commit.
     pub(crate) fork: Option<(Uuid, u64)>,
     /// For an own copy, whether it is consistent: false when the lead's sandbox had its files mounted, as it does
-    /// while the lead runs, so files it was changing may be partial (review M2). `None` on the lead's own files.
+    /// while the lead runs, so files it was changing may be partial. `None` on the lead's own files.
     pub(crate) consistent: Option<bool>,
 }
 

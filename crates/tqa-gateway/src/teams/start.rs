@@ -48,7 +48,7 @@ pub(crate) async fn join(
     .fetch_optional(&mut *connection)
     .await?
     .ok_or(GatewayError::NotFound)?;
-    // Depth 1: a conversation that was ever a member never leads (review L1).
+    // Depth 1: a conversation that was ever a member never leads.
     if sqlx::query_scalar!(
         "SELECT EXISTS(SELECT 1 FROM agent_team_members WHERE conversation_id = $1) AS \"member!\"",
         joining.lead
@@ -179,10 +179,10 @@ pub(crate) async fn start_member(
         "conversation": member.conversation,
         "workspace": request.workspace,
         "workspace_id": member.workspace,
-        // On the lead's files the member waits for the lead's sandbox to hand over its files (review L3).
+        // On the lead's files the member waits for the lead's sandbox to hand over its files.
         "state": if request.workspace == tqa_types::WorkspaceMode::MyFiles { "queued" } else { "starting" },
     });
-    // A copy of files the lead's sandbox had open may hold half-written ones: the lead is told (review M2).
+    // A copy of files the lead's sandbox had open may hold half-written ones: the lead is told.
     if let Some(consistent) = member.consistent {
         shown["consistent"] = serde_json::json!(consistent);
     }

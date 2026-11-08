@@ -1,4 +1,4 @@
-//! SEC-059's runtime half (ADR-0039 section 6, the lead's decision of 7 Oct 2026): every run of a desktop session starts
+//! SEC-059's runtime half (ADR-0039 section 6, amended 7 Oct 2026): every run of a desktop session starts
 //! signed out, except that a sign-in made during a Take over serves the run that follows it. The profile holding that
 //! sign-in is still there when the next run starts; when that run ends it is gone, so the run after starts signed
 //! out. After every reset, and after Sign out everywhere, the runtime starts its browser again, blank, on

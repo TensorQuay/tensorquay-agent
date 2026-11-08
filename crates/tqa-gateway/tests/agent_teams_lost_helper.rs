@@ -163,8 +163,8 @@ async fn gw_i_254_a_helper_whose_sandbox_keeps_stopping_is_told_to_the_lead_as_f
         .fetch_one(&f.pool)
         .await?;
         assert_eq!((state.as_str(), failed_run), ("failed", true));
-        // Past member_stuck_minutes the given-up run still reads as unfinished: no "seems stuck" after "failed", and the
-        // helper stays failed (the review of teams-edges-m, P2).
+        // Past member_stuck_minutes the given-up run still reads as unfinished: no "seems stuck" after "failed", and
+        // the helper stays failed.
         sqlx::query(
             "UPDATE events SET created_at = created_at - make_interval(mins => 16) WHERE conversation_id = $1",
         )

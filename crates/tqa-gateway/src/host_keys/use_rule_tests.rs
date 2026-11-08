@@ -278,7 +278,7 @@ fn gw_u_110_a_placeholder_is_used_only_from_its_sandbox_at_its_address() {
 }
 
 // TEST: GW-U-110
-/// A path some servers resolve outside the key's prefix is outside it here too (the second review's L3): a segment
+/// A path some servers resolve outside the key's prefix is outside it here too: a segment
 /// that is `.` or `..` before a `;` parameter, as Tomcat-style servers read it, and any `%25`, which a server that
 /// decodes twice turns into an escape.
 #[test]

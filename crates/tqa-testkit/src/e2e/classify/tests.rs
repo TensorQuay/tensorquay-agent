@@ -278,7 +278,7 @@ fn tk_u_004_driver_and_integrity_faults_win_over_everything() -> TestResult {
         Class::ModelBudget,
     ];
     assert!(model.iter().all(|class| !class.is_harness()));
-    // The stuck and unreadable stops are the model's, under names of their own (7 Oct 2026, backlog #16).
+    // The stuck and unreadable stops are the model's, under names of their own (7 Oct 2026, TK-U-004).
     assert_eq!(
         serde_json::to_value(Class::ModelStuck)?,
         json!("model.stuck")

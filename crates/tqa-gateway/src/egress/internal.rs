@@ -1,4 +1,4 @@
-//! Internal rules (ADR-0035 amendment, the owner's decision of 1 Oct 2026): an administrator may let a rule for one exact
+//! Internal rules (ADR-0035's amendment of 1 Oct 2026): an administrator may let a rule for one exact
 //! host name reach a private address, for a named server on the internal network. Such a rule still never reaches
 //! loopback, link-local (cloud metadata), unspecified, multicast or broadcast addresses, nor anything the gateway itself
 //! stands on: the container engine's networks and their gateways (the host's address on each), the sandbox pool, the

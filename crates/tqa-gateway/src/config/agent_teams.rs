@@ -13,7 +13,7 @@ const DEFAULT_TOKEN_BUDGET: u64 = 2_000_000;
 const DEFAULT_DEADLINE_MINUTES: u32 = 120;
 const MAX_DEADLINE_MINUTES: u32 = 24 * 60;
 /// Liveness (point 9, slice 4): a member idle, a member stuck, and the whole team idle, in minutes; each 1 through a
-/// day (the lead's decision of 2 Oct 2026).
+/// day (ADR-0034's decision of 2 Oct 2026).
 const DEFAULT_MEMBER_IDLE_MINUTES: u32 = 10;
 const DEFAULT_MEMBER_STUCK_MINUTES: u32 = 15;
 const DEFAULT_IDLE_STOP_MINUTES: u32 = 30;

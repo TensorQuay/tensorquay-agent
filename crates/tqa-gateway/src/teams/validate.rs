@@ -126,7 +126,7 @@ pub(crate) fn report_files(files: &[String]) -> Result<(), GatewayError> {
 
 /// A member's name: its role, or its role with the next free number when the agent team already has that name.
 pub(crate) fn unique_name(role: &str, taken: &[&str]) -> String {
-    // Compared as PostgreSQL's lower() does in the unique index (review L3), for any letters, not only ASCII.
+    // Compared as PostgreSQL's lower() does in the unique index, for any letters, not only ASCII.
     let free = |name: &str| {
         !taken
             .iter()

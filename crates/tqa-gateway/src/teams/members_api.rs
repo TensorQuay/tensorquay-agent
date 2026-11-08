@@ -243,7 +243,7 @@ fn page(raw: Option<&str>) -> Result<(u64, u32), GatewayError> {
                         reason: InvalidReason::LimitOutOfRange,
                     })?;
             }
-            // Named as the people's message page names it (review L4).
+            // Named as the people's message page names it.
             _ => {
                 return Err(GatewayError::Invalid {
                     field: "query",
@@ -301,7 +301,7 @@ fn step(seq: u64, frame: ServerFrame) -> Step {
 }
 
 /// The most of one event a page carries (its text, a tool's content or a call's arguments), and of a whole page, so one
-/// large tool result can't fill the lead's model (review M3).
+/// large tool result can't fill the lead's model (GW-I-197).
 const EVENT_BYTES: usize = 8 * 1024;
 const PAGE_BYTES: usize = 64 * 1024;
 

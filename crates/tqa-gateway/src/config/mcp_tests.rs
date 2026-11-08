@@ -1,4 +1,4 @@
-//! GW-U-036: the install's MCP server catalogue, `[[mcp.servers]]` (ADR-0011 decision 2; review-adr-0011 B1): the
+//! GW-U-036: the install's MCP server catalogue, `[[mcp.servers]]` (ADR-0011 decision 2): the
 //! only place a command enters, validated at start with every bound named.
 use std::error::Error;
 

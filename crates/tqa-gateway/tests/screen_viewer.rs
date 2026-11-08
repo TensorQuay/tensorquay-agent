@@ -625,7 +625,7 @@ async fn gw_i_230_a_reset_that_couldn_t_empty_the_profile_is_said_on_control(
 
 // TEST: GW-U-156
 /// The unclean mark is the browser profile's, and the profile lives in the sandbox: once the task's sandbox is
-/// replaced (here after a loss) by a new one, Take over warns of nothing (the takeover pair's review, P3).
+/// replaced (here after a loss) by a new one, Take over warns of nothing.
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
 async fn gw_u_156_a_new_sandbox_starts_without_the_unclean_warning(pool: PgPool) -> TestResult {

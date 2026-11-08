@@ -1,4 +1,4 @@
-//! GW-I-179 (§19, a defect of G5a found by G9b's first stack run): a deployment mounts the install key and the secrets
+//! GW-I-179 (TEST-PLAN §19: a defect the first stack run found): a deployment mounts the install key and the secrets
 //! seed read-only, so the install CA can't live beside them. The gateway makes it in `[host_keys] ca_directory`
 //! (default `<storage.root>/host-ca`, 0700, its files 0600) and starts; no sandbox mount reaches it; `rotate-host-ca`
 //! uses the same place.

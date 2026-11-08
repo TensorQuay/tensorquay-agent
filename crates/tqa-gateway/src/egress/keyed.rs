@@ -67,7 +67,7 @@ pub(super) struct Tunnel {
     pub host: String,
     pub port: u16,
     /// The values the sender's swaps taught, on any of their connections to this host, scrubbed from every answer on
-    /// this one from its first byte (ADR-0037 §6; the second review's H2).
+    /// this one from its first byte (ADR-0037 §6).
     scrubber: Arc<Mutex<super::scrub::Scrubber>>,
     /// How long the keyed host may take to begin an answer (`[egress] keyed_answer_seconds`).
     answer: std::time::Duration,
@@ -405,7 +405,7 @@ async fn handle(
 }
 
 /// The exchange's answer, unless a placeholder in the body stopped the request before it was sent: then it is refused
-/// like one anywhere else, counted and told (the second review's M1). A header swap on the same request stands; its
+/// like one anywhere else, counted and told (ADR-0037 §4). A header swap on the same request stands; its
 /// head had gone.
 async fn unless_tripped(
     state: &State,
@@ -498,7 +498,7 @@ async fn swap(
 
 /// Inside a keyed tunnel a request names its host only in Host. A target with a scheme or an authority (absolute or
 /// authority form), which a server or a shared front may route by over Host (RFC 9112 §3.2.2), is refused before
-/// anything is judged, recorded or sent (the second review's H1: domain fronting).
+/// anything is judged, recorded or sent (ADR-0037 §4: domain fronting).
 fn full_target(request: &Request<Incoming>, tunnel: &Tunnel) -> Option<Response<Body>> {
     (request.uri().scheme().is_some() || request.uri().authority().is_some()).then(|| {
         refusal(
@@ -874,7 +874,7 @@ async fn active(state: &State, bound: Option<&host_keys::Bound>) -> bool {
 }
 
 /// Whether the task's network list still allows the host and port. A task's list is the installation's allow-list
-/// today, as minting reads it too (ADR-0037 §3; the second review's M4).
+/// today, as minting reads it too (ADR-0037 §3).
 fn allowed(state: &State, tunnel: &Tunnel) -> bool {
     !state.config.egress.disabled
         && matches!(

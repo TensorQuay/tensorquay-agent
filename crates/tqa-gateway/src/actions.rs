@@ -20,7 +20,7 @@ struct Action {
     frame: ClientFrame,
     fingerprint: [u8; 32],
     /// Waits for another task's sandbox on the workspace whatever the installation's busy policy says: an agent team
-    /// member's first turn on its lead's files (ADR-0034, the lead's decision of 2 Oct 2026).
+    /// member's first turn on its lead's files (ADR-0034's decision of 2 Oct 2026).
     always_wait: bool,
 }
 

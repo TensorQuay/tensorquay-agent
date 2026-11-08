@@ -319,7 +319,7 @@ fn older(frames: &[ServerFrame]) -> Option<(usize, u64)> {
 }
 
 /// The need beyond which older replayed states are dropped: where compaction would begin, so they go before any turn
-/// is folded (the lead's decision (a), CORE-U-044).
+/// is folded (CORE-U-044).
 fn states_limit(budget: &Budget) -> u64 {
     u64::from(budget.input_capacity()).saturating_mul(tqa_types::COMPACT_AT_PERCENT) / 100
 }

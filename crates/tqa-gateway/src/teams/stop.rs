@@ -2,7 +2,7 @@
 //! the budget, the deadline, the idle stop, a person's Stop, the lead's task deleted or its person disabled) only sets
 //! `stopping` with its reason; [`finish`] carries a stopping team to `ended`. It cancels each member's active run
 //! through the runtime link as a person's cancel does, marks the members still at work `stopped`, stores the gateway's
-//! end note to the lead (a team message of type `ended`: the lead's decision of 2 Oct 2026) and ends the team, the note
+//! end note to the lead (a team message of type `ended`: ADR-0034's decision of 2 Oct 2026) and ends the team, the note
 //! and the end in one transaction. Every step is idempotent, so a restart part way finishes it on the next pass.
 use crate::{GatewayError, app::State};
 use sqlx::PgConnection;
@@ -204,7 +204,7 @@ async fn cancel_members(state: &State, team: Uuid, lead_too: bool) -> Result<(),
     .await?;
     let (members, dropped) = members;
     withdraw(state, &dropped).await;
-    // Together: each cancel is bounded, so a team's stop waits about one bound however many links are slow (review L2).
+    // Together: each cancel is bounded, so a team's stop waits about one bound however many links are slow.
     let cancels = futures::future::join_all(
         members
             .into_iter()

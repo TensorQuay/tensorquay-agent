@@ -320,7 +320,7 @@ fn walk(root: &std::path::Path) -> Vec<std::path::PathBuf> {
 // TEST: CORE-U-084
 // TEST: CORE-U-081
 /// A request's screenshots are images like any other: each step call's usage records them in `estimated_images`
-/// (the lead's decision of 7 Oct 2026), so a desktop run's density takes them out of the provider's count and isn't
+/// (decided on 7 Oct 2026), so a desktop run's density takes them out of the provider's count and isn't
 /// read higher than its text's. Only the screenshots sent count: the latest three on a route with images, none on one
 /// without. The script's six requests have 0, 1, 2, 2 (a key press between), 3 and 3 (four taken, three sent).
 #[tokio::test]
