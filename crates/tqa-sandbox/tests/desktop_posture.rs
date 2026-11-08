@@ -143,9 +143,10 @@ fn assert_vnc(seen: &[(String, String)]) -> TestResult {
     Ok(())
 }
 
-/// The display's root window is white (16n C5, SBX-C-024): at a Take over the run's end reset closes the browser and
-/// starts it again, and the person's live picture showed the bare root between the two. Xvfb's default root is black, a
-/// black frame under "You have control" (c16k real-world A7); white is the blank page the browser comes back with.
+/// The display's root window is white (found before 17.0, SBX-C-024): at a Take over the run's end reset closes the
+/// browser and starts it again, and the person's live picture showed the bare root between the two. Xvfb's default root
+/// is black, a black frame under "You have control" (real-world use before 17.0); white is the blank page the browser
+/// comes back with.
 fn assert_white_root(seen: &[(String, String)]) -> TestResult {
     let display = &seen
         .iter()

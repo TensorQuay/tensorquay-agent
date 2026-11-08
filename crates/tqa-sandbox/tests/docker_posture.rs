@@ -546,9 +546,10 @@ async fn sec_018_proxy_mode_sets_variables_without_opening_the_network() -> Test
 #[tokio::test]
 #[ignore = "needs Docker; run with --run-ignored all and TQA_DOCKER_TESTS=1"]
 async fn sbx_c_023_a_sandbox_reaches_its_own_loopback_server_in_proxy_mode() -> TestResult {
-    // c16k real-world B10 (17 Oct 2026): a task served its page on 127.0.0.1 and couldn't test it: curl and Python sent
-    // the request to the egress proxy ("Blocked network access to 127.0.0.1:46765"). With the sandbox's own proxy
-    // environment, a server on loopback answers curl and Python by address and by name, and the network stays closed.
+    // Real-world use before 17.0 (17 Oct 2026): a task served its page on 127.0.0.1 and couldn't test it: curl and
+    // Python sent the request to the egress proxy ("Blocked network access to 127.0.0.1:46765"). With the sandbox's own
+    // proxy environment, a server on loopback answers curl and Python by address and by name, and the network stays
+    // closed.
     run(async |fixture| {
         let mut spec = fixture.spec("loopback", false)?;
         // The runtime's own image (the pinned toybox has neither curl nor Python), with its settings as docker_pids.rs

@@ -215,9 +215,9 @@ fn sbx_u_016_the_proxy_variables_are_an_origin_with_no_path() -> Result<(), Box<
 // TEST: SBX-U-018
 #[test]
 fn sbx_u_018_loopback_never_goes_through_the_proxy() -> Result<(), Box<dyn Error>> {
-    // c16k real-world B10 (17 Oct 2026): NO_PROXY named only the gateway, so curl and Python sent a task's own server
-    // on 127.0.0.1 to the egress proxy, which refused it. Loopback is bypassed, in both spellings; the rest still goes
-    // through the proxy (HTTP_PROXY and HTTPS_PROXY unchanged).
+    // Real-world use before 17.0 (17 Oct 2026): NO_PROXY named only the gateway, so curl and Python sent a task's own
+    // server on 127.0.0.1 to the egress proxy, which refused it. Loopback is bypassed, in both spellings; the rest
+    // still goes through the proxy (HTTP_PROXY and HTTPS_PROXY unchanged).
     let mut spec = support::spec()?;
     spec.egress.mode = EgressMode::Proxy;
     spec.egress.proxy_url = Some("http://proxy.invalid:8080/".parse()?);
