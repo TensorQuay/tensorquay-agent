@@ -63,13 +63,14 @@ for (const width of [1280, 390])
         expect(Number(counted[1])).toBeGreaterThanOrEqual(3);
       }
 
-      // The line opens what the model is thinking, once.
+      // What the model is thinking shows itself under the line, once (17.3); the line folds it.
       const thought =
         "The totals come from three sheets; I'll compare them first.";
-      await expect(page.getByText(thought)).toBeHidden();
-      await live.click();
       await expect(live).toHaveAttribute("aria-expanded", "true");
       await expect(page.getByText(thought)).toBeVisible();
       await expect(page.getByText(thought)).toHaveCount(1);
       await capture(page, `thinking-live-${width}-${theme}`);
+      await live.click();
+      await expect(live).toHaveAttribute("aria-expanded", "false");
+      await expect(page.getByText(thought)).toBeHidden();
     });

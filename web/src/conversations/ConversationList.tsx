@@ -181,6 +181,8 @@ export function ConversationList({
           type="button"
           className="nav-item task-search-row"
           aria-label={t("list.search")}
+          // On the rail it is an icon: its words in a tooltip, as the rail's other actions (WEB-U-435).
+          title={t("list.search")}
           aria-keyshortcuts={mac ? "Meta+K" : "Control+K"}
           aria-haspopup="dialog"
           onClick={taskSearch.open}

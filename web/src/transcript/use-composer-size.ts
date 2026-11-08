@@ -2,7 +2,11 @@
 
 import { useLayoutEffect, useRef } from "react";
 
-/** Keeps the composer between three and twelve lines without moving the page. */
+/** Lines of text the composer shows: two when empty, growing to eight, after which its text scrolls. */
+const LEAST = 2;
+const MOST = 8;
+
+/** Keeps the composer between two and eight lines without moving the page (UI-GUIDELINES §7 Composer). */
 export function useComposerSize(draft: string, focus: boolean) {
   const input = useRef<HTMLTextAreaElement>(null);
   useLayoutEffect(() => {
@@ -22,7 +26,7 @@ export function useComposerSize(draft: string, focus: boolean) {
         Number.parseFloat(style.borderTopWidth) +
         Number.parseFloat(style.borderBottomWidth);
       element.style.height = "auto";
-      element.style.height = `${Math.min(line * 12 + padding + border, Math.max(line * 3 + padding + border, element.scrollHeight + border))}px`;
+      element.style.height = `${Math.min(line * MOST + padding + border, Math.max(line * LEAST + padding + border, element.scrollHeight + border))}px`;
     };
     resize();
     window.addEventListener("resize", resize);

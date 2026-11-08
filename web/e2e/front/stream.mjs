@@ -24,6 +24,7 @@ import {
   desktopFrames,
   desktopGapsFrames,
 } from "./screen.mjs";
+import { SLOW_RUN, SLOW_TICK_MS, slowRunEvents } from "./slow-run.mjs";
 
 /** Marks a frame a test sends outside the schema on purpose (a newer gateway's code); never serialized. */
 export const FORWARD = Symbol("forward-compatible frame");
@@ -349,6 +350,10 @@ function beginRun(conversation, text) {
       emit(conversation, { ...value, seq: offset + value.seq });
     return;
   }
+  if (text === SLOW_RUN) {
+    playSlowRun(conversation, text);
+    return;
+  }
   const start = conversation.history.length;
   const startedAt = Date.now();
   const markdown = text.startsWith("Stream Markdown");
@@ -591,6 +596,43 @@ function beginRun(conversation, text) {
       },
       markdown ? 25 : 80,
     );
+  };
+  play();
+}
+
+/**
+ * The scripted slow model's long scenario (slow-run.mjs): one frame per chunk, each stamped as it goes out, so its
+ * calls take their real time. While the test's `fixture_hold=steps` cookie was set, it holds at each of its marks until
+ * fixture-resume.
+ */
+function playSlowRun(conversation, text) {
+  const events = slowRunEvents(text, conversation.run);
+  let index = 0;
+  const play = () => {
+    conversation.timer = setInterval(() => {
+      const entry = events[index++];
+      if (entry) {
+        const [event, step, hold] = entry;
+        emit(conversation, {
+          type: "event",
+          seq: conversation.history.length + 1,
+          run_id: conversation.run,
+          step,
+          ts: new Date().toISOString(),
+          event,
+        });
+        if (hold && conversation.holdSteps && index < events.length) {
+          clearInterval(conversation.timer);
+          conversation.timer = null;
+          conversation.resume = play;
+          return;
+        }
+      }
+      if (index >= events.length) {
+        clearInterval(conversation.timer);
+        conversation.timer = null;
+      }
+    }, SLOW_TICK_MS);
   };
   play();
 }

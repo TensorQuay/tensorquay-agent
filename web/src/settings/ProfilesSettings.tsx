@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { newActionKey } from "../api/action-key";
 import { useT } from "../i18n/I18nProvider";
 import type { User } from "../protocol/generated/api";
+import { CellNote } from "../ui/CellNote";
 import { ConfirmDialog } from "../ui/ConfirmDialog";
 import { Skeleton } from "../ui/Skeleton";
 import { TableScroll } from "../ui/TableScroll";
@@ -165,9 +166,7 @@ function ProfileRow({
         <div className="stack route-name">
           {/* The display name only: the internal name is not the reader's (as for connectors, S6). */}
           <span>{item.display_name}</span>
-          {item.description && (
-            <span className="type-small muted">{item.description}</span>
-          )}
+          {item.description && <CellNote>{item.description}</CellNote>}
         </div>
       </td>
       <td>
@@ -179,9 +178,7 @@ function ProfileRow({
             {t(item.usable ? "profiles.ready" : "profiles.unusable")}
           </span>
           {!item.usable && item.unusable_field && (
-            <span className="type-small">
-              {t(UNUSABLE[item.unusable_field])}
-            </span>
+            <CellNote>{t(UNUSABLE[item.unusable_field])}</CellNote>
           )}
         </div>
       </td>

@@ -9,6 +9,7 @@ import {
 import { describe, expect, it } from "vitest";
 
 import type { User } from "../protocol/generated/api";
+import { cellNote } from "../test/cell-note";
 import { engine, fakeEngines } from "../test/decision-engines";
 import { choose, picker } from "../test/picker";
 import { LIMITS } from "../test/user";
@@ -90,13 +91,12 @@ describe("WEB-U-074 decision engines", () => {
     );
     await screen.findByRole("table", { name: "Decision engines" });
     const router = row(/Policy engine/);
-    for (const text of [
-      "router.example",
-      "From the configuration file",
-      "Names and arguments",
-      "Key missing",
-    ])
+    for (const text of ["Names and arguments", "Key missing"])
       expect(within(router).getByText(text)).toBeVisible();
+    // Its host and, for a seeded one, its source: one muted line under the name (17.3).
+    expect(
+      cellNote(router, "router.example · From the configuration file"),
+    ).toBeVisible();
     const reviewer = row(/reviewer/);
     for (const text of ["reviewer.example", "Full conversation", "Off"])
       expect(within(reviewer).getByText(text)).toBeVisible();
@@ -130,6 +130,13 @@ describe("WEB-U-074 decision engines", () => {
             budget_used: { calls: 12, tokens: 4200 },
             budget_since: "2026-09-29T12:00:00Z",
           }),
+          engine("keyless", {
+            key_ref: "secrets/gone",
+            key_missing: true,
+            budget: { calls: 100, period: "month" },
+            budget_used: { calls: 7, tokens: 0 },
+            budget_since: "2026-09-01T00:00:00Z",
+          }),
           engine("plain"),
         ],
       }).api,
@@ -138,15 +145,19 @@ describe("WEB-U-074 decision engines", () => {
     expect(
       within(row(/monthly/)).getByText(/^1\s204 of 3\s000 calls this month$/),
     ).toBeVisible();
+    // One muted line for both limits (17.3); no page says the use, so the line's tooltip holds it whole.
     const typed = row(/typed/);
+    expect(cellNote(typed, "12 of 500 calls")).toHaveTextContent(
+      /^12 of 500 calls since Sep 29, 2026 · 4\s200 of 30\s000\s000 tokens since Sep 29, 2026$/,
+    );
+    // A missing key's link leads the line, and the use still follows it.
+    const keyless = row(/keyless/);
     expect(
-      within(typed).getByText(/^12 of 500 calls since Sep 29, 2026$/),
-    ).toBeVisible();
-    expect(
-      within(typed).getByText(
-        /^4\s200 of 30\s000\s000 tokens since Sep 29, 2026$/,
-      ),
-    ).toBeVisible();
+      within(keyless).getByRole("link", { name: "Add it under Keys › Shared" }),
+    ).toHaveAttribute("href", "/settings/keys/shared");
+    expect(cellNote(keyless, "Add it under Keys › Shared")).toHaveTextContent(
+      "Add it under Keys › Shared · 7 of 100 calls this month",
+    );
     expect(within(row(/plain/)).queryByText(/ of /)).toBeNull();
   });
 

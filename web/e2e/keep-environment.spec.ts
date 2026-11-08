@@ -1,6 +1,12 @@
+import { readFileSync } from "node:fs";
+
 import { createConversation, signIn } from "./session";
 import { axe } from "./settings-page";
 import { expect, test } from "./test";
+
+const en = JSON.parse(readFileSync("src/i18n/locales/en.json", "utf8")) as {
+  messages: Record<string, string>;
+};
 
 // WEB-U-204 on a phone, from the keyboard: the task's ⋯ holds Keep environment on, a checked toggle with what it costs
 // under it, inside the screen; chosen with Enter, it pins the task, and the menu reads it on again.
@@ -18,9 +24,7 @@ test("WEB-U-204 Keep environment on from the task's ⋯, at 390 by keyboard", as
   });
   await expect(toggle).toHaveAttribute("aria-checked", "false");
   await expect(
-    page.getByText(
-      "It stays running and counts toward your tasks running at once.",
-    ),
+    page.getByText(en.messages["task.keepOnNote"] ?? "", { exact: true }),
   ).toBeVisible();
   const box = await toggle.boundingBox();
   expect(box && box.x >= 0 && box.x + box.width <= 390).toBe(true);

@@ -176,6 +176,29 @@ function beforeReplay(stored: StoredRunStatus, t: Translate): Presentation {
   }
 }
 
+/**
+ * Whether the task's run is under way as its status says it (17.3, the one run mark): waiting for a free slot,
+ * starting (or starting again), working, or working by the record before the stream has replayed.
+ */
+export function runActive(
+  transcript: Transcript,
+  stored?: StoredRunStatus,
+  storedAt?: string,
+): boolean {
+  const { sandbox, run, recovery } = transcript;
+  if (sandbox === "queued" || sandbox === "creating") return true;
+  if (
+    stored &&
+    stored !== "idle" &&
+    (transcript.lastSeq === 0 || replayingEnded(transcript, stored, storedAt))
+  )
+    return stored === "running";
+  return (
+    isWorking(transcript) ||
+    (recovery?.seconds != null && run.status === "idle")
+  );
+}
+
 /** Converts internal state into one human run label and only relevant environment detail, in the reader's language. */
 export function runPresentation(
   transcript: Transcript,

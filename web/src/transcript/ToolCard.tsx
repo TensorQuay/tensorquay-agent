@@ -101,9 +101,14 @@ export function ToolCard({
       ? foldTraceback(shownOutput)
       : { text: shownOutput, folded: false };
   const lines = trace.text.split("\n");
+  // A running command's output grows line by line: its latest lines show as they come (a closing newline is no line of
+  // its own); once ended, its first (17.3).
   const output = showAll
     ? shownOutput
-    : lines.slice(0, previewLines).join("\n");
+    : (tool.status === "running"
+        ? trace.text.replace(/\n$/, "").split("\n").slice(-previewLines)
+        : lines.slice(0, previewLines)
+      ).join("\n");
   return (
     <article
       className={embedded ? "tool-card tool-card-embedded" : "tool-card"}

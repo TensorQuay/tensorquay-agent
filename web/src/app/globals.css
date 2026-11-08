@@ -43,6 +43,9 @@
   --danger: #b4233c;
   --info: #2451bd;
   --selection: #dedede;
+  /* The open item of a navigation list (the open task, the open helper, the Settings menu's item, Keys' tab): 8 % ink
+     over paper, a step stronger than the 4 % hover tint (17.3, §5c). */
+  --selected-fill: #ececec;
   --focus: #2563eb;
   --code-bg: #f1f1ef;
   --elevation: 0 8px 24px rgb(0 0 0 / 0.08);
@@ -63,6 +66,7 @@
   --danger: #fb7185;
   --info: #7aa2ff;
   --selection: #3a3a37;
+  --selected-fill: #242423;
   --focus: #60a5fa;
   --code-bg: #161615;
   --elevation: 0 8px 24px rgb(0 0 0 / 0.4);
@@ -84,6 +88,7 @@
     --danger: #fb7185;
     --info: #7aa2ff;
     --selection: #3a3a37;
+    --selected-fill: #242423;
     --focus: #60a5fa;
     --code-bg: #161615;
     --elevation: 0 8px 24px rgb(0 0 0 / 0.4);
@@ -133,10 +138,12 @@
   --press-share: 8%;
   --hover-tint: color-mix(in srgb, var(--ink) var(--hover-share), transparent);
   --press-tint: color-mix(in srgb, var(--ink) var(--press-share), transparent);
+  /* §7 Composer: Send with nothing to send is an outline disc at this share of the ink (the §8 inactive look). */
+  --inactive-share: 35%;
   --pill-radius: 999px;
   --display-size: 28px;
   --heading-size: 20px;
-  /* The UI standard: a task's title is 16 px, weight 600. */
+  /* The UI standard: a task's title is 16 px, weight 700 (the app ships 400 and 700, §4). */
   --task-title-size: 16px;
   --body-size: 15px;
   --small-size: 13px;
@@ -175,6 +182,8 @@
      table rows, and the height both grow to on touch screens. */
   --row-height-nav: 32px;
   --row-height-table: 40px;
+  /* A table row whose cells have a muted second line: every row of that table (17.3, §7 Table). */
+  --row-height-table-two: 64px;
   --row-height-touch: 44px;
   --space-half: 2px;
   --nav-pad-block: var(--space-1);
@@ -187,6 +196,10 @@
   --group-label-gap: var(--space-1);
   --heading-line-height: 28px;
   --table-name-width: 180px;
+  /* A table column whose cells carry a muted line keeps this much, before the name column takes the rest (17.3). */
+  --table-note-width: 16rem;
+  /* An environment's tools in its list row: one line at most this wide, the rest after "…" (17.3). */
+  --table-tools-width: 200px;
   --settings-nav-width: 160px;
   --transcript-width: 720px;
   --channel-side-width: 18rem;
@@ -216,6 +229,10 @@
   --skeleton-delay: 300ms;
   /* A lease held by a running task breathes this slowly (never under reduced motion). */
   --motion-pulse: 1.6s;
+  /* The live line's light crosses its words this slowly (never under reduced motion). */
+  --motion-shimmer: 2s;
+  /* The streaming caret blinks this often (§8; never under reduced motion). */
+  --motion-blink: 1s;
 }
 /* §5c: on touch screens rows are tap targets, 44 px; the density above is for a mouse. */
 @media (pointer: coarse) {
@@ -392,7 +409,7 @@ h3 {
 .type-task-title {
   font-size: var(--task-title-size);
   line-height: var(--heading-leading);
-  font-weight: 600;
+  font-weight: 700;
 }
 .type-heading {
   font-size: var(--heading-size);
@@ -417,7 +434,7 @@ h3 {
   /* §5c: labels are sans, never monospace; monospace is only for values that are code or ids (.type-code). */
   font-family: var(--font-ui);
   font-size: var(--label-size);
-  font-weight: 500;
+  font-weight: 400;
   line-height: var(--small-leading);
 }
 .type-code {
@@ -540,6 +557,28 @@ h3 {
 }
 .button.icon-button:focus-visible {
   box-shadow: none;
+}
+/* The composer bar's disc (§7): 36 px round with a 20 px icon; the + and Send share it and its hover tint. */
+.button.icon-button[data-shape="round"] {
+  width: var(--composer-button-size);
+  min-width: var(--composer-button-size);
+  height: var(--composer-button-size);
+  border-radius: var(--pill-radius);
+}
+/* Send with nothing to send: an outline disc at 35 % ink, nothing filled, no hover tint, so it reads as waiting and
+   never as a faded or faulty control (§8); the same while it keeps the focus (aria-disabled, WEB-U-273). */
+.button.icon-button[data-fill="outline"],
+.button.icon-button[data-fill="outline"]:hover,
+.button.icon-button[data-fill="outline"]:active {
+  background: transparent;
+  /* Mixed here, not in a root token, so the ink is this element's theme's (a panel can set its own). */
+  border-color: color-mix(
+    in srgb,
+    var(--ink) var(--inactive-share),
+    transparent
+  );
+  color: color-mix(in srgb, var(--ink) var(--inactive-share), transparent);
+  opacity: 1;
 }
 .field {
   display: flex;
@@ -944,6 +983,17 @@ textarea.form-control {
     overflow: hidden;
     clip-path: inset(50%);
   }
+  /* The rail is its global actions and, of the task list, the open task alone, its icon with its run mark (§6,
+     WEB-E2E-102): no other task, nor a team's chevron, count or waiting dot, nor the list's filter. */
+  .app-sidebar .task-group:not(:has([aria-current="page"])),
+  .app-sidebar .conversation-row:not(:has([aria-current="page"])),
+  .app-sidebar .conversation-link:not([aria-current="page"]),
+  .app-sidebar .task-helpers-toggle,
+  .app-sidebar .task-helpers-count,
+  .app-sidebar .task-waiting,
+  .app-sidebar .task-filter {
+    display: none;
+  }
 }
 @container sidebar (min-width: 121px) {
   .app-sidebar .conversation-link > svg {
@@ -976,10 +1026,9 @@ textarea.form-control {
   background: var(--hover-tint);
 }
 .nav-item[aria-current="page"] {
-  /* §5c: the active item is a fill and weight 500, no accent bar. */
+  /* §5c: the active item is the selected fill at the body weight, no accent bar (17.3). */
   color: var(--ink);
-  background: var(--surface);
-  font-weight: 500;
+  background: var(--selected-fill);
 }
 /* A light segmented control (the design direction): one tray, the chosen segment a paper fill; for filters. */
 .segmented {
@@ -999,11 +1048,11 @@ textarea.form-control {
 .segmented .button[aria-pressed="true"] {
   background: var(--paper);
   color: var(--ink);
-  font-weight: 500;
   box-shadow: 0 0 0 var(--border-width) var(--line);
 }
+/* Under the pointer the active item keeps its fill: the hover tint is the lighter step, never darker (17.3). */
 .nav-item[aria-current="page"]:hover {
-  background: color-mix(in srgb, var(--surface), var(--ink) var(--hover-share));
+  background: var(--selected-fill);
 }
 .nav-item svg {
   flex-shrink: 0;
@@ -1056,6 +1105,50 @@ textarea.form-control {
    (WEB-U-383). */
 .input-adorned {
   position: relative;
+}
+/* A check row (§7 Checkbox): a checkbox or radio and its words, the whole row its label. */
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--min-control-height);
+}
+/* The shared check row's control (§7 Checkbox, WEB-U-434): Lucide's 16 px box (a circle for a radio) in a 28 px target
+   that the native input fills, transparent, so the input keeps the pointer, the keyboard and the label; its focus ring
+   is drawn around the target. */
+.check-control {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: var(--min-control-height);
+  height: var(--min-control-height);
+  /* It starts at the row's edge, as a list's first item does (WEB-U-131); its words come a little closer. */
+  margin-inline-end: calc(-1 * var(--space-1));
+  border-radius: var(--control-radius);
+  color: var(--control-border);
+}
+.check-control:has(> input:checked),
+.check-control:has(> input:indeterminate) {
+  color: var(--ink);
+}
+.check-control:has(> input:disabled) {
+  opacity: 0.4;
+}
+.check-control:has(> input:focus-visible) {
+  outline: var(--focus-width) solid var(--focus);
+}
+.check-control > input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.check-control > input:disabled {
+  cursor: not-allowed;
 }
 .password-input input {
   padding-right: var(--space-12);
@@ -1216,6 +1309,17 @@ textarea.form-control {
     opacity: 1;
   }
 }
+/* The one run mark (17.3): a calm pulse while a task's run is under way, beside its title, in its sidebar item; reduced
+   motion holds it still. */
+.run-mark {
+  display: inline-block;
+  flex-shrink: 0;
+  width: var(--dot-size);
+  height: var(--dot-size);
+  border-radius: var(--pill-radius);
+  background: var(--info);
+  animation: pulse var(--motion-pulse) ease-in-out infinite;
+}
 /* §5b motion: floating layers and the approval card arrive with opacity and a small lift. */
 @keyframes lift-in {
   from {
@@ -1285,6 +1389,7 @@ textarea.form-control {
 [role="timer"],
 .run-elapsed,
 .recorded-duration,
+.activity-duration,
 .follow-controls,
 .conversation-status {
   font-variant-numeric: tabular-nums;
@@ -1320,9 +1425,10 @@ textarea.form-control {
   position: relative;
   display: inline-flex;
 }
-/* Placed by IconAction where it fits (inside the window and its panel); shown only while hovered or focused. */
+/* Placed by IconAction where it fits (inside the window and its panel), in the window's coordinates, as a layer of its
+   own on the page; shown only while hovered or focused. */
 .action-tooltip {
-  position: absolute;
+  position: fixed;
   z-index: 40;
   top: 0;
   left: 0;

@@ -11,6 +11,7 @@ import { useT } from "../i18n/I18nProvider";
 import type { MessageKey } from "../i18n/translate";
 import type { User } from "../protocol/generated/api";
 import { Button } from "../ui/Button";
+import { CellNote } from "../ui/CellNote";
 import { ConfirmDialog } from "../ui/ConfirmDialog";
 import { Skeleton } from "../ui/Skeleton";
 import { TableScroll } from "../ui/TableScroll";
@@ -246,7 +247,6 @@ function RouteTable({
             <th scope="col">{t("models.route")}</th>
             <th scope="col">{t("models.model")}</th>
             <th scope="col">{t("models.key")}</th>
-            {shown.source && <th scope="col">{t("models.source")}</th>}
             <th scope="col">
               <span className="sr-only">{t("common.actions")}</span>
             </th>
@@ -294,9 +294,22 @@ function RouteRow({
       <td>
         {/* The display name only (UI-GUIDELINES §10); the route's own name stands in when there is none. */}
         <div className="stack route-name">
-          <span>{routeLabel(item)}</span>
-          {item.description && (
-            <span className="type-small muted">{item.description}</span>
+          <div className="data-name" title={routeLabel(item)}>
+            <span>{routeLabel(item)}</span>
+          </div>
+          {/* One muted line (17.3): what the route is for, then where it came from, as Connectors and Environments
+              say theirs; the source only where some route comes from the configuration file (WEB-U-301). */}
+          {(item.description || shown.source) && (
+            <CellNote>
+              {[
+                item.description,
+                shown.source
+                  ? t(SOURCES[item.seed ?? "none"] ?? "models.addedHere")
+                  : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </CellNote>
           )}
         </div>
       </td>
@@ -306,11 +319,7 @@ function RouteRow({
             <span>{item.model}</span>
             <ProbeBadge probe={item.probe} />
           </div>
-          {shown.protocol && (
-            <span className="type-small muted">
-              {t(PROTOCOLS[item.protocol])}
-            </span>
-          )}
+          {shown.protocol && <CellNote>{t(PROTOCOLS[item.protocol])}</CellNote>}
         </div>
       </td>
       <td className="secret-changed">
@@ -325,9 +334,9 @@ function RouteRow({
             <span className="status-pill type-label" data-tone="warn">
               {t("models.keyMissing")}
             </span>
-            <Link href="/settings/keys/shared" className="type-small">
+            <CellNote href="/settings/keys/shared">
               {t("models.addKey")}
-            </Link>
+            </CellNote>
           </span>
         ) : (
           // The key's name, as Keys › Shared shows it: one line, never broken inside it; a long one shortens, and the full
@@ -340,11 +349,6 @@ function RouteRow({
           </code>
         )}
       </td>
-      {shown.source && (
-        <td className="muted cell-wrap">
-          {t(SOURCES[item.seed ?? "none"] ?? "models.addedHere")}
-        </td>
-      )}
       <td className="data-cell-action">
         <Link
           href={`${LIST}/${encodeURIComponent(item.name)}`}

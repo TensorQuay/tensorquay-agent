@@ -32,6 +32,8 @@ export const SECTIONS = [
     label: "settings.keys",
     href: "/settings/keys",
     admin: false,
+    // Its other view, the shared keys: the section itself, not a page inside it (17.3).
+    views: ["/settings/keys/shared"],
   },
   {
     id: "profiles",
@@ -116,6 +118,7 @@ export const SECTIONS = [
   label: string;
   href: string;
   admin: boolean;
+  views?: readonly string[];
 }[];
 
 export type SettingsSection = (typeof SECTIONS)[number]["id"];

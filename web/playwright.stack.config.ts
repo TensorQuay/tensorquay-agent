@@ -121,7 +121,10 @@ export default defineConfig({
                                                           : "full-stack.spec.ts",
   forbidOnly: Boolean(process.env.CI),
   retries: 0,
-  updateSnapshots: "none",
+  // Baselines are never rewritten by a check run; TQA_STACK_UPDATE_SNAPSHOTS=1 rewrites the ones a suite reads, for a
+  // release that changes the screens they show (each new baseline is reviewed before it is committed).
+  updateSnapshots:
+    process.env.TQA_STACK_UPDATE_SNAPSHOTS === "1" ? "all" : "none",
   workers: 1,
   // A test without its own budget still has room for one start (e2e/stack-start.ts).
   timeout: budget(1, 60_000),

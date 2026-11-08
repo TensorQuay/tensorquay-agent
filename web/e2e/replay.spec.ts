@@ -22,7 +22,7 @@ async function run(page: Page) {
 }
 async function openDetails(page: Page) {
   await page.getByRole("button", { name: /Worked for/ }).press("Enter");
-  await page.getByText("Thinking", { exact: true }).click();
+  await page.getByText(/^Thought for /).click();
   await openCard(
     page.getByRole("button", { name: /^Created hello\/README.md/ }),
   );

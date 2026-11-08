@@ -11,6 +11,7 @@ import { ApiError } from "../api/error";
 import { useT } from "../i18n/I18nProvider";
 import type { MessageKey, Translate } from "../i18n/translate";
 import type { User } from "../protocol/generated/api";
+import { CheckRow } from "../ui/CheckRow";
 import { Icon } from "../ui/Icon";
 import { Input } from "../ui/Input";
 import { Select } from "../ui/Select";
@@ -441,23 +442,22 @@ function ProfileForm(props: FormProps) {
           )}
           <div className="choice-grid">
             {choices.connectors.map((connector) => (
-              <label key={connector.name} className="check-row type-small">
-                <input
-                  type="checkbox"
-                  disabled={locked}
-                  checked={draft.connectors.includes(connector.name)}
-                  onChange={(event) =>
-                    set({
-                      connectors: toggle(
-                        draft.connectors,
-                        connector.name,
-                        event.target.checked,
-                      ),
-                    })
-                  }
-                />
-                {connector.label}
-              </label>
+              <CheckRow
+                key={connector.name}
+                className="type-small"
+                disabled={locked}
+                checked={draft.connectors.includes(connector.name)}
+                onChange={(event) =>
+                  set({
+                    connectors: toggle(
+                      draft.connectors,
+                      connector.name,
+                      event.target.checked,
+                    ),
+                  })
+                }
+                label={connector.label}
+              />
             ))}
           </div>
           {problems.connectors && (
@@ -509,23 +509,22 @@ function ProfileForm(props: FormProps) {
                   label: t("profiles.serverGone", { name }),
                 })),
             ].map(({ name, label }) => (
-              <label key={name} className="check-row type-small">
-                <input
-                  type="checkbox"
-                  disabled={locked}
-                  checked={draft.mcpServers.includes(name)}
-                  onChange={(event) =>
-                    set({
-                      mcpServers: toggle(
-                        draft.mcpServers,
-                        name,
-                        event.target.checked,
-                      ),
-                    })
-                  }
-                />
-                {label}
-              </label>
+              <CheckRow
+                key={name}
+                className="type-small"
+                disabled={locked}
+                checked={draft.mcpServers.includes(name)}
+                onChange={(event) =>
+                  set({
+                    mcpServers: toggle(
+                      draft.mcpServers,
+                      name,
+                      event.target.checked,
+                    ),
+                  })
+                }
+                label={label}
+              />
             ))}
           </div>
         </PageSection>
@@ -570,21 +569,19 @@ function ProfileForm(props: FormProps) {
       {admin && (creating || draft.shared) && (
         <PageSection title={t("profiles.sharing")}>
           {creating && (
-            <label className="field-note check-row type-small">
-              <input
-                type="checkbox"
-                checked={draft.shared}
-                // A person's own profile sets no tool servers: unsharing drops any chosen (WEB-U-059).
-                onChange={(event) =>
-                  set(
-                    event.target.checked
-                      ? { shared: true }
-                      : { shared: false, mcpServers: [] },
-                  )
-                }
-              />
-              {t("profiles.sharedSwitch")}
-            </label>
+            <CheckRow
+              className="field-note type-small"
+              checked={draft.shared}
+              // A person's own profile sets no tool servers: unsharing drops any chosen (WEB-U-059).
+              onChange={(event) =>
+                set(
+                  event.target.checked
+                    ? { shared: true }
+                    : { shared: false, mcpServers: [] },
+                )
+              }
+              label={t("profiles.sharedSwitch")}
+            />
           )}
         </PageSection>
       )}

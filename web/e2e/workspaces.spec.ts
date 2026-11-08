@@ -144,8 +144,11 @@ test("WEB-U-007 keyboard: a workspace's row and its menu, and dialogs return foc
   await review.focus();
   await page.keyboard.press("Tab");
   await expect(more).toBeFocused();
+  // The tip is a layer of its own on the page (WEB-U-429).
   await expect(
-    more.locator("xpath=..").locator(".action-tooltip"),
+    page.locator(".action-tooltip", {
+      hasText: "More actions for Workspace review",
+    }),
   ).toBeVisible();
   await page.keyboard.press("Enter");
   const menu = page.getByRole("menu", {

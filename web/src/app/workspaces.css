@@ -31,8 +31,13 @@
   align-items: center;
   gap: var(--space-3);
 }
-.workspace-filters {
+.workspace-filters,
+.workspace-filter-picker {
   margin-right: auto;
+}
+/* The filters' picker is a phone's (17.3): where there is room, the segmented control. */
+.workspace-filter-picker {
+  display: none;
 }
 /* The page's one primary button, at a nav row's height rather than a heavy block. */
 .workspaces-new {
@@ -169,6 +174,28 @@
 .workspace-table .workspace-lease,
 .workspace-table .workspace-size {
   margin: 0;
+}
+/* In the table (17.3, UI-GUIDELINES §7 Table): the size's words and its meter share the value's line, and when it was
+   measured is the cell's one muted line, so a row stays two lines. */
+.workspace-table .workspace-size[data-level] {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+}
+.workspace-table .workspace-size[data-level] .workspace-usage {
+  grid-area: 1 / 1;
+}
+.workspace-table .workspace-size[data-level] .workspace-meter {
+  grid-area: 1 / 2;
+}
+.workspace-table .workspace-size[data-level] .workspace-measured {
+  grid-area: 2 / 1 / 3 / -1;
+}
+/* The size column keeps its own minimum (above): a grid item spanning a flexible track can't widen it, so the measured
+   line asks for no more, and its short words show whole. */
+.workspace-table td .workspace-measured.cell-note {
+  min-width: 0;
 }
 .workspace-size-cell {
   min-width: var(--table-name-width);
@@ -310,14 +337,12 @@
   .workspaces-search {
     width: 100%;
   }
-  /* The filters scroll sideways inside their own row on a phone, never the page. */
+  /* On a phone the filters are the standard picker, never a row of labels to scroll sideways (17.3). */
   .workspace-filters {
-    width: 100%;
-    margin-right: 0;
-    overflow-x: auto;
+    display: none;
   }
-  .workspace-filters .button {
-    flex-shrink: 0;
+  .workspace-filter-picker {
+    display: inline-flex;
   }
   /* The 14b page pass, W4 (WEB-U-251): on a phone the email takes its own row; access and Share go under it. */
   .share-form {

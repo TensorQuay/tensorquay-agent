@@ -1,3 +1,5 @@
+import { SLOW_RUN, SLOW_RUN_FILES } from "./slow-run.mjs";
+
 // The task's workspace for the fake front (task 068b): an in-memory tree per conversation behind the same four routes
 // and limits as the gateway's files module, so the panel and composer run end to end without a sandbox.
 const MiB = 1024 * 1024;
@@ -462,6 +464,10 @@ export function agentWork(conversation, text, attachments) {
       bytes: encoder.encode("def test_parse(): assert parse('1') == 1\n"),
       modified_at: now(),
     });
+  // The slow scenario (slow-run.mjs): the demo its calls write.
+  else if (text === SLOW_RUN)
+    for (const [path, content] of Object.entries(SLOW_RUN_FILES))
+      files.set(path, { bytes: encoder.encode(content), modified_at: now() });
 }
 
 /** The workspace as a run found it (task 068c): uploads and private state are left out, as by the gateway. */

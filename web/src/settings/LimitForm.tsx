@@ -5,7 +5,7 @@ import { useState, type FormEvent } from "react";
 import { newActionKey } from "../api/action-key";
 import { ApiError } from "../api/error";
 import { useT } from "../i18n/I18nProvider";
-import type { MessageKey } from "../i18n/translate";
+import type { MessageKey, Translate } from "../i18n/translate";
 import { Button } from "../ui/Button";
 import { Dialog } from "../ui/Dialog";
 import { FormRefusal } from "../ui/FormRefusal";
@@ -34,6 +34,8 @@ type FormProps = {
   onClose: () => void;
   /** Asks to reset a value set here to the configuration file's; absent, no reset is offered. */
   onReset?: (item: Limit) => void;
+  /** What its list row adds of its own (a helper limit's), said whole here (17.3). */
+  note?: string | null;
 };
 
 /**
@@ -195,6 +197,11 @@ export function LimitForm(props: FormProps) {
         <p id="limit-range" className="type-small muted">
           {t(ceiling ? "limits.rangeHint" : "limits.rangeHintFrom", range)}
         </p>
+        {/* What its list row says of the value, whole here: the list keeps it to two lines (17.3). */}
+        <LimitNotes item={item} />
+        {props.note && (
+          <span className="type-small limit-note">{props.note}</span>
+        )}
         {/* When the change takes effect, where it differs from the page's rule (the Desktop limits). */}
         {applies && <p className="type-small muted">{t(applies.whole)}</p>}
         {/* The default and where the value comes from, out of the table (WEB-U-041). */}
@@ -242,5 +249,42 @@ export function LimitForm(props: FormProps) {
         </div>
       </form>
     </Dialog>
+  );
+}
+
+/**
+ * What differs from the configuration file, in words. At load the gateway moves a stored value the file's bounds no
+ * longer allow to the nearest bound and keeps the old one (`clamped_from`), so the row shows the bound and the note what
+ * it was; or the file set a value below what can be set here. As words, so a list row can keep them to one line (17.3).
+ */
+export function limitNoteWords(item: Limit, t: Translate): string[] {
+  const shown = (value: number) => display(t, item.unit, value);
+  const clamped = item.clamped_from;
+  return [
+    clamped !== null && (clamped > item.max || clamped < item.min)
+      ? clamped > item.max
+        ? t("limits.clampedDown", { was: shown(clamped), max: shown(item.max) })
+        : t("limits.clampedUp", { was: shown(clamped), min: shown(item.min) })
+      : null,
+    item.below_floor && item.value < item.min
+      ? t("limits.belowFloorWords", {
+          value: shown(item.value),
+          floor: shown(item.min),
+        })
+      : null,
+  ].filter((words): words is string => words !== null);
+}
+
+/** The same notes in the limit's Edit dialog, each on its own line, whole. */
+function LimitNotes({ item }: { item: Limit }) {
+  const t = useT();
+  return (
+    <>
+      {limitNoteWords(item, t).map((words) => (
+        <span key={words} className="type-small limit-note">
+          {words}
+        </span>
+      ))}
+    </>
   );
 }

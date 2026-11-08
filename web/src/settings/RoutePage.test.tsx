@@ -118,3 +118,47 @@ describe("WEB-U-115 the model route page", () => {
     );
   });
 });
+
+// 17.3 (C4): the list keeps a route's key to two lines; its page says the key's state where its key is set.
+describe("WEB-U-446 a route's page says its key's state", () => {
+  it("says a missing key, with where to add it", async () => {
+    showModels(
+      fakeRoutes({
+        routes: [
+          route("flash", {
+            display_name: "DeepSeek Flash",
+            key_missing: true,
+            key_ref: "secrets/deepseek",
+          }),
+        ],
+        secrets: [],
+      }).api,
+      router,
+      "/settings/models/flash",
+    );
+    const key = await screen.findByRole("region", { name: "Key" });
+    expect(within(key).getByText("Key missing")).toBeVisible();
+    expect(
+      within(key).getByRole("link", { name: "Add it under Keys › Shared" }),
+    ).toHaveAttribute("href", "/settings/keys/shared");
+  });
+
+  it("says a key it needs", async () => {
+    showModels(
+      fakeRoutes({
+        routes: [
+          route("flash", {
+            display_name: "DeepSeek Flash",
+            key_ref_invalid: true,
+          }),
+          LOCAL,
+        ],
+        secrets: ["secrets/local"],
+      }).api,
+      router,
+      "/settings/models/flash",
+    );
+    const key = await screen.findByRole("region", { name: "Key" });
+    expect(within(key).getByText("Key needed")).toBeVisible();
+  });
+});

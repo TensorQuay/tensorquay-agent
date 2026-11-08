@@ -8,6 +8,7 @@ import { notSentMessage } from "./action-failure";
 import {
   isWorking,
   recoveryAnnouncement,
+  runActive,
   runEnded,
   runPresentation,
   type StoredRunStatus,
@@ -153,8 +154,12 @@ export function RunStatus({
     : failure
       ? t("run.notSent")
       : (status.short ?? (elapsed ? label : null));
+  // The one run mark (17.3): a calm pulse before the words while the run is under way, the same as the sidebar's.
+  const active =
+    !sending && !failure && runActive(transcript, stored, storedAt);
   return (
     <div className="conversation-status">
+      {active && <span className="run-mark" aria-hidden="true" />}
       <span
         role="group"
         aria-label={t("run.statusLabel")}

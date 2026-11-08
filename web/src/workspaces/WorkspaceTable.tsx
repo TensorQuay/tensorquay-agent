@@ -132,7 +132,7 @@ export function WorkspaceTable({
                   )}
                 </td>
                 <td className="workspace-size-cell">
-                  {ready && <SizeMeter workspace={workspace} />}
+                  {ready && <SizeMeter workspace={workspace} inTable />}
                 </td>
                 <td className="data-cell-action">
                   <WorkspaceActions

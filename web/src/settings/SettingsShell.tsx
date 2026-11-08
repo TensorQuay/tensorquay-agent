@@ -18,7 +18,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { useSession } from "../auth/use-session";
@@ -56,6 +56,9 @@ const ICONS: Readonly<Record<SettingsSection, LucideIcon>> = {
   status: Activity,
 };
 
+/** The section's heading, by which a section's main list may be named (People's table). */
+export const SECTION_HEADING = "settings-section-heading";
+
 /**
  * Settings (UI-GUIDELINES §6, WEB-U-075): a page heading, the sections on the left in three groups on wide screens (one
  * grouped Section select above the column below 768 px) and a 720 px column. Your account is everyone's;
@@ -82,6 +85,7 @@ function Shell({
 }) {
   const t = useT();
   const router = useRouter();
+  const pathname = usePathname();
   const session = useSession();
   const admin = session.data?.role === "admin";
   const shown = SECTIONS.filter((entry) => admin || !entry.admin);
@@ -146,6 +150,18 @@ function Shell({
         />
       </div>
       <div className="settings-column">
+        {/* Every section opens with its name (17.3); a page inside it keeps its own title, under its way back. */}
+        {current &&
+          (pathname === current.href ||
+            ("views" in current &&
+              current.views.some((view) => view === pathname))) && (
+            <h2
+              id={SECTION_HEADING}
+              className="type-heading settings-section-title"
+            >
+              {title}
+            </h2>
+          )}
         {session.isError ? (
           <div className="stack">
             <ErrorMessage error={session.error} />

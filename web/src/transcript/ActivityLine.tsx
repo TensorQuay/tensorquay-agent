@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, LoaderCircle } from "lucide-react";
 import Link from "next/link";
 import { lazy, Suspense, useId, useState } from "react";
 
@@ -82,6 +82,13 @@ export function ActivityLine({
         : marks[tool.status];
   const mark = markKey ? t(markKey) : null;
   const words = mark ?? "";
+  // A running call turns a small mark (a loader) where a word would be; its word stays in the name
+  // (17.3). Once it has ended, its line says how long it took.
+  const working = tool.status === "running";
+  const took =
+    !working && tool.durationMs !== null
+      ? durationLabel(tool.durationMs, t)
+      : null;
   return (
     // The row and its card are one item: one surface while open, and the chevron turns with it (the review of 049).
     <li className="activity-line" data-open={open || undefined}>
@@ -97,24 +104,28 @@ export function ActivityLine({
         onPointerEnter={warmToolCard}
         onPointerDown={warmToolCard}
         onFocus={warmToolCard}
-        // Finding A1: a page's whole address where the line shortens it; else how long the step took.
-        title={
-          toolTitle(tool) ??
-          (tool.durationMs === null
-            ? undefined
-            : durationLabel(tool.durationMs, t))
-        }
+        // Finding A1: a page's whole address where the line shortens it.
+        title={toolTitle(tool) ?? undefined}
         onClick={() => setOpen(!open)}
       >
         <Icon glyph={ChevronRight} size={16} />
         <span className="activity-label">{label}</span>
 
-        {mark && (
-          <span
-            className={`type-label activity-mark ${limited ? "activity-limit" : `activity-${tool.status}`}`}
-          >
-            {mark}
+        {working ? (
+          <span className="activity-working" aria-hidden="true">
+            <Icon glyph={LoaderCircle} size={16} />
           </span>
+        ) : (
+          mark && (
+            <span
+              className={`type-label activity-mark ${limited ? "activity-limit" : `activity-${tool.status}`}`}
+            >
+              {mark}
+            </span>
+          )
+        )}
+        {took && (
+          <span className="type-label muted activity-duration">{took}</span>
         )}
       </button>
       <ConnectorHint tool={tool} />

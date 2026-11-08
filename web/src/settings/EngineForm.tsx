@@ -10,6 +10,7 @@ import { useT } from "../i18n/I18nProvider";
 import { sentenceGap } from "../i18n/sentences";
 import type { MessageKey } from "../i18n/translate";
 import { Button } from "../ui/Button";
+import { CheckRow } from "../ui/CheckRow";
 import { ConfirmDialog } from "../ui/ConfirmDialog";
 import { Dialog } from "../ui/Dialog";
 import { FormRefusal } from "../ui/FormRefusal";
@@ -385,17 +386,15 @@ function KindStep({
         <legend>{t("engines.kind")}</legend>
         {ENGINE_KINDS.map(([kind, label, hint]) => (
           <div key={kind} className="stack">
-            <label className="check-row">
-              <input
-                type="radio"
-                name={`${id}-kind`}
-                value={kind}
-                checked={section.draft.kind === kind}
-                aria-describedby={`${id}-${kind}-hint`}
-                onChange={() => section.set({ kind })}
-              />
-              {t(label)}
-            </label>
+            <CheckRow
+              type="radio"
+              name={`${id}-kind`}
+              value={kind}
+              checked={section.draft.kind === kind}
+              aria-describedby={`${id}-${kind}-hint`}
+              onChange={() => section.set({ kind })}
+              label={t(label)}
+            />
             <p id={`${id}-${kind}-hint`} className="type-small muted">
               {t(hint)}
             </p>
@@ -443,17 +442,15 @@ function Sees({ section }: { section: Section }) {
       <legend className="type-small">{t("engines.sees")}</legend>
       {EXPOSURES.map(([exposure, label, hint]) => (
         <div key={exposure} className="stack">
-          <label className="check-row">
-            <input
-              type="radio"
-              name={`${id}-sees`}
-              value={exposure}
-              checked={section.draft.exposure === exposure}
-              aria-describedby={`${id}-${exposure}-hint`}
-              onChange={() => section.set({ exposure })}
-            />
-            {t(label)}
-          </label>
+          <CheckRow
+            type="radio"
+            name={`${id}-sees`}
+            value={exposure}
+            checked={section.draft.exposure === exposure}
+            aria-describedby={`${id}-${exposure}-hint`}
+            onChange={() => section.set({ exposure })}
+            label={t(label)}
+          />
           <p id={`${id}-${exposure}-hint`} className="type-small muted">
             {t(hint)}
           </p>

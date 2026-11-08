@@ -408,6 +408,7 @@ function applyEvent(state: Transcript, frame: EventFrame): Transcript {
         ...step,
         durationMs: event.duration_ms ?? 0,
         waitingSince: null,
+        thoughtUntil: step.thoughtUntil ?? frame.ts,
       }));
     case "model.completed":
     // Only the size of opaque reasoning state reaches clients; nothing of it is kept or shown (GW-I-051).
@@ -459,6 +460,8 @@ function applyEvent(state: Transcript, frame: EventFrame): Transcript {
         ...step,
         text: step.text + event.text,
         waitingSince: null,
+        // Its first words end its thinking (17.3), as its first call does.
+        thoughtUntil: step.thoughtUntil ?? frame.ts,
       }));
     case "reasoning.delta":
       return updateStep(state, frame, (step) => ({
@@ -470,6 +473,7 @@ function applyEvent(state: Transcript, frame: EventFrame): Transcript {
       return updateStep(state, frame, (step) => ({
         ...step,
         waitingSince: null,
+        thoughtUntil: step.thoughtUntil ?? frame.ts,
         toolOrder: step.tools[event.call_id]
           ? step.toolOrder
           : [...step.toolOrder, event.call_id],

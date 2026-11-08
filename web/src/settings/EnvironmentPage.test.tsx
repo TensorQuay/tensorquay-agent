@@ -526,3 +526,49 @@ describe("WEB-U-098 a customised built-in", () => {
     ).toBeVisible();
   });
 });
+
+// 17.3 (C4): the list keeps an environment's check to two lines (its words whole in the line's tooltip); its own page
+// says the check in full.
+describe("WEB-U-445 an environment's page says its check in full", () => {
+  it("shows the check's state, why, and what it means for people", async () => {
+    const broken = environment("broken", {
+      display_name: "Broken tools",
+      seed: null,
+      last_set_by: "admin",
+      check: {
+        state: "refused",
+        reason: "not_derived",
+        checked_version: 1,
+        secret_files: null,
+        scan_limit: null,
+      },
+    });
+    showEnvironments(
+      fakeTemplates({ environments: [broken] }).api,
+      router,
+      "/settings/environments/broken",
+    );
+    const status = await screen.findByRole("region", { name: "Status" });
+    expect(within(status).getByText("Refused")).toBeVisible();
+    expect(
+      within(status).getByText(
+        "The image does not start from Workstation or Minimal. Build it FROM one of them.",
+      ),
+    ).toBeVisible();
+    expect(
+      within(status).getByText(
+        "People cannot pick it until it passes the check.",
+      ),
+    ).toBeVisible();
+  });
+
+  it("shows a check that passed as its state alone", async () => {
+    showEnvironments(
+      fakeTemplates({ environments: [environment("ok")] }).api,
+      router,
+      "/settings/environments/ok",
+    );
+    const status = await screen.findByRole("region", { name: "Status" });
+    expect(within(status).getByText("Verified")).toBeVisible();
+  });
+});

@@ -300,9 +300,8 @@
   font-weight: inherit;
 }
 .task-helper:has([aria-current="page"]) {
-  background: var(--surface);
+  background: var(--selected-fill);
   border-radius: var(--control-radius);
-  font-weight: 500;
 }
 @media (prefers-reduced-motion: no-preference) {
   .task-helpers-toggle svg {

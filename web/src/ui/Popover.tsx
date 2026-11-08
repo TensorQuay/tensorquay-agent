@@ -50,10 +50,32 @@ export function Popover({
       const gap =
         parseFloat(getComputedStyle(panel).getPropertyValue("--space-2")) || 0;
       const start = placement !== "below-end";
-      const left = start ? button.left : button.right - panel.offsetWidth;
-      panel.style.left = `${Math.max(gap, Math.min(left, innerWidth - panel.offsetWidth - gap))}px`;
+      // Inside the window; and opened in a panel marked as its bounds (the Files panel), inside that panel's content:
+      // never wider, moved along into it, so it never covers the page beside the panel (WEB-U-432).
+      let low = gap;
+      let high = innerWidth - gap;
+      const limit = anchor.current?.closest("[data-menu-bounds]");
+      if (limit) {
+        const box = limit.getBoundingClientRect();
+        const style = getComputedStyle(limit);
+        low = Math.max(low, box.left + (parseFloat(style.paddingLeft) || 0));
+        high = Math.min(
+          high,
+          box.right - (parseFloat(style.paddingRight) || 0),
+        );
+        // As wide as the room from its trigger's start (or to its end) to the panel's far edge, so it stays under it.
+        const room = start
+          ? high - Math.max(low, button.left)
+          : Math.min(high, button.right) - low;
+        panel.style.maxWidth = `${Math.max(room, 0)}px`;
+      }
+      const width = panel.offsetWidth;
+      const left = start ? button.left : button.right - width;
+      panel.style.left = `${Math.max(low, Math.min(left, high - width))}px`;
       // Never over its trigger (the UI standard): on its preferred side when it fits, else the other side when that
-      // fits, else the roomier side with its height capped there so its list scrolls. Measured at its natural height.
+      // fits, else the roomier side with its height capped there so its list scrolls. Measured at its natural height,
+      // with its list put back where the person had scrolled it (WEB-U-433).
+      const scrolled = panel.scrollTop;
       panel.style.maxHeight = "";
       const height = panel.offsetHeight;
       const below = innerHeight - button.bottom - 2 * gap;
@@ -70,6 +92,7 @@ export function Popover({
       const upward = side.current === "up";
       const room = upward ? above : below;
       if (height > room) panel.style.maxHeight = `${Math.max(room, 0)}px`;
+      panel.scrollTop = scrolled;
       // Upward, the bottom edge is pinned above the trigger, so content that arrives later (a lazily loaded menu)
       // grows the surface upward instead of over the trigger (WEB-E2E-018).
       if (upward) {
@@ -100,12 +123,21 @@ export function Popover({
       position();
     }
     window.addEventListener("resize", resize);
-    document.addEventListener("scroll", position, true);
+    // A scroll of the page or a panel moves its trigger; the menu's own list scrolling moves nothing (WEB-U-433).
+    function scroll(event: Event) {
+      if (
+        event.target instanceof Node &&
+        surface.current?.contains(event.target)
+      )
+        return;
+      position();
+    }
+    document.addEventListener("scroll", scroll, true);
     document.addEventListener("focusin", blur);
     return () => {
       observer?.disconnect();
       window.removeEventListener("resize", resize);
-      document.removeEventListener("scroll", position, true);
+      document.removeEventListener("scroll", scroll, true);
       document.removeEventListener("focusin", blur);
     };
   }, [anchor, onClose, placement, host]);

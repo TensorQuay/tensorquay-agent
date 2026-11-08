@@ -20,9 +20,9 @@ describe("WEB-U-001 transcript presentation", () => {
       screen.getByText(/The workspace contains a Rust project/),
     ).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: /Worked for/ }));
-    expect(screen.getByText("Thinking").closest("details")).not.toHaveAttribute(
-      "open",
-    );
+    expect(
+      screen.getByText(/^Thought for /).closest("details"),
+    ).not.toHaveAttribute("open");
     // The latest tool's card opens with its group (finding T2).
     expect(
       screen.getByRole("button", { name: "Ran a command: ls" }),

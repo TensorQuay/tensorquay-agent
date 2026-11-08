@@ -786,6 +786,10 @@ async function handle(request, response) {
           /(?:^|;\s*)fixture_hold=narration(?:;|$)/.test(
             request.headers.cookie ?? "",
           );
+        // Fixture only: the slow scenario (slow-run.mjs) held at each kind of step's first showing, for its checks.
+        conversation.holdSteps = /(?:^|;\s*)fixture_hold=steps(?:;|$)/.test(
+          request.headers.cookie ?? "",
+        );
         begin(conversation, input.text, input.attachments ?? [], {
           id: ids.get(key),
           author: { id: user.id, email: user.email },

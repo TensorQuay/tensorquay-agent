@@ -6,8 +6,10 @@ import { type ReactNode, useState } from "react";
 
 import { newActionKey } from "../api/action-key";
 import { useT } from "../i18n/I18nProvider";
+import type { Translate } from "../i18n/translate";
 import type { EnvironmentSize, User } from "../protocol/generated/api";
 import { Button } from "../ui/Button";
+import { CellNote } from "../ui/CellNote";
 import { ConfirmDialog } from "../ui/ConfirmDialog";
 import { Skeleton } from "../ui/Skeleton";
 import { TableScroll } from "../ui/TableScroll";
@@ -29,7 +31,7 @@ import {
   NAMES,
   refusal,
 } from "./limit-copy";
-import { LimitForm } from "./LimitForm";
+import { LimitForm, limitNoteWords } from "./LimitForm";
 import { LoadFailure } from "./LoadFailure";
 
 const KEY = ["admin-limits"];
@@ -121,6 +123,7 @@ function Limits({ api }: { api: LimitsApi }) {
       {dialog && "edit" in dialog && (
         <LimitForm
           item={dialog.edit}
+          note={helperNote(dialog.edit, list.data.items, t)}
           api={api}
           onClose={() => setDialog(null)}
           onReset={(item) => open({ reset: item })}
@@ -223,20 +226,23 @@ function LimitRow({
   // A value set here is the only one to name its source (its reset is in the edit dialog); the rest come from the file.
   const setHere = item.last_set_by === "admin";
   const applies = APPLIES[item.key];
+  const words = [
+    setHere ? t("limits.setHere") : null,
+    applies ? t(applies.short) : null,
+    ...limitNoteWords(item, t),
+    note,
+  ]
+    .filter(Boolean)
+    .join(" · ");
   return (
     <tr>
       <td>{name}</td>
       <td>
         <div className="stack route-name">
           <span>{display(t, item.unit, item.value)}</span>
-          {setHere && (
-            <span className="type-small muted">{t("limits.setHere")}</span>
-          )}
-          {applies && (
-            <span className="type-small muted">{t(applies.short)}</span>
-          )}
-          <LimitNotes item={item} />
-          {note && <span className="type-small limit-note">{note}</span>}
+          {/* One muted line (17.3): where it was set, when a change applies, and its notes; its Edit dialog says
+              each in full. */}
+          {words && <CellNote>{words}</CellNote>}
         </div>
       </td>
       <td className="data-cell-action">
@@ -253,39 +259,31 @@ function LimitRow({
 }
 
 /**
- * What differs from the configuration file, in words. At load the gateway moves a stored value the file's bounds no
- * longer allow to the nearest bound and keeps the old one (`clamped_from`), so the row shows the bound and the note what
- * it was; or the file set a value below what can be set here.
+ * A helper limit's own words, for its row and its Edit dialog (17.3): the most helpers can be no more than the room left
+ * beside the lead in the slots it shares, and a done helper holds its place until stopped (ADR-0034 member states).
  */
-function LimitNotes({ item }: { item: Limit }) {
-  const t = useT();
-  const shown = (value: number) => display(t, item.unit, value);
-  const clamped = item.clamped_from;
-  return (
-    <>
-      {clamped !== null && (clamped > item.max || clamped < item.min) && (
-        <span className="type-small limit-note">
-          {clamped > item.max
-            ? t("limits.clampedDown", {
-                was: shown(clamped),
-                max: shown(item.max),
-              })
-            : t("limits.clampedUp", {
-                was: shown(clamped),
-                min: shown(item.min),
-              })}
-        </span>
-      )}
-      {item.below_floor && item.value < item.min && (
-        <span className="type-small limit-note">
-          {t("limits.belowFloorWords", {
-            value: shown(item.value),
-            floor: shown(item.min),
-          })}
-        </span>
-      )}
-    </>
-  );
+export function helperNote(
+  item: Limit,
+  all: readonly Limit[],
+  t: Translate,
+): string | null {
+  if (item.key !== "agent_teams.max_members") return null;
+  const room = (["admission.slots", "admission.per_user"] as const)
+    .map((key) => all.find((each) => each.key === key))
+    .filter((each): each is Limit => each !== undefined)
+    .sort((a, b) => a.value - b.value)[0];
+  return [
+    room && room.value - 1 < item.value
+      ? t("limits.capLowered", {
+          value: display(t, "helpers", Math.max(room.value - 1, 0)),
+          name: t(NAMES[room.key]),
+          limit: display(t, room.unit, room.value),
+        })
+      : null,
+    t("limits.doneCounts"),
+  ]
+    .filter(Boolean)
+    .join(" ");
 }
 
 /**
@@ -312,26 +310,7 @@ function Helpers({
   const t = useT();
   const read = useHelperSettings(api);
   const [editing, setEditing] = useState<Setting | null>(null);
-  const room = (["admission.slots", "admission.per_user"] as const)
-    .map((key) => all.find((item) => item.key === key))
-    .filter((item): item is Limit => item !== undefined)
-    .sort((a, b) => a.value - b.value)[0];
-  // A done helper can be given more work, so it holds its place until stopped (ADR-0034 member states).
-  const note = (item: Limit) =>
-    item.key === "agent_teams.max_members"
-      ? [
-          room && room.value - 1 < item.value
-            ? t("limits.capLowered", {
-                value: display(t, "helpers", Math.max(room.value - 1, 0)),
-                name: t(NAMES[room.key]),
-                limit: display(t, room.unit, room.value),
-              })
-            : null,
-          t("limits.doneCounts"),
-        ]
-          .filter(Boolean)
-          .join(" ")
-      : null;
+  const note = (item: Limit) => helperNote(item, all, t);
   return (
     <section className="stack" aria-labelledby="limits-helpers">
       <h2 id="limits-helpers" className="type-label muted">
@@ -349,9 +328,7 @@ function Helpers({
             <td>
               <div className="stack route-name">
                 <span>{t("limits.on")}</span>
-                <span className="type-small muted">
-                  {t("limits.switchFromFile")}
-                </span>
+                <CellNote>{t("limits.switchFromFile")}</CellNote>
               </div>
             </td>
             <td />

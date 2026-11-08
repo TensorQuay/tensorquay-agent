@@ -38,7 +38,11 @@ for (const width of [1024, 1440]) {
       await page.goto("/");
       const input = page.getByRole("textbox", { name: "Message", exact: true });
       await expect(input).toBeFocused();
-      await expect(input).toHaveAttribute("placeholder", "Describe the task…");
+      // A person with no tasks yet: the keyboard hint is the placeholder's second line (WEB-U-431).
+      await expect(input).toHaveAttribute(
+        "placeholder",
+        "Describe the task…\nEnter to send · Shift+Enter for a new line",
+      );
       // What the task will use is in the composer: its model and environment pickers (WEB-U-102).
       await expect(
         page.getByRole("button", { name: "Model: Local model" }),
@@ -200,9 +204,14 @@ test("WEB-U-017 New task at 390: title beside the menu, a placeholder of its own
   expect((title?.x ?? 0) - ((menu?.x ?? 0) + (menu?.width ?? 0))).toBeLessThan(
     24,
   );
+  // Not the heading again; a person with no tasks yet also reads the keyboard hint under it (WEB-U-431; a narrow
+  // window with a mouse is not a touch screen).
   await expect(
     page.getByRole("textbox", { name: "Message", exact: true }),
-  ).toHaveAttribute("placeholder", "Describe the task…");
+  ).toHaveAttribute(
+    "placeholder",
+    "Describe the task…\nEnter to send · Shift+Enter for a new line",
+  );
   const weight = await page
     .getByRole("button", {
       name: "Draft a one-page plan for launching a newsletter",

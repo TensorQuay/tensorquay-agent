@@ -8,6 +8,7 @@ import { ApiError } from "../api/error";
 import { useT } from "../i18n/I18nProvider";
 import type { MessageKey } from "../i18n/translate";
 import { Button } from "../ui/Button";
+import { CheckRow } from "../ui/CheckRow";
 import { Dialog } from "../ui/Dialog";
 import { FormRefusal } from "../ui/FormRefusal";
 import { Input } from "../ui/Input";
@@ -221,15 +222,13 @@ function Check({
   const t = useT();
   return (
     <div>
-      <label className="check-row type-small">
-        <input
-          type="checkbox"
-          checked={section.draft[name] && !disabled}
-          disabled={disabled}
-          onChange={(event) => section.set({ [name]: event.target.checked })}
-        />
-        {t(labelKey)}
-      </label>
+      <CheckRow
+        className="type-small"
+        checked={section.draft[name] && !disabled}
+        disabled={disabled}
+        onChange={(event) => section.set({ [name]: event.target.checked })}
+        label={t(labelKey)}
+      />
       <p className="type-small muted">{t(hintKey)}</p>
     </div>
   );

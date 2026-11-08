@@ -40,19 +40,20 @@ describe("WEB-U-123 a long think shows its time and its thinking", () => {
     expect(live).toHaveTextContent("Thinking… · 1 min 35 s");
   });
 
-  it("opens the current step's thinking from the live line, and shows it once", () => {
+  // 17.3: the thinking shows itself, open under the live line; the line folds it.
+  it("shows the current step's thinking open under the live line, once, and folds it from there", () => {
     vi.useFakeTimers({ now: after(4, 3) });
     show([
       ...start,
       frame(4, { type: "reasoning.delta", text: "Let me see the totals." }),
     ]);
     const live = screen.getByRole("button", { name: /^Thinking…/ });
-    expect(live).toHaveAttribute("aria-expanded", "false");
-    expect(screen.queryByText("Let me see the totals.")).not.toBeVisible();
-    fireEvent.click(live);
     expect(live).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByText("Let me see the totals.")).toBeVisible();
     expect(screen.getAllByText("Let me see the totals.")).toHaveLength(1);
+    fireEvent.click(live);
+    expect(live).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByText("Let me see the totals.")).not.toBeVisible();
   });
 
   it("keeps earlier steps' thinking in the group's Thinking while the next step thinks", () => {

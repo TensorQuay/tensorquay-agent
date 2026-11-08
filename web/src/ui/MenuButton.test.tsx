@@ -465,3 +465,53 @@ describe("WEB-U-134 grouped choices", () => {
     expect(change).toHaveBeenCalledWith("people");
   });
 });
+
+// WEB-U-432: the Changes panel's run picker: each run on one line, and its "Latest" mark on the button only, so it is
+// said once while the menu is open under it.
+describe("WEB-U-432 a picker's one-line choices and its button-only mark", () => {
+  const runs = [
+    {
+      id: "b",
+      label: "Update the summary",
+      detail: <span className="type-small muted">2 min. ago</span>,
+      decoration: <span>Latest</span>,
+    },
+    {
+      id: "a",
+      label: "Find the three smallest primes greater than 1000",
+      detail: <span className="type-small muted">5 min. ago</span>,
+    },
+  ];
+
+  it("reads each choice on one line and keeps the mark on its button", () => {
+    render(
+      <MenuButton
+        label="Run"
+        options={runs}
+        value="b"
+        onChange={vi.fn()}
+        oneLine
+        rowDecorations={false}
+      />,
+    );
+    const trigger = screen.getByRole("button", {
+      name: "Run: Update the summary",
+    });
+    expect(within(trigger).getByText("Latest")).toBeVisible();
+    fireEvent.click(trigger);
+    const menu = screen.getByRole("menu", { name: "Run" });
+    expect(menu).toHaveAttribute("data-lines", "one");
+    expect(within(menu).queryByText("Latest")).toBeNull();
+    expect(screen.getAllByText("Latest")).toHaveLength(1);
+  });
+
+  it("shows a choice's mark on its row too, by default", () => {
+    render(
+      <MenuButton label="Run" options={runs} value="a" onChange={vi.fn()} />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /^Run: / }));
+    const menu = screen.getByRole("menu", { name: "Run" });
+    expect(menu).not.toHaveAttribute("data-lines");
+    expect(within(menu).getByText("Latest")).toBeVisible();
+  });
+});

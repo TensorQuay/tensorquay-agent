@@ -16,11 +16,18 @@
   min-width: 12em;
 }
 /* The UI standard's Popover: past 7 choices a search field heads the list; nothing found says so in the list's place. */
+/* A picker's Find box (§7 Popover, WEB-E2E-098) stays at the top while its list scrolls under it, inside the menu's
+   height, which the room on its side of the trigger caps. Its padding leaves room for the box's focus ring. */
+.popover .menu-find {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: var(--space-2);
+  background: var(--surface-raised);
+}
 .popover .menu-search {
   display: block;
-  width: calc(100% - var(--space-4));
-  /* Room for its focus ring inside the popover, whose scrolling edge would clip it into a heavy line. */
-  margin: var(--space-2);
+  width: 100%;
 }
 .menu-empty {
   margin: 0;
@@ -107,6 +114,23 @@
   display: flex;
   flex: 1;
   flex-direction: column;
+}
+/* A picker whose choices read on one line (the Changes panel's runs, WEB-U-432): the name, cut by an ellipsis, then
+   its muted line. */
+.menu[data-lines="one"] .menu-choice {
+  flex-direction: row;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+  white-space: nowrap;
+}
+.menu[data-lines="one"] .menu-choice > :first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.menu[data-lines="one"] .menu-choice > :not(:first-child) {
+  flex-shrink: 0;
 }
 .account-signout {
   border-top: var(--border-width) solid var(--line);

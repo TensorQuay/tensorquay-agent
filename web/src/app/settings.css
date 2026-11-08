@@ -52,16 +52,19 @@
 .settings-nav .nav-icon {
   flex-shrink: 0;
 }
-.settings-nav .nav-item[aria-current="page"] {
-  background: var(--surface);
-  color: var(--ink);
-}
+/* The Settings menu's item is §5c's active item: the selected fill, kept under the pointer (17.3). */
+.settings-nav .nav-item[aria-current="page"],
 .settings-nav .nav-item[aria-current="page"]:hover {
-  background: color-mix(in srgb, var(--surface), var(--ink) var(--hover-share));
+  background: var(--selected-fill);
+  color: var(--ink);
 }
 .settings-column {
   grid-area: column;
   min-width: 0;
+}
+/* A section's name over its one muted line (17.3), the section's own spacing below it. */
+.settings-section-title {
+  margin-bottom: var(--space-2);
 }
 .settings-section {
   gap: var(--space-4);
@@ -98,7 +101,7 @@
   gap: var(--space-1);
 }
 .keys-views .nav-item[aria-current="page"] {
-  background: var(--surface);
+  background: var(--selected-fill);
   color: var(--ink);
 }
 .settings-bar {
@@ -160,6 +163,122 @@
 .data-table tbody tr:hover {
   background: var(--surface);
 }
+/* §7 Table (17.3): a control in a row is 32 px with 4 px around it, so a one-line row stays 40 px; a cell is its value
+   and at most one muted line (.cell-note), cut with "…" and whole in its tooltip; a table with such a line gives every
+   row the same two-line height. Widths: a column whose cells carry a muted line keeps 16rem, then the name column takes
+   the rest (at least 12ch); on Limits the value column takes it instead (below). */
+.data-table th:first-child,
+.data-table td:first-child {
+  width: 100%;
+}
+.data-table td .button {
+  height: var(--row-height-nav);
+  min-height: var(--row-height-nav);
+}
+.data-table td .icon-button {
+  width: var(--row-height-nav);
+}
+/* A control or a link in a cell sits in the line's middle, never on its baseline (which leaves room for descenders). */
+.data-table td :is(.button, .icon-action, a) {
+  vertical-align: middle;
+}
+.data-table td:has(.button, a) {
+  padding-block: var(--space-1);
+}
+/* On touch the control is the row's 44 px (§5c), so the row stays 44 px. */
+@media (pointer: coarse) {
+  .data-table td:has(.button) {
+    padding-block: 0;
+  }
+}
+/* The name column's name is never held to the name width, nor widens its column: it takes the room the other columns
+   leave, cut with "…" only where that ends (whole in its tooltip), as a cell's note is. */
+.data-table td:first-child .data-name {
+  contain: inline-size;
+  min-width: 12ch;
+  max-width: none;
+}
+/* An environment's tools in a table row: one line, cut with "…", every tool named in its tooltip (17.3). Each tool is
+   inline there, so the "…" sits on their words' line; a card (under 600 px) lists them all. */
+@container data-table (min-width: 600px) {
+  .data-table .environment-tools {
+    display: block;
+    max-width: var(--table-tools-width);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .data-table .environment-tools li {
+    display: inline;
+    margin-inline-end: var(--space-3);
+  }
+  .data-table .environment-tools svg {
+    display: inline-block;
+    margin-inline-end: var(--space-1);
+    vertical-align: middle;
+  }
+}
+/* A note's words never widen its column (its inline size is contained). */
+.cell-note {
+  display: block;
+  contain: inline-size;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* A value that may be long (a command, an address, a last use, an email) keeps its own width up to 16rem and is cut
+   with "…" past it, whole in its tooltip and on its own page or dialog (17.3). */
+.cell-cut {
+  display: block;
+  max-width: var(--table-note-width);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* Outside the name column, a column whose cells carry a muted line keeps 16rem, so its notes read as words, not as a
+   few letters and "…" (17.3). */
+.data-table td:not(:first-child) .cell-note {
+  min-width: calc(var(--table-note-width) - 2 * var(--space-2));
+}
+.data-table:has(.cell-note) td {
+  height: var(--row-height-table-two);
+}
+/* A cell's pills side by side, on its value line (17.3), centred on it as its words are. */
+.cell-pills {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--space-1);
+}
+.cell-pills > .status-pill {
+  align-self: center;
+}
+/* A note that starts with a link (where to add a missing key): the link, underlined in the text's colour and as high as
+   the minimum control to hit (§5b), is never cut: its column keeps the link's width. The words after it follow on the
+   same line, cut with "…" where it ends. */
+.cell-note:has(> .cell-note-link) {
+  display: flex;
+  align-items: center;
+  contain: none;
+}
+.cell-note > * {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: pre;
+}
+.cell-note-link {
+  flex: none;
+  overflow: visible;
+  min-height: var(--min-control-height);
+  line-height: var(--min-control-height);
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.cell-note-link:hover {
+  color: var(--muted);
+}
 /* A name or email truncates with the full text on hover; a badge beside it never does. */
 .data-name {
   display: flex;
@@ -208,8 +327,10 @@
     min-width: 0;
   }
 }
-/* Links in tables and the back link: underlined, with at least the minimum control height to hit (§5b). */
-.data-table a,
+/* Links in tables and the back link: underlined, with at least the minimum control height to hit (§5b). A button drawn
+   as a link (a row's Edit that opens its page) is a button, never an underlined link (17.3); a link in a cell's note
+   stays inline in that line (above). */
+.data-table a:not(.button, .cell-note-link),
 .back-link {
   display: inline-flex;
   align-items: center;
@@ -220,7 +341,7 @@
 .back-link {
   align-self: flex-start;
 }
-.data-table a:hover {
+.data-table a:not(.button, .cell-note-link):hover {
   color: var(--muted);
 }
 .back-link:hover {
@@ -228,6 +349,13 @@
 }
 .data-cell-action {
   text-align: right;
+}
+/* A route's key state on its page (17.3): the pill and where to add the key, on one line. */
+.route-key-state {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 /* Where a table's own column is narrow (a phone, or beside a menu), its rows are cards rather than a table to scroll
@@ -285,11 +413,33 @@
     display: block;
     color: var(--muted);
     font-size: var(--label-size);
-    font-weight: 500;
     line-height: var(--small-leading);
   }
   .data-table .data-name {
     max-width: none;
+  }
+  /* A card is no table row (17.3): no two-line height or a row's padding around a control, and a cell's note wraps in
+     full, since a phone shows no tooltip. */
+  .data-table:has(.cell-note) td,
+  .data-table td:has(.button, a) {
+    height: auto;
+    padding-block: var(--space-1);
+  }
+  .data-table .cell-note,
+  .data-table .cell-cut,
+  .data-table td:not(:first-child) .cell-note {
+    contain: none;
+    min-width: 0;
+    max-width: none;
+    overflow: visible;
+    white-space: normal;
+  }
+  .data-table .cell-note:has(> .cell-note-link) {
+    flex-wrap: wrap;
+  }
+  .data-table .cell-note > * {
+    overflow: visible;
+    white-space: pre-wrap;
   }
 }
 .data-select {
@@ -349,14 +499,24 @@
   font-variant-numeric: tabular-nums;
 }
 .data-table tfoot td {
-  font-weight: 600;
+  font-weight: 700;
   border-bottom: 0;
 }
 
 /* The Models page: the route dialog is form-wide and scrolls; its groups are quiet fieldsets. */
-/* The reads table's five columns show whole at 1024 and up; a long email wraps (UX review 0927b, item 1). */
+/* The reads table's five columns show whole at 1024 and up (UX review 0927b, item 1). */
 .reads-dialog {
   width: min(52rem, calc(100% - var(--space-8)));
+}
+/* §7 Table in a dialog (17.3): each column keeps its content's width, its short notes whole ("12 times since …", "Run
+   unknown"), and the person's column takes the rest, a long address cut there, whole in its tooltip. */
+.reads-dialog .data-table th:first-child,
+.reads-dialog .data-table td:first-child {
+  width: auto;
+}
+.reads-dialog .data-table td .cell-note {
+  contain: none;
+  min-width: 0;
 }
 /* A cell of words that may wrap, so a longer label ("Configuration file") never widens its table (§6). */
 .data-table td.cell-wrap,
@@ -364,12 +524,32 @@
   white-space: normal;
 }
 .reads-dialog td.read-person {
-  white-space: normal;
-  overflow-wrap: anywhere;
+  width: 100%;
+}
+.reads-dialog td.read-person .cell-cut {
+  contain: inline-size;
+  max-width: none;
 }
 .route-dialog {
   width: min(var(--form-width), calc(100% - var(--space-8)));
   overflow-y: auto;
+}
+/* The route form's Shared key (§7 Input): a typed field with suggestions, so it can refuse a pasted key (SEC-033), that
+   looks like the standard picker: the browser's own list indicator hidden, the standard 16 px chevron 12 px inside its
+   right edge, its text stopping short of it (WEB-E2E-099). */
+/* The browser's own rule for a list input's indicator is !important, so only an !important rule hides it. */
+.key-ref-input::-webkit-calendar-picker-indicator {
+  display: none !important;
+}
+.form-control.key-ref-input {
+  padding-right: var(--space-8);
+}
+.key-ref-chevron {
+  position: absolute;
+  top: 50%;
+  right: var(--space-3);
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 /* Paste a key, inside the route form: an inset panel whose buttons read as its own (UX review 0927b, item 2). */
 .paste-key-panel {
@@ -428,12 +608,6 @@ details.route-group[open] > summary::before {
 details.route-group > summary::-webkit-details-marker {
   display: none;
 }
-.check-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: var(--min-control-height);
-}
 .fallback-list {
   margin: 0;
   padding: 0;
@@ -460,22 +634,15 @@ details.route-group > summary::-webkit-details-marker {
   display: flex;
   flex-direction: column;
 }
-/* The limits table's text wraps so its four columns fit the settings column; actions and pills stay on one line. */
-.limits-table td:not(.data-cell-action) {
-  white-space: normal;
-  overflow-wrap: normal;
-  padding-block: var(--space-2);
+/* §7 Table (17.3): on Limits the value column takes the room, since the notes are the value's; the names keep their own
+   width, 16 px from their value as in every table. */
+.limits-table th:first-child,
+.limits-table td:first-child {
+  width: auto;
 }
-.limits-table .status-pill {
-  white-space: nowrap;
-}
-/* A range never splits inside a value: the column takes its longest range and the names wrap instead. */
-.limits-table .limit-range {
-  white-space: nowrap;
-}
-.limits-table th,
-.limits-table td {
-  padding-inline: var(--space-1);
+.limits-table th:nth-child(2),
+.limits-table td:nth-child(2) {
+  width: 100%;
 }
 /* 099b-2: a route check's observations as term and value rows, and the server's answer as wrapped inert text. */
 .check-list {
@@ -501,16 +668,6 @@ details.route-group > summary::-webkit-details-marker {
   max-height: 12rem;
   overflow: auto;
 }
-/* WEB-U-052/054/056: a secret's name or reference, who may use it and its reminder wrap, so tables fit 720 px (§6). */
-.data-table td.secret-changed {
-  white-space: normal;
-}
-/* F8 (the first hour): a route's name and description wrap in their column, so a real description never pushes the
-   key and the actions off the table at 1280. */
-.models-table td:first-child {
-  white-space: normal;
-  min-width: 12ch;
-}
 /* A secret's name elsewhere (a route's key, a secret file) wraps anywhere rather than widen its table (WEB-U-054). */
 .secret-ref {
   overflow-wrap: anywhere;
@@ -527,10 +684,6 @@ details.route-group > summary::-webkit-details-marker {
 }
 .secret-changed .nowrap {
   white-space: nowrap;
-}
-/* A due reminder's pill under the name keeps its own width. */
-.secret-changed .status-pill {
-  align-self: flex-start;
 }
 /* The route's Check sits under its model; the ghost button's own padding is pulled back so its label lines up with
    the text above it, while the whole button stays the hit area (§5b). */
@@ -600,28 +753,6 @@ button.model-option:focus-visible {
   gap: var(--space-1);
   white-space: nowrap;
 }
-/* The environments table's text (a refusal's sentence, the origin line) wraps so its four columns fit the settings
-   column; pills and actions stay on one line, as on Limits. */
-.environments-table td:not(.data-cell-action) {
-  white-space: normal;
-  padding-block: var(--space-2);
-}
-.environments-table .status-pill,
-.environments-table .button {
-  white-space: nowrap;
-}
-
-/* The decision engines table's text (the host and source lines, what it sees) wraps so its four columns fit the settings
-   column, as on Environments; pills and actions stay on one line. */
-.engines-table td:not(.data-cell-action) {
-  white-space: normal;
-  padding-block: var(--space-2);
-}
-.engines-table .status-pill,
-.engines-table .button {
-  white-space: nowrap;
-}
-
 /* An engine's budget: calls, tokens and period side by side, wrapping on a narrow screen. */
 .engine-budget-row {
   display: flex;
@@ -843,7 +974,7 @@ button.model-option:focus-visible {
 }
 /* A form section's heading: plain body type, a little stronger, not the mono label face. */
 .route-group-legend {
-  font-weight: 600;
+  font-weight: 700;
 }
 /* A duration's number and its unit side by side; other limits have the number alone, full width (WEB-U-041). */
 .limit-value {
@@ -909,7 +1040,7 @@ button.model-option:focus-visible {
 /* Status (WEB-U-033): whether new tasks can start, in the colour of its answer; each failing check set apart. */
 .status-verdict-line {
   margin: 0;
-  font-weight: 600;
+  font-weight: 700;
 }
 .status-verdict-line[data-tone="ok"] {
   color: var(--ok);
@@ -932,7 +1063,7 @@ tr[data-expired] td:not(.data-cell-action) {
 }
 /* The current model in List models, named in words beside its edge (UI-GUIDELINES §9). */
 .model-current {
-  font-weight: 600;
+  font-weight: 700;
 }
 
 /* The route form's one-line summaries while editing (F4): the text, then its Change or Replace. */

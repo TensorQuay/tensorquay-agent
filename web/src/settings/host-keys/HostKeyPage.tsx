@@ -8,6 +8,7 @@ import { useId, useState } from "react";
 import { ApiError } from "../../api/error";
 import { useT } from "../../i18n/I18nProvider";
 import type { MessageKey } from "../../i18n/translate";
+import { CheckRow } from "../../ui/CheckRow";
 import { Input } from "../../ui/Input";
 import { Skeleton } from "../../ui/Skeleton";
 import { LoadFailure } from "../LoadFailure";
@@ -326,18 +327,21 @@ function KeyForm({
         >
           {schemes.map((scheme) => (
             <div key={scheme} className="stack">
-              <label className="check-row type-small">
-                <input
-                  type="radio"
-                  name="host-key-scheme"
-                  checked={draft.scheme === scheme}
-                  onChange={() => change({ scheme })}
-                />
-                <span>
-                  {t(SCHEME_WORDS[scheme].label)}{" "}
-                  <span className="muted">{t(SCHEME_WORDS[scheme].line)}</span>
-                </span>
-              </label>
+              <CheckRow
+                type="radio"
+                className="type-small"
+                name="host-key-scheme"
+                checked={draft.scheme === scheme}
+                onChange={() => change({ scheme })}
+                label={
+                  <span>
+                    {t(SCHEME_WORDS[scheme].label)}{" "}
+                    <span className="muted">
+                      {t(SCHEME_WORDS[scheme].line)}
+                    </span>
+                  </span>
+                }
+              />
               {scheme === "basic" && draft.scheme === "basic" && (
                 <Input
                   label={t("hostKeys.userName")}

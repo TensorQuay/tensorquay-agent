@@ -173,7 +173,8 @@ test("WEB-U-047 members see no Environments section", async ({ page }) => {
 });
 
 // An image holding credential files in its own layers is refused, naming each path and what it is, never its
-// content; an acknowledged one is marked (ADR-0032 amendment; WEB-U-060 browser part). Each run adds and deletes its own.
+// content; an acknowledged one is marked (ADR-0032 amendment; WEB-U-060 browser part): in the row's one muted line,
+// whole in its tooltip, and in full on the environment's page (17.3). Each run adds and deletes its own.
 for (const width of [1024, 1280] as const)
   for (const colorScheme of ["light", "dark"] as const)
     test(`WEB-U-060 credential files in an image ${width} ${colorScheme}`, async ({
@@ -192,21 +193,41 @@ for (const width of [1024, 1280] as const)
         name: new RegExp(`Credentials ${name}`),
       });
       await expect(row).toContainText("Refused", { timeout: 15_000 });
-      await expect(row).toContainText(
+      const note = row
+        .locator(".cell-note")
+        .filter({ hasText: "Its image holds credential files" });
+      await expect(note).toContainText(
         "Its image holds credential files that every task would get.",
       );
-      const list = row.getByRole("list", { name: "Credential files found" });
-      await expect(list.getByRole("listitem")).toHaveText([
-        "/root/.git-credentials: saved logins for a code host",
-        "/opt/test/fixture_key: a private key (acknowledged)",
-      ]);
-      await expect(row).toContainText("and 2 more");
+      await expect(note).toHaveAttribute(
+        "title",
+        / · \/root\/\.git-credentials: saved logins for a code host · .* · and 2 more · /,
+      );
       await fitsColumn(page, /^More actions for environment /);
       await axe(page);
       await capture(
         page,
         `environment-credential-files-${width}-${colorScheme}`,
       );
+      await row
+        .getByRole("link", { name: `Edit environment Credentials ${name}` })
+        .click();
+      const status = page.getByRole("region", { name: "Status" });
+      await expect(status).toContainText(
+        "Its image holds credential files that every task would get.",
+      );
+      const list = status.getByRole("list", { name: "Credential files found" });
+      await expect(list.getByRole("listitem")).toHaveText([
+        "/root/.git-credentials: saved logins for a code host",
+        "/opt/test/fixture_key: a private key (acknowledged)",
+      ]);
+      await expect(status).toContainText("and 2 more");
+      await axe(page);
+      await capture(
+        page,
+        `environment-credential-files-page-${width}-${colorScheme}`,
+      );
+      await page.goto("/settings/environments");
       await menu(
         page,
         `Credentials ${name}`,

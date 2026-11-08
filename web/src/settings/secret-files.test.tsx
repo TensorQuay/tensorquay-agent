@@ -1,36 +1,35 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, screen, within } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 
-import type { User } from "../protocol/generated/api";
+import { cellNote } from "../test/cell-note";
+import { showEnvironments } from "../test/environment-app";
 import { environment, fakeTemplates } from "../test/templates-admin";
-import { LIMITS } from "../test/user";
 
 import type { EnvironmentItem } from "./admin/templates";
-import { EnvironmentsSettings } from "./EnvironmentsSettings";
 
-const admin: User = {
-  id: "0195d8c0-0000-7000-8000-000000000001",
-  email: "admin@example.invalid",
-  role: "admin",
-  internet: "none",
-  limits: LIMITS,
-  features: { agent_teams: false },
-};
+/** Replaced by the harness once it renders (showEnvironments). */
+const router = vi.hoisted(() => ({ push: vi.fn<(href: string) => void>() }));
+vi.mock("next/navigation", () => ({ useRouter: () => router }));
+vi.mock("next/link", async () => {
+  const { createElement } = await import("react");
+  return {
+    default: ({ href, children, ...rest }: Record<string, unknown>) =>
+      createElement("a", { href, ...rest }, children as never),
+  };
+});
+
+/** The Environments list, from which each environment's page opens (its Status section says the check in full). */
 function show(environments: EnvironmentItem[]) {
-  const cache = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-  render(
-    <QueryClientProvider client={cache}>
-      <EnvironmentsSettings
-        me={admin}
-        api={fakeTemplates({ environments }).api}
-      />
-    </QueryClientProvider>,
-  );
+  showEnvironments(fakeTemplates({ environments }).api, router);
 }
 const row = (name: RegExp) => screen.getByRole("row", { name });
+/** Opens an environment's page from its row, and returns the page's Status section. */
+async function status(display: string) {
+  fireEvent.click(
+    screen.getByRole("link", { name: `Edit environment ${display}` }),
+  );
+  return screen.findByRole("region", { name: "Status" });
+}
 type Check = EnvironmentItem["check"];
 const refused = (check: Partial<Check>): Check => ({
   state: "refused",
@@ -43,7 +42,8 @@ const refused = (check: Partial<Check>): Check => ({
 
 // The image policy's secret-file scan (ADR-0032 amendment; SBX-C-014, GW-U-063): a template image that holds credential
 // files is refused, naming each path and what it looks like, never its content; paths the install file acknowledges
-// verify with a warning; an image too large to scan says which setting to raise (WEB-U-060).
+// verify with a warning; an image too large to scan says which setting to raise (WEB-U-060). The list row says it in
+// one muted line, whole in its tooltip; the environment's page in full (17.3).
 describe("WEB-U-060 credential files in an environment's image", () => {
   it("names each refused path as code with what it is, marks acknowledged ones, and counts the rest", async () => {
     show([
@@ -76,7 +76,12 @@ describe("WEB-U-060 credential files in an environment's image", () => {
       }),
     ]);
     await screen.findByRole("table", { name: "Environments" });
-    const data = row(/Data science/);
+    expect(
+      cellNote(row(/Data science/), "Credential files found"),
+    ).toHaveTextContent(
+      "Its image holds credential files that every task would get. Remove them, or acknowledge a path in the install file if it must stay. · Credential files found · /root/.git-credentials: saved logins for a code host · /srv/keys/deploy.pem: a private key · /opt/test/fixture_key: a private key (acknowledged) · and 3 more · People cannot pick it until it passes the check.",
+    );
+    const data = await status("Data science");
     expect(
       within(data).getByText(
         "Its image holds credential files that every task would get. Remove them, or acknowledge a path in the install file if it must stay.",
@@ -122,7 +127,12 @@ describe("WEB-U-060 credential files in an environment's image", () => {
       }),
     ]);
     await screen.findByRole("table", { name: "Environments" });
-    const fixtures = row(/Test fixtures/);
+    const line = row(/Test fixtures/);
+    expect(within(line).getByText("Verified")).toBeVisible();
+    expect(cellNote(line, "Acknowledged")).toHaveTextContent(
+      "Acknowledged credential files, which every task gets · /opt/test/fixture_key: a private key",
+    );
+    const fixtures = await status("Test fixtures");
     expect(within(fixtures).getByText("Verified")).toBeVisible();
     expect(
       within(fixtures).getByRole("list", {
@@ -183,7 +193,12 @@ describe("WEB-U-060 credential files in an environment's image", () => {
       }),
     ]);
     await screen.findByRole("table", { name: "Environments" });
-    const odd = row(/^Odd/);
+    const line = row(/^Odd/);
+    expect(
+      cellNote(line, "/home/<b>x</b>/�key…: netrc credentials"),
+    ).toBeVisible();
+    expect(line.querySelector("b")).toBeNull();
+    const odd = await status("Odd");
     expect(within(odd).getByText("/home/<b>x</b>/�key…").tagName).toBe("CODE");
     expect(odd).toHaveTextContent("/home/<b>x</b>/�key…: netrc credentials");
     expect(odd.querySelector("b")).toBeNull();

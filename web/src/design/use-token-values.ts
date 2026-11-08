@@ -17,6 +17,7 @@ const pairs = [
   ["danger", "tint"],
   ["info", "tint"],
   ["selection", "ink"],
+  ["selected-fill", "ink"],
   ["focus", "paper"],
   ["code-bg", "ink"],
 ] as const;

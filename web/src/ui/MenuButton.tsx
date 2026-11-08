@@ -61,6 +61,8 @@ export function MenuButton({
   invalid = false,
   describedBy,
   buttonId,
+  oneLine = false,
+  rowDecorations = true,
 }: {
   label: string;
   options: readonly MenuChoice[];
@@ -90,6 +92,10 @@ export function MenuButton({
   describedBy?: string | undefined;
   /** Its button's id, for what focuses it (a check's suggested setting, WEB-U-058). */
   buttonId?: string | undefined;
+  /** Each choice on one line: its name cut by an ellipsis, then its muted line (the Changes panel's runs, WEB-U-432). */
+  oneLine?: boolean;
+  /** Whether a choice's decoration shows on its row as well as on the button (a run's Latest: the button only, once). */
+  rowDecorations?: boolean;
 }) {
   const t = useT();
   const [expanded, setExpanded] = useState(defaultOpen);
@@ -158,7 +164,7 @@ export function MenuButton({
           option.detail
         )}
       </span>
-      {option.decoration}
+      {rowDecorations && option.decoration}
       <span className="menu-check">
         {option.id === value && <Icon glyph={Check} size={16} />}
       </span>
@@ -244,33 +250,35 @@ export function MenuButton({
             </p>
           )}
           {searchable && (
-            <input
-              ref={find}
-              type="search"
-              className="form-control menu-search"
-              aria-label={t("menu.find")}
-              placeholder={t("menu.findPlaceholder")}
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "ArrowDown") {
-                  event.preventDefault();
-                  document
-                    .getElementById(id)
-                    ?.querySelector<HTMLElement>('[role="menuitemradio"]')
-                    ?.focus();
-                } else if (event.key === "Enter") {
-                  event.preventDefault();
-                  const first = shown.find((option) => !option.disabled);
-                  if (first) choose(first);
-                }
-              }}
-            />
+            <div className="menu-find">
+              <input
+                ref={find}
+                type="search"
+                className="form-control menu-search"
+                aria-label={t("menu.find")}
+                placeholder={t("menu.findPlaceholder")}
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "ArrowDown") {
+                    event.preventDefault();
+                    document
+                      .getElementById(id)
+                      ?.querySelector<HTMLElement>('[role="menuitemradio"]')
+                      ?.focus();
+                  } else if (event.key === "Enter") {
+                    event.preventDefault();
+                    const first = shown.find((option) => !option.disabled);
+                    if (first) choose(first);
+                  }
+                }}
+              />
+            </div>
           )}
           {shown.length === 0 && (
             <p className="menu-empty type-small muted">{t("menu.noMatch")}</p>
           )}
-          <Menu label={label} id={id}>
+          <Menu label={label} id={id} lines={oneLine ? "one" : undefined}>
             {groups
               ? groups.map(([group, members], index) => (
                   <div

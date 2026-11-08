@@ -127,7 +127,6 @@ function TranscriptTurns({
             )}
             {(turn.activities.length > 0 ||
               turn.work.length > 0 ||
-              turn.thinking ||
               turn.retries.length > 0 ||
               turn.runKeys.length > 0 ||
               turn.status === "running") && (
@@ -152,9 +151,9 @@ function TranscriptTurns({
             {turn.answer.map((answer) => (
               <div
                 key={answer.id}
-                className={`markdown-answer markdown-body assistant-text ${answer.streaming ? "streaming-text" : ""}`}
+                className="markdown-answer markdown-body assistant-text"
               >
-                <DeferredMarkdown text={answer.text} />
+                <DeferredMarkdown text={answer.text} caret={answer.streaming} />
               </div>
             ))}
             {turn.outcome && (

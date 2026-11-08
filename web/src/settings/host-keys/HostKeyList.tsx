@@ -7,6 +7,7 @@ import { useEffect, useId, useState } from "react";
 
 import { ApiError } from "../../api/error";
 import { useT } from "../../i18n/I18nProvider";
+import { CellNote } from "../../ui/CellNote";
 import { EmptyState } from "../../ui/EmptyState";
 import { Icon } from "../../ui/Icon";
 import { Skeleton } from "../../ui/Skeleton";
@@ -57,8 +58,10 @@ export function HostKeyList({
     retry: false,
   });
   if (keys.error instanceof ApiError && keys.error.status === 404) return null;
+  // The view's one primary (UI-GUIDELINES §7), also as its empty state's one action: the connectors' Add below is
+  // secondary (17.3).
   const add = (
-    <Link href={ADD_KEY} className="button" data-variant="secondary">
+    <Link href={ADD_KEY} className="button" data-variant="primary">
       <span className="button-label">
         <Icon glyph={Plus} />
         {t("hostKeys.add")}
@@ -153,44 +156,50 @@ function KeyRow({
           )}
         </span>
       </td>
-      <td className="cell-wrap">
+      <td>
+        {/* The address, then, while tasks can't reach it, why in one muted line: an administrator's ends with where to
+            allow it, never cut (17.3, UI-GUIDELINES §7 Table). */}
         <span className="stack route-name">
-          {formatAddress(item)}
+          <span className="cell-cut" title={formatAddress(item)}>
+            {formatAddress(item)}
+          </span>
           {!item.allowed &&
             (admin ? (
-              <span className="type-small muted">
-                {t(
+              <CellNote
+                before={t(
                   address
                     ? "hostKeys.notAllowedAddress"
                     : "hostKeys.notAllowed",
-                  {
-                    host: item.host,
-                  },
-                )}{" "}
-                <Link
-                  // Internet access opens Add a site ready (WEB-U-150); a port other than 443 goes too, so the rule
-                  // matches the key's.
-                  href={`/settings/internet-access?host=${encodeURIComponent(item.host)}${
-                    item.port === 443 ? "" : `&port=${String(item.port)}`
-                  }`}
-                >
-                  {t("hostKeys.allowHost", { host: item.host })}
-                </Link>
-              </span>
+                  { host: item.host },
+                )}
+                // Internet access opens Add a site ready (WEB-U-150); a port other than 443 goes too, so the rule
+                // matches the key's.
+                href={`/settings/internet-access?host=${encodeURIComponent(item.host)}${
+                  item.port === 443 ? "" : `&port=${String(item.port)}`
+                }`}
+              >
+                {t("hostKeys.allowHost", { host: item.host })}
+              </CellNote>
             ) : (
-              <span className="type-small muted">
+              <CellNote>
                 {t(
                   address
                     ? "hostKeys.notAllowedAddressMember"
                     : "hostKeys.notAllowedMember",
                   { host: item.host },
                 )}
-              </span>
+              </CellNote>
             ))}
         </span>
       </td>
       <td>
-        <span title={use.title ?? undefined}>{use.text}</span>
+        {/* One line, cut where its column ends: the tooltip has it whole, then, on its own line, the use's details (17.3). */}
+        <span
+          className="cell-cut"
+          title={[use.text, use.title].filter(Boolean).join("\n")}
+        >
+          {use.text}
+        </span>
       </td>
     </tr>
   );

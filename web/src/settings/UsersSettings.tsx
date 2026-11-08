@@ -28,6 +28,7 @@ import { accountError } from "./account-errors";
 import { DateLabel } from "./DateLabel";
 import { settingsApi } from "./requests";
 import { SecretDialog } from "./SecretDialog";
+import { SECTION_HEADING } from "./SettingsShell";
 import { allTasks } from "./team-queries";
 
 const text = (value: FormDataEntryValue | null) =>
@@ -35,7 +36,8 @@ const text = (value: FormDataEntryValue | null) =>
 const ROLES = ["member", "admin"] as const;
 const INVITATION_TONES = {
   pending: "warn",
-  accepted: "ok",
+  // A plain state, not a check (17.3).
+  accepted: "muted",
   expired: "muted",
   revoked: "muted",
 } as const;
@@ -155,9 +157,8 @@ function Administration({ me, clock }: { me: User; clock: () => Date }) {
   );
   return (
     <div className="settings-section stack people-page">
-      <h2 className="type-heading" id="people-list">
-        {t("users.people")}
-      </h2>
+      {/* Under the section's heading, People (17.3), its one line; the list is named by that heading. */}
+      <p className="type-small muted">{t("users.intro")}</p>
       <ErrorMessage error={disabling ? null : describe(change.error)} />
       {users.isPending ? (
         <Skeleton label={t("skeleton.loading")} />
@@ -175,15 +176,18 @@ function Administration({ me, clock }: { me: User; clock: () => Date }) {
         </div>
       ) : (
         <>
-          <TableScroll labelledBy="people-list">
-            <table className="data-table" aria-labelledby="people-list">
+          <TableScroll labelledBy={SECTION_HEADING}>
+            <table className="data-table" aria-labelledby={SECTION_HEADING}>
               <thead className="type-label">
                 <tr>
                   <th scope="col">{t("users.email")}</th>
                   <th scope="col">{t("users.role")}</th>
                   <th scope="col">{t("users.status")}</th>
                   <th scope="col">{t("users.joined")}</th>
-                  <th scope="col">{t("users.tasks")}</th>
+                  {/* A count: on the right, in tabular figures (17.3, §7 Table). */}
+                  <th scope="col" className="numeric">
+                    {t("users.tasks")}
+                  </th>
                   <th scope="col">
                     <span className="sr-only">{t("common.actions")}</span>
                   </th>
@@ -229,7 +233,8 @@ function Administration({ me, clock }: { me: User; clock: () => Date }) {
                       <td>
                         <span
                           className="status-pill type-label"
-                          data-tone={account.disabled ? "muted" : "ok"}
+                          // Active or not is a state, said by its word (17.3).
+                          data-tone="muted"
                         >
                           {t("users.accountStatus", {
                             disabled: account.disabled ? "yes" : "no",
@@ -239,7 +244,7 @@ function Administration({ me, clock }: { me: User; clock: () => Date }) {
                       <td>
                         <DateLabel value={account.created_at} />
                       </td>
-                      <td>
+                      <td className="numeric">
                         {tasks.data && (
                           <Link href={`/settings/people/${account.id}`}>
                             {t("users.taskCount", { count })}

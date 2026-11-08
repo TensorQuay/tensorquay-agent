@@ -71,6 +71,23 @@ export function WorkspacesToolbar({
           </Button>
         ))}
       </div>
+      {/* The same filters as the standard picker, where a phone has no room for the four labels (17.3); the stylesheet
+          shows one or the other by width. */}
+      <span className="workspace-filter-picker">
+        <MenuButton
+          label={t("workspaces.filterLabel")}
+          placement="below-start"
+          value={filter}
+          options={FILTERS.map((value) => ({
+            id: value,
+            label: t(FILTER_LABELS[value]),
+          }))}
+          onChange={(value) => {
+            const chosen = FILTERS.find((each) => each === value);
+            if (chosen) onFilter(chosen);
+          }}
+        />
+      </span>
       {/* The standard picker (WEB-U-134), named like the search beside it, so the toolbar stays one line. */}
       <MenuButton
         label={t("workspaces.sort")}

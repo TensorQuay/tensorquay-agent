@@ -644,6 +644,21 @@ describe("WEB-U-073 finding a workspace", () => {
     expect(window.location.search).toBe("?filter=idle");
   });
 
+  // 17.3: a phone has no room for the segmented filter's four labels; it offers the same choices as the standard picker
+  // (the stylesheet shows one or the other by width).
+  it("offers the same filters as the standard picker, for a phone", async () => {
+    window.history.replaceState(null, "", "/workspaces?filter=shared_with_me");
+    show([], {
+      [`${PAGE}&filter=shared_with_me`]: page("Shared", 2),
+      [`${PAGE}&filter=idle`]: page("Idle", 1),
+    });
+    await screen.findByText("Shared 1");
+    expect(chosen("Show")).toBe("Shared with me");
+    choose("Show", "Idle");
+    expect(await screen.findByText("Idle 1")).toBeInTheDocument();
+    expect(window.location.search).toBe("?filter=idle");
+  });
+
   it("offers no search, filters or sort while every workspace fits on the page (fewer than eight)", async () => {
     show([
       workspace({ name: "Sales analysis" }),

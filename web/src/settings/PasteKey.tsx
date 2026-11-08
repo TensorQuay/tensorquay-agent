@@ -103,16 +103,19 @@ export function PasteKey({
 
   if (!open)
     return (
-      <Button
-        variant="secondary"
-        type="button"
-        onClick={() => {
-          setName(suggestedSecretName(route));
-          setOpen(true);
-        }}
-      >
-        {t("models.pasteKey")}
-      </Button>
+      // A secondary button at its own width, as every other in the form, never the field's whole width (WEB-E2E-099).
+      <div className="panel-actions">
+        <Button
+          variant="secondary"
+          type="button"
+          onClick={() => {
+            setName(suggestedSecretName(route));
+            setOpen(true);
+          }}
+        >
+          {t("models.pasteKey")}
+        </Button>
+      </div>
     );
   return (
     // An inset panel of its own, its buttons inside it: Save stays the page's one primary action

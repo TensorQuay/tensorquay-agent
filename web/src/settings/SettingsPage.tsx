@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
   type FormEvent,
@@ -177,7 +178,9 @@ function useUnsavedGuard(dirty: boolean) {
   useEffect(() => {
     changed.current = dirty;
   }, [dirty]);
-  useEffect(() => {
+  // Its listeners go with the page, in the same commit (a layout effect's clean-up, not a later one): a save that leaves
+  // from a promise shows the next page first, and a click there must never meet a guard whose page is gone.
+  useLayoutEffect(() => {
     function click(event: MouseEvent) {
       if (!changed.current || event.defaultPrevented || event.button !== 0)
         return;

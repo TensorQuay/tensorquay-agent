@@ -1,7 +1,7 @@
 // @vitest-environment node
 // WEB-U-080: one density for navigation lists, menus and tables, set once as tokens (UI-GUIDELINES §5c): 32 px nav
 // rows, 12 px sans labels, a fill-only active item, 40 px table rows, 32 px menu items, and 44 px on touch screens.
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
@@ -25,6 +25,19 @@ function rule(css: string, selector: string): string {
 const declared = (block: string, property: string) =>
   block.match(new RegExp(`(?:^|[;\\s])${property}:\\s*([^;]+)`))?.[1]?.trim();
 const root = rule(globals, ":root");
+/** `share` of the `ink` colour over the `paper` colour, both #rrggbb, as #rrggbb (each channel rounded). */
+function over(ink = "", paper = "", share = 0) {
+  const channels = (hex: string) =>
+    [1, 3, 5].map((at) => Number.parseInt(hex.slice(at, at + 2), 16));
+  const [top, base] = [channels(ink), channels(paper)];
+  return `#${base
+    .map((channel, index) =>
+      Math.round(channel + ((top[index] ?? 0) - channel) * share)
+        .toString(16)
+        .padStart(2, "0"),
+    )
+    .join("")}`;
+}
 
 describe("WEB-U-080 density tokens", () => {
   it.each([
@@ -64,11 +77,12 @@ describe("WEB-U-080 density tokens", () => {
 });
 
 describe("WEB-U-080 labels, rows and the active item", () => {
-  it("sets labels in the sans face at 12 px, weight 500, never monospace", () => {
+  it("sets labels in the sans face at 12 px, weight 400, never monospace", () => {
     const label = rule(globals, ".type-label");
     expect(declared(label, "font-family")).toBe("var(--font-ui)");
     expect(declared(label, "font-size")).toBe("var(--label-size)");
-    expect(declared(label, "font-weight")).toBe("500");
+    // The app ships Space Grotesk at 400 and 700 only (§4): a label is 400, as it always drew.
+    expect(declared(label, "font-weight")).toBe("400");
   });
 
   it("makes navigation rows 32 px with 14/20 text from the tokens", () => {
@@ -79,11 +93,38 @@ describe("WEB-U-080 labels, rows and the active item", () => {
     expect(declared(item, "line-height")).toBe("var(--nav-line-height)");
   });
 
-  it("marks the active item with a fill and weight 500 only, no accent bar", () => {
+  // 17.3: one selected fill, 8 % ink over paper, so the open item reads at a glance; the body weight (the app ships
+  // Space Grotesk at 400 and 700 only); the hover tint is the lighter step, and the selected row keeps its fill under it.
+  it("marks the active item with the selected fill at the body weight, no accent bar", () => {
     const active = rule(globals, '.nav-item[aria-current="page"]');
-    expect(declared(active, "background")).toBe("var(--surface)");
-    expect(declared(active, "font-weight")).toBe("500");
+    expect(declared(active, "background")).toBe("var(--selected-fill)");
+    expect(declared(active, "font-weight")).toBe(undefined);
+    expect(
+      declared(
+        rule(globals, '.nav-item[aria-current="page"]:hover'),
+        "background",
+      ),
+    ).toBe("var(--selected-fill)");
     expect(all).not.toMatch(/\.nav-item\[aria-current="page"\]::before/);
+  });
+
+  it("sets the selected fill to 8 % ink over paper in either theme", () => {
+    const dark = rule(globals, '[data-theme="dark"]');
+    const system = rule(globals, ':root:not([data-theme="light"])');
+    for (const theme of [root, dark, system])
+      expect(declared(theme, "--selected-fill")).toBe(
+        over(declared(theme, "--ink"), declared(theme, "--paper"), 0.08),
+      );
+  });
+
+  it("gives the Settings menu's active item the selected fill, kept under the pointer", () => {
+    for (const selector of [
+      '.settings-nav .nav-item[aria-current="page"]',
+      '.settings-nav .nav-item[aria-current="page"]:hover',
+    ])
+      expect(declared(rule(settings, selector), "background")).toBe(
+        "var(--selected-fill)",
+      );
   });
 
   it("spaces the Settings menu's groups 16 px apart, rows 2 px apart", () => {
@@ -128,7 +169,11 @@ describe("WEB-U-080 labels, rows and the active item", () => {
     expect(declared(control, "border-radius")).toBe("var(--control-radius)");
     const pressed = rule(globals, '.segmented .button[aria-pressed="true"]');
     expect(declared(pressed, "background")).toBe("var(--paper)");
-    expect(declared(pressed, "font-weight")).toBe("500");
+    // The chosen segment keeps the segments' body weight: its paper fill marks it (§4: 400 and 700 only).
+    expect(declared(pressed, "font-weight")).toBe(undefined);
+    expect(declared(rule(globals, ".segmented .button"), "font-weight")).toBe(
+      "400",
+    );
     // The page's primary button stays, at a nav row's height.
     expect(declared(rule(workspaces, ".workspaces-new"), "min-height")).toBe(
       "var(--row-height-nav)",
@@ -145,5 +190,23 @@ describe("WEB-U-080 labels, rows and the active item", () => {
     const title = rule(settings, ".settings-title h1");
     expect(declared(title, "font-size")).toBe("var(--heading-size)");
     expect(declared(title, "line-height")).toBe("var(--heading-line-height)");
+  });
+});
+
+// 17.3: the app ships Space Grotesk at 400 and 700 only (§4), so a stylesheet asks for one of the two; any other weight
+// draws as one of them anyway (500 as 400, 600 as 700), and the rule would say what the screen doesn't show.
+describe("WEB-U-448 the weights the app ships", () => {
+  it("asks only for 400 or 700 in every stylesheet", () => {
+    const asked = readdirSync("src/app")
+      .filter((file) => file.endsWith(".css"))
+      .flatMap((file) =>
+        [...read(file).matchAll(/font-weight:\s*([^;}]+)/g)].map(
+          (match) => `${file}: ${(match[1] ?? "").trim()}`,
+        ),
+      );
+    expect(asked.length).toBeGreaterThan(0);
+    expect(
+      asked.filter((weight) => !/: (400|700|inherit)$/.test(weight)),
+    ).toEqual([]);
   });
 });

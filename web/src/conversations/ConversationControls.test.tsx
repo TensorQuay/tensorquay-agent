@@ -8,6 +8,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import en from "../i18n/locales/en.json";
 import type { Conversation } from "../protocol/generated/api";
 import { conversationId, runId } from "../test/frames";
 import { openTaskChoices } from "../test/start-choices";
@@ -97,6 +98,23 @@ function page(
     </QueryClientProvider>,
   );
 }
+
+// WEB-U-441 (17.3): the one run mark is in the tab title too, while the task's run is under way.
+describe("WEB-U-441 the tab title carries the run mark", () => {
+  it("starts with ● while the run works", () => {
+    page(true);
+    expect(document.title).toBe("● Workspace review · TensorQuay Agent");
+    expect(
+      document.querySelector(".conversation-status > .run-mark"),
+    ).not.toBeNull();
+  });
+
+  it("is plain while nothing runs", () => {
+    page(false);
+    expect(document.title).toBe("Workspace review · TensorQuay Agent");
+    expect(document.querySelector(".run-mark")).toBeNull();
+  });
+});
 
 describe("WEB-U-007 conversation bar", () => {
   // The design direction (task page, P2): an icon in the header says what it does on hover and on keyboard focus, in
@@ -350,9 +368,10 @@ describe("WEB-U-204 Keep environment on", () => {
       name: "Keep environment on",
     });
     expect(toggle).toHaveAttribute("aria-checked", "false");
-    expect(toggle).toHaveAccessibleDescription(
-      "It stays running and counts toward your tasks running at once.",
-    );
+    // What it costs in one short muted line: at most 36 characters, so the menu keeps its 180 to 220 px (17.3).
+    const cost = en.messages["task.keepOnNote"];
+    expect(cost.length).toBeLessThanOrEqual(36);
+    expect(toggle).toHaveAccessibleDescription(cost);
     const items = screen
       .getByRole("menu")
       .querySelectorAll('[role^="menuitem"]');

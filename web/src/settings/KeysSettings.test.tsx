@@ -299,6 +299,32 @@ describe("WEB-U-044 keys for connectors", () => {
 
 // Host keys (ADR-0037, slice 1): the Keys page lists the person's keys for web services when the gateway has them.
 describe("WEB-U-141 the Keys page with host keys", () => {
+  // UI-GUIDELINES §7: an empty state's one action is the primary, and a view has one primary (17.3): the web services'
+  // Add, first on the page, empty or not; the connectors' below it is secondary.
+  it.each([
+    ["no keys yet", []],
+    ["a key", [hostKey({ name: "GITHUB_WORK" })]],
+  ])(
+    "has one primary Add with %s for web services, theirs",
+    async (_, keys) => {
+      const { api } = fakeHostKeys({ keys });
+      showWithHostKeys(api);
+      expect(
+        await screen.findByRole("link", {
+          name: "Add a key for a web service",
+        }),
+      ).toHaveAttribute("data-variant", "primary");
+      expect(
+        await screen.findByRole("button", {
+          name: "Add a key for a connector",
+        }),
+      ).toHaveAttribute("data-variant", "secondary");
+      expect(
+        document.querySelectorAll('[data-variant="primary"]'),
+      ).toHaveLength(1);
+    },
+  );
+
   it("lists the person's keys for web services, above the rest", async () => {
     const { api } = fakeHostKeys({ keys: [hostKey({ name: "GITHUB_WORK" })] });
     showWithHostKeys(api);

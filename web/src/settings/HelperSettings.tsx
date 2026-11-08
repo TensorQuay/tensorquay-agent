@@ -103,12 +103,17 @@ export function HelperSettingRows({
         const code =
           setting === "acceptance_check" &&
           settings.data.acceptance_check !== null;
+        const value = shown(t, settings.data, setting, routes);
         return (
           <tr key={setting}>
             <td>{name}</td>
             <td>
-              <span className={code ? "type-code" : undefined}>
-                {shown(t, settings.data, setting, routes)}
+              {/* A command is cut where the column ends, whole in its tooltip and its Edit dialog (17.3). */}
+              <span
+                className={code ? "type-code cell-cut" : undefined}
+                title={code ? value : undefined}
+              >
+                {value}
               </span>
             </td>
             <td className="data-cell-action">

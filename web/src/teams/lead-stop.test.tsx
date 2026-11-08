@@ -88,7 +88,10 @@ describe("WEB-U-307 a lead's Stop while its helpers work", () => {
   it("puts what Stop does in the Stop button's tooltip and description", () => {
     render(<Composer {...props} run={running} stopHint={HINT} />);
     const stop = screen.getByRole("button", { name: "Stop" });
-    expect(stop).toHaveAttribute("title", HINT);
+    // The composer's icon button says it in its own tip (WEB-U-428); a native title would show a second one.
+    fireEvent.pointerEnter(stop.parentElement as HTMLElement);
+    expect(document.querySelector(".action-tooltip")).toHaveTextContent(HINT);
+    expect(stop).not.toHaveAttribute("title");
     expect(stop).toHaveAccessibleDescription(HINT);
   });
 

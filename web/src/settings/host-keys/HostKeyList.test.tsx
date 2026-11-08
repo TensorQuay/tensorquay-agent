@@ -97,12 +97,12 @@ describe("WEB-U-141 the Mine list of host keys", () => {
     expect(third).toHaveTextContent(
       /GITHUB_TOKEN.*api\.github\.com.*Never used/,
     );
-    // The whole of a use on hover and focus.
+    // The whole of a use on hover and focus: its line as shown (cut where its column ends, 17.3), then the details.
     expect(
       within(first as HTMLElement).getByText(/Today, 14:02/),
     ).toHaveAttribute(
       "title",
-      "Used 12 times in Sales report, last on Sep 30, 2026, 14:02",
+      "Today, 14:02 · Sales report\nUsed 12 times in Sales report, last on Sep 30, 2026, 14:02",
     );
   });
 
@@ -258,10 +258,11 @@ describe("WEB-U-141 the Mine list of host keys", () => {
     expect(
       screen.getByRole("link", { name: "Add a key for a web service" }),
     ).toHaveAttribute("href", "/settings/keys/new");
-    // The review of 36740156, item 1: a secondary button, as the other settings links are.
+    // An empty state's one action is the primary (UI-GUIDELINES §7, 17.3), as the other sections' Add links are; it
+    // was a secondary button since the review of 36740156, item 1.
     expect(
       screen.getByRole("link", { name: "Add a key for a web service" }),
-    ).toHaveAttribute("data-variant", "secondary");
+    ).toHaveAttribute("data-variant", "primary");
   });
 
   it("leaves itself out on a gateway without host keys", async () => {

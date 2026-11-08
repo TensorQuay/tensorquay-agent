@@ -107,7 +107,14 @@ export function LeaseLine({ workspace }: { workspace: Workspace }) {
 }
 
 /** Size against the quota: a thin meter that warns at 80 % and turns danger at 95 %; the size alone without a quota. */
-export function SizeMeter({ workspace }: { workspace: Workspace }) {
+export function SizeMeter({
+  workspace,
+  inTable = false,
+}: {
+  workspace: Workspace;
+  /** In the workspaces table, when it was measured is the cell's one muted line (17.3, UI-GUIDELINES §7 Table). */
+  inTable?: boolean;
+}) {
   const t = useT();
   const { size_bytes: size, quota_bytes: quota } = workspace;
   if (size === null)
@@ -121,7 +128,7 @@ export function SizeMeter({ workspace }: { workspace: Workspace }) {
     return (
       <div className="workspace-size">
         <p className="type-small muted">{formatSize(size, t.locale)}</p>
-        <Measured at={workspace.size_measured_at} />
+        <Measured at={workspace.size_measured_at} note={inTable} />
       </div>
     );
   const usage = t("workspaces.sizeOf", {
@@ -148,7 +155,7 @@ export function SizeMeter({ workspace }: { workspace: Workspace }) {
       <p className="type-small workspace-usage">
         {level === "danger" ? t("workspaces.almostFull", { usage }) : usage}
       </p>
-      <Measured at={workspace.size_measured_at} />
+      <Measured at={workspace.size_measured_at} note={inTable} />
     </div>
   );
 }
@@ -157,14 +164,16 @@ export function SizeMeter({ workspace }: { workspace: Workspace }) {
  * When the size was measured: it is a past measurement, taken while the workspace was free or during a run, so it never
  * shows alone (the 13h UI review, #4: "0 B" for a workspace holding a file was taken before the file existed).
  */
-function Measured({ at }: { at: string | null }) {
+function Measured({ at, note }: { at: string | null; note: boolean }) {
   const t = useT();
   if (at === null) return null;
   const [before, after] = t("workspaces.measured", { time: TIME_MARK }).split(
     TIME_MARK,
   );
   return (
-    <p className="type-small muted workspace-measured">
+    <p
+      className={`type-small muted workspace-measured${note ? " cell-note" : ""}`}
+    >
       {before}
       <RelativeTime value={at} />
       {after}
