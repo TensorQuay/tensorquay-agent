@@ -10,10 +10,11 @@ Subcommands (wired by .githooks/*):
   audit [--contributed <base>]   whole tree + full history; exit 1 on any violation. With --contributed, the
                         commits in <base>..HEAD are a pull request's own: any identity, everything else checked.
 
-The identity and remote rules are the maintainers': they apply in a clone set up with
-`tools/install-guardrails.sh --maintainer` (git config tq.guard.maintainer), in a clone that commits as the company
-identity, and in CI's audits (TQ_GUARD_IDENTITY=1). A contributor commits as themselves, pushes to their own fork and
-may force-push their own branches there; GitHub's squash merge of their pull request keeps them as its author.
+The identity and remote rules are the maintainers'. They are off only in a clone that
+`tools/install-guardrails.sh` (without --maintainer) marked as a contributor's (git config tq.guard.maintainer false)
+and that does not commit as the company identity; every other clone and CI's audits (TQ_GUARD_IDENTITY=1) keep them.
+A contributor commits as themselves, pushes to their own fork and may force-push their own branches there; GitHub's
+squash merge of their pull request keeps them as its author.
 Content and messages are checked for everyone, and no commit, whoever made it, has a personal identifier of the
 denylist as its author or committer.
 
@@ -32,7 +33,10 @@ from pathlib import Path
 IDENTITY = ("TensorQuay", "dev@tensorquay.com")  # every new commit, from 7 Nov 2026
 EARLIER_IDENTITIES = (("TensorQuay", "admin@tensorquay.com"),)  # history made before then; never a new commit
 MERGER = ("GitHub", "noreply@github.com")  # the committer of a pull request merged on GitHub; never an author
-REMOTE_OK = re.compile(r"github\.com[:/]TensorQuay/", re.I)
+# GitHub itself (https, with or without a user, or ssh), never a URL that merely holds github.com/... further on.
+GITHUB = r"^(?:https://(?:[^/@\s]+@)?github\.com/|(?:ssh://)?git@github\.com[:/])"
+REMOTE_OK = re.compile(GITHUB + r"TensorQuay/", re.I)
+PROJECT = re.compile(GITHUB + r"TensorQuay/tensorquay-agent(?:\.git)?/?$", re.I)  # this project's own repository
 MAX_BYTES = 2 * 1024 * 1024
 ZERO = "0" * 40
 PROTECTED_BRANCHES = {"refs/heads/main", "refs/heads/master"}
@@ -234,11 +238,12 @@ def scan_patch(patch, deny, allow, problems):
 
 
 def maintainer():
-    """Whether the identity and remote rules apply: a maintainer's clone, a clone that commits as the company identity
-    (one set up before --maintainer existed, or with it forgotten), or a run that asks for them (CI)."""
+    """Whether the identity and remote rules apply. They are off only in a clone the install script marked as a
+    contributor's (tq.guard.maintainer false) that does not commit as the company identity; a clone set up before
+    contributors could commit, a run outside any set-up clone and CI's audits (TQ_GUARD_IDENTITY=1) keep them."""
     if os.environ.get("TQ_GUARD_IDENTITY") == "1":
         return True
-    if git("config", "--get", "--bool", "tq.guard.maintainer", check=False).strip() == "true":
+    if git("config", "--get", "--bool", "tq.guard.maintainer", check=False).strip() != "false":
         return True
     return git("config", "--get", "user.email", check=False).strip().lower() == IDENTITY[1]
 
@@ -331,17 +336,19 @@ def check_commit(sha, deny, allow, problems, identity=True):
     scan_patch(git("show", "--format=", "-U0", "--no-color", "--no-ext-diff", sha), deny, allow, problems)
 
 
-def tensorquay_remotes():
-    """The remotes that are TensorQuay's GitHub repositories: what they hold was checked when it got there."""
-    return [name for name in git("remote").split() if REMOTE_OK.search(git("remote", "get-url", name, check=False))]
+def project_remotes():
+    """The remotes that are this project's own GitHub repository: what they hold is already published there. Another
+    TensorQuay repository's history (private, unguarded) is no such proof."""
+    return [name for name in git("remote").split()
+            if PROJECT.search(git("remote", "get-url", name, check=False).strip())]
 
 
 def outgoing(local_sha, remote_sha, remote):
-    """The commits a push sends: those not on the remote's branch, nor on the pushed remote or a TensorQuay remote
-    (so a contributor's first push to a fork checks their own commits, not the whole of upstream's history)."""
+    """The commits a push sends: those not on the remote's branch, nor on the pushed remote or this project's own
+    repository (so a contributor's first push to a fork checks their own commits, not all of upstream's history)."""
     known = remote_sha != ZERO and subprocess.run(
         ["git", "cat-file", "-e", f"{remote_sha}^{{commit}}"], capture_output=True).returncode == 0
-    exclude = [f"--remotes={name}" for name in sorted({remote, *tensorquay_remotes()})]
+    exclude = [f"--remotes={name}" for name in sorted({remote, *project_remotes()})]
     return git("rev-list", local_sha, "--not", *exclude, *([remote_sha] if known else [])).split()
 
 

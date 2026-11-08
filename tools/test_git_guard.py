@@ -414,6 +414,12 @@ class ContributorLimits(unittest.TestCase):
             contributor()
             self.assertEqual(quiet(guard.audit), [])
 
+    def test_ci_asks_for_the_maintainers_rules_even_in_a_contributors_clone(self):
+        with scratch_repository({"TQ_GUARD_IDENTITY": "1"}):
+            contributor()
+            commit(JANE, message="fix: a change")
+            self.assertEqual(len(quiet(guard.audit)), 2)
+
     def test_a_maintainers_push_holds_each_outgoing_commit_to_the_identity(self):
         with scratch_repository():
             git("config", "tq.guard.maintainer", "true")
