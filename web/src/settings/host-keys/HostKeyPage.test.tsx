@@ -58,11 +58,11 @@ describe("WEB-U-142 the Add a key page", () => {
   it("takes the address a task linked to, and counts nothing as unsaved yet", () => {
     show(fakeHostKeys().api, { address: "api.notion.com" });
     expect(field("Web address")).toHaveValue("api.notion.com");
-    // The review of 36740156, item 7: nothing was typed, so leaving doesn't ask.
+    // Nothing was typed, so leaving doesn't ask.
     expect(screen.queryByText("Unsaved changes")).toBeNull();
   });
 
-  // The review of 36740156, item 3: the suggestion waits for the person's keys, so it never offers a taken name.
+  // The suggestion waits for the person's keys, so it never offers a taken name.
   it("suggests, for an address it starts with, a name the person's keys don't have", async () => {
     show(
       fakeHostKeys({
@@ -166,7 +166,7 @@ describe("WEB-U-142 the Add a key page", () => {
     expect(calls.addKey).not.toHaveBeenCalled();
   });
 
-  // The review of 36740156, item 4: the user name a service expects with the key is asked for before sending.
+  // The user name a service expects with the key is asked for before sending.
   it("asks for the user name when the key goes with one", async () => {
     const { api, calls } = fakeHostKeys();
     show(api);
@@ -240,7 +240,7 @@ describe("WEB-U-142 the Add a key page", () => {
       "This name is already another key's. Pick another name.",
     ],
     [
-      // The review of 36740156, item 5: a refused way of sending is the page's line, not the address's.
+      // A refused way of sending is the page's line, not the address's.
       "a way of sending it doesn't take yet",
       new ApiError(400, "invalid_request", "Bad.", undefined, [
         { field: "scheme", reason: "scheme_not_supported" },
@@ -325,7 +325,7 @@ describe("WEB-U-142 the key's own checks", () => {
   });
 });
 
-// The review of 36740156, item 6: a name another key took meanwhile is said at Name, however the gateway says it.
+// A name another key took meanwhile is said at Name, however the gateway says it.
 describe("WEB-U-142 a name taken meanwhile", () => {
   it("marks Name for a 409 name_taken without details too", async () => {
     const { api } = fakeHostKeys({
@@ -345,7 +345,7 @@ describe("WEB-U-142 a name taken meanwhile", () => {
   });
 });
 
-// The review of 36740156, item 5: a refused way of sending is said on the page's line, never under Web address.
+// A refused way of sending is said on the page's line, never under Web address.
 describe("WEB-U-142 a way of sending the gateway doesn't take yet", () => {
   it("says it on the page's line, leaving the address alone", async () => {
     const { api } = fakeHostKeys();

@@ -3,9 +3,9 @@ import { randomUUID } from "node:crypto";
 import { signIn } from "./session";
 import { expect, test, type Page } from "./test";
 
-// The review of d9fb1917 (MUST 1): one Ctrl/Cmd K, one search, and it can always be seen and typed into: at desktop
-// width, and at phone width with the drawer closed (the hidden sidebar's list once opened an invisible modal) and open
-// (the drawer's list once opened a second one). Choosing a match opens its task and closes the drawer.
+// One Ctrl/Cmd K, one search, and it can always be seen and typed into: at desktop width, and at phone width with the
+// drawer closed (the hidden sidebar's list once opened an invisible modal) and open (the drawer's list once opened a
+// second one). Choosing a match opens its task and closes the drawer.
 async function nine(page: Page) {
   await signIn(page);
   for (let n = 1; n <= 9; n += 1) {

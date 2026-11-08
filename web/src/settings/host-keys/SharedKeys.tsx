@@ -97,8 +97,7 @@ export function SharedKeyPage({
 }
 
 /**
- * "Everyone", or "2 people" that opens the list, by pointer, keyboard or touch alike (the review of 938fa83c,
- * item 17).
+ * "Everyone", or "2 people" that opens the list, by pointer, keyboard or touch alike.
  */
 function WhoMayUseCell({ item }: { item: HostKey }) {
   const t = useT();
@@ -156,7 +155,7 @@ export function AdminSharedKeys({
   useEffect(() => {
     cache.removeQueries({ queryKey: HOST_KEYS_NOTICE, exact: true });
   }, [cache]);
-  // By id, so a refetch after a conflict gives the dialog the key as it is now (the review of 938fa83c, item 15).
+  // By id, so a refetch after a conflict gives the dialog the key as it is now.
   const [deleting, setDeleting] = useState<string | null>(null);
   const keys = useQuery({
     queryKey: ADMIN_HOST_KEYS,

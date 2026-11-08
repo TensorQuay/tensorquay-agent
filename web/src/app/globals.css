@@ -166,11 +166,11 @@
   /* The account avatar in the sidebar row (§7); fits the 36 px row with 4 px above and below. */
   --avatar-size: 28px;
   --sidebar-width: 260px;
-  /* The navigation drawer at phone width, at most 85% of the screen (the review of 7e282fc0). */
+  /* The navigation drawer at phone width, at most 85% of the screen. */
   --drawer-width: 320px;
   /* A side sheet: one item looked at without leaving the list; the whole width on a phone. */
   --sheet-width: 440px;
-  /* The search overlay's matches scroll within this height (the review of d9fb1917). */
+  /* The search overlay's matches scroll within this height. */
   --search-results-height: 480px;
   --rail-width: 56px;
   --dialog-width: 480px;
@@ -715,7 +715,7 @@ textarea.form-control {
 }
 /*
  * A sheet (UI-GUIDELINES' Side sheet; WEB-U-230): a dialog at an edge, full height, sliding in from it. The navigation
- * drawer at the start, at most 85 % of the screen (the review of 7e282fc0); a side sheet at the end.
+ * drawer at the start, at most 85 % of the screen; a side sheet at the end.
  */
 .dialog-sheet {
   position: fixed;

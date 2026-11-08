@@ -133,8 +133,7 @@ describe("WEB-U-025 workspaces page", () => {
       "sr-only",
     );
     expect(rows[0]!.querySelector(".status-pill")).toBeNull();
-    // The owner in every row: "You" for yours, never a blank cell (the review of 047b8713), and someone else's
-    // by email with your access.
+    // The owner in every row: "You" for yours, never a blank cell, and someone else's by email with your access.
     const owner = (row: HTMLElement) =>
       within(row).getAllByRole("cell")[1]?.textContent;
     expect(rows.map(owner)).toEqual([

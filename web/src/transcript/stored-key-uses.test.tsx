@@ -171,7 +171,7 @@ describe("WEB-U-193 a task's stored key uses, placed at load", () => {
     expect(runKeys(other)).toEqual([{ ...use, outcome: "foreign_run" }]);
   });
 
-  // ADR-0037 (c740e186): someone removed from a shared key mid-run still gets its name in that run's live refusal, while
+  // ADR-0037: someone removed from a shared key mid-run still gets its name in that run's live refusal, while
   // the stored row, judged when read, has none. The same use, said once.
   it("takes a live line with the key's name and its stored row without one as the same use", () => {
     const seen = applyAt(

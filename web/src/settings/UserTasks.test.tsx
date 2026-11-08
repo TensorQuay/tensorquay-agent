@@ -140,7 +140,7 @@ describe("WEB-U-023 a person's tasks", () => {
     );
   });
 
-  // The dev screen review (011e8972), #3: every row was named "Private task", and the environment and model were raw
+  // A screen review before 17.0: every row was named "Private task", and the environment and model were raw
   // ids. The created date opens the details; the environment and model read as everywhere else.
   it("WEB-U-172 names no row Private task, and shows the environment and model by name", async () => {
     serve([

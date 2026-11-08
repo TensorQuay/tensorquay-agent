@@ -223,7 +223,7 @@ describe("WEB-U-088 a spreadsheet in the Files panel", () => {
     expect(screen.queryByRole("group", { name: "Sheets" })).toBeNull();
   });
 
-  // The dev screen review (011e8972), #6: the sheet's first fact was its file size ("6 B"), and columns past the panel
+  // A screen review before 17.0: the sheet's first fact was its file size ("6 B"), and columns past the panel
   // were cut with no sign. It leads with its rows and columns, and the cut edge shows there is more.
   it("WEB-U-182 leads with rows and columns, not the size, and marks a table wider than its box", async () => {
     files["sales.xlsx"] = content("sales.xlsx", 5000, null);

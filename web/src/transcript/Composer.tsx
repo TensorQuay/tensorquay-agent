@@ -339,7 +339,7 @@ export function Composer({
             onClick={(event) => {
               if (!active) return;
               // Send and Stop are one button: the second click of a double-click on Send (the browser counts
-              // it) never stops the run it just started; any deliberate click does (the review of ea1e1a3b).
+              // it) never stops the run it just started; any deliberate click does.
               if (event.detail > 1) return;
               void onStop();
             }}

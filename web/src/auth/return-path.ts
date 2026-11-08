@@ -12,7 +12,7 @@ const APP_PAGE = new RegExp(
  * Only the app's own pages are accepted after sign-in; anything else (another site, a protocol-relative or script
  * URL, the API, sign-in itself) returns to New task. A query is left behind: only the page comes back. The path is
  * decoded first, so an encoded segment (`%2e%2e`, which a browser reads as `..`) is judged as the browser will read it,
- * and a path that doesn't decode is refused (a06446f6, from review).
+ * and a path that doesn't decode is refused.
  */
 export function returnPath(path: string | null): string {
   if (path === null) return "/";

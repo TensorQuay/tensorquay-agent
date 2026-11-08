@@ -55,7 +55,7 @@ export function sharedTitles(items: readonly Conversation[]): Set<string> {
   );
 }
 
-/** A task's last activity in full, with the year (the review of 7e282fc0): its row's tooltip, and its name if shared. */
+/** A task's last activity in full, with the year: its row's tooltip, and its name if shared. */
 export function fullTime(iso: string, locale: string): string {
   return new Intl.DateTimeFormat(locale, {
     year: "numeric",

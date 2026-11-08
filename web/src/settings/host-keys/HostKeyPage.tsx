@@ -189,7 +189,7 @@ function KeyForm({
   );
   const [initial] = useState(draft);
   // The name follows the address, and the names the person's runs already get as they load, until the person types
-  // one (the review of 36740156, item 3); a saved key's name never follows.
+  // one; a saved key's name never follows.
   const [named, setNamed] = useState(item !== null);
   const current: HostKeyDraft = named
     ? draft
@@ -235,7 +235,7 @@ function KeyForm({
       done(t("hostKeys.saved", { name: made.name }));
     } catch (error) {
       // Someone changed the key meanwhile: as every settings form, keep the person's draft and take the new
-      // version (the review of b608b50f, item 10), so saving again replaces their change.
+      // version, so saving again replaces their change.
       if (error instanceof ApiError && error.code === "conflict") {
         setFailure(t("hostKeys.conflict"));
         void own.refetch();

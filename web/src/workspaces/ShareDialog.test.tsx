@@ -88,7 +88,7 @@ describe("WEB-U-025 share dialog", () => {
     expect(email).toHaveValue("");
   });
 
-  // The dev screen review (011e8972), #5: a quick share granted write access. The least access is the default.
+  // A screen review before 17.0: a quick share granted write access. The least access is the default.
   it("WEB-U-173 shares as Can view unless Can edit is chosen", async () => {
     const { calls } = show({
       [`GET ${base}`]: () => Response.json({ items: [] }),

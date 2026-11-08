@@ -6,7 +6,7 @@ import type { ToolView } from "./types";
 /**
  * Every way a push can fail, in plain words under its step (WEB-U-094): what happened and what to do, with no git words
  * and no code. Typed over GitPushFailure, so a new failure without words fails the typecheck. The two credential
- * failures ("key") keep their link to the person's Keys (WEB-U-038). key_use_unrecorded is a0718b8c's (GW-I-149).
+ * failures ("key") keep their link to the person's Keys (WEB-U-038). key_use_unrecorded is GW-I-149's.
  */
 export const PUSH_FAILURES: Readonly<
   Record<GitPushFailure | "key_use_unrecorded", MessageKey | "key">

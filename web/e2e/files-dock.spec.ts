@@ -47,7 +47,7 @@ for (const width of [1280, 1440])
     ).toBeLessThanOrEqual(0);
   });
 
-// WEB-U-170 (the dev screen review 011e8972, #1): at 1024 with the rail the task's layout has room for the panel, so it
+// WEB-U-170 (a screen review before 17.0): at 1024 with the rail the task's layout has room for the panel, so it
 // starts closed (WEB-U-124) and then docks beside the answer instead of floating over it. Where there is less room
 // (the sidebar open) it takes the whole column (files.spec.ts).
 test("WEB-U-170 at 1024 the files panel starts closed, then docks beside the answer", async ({

@@ -228,8 +228,8 @@ function applyLive(
 }
 
 /**
- * Onto the step it names, even when that step has ended (the review of cf653e47, item 20), once per key, address and
- * outcome (the gateway already limits repeats to one a minute). A step not on this page shows nothing.
+ * Onto the step it names, even when that step has ended, once per key, address and outcome (the gateway already limits
+ * repeats to one a minute). A step not on this page shows nothing.
  */
 function keyUse(
   state: Transcript,

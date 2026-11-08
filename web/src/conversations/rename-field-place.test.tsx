@@ -66,7 +66,7 @@ function header(choices: Box, files: Box, wrapper: Box = none) {
 }
 const field = () => screen.getByRole("textbox", { name: "Task title" });
 
-// Regression (TEST-PLAN §19, fixed in c4cf0f5e): on a phone the pickers' wrapper has no box, and the rename field ran
+// Regression (TEST-PLAN §19): on a phone the pickers' wrapper has no box, and the rename field ran
 // to the bar's end, over the Files icon and the ⋯. It ends before the first control on the title's row.
 describe("WEB-U-159 the rename field ends before what follows the title on its row", () => {
   it("on a phone, before Files, with the pickers on the line below", () => {

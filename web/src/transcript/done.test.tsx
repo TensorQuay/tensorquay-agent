@@ -74,7 +74,7 @@ describe("WEB-U-016 a finished task: what it wrote, and what could follow", () =
       "Created brief.md",
     );
     expect(screen.queryByRole("button", { name: "Open changes" })).toBeNull();
-    // Each turn's Open says which file, so a transcript has no row of identical "Open" buttons (the review of 6437d8d9).
+    // Each turn's Open says which file, so a transcript has no row of identical "Open" buttons.
     const open = screen.getByRole("button", { name: "Open brief.md" });
     expect(open).toHaveTextContent(/^Open$/);
     fireEvent.click(open);

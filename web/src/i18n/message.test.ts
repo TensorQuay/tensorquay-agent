@@ -132,7 +132,7 @@ describe("WEB-U-020 file sizes", () => {
   });
 });
 
-// The dev screen review (011e8972), #10: sizes were written several ways ("4 GiB" in the environment menu, "10 GB" on
+// A screen review before 17.0: sizes were written several ways ("4 GiB" in the environment menu, "10 GB" on
 // Workspaces). One formatter for every size; memory and disk are set in whole binary units, so what an administrator
 // typed as 4 reads back as 4, never "4.3".
 describe("WEB-U-185 a size reads back as it was set", () => {

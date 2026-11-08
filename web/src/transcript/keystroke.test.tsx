@@ -120,7 +120,7 @@ beforeEach(() => {
   showing(finished);
 });
 
-// The keystroke profile of dc017a1f: every keystroke re-rendered the whole transcript (95% of its time, 21-51 ms for
+// A keystroke profile before 17.0: every keystroke re-rendered the whole transcript (95% of its time, 21-51 ms for
 // 100 turns in a development build) and the header's pickers, because the message box's text lives on the task's page.
 describe("WEB-U-151 typing re-renders only the message box", () => {
   it("re-renders neither the transcript's turns nor the header's pickers", async () => {

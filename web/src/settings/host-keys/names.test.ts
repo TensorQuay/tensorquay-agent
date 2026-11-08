@@ -25,7 +25,7 @@ describe("WEB-U-140 a key's name", () => {
     expect(suggestName(host, [])).toBe(name);
   });
 
-  // The review of 36740156, item 8: a long first label is cut so the whole name fits 64 characters.
+  // A long first label is cut so the whole name fits 64 characters.
   it("keeps a suggestion within 64 characters, numbered or not", () => {
     const label = "a".repeat(63);
     const plain = suggestName(`${label}.example`, []);

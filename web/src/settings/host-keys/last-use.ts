@@ -20,8 +20,7 @@ export const REFUSALS: Readonly<
 
 /**
  * When a key was last used and nothing more, "Today, 14:02", "Sep 28" or "Never used": a member's own key in an
- * administrator's list, where the member's task, and whether the try was refused, are theirs (least exposure, the
- * review of 5121d0d0, item 23).
+ * administrator's list, where the member's task, and whether the try was refused, are theirs (least exposure).
  */
 export function lastUseTime(
   use: Pick<HostKeyUse, "at"> | null,

@@ -307,8 +307,8 @@ describe("WEB-U-071 sidebar task list", () => {
     expect(screen.queryByRole("dialog", { name: "Search tasks" })).toBeNull();
   });
 
-  // The review of d9fb1917 (MUST 1): one Ctrl/Cmd K listener, in the shell, with one overlay, however many lists the
-  // page mounts (the sidebar's, and the phone drawer's).
+  // One Ctrl/Cmd K listener, in the shell, with one overlay, however many lists the page mounts (the sidebar's, and the
+  // phone drawer's).
   it("opens exactly one search from Ctrl K with two lists mounted", async () => {
     show([...older(8)], {}, 2);
     await waitFor(() =>

@@ -34,7 +34,7 @@ function Layout({ shown }: { shown: boolean }) {
   );
 }
 
-// The dev screen review (011e8972), #2: at 390 the open panel started at a fixed bar height, over the header's second
+// A screen review before 17.0: at 390 the open panel started at a fixed bar height, over the header's second
 // line. The fix's review: a bar mounted after the layout (or replaced) must be measured too.
 describe("WEB-U-171 the header's room at the top", () => {
   it("is measured by the bar itself, also when it mounts late, and cleared when it goes", () => {

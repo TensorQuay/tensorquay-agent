@@ -303,7 +303,7 @@ describe("WEB-U-047 the default environment in status", () => {
   });
 });
 
-// The dev screen review (011e8972), #8: while new tasks couldn't start, the default environment still wore a green
+// A screen review before 17.0: while new tasks couldn't start, the default environment still wore a green
 // "Available". Its pill is muted then, and says it is waiting on the problem above.
 describe("WEB-U-174 the default environment while tasks can't start", () => {
   const section = () =>

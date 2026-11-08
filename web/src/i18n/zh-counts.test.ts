@@ -6,7 +6,7 @@ import { formatDuration, formatMessage } from "./message";
 
 const messages = zh.messages as Record<string, string>;
 
-// The dev screen review (011e8972), #10: Chinese wrote the same quantities two ways: "2秒" from the formatter beside
+// A screen review before 17.0: Chinese wrote the same quantities two ways: "2秒" from the formatter beside
 // "{seconds} 秒" in messages, and "运行了 1 条命令" in a turn's summary beside "运行了一条命令" on its line. One way is
 // now spaced, the formatter included (UI-GUIDELINES §11b, WEB-U-305), as the catalogue writes every other number.
 describe("WEB-U-185 Chinese counts and units read one way", () => {

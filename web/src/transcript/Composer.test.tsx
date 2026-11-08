@@ -117,9 +117,9 @@ describe("WEB-U-001 composer states", () => {
     await waitFor(() => expect(input).toHaveValue("One copy while sending"));
   });
 
-  // The review of ea1e1a3b (SHOULD): Send and Stop are one button, so the second click of a double-click on Send must
-  // not stop the run it just started. Only that second click is ignored (the browser counts it): a deliberate click on
-  // Stop, however soon, stops (WEB-E2E-004 clicks Stop as soon as the run shows Working…).
+  // Send and Stop are one button, so the second click of a double-click on Send must not stop the run it just started.
+  // Only that second click is ignored (the browser counts it): a deliberate click on Stop, however soon, stops
+  // (WEB-E2E-004 clicks Stop as soon as the run shows Working…).
   it("ignores the second click of a double-click on Send, never a deliberate Stop", () => {
     const onStop = vi.fn(() => Promise.resolve());
     const { rerender } = render(<Composer {...defaults} onStop={onStop} />);

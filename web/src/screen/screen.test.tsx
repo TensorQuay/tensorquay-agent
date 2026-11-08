@@ -710,9 +710,9 @@ describe("WEB-U-242 the Screen panel", () => {
     ).toBeVisible();
   });
 
-  // the review of 66d88931, P3-a: in the expanded screen, while this tab has control and the keyboard is in the
-  // screen, one Escape is the desktop's, whatever the screen client does with it; once the keyboard is back on the
-  // page (Escape twice), Escape closes the dialog. The close button always does.
+  // In the expanded screen, while this tab has control and the keyboard is in the screen, one Escape is the desktop's,
+  // whatever the screen client does with it; once the keyboard is back on the page (Escape twice), Escape closes the
+  // dialog. The close button always does.
   it("keeps the expanded screen open for an Escape that belongs to the desktop", async () => {
     const { ScreenPanel } = await import("./ScreenPanel");
     render(<ScreenPanel conversationId="task-1" working={false} />);
@@ -737,8 +737,8 @@ describe("WEB-U-242 the Screen panel", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
-  // the review of 66d88931, P3-b: the screen stops being live while expanded (the desktop stopped): the dialog
-  // closes, and the focus goes to the panel, not to the page's body.
+  // The screen stops being live while expanded (the desktop stopped): the dialog closes, and the focus goes to the
+  // panel, not to the page's body.
   it("closes the expanded screen when it stops being live, with the focus on the panel", async () => {
     const { ScreenPanel } = await import("./ScreenPanel");
     render(<ScreenPanel conversationId="task-1" working={false} />);

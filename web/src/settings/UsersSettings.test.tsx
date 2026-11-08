@@ -228,7 +228,7 @@ describe("WEB-U-023 users", () => {
     });
   });
 
-  // The dev screen review (011e8972), #4: Disable was a bare red button on every row, one click from a destructive
+  // A screen review before 17.0: Disable was a bare red button on every row, one click from a destructive
   // action. It is a danger item under the row's ⋯, as on the other admin tables; your own row has no ⋯.
   it("WEB-U-169 keeps Disable and Enable under the row's ⋯, Disable as danger", async () => {
     standard();

@@ -316,7 +316,7 @@ export function ScreenPanel({
   }, [label, state.kind, dimmed, typing, helpId, drawn]);
 
   // The screen stopped being live while expanded (the desktop stopped, a refusal): the dialog closes, and the focus,
-  // whose opener may be gone, goes to the panel (the review of 66d88931, P3-b). Worked out while rendering.
+  // whose opener may be gone, goes to the panel. Worked out while rendering.
   const [refocus, setRefocus] = useState(false);
   if (expanded && !LIVE.has(state.kind)) {
     setExpanded(false);

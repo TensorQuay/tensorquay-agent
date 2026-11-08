@@ -19,7 +19,7 @@ export function secretProblems(
   const problems: FieldProblem[] = [];
   if (needsName && !NAME.test(write.name))
     problems.push({ field: "name", reason: "name_invalid" });
-  // Personal Git and connector credentials own these names, in any case (bc96026).
+  // Personal Git and connector credentials own these names, in any case.
   else if (needsName && /^(git|connector)-/i.test(write.name))
     problems.push({ field: "name", reason: "reserved_prefix" });
   // A key pasted where its name belongs, as the gateway refuses it on create (SEC-033, WEB-U-303).

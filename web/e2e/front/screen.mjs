@@ -234,7 +234,7 @@ function handedBack(screen, ended) {
 }
 
 /**
- * The gateway restarting under a Take over (the gateway's 1e5f33f1): every viewer's socket drops with the old process (a
+ * The gateway restarting under a Take over: every viewer's socket drops with the old process (a
  * close the page retries), and the new process records the hand-back the restart cut short before it listens: ended
  * `restart`, with no seconds (how long it was held isn't known). The page reads it once it is back.
  */

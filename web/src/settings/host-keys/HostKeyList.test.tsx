@@ -259,7 +259,7 @@ describe("WEB-U-141 the Mine list of host keys", () => {
       screen.getByRole("link", { name: "Add a key for a web service" }),
     ).toHaveAttribute("href", "/settings/keys/new");
     // An empty state's one action is the primary (UI-GUIDELINES §7, 17.3), as the other sections' Add links are; it
-    // was a secondary button since the review of 36740156, item 1.
+    // was a secondary button before 17.3.
     expect(
       screen.getByRole("link", { name: "Add a key for a web service" }),
     ).toHaveAttribute("data-variant", "primary");

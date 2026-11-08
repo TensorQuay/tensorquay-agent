@@ -26,7 +26,7 @@ const said = (transcript: ReturnType<typeof emptyTranscript>) =>
   );
 
 // A task's decision engine that stops answering never fails the run: the agent goes on deciding by itself
-// (ADR-0013). The person hears it once per run, in plain words, with why and never a code (the review of 7c39d20b).
+// (ADR-0013). The person hears it once per run, in plain words, with why and never a code.
 describe("WEB-U-093 the decision engine falls back", () => {
   it("says so once per run, with why", () => {
     const transcript = [

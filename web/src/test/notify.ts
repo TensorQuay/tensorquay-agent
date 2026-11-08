@@ -4,7 +4,7 @@ import { vi } from "vitest";
 // Query notifications (TanStack's notifyManager) run on a timer. One queued as a test ends could fire after its file's
 // jsdom is gone and React then reaches for `window` (§19a, WEB-U-195). The shared setup runs them through this counting
 // scheduler and waits for none to be pending after each test.
-// The bound's own timer is real time even when a test left fake timers on (review of f1480992).
+// The bound's own timer is real time even when a test left fake timers on.
 const realSetTimeout = globalThis.setTimeout;
 const realClearTimeout = globalThis.clearTimeout;
 let pending = 0;

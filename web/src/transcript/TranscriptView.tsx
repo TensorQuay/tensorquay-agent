@@ -214,7 +214,7 @@ function TranscriptTurns({
                 {turn.wrote && onOpenFile ? (
                   <Button
                     variant="ghost"
-                    // Named for its file, so a transcript has no row of identical "Open" buttons (the review of 6437d8d9).
+                    // Named for its file, so a transcript has no row of identical "Open" buttons.
                     aria-label={t("followUp.open", {
                       name: fileName(turn.wrote),
                     })}

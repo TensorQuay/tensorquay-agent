@@ -49,8 +49,8 @@ export function TaskSearch({
       "a.conversation-link",
     ) ?? []),
   ];
-  // SHOULD 3 of the review of d9fb1917: the arrow keys move through the matches, and up from the first returns to
-  // the box. A native listener, so the list itself stays a plain list.
+  // The arrow keys move through the matches, and up from the first returns to the box. A native listener, so the list
+  // itself stays a plain list.
   useEffect(() => {
     const list = results.current;
     if (!list) return;

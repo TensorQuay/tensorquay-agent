@@ -26,7 +26,7 @@ const CODES = [
   "mcp_server_exited",
   // GW-I-147: the gateway uses no key it can't record the use of.
   "key_use_unrecorded",
-  // The MCP proxy's own refusals (X-TQA-Gateway-Error, 2849c1c4).
+  // The MCP proxy's own refusals (X-TQA-Gateway-Error).
   "not_found",
   "body_too_large",
   "secret_unavailable",

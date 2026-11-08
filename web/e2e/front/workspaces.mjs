@@ -111,7 +111,7 @@ function view(workspace, conversations) {
           conversation_id: holder.id,
           title: holder.title ?? null,
           running: Boolean(running),
-          // The holder's keep-alive pin, as the gateway reports it beside running (2ece77b6).
+          // The holder's keep-alive pin, as the gateway reports it beside running.
           pinned: Boolean(holder.pinned),
         }
       : null);

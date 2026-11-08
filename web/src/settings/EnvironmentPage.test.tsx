@@ -95,7 +95,7 @@ describe("WEB-U-097 the Environment page", () => {
     // Each card says what it is: its description and its tools, by name.
     expect(minimal.closest("label")).toHaveTextContent("A shell and Python");
     expect(minimal.closest("label")).toHaveTextContent("Shell");
-    // WEB-U-184 (the dev screen review 011e8972, #9): a new environment starts from the default built-in, chosen and
+    // WEB-U-184 (a screen review before 17.0): a new environment starts from the default built-in, chosen and
     // seen to be; its tools are the built-in's, said once, not a second list of boxes.
     const workstation = within(cards).getByRole("radio", {
       name: /^Workstation/,
@@ -150,7 +150,7 @@ describe("WEB-U-097 the Environment page", () => {
     });
     const choices = within(menu).getAllByRole("menuitemradio");
     // Only the host's own images: the built-ins are the cards above.
-    // Each choice's name, then its line, read as two phrases (6a30ab45).
+    // Each choice's name, then its line, read as two phrases.
     expect(choices.map((choice) => choice.textContent)).toEqual([
       "team/notebooks:1 Based on Workstation · Built Sep 29, 2026 · 1.4 GB · Used by Data science",
       "Untagged image Based on Minimal · Built Sep 28, 2026 · 1.4 GB",

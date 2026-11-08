@@ -48,7 +48,7 @@ describe("WEB-U-094 every failed push in plain words", () => {
     },
   );
 
-  // a0718b8c (GW-I-149): the key's use couldn't be recorded, so nothing was saved.
+  // GW-I-149: the key's use couldn't be recorded, so nothing was saved.
   it("says a push whose key's use couldn't be recorded didn't run", () => {
     render(
       <TranscriptView

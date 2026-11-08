@@ -2,7 +2,7 @@ import { createConversation, signIn } from "./session";
 import { expect, test } from "./test";
 
 // WEB-U-094 on the page: a failed push says what happened and what to do under its step, in plain words, never its
-// code (the fake front's "Fail the save with <code>", e2e/front/stream.mjs). key_use_unrecorded is a0718b8c's.
+// code (the fake front's "Fail the save with <code>", e2e/front/stream.mjs). key_use_unrecorded is GW-I-149's.
 for (const [code, words] of [
   [
     "key_use_unrecorded",

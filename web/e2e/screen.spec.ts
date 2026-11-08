@@ -132,7 +132,7 @@ for (const width of [390, 1280] as const)
       await capture(page, `stopped-${width}-${colorScheme}`);
     });
 
-// A restart under a Take over (the gateway's 1e5f33f1): the holder's socket goes with the old process, the new one
+// A restart under a Take over: the holder's socket goes with the old process, the new one
 // records the hand-back the restart cut short before it listens (ended restart, no time), and the page, back on its streams, reads it:
 // the panel watches again without control, offers Take over, and the transcript says the desktop was handed back.
 test("WEB-E2E-037 a Take over cut short by a gateway restart is handed back", async ({

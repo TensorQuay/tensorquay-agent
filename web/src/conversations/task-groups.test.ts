@@ -66,7 +66,7 @@ describe("WEB-U-070 task groups and status", () => {
     expect(sharedTitles([withheld("a"), withheld("b")]).size).toBe(0);
   });
 
-  // The review of 7e282fc0 (nit): the full time says the year, so last September isn't this one.
+  // The full time says the year, so last September isn't this one.
   it("gives the full time, with the year", () => {
     expect(fullTime(new Date(2025, 8, 3, 10).toISOString(), "en")).toBe(
       "Sep 3, 2025, 10:00",

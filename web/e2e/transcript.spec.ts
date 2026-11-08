@@ -449,7 +449,7 @@ test("WEB-U-015 a paused view that grows to fit everything follows again", async
 // Plan §3, Done: a run that added a test offers Run all the tests, which puts the request in the box to send.
 test("WEB-U-016 a new test offers Run all the tests", async ({ page }) => {
   const input = await run(page, ADD_TEST);
-  // Finding D2: the one file it wrote, by name, with Open, named for its file (the review of 6437d8d9).
+  // The one file it wrote, by name, with Open, named for its file.
   await expect(page.locator(".turn-summary")).toHaveText(
     "Created test_parser.py",
   );

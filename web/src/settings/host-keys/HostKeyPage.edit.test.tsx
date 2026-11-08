@@ -188,8 +188,8 @@ describe("WEB-U-143 a key's own page", () => {
     expect(items).toEqual([]);
   });
 
-  // The review of b608b50f, item 10: as every settings form, a conflict keeps the person's edits and takes the new
-  // version, so saving again replaces the other change.
+  // As every settings form, a conflict keeps the person's edits and takes the new version, so saving again replaces the
+  // other change.
   it("keeps the person's edits when someone changed the key meanwhile, and saves them over it next time", async () => {
     const item = key();
     const { api, items, updated } = fakeHostKeys({ keys: [item] });
@@ -220,7 +220,7 @@ describe("WEB-U-143 a key's own page", () => {
     });
   });
 
-  // The review of b608b50f, item 11: a delete that a change beat takes the new version, so deleting again works.
+  // A delete that a change beat takes the new version, so deleting again works.
   it("takes the key's new version when a delete was refused as changed, and deletes on the next try", async () => {
     const item = key();
     const { api, items } = fakeHostKeys({ keys: [item] });

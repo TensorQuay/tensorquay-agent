@@ -65,7 +65,7 @@ export function readinessRoute(
 // A small seeded store with versions, 409s, 400 details with the closed reason list, and Idempotency-Key replay.
 // Values are accepted and dropped at once; nothing here ever holds one.
 const NAME = /^[A-Za-z0-9_-]{1,120}$/;
-// Personal Git and connector credentials own these prefixes, in any case (bc96026).
+// Personal Git and connector credentials own these prefixes, in any case.
 const RESERVED = /^(git|connector)-/i;
 const secrets = seededMap(
   [

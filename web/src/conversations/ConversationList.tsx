@@ -99,7 +99,7 @@ export function ConversationList({
   const loading = (session.isPending || list.isPending) && !error;
   // A search only over a list long enough to need one (UI-GUIDELINES §7).
   const searchable = loaded.length >= SEARCH_FROM || list.hasNextPage;
-  // The shell holds the one shortcut and the one search (the review of d9fb1917); the list says it is long enough.
+  // The shell holds the one shortcut and the one search; the list says it is long enough.
   // Not yet known while the list loads, so a shortcut pressed meanwhile waits for the answer (WEB-U-218).
   const searchState = error ? "failed" : loading ? "unknown" : searchable;
   useEffect(() => {

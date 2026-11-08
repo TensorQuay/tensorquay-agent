@@ -7,7 +7,7 @@ import { fakeHostKeys } from "../../test/host-keys";
 import { NewHostKeyPage } from "./NewHostKeyPage";
 
 // The router's address, as a client navigation from a task's "Add a key for {host}" gives it: window.location still
-// shows the page it came from while the new page renders (the review of f8780321, item 1), so only the router knows.
+// shows the page it came from while the new page renders, so only the router knows.
 const router = vi.hoisted(() => ({
   search: "",
   replace: vi.fn(),

@@ -1070,7 +1070,7 @@ textarea.composer-input {
 .task-search-keys {
   margin-left: auto;
 }
-/* The review of d9fb1917 (part 2): no shortcut to show where there is no keyboard to press it. */
+/* No shortcut to show where there is no keyboard to press it. */
 @media (pointer: coarse) {
   .task-search-keys {
     display: none;
