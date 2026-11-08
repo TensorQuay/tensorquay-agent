@@ -1136,7 +1136,7 @@
         },
         {
           "const": "workspace_quota",
-          "description": "The workspace is over its quota; the run stops past the quota plus a margin, and new runs start only once it\nholds less again (N4).",
+          "description": "The workspace is over its quota; the run stops past the quota plus a margin, and new runs start only once it\nholds less again.",
           "type": "string"
         },
         {
@@ -2966,7 +2966,7 @@
         },
         {
           "const": "key_use_unrecorded",
-          "description": "The push's key was not used, because its use could not be recorded (D4); retryable.",
+          "description": "The push's key was not used, because its use could not be recorded (GW-I-147); retryable.",
           "type": "string"
         }
       ]
@@ -4933,7 +4933,7 @@
               "type": "boolean"
             },
             "ready": {
-              "description": "Whether the browser started again and its window took the focus, as `screen.reset`'s (`false`: a Take over\nafter it says a sign-in now may not last; the 16v integration's `sec_059_a` review). Absent from a runtime\nthat doesn't say: true.",
+              "description": "Whether the browser started again and its window took the focus, as `screen.reset`'s (`false`: a Take over\nafter it says a sign-in now may not last). Absent from a runtime\nthat doesn't say: true.",
               "type": "boolean"
             },
             "reason": {
