@@ -80,7 +80,9 @@ pub(super) fn encode(route: &Route, request: &CompletionRequest) -> Result<Vec<u
         body["thinking"] = json!({"type":"enabled","budget_tokens":budget});
     }
     if let Some(effort) = effort {
-        body["thinking"] = json!({"type":"adaptive"});
+        // Summarized, not omitted (these models' default): the task page shows what the model thinks while it
+        // thinks (LLM-U-055).
+        body["thinking"] = json!({"type":"adaptive","display":"summarized"});
         body["output_config"] = json!({"effort":effort});
     }
     if let Some(temperature) = request.temperature {
