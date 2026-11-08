@@ -250,8 +250,8 @@ async fn core_e_041_a_parallel_batch_after_a_change_never_launches_past_the_limi
 }
 
 // TEST: CORE-E-041
-/// The c14b-rc wave8 miss's shape: the test run fails, the model edits, three rounds, then the tests pass. It used to
-/// stop at the third failure; the edits between them let it finish.
+/// The shape of a miss in an agent wave before 17.0: the test run fails, the model edits, three rounds, then the tests
+/// pass. It used to stop at the third failure; the edits between them let it finish.
 #[tokio::test]
 async fn core_e_041_fix_and_rerun_goes_on_while_the_model_edits() -> TestResult {
     let mut runs = vec![failed(), failed(), failed(), failed()];
