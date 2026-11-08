@@ -66,7 +66,7 @@ pub(crate) fn run_header(headers: &HeaderMap) -> Result<String, GatewayError> {
         .map_err(|_| invalid(InvalidReason::ParameterInvalid))
 }
 
-/// `409 not_current_run` unless `run` is the conversation's current run (review H2), so whatever a call records for
+/// `409 not_current_run` unless `run` is the conversation's current run (GW-I-109), so whatever a call records for
 /// its run is pruned when that run ends.
 ///
 /// # Errors
@@ -150,7 +150,7 @@ async fn sent(state: &State, lead: Uuid, sent: Vec<String>) {
     }
 }
 
-/// A strictly decoded body; a refusal names the field serde names (review M3): an unknown field, a missing one, or
+/// A strictly decoded body; a refusal names the field serde names (GW-I-109): an unknown field, a missing one, or
 /// `type` for an unknown message type. Anything else is the body as a whole.
 pub(crate) fn decode<T: serde::de::DeserializeOwned>(bytes: &[u8]) -> Result<T, GatewayError> {
     serde_json::from_slice(bytes).map_err(|error| decode_error(&error.to_string()))

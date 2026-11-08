@@ -57,7 +57,7 @@ pub(crate) async fn team_for(f: &Fixture, owner: Uuid, cookie: String) -> Result
     }
     let [lead, researcher, reviewer, outsider]: [(ConversationId, String); 4] =
         tokens.try_into().map_err(|_| "four conversations")?;
-    // Each conversation's current run, as its runtime starts it: reads must name it (review H2).
+    // Each conversation's current run, as its runtime starts it: reads must name it (GW-I-109).
     for ((conversation, _), run) in [
         (&lead, "r-1"),
         (&researcher, "r-2"),

@@ -15,7 +15,7 @@ fn key(member: &ConversationId) -> String {
 }
 
 /// The fixed frame: who the member is, where it works, and how it reports. It names no title, so the gateway's own
-/// sentence never holds someone else's words (review L1); a copy taken while the lead worked says so (review M2).
+/// sentence never holds someone else's words; a copy taken while the lead worked says so.
 fn frame(name: &str, workspace: WorkspaceMode, consistent: bool) -> String {
     let place = match workspace {
         WorkspaceMode::OwnCopy if !consistent => {
@@ -181,8 +181,8 @@ pub(crate) async fn copy_ended(state: &State, workspace: Uuid) -> Result<(), Gat
 pub(crate) const SWEEP_EVERY: std::time::Duration = std::time::Duration::from_secs(5);
 const START_LIMIT_MINUTES: i32 = 10;
 
-/// Every member still starting whose first turn isn't stored gets it now: one a restart or a failed send cut short
-/// (review M1). The key makes a turn already sent a replay. One still without its turn ten minutes after it was
+/// Every member still starting whose first turn isn't stored gets it now: one a restart or a failed send cut short. The
+/// key makes a turn already sent a replay. One still without its turn ten minutes after it was
 /// started fails, with a `member_failed` notice to the lead, so no member waits forever. A copy still being made is
 /// left to the copy's end; one a restart cut short failed at start-up (`workspaces::upkeep::recover`), so its member
 /// fails with a notice too. A member whose first turn is stored but who is still marked starting (a failure between

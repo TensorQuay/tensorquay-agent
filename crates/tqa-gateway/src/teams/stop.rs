@@ -204,7 +204,7 @@ async fn cancel_members(state: &State, team: Uuid, lead_too: bool) -> Result<(),
     .await?;
     let (members, dropped) = members;
     withdraw(state, &dropped).await;
-    // Together: each cancel is bounded, so a team's stop waits about one bound however many links are slow (review L2).
+    // Together: each cancel is bounded, so a team's stop waits about one bound however many links are slow.
     let cancels = futures::future::join_all(
         members
             .into_iter()

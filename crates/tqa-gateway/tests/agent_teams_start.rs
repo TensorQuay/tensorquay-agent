@@ -145,7 +145,7 @@ async fn gw_i_106_the_first_start_makes_the_team_and_a_member_task(pool: PgPool)
             (&member["name"], &member["workspace"], &member["state"], &started["lead_tools"]),
             (&json!("researcher"), &json!("own_copy"), &json!("starting"), &json!(true))
         );
-        // The lead runs while it starts the member, so its copy is marked inconsistent (review M2).
+        // The lead runs while it starts the member, so its copy is marked inconsistent.
         assert_eq!(member["consistent"], json!(false));
         assert!(member.get("left_out").is_none() && member.get("profile").is_none());
         let conversation = uuid(&member["conversation"])?;
@@ -188,7 +188,7 @@ async fn gw_i_106_the_first_start_makes_the_team_and_a_member_task(pool: PgPool)
         let (status, second) = start(f, &lead.token, "c-2", &mine).await?;
         assert_eq!(status, 201, "{second}");
         assert_eq!(uuid(&second["member"]["workspace_id"])?, lead_workspace);
-        // It waits for the lead's sandbox to hand over the files, and the answer says so (review L3).
+        // It waits for the lead's sandbox to hand over the files, and the answer says so.
         assert_eq!(second["member"]["state"], "queued");
         assert!(second["member"].get("consistent").is_none(), "no copy, nothing to call consistent");
         assert!(second["seq"].as_i64() > Some(seq));

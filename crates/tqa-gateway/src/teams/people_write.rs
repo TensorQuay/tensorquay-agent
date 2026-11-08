@@ -202,7 +202,7 @@ async fn stop_helper(
         role: Role::Lead,
         name: "lead".to_owned(),
     };
-    // The lead's notice says its person stopped it (the copy review's C8).
+    // The lead's notice says its person stopped it.
     let stopped = store::stop_member(connection, &caller, (&name, store::Stopper::Person)).await?;
     Ok((
         json!({ "member": { "name": stopped.name, "state": "stopped" } }),

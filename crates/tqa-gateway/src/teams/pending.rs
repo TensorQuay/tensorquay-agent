@@ -1,5 +1,5 @@
 //! The agent-team reads still waiting for their `tool.result`, by reader and call key, kept in memory so that storing
-//! an event costs nothing unless it ends one of them (review M1, PERF-002). It mirrors `agent_team_reads`: loaded at
+//! an event costs nothing unless it ends one of them (PERF-002). It mirrors `agent_team_reads`: loaded at
 //! start, added to by the read route after its commit, and taken from by the event store after the commit that
 //! advances the reader's seq. Absent when agent teams are off, so the event path does no work at all then.
 use crate::GatewayError;
@@ -22,7 +22,7 @@ impl Pending {
     /// Storage failure.
     pub(crate) async fn load(&self, pool: &sqlx::PgPool) -> Result<(), GatewayError> {
         // A read whose run is no longer its reader's current run will never get its result, and its run's end may
-        // have passed while agent teams were off: it goes now (re-review N2).
+        // have passed while agent teams were off: it goes now (GW-I-109).
         sqlx::query!(
             "DELETE FROM agent_team_reads r WHERE r.run_id IS DISTINCT FROM ( \
                SELECT CASE WHEN e.lifecycle IN ('run.started', 'run.resumed') THEN e.run_id END FROM events e \

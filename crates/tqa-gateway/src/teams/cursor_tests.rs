@@ -93,7 +93,7 @@ fn gw_u_126_an_empty_answer_is_pruned_when_its_result_is_stored() {
 
 #[test]
 fn gw_u_126_a_read_starts_after_the_answers_still_outstanding() {
-    // Two reads before either result is stored (review H1): the second never answers what the first did.
+    // Two reads before either result is stored (GW-I-195's case): the second never answers what the first did.
     let mut cursor = Cursor::new(0);
     assert_eq!(cursor.answer("first", "run-1", &[1, 2], 50), vec![1, 2]);
     assert_eq!(cursor.answer("second", "run-1", &[1, 2, 3], 50), vec![3]);

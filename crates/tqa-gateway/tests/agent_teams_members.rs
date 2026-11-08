@@ -158,7 +158,7 @@ async fn gw_i_197_the_lead_reads_its_helpers_transcript_in_pages(pool: PgPool) -
             .filter_map(|e| e["seq"].as_u64())
             .collect();
         assert_eq!(seqs, [5, 6]);
-        // A large tool result reaches the lead cut to 8 KiB, marked, with its full size (review M3).
+        // A large tool result reaches the lead cut to 8 KiB, marked, with its full size.
         let large = Event::ToolResult {
             call_id: "c-2".parse()?,
             status: ToolStatus::Ok,
