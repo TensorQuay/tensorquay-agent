@@ -1,4 +1,4 @@
-//! The model server's own context (first-hour finding F3): Ollama gives a model a small context unless told otherwise
+//! The model server's own context (a first-hour check): Ollama gives a model a small context unless told otherwise
 //! (4096 below 23 GiB of GPU memory, which is most Macs), and it fits an oversized request by dropping its oldest
 //! messages without a word, the person's request first. Its OpenAI-compatible endpoint can't ask for more. So on a
 //! local route the check asks the server what the model it just answered with runs with: `GET /api/version` says

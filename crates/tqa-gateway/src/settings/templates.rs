@@ -581,14 +581,14 @@ impl Current {
     }
 }
 
-/// Whether a replacement needs checking again: a checked input changed (review R2). The default must stay offered, or
+/// Whether a replacement needs checking again: a checked input changed. The default must stay offered, or
 /// every create without a template name is refused, so a write that would leave it unoffered is refused.
 ///
 /// # Errors
 /// `409 template_is_default`; a template whose columns cannot be stored.
 fn recheck(current: &Current, template: &Template, enabled: bool) -> Result<bool, GatewayError> {
     let stored = columns(template)?;
-    // The image, capabilities, CPU and memory are checked inputs (review R2); processes and disk are not.
+    // The image, capabilities, CPU and memory are checked inputs; processes and disk are not.
     let changed = current.image != template.environment().digest
         || current.capabilities != stored.capabilities
         || current.cpu_millicores != stored.cpu

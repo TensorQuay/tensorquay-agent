@@ -1,4 +1,4 @@
-//! GW-I-067 (ADR-0011; review-adr-0011 B2): a conversation starts with the catalogue's enabled-by-default MCP servers,
+//! GW-I-067 (ADR-0011): a conversation starts with the catalogue's enabled-by-default MCP servers,
 //! and `PATCH /conversations/{id}` changes its set within the catalogue, never during a run.
 #[path = "support/fixture.rs"]
 mod support;

@@ -1,4 +1,4 @@
-//! GW-I-081 (unit side, review R1 of slice 4/5): a reply is bounded while it arrives, by parts and by bytes, so a
+//! GW-I-081 (unit side): a reply is bounded while it arrives, by parts and by bytes, so a
 //! runtime cannot make the gateway hold more than its request can need.
 use std::time::Duration;
 

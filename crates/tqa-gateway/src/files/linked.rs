@@ -93,7 +93,7 @@ pub(super) struct Head {
 ///
 /// # Errors
 /// As [`list`]; a file that changes between chunks (another size or inode, or it ends early) is
-/// `409 file_changed`, retryable: a race with the task writing it, not a protocol violation (review R2).
+/// `409 file_changed`, retryable: a race with the task writing it, not a protocol violation.
 pub(super) async fn head(
     state: &State,
     link: &ConversationId,

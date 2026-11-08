@@ -315,8 +315,7 @@ fn gw_u_156_a_late_grant_never_claims_to_know_the_reset() -> Result<(), Box<dyn 
 
 // TEST: GW-U-156
 /// The unclean mark is the profile's, and the profile lives in the sandbox: a new sandbox for the task (after an idle
-/// retire, a hand-over or an environment change) starts clean, and a deleted task keeps no mark (the takeover pair's
-/// review, P3).
+/// retire, a hand-over or an environment change) starts clean, and a deleted task keeps no mark.
 #[test]
 fn gw_u_156_a_new_sandbox_or_a_deleted_task_forgets_the_unclean_mark()
 -> Result<(), Box<dyn std::error::Error>> {

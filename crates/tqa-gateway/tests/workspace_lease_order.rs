@@ -1,4 +1,4 @@
-//! GW-I-031's turn order (066b; lease P2-2 and the lease-fifo review's P1, 7 Oct 2026): turns on one workspace go in
+//! GW-I-031's turn order (7 Oct 2026): turns on one workspace go in
 //! the order they were accepted, through the hand-over and admission alike. Split from `workspace_lease.rs` at the c16
 //! merge, which would have passed 1000 lines (G-06); the helpers are that file's. GW-I-263: a restart in the middle of
 //! a hand-over keeps the holder's queued turns. GW-I-309: a holder whose turn its runtime took, with its run not yet
@@ -300,7 +300,7 @@ async fn serve_both(
 }
 
 // TEST: GW-I-258
-// The review of the FIFO hand-over (P1): admission orders owners by their live sandboxes first, the hand-over by
+// Admission used to order owners by their live sandboxes first, the hand-over by
 // acceptance. On a workspace shared for writing between two people they disagreed, and the two tasks took the workspace
 // from each other every pass. Turns on one workspace now go in acceptance order in admission too.
 #[sqlx::test]

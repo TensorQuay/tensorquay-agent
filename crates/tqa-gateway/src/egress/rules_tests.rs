@@ -87,7 +87,7 @@ fn gw_i_012_reserved_destinations_need_an_ip_literal_rule() -> TestResult {
         "::1".parse()?,
         "fd00::1".parse()?,
         "::ffff:10.0.0.1".parse()?,
-        // IPv6 forms that embed IPv4: NAT64, 6to4 and IPv4-compatible (review-045 l1).
+        // IPv6 forms that embed IPv4: NAT64, 6to4 and IPv4-compatible.
         "64:ff9b::a00:5".parse()?,
         "2002:a00:5::1".parse()?,
         "::10.0.0.5".parse()?,
@@ -111,7 +111,7 @@ fn gw_i_012_reserved_destinations_need_an_ip_literal_rule() -> TestResult {
     ] {
         assert!(!guarded(public.parse()?, false), "{public}");
     }
-    // An exact host name never exempts a reserved answer: its DNS may be poisoned (review-045 m1).
+    // An exact host name never exempts a reserved answer: its DNS may be poisoned.
     let allow = list(&[
         ("*.internal.example", &[443]),
         ("db.internal.example", &[5432]),

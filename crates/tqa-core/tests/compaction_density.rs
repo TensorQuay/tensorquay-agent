@@ -34,8 +34,8 @@ fn without_states(request: &tqa_llm::CompletionRequest) -> tqa_llm::CompletionRe
 // TEST: CORE-U-084
 // TEST: CORE-U-044
 /// A request that had dropped its older states recorded what it really sent, so the next one knows the route's
-/// density exactly and never sends those states back past the window uncompacted. This is the review's P2-A case of
-/// 7 Oct, which a recomputed density got wrong (80 of 390 cases overflowed). The same journal read twice gives the
+/// density exactly and never sends those states back past the window uncompacted. This is a case found on 7 Oct, which
+/// a recomputed density got wrong (80 of 390 cases overflowed). The same journal read twice gives the
 /// same requests: nothing is kept in memory.
 #[tokio::test]
 async fn core_u_084_a_request_that_dropped_states_records_what_it_sent() -> TestResult {
@@ -71,7 +71,7 @@ async fn core_u_084_a_request_that_dropped_states_records_what_it_sent() -> Test
 // TEST: CORE-U-084
 // TEST: CORE-U-081
 /// The image a call sent is recorded beside its estimate, so its real count's image comes out of the density and the
-/// next request's image is counted once (the review's P2-2).
+/// next request's image is counted once.
 #[tokio::test]
 async fn core_u_084_a_recorded_image_counts_once() -> TestResult {
     let image = u64::from(IMAGE_TOKENS);

@@ -390,7 +390,7 @@ fn gw_u_093_the_name_new_is_reserved_from_both_paths() -> Result<(), Box<dyn Err
 }
 
 // TEST: GW-U-101
-/// The first hour's F3: the quick start's Minimal, made from `[runtime] image` when the file has no templates, says
+/// From a first-hour check: the quick start's Minimal, made from `[runtime] image` when the file has no templates, says
 /// what that image (the runtime's base target) has, Shell and Python, as its label and the Environment page do. The
 /// wire's legacy default, which older gateways omitted, stays Shell alone.
 #[test]

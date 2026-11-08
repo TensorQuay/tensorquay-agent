@@ -34,7 +34,7 @@ pub(crate) const BLOB_BATCH_BYTES: u64 = 4 * 1024 * 1024;
 /// Parts a blobs reply may take beyond one per hash: 4 MiB in 128 KiB chunks is 32 more.
 const BLOB_EXTRA_PARTS: usize = 32;
 
-/// A manifest entry on the wire at most: a 4096-byte path, a hash, and the other fields (review R1 of slice 4/5).
+/// A manifest entry on the wire at most: a 4096-byte path, a hash, and the other fields.
 const MAX_ENTRY_BYTES: usize = 4096 + 64 + 128;
 /// What a reply's envelope and each item cost beyond their strings, in the estimate of [`weight`].
 const OVERHEAD: usize = 64;

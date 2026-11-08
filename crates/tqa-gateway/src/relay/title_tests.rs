@@ -149,7 +149,7 @@ fn gw_u_096_the_request_names_the_tasks_writing_system() -> Result<(), Box<dyn s
 #[test]
 fn gw_u_096_a_title_in_another_writing_system_is_refused() {
     for (task, title, fits_task) in [
-        // F23's case: the task keeps its first words.
+        // The case behind this test: the task keeps its first words.
         (
             "Create a CSV of 2025 regional sales",
             "创建2025年区域销售CSV",

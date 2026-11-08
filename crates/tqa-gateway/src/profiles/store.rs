@@ -100,7 +100,7 @@ pub(crate) async fn find(
     .ok_or(GatewayError::NotFound)
 }
 
-/// Personal profiles one user may hold (review R1 of slice 1).
+/// Personal profiles one user may hold.
 pub(crate) const MAX_PROFILES_PER_OWNER: i64 = 100;
 /// Shared profiles the API may create; the file may seed as many again.
 pub(crate) const MAX_SHARED_PROFILES: i64 = 64;
