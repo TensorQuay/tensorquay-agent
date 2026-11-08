@@ -269,9 +269,9 @@ fn prompt_u_017_the_data_capability_says_the_python_data_libraries_are_installed
     Ok(())
 }
 
-/// PROMPT-U-020 (a first-hour check before 17.0): asked for a PDF, a small model said no PDF library was installed and gave up,
-/// though the Workstation's Chromium prints HTML to PDF. With the browser capability the prompt says how, in one line;
-/// without it, nothing.
+/// PROMPT-U-020 (a first-hour check before 17.0): asked for a PDF, a small model said no PDF library was installed and
+/// gave up, though the Workstation's Chromium prints HTML to PDF. With the browser capability the prompt says how, in
+/// one line; without it, nothing.
 #[test]
 fn prompt_u_020_the_browser_capability_says_how_to_make_a_pdf()
 -> Result<(), Box<dyn std::error::Error>> {

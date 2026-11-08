@@ -1,6 +1,6 @@
-//! GW-U-092, from a first-hour check before 17.0: the README's default small model on a CPU-only computer answered the check's
-//! two requests correctly, but thinking at a few tokens a second took longer than the check's 120 s. A local route's
-//! check is now bounded by progress: each answer's first byte within `[relay] local_check_timeout`, then no gap
+//! GW-U-092, from a first-hour check before 17.0: the README's default small model on a CPU-only computer answered the
+//! check's two requests correctly, but thinking at a few tokens a second took longer than the check's 120 s. A local
+//! route's check is now bounded by progress: each answer's first byte within `[relay] local_check_timeout`, then no gap
 //! longer than `[relay] idle_timeout`, within an outer cap of 10 minutes. It reports the model's speed, and below 15
 //! tokens a second it passes with `slow_answers`.
 
