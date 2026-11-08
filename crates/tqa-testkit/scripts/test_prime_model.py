@@ -10,6 +10,16 @@ import unittest
 import prime_model
 
 
+def deadline_scale(value):
+    """The harness's deadline scale for `value` (TQA_TEST_DEADLINE_SCALE), read as tqa_testkit::deadline::parse_scale
+    reads it: a trimmed integer from 1 to 20, else 1. CI's loaded runners set it, as for the Rust harness's waits."""
+    try:
+        scale = int((value or "").strip())
+    except ValueError:
+        return 1
+    return scale if 1 <= scale <= 20 else 1
+
+
 SERVER = '''#!/usr/bin/env python3
 import os
 from pathlib import Path
@@ -139,7 +149,8 @@ class Priming(unittest.TestCase):
                 environment["NEXTEST_ENV"] = str(environment_file)
                 result = subprocess.run(
                     [sys.executable, "-B", prime_model.__file__], env=environment,
-                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60,
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                    timeout=60 * deadline_scale(os.environ.get("TQA_TEST_DEADLINE_SCALE")),
                 )
                 if mode == "ready":
                     self.assertEqual(result.returncode, 0, result.stderr)
