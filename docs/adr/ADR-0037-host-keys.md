@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted (the owner's decisions 1 to 6, 30 Sep 2026, all as recommended). To be built after candidate 13c.
+Accepted (the Product Owner's decisions 1 to 6, 30 Sep 2026, all as recommended). Part of 17.0.
 Amended 30 Sep 2026: the gateway's contract with the web (see Amendment 1).
 Amends [ADR-0023](ADR-0023-workspace-push.md), [ADR-0033](ADR-0033-built-in-secret-store.md) and
 [ADR-0035](ADR-0035-network-guardrails.md) where they conflict (see Amendments).

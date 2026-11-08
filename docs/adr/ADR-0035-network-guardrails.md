@@ -2,7 +2,7 @@
 
 ## Status
 Accepted (8 Oct 2026). The owner decided the removal of the per-call policy and approvals (§1, §3 to §7), the git
-push variant (§5) and, on 8 Oct, the network extras in §2: point 1 confirmed, point 3 built after c16, point 2 when
+push variant (§5) and, on 8 Oct, the network extras in §2: point 1 confirmed, point 3 built after 17.0, point 2 when
 someone asks for it, point 4 dropped ("The owner's decision on the network extras", at the end).
 
 ## Date
@@ -319,7 +319,7 @@ tagged, so nothing is deprecated for a release first: what goes is removed outri
   - the Gate 9 and FR-10 traceability rows.
 - **ADR-0034** (team runs): a spawned member's reach is at most the caller's tools, connectors and network list, in
   place of "the stricter policy" (§1).
-- **PRD:** already amended (1b7f7f6b). If the owner agrees to §2's points 2 to 4, FR-15 and FR-22 gain per-profile
+- **PRD:** already amended. If the owner agrees to §2's points 2 to 4, FR-15 and FR-22 gain per-profile
   lists and observe mode.
 
 ## Tests that go or change

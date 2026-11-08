@@ -360,7 +360,8 @@ with slots, queue, eviction, parking and pin (ADR-0016).
     **Decided since (2 Oct 2026; the owner left the open points to the technical lead):** a person can type to any
     member directly, like typing into any developer's terminal window, and the lead is told (proposal G). It is built
     now, test-first, slice by slice, behind an install switch (`[agent_teams] enabled`, off by default), and merges
-    into dev behind it; the 13h release and the next keep first call on testing time. Members per lead: 3 by default,
+    into the development branch behind it; the internal releases then in testing keep first call on testing time.
+    Members per lead: 3 by default,
     at most 8, never more than the slots minus one. Deleting the lead's task removes the team's messages, the
     helpers' tasks and their copies; the lead's workspace stays. v1.0's channel stays as built, voting included. Of
     the proposals (ADR-0034), A, B, C, D, E, F, H and J are taken, and I is out of scope.
@@ -381,9 +382,9 @@ with slots, queue, eviction, parking and pin (ADR-0016).
     releases: first deprecated and unused by the web, then removed).
 23. **The network extras (8 Oct 2026, ADR-0035 §2):** the host:port allow-list with wildcards, default deny, is
     confirmed as v1.0's design, as built. "Recently refused" with "Allow this site" in Settings › Internet access is
-    built after c16. Per-profile network lists come when someone asks for them. Observe mode is dropped: it would
+    built after 17.0. Per-profile network lists come when someone asks for them. Observe mode is dropped: it would
     switch the only guardrail off for a while. None of them asks a person to approve anything.
-24. **A desktop sign-in lasts one run (8 Oct 2026, ADR-0039 §6):** in c16, a sign-in a person makes during Take over
+24. **A desktop sign-in lasts one run (8 Oct 2026, ADR-0039 §6):** in 17.0, a sign-in a person makes during Take over
     lasts for the agent's next run only, then the desktop's browser forgets it, so work inside an account means a Take
     over and a sign-in before each message. Keeping a sign-in for the whole task is for a later release.
 25. **The 24-hour soak's growth rule (9 Oct 2026, TEST-PLAN SOAK-001):** the gateway's memory (RSS) keeps M5's
@@ -392,7 +393,7 @@ with slots, queue, eviction, parking and pin (ADR-0016).
     rule. The gateway's database connections are judged against the pool: never above its maximum plus the gateway's
     listeners, at the maximum in under 90 % of the last hour, and their floor up by at most 2 from the first three
     settled hours to the last three. The probe's own database session is no longer counted as the gateway's. Why: the
-    pool's normal swings (4 to 16 connections within an hour) failed the 5 % rule on both soaks it judged, c15's of 6
+    pool's normal swings (4 to 16 connections within an hour) failed the 5 % rule on both soaks it judged, those of 6
     and 8 Oct 2026, while the other descriptors stayed flat; and the probe counted itself (the 17 seen was the pool's
     16 plus the probe). The stated blind spot: a leak of 3 or fewer held connections per 12 h can pass, and a run with
     no gateway lifetime of 11 h or more (an 8 h run) doesn't judge the floor and says so; the 24 h run fails if it
@@ -401,5 +402,5 @@ with slots, queue, eviction, parking and pin (ADR-0016).
     connections may stay idle for over 25 minutes than its listeners (none in the soak). A healthy pool puts its
     connections back into use; a connection taken and never used again idles for good, so it fails about 25 minutes
     after being taken, in any lifetime, the 8 h run's included. A leaked connection still used now and then is left
-    to the floor check. The 25 minutes are the pool's own bound with no traffic at all, and a later soak than 15b's
-    calibrates it.
+    to the floor check. The 25 minutes are the pool's own bound with no traffic at all, and a later soak than the v1.0
+    candidate's calibrates it.

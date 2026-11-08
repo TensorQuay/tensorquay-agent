@@ -71,7 +71,7 @@ the header, once every supported runtime sends it, is the owner's decision.
 ## History
 
 The external vault was Infisical. A connect-only `infisical` backend (our own HTTP client, no Infisical code or image)
-was on dev from 2026-09-27 (commits 35f83ff, 19e4d14 and c036663, merged as f759af8 and 6fd413d) and is removed by
+was on the development branch from 2026-09-27 and is removed by
 this decision. A second slice was abandoned before merge. The licence review, the feature map and the design note
 are in the team's working notes, not in the repository.
 

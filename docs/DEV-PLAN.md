@@ -207,8 +207,8 @@ Gate 9: PRD metrics M1–M8 met or explicitly waived; all P1 tests pass; PO sign
 
 ### Phase 10 (v1.1 outline): agent teams (3–4 weeks)
 A lead and its members (helpers), as decided on 2 Oct 2026 (PRD §12 item 20, ADR-0034). Built now, test-first, slice
-by slice, behind the install switch `[agent_teams] enabled` (off by default), and merged into dev behind it; the 13h
-release and the next keep first call on testing time. Each slice comes with its tests:
+by slice, behind the install switch `[agent_teams] enabled` (off by default), and merged into the development branch
+behind it; the internal releases then in testing keep first call on testing time. Each slice comes with its tests:
 1. **Roles and delivery.** `agent_teams` and `agent_team_members`; roles stored at start and checked on every route;
    the agent-team channel kind with addressed messages and per-reader last-read seqs; a send stored or refused with a
    reason, against the S1 contract in ADR-0034 (GW-U-069, GW-U-125, GW-U-126, GW-I-109's delivery
@@ -240,11 +240,11 @@ release and the next keep first call on testing time. Each slice comes with its 
 A `desktop` capability on the Workstation template (display server, screenshot and input tools for the agent), a live
 Screen panel in the conversation page; the switch to a desktop environment stays the person's, in the environment
 picker (ARCHITECTURE §4.7; the agent's one-click suggestion was dropped by the owner, 10 Oct 2026, ADR-0039 §8). Needs its own security review (what a desktop session may reach).
-Status (8 Oct 2026): complete for the release after v1.0 (c16), outside c15. The runtime half of the screen bridge and
+Status (8 Oct 2026): complete for the release after v1.0 (shipped in 17.0), not in the v1.0 candidate. The runtime half of the screen bridge and
 Sign out everywhere are built; the panel's review fixes are in; the security review's threats each map to a test, and
 the gaps found on 8 Oct are filled (another person, a share holder and an administrator refused the screen and its
 records; a sandbox's bridge reaching only its own task; the secret search in a Desktop sandbox; a share holder's and a
-fork's desktop each a sandbox of their own). What remains runs on the stack after c16's merge: the Desktop suite, the
+fork's desktop each a sandbox of their own). What remains runs on the stack once that release is merged: the Desktop suite, the
 security tests that need a Desktop sandbox (SEC-057, SEC-058, the Desktop secret search, the live sign-in), the page
 pass on the review stack (which gets the Desktop with one Desktop at once) and the lead's live check.
 

@@ -14,13 +14,13 @@ each a file here:
    one call per target and way against an OpenAI Chat endpoint, shaped as the route sends it with the product's own
    tool schema from the capture, appended to `DIR/answers.jsonl` with why each reply ended; it resumes where it
    stopped. `run_eval.sh DIR` runs it against the team's local model with the local route's settings, then the scorer.
-   `--coordinate-space 1000` (exploratory, c17) asks the coordinates way for x and y from 0
+   `--coordinate-space 1000` (exploratory, since 17.0) asks the coordinates way for x and y from 0
    to 1000 across the screenshot instead of its pixels, Qwen3-VL's family's convention; the product has no such mode
    yet. Its answers record their space, so it takes its own `--route` name.
-   `detect.py` and `recall.py` (exploratory, c17; no detector ships): a UI element detector's boxes on a capture's
+   `detect.py` and `recall.py` (exploratory, since 17.0; no detector ships): a UI element detector's boxes on a capture's
    unmarked screens, in a throwaway container with no network, then how many targets those boxes reach with no model
    (IoU 0.5, or a box's centre inside), which caps any marks drawn from them.
-   `grid_runner.py DIR --variant g12|g20 --route NAME ...` (exploratory, c17): grid-then-zoom, the model naming
+   `grid_runner.py DIR --variant g12|g20 --route NAME ...` (exploratory, since 17.0): grid-then-zoom, the model naming
    labelled cells and never a coordinate (`grid.py`: the geometry, the drawing from the capture's unmarked screens with
    `pngio.py`, the words); its answers are coordinates lines in screen pixels, with the cells picked and each level's
    result, so the scorer reads them unchanged.

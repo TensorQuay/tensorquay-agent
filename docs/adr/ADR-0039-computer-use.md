@@ -167,7 +167,7 @@ number, not a point:
 **Typing and keys:** `type` takes `text` (at most 4,000 bytes; with a `ref`, into that element; without one, into the
 focus). `key` takes `keys`, an xdotool-style combination (`ctrl+s`, `Return`, `alt+Tab`), at most 8 keys. Text reaches
 the application as XTEST key events or the element's set-text action, never through the clipboard (section 7 decides
-the clipboard). **Amended 12 Oct 2026 by the lead (c16's record rerun):** on the desktop, `key` and `type` without a
+the clipboard). **Amended 12 Oct 2026 by the technical lead:** on the desktop, `key` and `type` without a
 `ref` always go through XTEST, as a person's keyboard does, whichever window has the focus, so the browser's own UI
 (ctrl+l and its address bar) gets them as well as the page. Slice 2's driver sent them to the focused page as debugging
 protocol input events, which Chromium's UI never sees, so a model's ctrl+l and URL left the page on `about:blank`. The
@@ -318,7 +318,7 @@ thing.
   next run starts, and is gone when that run ends. A Take over that no run follows leaves the profile until the sandbox
   retires, which ends it too. So every new sandbox, every later run, a person a workspace is shared with, a fork and
   another task on the same workspace all start signed out. There is no option to keep a session across runs in this
-  version. **The owner confirmed it for c16 (8 Oct 2026)**, after the computer-use review's finding 23 (work in an
+  version. **The Product Owner confirmed it for 17.0 (8 Oct 2026)**, after a computer-use review (work in an
   account means a Take over and a sign-in before each message): keeping a sign-in for the whole task is for a later
   release (PRD §12, item 24).
   - **Known edge:** the cancelled run's own end empties the profile. A sign-in begun in the few seconds while that run
@@ -327,7 +327,7 @@ thing.
     Chromium writes its cookies to the profile only in batches, about every 30 s, and a reset kills the browser
     without a graceful close (the profile is emptied straight after). So if the browser dies between a sign-in and
     the next run (a crash), a sign-in from its last ~30 s can be lost and the person signs in again. A runtime restart
-    empties the profile anyway (below). This fails safe (amended 12 Oct 2026, c16: SEC-059).
+    empties the profile anyway (below). This fails safe (amended 12 Oct 2026: SEC-059).
 - **Take over always finds the runtime's browser** (the lead, 7 Oct 2026). After every reset (a run's end, Sign out
   everywhere, and the session's start) the runtime starts its browser again, blank, on the emptied profile, so the
   person signs in there and nowhere else. A browser started by hand is the same profile too: the Desktop image's
@@ -346,7 +346,7 @@ thing.
     keeps its own profile until the sandbox retires: a deliberate act, not a way the desktop offers. A runtime restart
     in the same sandbox resets at its session's start, so a sign-in made before it is emptied; the person signs in
     again (fails safe).
-- **A paste in reaches the desktop's clipboard from the start** (amended 12 Oct 2026, c16: RT-I-046's paste never
+- **A paste in reaches the desktop's clipboard from the start** (amended 12 Oct 2026: RT-I-046's paste never
   arrived). x11vnc 0.9.17 makes the window it owns the X selections with only some 10 s into a viewer's connection
   (inside its per-client setup; no flag, `-speeds`, `-noxdamage` or `-noxfixes`, makes it sooner, and it does no X
   work without a client), and a paste it gets before then is logged as set but owned by no one, so the browser's
@@ -359,19 +359,19 @@ thing.
   the server has no client and has its selection window). The cost is some 10 s more before a Desktop's runtime registers. `-seldir recv` stays:
   without it the desktop's cut buffer was sent to viewers. Known edge: an x11vnc the init's loop restarts isn't warmed
   again, so a paste in its first seconds is lost, as before this change.
-- **Typing is offered only once the desktop takes it** (amended 12 Oct 2026, c16: two of three hand sign-ins in a
+- **Typing is offered only once the desktop takes it** (amended 12 Oct 2026: two of three hand sign-ins in a
   Take over never reached the site). Two things have to be true before the panel says "You have control" and gives the
   picture the keyboard: the gateway has granted control, and the panel's screen client has connected (noVNC's
   `connect`); until then it says "Connecting to the desktop…", input stays off, and Hand back is still there. A grant
   that came before the client had loaded used to leave it view-only under "You have control", so nothing typed was
   sent. And the run's end reset is announced only once the reopened browser's window has the focus, not as soon as its
   debugging port opens: keys sent before then reached no window, or the window manager (WEB-U-329, RT-I-053). The reset
-  says whether it got that far (`screen.reset`'s `ready`, 18 Oct 2026, the 16r int's `sec_059_a`): the launch and the
+  says whether it got that far (`screen.reset`'s `ready`, 18 Oct 2026, an integration run's `sec_059_a`): the launch and the
   focus share one 20 s bound, and a browser that didn't start or whose window never took the focus is said not ready.
   The person's control then says a sign-in now may not last, and keeps saying so until a reset says the browser is
   ready (GW-U-203, GW-I-313, RT-I-055). Before, after 5 s the reset was announced as over anyway, and under load a
   person typed into a desktop whose browser wasn't there. Ready proves input, not only a window (amended 19 Oct 2026,
-  the 16v integration's coverage `sec_059_a`: a reset said ready, control was plain and on time, and the keys typed
+  an integration run's coverage `sec_059_a`: a reset said ready, control was plain and on time, and the keys typed
   reached no page): within the same 20 s bound, the browser's window must hold both the window manager's active window
   and the X input focus, where the VNC server's keys go (the manager names a window active and moves the input focus
   as a step of its own), and the browser must answer two round trips on its debugging connection, its window asked
@@ -381,7 +381,7 @@ thing.
   and the answer took (RT-I-057).
 - **Sign out everywhere** on the Screen panel's ⋯ ends the session at once (the browser restarted with an empty
   profile); the transcript notes that it was done. Its answer (`screen.sign_out.done`) comes once the browser has
-  started again, with the same `ready` as a run's end reset (amended 19 Oct 2026, the 16v integration's `sec_059_a`
+  started again, with the same `ready` as a run's end reset (amended 19 Oct 2026, an integration run's `sec_059_a`
   review): the gateway treats the sign-out as a reset from the moment it asks, so a Take over meanwhile waits for it,
   and one after a not-ready answer is granted not ready. Before, the runtime answered first and started the browser
   after, so a Take over right after was granted plain control over a desktop with no browser yet (GW-U-204,
@@ -503,7 +503,7 @@ revisit a suggestion.
   restart every desktop counts as possibly signed in until its next reset: it fails safe, and such a desktop waits out
   its idle limit as before. The waiting line reads "One frees soon after another task finishes" (GW-I-305, GW-U-200,
   WEB-U-397).
-- **What the runtime's reaper leaves on a desktop** (the lead, 12 Oct 2026; c16: the first shell command of a desktop
+- **What the runtime's reaper leaves on a desktop** (the technical lead, 12 Oct 2026: the first shell command of a desktop
   run killed the browser, and no application the agent opened survived the call). The runtime is a child-subreaper and
   kills every direct child it didn't record after each shell call and each run (ADR-0016's amendment, TOOL-U-008). On a
   desktop it also leaves alone: its own browser, started as the leader of a group of its own and recorded as an MCP

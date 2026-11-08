@@ -218,7 +218,7 @@ the run completes, and an `mcp.server` event reports the server ready with one t
 TQA_DOCKER_TESTS=1 python3 tests/e2e/mcp_task.py
 ```
 
-It needs images from dev at `cebfea9` or later (the gateway's catalogue delivery and the runtime's MCP client), with
+It needs images built from 17.0 or later (the gateway's catalogue delivery and the runtime's MCP client), with
 `TQA_RUNTIME_TEST_IMAGE` naming the workstation runtime image. It finishes within five minutes.
 
 ## A profile task (E2E-PROFILE-007)
