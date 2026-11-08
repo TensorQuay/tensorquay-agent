@@ -133,7 +133,7 @@ for (const width of [1024, 1440])
         page.getByRole("button", { name: /^Model:/ }),
       ).toHaveAttribute("aria-disabled", "true");
       await closeChoices(page);
-      // WEB-U-155 (the 13f screens, #4): one word while working; the count is in its tooltip.
+      // WEB-U-155 (a screen review before 17.0): one word while working; the count is in its tooltip.
       await expect(page.getByLabel("Run status")).toHaveAttribute(
         "data-short",
         "Working…",

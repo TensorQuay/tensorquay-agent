@@ -74,8 +74,8 @@ const jira = hostKey({
   ],
 });
 
-// The reviewed Keys sketch §5 (ADR-0037 §1, §9): administrators make shared keys and choose who may use them; they see
-// members' own keys only to delete them.
+// ADR-0037 §1, §9: administrators make shared keys and choose who may use them; they see members' own keys only to
+// delete them.
 describe("WEB-U-145 Keys › Shared for administrators", () => {
   it("heads the shared keys at the page's second level, for administrators and members", async () => {
     const admin = wrap(
@@ -260,8 +260,7 @@ describe("WEB-U-145 Keys › Shared for administrators", () => {
   });
 });
 
-// The reviewed Keys sketch §6 and decision 2: members see the shared keys they may use, read-only, with only their own
-// last use, and no one else's names.
+// Members see the shared keys they may use, read-only, with only their own last use, and no one else's names.
 describe("WEB-U-146 Keys › Shared for members", () => {
   it("lists the shared keys they may use, read-only, with their own last use", async () => {
     const mine = {

@@ -62,8 +62,8 @@ describe("WEB-U-025 workspace card", () => {
     expect(line).toHaveAttribute("data-lease", "running");
   });
 
-  // WEB-U-199 (the 13h UI review, #3): a task that is done but whose environment is kept still holds the lease; "In
-  // use" wasn't true there. Only a going run is in use; a kept environment is said quietly, as where it's open.
+  // WEB-U-199 (a UI review before 17.0): a task that is done but whose environment is kept still holds the lease;
+  // "In use" wasn't true there. Only a going run is in use; a kept environment is said quietly, as where it's open.
   it.each([
     ["Hello file", "Open in “Hello file”"],
     [null, "Open in another task"],
@@ -79,7 +79,7 @@ describe("WEB-U-025 workspace card", () => {
     },
   );
 
-  // WEB-U-200 (the 13h UI review, #4): "0 B of 10 GB" for a workspace holding a file was an early measurement, taken
+  // WEB-U-200 (a UI review before 17.0): "0 B of 10 GB" for a workspace holding a file was an early measurement, taken
   // during the run before the file existed. A size is a past measurement: it always says when it was taken.
   it("WEB-U-200 says when a workspace's size was measured, with or without a quota", async () => {
     for (const quota of [10 * GB, null]) {

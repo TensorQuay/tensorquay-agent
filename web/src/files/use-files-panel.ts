@@ -39,7 +39,7 @@ export function useFilesPanel(docks: boolean) {
   const open = choice ?? (docks && remembered() === "open");
   // The chosen tab survives closing and reopening the panel.
   const [tab, setTab] = useState<PanelTab>("files");
-  // A file to show, numbered so the same file can be asked for again (a finished turn's Open, findings D1-D2).
+  // A file to show, numbered so the same file can be asked for again (a finished turn's Open).
   const [target, setTarget] = useState<FileTarget | null>(null);
   // Stable functions: the transcript takes show and showFile, and re-renders only when they change (WEB-U-151).
   const change = useCallback(

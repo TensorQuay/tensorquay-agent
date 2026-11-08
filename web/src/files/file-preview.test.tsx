@@ -77,7 +77,7 @@ const downloads = () =>
     String(input).includes("/files/download"),
   ).length;
 
-// The general-purpose walk-through (findings F1-F3): the files panel shows what the agent made, not only code.
+// The files panel shows what the agent made, not only code.
 describe("WEB-U-022 previews by kind", () => {
   it("F1: shows a PNG as an image, from its bytes typed by the file's extension", async () => {
     answers["out/chart.png"] = content("out/chart.png", null);

@@ -147,7 +147,7 @@ function Administration({ me, clock }: { me: User; clock: () => Date }) {
   for (const task of tasks.data ?? [])
     counts.set(task.owner_id, (counts.get(task.owner_id) ?? 0) + 1);
 
-  // Pending invitations, and expired ones for a week (adversarial review, Users): the rest is history.
+  // Pending invitations, and expired ones for a week: the rest is history.
   const listed = (invitations.data?.items ?? []).filter(
     (invitation) =>
       invitation.status === "pending" ||
@@ -371,7 +371,7 @@ function Administration({ me, clock }: { me: User; clock: () => Date }) {
         </>
       )}
 
-      {/* Invite someone after the people and the pending invitations (the 13f screens, #7, WEB-U-156). */}
+      {/* Invite someone after the people and the pending invitations (a screen review before 17.0, WEB-U-156). */}
       <h2 className="type-heading" id="invite-heading">
         {t("users.inviteTitle")}
       </h2>

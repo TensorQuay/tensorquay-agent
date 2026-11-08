@@ -162,7 +162,7 @@ async function memberFetches(page: Page, link: string) {
   await expect(guest.getByLabel("Message", { exact: true })).toBeVisible();
   await fetchInNewConversation(guest, "second");
   await expect(guest.getByText(blocked(), { exact: true })).toHaveCount(0);
-  // The fetch's own result, from the upstream: the path it served. Finding A1: a fetch's line names the page it read.
+  // The fetch's own result, from the upstream: the path it served. A fetch's line names the page it read.
   await openCard(guest.getByRole("button", { name: /^Read / }));
   // Only the upstream's own answer carries these keys (upstream.py); the URL alone is in the arguments too.
   await expect(

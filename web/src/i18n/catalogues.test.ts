@@ -153,7 +153,7 @@ describe("WEB-U-215 nothing in the app is specific to git", () => {
   });
 });
 
-// WEB-U-201 (the 13h UI review, #5): a size reads the same everywhere. The app writes sizes as `formatSize` does, in
+// WEB-U-201 (a UI review before 17.0): a size reads the same everywhere. The app writes sizes as `formatSize` does, in
 // binary steps named kB, MB and GB (WEB-U-185); a message naming KiB, MiB, GiB or TiB is another convention.
 describe("WEB-U-201 one way to write a size", () => {
   it("names no binary unit in any catalogue", () => {

@@ -54,8 +54,8 @@ for (const [code, reason] of cases)
     await expect(page.getByLabel("Run status")).toHaveText(
       `Failed: ${words(known.reason)}`,
     );
-    // Only provider_error keeps its classification as the muted code line (UX review 0927b, item 4); a decision
-    // engine's stop adds the engine's own reason, quoted, after the sentence (WEB-U-328).
+    // Only provider_error keeps its classification as the muted code line; a decision engine's stop adds the engine's
+    // own reason, quoted, after the sentence (WEB-U-328).
     const engine =
       code === "decision_stop" ? ` ${words("fail.engineSaid")} ${reason}` : "";
     await expect(page.locator(".turn-outcome")).toHaveText(

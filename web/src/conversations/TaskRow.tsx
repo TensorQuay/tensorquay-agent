@@ -175,7 +175,8 @@ export function TaskRow({
             className="type-small task-helpers-count"
             data-tone={lead.count.tone}
             aria-hidden="true"
-            // Its words for sighted people too: a lone "2" beside a spinner read as unread messages (the c16 UX review).
+            // Its words for sighted people too: a lone "2" beside a spinner read as unread messages (a UX review
+            // before 17.0).
             title={lead.count.label}
           >
             {lead.count.words}

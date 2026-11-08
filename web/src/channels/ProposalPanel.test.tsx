@@ -165,7 +165,7 @@ describe("WEB-U-064 a proposal's votes and decision", () => {
   });
 });
 
-// The 13f screen review, #8: after voting, the buttons looked the same as before; only a line of text said how this
+// A screen review before 17.0: after voting, the buttons looked the same as before; only a line of text said how this
 // person voted. The chosen one is marked pressed, and drawn so, with a tick (not colour alone).
 describe("WEB-U-166 the vote this person chose is marked", () => {
   it("presses the chosen choice only", () => {

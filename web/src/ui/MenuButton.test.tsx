@@ -125,7 +125,7 @@ describe("WEB-U-007 shared picker menu", () => {
     expect(screen.queryByText(model.name)).toBeNull();
   });
 
-  // General-purpose finding X1: a model's purpose line, in the administrator's words, under its name in the menu.
+  // A model's purpose line, in the administrator's words, under its name in the menu.
   it("shows a model's description under its name in the menu", () => {
     const model = {
       name: "fast",

@@ -41,7 +41,7 @@ export function ToolCard({
   tool: ToolView;
   initiallyOpen?: boolean;
   /**
-   * Opened from its activity line, which already names the call and its outcome (finding T-b): no heading of its
+   * Opened from its activity line, which already names the call and its outcome: no heading of its
    * own, no internal tool name and no status badge; the command itself stays behind Details.
    */
   embedded?: boolean;
@@ -54,7 +54,7 @@ export function ToolCard({
   } | null>(null);
   const [showAll, setShowAll] = useState(false);
   const [details, setDetails] = useState(false);
-  // A call with no arguments has no Details to offer (the review of 049/054: never a bare label).
+  // A call with no arguments has no Details to offer, never a bare label.
   const hasArguments =
     tool.arguments != null &&
     !(
@@ -139,7 +139,7 @@ export function ToolCard({
       )}
       <div id={id} className="tool-body" hidden={!embedded && !expanded}>
         {/* A desktop step's pictures are what it did, so they come first; its arguments (an element's ref the model
-            used, "e7") come last (the c16 UX review, #8). */}
+            used, "e7") come last (a UX review before 17.0). */}
         {desktop && <ScreenPictures tool={tool} />}
         {!embedded && !desktop && (
           <ScrollBlock label={t("toolcard.arguments")}>
@@ -155,7 +155,7 @@ export function ToolCard({
         )}
         {shownOutput && (
           <>
-            {/* Finding T-a: the output has its own label, never under the arguments. */}
+            {/* The output has its own label, never under the arguments. */}
             <p className="type-label muted">{t("toolcard.outputHeading")}</p>
             <ScrollBlock label={t("toolcard.output")}>{output}</ScrollBlock>
             {(lines.length > previewLines || trace.folded) && (
@@ -184,7 +184,7 @@ export function ToolCard({
               })}
             </p>
           )}
-        {/* Finding A5: only a command that didn't succeed says so, with its code; success says nothing. */}
+        {/* Only a command that didn't succeed says so, with its code; success says nothing. */}
         {tool.ran && tool.exitCode !== null && tool.exitCode !== 0 && (
           <p className="type-label muted">
             {t("toolcard.exitCode", { code: String(tool.exitCode) })}

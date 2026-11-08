@@ -556,7 +556,7 @@ describe("WEB-U-223 a helper's page", () => {
     expect(readLog).not.toHaveBeenCalled();
   });
 
-  // WEB-U-310 (the c16 UX review, #3): the gateway copies a person's message to the lead only while the team runs.
+  // WEB-U-310 (a UX review before 17.0): the gateway copies a person's message to the lead only while the team runs.
   it("drops the notice that the lead sees what is sent once the team has ended", async () => {
     show(
       task(helperId(1), {

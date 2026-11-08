@@ -51,7 +51,7 @@ const show = (frames: ReturnType<typeof frame>[]) =>
     <TranscriptView transcript={frames.reduce(apply, emptyTranscript())} />,
   );
 
-// WEB-U-016: the review of §3 step 3 (findings T-a, T-b, T-c, T-e, T-f).
+// WEB-U-016: one item per call, in words.
 describe("WEB-U-016 one item per call, in words", () => {
   it("T-a/T-b: the row is the card's heading; output has its own label; arguments stay behind Details; no internal name or Completed badge", async () => {
     show(ls);

@@ -41,7 +41,7 @@ describe("WEB-U-055 the provider's own words on a failure and a retry", () => {
         transcript={run("Overloaded, try later", "Invalid model: gpt-x")}
       />,
     );
-    // UX review 0927b, item 4: the provider's words first, in plain English; the code after, small and muted.
+    // The provider's words first, in plain English; the code after, small and muted.
     const outcome = container.querySelector(".turn-outcome");
     expect(outcome).toHaveTextContent(
       /^The provider said: Invalid model: gpt-x Try again in a moment, or ask an administrator to check the model route\./,

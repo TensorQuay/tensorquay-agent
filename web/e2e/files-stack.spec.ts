@@ -332,7 +332,7 @@ test("WEB-E2E-021 uploads, workspace files and run changes on the real stack", a
     "Createdreport.md+3",
     "Createdrows.txt+1",
   ]);
-  // Finding F5 (T25): a file the run created opens as the file itself, not as a diff of nothing.
+  // A file the run created opens as the file itself, not as a diff of nothing.
   await step("G2 T25: a created file opens from Changes as the file");
   await list.getByRole("button", { name: /report\.md/ }).click();
   await expect(panel.getByRole("tab", { name: "Files" })).toHaveAttribute(

@@ -135,7 +135,7 @@ export type TurnView = {
   openChanges: boolean;
   /** Follow-ups that clearly follow from what happened (at most two), as copy keys. */
   followUps: readonly FollowUp[];
-  /** The one file this turn wrote, for the footer's "Created …" or "Updated …" and Open (finding D2). */
+  /** The one file this turn wrote, for the footer's "Created …" or "Updated …" and Open. */
   wrote: string | null;
   /** Whether that file is new or was there before (the step line's own words). */
   wroteKind: "created" | "updated";
@@ -293,7 +293,7 @@ function presentTurn(
           (activity) => activity.label === noticeText(notice.copy, t),
         ),
     ),
-    // Finding T-c: recovered retries are said on the step line ("… · the model was slow, retried twice").
+    // Recovered retries are said on the step line ("… · the model was slow, retried twice").
     activityLabel: !terminal
       ? t("run.working")
       : status === "completed" && retries.length > 0

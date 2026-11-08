@@ -145,7 +145,7 @@ describe("WEB-U-048 a new task when the default environment is not offered", () 
     ).toMatchObject({ template: "workstation" });
   });
 
-  // General-purpose finding N1: under the pickers, what the chosen environment is for; its tools on hover.
+  // Under the pickers, what the chosen environment is for; its tools on hover.
   it("says what the chosen environment is for, with its tools on hover", async () => {
     start([
       {

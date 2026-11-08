@@ -282,7 +282,7 @@ export function NewConversation({
                         defaultOpen={addingWorkspace}
                         onDismiss={() => setAddingWorkspace(false)}
                       />
-                      {/* Finding N2: what a workspace is, for someone who has never met one. */}
+                      {/* What a workspace is, for someone who has never met one. */}
                       <span hidden id={`${id}-workspace-hint`}>
                         {t("start.workspaceHint")}
                       </span>

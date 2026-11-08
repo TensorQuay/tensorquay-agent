@@ -295,8 +295,8 @@
   flex-shrink: 0;
 }
 /* An email on People is read whole (WEB-U-117, a first-hour check): not held to the name width, on one line wherever
-   its column has room (the 13f screens, #7, WEB-U-156), and broken only at the <wbr> after its @ and dots, never inside
-   a word. */
+   its column has room (a screen review before 17.0, WEB-U-156), and broken only at the <wbr> after its @ and dots,
+   never inside a word. */
 .data-name-wrap {
   max-width: none;
   /* Beside a full-width address, "You" goes under it rather than squeezing it. */
@@ -316,7 +316,7 @@
   flex-shrink: 0;
   min-width: auto;
 }
-/* People's own width decides, not the window's (the review of WEB-U-168): where the section is narrow (a phone, or a
+/* People's own width decides, not the window's (WEB-U-168): where the section is narrow (a phone, or a
    tablet with the sidebar open) an email may break at its <wbr>s, so the row's ⋯ stays in view. */
 .people-page {
   container: people / inline-size;
@@ -505,7 +505,7 @@
 }
 
 /* The Models page: the route dialog is form-wide and scrolls; its groups are quiet fieldsets. */
-/* The reads table's five columns show whole at 1024 and up (UX review 0927b, item 1). */
+/* The reads table's five columns show whole at 1024 and up. */
 .reads-dialog {
   width: min(52rem, calc(100% - var(--space-8)));
 }
@@ -552,7 +552,7 @@
   transform: translateY(-50%);
   pointer-events: none;
 }
-/* Paste a key, inside the route form: an inset panel whose buttons read as its own (UX review 0927b, item 2). */
+/* Paste a key, inside the route form: an inset panel whose buttons read as its own. */
 .paste-key-panel {
   margin: 0;
   padding: var(--space-3) var(--space-4) var(--space-4);
@@ -593,7 +593,7 @@ details.route-group > summary {
   list-style: none;
 }
 /* A disclosure chevron, pointing right while closed and down while open, so a collapsed group reads as one to open
-   rather than a heading (UX review 0927b, item 3). Drawn from the text colour: two borders turned 45 degrees. */
+   rather than a heading. Drawn from the text colour: two borders turned 45 degrees. */
 details.route-group > summary::before {
   content: "";
   flex-shrink: 0;
@@ -674,7 +674,7 @@ details.route-group > summary::-webkit-details-marker {
   overflow-wrap: anywhere;
 }
 /* On Keys › Shared a name may be 120 characters long: it stays on one line, never broken mid-word, and truncates with
-   the full name on hover rather than widen the table (finding 7, UI-GUIDELINES §7). The table fits 720 px at 1024. */
+   the full name on hover rather than widen the table (UI-GUIDELINES §7). The table fits 720 px at 1024. */
 .secret-ref-line {
   display: block;
   min-width: 0;
@@ -1058,7 +1058,7 @@ button.model-option:focus-visible {
   margin: 0;
 }
 
-/* An expired API token stays listed until revoked, greyed so the live ones stand out (finding 18). */
+/* An expired API token stays listed until revoked, greyed so the live ones stand out. */
 tr[data-expired] td:not(.data-cell-action) {
   color: var(--muted);
 }

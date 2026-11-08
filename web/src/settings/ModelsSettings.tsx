@@ -125,7 +125,7 @@ function Models({ api }: { api: RoutesApi }) {
           {t("models.export")}
         </a>
       </div>
-      {/* What the download is for, so it isn't taken for a step (the Models page review, P3). */}
+      {/* What the download is for, so it isn't taken for a step. */}
       <p id="models-export-hint" className="type-small muted">
         {t("models.exportHint")}
       </p>

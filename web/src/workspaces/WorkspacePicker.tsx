@@ -41,7 +41,7 @@ export function WorkspacePicker({
   value: string;
   onChange: (id: string) => void;
   disabled?: boolean;
-  /** The id of a hint that says what a workspace is, where the picker needs one (finding N2). */
+  /** The id of a hint that says what a workspace is, where the picker needs one. */
   describedBy?: string;
   /** Open at once (a chip New task's "+" just added). */
   defaultOpen?: boolean;

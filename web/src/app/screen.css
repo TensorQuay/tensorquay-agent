@@ -105,7 +105,7 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
-/* The agent is acting on the desktop (the c16 UX review, #14): a dot on the Screen toggle, beside its words. */
+/* The agent is acting on the desktop (a UX review before 17.0): a dot on the Screen toggle, beside its words. */
 .screen-acting > .button {
   position: relative;
 }

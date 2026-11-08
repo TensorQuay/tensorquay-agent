@@ -34,7 +34,7 @@ beforeEach(() => {
 });
 afterEach(() => vi.unstubAllGlobals());
 
-// Finding 22: a task that can't load kept only a red line and a full-width bar. The header stays, and the transcript
+// A task that can't load kept only a red line and a full-width bar. The header stays, and the transcript
 // area says one sentence with a normal-size Try again.
 describe("WEB-U-017 a task that could not load", () => {
   // A pass over the pages before 17.0: a member opening another's task through a shared workspace is refused 403
@@ -77,7 +77,7 @@ describe("WEB-U-017 a task that could not load", () => {
         "This task doesn't exist, or you can't open it.",
       );
       expect(screen.queryByRole("button", { name: "Try again" })).toBeNull();
-      // Finding T-i: not a dead end.
+      // Not a dead end.
       expect(screen.getByRole("link", { name: "New task" })).toHaveAttribute(
         "href",
         "/",

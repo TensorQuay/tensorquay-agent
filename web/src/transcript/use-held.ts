@@ -16,9 +16,10 @@ export const gatewayTurn = (message: QueuedMessage) =>
   Boolean(message.team_wake || message.lead_brief);
 
 /**
- * The task's messages waiting for its run (finding T4; GW-I-129), or for a slot (GW-I-173), as the gateway keeps them: read again whenever the
- * stream says they changed (`version`, from message.queue frames) or a send was held. Held ones go out, joined as one
- * turn, when the run ends; a failed or stopped run drops them. Sent ones are the transcript's, not listed here.
+ * The task's messages waiting for its run (GW-I-129), or for a slot (GW-I-173), as the gateway keeps them: read again
+ * whenever the stream says they changed (`version`, from message.queue frames) or a send was held. Held ones go out,
+ * joined as one turn, when the run ends; a failed or stopped run drops them. Sent ones are the transcript's, not listed
+ * here.
  */
 export function useHeldMessages(
   conversationId: string,

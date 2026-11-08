@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import { parseHunk } from "./hunk-header";
 
-// The 13f screen review, #9: Changes printed unified-diff hunk headers ("@@ -1,4 +1,6 @@"), a developer's notation. The
-// header is read once, here, and the page says where the change is in words. A parser: every form, and malformed ones
-// (guardrails §2.2: 100 % lines and branches).
+// A screen review before 17.0: Changes printed unified-diff hunk headers ("@@ -1,4 +1,6 @@"), a developer's notation.
+// The header is read once, here, and the page says where the change is in words. A parser: every form, and malformed
+// ones (guardrails §2.2: 100 % lines and branches).
 describe("WEB-U-164 a hunk header read into where the change is", () => {
   it.each([
     // [header, what it means]

@@ -112,7 +112,7 @@ describe("WEB-U-025 share dialog", () => {
     );
   });
 
-  // The fix's review: after a share with Can edit, the next person starts at Can view again.
+  // After a share with Can edit, the next person starts at Can view again.
   it("WEB-U-173 starts the next share at Can view again", async () => {
     show({
       [`GET ${base}`]: () => Response.json({ items: [] }),

@@ -56,7 +56,7 @@ export function ActivityLine({
   latest = false,
 }: {
   activity: TurnView["activities"][number];
-  /** The turn's latest tool: its card starts open (finding T2), until the person closes it. */
+  /** The turn's latest tool: its card starts open, until the person closes it. */
   latest?: boolean;
 }) {
   // The person's choice outlives re-renders and replays of the transcript (step-state.tsx).
@@ -105,7 +105,7 @@ export function ActivityLine({
         onPointerEnter={warmToolCard}
         onPointerDown={warmToolCard}
         onFocus={warmToolCard}
-        // Finding A1: a page's whole address where the line shortens it.
+        // A page's whole address where the line shortens it.
         title={toolTitle(tool) ?? undefined}
         onClick={() => setOpen(!open)}
       >

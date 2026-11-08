@@ -170,13 +170,13 @@ describe("WEB-U-023 a person's tasks", () => {
       "href",
       "/c/0195d8c0-0000-7000-8000-0000000000a1",
     );
-    // The fix's review: same-day tasks must not share one link name (WCAG 2.4.4); the details tell them apart, no title.
+    // Same-day tasks must not share one link name (WCAG 2.4.4); the details tell them apart, no title.
     expect(within(first!).getByRole("link")).toHaveAccessibleName(
       "Task created Jan 1, 2026, Workstation, Local model",
     );
   });
 
-  // The fix's review: the ids flashed before the names arrived. The table waits for both lists; a list that fails
+  // The ids flashed before the names arrived. The table waits for both lists; a list that fails
   // leaves the ids, set as code, rather than waiting forever.
   it("WEB-U-172 shows no raw id while the names load, and the ids if a list fails", async () => {
     serve([task("0195d8c0-0000-7000-8000-0000000000a1")]);

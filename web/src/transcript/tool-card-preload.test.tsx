@@ -34,7 +34,7 @@ const finished = [
   frame(7, { type: "run.completed", run_id: runId }),
 ].reduce(apply, emptyTranscript());
 
-// The 13h UI review (#10): after a reload, an opened tool card sat behind its grey placeholder for 0.8 s while its code
+// A UI review before 17.0: after a reload, an opened tool card sat behind its grey placeholder for 0.8 s while its code
 // loaded, where the UI guidelines show a placeholder only after 300 ms. The card's code loads on the person's intent to
 // open a step: a pointer over its toggle, a press (touch's pointerdown comes before its click) or focus; with the
 // placeholder's 300 ms wait, a card whose code is here renders at once. Restated 3 Oct 2026: it loaded as the turn

@@ -339,9 +339,9 @@ describe("WEB-U-095 a local model that answers slowly", () => {
   });
 });
 
-// WEB-U-271 (the accessibility review of the screens since c14b-rc): the "Checking…" status went away when the result
-// came, so a screen reader heard the start and never the outcome. One status line stays: running, then the verdict, or
-// why the check couldn't run; the visible "Checking…" isn't read twice.
+// WEB-U-271: the "Checking…" status went away when the result came, so a screen reader heard the start and never the
+// outcome. One status line stays: running, then the verdict, or why the check couldn't run; the visible "Checking…"
+// isn't read twice.
 describe("WEB-U-271 a route check's outcome is announced", () => {
   it("says it is checking, then the verdict, on the same status line", async () => {
     const failed = probeResult("failed", {
@@ -690,9 +690,10 @@ describe("WEB-U-269 a local model's context", () => {
   });
 });
 
-// WEB-U-298 (the c15 accessibility review): a failed check's next step is heard with its verdict, in the result's own
-// words, so a screen-reader user isn't left to read on to find it; a failure with no next step announces the verdict
-// alone. And a context suggestion arriving with another failure shows nothing, never the generic tool-settings line.
+// WEB-U-298 (an accessibility review before 17.0): a failed check's next step is heard with its verdict, in the
+// result's own words, so a screen-reader user isn't left to read on to find it; a failure with no next step announces
+// the verdict alone. And a context suggestion arriving with another failure shows nothing, never the generic
+// tool-settings line.
 type Failure = NonNullable<ProbeResult["observed"]["failure"]>;
 
 describe("WEB-U-298 a check's announcement carries its next step", () => {
@@ -748,7 +749,7 @@ describe("WEB-U-298 a check's announcement carries its next step", () => {
       { local: true },
       "Check finished: The check failed. The server did not answer in time. A local model may be busy with another task or slow on this computer. Try again when it's idle; you can give local checks longer with [relay] local_check_timeout in gateway.toml.",
     ],
-    // The review of 7 Oct (P3-1): each of nextStep()'s other ways, since a wrong key there would only be heard.
+    // Each of nextStep()'s other ways, since a wrong key there would only be heard.
     [
       "a localhost route where host.docker.internal doesn't resolve",
       { code: "unreachable", container_host: false } as const,

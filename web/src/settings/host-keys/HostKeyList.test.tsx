@@ -31,8 +31,8 @@ const rows = async () =>
     .getAllByRole("row")
     .slice(1);
 
-// ADR-0037 and the reviewed Keys sketch §2: a person's keys by the name their tasks read, the web address, and when
-// each was last used and by which task; never a value.
+// ADR-0037: a person's keys by the name their tasks read, the web address, and when each was last used and by which
+// task; never a value.
 describe("WEB-U-141 the Mine list of host keys", () => {
   // Found at 390 px, where the settings menu's own headings aren't on the page (axe heading-order, WEB-U-141): the
   // section is the page's second level, as on every settings list.

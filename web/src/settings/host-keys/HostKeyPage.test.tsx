@@ -34,8 +34,8 @@ const type = (name: string, value: string) =>
 const save = () =>
   fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
-// ADR-0037 and the reviewed Keys sketch §3: Add a key is a Page (the UI standard): where it's used, how the service
-// expects it, and the key itself, written once and never shown again.
+// ADR-0037: Add a key is a Page (the UI standard): where it's used, how the service expects it, and the key itself,
+// written once and never shown again.
 describe("WEB-U-142 the Add a key page", () => {
   it("is a page with its sections, and suggests a name from the address until it's edited", async () => {
     show(fakeHostKeys().api);

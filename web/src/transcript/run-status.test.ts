@@ -20,7 +20,7 @@ describe("WEB-U-001 human run and environment status", () => {
       ...frame(2, { type: "run.completed", run_id: runId }),
       ts: new Date(Date.parse(started.ts) + 22300).toISOString(),
     });
-    // Finding T-d: "Done" alone; how long it took waits in the tooltip.
+    // "Done" alone; how long it took waits in the tooltip.
     expect(
       runPresentation(finished, Date.parse(started.ts) + 90000),
     ).toMatchObject({ label: "Done", took: "Took 22 s" });

@@ -45,7 +45,7 @@ async function waitForSlot(page: Page, id: string) {
     "Waiting for a free slot · 2 ahead",
   );
   await expect(input).toHaveAttribute("placeholder", "Reply…");
-  // WEB-U-161 (the 13f screens, #6): the waiting is said once, in the header; the composer says what to do.
+  // WEB-U-161 (a screen review before 17.0): the waiting is said once, in the header; the composer says what to do.
   await expect(page.getByText("You can reply once it starts.")).toHaveCount(1);
   await expect(page.getByText(/Waiting for a free slot/)).toHaveCount(1);
   // WEB-U-161: the duplicated words it replaced are gone: the bubble's "Queued" line and the composer's sentence.
@@ -105,7 +105,7 @@ for (const width of [1024, 1440])
       await advance(page, id);
       await expect(bar.getByRole("status")).toHaveText("Working…");
       await expect(bar.getByRole("status")).toHaveText("Done");
-      // Finding T-d: a sleeping environment isn't news in the bar.
+      // A sleeping environment isn't news in the bar.
       await expect(bar.locator(".environment-status")).toHaveCount(0);
       await expect(input).toBeEnabled();
       await expect(
@@ -158,7 +158,7 @@ for (const [width, colorScheme] of [
     await capture(page, `${width}-${colorScheme}-fresh-done`);
   });
 
-// The 13f screen review, #6 (GW-I-173): a message waiting for a free slot shows with Cancel, also after a reload and
+// A screen review before 17.0 (GW-I-173): a message waiting for a free slot shows with Cancel, also after a reload and
 // in another tab; cancelling it ends the waiting everywhere, and one the gateway had already claimed says so.
 for (const [width, colorScheme] of [
   [1024, "light"],

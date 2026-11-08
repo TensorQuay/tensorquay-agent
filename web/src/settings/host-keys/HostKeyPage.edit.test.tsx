@@ -57,8 +57,8 @@ const field = (name: string) => screen.getByLabelText(name, { exact: true });
 const save = () =>
   fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
-// ADR-0037 §9 and the reviewed Keys sketch §4: a key's own page shows what it is and when it was used, never its value;
-// its fields change and save as a whole; the value is replaced in place; deleting asks first.
+// ADR-0037 §9: a key's own page shows what it is and when it was used, never its value; its fields change and save as a
+// whole; the value is replaced in place; deleting asks first.
 describe("WEB-U-143 a key's own page", () => {
   it("shows the key: its name, address and way, its last use, and when its value was set", async () => {
     const item = key();

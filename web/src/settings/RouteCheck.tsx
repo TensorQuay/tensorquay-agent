@@ -100,7 +100,8 @@ export function RouteCheck({
             ? t(local ? "models.checkingLocal" : "models.checking")
             : state.kind === "done"
               ? t("models.checkAnnounceDone", {
-                  // The next step, when the result has one, is heard with the verdict (the c15 accessibility review).
+                  // The next step, when the result has one, is heard with the verdict (an accessibility review
+                  // before 17.0).
                   verdict: [
                     verdict(state.result, t),
                     nextStep(state.result, { local, address, protocol }, t),

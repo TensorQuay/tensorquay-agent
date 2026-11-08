@@ -326,7 +326,7 @@ describe("WEB-U-071 sidebar task list", () => {
       expect(within(list).queryByRole("dialog")).toBeNull();
   });
 
-  // SHOULD 4: on a Mac Ctrl K is the text fields' delete-to-end-of-line; only Cmd K opens the search there.
+  // On a Mac Ctrl K is the text fields' delete-to-end-of-line; only Cmd K opens the search there.
   it("opens with Cmd K on a Mac, and leaves Ctrl K to the text fields", async () => {
     vi.spyOn(navigator, "platform", "get").mockReturnValue("MacIntel");
     show([...older(8)]);
@@ -356,7 +356,7 @@ describe("WEB-U-071 sidebar task list", () => {
     other.remove();
   });
 
-  // SHOULD 3: Enter opens the first match; the arrow keys move from the box through the matches and back.
+  // Enter opens the first match; the arrow keys move from the box through the matches and back.
   it("opens the first match on Enter, and moves through the matches with the arrow keys", async () => {
     const found = [
       ago(7, 24 * 60, { title: "Deploy the date fix" }),
@@ -385,7 +385,7 @@ describe("WEB-U-071 sidebar task list", () => {
     expect(screen.queryByRole("dialog", { name: "Search tasks" })).toBeNull();
   });
 
-  // SHOULD 2: every match, however many: the first page, then Show more, and the count says there are more.
+  // Every match, however many: the first page, then Show more, and the count says there are more.
   it("loads more matches on request", async () => {
     const first = Array.from({ length: 3 }, (_, index) =>
       ago(20 + index, 24 * 60 + index, { title: `Report ${index + 1}` }),

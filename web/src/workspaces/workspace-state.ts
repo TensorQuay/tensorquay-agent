@@ -41,7 +41,8 @@ export function deletePlan(
 ): DeletePlan {
   if (workspace.state === "forking")
     return { kind: "blocked", reason: "notReady" };
-  // Only a going run blocks it: a done task's kept, idle environment is retired by the delete (the 13h UI review, #3).
+  // Only a going run blocks it: a done task's kept, idle environment is retired by the delete (a UI review
+  // before 17.0).
   if (workspace.lease?.running) return { kind: "blocked", reason: "working" };
   // A pinned task keeps its environment on (FR-33): the delete doesn't retire it.
   if (workspace.lease?.pinned) return { kind: "blocked", reason: "pinned" };

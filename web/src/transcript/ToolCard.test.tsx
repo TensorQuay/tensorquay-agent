@@ -101,7 +101,7 @@ describe("WEB-U-001 tool card behavior", () => {
         tool={{ ...tool, status: "error", exitCode: 1, durationMs: 1250 }}
       />,
     );
-    // Finding A5: a non-zero exit reads as not succeeding, its code kept.
+    // A non-zero exit reads as not succeeding, its code kept.
     expect(screen.getByText("Didn't succeed (code 1)")).toBeVisible();
     // The shell's 127 is a missing command: said so, with the code kept (the owner's Mac test).
     rerender(

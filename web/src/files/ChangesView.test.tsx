@@ -105,8 +105,7 @@ const rows = async () =>
     .getAllByRole("listitem")
     .map((item) => item.textContent);
 
-// The general-purpose walk-through (finding F5): a file the run created, or an image it changed, opens as what it is;
-// a text file it edited shows its diff.
+// A file the run created, or an image it changed, opens as what it is; a text file it edited shows its diff.
 describe("WEB-U-024 opening a changed file", () => {
   it("opens a created file and a changed image in the files panel, and an edited text file's diff", async () => {
     runs["run-2"] = page([
@@ -159,7 +158,7 @@ describe("WEB-U-024 run changes", () => {
     expect(
       screen.getByText("Your uploads are not listed as changes."),
     ).toBeVisible();
-    // Generated caches are left out quietly (finding T6: saying so was noise).
+    // Generated caches are left out quietly (saying so was noise).
     expect(screen.queryByText(/__pycache__/)).toBeNull();
   });
 
@@ -307,7 +306,7 @@ describe("WEB-U-024 run changes", () => {
     expect(await screen.findByText(copy)).toBeVisible();
   });
 
-  // The 13f screen review, #9: hunk headers were printed raw ("@@ -1,2 +1 @@"). Each is a quiet separator in words,
+  // A screen review before 17.0: hunk headers were printed raw ("@@ -1,2 +1 @@"). Each is a quiet separator in words,
   // and a changed line says what it is to assistive technology, not only by its tint and its + or −.
   it("WEB-U-164 says where each change is in words, never as @@", async () => {
     diffs["run-2:report.md"] = {

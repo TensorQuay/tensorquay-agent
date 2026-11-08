@@ -29,8 +29,8 @@ const show = (frames: ReturnType<typeof frame>[]) =>
     <TranscriptView transcript={frames.reduce(apply, emptyTranscript())} />,
   );
 
-// The review's finding 15 and plan §3: a retry that worked is not news. It belongs to its step, in plain words while
-// the agent works, then one quiet "Retried twice" inside the step's details; the code stays in a tooltip.
+// A retry that worked is not news. It belongs to its step, in plain words while the agent works, then one quiet
+// "Retried twice" inside the step's details; the code stays in a tooltip.
 describe("WEB-U-016 a model retry is part of its step, not a transcript notice", () => {
   it("says what happened in plain words while the agent works, without codes or false precision", () => {
     const { container } = show([...start, retry(4, "fallback_parse: schema")]);
@@ -59,7 +59,7 @@ describe("WEB-U-016 a model retry is part of its step, not a transcript notice",
     expect(container).not.toHaveTextContent(
       /Model request failed|trying again/,
     );
-    // Counted on the step's summary line (finding T-c), by the last reason; the codes in its tooltip.
+    // Counted on the step's summary line, by the last reason; the codes in its tooltip.
     const heading = screen.getByRole("button", { name: /Worked for/ });
     expect(heading).toHaveTextContent(/the model was slow, retried twice$/);
     expect(heading.querySelector("[title]")).toHaveAttribute(
@@ -133,7 +133,7 @@ describe("WEB-U-304 a retry's tooltip says it in words before the runtime's code
     );
   });
 
-  // The 7 Oct review's P3: a title is for a pointer only, so keyboard and touch never read the reasons. As the team
+  // A title is for a pointer only, so keyboard and touch never read the reasons. As the team
   // sheet carries the strip's exact figures, the opened step carries them in one quiet line, describing its toggle.
   it("puts the done step's reasons and codes in the step too, read with its toggle by any means", () => {
     show([

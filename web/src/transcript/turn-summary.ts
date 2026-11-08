@@ -76,7 +76,7 @@ export function turnSummary(
   const commands = tools.filter(
     (tool) => tool.name === "shell" && tool.ran,
   ).length;
-  // Finding A1: research reads pages; the heading counts them, as it counts commands.
+  // Research reads pages; the heading counts them, as it counts commands.
   const pages = tools.filter(
     (tool) => tool.name === "fetch_url" && tool.status === "ok",
   ).length;
@@ -144,7 +144,7 @@ export function turnSummary(
         }
       : run?.status === "cancelled"
         ? {
-            // "Stopped." alone: the composer already offers the next message (the c8 review, WEB-U-016).
+            // "Stopped." alone: the composer already offers the next message (a review before 17.0, WEB-U-016).
             reason: t("summary.cancelled"),
             next: null,
             provider: null,
@@ -152,7 +152,7 @@ export function turnSummary(
             code: null,
           }
         : null;
-  // A clear next step only (never "undo": there is no reliable one). Findings D1-D2: one file is the footer's own
+  // A clear next step only (never "undo": there is no reliable one). One file is the footer's own
   // Open; among several, the chart and the documents it made open, and a changed test file offers every test.
   const testChanged = written.some(
     (path) => TEST_FILE.test(path) && !NOT_CODE.test(path),

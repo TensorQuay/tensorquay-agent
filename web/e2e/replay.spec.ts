@@ -30,7 +30,7 @@ async function openDetails(page: Page) {
     page.getByRole("button", { name: /^Ran a command: cat hello\/README.md/ }),
   );
   const shell = page.getByRole("article", { name: "shell tool call" });
-  // Finding A5: a command that succeeded says nothing of its exit code.
+  // A command that succeeded says nothing of its exit code.
   await expect(shell.getByText(/code 0/)).toHaveCount(0);
   await expect(page.getByText(finalAnswer, { exact: true })).toBeVisible();
 }
@@ -52,7 +52,7 @@ test("WEB-U-037 a replay snapshot waits for a tool card that is still loading", 
   await openCard(
     page.getByRole("button", { name: /^Created hello\/README.md/ }),
   );
-  // The latest card opens with the group too (finding T2), so more than one card may wait on the held code.
+  // The latest card opens with the group too, so more than one card may wait on the held code.
   await expect(page.getByLabel("Loading tool details").first()).toBeVisible();
   const taken = snapshot(page);
   // Real time, bounded, to observe the helper: one that does not wait answers within this window while the card is

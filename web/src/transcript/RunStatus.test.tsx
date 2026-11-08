@@ -191,9 +191,10 @@ describe("WEB-U-112 a status that gives way", () => {
   });
 });
 
-// The 13f screen review, #4: at 1024 the header cut both the title and a long status ("Failed: The task's environment
-// couldn't…", "Working… · …"). The status is one short word at every width, whole in its tooltip and for assistive
-// technology; how long it has worked is in the tooltip and the transcript's live line (WEB-U-123).
+// A screen review before 17.0: at 1024 the header cut both the title and a long status
+// ("Failed: The task's environment couldn't…", "Working… · …"). The status is one short word at every width, whole in
+// its tooltip and for assistive technology; how long it has worked is in the tooltip and the transcript's live line
+// (WEB-U-123).
 describe("WEB-U-155 the header's status is one short word", () => {
   const working = [
     frame(1, { type: "message.user", text: "Try it", attachments: [] }),

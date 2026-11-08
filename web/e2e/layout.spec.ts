@@ -102,8 +102,8 @@ for (const width of [1024, 1440])
         ).toBe(sidebar === "rail" ? 260 : 56);
       });
 
-// WEB-U-007 (the polish review's hydration capture): before the app's scripts run, the toggle's name already matches the
-// layout the stylesheet shows (the stored choice, else the width), and it stays the same once they run.
+// WEB-U-007: before the app's scripts run, the toggle's name already matches the layout the stylesheet shows (the
+// stored choice, else the width), and it stays the same once they run.
 for (const [stored, width, layout] of [
   [null, 1024, "rail"],
   [null, 1280, "expanded"],
@@ -237,7 +237,7 @@ test.describe("touch", () => {
   });
 });
 
-/** How the bar spends its width: the run status is whole, never cut, and the title truncates instead (finding T1). */
+/** How the bar spends its width: the run status is whole, never cut, and the title truncates instead. */
 async function barState(page: Page) {
   return page.evaluate(() => {
     const clause = document.querySelector(
@@ -270,7 +270,7 @@ async function barState(page: Page) {
   });
 }
 
-// Review of 059a: at 1024 the bar cut the status mid-word. Finding T1: the status is never cut; the title truncates.
+// Review of 059a: at 1024 the bar cut the status mid-word. The status is never cut; the title truncates.
 test("WEB-U-007 the bar keeps the status whole and truncates the title", async ({
   page,
 }) => {
@@ -284,7 +284,7 @@ test("WEB-U-007 the bar keeps the status whole and truncates the title", async (
   await input.fill("Summarize the workspace.");
   await input.press("Enter");
   await expect(page.getByLabel("Run status")).toHaveText(/Done/);
-  // Finding T-d: a sleeping environment isn't news in the bar.
+  // A sleeping environment isn't news in the bar.
   await expect(page.locator(".environment-status")).toHaveCount(0);
   for (const title of [
     "Short",

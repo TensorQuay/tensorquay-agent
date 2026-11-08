@@ -77,7 +77,7 @@ test.beforeAll(async () => {
 });
 
 /** Whether the task's stream has reported the connector ready: its tools are registered for the run. Connectors start
- * after run.started, so "Working…" alone does not mean the connector is in the task (the R1 review). */
+ * after run.started, so "Working…" alone does not mean the connector is in the task. */
 async function watchReady(page: Page, connector: string) {
   const session = await page.context().newCDPSession(page);
   await session.send("Network.enable");

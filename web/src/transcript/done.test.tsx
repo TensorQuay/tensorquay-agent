@@ -65,8 +65,8 @@ function show(frames: ReturnType<typeof frame>[]) {
   return { onOpenChanges, onFollowUp, onOpenFile };
 }
 
-// §3 and the general-purpose walk-through's findings D1-D2: a finished task says what it wrote (one file by name, with Open; several with Open
-// changes), and offers at most two follow-ups, only ones that clearly follow; none when nothing fits. Never "Undo it".
+// A finished task says what it wrote (one file by name, with Open; several with Open changes), and offers at most two
+// follow-ups, only ones that clearly follow; none when nothing fits. Never "Undo it".
 describe("WEB-U-016 a finished task: what it wrote, and what could follow", () => {
   it("D2: names the one file it wrote, with an Open named for it", () => {
     const { onOpenFile } = show(turn(1, "notes/brief.md"));
@@ -230,8 +230,8 @@ describe("WEB-U-016 a finished task: what it wrote, and what could follow", () =
   });
 });
 
-// The c8 review (WEB-U-016): a stopped turn says "Stopped." and nothing more; "run" is jargon, and the composer already
-// offers the next message.
+// A review before 17.0 (WEB-U-016): a stopped turn says "Stopped." and nothing more; "run" is jargon, and the composer
+// already offers the next message.
 describe("WEB-U-016 a stopped turn", () => {
   it("says only Stopped.", () => {
     show([

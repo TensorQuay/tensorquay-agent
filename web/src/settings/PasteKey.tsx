@@ -118,8 +118,7 @@ export function PasteKey({
       </div>
     );
   return (
-    // An inset panel of its own, its buttons inside it: Save stays the page's one primary action
-    // (UX review 0927b, item 2).
+    // An inset panel of its own, its buttons inside it: Save stays the page's one primary action.
     <fieldset className="paste-key-panel stack">
       <legend className="type-label">{t("models.pasteTitle")}</legend>
       <Input

@@ -192,7 +192,7 @@ describe("SEC-001 denied fetch activity line", () => {
       "Couldn't read example.invalid/private",
     );
   });
-  // Finding A1: a fetch reads as the page it read, never with the URL's query.
+  // A fetch reads as the page it read, never with the URL's query.
   it("says which page it read, or couldn't, and never shows the URL query", () => {
     const read = fetchUrl(
       "ok",

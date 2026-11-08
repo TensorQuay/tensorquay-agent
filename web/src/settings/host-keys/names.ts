@@ -41,7 +41,7 @@ const reserved = (name: string) =>
   RESERVED.has(name) ||
   RESERVED_PREFIXES.some((prefix) => name.startsWith(prefix));
 
-/** Well-known hosts and the name their tools expect (the reviewed sketch's §9, decision 4), matched by domain. */
+/** Well-known hosts and the name their tools expect, matched by domain. */
 const WELL_KNOWN: readonly [domain: string, name: string][] = [
   ["github.com", "GITHUB_TOKEN"],
   ["gitlab.com", "GITLAB_TOKEN"],

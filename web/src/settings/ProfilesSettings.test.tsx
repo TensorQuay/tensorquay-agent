@@ -136,7 +136,7 @@ describe("WEB-U-049 the profiles list", () => {
     ).toBeVisible();
   });
 
-  // Finding 9: with nothing on either list, one empty state with the way to add one, not two empty headings.
+  // With nothing on either list, one empty state with the way to add one, not two empty headings.
   it("shows one empty state with Add agent profile when there are none at all", async () => {
     show(fakeProfiles({ profiles: [] }).api);
     const empty = await screen.findByRole("region", {

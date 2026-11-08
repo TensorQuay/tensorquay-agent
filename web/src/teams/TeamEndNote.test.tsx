@@ -43,7 +43,7 @@ describe("WEB-U-222 the team's end note", () => {
       // Shares of the team's use, never the word tokens (PRD §12 item 11): the lead task's is what the helpers didn't use.
       "Share of the work: Researcher 48 %, Reviewer 12 %, the lead task 40 %",
     );
-    // Each helper's count in words, by the language's plural rule (the S6 web review).
+    // Each helper's count in words, by the language's plural rule.
     expect(card).toHaveTextContent(
       "2 reports from Researcher and 1 report from Reviewer",
     );

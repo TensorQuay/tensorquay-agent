@@ -331,7 +331,7 @@ export class ApiClient {
       { parameters: { id, run_id }, signal },
     );
   }
-  /** A file's bytes, for a preview the browser draws itself (an image, finding F1); downloads use downloadUrl. */
+  /** A file's bytes, for a preview the browser draws itself (an image); downloads use downloadUrl. */
   fileBlob(id: string, path: string, signal?: AbortSignal) {
     return this.transport.request(
       "fileDownload",

@@ -5,7 +5,7 @@ import { useLayoutEffect, useState, type RefObject } from "react";
 /**
  * The task layout's width from which the files panel docks beside the conversation (UI-GUIDELINES §6, WEB-U-170):
  * the 360 px panel, its 24 px gap and at least 516 px of conversation. The layout's own width decides, not the
- * window's, so an open sidebar counts (the fix's review). files.css's container query uses the same number.
+ * window's, so an open sidebar counts. files.css's container query uses the same number.
  */
 export const DOCK_WIDTH = 900;
 

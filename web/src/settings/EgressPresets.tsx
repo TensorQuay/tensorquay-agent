@@ -181,7 +181,7 @@ function Preset({
         <p className="type-small">{t("egress.presetPartial")}</p>
       )}
       <div className="preset-actions">
-        {/* Whether the list is on, said on every card, not only by its buttons (the 13f screens, #10, WEB-U-162). */}
+        {/* Whether the list is on, said on every card, not only by its buttons (WEB-U-162). */}
         <span
           role="status"
           className="status-pill type-label"

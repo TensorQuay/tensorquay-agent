@@ -373,7 +373,7 @@ function EnvironmentForm(props: FormProps) {
         {creating && !idShown && draft.name && (
           <IdLine id={draft.name} onChange={derived.change} />
         )}
-        {/* What it is for, where people pick it (general-purpose finding N1). */}
+        {/* What it is for, where people pick it. */}
         {text(
           "description",
           "environments.description",

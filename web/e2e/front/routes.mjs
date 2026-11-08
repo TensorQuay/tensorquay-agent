@@ -224,7 +224,7 @@ function ollamaProbe(name, item, answer) {
 }
 
 /**
- * The Models page review's cases (WEB-E2E-039): a "desktop-" route at localhost is unreachable and its gateway reaches
+ * WEB-E2E-039's cases: a "desktop-" route at localhost is unreachable and its gateway reaches
  * host.docker.internal (container_host true), and it passes once its address uses that name; a "linux-" one is
  * unreachable and host.docker.internal doesn't resolve (false); a "wrongpath-" route answers 404 at the protocol's own
  * request (endpoint_missing); a "nousage-" route's server refuses usage reporting until the route stops asking; a

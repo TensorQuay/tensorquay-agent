@@ -32,7 +32,7 @@ describe("WEB-U-001 queued, sleeping and waking copy", () => {
         frame(1, { type: "run.started", run_id: runId }),
         frame(2, { type: "run.completed", run_id: runId }),
       ].reduce(apply, emptyTranscript());
-      // Finding T-d: people don't manage environments; a sleeping one isn't news in the header.
+      // People don't manage environments; a sleeping one isn't news in the header.
       expect(
         runPresentation({ ...completed, sandbox }, 0).environment,
       ).toBeNull();

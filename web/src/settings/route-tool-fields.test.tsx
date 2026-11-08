@@ -388,9 +388,9 @@ describe("WEB-U-269 Context window from the server's size", () => {
   });
 });
 
-// WEB-U-281 (the Models page review's P1): from the gateway's container, localhost is the container itself, so a model
-// server on this computer at http://localhost:… is never reached. The failed check says so and offers the container
-// host's name in one click; the route's page opens with Address changed, focused and unsaved.
+// WEB-U-281: from the gateway's container, localhost is the container itself, so a model server on this computer at
+// http://localhost:… is never reached. The failed check says so and offers the container host's name in one click; the
+// route's page opens with Address changed, focused and unsaved.
 describe("WEB-U-281 a route at localhost the check can't reach", () => {
   // The gateway says whether host.docker.internal resolves from its container (GW-U-154); the one click needs it to.
   const unreachable = probeResult("failed", {
@@ -526,8 +526,8 @@ describe("WEB-U-281 a route at localhost the check can't reach", () => {
   );
 });
 
-// WEB-U-287 (the Models page review, #3): a 404 or 405 at the protocol's own request is endpoint_missing (GW-U-154);
-// the result names the route's protocol and the two others to try.
+// WEB-U-287: a 404 or 405 at the protocol's own request is endpoint_missing (GW-U-154); the result names the route's
+// protocol and the two others to try.
 describe("WEB-U-287 a server without the route's protocol endpoint", () => {
   it("names the protocol and the others to try", async () => {
     const fake = fakeRoutes({
@@ -559,8 +559,8 @@ describe("WEB-U-287 a server without the route's protocol endpoint", () => {
   });
 });
 
-// WEB-U-289 (the Models page review, P2 #8 and #9): the usage setting is named for what it does, with a hint; a check
-// that finds the server refusing it opens the route with the box unticked, focused and its note beside it.
+// WEB-U-289: the usage setting is named for what it does, with a hint; a check that finds the server refusing it opens
+// the route with the box unticked, focused and its note beside it.
 describe("WEB-U-289 asking the server for token usage", () => {
   it("opens the route with the box off, focused, and its note beside it", async () => {
     const fake = fakeRoutes({

@@ -320,7 +320,7 @@ for (const width of [1024, 1280] as const)
         .focus();
       await page.keyboard.press("Enter");
       const form = routePage(page);
-      // UX review 0927b, item 3: a collapsible group shows a disclosure chevron, turned while it is open.
+      // A collapsible group shows a disclosure chevron, turned while it is open.
       const chevron = (label: string) =>
         form.locator("summary", { hasText: label }).evaluate((summary) => {
           const mark = getComputedStyle(summary, "::before");

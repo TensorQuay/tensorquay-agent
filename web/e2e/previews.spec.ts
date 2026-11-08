@@ -2,8 +2,8 @@ import { openFilesPanel } from "./files-panel";
 import { createConversation, signIn } from "./session";
 import { expect, test, type Page } from "./test";
 
-// The general-purpose walk-through (findings F1-F3): the files panel shows a brief, a table and a chart as what
-// they are. The fake agent writes them for this message (e2e/front/files.mjs).
+// The files panel shows a brief, a table and a chart as what they are. The fake agent writes them for this message
+// (e2e/front/files.mjs).
 async function made(page: Page) {
   await signIn(page);
   await page.goto(await createConversation(page));

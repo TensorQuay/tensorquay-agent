@@ -53,7 +53,7 @@ describe("WEB-U-001 transient queue position", () => {
     expect(
       runPresentation(queued({ ahead: 0, reason: "workspace" }), 0).label,
     ).toBe("Waiting for the workspace");
-    // The c16 UX review, #13 and #31: why, in words, and no capital where no other desktop string has one. WEB-U-397:
+    // A UX review before 17.0: why, in words, and no capital where no other desktop string has one. WEB-U-397:
     // a finished task's desktop gives way (GW-I-305), so it frees soon after one finishes.
     expect(
       runPresentation(queued({ ahead: 0, reason: "desktop_sessions" }), 0)

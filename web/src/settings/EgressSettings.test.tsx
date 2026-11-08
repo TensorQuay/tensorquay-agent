@@ -71,7 +71,7 @@ describe("WEB-U-040 egress rules", () => {
       within(row("api.example.com")).getByText("Configuration file"),
     ).toBeVisible();
     expect(within(row("pypi.org")).getByText("Added here")).toBeVisible();
-    // WEB-U-162 (the 13f screens, #10): the rules have a heading, and Delete is under each row's ⋯, never bare.
+    // WEB-U-162 (a screen review before 17.0): the rules have a heading, and Delete is under each row's ⋯, never bare.
     expect(
       screen.getByRole("heading", { name: "Allowed sites" }),
     ).toBeVisible();
@@ -505,7 +505,7 @@ describe("WEB-U-150 opened for a host", () => {
   });
 });
 
-// The 13f screen review, #10: a ready-made list's card didn't say whether it was on (only an Add button did). Each
+// A screen review before 17.0: a ready-made list's card didn't say whether it was on (only an Add button did). Each
 // card says On, Partly on or Off.
 describe("WEB-U-162 each ready-made list says whether it is on", () => {
   it("says On, Partly on or Off", async () => {

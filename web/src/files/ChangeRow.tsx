@@ -21,7 +21,7 @@ export function ChangeSummary({ change }: { change: FileChange }) {
   return (
     <>
       <span className="change-status type-small" data-status={change.status}>
-        {/* Finding F5: a changed image was updated, not edited line by line. */}
+        {/* A changed image was updated, not edited line by line. */}
         {t(
           change.status === "modified" && previewKind(change.path) === "image"
             ? "changes.updated"

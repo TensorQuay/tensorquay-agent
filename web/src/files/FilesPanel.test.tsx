@@ -129,7 +129,7 @@ describe("WEB-U-022 files panel", () => {
     expect(screen.getByRole("tabpanel")).toHaveAttribute("tabindex", "0");
   });
 
-  // Finding 32: .git and other dotfiles were listed first, which is noise. They wait behind one quiet button.
+  // .git and other dotfiles were listed first, which is noise. They wait behind one quiet button.
   it("hides dotfiles until asked, and says how many", async () => {
     folders[""] = [
       page("", [entry(".git", "dir", 0), entry(".env"), entry("README.md")]),
@@ -171,7 +171,7 @@ describe("WEB-U-022 files panel", () => {
     show();
     fireEvent.click(await screen.findByRole("button", { name: /^README\.md/ }));
     const preview = await screen.findByRole("region", { name: "README.md" });
-    // Finding F2: a Markdown file renders as a document; the renderer loads first (WEB-U-014).
+    // A Markdown file renders as a document; the renderer loads first (WEB-U-014).
     await settleLazy();
     expect(
       within(preview).getByRole("heading", { name: "Title" }),
@@ -404,7 +404,7 @@ describe("WEB-U-046 the Context tab", () => {
       "true",
     );
   });
-  // Finding F6: why a folder was left out is for an administrator, who can fix it; anyone else sees it wasn't loaded.
+  // Why a folder was left out is for an administrator, who can fix it; anyone else sees it wasn't loaded.
   it.each([
     ["admin", true],
     ["member", false],
@@ -432,7 +432,7 @@ describe("WEB-U-046 the Context tab", () => {
   });
 });
 
-// Findings D1-D2: a finished turn's Open shows that file's preview, and asking again shows it again.
+// A finished turn's Open shows that file's preview, and asking again shows it again.
 describe("WEB-U-022 opening a file from elsewhere", () => {
   it("opens the target's folder and preview, again on a new request", async () => {
     contents["src/app.py"] = text("src/app.py", "print('hello')\n");
@@ -474,4 +474,4 @@ describe("WEB-U-083 a file outside the workspace", () => {
   });
 });
 
-// The general-purpose walk-through (finding F6): the Context tab is there only when a run loaded something to show.
+// The Context tab is there only when a run loaded something to show.

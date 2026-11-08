@@ -164,12 +164,12 @@ describe("WEB-U-080 one left edge in the sidebar", () => {
   });
 });
 
-// The UX review of the dev tip (WEB-U-022): at 1280 the floating panel covered the answer mid-word; it docked from
-// 1280 px. A screen review before 17.0: at 1024 it still covered the person's own messages. It docks from
-// 1024 px (WEB-U-170), the conversation narrowing beside it; below that it takes the whole column, never part of it,
-// and starts where the header ends (WEB-U-171).
+// WEB-U-022: at 1280 the floating panel covered the answer mid-word; it docked from 1280 px. A screen review
+// before 17.0: at 1024 it still covered the person's own messages. It docks from 1024 px (WEB-U-170), the conversation
+// narrowing beside it; below that it takes the whole column, never part of it, and starts where the header ends
+// (WEB-U-171).
 describe("WEB-U-170 the files panel never covers part of the transcript", () => {
-  // The fix's review: by the layout's own width (a container), not the window's, so the sidebar's width counts.
+  // By the layout's own width (a container), not the window's, so the sidebar's width counts.
   const narrow =
     new RegExp(
       `@container conversation-layout \\(max-width: ${DOCK_WIDTH - 1}px\\) \\{\\s*\\.files-panel \\{([^}]*)\\}`,

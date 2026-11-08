@@ -30,8 +30,8 @@ const tool = (
   ...overrides,
 });
 
-// The general-purpose walk-through (findings A1–A3): a step reads as what it did, in plain words, never as an
-// internal tool name or a return code; the details stay in the card.
+// A step reads as what it did, in plain words, never as an internal tool name or a return code; the details stay in the
+// card.
 describe("WEB-U-016 steps in plain words", () => {
   const page = tool("fetch_url", {
     url: "https://www.example.com/pricing?plan=team#top",

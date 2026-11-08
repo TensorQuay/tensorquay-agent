@@ -132,7 +132,8 @@ for (const width of [1024, 1440])
         }),
       ).toBe(true);
       await page.keyboard.press("Escape");
-      // WEB-U-156 (the 13f screens, #7): the people come before Invite someone, and each email reads whole, on one line.
+      // WEB-U-156 (a screen review before 17.0): the people come before Invite someone, and each email reads whole, on
+      // one line.
       const [peopleHeading, inviteHeading] = await Promise.all([
         page
           .getByRole("heading", { name: "People", exact: true })
@@ -327,7 +328,7 @@ test("WEB-U-023 members see their tokens, not user administration", async ({
   await capture(page, "member-users");
 });
 
-// The review of WEB-U-168: where People itself is narrow (800 px with the sidebar and the Settings menu open, about
+// WEB-U-168: where People itself is narrow (800 px with the sidebar and the Settings menu open, about
 // 300 px for the tables), a long address breaks at its <wbr>s instead of widening the table, the page never scrolls
 // sideways, and each table's rows are cards (WEB-U-190), so every row's action is in view without scrolling the table.
 test("WEB-U-168 a long address on a narrow People wraps, and its row's action is reached in the table", async ({

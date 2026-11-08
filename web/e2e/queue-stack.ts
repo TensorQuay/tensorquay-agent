@@ -171,7 +171,7 @@ export async function answered(page: Page, turn: number) {
   await expect(
     page.getByText("The queued task ran once the slot was free."),
   ).toHaveCount(turn);
-  // Finding T-d: a sleeping environment isn't news in the bar.
+  // A sleeping environment isn't news in the bar.
   await expect(
     page.locator(".conversation-bar .environment-status"),
   ).toHaveCount(0);

@@ -193,7 +193,7 @@
 .brief-card dd {
   margin: 0;
 }
-/* Each part its own space (the task, then Output, …), its label close to its text (the S6 web review). */
+/* Each part its own space (the task, then Output, …), its label close to its text. */
 .brief-body,
 .brief-card dl {
   display: grid;

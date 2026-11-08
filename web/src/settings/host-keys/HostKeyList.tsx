@@ -25,8 +25,8 @@ export const KEYS_PAGE = "/settings/keys";
 export const ADD_KEY = `${KEYS_PAGE}/new`;
 
 /**
- * Your account › Keys › Mine, the per-service keys (ADR-0037; the reviewed Keys sketch §2): each key by the name its
- * tasks read, its web address, and when it was last used and by which task; a quiet warning when tasks can't reach its
+ * Your account › Keys › Mine, the per-service keys (ADR-0037): each key by the name its tasks read, its web address,
+ * and when it was last used and by which task; a quiet warning when tasks can't reach its
  * host. A gateway without host keys answers 404, and the list leaves itself out.
  */
 export function HostKeyList({

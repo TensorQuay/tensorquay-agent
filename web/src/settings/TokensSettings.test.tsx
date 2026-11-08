@@ -114,7 +114,7 @@ describe("WEB-U-023 API tokens", () => {
       )
       .mockImplementationOnce(() => json({ items: [] }));
     show();
-    // The button names its object; the confirmation carries the danger, not a red button on every row (finding 18).
+    // The button names its object; the confirmation carries the danger, not a red button on every row.
     const revoke = await screen.findByRole("button", {
       name: "Revoke token “CI”",
     });

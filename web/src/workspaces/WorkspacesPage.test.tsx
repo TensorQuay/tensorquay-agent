@@ -403,8 +403,8 @@ describe("WEB-U-025 deleting a workspace", () => {
     return { dialog: screen.getByRole("dialog"), ...gateway };
   }
 
-  // WEB-U-275 (the accessibility review of the core screens): the deleted card takes the ⋯ that opened its confirmation
-  // with it, so the focus would fall to the page; the page's heading takes it once the card is gone.
+  // WEB-U-275: the deleted card takes the ⋯ that opened its confirmation with it, so the focus would fall to the page;
+  // the page's heading takes it once the card is gone.
   it("gives the focus to the page's heading once the deleted card is gone", async () => {
     const value = workspace({ name: "Old notes" });
     let current = [value];
@@ -496,7 +496,7 @@ describe("WEB-U-025 deleting a workspace", () => {
     expect(within(dialog).queryByRole("button", { name: "Delete" })).toBeNull();
   });
 
-  // The 13h UI review (#3): a done task's kept environment doesn't block the delete; the gateway retires it.
+  // A UI review before 17.0: a done task's kept environment doesn't block the delete; the gateway retires it.
   it("offers the delete when a done task's environment is only kept", async () => {
     const value = workspace({
       name: "Kept",

@@ -41,7 +41,7 @@ export function ConversationPage({ id }: { id: string }) {
   const gone =
     error instanceof ApiError && (error.status === 404 || error.status === 403);
   const shell = useShell();
-  // Finding 22: the header stays, and the transcript's place says one sentence with a normal-size Try again.
+  // The header stays, and the transcript's place says one sentence with a normal-size Try again.
   if (error)
     return (
       <section className="conversation-page" aria-label={t("task.region")}>
@@ -54,7 +54,7 @@ export function ConversationPage({ id }: { id: string }) {
             <ErrorMessage error={error} />
           )}
           {gone && (
-            // Finding T-i: not a dead end. The task list is the sidebar: opened on a phone, focused otherwise.
+            // Not a dead end. The task list is the sidebar: opened on a phone, focused otherwise.
             <div className="conversation-failure-actions">
               <Link href="/" className="button" data-variant="primary">
                 {t("shell.newTask")}

@@ -37,7 +37,7 @@ const PREVIEW_LIMITS = {
 };
 
 /**
- * One file, shown as what it is (findings F1-F3; the file previews design): an image, a rendered document, a table, a
+ * One file, shown as what it is (the file previews design): an image, a rendered document, a table, a
  * web page in a sandboxed frame, a PDF's pages, a spreadsheet's sheet, or text with line numbers; a plain note for other binary,
  * empty and cut-short files; always a download link.
  */

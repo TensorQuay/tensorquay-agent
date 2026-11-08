@@ -378,8 +378,8 @@ describe("WEB-U-227 the helper limits", () => {
     ).toBeVisible();
   });
 
-  // The teams UX review, #6: each row says when its change applies, as the Desktop's do (the gateway's `applies`:
-  // next_member, next_team, next_check), and its edit dialog says the whole rule.
+  // Each row says when its change applies, as the Desktop's do (the gateway's `applies`: next_member, next_team,
+  // next_check), and its edit dialog says the whole rule.
   it("says under each value when a change applies, and the whole rule where it's changed", async () => {
     show(fakeLimits({ limits: [...ROOM, ...TEAM_LIMITS] }).api);
     await screen.findByRole("heading", { name: "Helpers" });
@@ -575,7 +575,7 @@ describe("WEB-U-248 the Desktop's limits", () => {
       name: "Desktop limits",
     });
     expect(screen.getByRole("heading", { name: "Desktop" })).toBeVisible();
-    // The intro is short; each row says when a change applies (the c16 UX review, #12).
+    // The intro is short; each row says when a change applies (a UX review before 17.0).
     expect(
       screen.getByText(
         "For tasks on a Desktop environment. Each limit says when a change applies.",
@@ -622,7 +622,7 @@ describe("WEB-U-248 the Desktop's limits", () => {
     enter("9");
     save();
     // The gateway lists this limit's max as the slots, so the page refuses more itself, saying the rule and its number,
-    // not only a range (the review of WEB-E2E-067: the stack meets this, never the gateway's own refusal).
+    // not only a range (WEB-E2E-067: the stack meets this, never the gateway's own refusal).
     expect(
       await within(dialog()).findByText(
         "Desktop environments at once can't be more than Tasks running at once, which is 8 now.",

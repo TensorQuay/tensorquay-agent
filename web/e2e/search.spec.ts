@@ -73,7 +73,7 @@ test("WEB-U-071 one visible search from Ctrl K at 390, drawer closed and open", 
   await page.getByRole("button", { name: "Open navigation" }).click();
   const drawer = page.getByRole("dialog", { name: "Navigation" });
   await expect(drawer).toBeVisible();
-  // Ctrl K is ignored over another dialog (the review's nit 5); the drawer's Search row opens it instead.
+  // Ctrl K is ignored over another dialog; the drawer's Search row opens it instead.
   await page.keyboard.press("Control+k");
   await expect(page.getByRole("dialog", { name: "Search tasks" })).toHaveCount(
     0,

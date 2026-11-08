@@ -21,7 +21,7 @@ const LIST = "/settings/models";
 export const ROUTES_KEY = ["admin-routes"];
 /** What the list says when a page sends the administrator back to it ("Saved route …"). */
 export const ROUTE_NOTICE_KEY = ["admin-routes-notice"];
-/** A route just added: the list offers to check it, beside its notice (the Models page review, P2 #6). */
+/** A route just added: the list offers to check it, beside its notice. */
 export const ROUTE_CHECK_NEXT_KEY = ["admin-routes-check-next"];
 /** How the list asks a route's page to open: with Paste key ready, or a check's suggested setting applied. */
 export const ROUTE_OPEN_KEY = ["admin-routes-open"];

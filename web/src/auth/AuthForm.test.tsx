@@ -181,7 +181,7 @@ describe("WEB-U-007 authentication forms", () => {
       "That setup token is not correct. Copy it again from compose.env.",
     );
     expect(alert).not.toHaveTextContent(/authentication required/i);
-    // WEB-U-179 (the 13f screens, smaller items): the variable is named once, in the help that says where the token is.
+    // WEB-U-179 (a screen review before 17.0): the variable is named once, in the help that says where the token is.
     expect(alert).not.toHaveTextContent("TQA_BOOTSTRAP_TOKEN");
     expect(document.body.textContent?.split("TQA_BOOTSTRAP_TOKEN").length).toBe(
       2,

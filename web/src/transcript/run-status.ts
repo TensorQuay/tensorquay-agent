@@ -263,7 +263,7 @@ export function runPresentation(
     return status(t("run.starting"), "info", recovery);
   switch (run.status) {
     case "completed": {
-      // Finding T-d: "Done" alone; how long it took waits in the tooltip.
+      // "Done" alone; how long it took waits in the tooltip.
       const took = record?.finishedAt
         ? t("run.took", {
             elapsed: secondsLabel(

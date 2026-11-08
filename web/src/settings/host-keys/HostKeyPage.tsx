@@ -87,9 +87,9 @@ type PageProps = {
 };
 
 /**
- * Add a key, or a key's own page (ADR-0037; the reviewed Keys sketch §3 and §4), the UI standard's Page. With an `id`,
- * the key is the person's own, found in their list; one that no longer exists says so. A save that another change beat
- * shows the key as it is now, saying why.
+ * Add a key, or a key's own page (ADR-0037), the UI standard's Page. With an `id`, the key is the person's own, found
+ * in their list; one that no longer exists says so. A save that another change beat shows the key as it is now, saying
+ * why.
  */
 export function HostKeyPage({ id, ...props }: PageProps & { id?: string }) {
   const t = useT();

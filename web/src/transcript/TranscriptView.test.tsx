@@ -23,7 +23,7 @@ describe("WEB-U-001 transcript presentation", () => {
     expect(
       screen.getByText(/^Thought for /).closest("details"),
     ).not.toHaveAttribute("open");
-    // The latest tool's card opens with its group (finding T2).
+    // The latest tool's card opens with its group.
     expect(
       screen.getByRole("button", { name: "Ran a command: ls" }),
     ).toHaveAttribute("aria-expanded", "true");
@@ -45,7 +45,7 @@ describe("WEB-U-001 transcript presentation", () => {
 });
 
 // WEB-U-222 (ADR-0034 S6): time-placed lines (a team's log) sit among the turns by time, each run of them one list
-// read as one log, never spaced as turns are (the S6 web review).
+// read as one log, never spaced as turns are.
 describe("WEB-U-222 lines among the turns", () => {
   it("puts earlier lines before the turn in one list, and later ones after it in another", () => {
     const state = transcriptFrames.reduce(apply, emptyTranscript());
@@ -121,7 +121,7 @@ describe("WEB-U-037 a replayed Messages run", () => {
     fireEvent.click(
       screen.getByRole("button", { name: /^Created hello\/README\.md/ }),
     );
-    // The latest card is already open (finding T2); opening it again would close it.
+    // The latest card is already open; opening it again would close it.
     const latest = screen.getByRole("button", {
       name: /^Ran a command: cat hello\/README\.md/,
     });
@@ -132,7 +132,7 @@ describe("WEB-U-037 a replayed Messages run", () => {
     expect(
       screen.getByRole("article", { name: "write_file tool call" }),
     ).toBeVisible();
-    // Finding A5: a command that succeeded says nothing of its exit code.
+    // A command that succeeded says nothing of its exit code.
     expect(
       within(
         screen.getByRole("article", { name: "shell tool call" }),

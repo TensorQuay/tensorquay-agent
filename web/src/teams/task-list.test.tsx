@@ -93,7 +93,7 @@ describe("WEB-U-220 helpers under their lead in the task list", () => {
     const row = await screen.findByRole("link", { name: /^Report on Q3/ });
     expect(row).toHaveAccessibleName(/2 helpers$/);
     expect(row).toHaveTextContent("2");
-    // The count's words show on hover too, not only to a screen reader (WEB-U-310's review, P3).
+    // The count's words show on hover too, not only to a screen reader (WEB-U-310).
     expect(row.querySelector("[title='2 helpers']")).not.toBeNull();
     const toggle = screen.getByRole("button", {
       name: "Helpers of Report on Q3",
@@ -164,7 +164,7 @@ describe("WEB-U-220 helpers under their lead in the task list", () => {
     expect(await screen.findByRole("list", { name: "Helpers" })).toBeVisible();
   });
 
-  // The review of 7 Oct, seen in a browser: the lead's count said "1 stuck" from the list's poll while the open helper
+  // Seen in a browser, the lead's count said "1 stuck" from the list's poll while the open helper
   // row still said Working… The rows read the team again whenever the list's view of the team changes.
   it("reads the open helpers again when the list's view of the team changes, and only then", async () => {
     const { SidebarHelpers } = await import("./SidebarHelpers");

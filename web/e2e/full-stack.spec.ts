@@ -78,7 +78,7 @@ async function createProject(page: Page) {
   const input = page.getByLabel("Message", { exact: true });
   await expect(input).toBeFocused();
   await chooseModel(page, "local");
-  // The model and environment wait behind Change on New task (finding T1), not in its header.
+  // The model and environment wait behind Change on New task, not in its header.
   await expect(
     page
       .getByRole("region", { name: "New task" })
@@ -148,7 +148,7 @@ async function verifyTranscript(page: Page) {
   await expect(shell.getByLabel("Result")).toHaveText(
     "# Hello\nA small demonstration project.\nREADME.md\n",
   );
-  // Finding A5: a command that succeeded says nothing of its exit code.
+  // A command that succeeded says nothing of its exit code.
   await expect(shell.getByText(/code 0/)).toHaveCount(0);
   await expect(page.getByText(finalAnswer, { exact: true })).toBeVisible();
 }

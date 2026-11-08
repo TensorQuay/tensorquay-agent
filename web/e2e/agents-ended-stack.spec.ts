@@ -11,7 +11,7 @@ import {
 import { afterStart, budget } from "./stack-start";
 import { bootstrap } from "./ux/flow";
 
-// WEB-E2E-062: an ended team reads as ended (the c16 UX review, #1-#3; WEB-U-310, GW-U-169), on the agents stack
+// WEB-E2E-062: an ended team reads as ended (a UX review before 17.0; WEB-U-310, GW-U-169), on the agents stack
 // suite with EDGE-A's script in deploy/tests/fixtures/agents.json, whose helper "ghost" has no script and fails. It
 // runs between agents-edges-stack.spec.ts and agents-stack.spec.ts (name order), so E2E-AGENTS-020 stays last.
 test.skip(

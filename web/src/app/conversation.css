@@ -70,9 +70,8 @@
   gap: var(--space-8);
   min-width: 0;
 }
-/* Time-placed lines (a team's log) between turns: close together, as one log (the S6 web review). One column as wide as
-   the transcript, so a long team line ends in "…" rather than widening every turn past it (a pass over the pages
-   before 17.0). */
+/* Time-placed lines (a team's log) between turns: close together, as one log. One column as wide as the transcript, so
+   a long team line ends in "…" rather than widening every turn past it (a pass over the pages before 17.0). */
 .transcript-lines {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -427,7 +426,7 @@ textarea.composer-input {
   flex-shrink: 0;
   color: var(--muted);
 }
-/* An approval's outcome on its tool's line, before the tool's own mark (UX review 0927). */
+/* An approval's outcome on its tool's line, before the tool's own mark. */
 .activity-decision {
   flex-shrink: 0;
   color: var(--muted);
@@ -514,7 +513,7 @@ textarea.composer-input {
 .header-choices .picker-button .button-label {
   gap: var(--space-1);
 }
-/* A choice that can't change now (a run, or the task's profile) is muted beside a free one (UX review 0927b, item 6);
+/* A choice that can't change now (a run, or the task's profile) is muted beside a free one;
    its reason is in its description, not a dashed box. */
 .header-choices .button.picker-button[aria-disabled="true"] {
   border-color: transparent;
@@ -706,7 +705,7 @@ textarea.composer-input {
 /*
  * The title and, under it, the profile a task came from (ADR-0012) share one block that truncates before anything
  * else in the bar gives way; the rename control keeps its size, and the block clips rather than run under the run
- * status (UX review 0927b, item 7).
+ * status.
  */
 .conversation-title {
   flex: 0 1 auto;
@@ -759,8 +758,7 @@ textarea.composer-input {
 /*
  * The bar gives way in order: the environment clause takes only the room the title leaves (basis 0) and shows whole or
  * not at all; the title truncates next, down to a few words; the pickers' names truncate; a long run status (a
- * failure's reason) truncates to its first word or so, whole in its tooltip, and never vanishes. Nothing overlaps
- * (UX review 0927b, item 7).
+ * failure's reason) truncates to its first word or so, whole in its tooltip, and never vanishes. Nothing overlaps.
  */
 /* The title gives way first, down to a few words; then the status truncates, whole in its tooltip, and never the
    controls after it (found before 17.0, WEB-U-112). Nothing waits for the reader now, so no status must stay whole. */
@@ -790,9 +788,9 @@ textarea.composer-input {
  * technology; the elapsed time is the transcript's. The title gives way to a few letters first.
  */
 /*
- * At every width (the 13f screen review, #4, WEB-U-155) the status is one short word: a failure reads "Failed", a working
- * run "Working…"; the reason and the count stay in its tooltip, are still read, and are the transcript's too. The title
- * keeps the width.
+ * At every width (a screen review before 17.0, WEB-U-155) the status is one short word: a failure reads "Failed", a
+ * working run "Working…"; the reason and the count stay in its tooltip, are still read, and are the transcript's too.
+ * The title keeps the width.
  */
 .conversation-status .run-elapsed {
   display: none;
@@ -1018,7 +1016,7 @@ textarea.composer-input {
   overflow-wrap: anywhere;
 }
 
-/* A failure's code under its plain words: a line of its own, secondary (UX review 0927b, item 4). */
+/* A failure's code under its plain words: a line of its own, secondary. */
 .turn-code {
   display: block;
 }
@@ -1047,7 +1045,7 @@ textarea.composer-input {
 .conversation-origin {
   line-height: 1.2;
 }
-/* Finding 22: a task that could not load keeps its header; the transcript's place says so, centred. */
+/* A task that could not load keeps its header; the transcript's place says so, centred. */
 .conversation-failure {
   flex: 1;
   align-items: center;
@@ -1248,8 +1246,8 @@ textarea.composer-input {
   display: none;
 }
 /*
- * A task's header on a phone (the 13f screen review, #3, WEB-U-154): the first line keeps the title, the status, Files
- * and ⋯; the task's model and environment take a quiet second line under it, with their names, one tap each. The
+ * A task's header on a phone (a screen review before 17.0, WEB-U-154): the first line keeps the title, the status,
+ * Files and ⋯; the task's model and environment take a quiet second line under it, with their names, one tap each. The
  * pickers' wrapper steps aside (display: contents) so the choices wrap alone while Files and ⋯ stay on the first line.
  * New task's header keeps its icons: its title is short.
  */
@@ -1260,7 +1258,7 @@ textarea.composer-input {
   }
   /* Lines break on each item's own width, before anything shrinks: a long title would push ⋯ under it. With no width
      of its own, the title breaks no line; it then grows first, up to its whole text, before the status takes the rest,
-     so a title that fits is whole and a longer one truncates with ⋯ beside it (the S6 web review; WEB-U-106). */
+     so a title that fits is whole and a longer one truncates with ⋯ beside it (WEB-U-106). */
   .conversation-bar-main:has(.task-choices) > .conversation-title {
     flex: 1000 1 0;
     max-width: max-content;

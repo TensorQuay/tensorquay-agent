@@ -298,8 +298,8 @@ export function useTeamPage({
     asked,
     answer,
     answerProblem: problem ? t(problem) : null,
-    // Only while the team runs: the gateway copies a person's message to the lead for a running team only (the c16 UX
-    // review, #3); once it has ended, the helper is an ordinary task again.
+    // Only while the team runs: the gateway copies a person's message to the lead for a running team only (a UX review
+    // before 17.0); once it has ended, the helper is an ordinary task again.
     composerNotice:
       place?.role === "member" && place.state === "running"
         ? t("team.composerNotice")

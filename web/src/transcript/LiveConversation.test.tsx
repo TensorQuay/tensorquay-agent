@@ -293,8 +293,8 @@ describe("WEB-U-015 composer resumes following", () => {
     ).toHaveLength(2);
   });
 
-  // WEB-U-274 (the accessibility review of the core screens): Jump to latest goes once the view is at the end, so the
-  // focus of someone using it with the keyboard fell to the page; the transcript, showing the latest, keeps it.
+  // WEB-U-274: Jump to latest goes once the view is at the end, so the focus of someone using it with the keyboard fell
+  // to the page; the transcript, showing the latest, keeps it.
   it("leaves the focus on the transcript after Jump to latest", () => {
     vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockReturnValue(200);
     vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockReturnValue(

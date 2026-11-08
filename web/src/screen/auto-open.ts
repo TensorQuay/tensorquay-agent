@@ -32,7 +32,7 @@ function write(key: string) {
 /**
  * Whether a task's page offers its screen (ADR-0039 §5): its environment declares a desktop, and the person viewing is
  * the task's owner. Nobody else may see the screen (the gateway refuses them), so nobody else is offered its toggle,
- * its tab or its opening by itself (the c16 UX review's second pass, #21).
+ * its tab or its opening by itself (a UX review before 17.0).
  */
 export function screenOffered(
   environment: { capabilities: readonly string[] } | undefined,
@@ -55,7 +55,7 @@ export function actedOnDesktop(transcript: Transcript): boolean {
   );
 }
 
-/** Whether the agent is acting on the desktop right now: a `computer` call running (the c16 UX review, #14). */
+/** Whether the agent is acting on the desktop right now: a `computer` call running (a UX review before 17.0). */
 export function actingOnDesktop(transcript: Transcript): boolean {
   return transcript.items.some(
     (item) =>

@@ -31,7 +31,7 @@ const shell = (seq: number, id: string, command: string, output: string) => [
   }),
 ];
 
-// Finding T2: seeing a command's output took three clicks. The latest tool card opens with the group; earlier ones
+// Seeing a command's output took three clicks. The latest tool card opens with the group; earlier ones
 // stay folded to one line each, and each still opens and closes on demand.
 describe("WEB-U-016 the latest tool card is open", () => {
   it("opens the latest card with its group, leaving the earlier ones folded", async () => {

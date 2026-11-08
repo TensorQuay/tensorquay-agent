@@ -82,7 +82,7 @@ function TranscriptTurns({
   onOpenChanges?: () => void;
   /** Puts a follow-up in the message box. */
   onFollowUp?: (text: string) => void;
-  /** Shows a file this task wrote in the files panel (findings D1-D2). */
+  /** Shows a file this task wrote in the files panel. */
   onOpenFile?: (path: string) => void;
   /** Who is reading, by user id: a host key's name and "Add a key" show only to the run's sender (ADR-0037 §2). */
   viewer?: string | null;
@@ -202,7 +202,7 @@ function TranscriptTurns({
                   title={turn.summaryDetails ?? undefined}
                 >
                   {turn.wrote ? (
-                    // Finding D2: the one file it wrote, by name, with Open for its preview.
+                    // The one file it wrote, by name, with Open for its preview.
                     t("summary.wrote", {
                       kind: turn.wroteKind,
                       name: fileName(turn.wrote),
@@ -251,7 +251,7 @@ function TranscriptTurns({
                         {t(next.key)}
                       </Button>
                     ) : (
-                      // Finding D1: a chart or a document it made, opened in the files panel.
+                      // A chart or a document it made, opened in the files panel.
                       <Button
                         key={next.path}
                         variant="secondary"

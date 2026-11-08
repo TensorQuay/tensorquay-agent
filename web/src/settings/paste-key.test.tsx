@@ -134,8 +134,7 @@ describe("WEB-U-056 the route's key is always a stored secret", () => {
     expect(
       within(dialog()).getByLabelText("Key", { selector: "input" }),
     ).toHaveAttribute("type", "password");
-    // UX review 0927b, item 2: the panel's buttons belong to it, not the dialog's footer, and Save stays the
-    // dialog's one primary action.
+    // The panel's buttons belong to it, not the dialog's footer, and Save stays the dialog's one primary action.
     const store = within(dialog()).getByRole("button", { name: "Store key" });
     expect(store.closest(".dialog-actions")).toBeNull();
     expect(store.closest(".paste-key-panel")).not.toBeNull();

@@ -101,8 +101,8 @@ beforeEach(() => {
 });
 afterEach(() => vi.restoreAllMocks());
 
-// The 13f screen review, #6 (GW-I-173): a message waiting for a free slot couldn't be taken back. It shows with Cancel,
-// from the gateway's list, so a reload or another tab can cancel it too; the task then stops waiting.
+// A screen review before 17.0 (GW-I-173): a message waiting for a free slot couldn't be taken back. It shows with
+// Cancel, from the gateway's list, so a reload or another tab can cancel it too; the task then stops waiting.
 describe("WEB-U-167 a message waiting for a slot can be cancelled", () => {
   it("shows the waiting message with Cancel after a reload, when the tab never sent it", async () => {
     vi.spyOn(api, "queuedMessages").mockResolvedValue({ items: [waiting] });

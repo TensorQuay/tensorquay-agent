@@ -562,7 +562,7 @@ function budgetNotice(budget: BudgetKind, used: number, limit: number): Copy {
       return message("budget.steps", { used, limit });
     case "wall_clock":
       return message("budget.wallClock", { used, limit });
-    // Finding A8: a reply's length as a share of the task's limit, not tokens; no progress in plain words.
+    // A reply's length as a share of the task's limit, not tokens; no progress in plain words.
     case "output_tokens":
       return message("budget.outputTokens", {
         percent: limit > 0 ? Math.round((used * 100) / limit) : 100,

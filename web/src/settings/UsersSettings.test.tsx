@@ -171,7 +171,7 @@ describe("WEB-U-023 users", () => {
       `/settings/people/${colleague.id}`,
     );
     expect(theirs.getByText("Active")).toBeInTheDocument();
-    // A long address wraps rather than being cut off, since the table has room (finding 12).
+    // A long address wraps rather than being cut off, since the table has room.
     expect(theirs.getByText(colleague.email).closest(".data-name")).toHaveClass(
       "data-name-wrap",
     );
@@ -251,8 +251,8 @@ describe("WEB-U-023 users", () => {
     expect(mine.queryByRole("button", { name: /^More actions/ })).toBeNull();
   });
 
-  // The fix's review: the row's ⋯ kept the pending guard the bare buttons had; while a change is saved,
-  // Disable and Enable say so instead of acting twice.
+  // The row's ⋯ kept the pending guard the bare buttons had; while a change is saved, Disable and Enable say so instead
+  // of acting twice.
   it("WEB-U-169 holds Disable while another change is being saved", async () => {
     standard();
     const answer = fetch.getMockImplementation();
@@ -449,8 +449,8 @@ describe("WEB-U-023 users", () => {
     );
   });
 
-  // Adversarial review (Users P3): closed invitations stay listed forever. Pending ones stay, and an expired one for a
-  // week so it can be sent again; accepted and revoked ones go.
+  // Closed invitations stay listed forever. Pending ones stay, and an expired one for a week so it can be sent again;
+  // accepted and revoked ones go.
   it("lists pending invitations, and expired ones for a week only", async () => {
     standard();
     const invitation = (email: string, extra: Partial<Invitation>) => ({
@@ -524,8 +524,8 @@ describe("WEB-U-023 users", () => {
   });
 });
 
-// The 13f screen review, #7: People opened on an empty Invite form, the people below it. The people come first, then the
-// pending invitations, then Invite someone.
+// A screen review before 17.0: People opened on an empty Invite form, the people below it. The people come first, then
+// the pending invitations, then Invite someone.
 // 17.3 (UI-GUIDELINES §7 Table): a table's numbers align on the right, in tabular figures; names and words on the left.
 describe("WEB-U-443 People's counts on the right", () => {
   it("aligns the task counts and their column's label on the right", async () => {

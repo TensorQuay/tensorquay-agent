@@ -2,8 +2,8 @@ import { addFromPlus, openChoices } from "./choices";
 import { signIn } from "./session";
 import { expect, test, type Locator, type Page } from "./test";
 
-// The task header with the side panel open (UI-GUIDELINES §6; UX review 0927b, item 7): the title and the profile
-// label give way (truncated or wrapped), and never overlap the run status or the header's controls (its ⋯ among them), at 1280
+// The task header with the side panel open (UI-GUIDELINES §6): the title and the profile label give way (truncated or
+// wrapped), and never overlap the run status or the header's controls (its ⋯ among them), at 1280
 // and 1024, for a finished task from a profile and for a failed one.
 type Box = { x: number; y: number; width: number; height: number };
 const overlap = (a: Box, b: Box) =>
@@ -98,7 +98,7 @@ for (const width of [1280, 1024] as const)
       await toggle.click();
     await expect(toggle).toHaveAttribute("aria-expanded", "true");
     await checkHeader(page, "Agent: Team default");
-    // UX review 0927b, item 6: a picker the profile fixes looks disabled beside one it leaves free (in Change).
+    // A picker the profile fixes looks disabled beside one it leaves free (in Change).
     await openChoices(page);
     const look = (name: RegExp) =>
       page.getByRole("button", { name }).evaluate((button) => {

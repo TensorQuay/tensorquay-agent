@@ -266,7 +266,7 @@ function SecretTable({
   const t = useT();
   if (items.length === 0) return <p className="muted">{t("secrets.empty")}</p>;
   // Where a key came from, for a key from the configuration file: a note under its name, no column. A key added here, the
-  // usual, says nothing; a file key always says so, since this list is the only place that does (the 7 Oct review).
+  // usual, says nothing; a file key always says so, since this list is the only place that does.
   return (
     <TableScroll label={t("secrets.list")}>
       <table className="data-table" aria-label={t("secrets.list")}>

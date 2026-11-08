@@ -183,9 +183,9 @@ describe("WEB-U-001 accepted action failure recovery", () => {
       "placeholder",
       "Reply…",
     );
-    // WEB-U-161 (the 13f screens, #6): the composer says what to do, not the state again.
+    // WEB-U-161 (a screen review before 17.0): the composer says what to do, not the state again.
     expect(screen.getByText("You can reply once it starts.")).toBeVisible();
-    // The model and environment wait behind the header's Change (finding T1).
+    // The model and environment wait behind the header's Change.
     await openTaskChoices();
     const model = screen.getByRole("button", { name: /^Model:/ });
     expect(model).toHaveAttribute("aria-disabled", "true");

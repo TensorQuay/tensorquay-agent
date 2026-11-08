@@ -58,7 +58,7 @@ describe("WEB-U-018 environment picker", () => {
     ).toHaveAttribute("aria-checked", "true");
     const minimal = screen.getByRole("menuitemradio", { name: /^Minimal/ });
     expect(within(minimal).getByText("Shell")).toBeVisible();
-    // Its size at the end of the line, muted: what people choose by, not processes or disk (the sizes review).
+    // Its size at the end of the line, muted: what people choose by, not processes or disk.
     expect(
       screen.getByRole("menuitemradio", { name: /^Workstation/ }),
     ).toHaveTextContent(
@@ -76,7 +76,7 @@ describe("WEB-U-018 environment picker", () => {
     expect(trigger).toHaveFocus();
   });
 
-  // The c16 UX review's second pass, #29: with a description the capabilities are only a tooltip, so a desktop
+  // A UX review before 17.0: with a description the capabilities are only a tooltip, so a desktop
   // environment says it has one where it can be read, as its size is.
   it("marks a described desktop environment as a Desktop", () => {
     render(
@@ -243,7 +243,7 @@ describe("WEB-U-018 environment picker", () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
-  // General-purpose finding N1: what each environment is for, in the administrator's words; its tools on hover.
+  // What each environment is for, in the administrator's words; its tools on hover.
   it("reads each environment by what it is for, with its tools on hover, or its tools when it says nothing", () => {
     render(
       <EnvironmentPicker

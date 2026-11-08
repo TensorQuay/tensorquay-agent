@@ -427,7 +427,7 @@ export function agentWork(conversation, text, attachments) {
     );
   else if (text.startsWith("Remove the summary"))
     files.delete("results/summary.md");
-  // MAKE_REPORT in stream.mjs (findings F1-F3, D1-D2): a research and data run leaves a brief, a table, a chart and
+  // MAKE_REPORT in stream.mjs: a research and data run leaves a brief, a table, a chart and
   // a logo, so the files panel shows each as what it is.
   else if (text === "Make a chart and a brief") {
     const put = (path, bytes) => files.set(path, { bytes, modified_at: now() });

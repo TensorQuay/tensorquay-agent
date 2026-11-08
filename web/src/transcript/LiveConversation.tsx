@@ -173,7 +173,7 @@ export function LiveConversation({
     docks,
     panel,
   });
-  // Finding T4 (GW-I-129): a message sent while the agent works is held by the gateway until the run ends.
+  // GW-I-129: a message sent while the agent works is held by the gateway until the run ends.
   const slotWait = ["queued", "creating"].includes(transcript.sandbox);
   const held = useHeldMessages(
     conversation.id,
@@ -293,7 +293,8 @@ export function LiveConversation({
     team.outputs.lines.length === 0 &&
     !["queued", "creating"].includes(transcript.sandbox) &&
     !actions.prompt;
-  // "Your workspace starts empty" only when it is: a task can open on a workspace with files (the 13f screens, #1).
+  // "Your workspace starts empty" only when it is: a task can open on a workspace with files (a screen review
+  // before 17.0).
   const empty = useWorkspaceEmpty(conversation.id, beginning);
   // The transcript's props stay the same while the person types, so a keystroke doesn't re-render it (WEB-U-151).
   const { show: showPanel } = panel;

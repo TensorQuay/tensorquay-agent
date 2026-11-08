@@ -23,7 +23,7 @@ export function ContextView({
   showReasons = false,
 }: {
   state: ContextState;
-  /** Why a folder was left out is for administrators, who can fix it (finding F6). */
+  /** Why a folder was left out is for administrators, who can fix it. */
   showReasons?: boolean;
 }) {
   return (

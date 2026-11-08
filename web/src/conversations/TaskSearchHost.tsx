@@ -85,7 +85,7 @@ export function TaskSearchHost({
           lead: conversation.team.lead?.title ?? t("task.untitled"),
         })
       : undefined;
-  // A match opens its task; its rename and delete stay in the list (nit 6: no dialog over the search).
+  // A match opens its task; its rename and delete stay in the list (no dialog over the search).
   const row = (
     conversation: Conversation,
     shared: boolean | undefined,

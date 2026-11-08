@@ -84,8 +84,8 @@ export function signInMayRemain(
 /**
  * Whether the person handed the desktop back and nothing has run since, so the agent waits for a message (ADR-0039 §6):
  * the latest Take over or hand-back is a hand-back the person made (a restart's isn't theirs), and no run started after
- * it. Read from the notices, so it holds after a reload or with the panel reopened (the c16 UX review's second pass,
- * #27). False until the stored notices are read.
+ * it. Read from the notices, so it holds after a reload or with the panel reopened (a UX review before 17.0). False
+ * until the stored notices are read.
  */
 export function waitsAfterHandBack(
   notices: readonly ScreenNoticeView[] | null,

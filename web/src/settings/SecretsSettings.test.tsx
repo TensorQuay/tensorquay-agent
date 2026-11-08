@@ -71,7 +71,7 @@ async function add(name: string, value: string) {
 // Task 090 (FR-22, FR-28): shared secrets for administrators, write-only (WEB-U-035).
 // One word on the page, "key" (the owner's ask): names without the secrets/ reference, which Who may use states.
 describe("WEB-U-035 shared keys", () => {
-  // The 7 Oct review (as P2-1 on Models): a file-managed list still says where its keys come from, and when every key
+  // As on the Models page, a file-managed list still says where its keys come from, and when every key
   // has left the file, its marker is what says to delete them.
   it.each([
     ["current", "Configuration file"],
@@ -139,7 +139,7 @@ describe("WEB-U-035 shared keys", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
-  // One actions column (finding 7, UI-GUIDELINES §7): Replace, and a menu with the rest; no actions in the data cells.
+  // One actions column (UI-GUIDELINES §7): Replace, and a menu with the rest; no actions in the data cells.
   it("gives each key Replace and a menu, keeps names on one line and counts more than two models", async () => {
     show(fakeAdmin({ secrets: [...seeded, many] }).api);
     await screen.findByRole("table", { name: "Shared keys" });

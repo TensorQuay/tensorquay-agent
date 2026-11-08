@@ -29,7 +29,7 @@ describe("WEB-U-117 an email reads whole", () => {
   });
 });
 
-// The 13f screen review, #7: at 1024 an email broke at a dot although the table had room for it. Where its column has
+// A screen review before 17.0: at 1024 an email broke at a dot although the table had room for it. Where its column has
 // room it stays on one line (accounts.spec counts its line boxes at 1024 and 1440); since WEB-U-382 a long one may break
 // at its <wbr>s in any width, and on a phone it may also shrink.
 describe("WEB-U-156 an email stays on one line where there is room", () => {

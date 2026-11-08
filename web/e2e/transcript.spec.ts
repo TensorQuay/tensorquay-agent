@@ -292,7 +292,7 @@ test("WEB-U-014/WEB-U-015 preserves completed output while the Markdown chunk is
   await followingBottom(page);
 });
 
-// WEB-U-016 (finding 15): a run that retried the model twice and recovered shows no notice for it; its step line counts
+// WEB-U-016: a run that retried the model twice and recovered shows no notice for it; its step line counts
 // the retries, with the codes in the tooltip only.
 test("WEB-U-016 recovered retries fold into the step", async ({ page }) => {
   await signIn(page);
@@ -310,7 +310,7 @@ test("WEB-U-016 recovered retries fold into the step", async ({ page }) => {
   await expect(page.locator(".activity-retries")).toHaveText(
     "The model took too long to answer. Details: timeout, fallback_parse: schema",
   );
-  // Finding T-c: counted on the step's summary line by the last reason; its tooltip says each reason in words, then
+  // Counted on the step's summary line by the last reason; its tooltip says each reason in words, then
   // the codes after "Details:" (WEB-U-304).
   const heading = page.getByRole("button", { name: /Worked for/ });
   await expect(heading).toHaveText(

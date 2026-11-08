@@ -156,8 +156,8 @@ describe("WEB-U-047 environment rules", () => {
     ).toEqual({});
   });
 
-  // Review of the sizes (MUST 2): the GiB text is rounded for reading, so an unchanged field sends the stored MiB
-  // exactly; otherwise saving any field would change memory or disk by 1 MiB and send the environment back to its check.
+  // The GiB text is rounded for reading, so an unchanged field sends the stored MiB exactly; otherwise saving any field
+  // would change memory or disk by 1 MiB and send the environment back to its check.
   it("rounds typed GiB to whole MiB once: 320 MiB reads 0.313 and stays 320 unless typed", () => {
     const item = environment("data", { memory_mib: 320 });
     expect(toDraft(item).memory).toBe("0.313");
@@ -186,8 +186,8 @@ describe("WEB-U-047 environment rules", () => {
     }
   });
 
-  // Review of the sizes (MUST 1): a size the ceiling has since lowered is kept as stored when not edited, so the
-  // environment (even the default, whose size is locked) can still be saved; an edited one must fit the ceiling.
+  // A size the ceiling has since lowered is kept as stored when not edited, so the environment (even the default, whose
+  // size is locked) can still be saved; an edited one must fit the ceiling.
   it("lets an unchanged size above the ceiling through, and refuses an edited one", () => {
     const ceiling = {
       cpus: 8,

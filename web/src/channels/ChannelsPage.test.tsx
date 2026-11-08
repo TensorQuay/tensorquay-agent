@@ -83,7 +83,7 @@ describe("WEB-U-062 the channels list", () => {
     expect(within(retro).getByText("Ended")).toBeVisible();
   });
 
-  // General-purpose finding C1: what a channel is for, in plain words and with an example that isn't only coding.
+  // What a channel is for, in plain words and with an example that isn't only coding.
   it("says what a channel is for, with an example", async () => {
     show(fakeChannels().api);
     expect(
@@ -241,7 +241,7 @@ describe("WEB-U-062 the channels list", () => {
     ).toBeVisible();
   });
 
-  // One label style in the dialog, and More options reads as a disclosure (review points a and b).
+  // One label style in the dialog, and More options reads as a disclosure.
   it("labels every part alike, and shows More options as a disclosure", async () => {
     show(fakeChannels().api);
     await open();
@@ -355,7 +355,7 @@ describe("WEB-U-062 the channels list", () => {
     ).toBeNull();
     fireEvent.change(search, { target: { value: "" } });
     fireEvent.focus(search);
-    // Says why nothing is offered: no tasks yet (F1 review point c).
+    // Says why nothing is offered: no tasks yet.
     expect(
       await within(dialog()).findByText("You have no tasks yet."),
     ).toBeVisible();

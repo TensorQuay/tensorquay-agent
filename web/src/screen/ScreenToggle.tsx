@@ -16,7 +16,7 @@ export function ScreenToggle({
   open: boolean;
   /**
    * The agent is acting on the desktop now: the toggle says so by its name and tooltip, and a dot, so a person with the
-   * panel closed sees it start (the c16 UX review, #14).
+   * panel closed sees it start (a UX review before 17.0).
    */
   acting?: boolean;
   onOpen: () => void;

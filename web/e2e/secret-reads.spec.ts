@@ -41,7 +41,7 @@ for (const width of [1024, 1280] as const)
       await expect(rows.filter({ hasText: "tracker" })).not.toContainText(
         "Run unknown",
       );
-      // Every column shows: the table fits the dialog without scrolling sideways (UX review 0927b, item 1).
+      // Every column shows: the table fits the dialog without scrolling sideways.
       expect(
         await dialog
           .locator(".data-table-scroll")

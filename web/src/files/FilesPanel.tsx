@@ -90,7 +90,7 @@ export function FilesPanel({
   screenHandedBack?: boolean;
 }) {
   const [localTab, setLocalTab] = useState(tab);
-  // Finding F6: the Context tab is there only when the run loaded something; a view it was on falls back to Files.
+  // The Context tab is there only when the run loaded something; a view it was on falls back to Files.
   const available: readonly PanelTab[] = [
     "files",
     "changes",

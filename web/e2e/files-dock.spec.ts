@@ -1,7 +1,7 @@
 import { createConversation, signIn } from "./session";
 import { expect, test, type Page } from "./test";
 
-// The UX review of the dev tip (WEB-U-022): at 1280 the files panel floated over the answer and cut it mid-word. It docks
+// WEB-U-022: at 1280 the files panel floated over the answer and cut it mid-word. It docks
 // beside the transcript, which narrows, wherever the task's layout has room (WEB-U-170); it opens when the person opens
 // it (F6).
 async function done(page: Page) {
@@ -37,7 +37,7 @@ for (const width of [1280, 1440])
     expect(
       await panel.evaluate((element) => getComputedStyle(element).position),
     ).not.toBe("absolute");
-    // The tightest case (finding T1): with the sidebar expanded and the panel docked, the header still fits its title,
+    // The tightest case: with the sidebar expanded and the panel docked, the header still fits its title,
     // status and buttons without overflowing.
     const header = page.getByRole("region", { name: "Task header" });
     expect(

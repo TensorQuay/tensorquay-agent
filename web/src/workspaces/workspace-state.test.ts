@@ -67,7 +67,7 @@ describe("WEB-U-025 workspace state", () => {
       kind: "blocked",
       reason: "othersTasks",
     });
-    // Only a going run blocks it; a kept, idle environment is retired by the delete (the 13h UI review, #3).
+    // Only a going run blocks it; a kept, idle environment is retired by the delete (a UI review before 17.0).
     const held = (running: boolean) =>
       workspace({
         task_count: 1,
