@@ -58,7 +58,7 @@ export function FileList({
     );
   }
   const all = pages.data.pages.flatMap((page) => page.items);
-  // Finding 32: dotfiles (.git, .env…) are noise to most people; they wait behind one quiet button.
+  // Dotfiles (.git, .env…) are noise to most people; they wait behind one quiet button.
   const hidden = all.filter((entry) => entry.name.startsWith(".")).length;
   const entries = showHidden
     ? all

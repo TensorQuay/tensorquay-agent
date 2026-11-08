@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { parseTable } from "./csv";
 
-// Finding F3: a CSV or TSV file shows as a table; the parser takes quotes, doubled quotes and line breaks in quotes.
+// A CSV or TSV file shows as a table; the parser takes quotes, doubled quotes and line breaks in quotes.
 describe("WEB-U-022 reading a file as a table", () => {
   it("splits rows and fields, keeping quoted commas, doubled quotes and line breaks", () => {
     expect(

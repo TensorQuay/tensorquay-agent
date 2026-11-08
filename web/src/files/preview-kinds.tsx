@@ -55,7 +55,7 @@ function base64(buffer: ArrayBuffer): string {
 /**
  * An image drawn from its bytes, typed by its extension (F1): the download is octet-stream and never rendered. The
  * query keeps the bytes; each mount makes and revokes its own object URL, so a remount never meets a revoked one. An
- * SVG shows from a data: URL instead (the review of 9b1297d3): a blob: URL has the page's origin, and an SVG opened
+ * SVG shows from a data: URL instead: a blob: URL has the page's origin, and an SVG opened
  * from one in a new tab would run its script there, with the session. A data: document has an opaque origin, so even
  * if a browser opens it, its script can't reach this origin or the session: keep SVG off blob: URLs. A large image
  * isn't fetched.
@@ -183,7 +183,7 @@ export function TablePreview({
     );
   const [header = [], ...body] = rows;
   const shown = body.slice(0, MAX_ROWS);
-  // A row wider than the header keeps its cells, under empty headings (the review of 9b1297d3).
+  // A row wider than the header keeps its cells, under empty headings.
   const columns = Math.max(header.length, ...shown.map((row) => row.length));
   const count = truncated
     ? t("files.rowsFirst", { shown: String(shown.length) })

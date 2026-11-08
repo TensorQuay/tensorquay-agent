@@ -120,7 +120,7 @@ export function ProfilesSettings({
           {notice}
         </p>
       )}
-      {/* Nothing on either list: one empty state with the way to add one, not two empty headings (finding 9). */}
+      {/* Nothing on either list: one empty state with the way to add one, not two empty headings. */}
       {none ? (
         <section
           className="empty-state stack"

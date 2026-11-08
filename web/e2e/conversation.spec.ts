@@ -116,7 +116,7 @@ test("WEB-E2E-004 precursor: sign in, create, stream a tool call, replay, delete
     ).status(),
   ).toBe(204);
   await expect(page.getByLabel("Run status")).toHaveText("Done");
-  // Finding T-d: how long the run took waits in the status's tooltip.
+  // How long the run took waits in the status's tooltip.
   await expect(page.getByLabel("Run status")).toHaveAttribute(
     "title",
     /^Took [\d\u202f]+ s$/,
@@ -136,7 +136,7 @@ test("WEB-E2E-004 precursor: sign in, create, stream a tool call, replay, delete
     .toBe(transcript);
   await page.getByRole("button", { name: /Worked for/ }).press("Enter");
   await openCard(page.getByRole("button", { name: "Ran a command: ls" }));
-  // Finding T-a: the step's line names the command; the card keeps the call's arguments behind Details.
+  // The step's line names the command; the card keeps the call's arguments behind Details.
   await card.getByRole("button", { name: "Details", exact: true }).click();
   await expect(card.getByLabel("All arguments")).toContainText(
     '"command": "ls"',

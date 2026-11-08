@@ -68,7 +68,7 @@ describe("WEB-U-014 assistant Markdown", () => {
     expect(screen.getByText("const value = 1;")).toBeVisible();
   });
 
-  // Task 084: a value such as "2,124 B" stays on one line; prose cells keep wrapping between words.
+  // A value such as "2,124 B" stays on one line; prose cells keep wrapping between words.
   it("WEB-U-027 keeps short table cells whole and preserves column alignment", async () => {
     render(
       <TranscriptView
@@ -200,8 +200,8 @@ describe("WEB-U-014 assistant Markdown", () => {
     expect(document.querySelector("textarea")).toBeNull();
   });
 
-  // WEB-U-296 (the c14b first hour, F9): a model's empty fenced block, its opening fence alone or with only blank lines
-  // inside, shows no code box with Copy code; the answer's own text before and after it stays.
+  // WEB-U-296 (a first-hour check before 17.0): a model's empty fenced block, its opening fence alone or with only
+  // blank lines inside, shows no code box with Copy code; the answer's own text before and after it stays.
   it.each([
     ["an opening fence with nothing after it", "Done.\n\n```json\n"],
     [

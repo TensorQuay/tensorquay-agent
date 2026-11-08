@@ -1,6 +1,6 @@
 import { SLOW_RUN, SLOW_RUN_FILES } from "./slow-run.mjs";
 
-// The task's workspace for the fake front (task 068b): an in-memory tree per conversation behind the same four routes
+// The task's workspace for the fake front: an in-memory tree per conversation behind the same four routes
 // and limits as the gateway's files module, so the panel and composer run end to end without a sandbox.
 const MiB = 1024 * 1024;
 const LIMITS = { upload: 25 * MiB, preview: 512 * 1024, page: 200 };
@@ -396,7 +396,7 @@ export async function filesRoute(
   return true;
 }
 
-/** A message may name only uploaded files of its task's workspace (contract item 4). */
+/** A message may name only uploaded files of its task's workspace. */
 export function missingAttachment(conversation, attachments = []) {
   const files = workspace(conversation);
   return attachments.some(
@@ -427,7 +427,7 @@ export function agentWork(conversation, text, attachments) {
     );
   else if (text.startsWith("Remove the summary"))
     files.delete("results/summary.md");
-  // MAKE_REPORT in stream.mjs (findings F1-F3, D1-D2): a research and data run leaves a brief, a table, a chart and
+  // MAKE_REPORT in stream.mjs: a research and data run leaves a brief, a table, a chart and
   // a logo, so the files panel shows each as what it is.
   else if (text === "Make a chart and a brief") {
     const put = (path, bytes) => files.set(path, { bytes, modified_at: now() });
@@ -470,7 +470,7 @@ export function agentWork(conversation, text, attachments) {
       files.set(path, { bytes: encoder.encode(content), modified_at: now() });
 }
 
-/** The workspace as a run found it (task 068c): uploads and private state are left out, as by the gateway. */
+/** The workspace as a run found it: uploads and private state are left out, as by the gateway. */
 export function snapshot(conversation, run) {
   (conversation.snapshots ??= []).push({ run, files: tracked(conversation) });
 }

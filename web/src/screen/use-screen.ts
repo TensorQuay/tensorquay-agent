@@ -101,7 +101,7 @@ export function useScreen(
     };
   }, [conversationId, open, attempt, wake.count, dependencies]);
 
-  // A Take over with no answer at all is given up, so the button doesn't spin for good (the c16 UX review, #17). The
+  // A Take over with no answer at all is given up, so the button doesn't spin for good (a UX review before 17.0). The
   // gateway made the claim at the press and releases it only on a hand-back or this socket's close, holding the task's
   // turns meanwhile: so the page hands back. A grant already on its way is then ignored by both: the gateway's, as its
   // claim is gone, and the page's until the next ask (screen-state).

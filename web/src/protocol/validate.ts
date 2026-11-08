@@ -37,7 +37,7 @@ export function knownFormat(name: string): boolean {
   return name in formats;
 }
 
-/** A frame or event kind this web does not know: kept only for its sequence, rendered as nothing (task 069b). */
+/** A frame or event kind this web does not know: kept only for its sequence, rendered as nothing. */
 export type IgnoredFrame = { type: "ignored"; seq?: number };
 export type ParsedFrame = ServerFrame | IgnoredFrame;
 

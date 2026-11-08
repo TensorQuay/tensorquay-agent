@@ -43,7 +43,7 @@ describe("WEB-U-222 the team's end note", () => {
       // Shares of the team's use, never the word tokens (PRD §12 item 11): the lead task's is what the helpers didn't use.
       "Share of the work: Researcher 48 %, Reviewer 12 %, the lead task 40 %",
     );
-    // Each helper's count in words, by the language's plural rule (the S6 web review).
+    // Each helper's count in words, by the language's plural rule.
     expect(card).toHaveTextContent(
       "2 reports from Researcher and 1 report from Reviewer",
     );
@@ -73,7 +73,7 @@ describe("WEB-U-222 the team's end note", () => {
   });
 });
 
-// WEB-U-375 (the lead's live session on 16e, L48/L49): the handed-back files are joined in the reader's language, "、"
+// WEB-U-375 (a live check before 17.0): the handed-back files are joined in the reader's language, "、"
 // in Chinese, never the comma each file's own parentheses already use ("…（401 B，coder）, test_primes.py…" before).
 describe("WEB-U-375 the handed-back list's separator", () => {
   it("joins files with the catalogue's separator", () => {
@@ -107,8 +107,9 @@ describe("WEB-U-375 the handed-back list's separator", () => {
   });
 });
 
-// WEB-U-396 (16n T7; c16k real-world B9c, 17 Oct 2026): the end card showed the lead's summary with its Markdown marks
-// ("**Day-by-day plan**", "**Cost estimate table**"). It reads as the lead's reply does: formatted, never raw marks.
+// WEB-U-396 (a review and real-world use before 17.0, 17 Oct 2026): the end card showed the lead's summary with its
+// Markdown marks ("**Day-by-day plan**", "**Cost estimate table**"). It reads as the lead's reply does: formatted,
+// never raw marks.
 describe("WEB-U-396 the end note's summary is formatted", () => {
   it("renders the lead's Markdown, with no raw marks", async () => {
     render(
@@ -129,9 +130,9 @@ describe("WEB-U-396 the end note's summary is formatted", () => {
   });
 });
 
-// WEB-U-394 (c16k real-world B9b, 17 Oct 2026): a team that ran out of budget said only "The team used its whole
-// budget." under a green Done, with no word that the goal wasn't met or what to do. Its end note says so and gives the
-// next step; the team's own lines say what the 80 % and helpers' notices asked.
+// WEB-U-394 (real-world use before 17.0, 17 Oct 2026): a team that ran out of budget said only
+// "The team used its whole budget." under a green Done, with no word that the goal wasn't met or what to do. Its end
+// note says so and gives the next step; the team's own lines say what the 80 % and helpers' notices asked.
 describe("WEB-U-394 a budget end and the budget notices say what happens next", () => {
   it("gives a budget end its next step", () => {
     render(<TeamEndNote note={note({ reason: "budget", summary: null })} />);

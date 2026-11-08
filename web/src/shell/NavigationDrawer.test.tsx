@@ -66,8 +66,9 @@ function drawer(onClose: () => void) {
   return screen.getByRole("dialog", { name: "Navigation" });
 }
 
-// The 16f page pass (F1): below 768 px the sidebar is hidden, so the drawer is the only place a phone finds the account
-// menu: Settings, theme, language and sign out, at its foot as in the sidebar. An item that navigates closes the drawer.
+// A pass over the pages before 17.0: below 768 px the sidebar is hidden, so the drawer is the only place a phone finds
+// the account menu: Settings, theme, language and sign out, at its foot as in the sidebar. An item that navigates
+// closes the drawer.
 describe("WEB-U-379 the navigation drawer has the account menu", () => {
   beforeAll(async () => {
     await import("../auth/AccountActions");

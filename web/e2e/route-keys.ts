@@ -4,7 +4,7 @@ import { expect, type Page } from "@playwright/test";
 
 /**
  * Allows the shared key `keyRef` for route `name`, as an administrator does on the Keys page: a route naming a shared
- * key that isn't bound to it can't be saved (`409 secret_not_allowed`, vault slice 3). Removing the route unbinds it.
+ * key that isn't bound to it can't be saved (`409 secret_not_allowed`). Removing the route unbinds it.
  * `origin` defaults to the page's own, for a page that has navigated; a spec that writes before it navigates names it.
  */
 export async function allowKey(

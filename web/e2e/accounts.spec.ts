@@ -37,7 +37,7 @@ async function openSettings(page: Page) {
   await expect(page).toHaveURL(/\/settings(\/account)?$/);
 }
 
-// Task 067 / WEB-U-023: team accounts in the web, every state at 1024 and 1440 in both themes.
+// WEB-U-023: team accounts in the web, every state at 1024 and 1440 in both themes.
 for (const width of [1024, 1440])
   for (const colorScheme of ["light", "dark"] as const) {
     const suffix = `${width}-${colorScheme}`;
@@ -132,7 +132,8 @@ for (const width of [1024, 1440])
         }),
       ).toBe(true);
       await page.keyboard.press("Escape");
-      // WEB-U-156 (the 13f screens, #7): the people come before Invite someone, and each email reads whole, on one line.
+      // WEB-U-156 (a screen review before 17.0): the people come before Invite someone, and each email reads whole, on
+      // one line.
       const [peopleHeading, inviteHeading] = await Promise.all([
         page
           .getByRole("heading", { name: "People", exact: true })
@@ -311,7 +312,7 @@ test("WEB-U-023 members see their tokens, not user administration", async ({
   expect(response.status()).toBe(200);
   await openSettings(page);
   const sections = page.getByRole("navigation", { name: "Settings sections" });
-  // Task 095, WEB-U-044 and WEB-U-049: every signed-in user also keeps their own Git and connector credentials and
+  // WEB-U-044 and WEB-U-049: every signed-in user also keeps their own Git and connector credentials and
   // their own task profiles; administration stays hidden (WEB-U-075: Your account only; a member lands on Account).
   await expect(page).toHaveURL(/\/settings\/account$/);
   await expect(sections.getByRole("link")).toHaveText([
@@ -327,7 +328,7 @@ test("WEB-U-023 members see their tokens, not user administration", async ({
   await capture(page, "member-users");
 });
 
-// The review of WEB-U-168: where People itself is narrow (800 px with the sidebar and the Settings menu open, about
+// WEB-U-168: where People itself is narrow (800 px with the sidebar and the Settings menu open, about
 // 300 px for the tables), a long address breaks at its <wbr>s instead of widening the table, the page never scrolls
 // sideways, and each table's rows are cards (WEB-U-190), so every row's action is in view without scrolling the table.
 test("WEB-U-168 a long address on a narrow People wraps, and its row's action is reached in the table", async ({
@@ -403,9 +404,9 @@ test("WEB-U-168 a long address on a narrow People wraps, and its row's action is
   await capture(page, "users-narrow-long-800");
 });
 
-// WEB-U-382 (the 16f page pass, F3): at 1280 a 41-character address ran under its row's Role menu. Kept on one line
-// and unsqueezed, it was still measured by the table as if it could break at its <wbr>s, so its column came out
-// narrower than its text. It now breaks at its <wbr>s wherever the column needs it, at 1280 as on a phone; its full
+// WEB-U-382 (a pass over the pages before 17.0): at 1280 a 41-character address ran under its row's Role menu. Kept on
+// one line and unsqueezed, it was still measured by the table as if it could break at its <wbr>s, so its column came
+// out narrower than its text. It now breaks at its <wbr>s wherever the column needs it, at 1280 as on a phone; its full
 // text stays in the cell (and its title).
 for (const size of [
   { width: 1280, height: 800 },

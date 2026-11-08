@@ -32,9 +32,9 @@ import "../../protocol/generated/validators.settings";
 /**
  * Waits for the answers the gateway bounds itself for longer than the web's usual 10 s (the c13c how-to check,
  * WEB-U-138). A route check is bounded per route by the gateway: a hosted model's by a minute, a local model's by its
- * progress within an outer cap of 10 minutes (the c16d first hour, F2), plus a margin; so one ceiling past that is never
- * the one that ends it. Listing a route's models
- * and reading the container engine (its images, Reset to built-in) are bounded at 30 s there.
+ * progress within an outer cap of 10 minutes (a first-hour check before 17.0), plus a margin; so one ceiling past that
+ * is never the one that ends it. Listing a route's models and reading the container engine (its images, Reset to
+ * built-in) are bounded at 30 s there.
  */
 const CHECK_TIMEOUT_MS = 660_000;
 const LISTING_TIMEOUT_MS = 45_000;
@@ -118,7 +118,7 @@ function secretRequests(client: ApiClient) {
 /** Model routes (slice 3). */
 function routeRequests(client: ApiClient) {
   return {
-    /** Checks one stored route as a task would use it (099b-2); a failed check is still a result. */
+    /** Checks one stored route as a task would use it; a failed check is still a result. */
     /** The saved route's upstream models (WEB-U-067); the server's refusal is in `failure`. */
     routeModels: (name: string, signal?: AbortSignal) =>
       client.request(

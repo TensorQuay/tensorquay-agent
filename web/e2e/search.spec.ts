@@ -3,9 +3,9 @@ import { randomUUID } from "node:crypto";
 import { signIn } from "./session";
 import { expect, test, type Page } from "./test";
 
-// The review of d9fb1917 (MUST 1): one Ctrl/Cmd K, one search, and it can always be seen and typed into: at desktop
-// width, and at phone width with the drawer closed (the hidden sidebar's list once opened an invisible modal) and open
-// (the drawer's list once opened a second one). Choosing a match opens its task and closes the drawer.
+// One Ctrl/Cmd K, one search, and it can always be seen and typed into: at desktop width, and at phone width with the
+// drawer closed (the hidden sidebar's list once opened an invisible modal) and open (the drawer's list once opened a
+// second one). Choosing a match opens its task and closes the drawer.
 async function nine(page: Page) {
   await signIn(page);
   for (let n = 1; n <= 9; n += 1) {
@@ -73,7 +73,7 @@ test("WEB-U-071 one visible search from Ctrl K at 390, drawer closed and open", 
   await page.getByRole("button", { name: "Open navigation" }).click();
   const drawer = page.getByRole("dialog", { name: "Navigation" });
   await expect(drawer).toBeVisible();
-  // Ctrl K is ignored over another dialog (the review's nit 5); the drawer's Search row opens it instead.
+  // Ctrl K is ignored over another dialog; the drawer's Search row opens it instead.
   await page.keyboard.press("Control+k");
   await expect(page.getByRole("dialog", { name: "Search tasks" })).toHaveCount(
     0,

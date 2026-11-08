@@ -1,6 +1,5 @@
 /**
- * What a file is shown as (findings F1-F3; the file previews design), by its extension: small on purpose, the
- * conversation page loads it.
+ * What a file is shown as, by its extension: small on purpose, the conversation page loads it.
  */
 export type PreviewKind =
   "image" | "document" | "table" | "page" | "pdf" | "sheet" | "text";

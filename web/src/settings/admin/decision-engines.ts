@@ -33,7 +33,7 @@ export type EnginesApi = {
   deleteEngine(name: string, version: number, key: string): Promise<void>;
   /** The shared secrets' refs, offered as an engine's key. */
   secretRefs(signal?: AbortSignal): Promise<string[]>;
-  /** Adds this engine to who may use a secret, on the secret's current version (vault slice 3). */
+  /** Adds this engine to who may use a secret, on the secret's current version. */
   allowSecret(ref: string, engine: string): Promise<void>;
   /** The installation's model routes, by name, in their order: a multiple-choice service chooses among them. */
   routeNames(signal?: AbortSignal): Promise<string[]>;

@@ -208,7 +208,7 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
     item.state === "open" && item.role !== null && item.role !== "observer";
   // WEB-U-063: a new channel's empty log gives a first step, and the box has the focus.
   const firstStep = posts && log.loaded && log.messages.length === 0;
-  // C2 (the 14b page pass): the title is usually the purpose's start; the line under it says only what it adds.
+  // WEB-U-250: the title is usually the purpose's start; the line under it says only what it adds.
   const beyond = purposeBeyond(item.purpose, item.name);
   return (
     <div className="channel-page">

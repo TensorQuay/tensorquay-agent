@@ -45,7 +45,7 @@ const BARE = "something went wrong";
 const UNKNOWN =
   "The gateway refused this for a reason this page doesn't recognise. Reload the page and retry; if it happens again, ask an administrator.";
 
-// WEB-U-236 (the 14b page pass, E4's third point): "something went wrong" never shows alone. Every code a person can
+// WEB-U-236 (a pass over the pages before 17.0): "something went wrong" never shows alone. Every code a person can
 // meet reads as what happened and what to do, in the words the transcript uses for the same failure, and a code this
 // page doesn't know still says what to do.
 describe("WEB-U-236 every error a person can meet in its own words", () => {

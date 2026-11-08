@@ -22,8 +22,9 @@ const waiting = (unread: number, extra: Partial<Team> = {}) =>
     ...extra,
   });
 
-// WEB-U-423 (c17 3a; GW-I-319): after a person stops a lead, the team's messages to it wait unread, and nothing said
-// so (the c16k wake review's S2). The lead's strip now says how many, from the gateway's count, in its live region.
+// WEB-U-423 (17.0's release candidate; GW-I-319): after a person stops a lead, the team's messages to it wait unread,
+// and nothing said so (a review of the team wake before 17.0). The lead's strip now says how many, from the gateway's
+// count, in its live region.
 describe("WEB-U-423 a stopped lead's unread team messages", () => {
   it("says how many wait unread for the lead once it is stopped", () => {
     lead(waiting(3), true);

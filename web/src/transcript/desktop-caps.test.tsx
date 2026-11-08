@@ -45,9 +45,9 @@ function line(code: string) {
   };
 }
 
-// WEB-U-330 (the 16d page pass, Z25): a per-run cap is the limit doing its job, not a failure. Its line says what
-// happens next first, so a folded line keeps it, and its mark is a muted "Limit reached"; any other failure stays a
-// "Failed" in the danger tone.
+// WEB-U-330 (a pass over the pages before 17.0): a per-run cap is the limit doing its job, not a failure. Its line says
+// what happens next first, so a folded line keeps it, and its mark is a muted "Limit reached"; any other failure stays
+// a "Failed" in the danger tone.
 describe("WEB-U-330 a desktop cap reads as a limit, consequence first", () => {
   it.each([
     [
@@ -111,7 +111,7 @@ describe("WEB-U-330 a desktop cap reads as a limit, consequence first", () => {
     expect(summary).toHaveClass("tool-disclosure");
   });
 
-  // The page pass's P3: an opened cap card had a "Result" heading with nothing under it.
+  // A pass over the pages before 17.0: an opened cap card had a "Result" heading with nothing under it.
   it("shows no empty Result in its opened card", async () => {
     render(<TranscriptView transcript={refused("screenshot_too_large")} />);
     await settleLazy();

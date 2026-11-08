@@ -62,7 +62,7 @@ describe("WEB-U-016 narration belongs with its work", () => {
     const rows = within(
       screen.getByRole("group", { name: "Activity" }),
     ).getAllByRole("listitem");
-    // A tool row reads by its line; the latest one's open card (finding T2) follows it in the same row.
+    // A tool row reads by its line; the latest one's open card follows it in the same row.
     expect(
       rows.map(
         (row) =>

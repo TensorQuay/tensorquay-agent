@@ -27,7 +27,8 @@ export type LeadRow = {
 
 /**
  * One task in the sidebar: its title (never a slug) and its status. Its group heading says when; the tooltip holds the
- * full title, the workspace and the full time (the live review of c8, L9, revised), and a shared title's name adds the time. Rename and Delete sit in a menu that appears on hover or focus.
+ * full title, the workspace and the full time (a live check before 17.0, revised), and a shared title's name adds the
+ * time. Rename and Delete sit in a menu that appears on hover or focus.
  */
 export function TaskRow({
   conversation,
@@ -174,7 +175,8 @@ export function TaskRow({
             className="type-small task-helpers-count"
             data-tone={lead.count.tone}
             aria-hidden="true"
-            // Its words for sighted people too: a lone "2" beside a spinner read as unread messages (the c16 UX review).
+            // Its words for sighted people too: a lone "2" beside a spinner read as unread messages (a UX review
+            // before 17.0).
             title={lead.count.label}
           >
             {lead.count.words}

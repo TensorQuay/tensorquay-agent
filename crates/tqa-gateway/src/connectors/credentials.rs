@@ -221,7 +221,7 @@ pub(crate) async fn remove(
 }
 
 /// `GET /api/v1/connectors/{name}/credential/reads?limit&before`: when the caller's own credential for a connector was
-/// read, for which conversation and run, newest first; never its value (vault slice 2).
+/// read, for which conversation and run, newest first; never its value.
 ///
 /// # Errors
 /// `404` when the caller holds none, `400` for invalid paging, `403 session_required`, or a store failure.
@@ -281,7 +281,7 @@ pub(crate) async fn resolve(
     name: &str,
     conversation: Option<Uuid>,
 ) -> Result<Option<ConnectorCredential>, GatewayError> {
-    // Every read is recorded, never a value (vault slice 2).
+    // Every read is recorded, never a value.
     let context = crate::secrets::reads::ReadContext {
         conversation,
         user: Some(user),

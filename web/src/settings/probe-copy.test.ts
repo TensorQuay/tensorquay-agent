@@ -14,7 +14,7 @@ import {
 const observation = adminSchema.definitions.RouteProbeObservation.properties;
 const values = (node: { enum?: string[] }) => node.enum ?? [];
 
-// Every value a route check can report reads as a sentence, and a newer one still reads plainly (WEB-U-039, 099b-2).
+// Every value a route check can report reads as a sentence, and a newer one still reads plainly (WEB-U-039).
 describe("WEB-U-039 route check copy", () => {
   it("has a sentence for every failure, step and warning the contract defines", () => {
     const failure = observation.failure.oneOf.find(

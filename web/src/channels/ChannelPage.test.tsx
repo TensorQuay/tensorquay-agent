@@ -124,7 +124,7 @@ describe("WEB-U-063 the channel page", () => {
     expect(within(bar).queryByText("Get the release out.")).toBeNull();
   });
 
-  // WEB-U-250 (the 14b page pass, C2): a title cut from the purpose isn't followed by the purpose again.
+  // WEB-U-250 (a pass over the pages before 17.0): a title cut from the purpose isn't followed by the purpose again.
   it("carries on from a title cut from the purpose, with the whole purpose in its tooltip", async () => {
     const purpose =
       "Plan the spring newsletter: agree the topics and who drafts each part.";
@@ -323,8 +323,8 @@ describe("WEB-U-063 the channel page", () => {
     );
   });
 
-  // WEB-U-263 (the c14b first hour, F5): a task added as a member is an agent's task; the channel's own work items are
-  // to-dos, so the side panel never says "No tasks yet" beside a member task.
+  // WEB-U-263 (a first-hour check before 17.0): a task added as a member is an agent's task; the channel's own work
+  // items are to-dos, so the side panel never says "No tasks yet" beside a member task.
   it("calls the channel's own work items to-dos, apart from the member tasks", async () => {
     const fake = fakeChannels({
       channels: [RELEASE],

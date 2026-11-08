@@ -42,7 +42,7 @@ const CHECKS: readonly { key: string; label: MessageKey; fix: MessageKey }[] = [
 /** How often an open Status page reads the readiness detail again. */
 export const STATUS_REFRESH_MS = 30_000;
 
-/** Runtime status for administrators (FR-22, task 090): the gateway's readiness checks and its sandbox backend. */
+/** Runtime status for administrators (FR-22): the gateway's readiness checks and its sandbox backend. */
 export function StatusSettings({
   me,
   environments,
@@ -69,7 +69,7 @@ function Status({ environments }: { environments?: TemplatesApi | undefined }) {
   });
   if (status.isPending) return <Skeleton label={t("health.loading")} />;
   // Only a page with no read yet shows the failure alone: after a good read, a failed one keeps that read on screen with
-  // a line saying so, so the live lines stay the same elements and the next good read is heard (the 7 Oct review, P3-3).
+  // a line saying so, so the live lines stay the same elements and the next good read is heard.
   if (status.isError && !status.data)
     return (
       <div className="stack">
@@ -91,10 +91,10 @@ function Status({ environments }: { environments?: TemplatesApi | undefined }) {
   return (
     <div className="stack">
       <p className="type-small muted">{t("health.intro")}</p>
-      {/* The one line first (the owner's review): can new tasks start right now. */}
+      {/* The one line first: can new tasks start right now. */}
       <div className="stack status-verdict">
         {/* Polite and live, so a change after Check again or a 30 s read is heard; a read that leaves it as it was says
-            nothing (the c15 accessibility review). Checked at, below, isn't live. */}
+            nothing (an accessibility review before 17.0). Checked at, below, isn't live. */}
         <p
           role="status"
           className="type-body status-verdict-line"
@@ -165,12 +165,12 @@ function Status({ environments }: { environments?: TemplatesApi | undefined }) {
 
 /**
  * How many tasks are working on a step (GW-I-229), so an administrator restarts in a gap: a restart starts each of those
- * steps over (first-hour F7; the admin guide's Restarting the gateway). A count only, never which tasks or whose;
+ * steps over (a first-hour check; the admin guide's Restarting the gateway). A count only, never which tasks or whose;
  * nothing when it couldn't be read.
  */
 function ActiveRuns({ active }: { active: ReadyDetail["runs_active"] }) {
   const t = useT();
-  // Named once, by its heading (the c15 accessibility review).
+  // Named once, by its heading (an accessibility review before 17.0).
   const heading = useId();
   if (active === null) return null;
   return (
@@ -233,7 +233,7 @@ function DefaultEnvironment({
   problems: number;
 }) {
   const t = useT();
-  // The Environments page's own query, so both pages share it; without it the slug stands in (UX review 0927).
+  // The Environments page's own query, so both pages share it; without it the slug stands in.
   const list = useQuery({
     queryKey: ["admin-templates"],
     queryFn: ({ signal }) =>

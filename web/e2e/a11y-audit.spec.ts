@@ -107,7 +107,7 @@ for (const [width, height] of [
 }
 
 // A finished task with the files panel's tabs and an opened tool card (WEB-U-022; ADR-0035: nothing asks first). The
-// run loads context, so the Context tab is there (finding F6).
+// run loads context, so the Context tab is there.
 test("A11Y a task's panel tabs and a tool card", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await signIn(page);

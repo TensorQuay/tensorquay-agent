@@ -30,8 +30,8 @@ const tool = (
   ...overrides,
 });
 
-// The general-purpose walk-through (findings A1–A3): a step reads as what it did, in plain words, never as an
-// internal tool name or a return code; the details stay in the card.
+// A step reads as what it did, in plain words, never as an internal tool name or a return code; the details stay in the
+// card.
 describe("WEB-U-016 steps in plain words", () => {
   const page = tool("fetch_url", {
     url: "https://www.example.com/pricing?plan=team#top",
@@ -76,7 +76,8 @@ describe("WEB-U-016 steps in plain words", () => {
     expect(toolSummary(tool(name, args))).toBe(line);
   });
 
-  // The 14b page pass (H02): the agent-team tools read as what the lead or helper did, never "Used start_member".
+  // A pass over the pages before 17.0: the agent-team tools read as what the lead or helper did, never
+  // "Used start_member".
   it.each([
     [
       "start_member",
@@ -330,10 +331,10 @@ describe("WEB-U-016 no git words", () => {
   });
 });
 
-// WEB-U-390 (the c16k real-world run, 17 Oct 2026, B9: 24 of the lead's 27 steps were "Ran a command: python3 -
-// <<'EOF' import re, urllib.request, html pages = …", the whole script flattened into the label): a script given
-// inline reads as a script in its language, any other multi-line command as its first line and "…", and a one-line
-// command as before. The whole command stays in the card's Details.
+// WEB-U-390 (real-world use before 17.0, 17 Oct 2026: 24 of the lead's 27 steps were
+// "Ran a command: python3 - <<'EOF' import re, urllib.request, html pages = …", the whole script flattened into the
+// label): a script given inline reads as a script in its language, any other multi-line command as its first line and
+// "…", and a one-line command as before. The whole command stays in the card's Details.
 describe("WEB-U-390 a multi-line command's step label", () => {
   // B9's first step, as the lead sent it (cut after its first lines).
   const b9 = `python3 - <<'EOF'

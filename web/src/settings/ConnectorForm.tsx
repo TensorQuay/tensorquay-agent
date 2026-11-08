@@ -47,7 +47,7 @@ function useConnectorSave({ item, api, onSaved, onStale }: FormProps) {
   const [problems, setProblems] = useState<Record<string, MessageKey>>({});
   const [failure, setFailure] = useState<MessageKey | null>(null);
   const [pending, setPending] = useState(false);
-  /** The secret a save named but may not use yet (vault slice 3: 409 secret_not_allowed). */
+  /** The secret a save named but may not use yet (409 secret_not_allowed). */
   const [notAllowed, setNotAllowed] = useState<string | null>(null);
   const set = (change: Partial<ConnectorDraft>) =>
     setDraft((current) => ({ ...current, ...change }));

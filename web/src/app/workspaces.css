@@ -1,4 +1,4 @@
-/* Task 076: the Workspaces page (UI-GUIDELINES §6 and §7 Workspace card). */
+/* The Workspaces page (UI-GUIDELINES §6 and §7 Workspace card). */
 .workspaces-page {
   container: workspaces / inline-size;
   display: flex;
@@ -294,7 +294,7 @@
 .start-internet a:hover {
   color: var(--muted);
 }
-/* The task list's workspace label and filter chip (answers-076 Q8). The label stays on one line: the workspace
+/* The task list's workspace label and filter chip. The label stays on one line: the workspace
    name truncates first and the separator and time keep their width (WEB-U-026). */
 .conversation-meta {
   display: flex;
@@ -344,7 +344,7 @@
   .workspace-filter-picker {
     display: inline-flex;
   }
-  /* The 14b page pass, W4 (WEB-U-251): on a phone the email takes its own row; access and Share go under it. */
+  /* WEB-U-251: on a phone the email takes its own row; access and Share go under it. */
   .share-form {
     flex-wrap: wrap;
   }

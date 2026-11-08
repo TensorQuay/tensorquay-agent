@@ -35,8 +35,9 @@ const grant = (fields: Record<string, unknown>) =>
     ),
   );
 
-// WEB-U-333 (the 16d page pass, Z12): while control is granted but the agent may still be stopping, the status line is
-// a state to wait out, in the panel's attention tone with a clock; the grant that follows reads as plain control.
+// WEB-U-333 (a pass over the pages before 17.0): while control is granted but the agent may still be stopping, the
+// status line is a state to wait out, in the panel's attention tone with a clock; the grant that follows reads as plain
+// control.
 describe("WEB-U-333 a late grant's line reads as a state to wait out", () => {
   it("is in the warn tone with an icon, then plain once the reset lands", async () => {
     const { ScreenPanel } = await import("./ScreenPanel");
@@ -57,8 +58,8 @@ describe("WEB-U-333 a late grant's line reads as a state to wait out", () => {
   });
 });
 
-// WEB-U-334 (the 16d page pass, Z26): the picture box shows only while a picture is being drawn (the screen client
-// connected); with none (not connected yet, or the connection dropped) there is no empty box and no Expand.
+// WEB-U-334 (a pass over the pages before 17.0): the picture box shows only while a picture is being drawn (the screen
+// client connected); with none (not connected yet, or the connection dropped) there is no empty box and no Expand.
 describe("WEB-U-334 no empty picture box, and Expand only with a picture", () => {
   it("shows the box and Expand only while connected", async () => {
     FakeScreenClient.autoConnect = false;
@@ -80,8 +81,9 @@ describe("WEB-U-334 no empty picture box, and Expand only with a picture", () =>
   });
 });
 
-// WEB-U-335 (the 16d page pass, Z17): the warning about earlier sign-ins always comes with its means: Clear sign-ins is
-// there from the grant, disabled while the agent is still stopping and described by why, enabled once it has stopped.
+// WEB-U-335 (a pass over the pages before 17.0): the warning about earlier sign-ins always comes with its means: Clear
+// sign-ins is there from the grant, disabled while the agent is still stopping and described by why, enabled once it
+// has stopped.
 describe("WEB-U-335 the sign-ins warning always comes with its button", () => {
   it("is disabled with its reason while the agent works, then enabled", async () => {
     const { ScreenPanel } = await import("./ScreenPanel");

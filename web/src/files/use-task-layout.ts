@@ -5,14 +5,14 @@ import { useLayoutEffect, useState, type RefObject } from "react";
 /**
  * The task layout's width from which the files panel docks beside the conversation (UI-GUIDELINES §6, WEB-U-170):
  * the 360 px panel, its 24 px gap and at least 516 px of conversation. The layout's own width decides, not the
- * window's, so an open sidebar counts (the fix's review). files.css's container query uses the same number.
+ * window's, so an open sidebar counts. files.css's container query uses the same number.
  */
 export const DOCK_WIDTH = 900;
 
 /**
  * The task layout's room, measured as it changes: whether the files panel docks beside the conversation (returned),
  * and `--composer-offset`, the room the composer takes at the bottom, so a panel lying over the column ends above it
- * and the composer stays usable (review of 068c). The composer grows with its text, so it is measured, not fixed;
+ * and the composer stays usable. The composer grows with its text, so it is measured, not fixed;
  * where the panel starts is the bar's own (use-bar-offset).
  */
 export function useTaskLayout(layout: RefObject<HTMLElement | null>): boolean {

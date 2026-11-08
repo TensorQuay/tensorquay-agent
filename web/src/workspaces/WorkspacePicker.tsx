@@ -24,7 +24,7 @@ const RECENT = 8;
 const MATCHES = 20;
 
 /**
- * The workspace choice in the task bar (task 076): "New workspace" (the value "") first, then recent workspaces with
+ * The workspace choice in the task bar: "New workspace" (the value "") first, then recent workspaces with
  * their owner and state. A read-only share or a fork being copied is listed but disabled, with the reason (Q7).
  */
 export function WorkspacePicker({
@@ -41,7 +41,7 @@ export function WorkspacePicker({
   value: string;
   onChange: (id: string) => void;
   disabled?: boolean;
-  /** The id of a hint that says what a workspace is, where the picker needs one (finding N2). */
+  /** The id of a hint that says what a workspace is, where the picker needs one. */
   describedBy?: string;
   /** Open at once (a chip New task's "+" just added). */
   defaultOpen?: boolean;

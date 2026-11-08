@@ -5,7 +5,7 @@ import { addFromPlus } from "./choices";
 import { signIn } from "./session";
 import { expect, test, type Page } from "./test";
 
-// WEB-U-128 on the page (candidate12 F2): a new task's workspace is new and empty, so its suggestions work from
+// WEB-U-128 on the page (found before 17.0): a new task's workspace is new and empty, so its suggestions work from
 // nothing; with a workspace chosen that holds files, they work on its files.
 async function capture(page: Page, name: string) {
   if (!process.env.TQA_WEB_EVIDENCE_DIR) return;

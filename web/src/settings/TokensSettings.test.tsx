@@ -42,7 +42,7 @@ function show(clock: () => Date = march) {
   );
 }
 
-// Task 067 / FR-26: personal API tokens - listed without their secret, shown once on creation, revoked with a confirm.
+// FR-26: personal API tokens - listed without their secret, shown once on creation, revoked with a confirm.
 describe("WEB-U-023 API tokens", () => {
   it("explains Bearer use and shows the empty state", async () => {
     fetch.mockImplementationOnce(() => json({ items: [] }));
@@ -114,7 +114,7 @@ describe("WEB-U-023 API tokens", () => {
       )
       .mockImplementationOnce(() => json({ items: [] }));
     show();
-    // The button names its object; the confirmation carries the danger, not a red button on every row (finding 18).
+    // The button names its object; the confirmation carries the danger, not a red button on every row.
     const revoke = await screen.findByRole("button", {
       name: "Revoke token “CI”",
     });
@@ -163,8 +163,8 @@ describe("WEB-U-023 API tokens", () => {
   });
 });
 
-// WEB-U-355 (the 16f page pass, E1): an empty name is said under the field in the app's words, never by the browser's
-// own bubble (UI-GUIDELINES §5, input errors), and nothing is sent.
+// WEB-U-355 (a pass over the pages before 17.0): an empty name is said under the field in the app's words, never by the
+// browser's own bubble (UI-GUIDELINES §5, input errors), and nothing is sent.
 describe("WEB-U-355 the token's name, said by the page", () => {
   it("says an empty name under the field and sends nothing", async () => {
     fetch.mockImplementation(() => json({ items: [] }));

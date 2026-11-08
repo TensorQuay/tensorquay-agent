@@ -2,7 +2,7 @@ import { expect, test, type Page } from "./test";
 
 // WEB-U-383: the password's show/hide button sits inside the password box whatever is said under the field: the
 // server's refusal (WEB-U-380) and the form's own "Enter your password." both put a line below the input, and the
-// button must not follow it (the 16h retake, P01 wrong password: it dropped onto the error line).
+// button must not follow it (a retake before 17.0, with a wrong password: it dropped onto the error line).
 async function expectEyeInBox(page: Page) {
   const input = await page
     .getByLabel("Password", { exact: true })

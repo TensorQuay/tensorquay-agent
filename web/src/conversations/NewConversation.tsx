@@ -77,8 +77,8 @@ export function NewConversation({
     ? t("picker.setByProfile", { name: profile.display_name })
     : undefined;
   const action = useFirstMessage(route, template, workspace, profile);
-  // A Desktop with a route that can't see images leaves the agent blind on the screen (16e's first hour, 8b): said
-  // where the person picks them (WEB-U-370).
+  // A Desktop with a route that can't see images leaves the agent blind on the screen (a first-hour check before 17.0):
+  // said where the person picks them (WEB-U-370).
   const blind =
     Boolean(
       offered
@@ -282,7 +282,7 @@ export function NewConversation({
                         defaultOpen={addingWorkspace}
                         onDismiss={() => setAddingWorkspace(false)}
                       />
-                      {/* Finding N2: what a workspace is, for someone who has never met one. */}
+                      {/* What a workspace is, for someone who has never met one. */}
                       <span hidden id={`${id}-workspace-hint`}>
                         {t("start.workspaceHint")}
                       </span>
@@ -420,8 +420,8 @@ export function NewConversation({
         )}
         {!shown && (
           <div className="example-tasks">
-            {/* A general-purpose agent: examples for data, writing and code, not only code (the owner's principle). On
-                 files the task has (a chosen workspace that holds some), else from nothing (candidate12 F2, WEB-U-128). */}
+            {/* A general-purpose agent: examples for data, writing and code, not only code. On files the task has (a
+                 chosen workspace that holds some), else from nothing (found before 17.0, WEB-U-128). */}
             {(chosen && (chosen.size_bytes ?? 0) > 0
               ? [
                   t("start.exampleExplain"),

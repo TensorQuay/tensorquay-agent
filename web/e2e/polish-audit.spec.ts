@@ -79,7 +79,7 @@ for (const width of [1024, 1440, 1920])
       await page.getByRole("button", { name: /Worked for/ }).click();
       await audit("task");
 
-      // Task 067: settings, the users table with a shown-once link, a person's tasks, the private view and joining.
+      // Settings, the users table with a shown-once link, a person's tasks, the private view and joining.
       await page.goto("/settings/tokens");
       await page.getByRole("textbox", { name: "Name" }).fill("Audit");
       await page.getByRole("button", { name: "Create token" }).click();
@@ -115,7 +115,7 @@ for (const width of [1024, 1440, 1920])
         page.getByRole("heading", { level: 1, name: "Private task" }),
       ).toBeVisible();
       await audit("private-task");
-      // Task 076: the Workspaces page and its share dialog.
+      // The Workspaces page and its share dialog.
       await page.goto("/workspaces");
       await expect(
         page.getByRole("table", { name: "Workspaces" }),

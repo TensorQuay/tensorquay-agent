@@ -383,7 +383,7 @@ describe("durable user actions", () => {
   });
 });
 
-// WEB-U-023 (task 067): team accounts through the public API only.
+// WEB-U-023: team accounts through the public API only.
 describe("WEB-U-023 team account requests", () => {
   const stamp = "2026-01-01T00:00:00Z";
   const token = {

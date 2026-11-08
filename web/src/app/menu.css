@@ -189,7 +189,7 @@
 }
 /*
  * A picker a profile fixes (or one with nothing to choose) looks disabled: muted text over the ghost button's own
- * colour, a dashed border, and no chevron, since no menu opens (UX review 0927b, item 6).
+ * colour, a dashed border, and no chevron, since no menu opens.
  */
 .button.picker-button[aria-disabled="true"] {
   color: var(--muted);

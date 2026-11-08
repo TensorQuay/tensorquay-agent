@@ -225,7 +225,7 @@ describe("WEB-U-077 settings overview", () => {
   });
 });
 
-// The c16 first hour (P2-3): the Desktop and agent teams are install-time choices, so the administrator's landing
+// A first-hour check before 17.0: the Desktop and agent teams are install-time choices, so the administrator's landing
 // page names each when it's there, with where it's managed; when it isn't, nothing about it shows (WEB-U-318).
 describe("WEB-U-318 Overview names c16's features when they're available", () => {
   it("names the Desktop and agent teams when the install has them", async () => {
@@ -260,8 +260,8 @@ describe("WEB-U-318 Overview names c16's features when they're available", () =>
   });
 });
 
-// WEB-U-360 (the 16f page pass, E8): a line that can't be read offers Try again, which reads it again, as the other
-// settings pages' load failures do.
+// WEB-U-360 (a pass over the pages before 17.0): a line that can't be read offers Try again, which reads it again, as
+// the other settings pages' load failures do.
 describe("WEB-U-360 Try again on the overview", () => {
   it("reads the status again", async () => {
     let calls = 0;

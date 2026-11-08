@@ -17,7 +17,7 @@ export const KEY_USE_SKEW_MS = 2_000;
 
 /**
  * The same use of a key: the same sender, address and outcome, and the same name or one left out. A name is judged when
- * it is sent (c740e186): someone removed from a shared key mid-run gets its name in the run's live refusal but not in
+ * it is sent: someone removed from a shared key mid-run gets its name in the run's live refusal but not in
  * the stored row, which is the same use.
  */
 const same = (a: KeyUseView, b: KeyUseView) =>

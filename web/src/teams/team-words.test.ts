@@ -110,7 +110,7 @@ describe("WEB-U-220 a lead task's helper count", () => {
   });
 });
 
-// WEB-U-310 (the c16 UX review, #1 and #2): an ended team reads as ended. The strip says how it ended and the share it
+// WEB-U-310 (a UX review before 17.0): an ended team reads as ended. The strip says how it ended and the share it
 // used, with no time left to count; the list's count is no longer red for a helper that failed or got stuck in it.
 describe("WEB-U-310 an ended team reads as ended", () => {
   const budget = { tokens: 2_000_000, spent: 41_000 };

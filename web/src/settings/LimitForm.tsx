@@ -76,7 +76,7 @@ function useLimitSave({ item, api, onSaved, onReload }: FormProps) {
         ? (["limits.number", "limits.numberFrom"] as const)
         : (["limits.wholeNumber", "limits.wholeNumberFrom"] as const);
       // Desktop environments at once can go up to Tasks running at once (ADR-0039 §10), which is its max as the
-      // gateway lists it: above it, the rule and its number say why, not only a range (the review of WEB-E2E-067).
+      // gateway lists it: above it, the rule and its number say why, not only a range (WEB-E2E-067).
       const overSlots =
         current.key === "desktop.max_sessions" &&
         ceiling &&

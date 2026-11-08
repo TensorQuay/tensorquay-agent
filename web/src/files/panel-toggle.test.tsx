@@ -48,7 +48,7 @@ afterEach(() => {
   localStorage.clear();
 });
 /**
- * A task layout wide enough for the panel to dock beside the conversation, or not (the review of WEB-U-170: the
+ * A task layout wide enough for the panel to dock beside the conversation, or not (WEB-U-170: the
  * layout's own width decides, not the window's): narrower, the panel lies over the column and starts closed (T1).
  */
 function wide(docks: boolean, width = docks ? 1176 : 716) {
@@ -145,7 +145,7 @@ describe("WEB-U-022 files panel placement", () => {
     expect(panel()).toBeNull();
   });
 
-  // The fix's review: at 1024 with the rail the layout is 920 px and the panel docks there, so the choice is kept there too.
+  // At 1024 with the rail the layout is 920 px and the panel docks there, so the choice is kept there too.
   it("WEB-U-170 keeps the choice wherever the panel docks, 1024 with the rail included", () => {
     wide(true, 920);
     const first = show();

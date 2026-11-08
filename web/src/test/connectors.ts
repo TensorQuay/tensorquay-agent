@@ -69,7 +69,7 @@ export function fakeConnectors({
   secrets?: string[];
   reserved?: string[];
   limit?: number;
-  /** Vault slice 3: the connectors each secret is allowed for; a secret missing here allows every connector. */
+  /** The connectors each secret is allowed for; a secret missing here allows every connector. */
   bindings?: Record<string, string[]>;
 } = {}) {
   const store = new Map(connectors.map((item) => [item.name, { ...item }]));
@@ -98,7 +98,7 @@ export function fakeConnectors({
       if (replay) return Promise.resolve(replay);
       const refusal = problem(name, fields);
       if (refusal) return Promise.reject(refusal);
-      // An existing secret not allowed for this connector is refused without details (vault slice 3).
+      // An existing secret not allowed for this connector is refused without details.
       if (
         fields.secret_ref &&
         allowed.get(fields.secret_ref)?.includes(name) === false

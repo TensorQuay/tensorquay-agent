@@ -432,7 +432,7 @@ describe("WEB-U-242 the Screen panel", () => {
     expect(screen.getByRole("button", { name: "Hand back" })).toBeVisible();
   });
 
-  // The c16 UX review's second pass, #20: the gateway grants once, late, and re-sends the grant to that viewer when the
+  // A UX review before 17.0: the gateway grants once, late, and re-sends the grant to that viewer when the
   // reset lands, as an on-time grant would have been: `you` with no `ready` (clean), or with `reset_ok: false`.
   it("says control is ready once the gateway re-sends the grant after the reset", async () => {
     const { ScreenPanel } = await import("./ScreenPanel");
@@ -620,7 +620,7 @@ describe("WEB-U-242 the Screen panel", () => {
     expect(clients).toHaveLength(1);
   });
 
-  // The c16 UX review, #18: another tab holds the screen; the line says what to do about it.
+  // A UX review before 17.0: another tab holds the screen; the line says what to do about it.
   it("says how to get the screen back from another tab", async () => {
     const { ScreenPanel } = await import("./ScreenPanel");
     render(<ScreenPanel conversationId="task-1" working={false} />);
@@ -631,7 +631,7 @@ describe("WEB-U-242 the Screen panel", () => {
     );
   });
 
-  // The c16 UX review's second pass, #26: the warning names an action, so it offers it where it says so.
+  // A UX review before 17.0: the warning names an action, so it offers it where it says so.
   it("offers Clear sign-ins in the warning about earlier sign-ins", async () => {
     const { ScreenPanel } = await import("./ScreenPanel");
     render(<ScreenPanel conversationId="task-1" working={false} />);
@@ -650,7 +650,7 @@ describe("WEB-U-242 the Screen panel", () => {
     ).toBeVisible();
   });
 
-  // The c16 UX review's second pass, #27: after a reload or the panel reopened, the page still knows the desktop was
+  // A UX review before 17.0: after a reload or the panel reopened, the page still knows the desktop was
   // handed back with no run since (from the notices), so the status keeps its next step.
   it("says the desktop was handed back when the page says so, not only after a hand-back here", async () => {
     const { ScreenPanel } = await import("./ScreenPanel");
@@ -661,7 +661,7 @@ describe("WEB-U-242 the Screen panel", () => {
     );
   });
 
-  // The c16 UX review's second pass, #19: Expand is the size a person signs in at, so the status and the controls go
+  // A UX review before 17.0: Expand is the size a person signs in at, so the status and the controls go
   // with the picture into the dialog; Expand itself stays in the panel, for the focus to come back to.
   it("takes over, says so and hands back inside the expanded screen", async () => {
     const { ScreenPanel } = await import("./ScreenPanel");
@@ -710,9 +710,9 @@ describe("WEB-U-242 the Screen panel", () => {
     ).toBeVisible();
   });
 
-  // the review of 66d88931, P3-a: in the expanded screen, while this tab has control and the keyboard is in the
-  // screen, one Escape is the desktop's, whatever the screen client does with it; once the keyboard is back on the
-  // page (Escape twice), Escape closes the dialog. The close button always does.
+  // In the expanded screen, while this tab has control and the keyboard is in the screen, one Escape is the desktop's,
+  // whatever the screen client does with it; once the keyboard is back on the page (Escape twice), Escape closes the
+  // dialog. The close button always does.
   it("keeps the expanded screen open for an Escape that belongs to the desktop", async () => {
     const { ScreenPanel } = await import("./ScreenPanel");
     render(<ScreenPanel conversationId="task-1" working={false} />);
@@ -737,8 +737,8 @@ describe("WEB-U-242 the Screen panel", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
-  // the review of 66d88931, P3-b: the screen stops being live while expanded (the desktop stopped): the dialog
-  // closes, and the focus goes to the panel, not to the page's body.
+  // The screen stops being live while expanded (the desktop stopped): the dialog closes, and the focus goes to the
+  // panel, not to the page's body.
   it("closes the expanded screen when it stops being live, with the focus on the panel", async () => {
     const { ScreenPanel } = await import("./ScreenPanel");
     render(<ScreenPanel conversationId="task-1" working={false} />);
@@ -777,7 +777,7 @@ describe("WEB-U-242 the Screen panel", () => {
   it.each([
     ["no_desktop", "This task's environment has no desktop."],
     ["forbidden", "Only the task's owner can see its screen."],
-    // A deleted task or a wrong link: nobody to ask (the review's P3-1).
+    // A deleted task or a wrong link: nobody to ask.
     ["not_found", "This task's screen can't be opened."],
   ])(
     "says why it can't open the screen (%s), with no Try again that can't help",

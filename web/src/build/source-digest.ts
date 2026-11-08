@@ -20,7 +20,7 @@ function files(root: string, path: string): string[] {
 
 /**
  * Hashes the relative paths and contents of the listed inputs under `root`, in sorted order, so the same source
- * always yields the same identity whatever the file times or creation order (061: reproducible web images).
+ * always yields the same identity whatever the file times or creation order (reproducible web images).
  */
 export function sourceDigest(root: string, inputs: readonly string[]): string {
   const hash = createHash("sha256");

@@ -101,9 +101,9 @@ export function helperShare(
  * it by the calls in flight (the S6 contract), which is true.
  */
 /**
- * How a team that no longer runs ended, in the strip's place for the budget and the time left (the c16 UX review, #1):
- * an ended team has no time left to count, so it says how it ended and what share of the budget it used. Null while it
- * runs.
+ * How a team that no longer runs ended, in the strip's place for the budget and the time left (a UX review
+ * before 17.0): an ended team has no time left to count, so it says how it ended and what share of the budget it used.
+ * Null while it runs.
  */
 export function endedLine(
   team: Pick<TeamView, "state" | "stopReason" | "budget">,

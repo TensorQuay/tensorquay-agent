@@ -58,7 +58,7 @@ describe("WEB-U-018 environment picker", () => {
     ).toHaveAttribute("aria-checked", "true");
     const minimal = screen.getByRole("menuitemradio", { name: /^Minimal/ });
     expect(within(minimal).getByText("Shell")).toBeVisible();
-    // Its size at the end of the line, muted: what people choose by, not processes or disk (the sizes review).
+    // Its size at the end of the line, muted: what people choose by, not processes or disk.
     expect(
       screen.getByRole("menuitemradio", { name: /^Workstation/ }),
     ).toHaveTextContent(
@@ -76,7 +76,7 @@ describe("WEB-U-018 environment picker", () => {
     expect(trigger).toHaveFocus();
   });
 
-  // The c16 UX review's second pass, #29: with a description the capabilities are only a tooltip, so a desktop
+  // A UX review before 17.0: with a description the capabilities are only a tooltip, so a desktop
   // environment says it has one where it can be read, as its size is.
   it("marks a described desktop environment as a Desktop", () => {
     render(
@@ -111,8 +111,8 @@ describe("WEB-U-018 environment picker", () => {
     );
   });
 
-  // The 16d page pass (Z09): without a description the line lists the tools, and a desktop was one more of its commas
-  // ("Shell, Browser, Desktop · 2 CPUs"); it is marked as a described one is, after the tools.
+  // A pass over the pages before 17.0: without a description the line lists the tools, and a desktop was one more of
+  // its commas ("Shell, Browser, Desktop · 2 CPUs"); it is marked as a described one is, after the tools.
   it("marks an undescribed desktop environment as a Desktop after its tools", () => {
     render(
       <EnvironmentPicker
@@ -147,7 +147,7 @@ describe("WEB-U-018 environment picker", () => {
     ).toHaveTextContent(/^Screen only Desktop$/);
   });
 
-  // The 16d page pass (Z09's zh capture): the tools were joined with ", " in every language; Chinese and Japanese list
+  // A pass over the pages before 17.0: the tools were joined with ", " in every language; Chinese and Japanese list
   // with 、 (as limits.ceiling does), and a language without its own separator keeps English's.
   it("joins the tools with the reader's own list separator", () => {
     const tools = ["shell", "python", "build"] as const;
@@ -243,7 +243,7 @@ describe("WEB-U-018 environment picker", () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
-  // General-purpose finding N1: what each environment is for, in the administrator's words; its tools on hover.
+  // What each environment is for, in the administrator's words; its tools on hover.
   it("reads each environment by what it is for, with its tools on hover, or its tools when it says nothing", () => {
     render(
       <EnvironmentPicker

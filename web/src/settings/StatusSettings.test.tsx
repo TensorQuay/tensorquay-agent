@@ -67,7 +67,7 @@ const failing = (checks: Partial<typeof ready.checks>, extra = {}) => ({
   checks: { ...ready.checks, ...checks },
 });
 
-// Task 090 (FR-22) and the owner's review: can new tasks start, and if not, what to do; passing checks in one line.
+// FR-22: can new tasks start, and if not, what to do; passing checks in one line.
 describe("WEB-U-033 status", () => {
   it("says in one line that new tasks can start, with the passing checks quietly under it", async () => {
     fetch.mockImplementationOnce(() => json(ready));
@@ -263,7 +263,7 @@ describe("WEB-U-047 the default environment in status", () => {
     },
   );
 
-  it("names the default by its display name, with the link set apart from the reason (UX review 0927)", async () => {
+  it("names the default by its display name, with the link set apart from the reason", async () => {
     fetch.mockImplementationOnce(() =>
       json({
         ...ready,
@@ -303,7 +303,7 @@ describe("WEB-U-047 the default environment in status", () => {
   });
 });
 
-// The dev screen review (011e8972), #8: while new tasks couldn't start, the default environment still wore a green
+// A screen review before 17.0: while new tasks couldn't start, the default environment still wore a green
 // "Available". Its pill is muted then, and says it is waiting on the problem above.
 describe("WEB-U-174 the default environment while tasks can't start", () => {
   const section = () =>
@@ -345,7 +345,7 @@ describe("WEB-U-174 the default environment while tasks can't start", () => {
   });
 });
 
-// The fix's review: with no problem listed (a check this page doesn't name), "the problem above" points at nothing.
+// With no problem listed (a check this page doesn't name), "the problem above" points at nothing.
 describe("WEB-U-174 the default environment's words when no problem is listed", () => {
   it("says it is ready once new tasks can start", async () => {
     fetch.mockImplementationOnce(() => json(failing({})));
@@ -492,8 +492,8 @@ describe("WEB-U-292 tasks working on a step in status", () => {
   });
 });
 
-// WEB-U-299 (the c15 accessibility review): each Status section is named once, by its heading, and the verdict is a
-// live line, so a change after Check again is heard.
+// WEB-U-299 (an accessibility review before 17.0): each Status section is named once, by its heading, and the verdict
+// is a live line, so a change after Check again is heard.
 describe("WEB-U-299 Status's sections and verdict", () => {
   it("names each section by its heading, and the verdict is a live line", async () => {
     fetch.mockImplementationOnce(() => json({ ...ready, runs_active: 0 }));
@@ -512,7 +512,7 @@ describe("WEB-U-299 Status's sections and verdict", () => {
     );
   });
 
-  // The 7 Oct review, P3-2: the claim itself, as WEB-U-297 does for the count. After Check again the verdict is the
+  // The claim itself, as WEB-U-297 does for the count. After Check again the verdict is the
   // same live element with its words replaced, which is what a screen reader announces.
   it("WEB-U-299: a changed verdict after Check again is the same live line, its words replaced", async () => {
     fetch
@@ -533,7 +533,7 @@ describe("WEB-U-299 Status's sections and verdict", () => {
     expect(verdict).toHaveAttribute("role", "status");
   });
 
-  // The 7 Oct review, P3-3: a failed read after a good one keeps the page and its live lines, says so in a live line of
+  // A failed read after a good one keeps the page and its live lines, says so in a live line of
   // its own, and the next good read is heard in the same elements.
   it("keeps the last read and its live lines when a 30 s read fails", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
@@ -553,7 +553,8 @@ describe("WEB-U-299 Status's sections and verdict", () => {
       await vi.advanceTimersByTimeAsync(STATUS_REFRESH_MS);
       const line = await screen.findByText(failed);
       expect(line).toHaveAttribute("role", "status");
-      // WEB-U-361 (the 16f page pass, E15): an older read shown is quiet, never the danger tone under a green answer.
+      // WEB-U-361 (a pass over the pages before 17.0): an older read shown is quiet, never the danger tone under a
+      // green answer.
       expect(line).toHaveClass("muted");
       expect(line).not.toHaveClass("field-error");
       expect(screen.queryByText("The status could not be loaded.")).toBeNull();

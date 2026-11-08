@@ -184,7 +184,7 @@ describe("WEB-U-147 host key frames onto their step", () => {
     expect(after.lastSeq).toBe(before.lastSeq);
   });
 
-  // The review of cf653e47, item 20: a use reported after its step ended keeps its own step.
+  // A use reported after its step ended keeps its own step.
   it("keeps a use on its own step when it arrives after that step ended", () => {
     const state = live(working(), { ...used, step: 1 });
     expect(keysOf(state, 1)).toHaveLength(1);
@@ -219,8 +219,8 @@ const view = (...frames: object[]) =>
     <TranscriptView transcript={live(working(), ...frames)} viewer={ME} />,
   );
 /**
- * Someone other than the run's sender viewing the task: never the key's name, nor a way to add one (the review of
- * cf653e47, item 19). The gateway sends them no name; a name that came anyway is not shown either.
+ * Someone other than the run's sender viewing the task: never the key's name, nor a way to add one. The gateway sends
+ * them no name; a name that came anyway is not shown either.
  */
 const viewAsOther = (...frames: object[]) =>
   render(
@@ -318,8 +318,8 @@ describe("WEB-U-148 a task's keyed calls in words", () => {
   });
 });
 
-// The review of cf653e47, item 19 (least exposure): a key's name, and the way to add one, are its owner's; anyone else
-// who sees the task reads what happened without them.
+// A key's name, and the way to add one, are its owner's; anyone else who sees the task reads what happened without
+// them.
 describe("WEB-U-148 keyed calls as someone else sees the task", () => {
   it("says a key was used, without its name", () => {
     const { container } = viewAsOther(used);

@@ -29,8 +29,8 @@ const frames = () =>
     return 0;
   });
 
-// WEB-U-276 (the accessibility review of the core screens): a retry that works replaces the failure, Try again with
-// it, so the focus fell to the page; the section that now holds the content takes it.
+// WEB-U-276: a retry that works replaces the failure, Try again with it, so the focus fell to the page; the section
+// that now holds the content takes it.
 describe("WEB-U-276 the focus after Try again", () => {
   it("goes to the section that now holds the content", () => {
     frames();

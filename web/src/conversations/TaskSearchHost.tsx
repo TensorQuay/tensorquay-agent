@@ -34,11 +34,11 @@ function answer(t: Translate) {
 }
 
 /**
- * The shell's one task search (the review of d9fb1917, MUST 1): the only Ctrl/Cmd K listener and the only overlay,
- * outside the sidebar and the drawer, so a hidden sidebar can never hold an invisible modal and a second list can
- * never open a second one. Cmd K on a Mac (Ctrl K is its text fields' delete-to-end-of-line), Ctrl K elsewhere; never
- * over another open dialog. While no list has said whether it is long enough to search, a press is kept and answered
- * once one does; one that can't be honoured says why, never nothing (WEB-U-218).
+ * The shell's one task search: the only Ctrl/Cmd K listener and the only overlay, outside the sidebar and the drawer,
+ * so a hidden sidebar can never hold an invisible modal and a second list can never open a second one. Cmd K on a Mac
+ * (Ctrl K is its text fields' delete-to-end-of-line), Ctrl K elsewhere; never over another open dialog. While no list
+ * has said whether it is long enough to search, a press is kept and answered once one does; one that can't be honoured
+ * says why, never nothing (WEB-U-218).
  */
 export function TaskSearchHost({
   onNavigate,
@@ -85,7 +85,7 @@ export function TaskSearchHost({
           lead: conversation.team.lead?.title ?? t("task.untitled"),
         })
       : undefined;
-  // A match opens its task; its rename and delete stay in the list (nit 6: no dialog over the search).
+  // A match opens its task; its rename and delete stay in the list (no dialog over the search).
   const row = (
     conversation: Conversation,
     shared: boolean | undefined,

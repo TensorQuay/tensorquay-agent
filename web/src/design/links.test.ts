@@ -1,5 +1,5 @@
 // @vitest-environment node
-// WEB-U-116 (the first hour's F22, superseding WEB-U-082's blue): the overview's row actions look like every other link
+// WEB-U-116 (a first-hour check, superseding WEB-U-082's blue): the overview's row actions look like every other link
 // in the app, the text's own colour and underlined, with at least the minimum control height to hit.
 import { readFileSync } from "node:fs";
 

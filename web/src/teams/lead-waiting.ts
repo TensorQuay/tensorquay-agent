@@ -18,10 +18,10 @@ export function leadReminders(messages: readonly TeamMessage[]): number {
 }
 
 /**
- * The lead task's header words, in Done's place, for when its run is over while its team still runs (WEB-U-398, c16k
- * B2: the header said Done while the team ran on and its finish check never ran); null when its team doesn't run. Not
- * gated on the run: the header shows them only once the run is over, in the same render (WEB-U-415: gated here, they
- * came one effect after the run's end, and that render read Done).
+ * The lead task's header words, in Done's place, for when its run is over while its team still runs (WEB-U-398,
+ * real-world use before 17.0: the header said Done while the team ran on and its finish check never ran); null when its
+ * team doesn't run. Not gated on the run: the header shows them only once the run is over, in the same render
+ * (WEB-U-415: gated here, they came one effect after the run's end, and that render read Done).
  */
 export function leadWaiting(
   {
@@ -40,11 +40,11 @@ export function leadWaiting(
 }
 
 /**
- * A lead whose last run failed while its team runs and a helper still works (WEB-U-401, c16k B9c): the gateway wakes it
- * on the next team message (E2E-AGENTS-021), so it waits for its helpers rather than reading red Failed. The header's
- * short and whole words and the failed turn's next step; null when nothing will wake it (no helper working, or the team
- * ended: budget, deadline, stop, idle). Not gated on the run: the header and the failed turn show them only once the
- * run failed, in the same render (WEB-U-415).
+ * A lead whose last run failed while its team runs and a helper still works (WEB-U-401, real-world use before 17.0):
+ * the gateway wakes it on the next team message (E2E-AGENTS-021), so it waits for its helpers rather than reading red
+ * Failed. The header's short and whole words and the failed turn's next step; null when nothing will wake it (no helper
+ * working, or the team ended: budget, deadline, stop, idle). Not gated on the run: the header and the failed turn show
+ * them only once the run failed, in the same render (WEB-U-415).
  */
 export function leadCarriesOn(
   {
@@ -60,7 +60,8 @@ export function leadCarriesOn(
 ): CarriesOn | null {
   if (!lead || state !== "running" || !helpersWorking) return null;
   return {
-    // One short word at every width (WEB-U-155): at 1280 "Waiting for its helpers" was cut (WEB-U-408, c17 U3).
+    // One short word at every width (WEB-U-155): at 1280 "Waiting for its helpers" was cut (WEB-U-408, 17.0's release
+    // candidate).
     short: t("run.waitingShort"),
     whole: t("team.leadCarriesWhole"),
     next: t("team.leadCarriesNext"),
@@ -70,9 +71,9 @@ export function leadCarriesOn(
 
 /**
  * A task in a running team waiting for the workspace: the composer says it waits for a turn on the lead's files, which
- * the header's "Waiting…" says only in its tooltip (WEB-U-410, c17 U5; a phone can't hover). A helper names the task
- * using them, `holder`, the title the files' lease gives (WEB-U-419); without one, the general words. Null outside a
- * running team.
+ * the header's "Waiting…" says only in its tooltip (WEB-U-410, 17.0's release candidate; a phone can't hover). A helper
+ * names the task using them, `holder`, the title the files' lease gives (WEB-U-419); without one, the general words.
+ * Null outside a running team.
  */
 export function teamWaitWords(
   place: Conversation["team"] | null,

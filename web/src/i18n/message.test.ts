@@ -65,9 +65,9 @@ describe("WEB-U-019 message format", () => {
   });
 });
 
-// Review of 059: durations use each language's own unit (Intl), with narrow no-break space thousands as every number (§10).
-// Review of the environment sizes (nit 7): a fractional count reads in the reader's language, in the plural `#` and
-// in a plain number argument alike (1.5 is "1,5" in French).
+// Durations use each language's own unit (Intl), with narrow no-break space thousands as every number (§10). A
+// fractional count reads in the reader's language, in the plural `#` and in a plain number argument alike (1.5 is "1,5"
+// in French).
 describe("WEB-U-019 fractional counts", () => {
   it("formats half CPUs for the language, in a plural and in a plain argument", () => {
     const cpus = "{cpus, plural, one {# CPU} other {# CPUs}}";
@@ -115,7 +115,7 @@ describe("WEB-U-019 durations", () => {
   });
 });
 
-// Task 068b: file sizes in binary steps with each language's own short unit; English and Japanese write "B".
+// File sizes in binary steps with each language's own short unit; English and Japanese write "B".
 describe("WEB-U-020 file sizes", () => {
   it.each([
     ["en", 0, "0 B"],
@@ -132,7 +132,7 @@ describe("WEB-U-020 file sizes", () => {
   });
 });
 
-// The dev screen review (011e8972), #10: sizes were written several ways ("4 GiB" in the environment menu, "10 GB" on
+// A screen review before 17.0: sizes were written several ways ("4 GiB" in the environment menu, "10 GB" on
 // Workspaces). One formatter for every size; memory and disk are set in whole binary units, so what an administrator
 // typed as 4 reads back as 4, never "4.3".
 describe("WEB-U-185 a size reads back as it was set", () => {
@@ -156,7 +156,8 @@ describe("WEB-U-185 a size reads back as it was set", () => {
 });
 
 // WEB-U-354: a grouped number never breaks across lines: thousands are grouped with U+202F NARROW NO-BREAK SPACE,
-// which looks like a thin space but doesn't let a line wrap inside the number ("4 / 096" at 390, the 16f page pass).
+// which looks like a thin space but doesn't let a line wrap inside the number ("4 / 096" at 390, a pass over the pages
+// before 17.0).
 describe("WEB-U-354 grouped numbers never break", () => {
   it.each([
     ["en", 4096, "4 096"],

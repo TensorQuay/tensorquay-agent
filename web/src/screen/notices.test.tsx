@@ -195,7 +195,7 @@ describe("WEB-U-245 the screen notices", () => {
     ).toBe(true);
   });
 
-  // The c16 UX review's second pass, #27: handed back by the person, with no run started since, the agent waits for a
+  // A UX review before 17.0: handed back by the person, with no run started since, the agent waits for a
   // message; a restart's hand-back was no person's, and a run since then has carried on.
   it("tells when the desktop was handed back and nothing has run since", () => {
     const at = (
@@ -224,8 +224,8 @@ describe("WEB-U-245 the screen notices", () => {
     ).toBe(false);
   });
 
-  // The c16 UX review, #6b (ADR-0039 §6, option b): a sign-in is made during Take over and ends with the first run that
-  // starts after the hand-back; when the page can't tell, it may remain.
+  // A UX review before 17.0 (ADR-0039 §6, option b): a sign-in is made during Take over and ends with the first run
+  // that starts after the hand-back; when the page can't tell, it may remain.
   it("tells when the desktop's browser may still hold a sign-in", () => {
     const at = (kind: ScreenNoticeView["kind"], minute: number) => ({
       kind,

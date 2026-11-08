@@ -99,7 +99,7 @@ describe("WEB-U-046 the context view", () => {
     ).toBeNull();
   });
 
-  // The general-purpose walk-through (finding F6): why a skill folder wasn't loaded is for administrators, who fix it.
+  // Why a skill folder wasn't loaded is for administrators, who fix it.
   it("names a folder left out without its reason to anyone who isn't an administrator", () => {
     show(report, false);
     const skipped = within(section(/^Not loaded · 2$/)).getAllByRole(

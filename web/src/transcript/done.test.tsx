@@ -65,8 +65,8 @@ function show(frames: ReturnType<typeof frame>[]) {
   return { onOpenChanges, onFollowUp, onOpenFile };
 }
 
-// §3 and the general-purpose walk-through's findings D1-D2: a finished task says what it wrote (one file by name, with Open; several with Open
-// changes), and offers at most two follow-ups, only ones that clearly follow; none when nothing fits. Never "Undo it".
+// A finished task says what it wrote (one file by name, with Open; several with Open changes), and offers at most two
+// follow-ups, only ones that clearly follow; none when nothing fits. Never "Undo it".
 describe("WEB-U-016 a finished task: what it wrote, and what could follow", () => {
   it("D2: names the one file it wrote, with an Open named for it", () => {
     const { onOpenFile } = show(turn(1, "notes/brief.md"));
@@ -74,7 +74,7 @@ describe("WEB-U-016 a finished task: what it wrote, and what could follow", () =
       "Created brief.md",
     );
     expect(screen.queryByRole("button", { name: "Open changes" })).toBeNull();
-    // Each turn's Open says which file, so a transcript has no row of identical "Open" buttons (the review of 6437d8d9).
+    // Each turn's Open says which file, so a transcript has no row of identical "Open" buttons.
     const open = screen.getByRole("button", { name: "Open brief.md" });
     expect(open).toHaveTextContent(/^Open$/);
     fireEvent.click(open);
@@ -123,7 +123,7 @@ describe("WEB-U-016 a finished task: what it wrote, and what could follow", () =
     },
   );
 
-  // The live review of c8 (L8): one way to what a run made. Named Open buttons when they cover every file it changed,
+  // A live check before 17.0: one way to what a run made. Named Open buttons when they cover every file it changed,
   // else one Open changes; never both.
   it("D1: two files it made open by name, and Open changes goes", () => {
     const { onOpenFile } = show(turn(1, ["out/chart.png", "brief.md"]));
@@ -201,7 +201,7 @@ describe("WEB-U-016 a finished task: what it wrote, and what could follow", () =
     expect(screen.queryByRole("group", { name: "What next" })).toBeNull();
   });
 
-  // The owner's principle: a general-purpose agent. A document or data file in a spec/ or tests/ folder is not a test.
+  // A general-purpose agent. A document or data file in a spec/ or tests/ folder is not a test.
   it.each(["spec/requirements.md", "tests/plan.txt", "test_results.csv"])(
     "offers no Run all the tests for %s",
     (path) => {
@@ -230,8 +230,8 @@ describe("WEB-U-016 a finished task: what it wrote, and what could follow", () =
   });
 });
 
-// The c8 review (WEB-U-016): a stopped turn says "Stopped." and nothing more; "run" is jargon, and the composer already
-// offers the next message.
+// A review before 17.0 (WEB-U-016): a stopped turn says "Stopped." and nothing more; "run" is jargon, and the composer
+// already offers the next message.
 describe("WEB-U-016 a stopped turn", () => {
   it("says only Stopped.", () => {
     show([

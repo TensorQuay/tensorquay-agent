@@ -84,7 +84,7 @@ describe("WEB-U-044 the connector credentials client", () => {
   });
 });
 
-// Vault slice 2: the reads of a person's own credential, paged (WEB-U-053).
+// The reads of a person's own credential, paged (WEB-U-053).
 describe("WEB-U-053 the connector credential reads client", () => {
   it("pages with limit and before, and refuses a malformed page", async () => {
     const page = {

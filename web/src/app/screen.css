@@ -59,8 +59,9 @@
   min-width: 0;
 }
 /* In the dialog the picture's width is also held to the height left for it at 16:10, so the status, Hand back, ⋯ and
-   the lines stay in view at a laptop's height (the 16d page pass, Z14); 22.5rem is the rest of the dialog, its lines
-   wrapped at that width. The status, the controls and the lines take the picture's width, so they start where it does. */
+   the lines stay in view at a laptop's height (a pass over the pages before 17.0); 22.5rem is the rest of the dialog,
+   its lines wrapped at that width. The status, the controls and the lines take the picture's width, so they start where
+   it does. */
 .preview-dialog .screen-panel {
   width: 100%;
   max-width: min(1280px, calc((100dvh - 22.5rem) * 16 / 10));
@@ -104,7 +105,7 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
-/* The agent is acting on the desktop (the c16 UX review, #14): a dot on the Screen toggle, beside its words. */
+/* The agent is acting on the desktop (a UX review before 17.0): a dot on the Screen toggle, beside its words. */
 .screen-acting > .button {
   position: relative;
 }

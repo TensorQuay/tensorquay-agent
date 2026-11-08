@@ -20,7 +20,7 @@ afterEach(() => {
   for (const root of roots.splice(0)) rmSync(root, { recursive: true });
 });
 
-// 061 addendum 2: the same web source must always produce the same build identity.
+// The same web source must always produce the same build identity.
 describe("reproducible build identity", () => {
   const base = {
     "package.json": "{}",

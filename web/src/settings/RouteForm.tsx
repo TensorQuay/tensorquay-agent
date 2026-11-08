@@ -99,7 +99,7 @@ function useRouteSave({
   const [stored, setStored] = useState<string | null>(null);
   const [storedAllowed, setStoredAllowed] = useState(true);
   const [kept, setKept] = useState(false);
-  /** The secret a save named but may not use yet (vault slice 3: 409 secret_not_allowed). */
+  /** The secret a save named but may not use yet (409 secret_not_allowed). */
   const [notAllowed, setNotAllowed] = useState<string | null>(null);
   /** The key typed inline, sent once on save and then dropped (WEB-U-056). */
   const [inlineKey, setInlineKey] = useState("");
@@ -240,7 +240,7 @@ function useRouteSave({
 }
 
 /**
- * Adds or edits one model route on its own page (WEB-U-115, the first hour's F9; design: models page); a replace
+ * Adds or edits one model route on its own page (WEB-U-115, a first-hour check); a replace
  * sends the version read.
  */
 export function RouteForm(props: FormProps) {

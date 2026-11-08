@@ -39,8 +39,8 @@ export async function pauseAndResume(page: Page) {
     latest?.bottom,
     "follow: scrolling up puts the latest line below the viewport",
   ).toBeGreaterThan(latest?.viewportBottom ?? Infinity);
-  // A live transcript isn't monotonic: when a new step arrives, the previous latest tool card's open body folds
-  // (finding T2), so its height drops by hundreds of pixels at each step. The room below is waited for, not raced; the
+  // A live transcript isn't monotonic: when a new step arrives, the previous latest tool card's open body folds, so its
+  // height drops by hundreds of pixels at each step. The room below is waited for, not raced; the
   // reader must stay where they scrolled the whole time (13h-pre, 1024 dark: 83 px read at a step boundary).
   // Bounded: 20 s of readings, every 100 ms (expect.poll, no sleep); a failure lists what it saw (room below and scroll
   // position).
@@ -156,7 +156,7 @@ export async function activities(page: Page, scripted: boolean) {
       paragraph,
       "narration: available inside expanded work",
     ).toBeVisible();
-  // WEB-E2E-018 (the 13f screens, smaller items; WEB-U-157 on the fake front): Thinking is a disclosure, never a bare
+  // WEB-E2E-018 (a screen review before 17.0; WEB-U-157 on the fake front): Thinking is a disclosure, never a bare
   // label. Each one shows its chevron, starts closed, and opens to the reasoning's own words; a turn without reasoning
   // has none, since the web renders one only for reasoning text.
   for (const thinking of await page
@@ -193,11 +193,11 @@ export async function activities(page: Page, scripted: boolean) {
     expect
       .soft(label, "plurals: a single read line is not a range")
       .not.toMatch(/lines (\d+)–\1\b/);
-    // Open it to read its card, unless it is open already (the turn's latest step starts open, finding T2).
+    // Open it to read its card, unless it is open already (the turn's latest step starts open).
     const toggle = line.locator("button").first();
     const opened = (await toggle.getAttribute("aria-expanded")) !== "true";
     if (opened) await toggle.click();
-    // Finding T-a: the card in a step shows no internal tool name; its accessible label still names the tool.
+    // The card in a step shows no internal tool name; its accessible label still names the tool.
     const name = (
       (await line.locator(".tool-card").getAttribute("aria-label")) ?? ""
     ).replace(/ tool call$/, "");
@@ -259,7 +259,7 @@ export async function fixedShell(page: Page) {
 /**
  * The transcript's markup for replay comparisons, taken once nothing in it is still loading: a lazily loaded part (a
  * tool card, formatted Markdown) shows a skeleton for a moment, and a snapshot in that moment differs from one taken a
- * frame later (task 093, WEB-U-037).
+ * frame later (WEB-U-037).
  */
 export async function snapshot(page: Page) {
   const transcript = page.getByTestId("transcript");

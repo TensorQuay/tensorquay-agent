@@ -2,8 +2,8 @@ import { addFromPlus, openChoices } from "./choices";
 import { signIn } from "./session";
 import { expect, test, type Locator, type Page } from "./test";
 
-// The task header with the side panel open (UI-GUIDELINES §6; UX review 0927b, item 7): the title and the profile
-// label give way (truncated or wrapped), and never overlap the run status or the header's controls (its ⋯ among them), at 1280
+// The task header with the side panel open (UI-GUIDELINES §6): the title and the profile label give way (truncated or
+// wrapped), and never overlap the run status or the header's controls (its ⋯ among them), at 1280
 // and 1024, for a finished task from a profile and for a failed one.
 type Box = { x: number; y: number; width: number; height: number };
 const overlap = (a: Box, b: Box) =>
@@ -64,7 +64,7 @@ async function checkHeader(page: Page, origin: string | null) {
   expect(moreShown.width).toBeCloseTo(moreBox.width, 0);
   // The title keeps some room: at least a few characters, with the rest in its tooltip.
   expect((await shown(title)).width).toBeGreaterThan(40);
-  // The run status gives way after the title and before the controls (c12 F18b, WEB-U-112, superseding finding T1):
+  // The run status gives way after the title and before the controls (found before 17.0, WEB-U-112):
   // it keeps room for its first word ("Done"), and has its tooltip (the whole text, or how long a finished run took).
   expect((await shown(status)).width).toBeGreaterThan(20);
   await expect(status).toHaveAttribute("title", /\S/);
@@ -98,7 +98,7 @@ for (const width of [1280, 1024] as const)
       await toggle.click();
     await expect(toggle).toHaveAttribute("aria-expanded", "true");
     await checkHeader(page, "Agent: Team default");
-    // UX review 0927b, item 6: a picker the profile fixes looks disabled beside one it leaves free (in Change).
+    // A picker the profile fixes looks disabled beside one it leaves free (in Change).
     await openChoices(page);
     const look = (name: RegExp) =>
       page.getByRole("button", { name }).evaluate((button) => {

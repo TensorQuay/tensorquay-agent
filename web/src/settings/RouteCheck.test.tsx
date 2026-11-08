@@ -40,7 +40,7 @@ function show(probes = {}, extra = {}, local = false) {
 const run = (dialog: HTMLElement) =>
   fireEvent.click(within(dialog).getByRole("button", { name: "Run check" }));
 
-// A route check runs only when asked, and reports what it observed in plain words (WEB-U-039, 099b-2).
+// A route check runs only when asked, and reports what it observed in plain words (WEB-U-039).
 describe("WEB-U-039 checking a route", () => {
   it("says what a check does, runs it once on request, and reports a verified route", async () => {
     const { fake, dialog } = show();
@@ -263,8 +263,8 @@ describe("WEB-U-095 checking a local route", () => {
   });
 });
 
-// The c16d first hour (F2): the README's default small model on a CPU-only computer works, slowly, and its check timed
-// out. The check now waits while the model keeps answering, and says how slow it is: verified, but slowly.
+// A first-hour check before 17.0: the README's default small model on a CPU-only computer works, slowly, and its check
+// timed out. The check now waits while the model keeps answering, and says how slow it is: verified, but slowly.
 describe("WEB-U-095 a local model that answers slowly", () => {
   const slow = probeResult("verified", {
     warnings: ["thinks_unasked", "slow_answers"],
@@ -339,9 +339,9 @@ describe("WEB-U-095 a local model that answers slowly", () => {
   });
 });
 
-// WEB-U-271 (the accessibility review of the screens since c14b-rc): the "Checking…" status went away when the result
-// came, so a screen reader heard the start and never the outcome. One status line stays: running, then the verdict, or
-// why the check couldn't run; the visible "Checking…" isn't read twice.
+// WEB-U-271: the "Checking…" status went away when the result came, so a screen reader heard the start and never the
+// outcome. One status line stays: running, then the verdict, or why the check couldn't run; the visible "Checking…"
+// isn't read twice.
 describe("WEB-U-271 a route check's outcome is announced", () => {
   it("says it is checking, then the verdict, on the same status line", async () => {
     const failed = probeResult("failed", {
@@ -450,8 +450,8 @@ describe("WEB-U-133 a model that thinks unasked", () => {
     ).toBeNull();
   });
 
-  // The 14b page pass (N3): with Max output blank or already 16384 or more there is nothing to do, so nothing reads like
-  // a task: no advice, no action.
+  // A pass over the pages before 17.0: with Max output blank or already 16384 or more there is nothing to do, so
+  // nothing reads like a task: no advice, no action.
   it.each([null, 16384, 32768])(
     "says nothing and offers no action when Max output is %s",
     async (maxOutput) => {
@@ -517,9 +517,9 @@ describe("WEB-U-138 a slow check", () => {
   });
 });
 
-// WEB-U-264 (the c14b first hour, F6): a check that timed out said only "The server did not answer in time". It now says
-// what to do next: for a local model, that it may be busy or slow here, to try again when it is idle, and the setting an
-// administrator can raise; for another route, to try again in a moment. Another failure gets neither line.
+// WEB-U-264 (a first-hour check before 17.0): a check that timed out said only "The server did not answer in time". It
+// now says what to do next: for a local model, that it may be busy or slow here, to try again when it is idle, and the
+// setting an administrator can raise; for another route, to try again in a moment. Another failure gets neither line.
 describe("WEB-U-264 a check that timed out says what to do next", () => {
   const timedOut = probeResult("failed", {
     ok: false,
@@ -556,11 +556,11 @@ describe("WEB-U-264 a check that timed out says what to do next", () => {
   });
 });
 
-// WEB-U-269 (the c14b first hour, F3): a local Ollama with Ollama's default 4,096-token context truncates the prompt
-// silently. Under 16 384 the check fails naming both sizes and how to give Ollama more room, on a Mac, on Linux and
-// in Docker, and offers to set the route's Context window to the size Ollama gives; at 16 384 or more, a route whose
-// Context window isn't that size is offered the same one click. Numbers group with a narrow no-break space (UI-GUIDELINES §10),
-// which the testing library reads as a space.
+// WEB-U-269 (a first-hour check before 17.0): a local Ollama with Ollama's default 4,096-token context truncates the
+// prompt silently. Under 16 384 the check fails naming both sizes and how to give Ollama more room, on a Mac, on Linux
+// and in Docker, and offers to set the route's Context window to the size Ollama gives; at 16 384 or more, a route
+// whose Context window isn't that size is offered the same one click. Numbers group with a narrow no-break space
+// (UI-GUIDELINES §10), which the testing library reads as a space.
 describe("WEB-U-269 a local model's context", () => {
   const server = {
     server: "ollama",
@@ -690,9 +690,10 @@ describe("WEB-U-269 a local model's context", () => {
   });
 });
 
-// WEB-U-298 (the c15 accessibility review): a failed check's next step is heard with its verdict, in the result's own
-// words, so a screen-reader user isn't left to read on to find it; a failure with no next step announces the verdict
-// alone. And a context suggestion arriving with another failure shows nothing, never the generic tool-settings line.
+// WEB-U-298 (an accessibility review before 17.0): a failed check's next step is heard with its verdict, in the
+// result's own words, so a screen-reader user isn't left to read on to find it; a failure with no next step announces
+// the verdict alone. And a context suggestion arriving with another failure shows nothing, never the generic
+// tool-settings line.
 type Failure = NonNullable<ProbeResult["observed"]["failure"]>;
 
 describe("WEB-U-298 a check's announcement carries its next step", () => {
@@ -748,7 +749,7 @@ describe("WEB-U-298 a check's announcement carries its next step", () => {
       { local: true },
       "Check finished: The check failed. The server did not answer in time. A local model may be busy with another task or slow on this computer. Try again when it's idle; you can give local checks longer with [relay] local_check_timeout in gateway.toml.",
     ],
-    // The review of 7 Oct (P3-1): each of nextStep()'s other ways, since a wrong key there would only be heard.
+    // Each of nextStep()'s other ways, since a wrong key there would only be heard.
     [
       "a localhost route where host.docker.internal doesn't resolve",
       { code: "unreachable", container_host: false } as const,
@@ -804,8 +805,9 @@ describe("WEB-U-298 a check's announcement carries its next step", () => {
   });
 });
 
-// WEB-U-358 (the 16f page pass, E5): a route without its key says so in one sentence, with the way to add it as a real
-// link on its own (not run on in the refusal's colour), and the button still reads Run check, since nothing ran.
+// WEB-U-358 (a pass over the pages before 17.0): a route without its key says so in one sentence, with the way to add
+// it as a real link on its own (not run on in the refusal's colour), and the button still reads Run check, since
+// nothing ran.
 describe("WEB-U-358 a check refused for a missing key", () => {
   it("says it once, links on its own, and offers Run check", async () => {
     const { dialog } = show({}, { key_missing: true });

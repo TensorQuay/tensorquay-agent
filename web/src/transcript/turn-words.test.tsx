@@ -7,7 +7,7 @@ import { apply, emptyTranscript } from "./reducer";
 import { TranscriptView } from "./TranscriptView";
 import { turnSummary } from "./turn-summary";
 
-// The 13f screen review, smaller notes: a turn's Thinking read as an empty label (its summary had lost the disclosure's
+// A screen review before 17.0: a turn's Thinking read as an empty label (its summary had lost the disclosure's
 // marker), and a quick step read "Worked for 0 s".
 describe("WEB-U-157 a turn's words", () => {
   it("marks Thinking as something to open", () => {

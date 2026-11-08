@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { useFilesPanel } from "./use-files-panel";
 
-// Findings D1-D2: a finished turn's Open shows a file in the files panel, on its Files tab, as a new request each time.
+// A finished turn's Open shows a file in the files panel, on its Files tab, as a new request each time.
 describe("WEB-U-022 the files panel opened on a file", () => {
   it("opens the panel on the Files tab with the file as a new request each time", () => {
     const { result } = renderHook(() => useFilesPanel(false));

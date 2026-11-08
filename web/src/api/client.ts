@@ -246,7 +246,7 @@ export class ApiClient {
       { parameters: { id }, query, signal },
     );
   }
-  /** Your workspaces and those shared with you (task 076). */
+  /** Your workspaces and those shared with you. */
   workspaces(signal?: AbortSignal) {
     return this.transport.request(
       "workspaces",
@@ -331,7 +331,7 @@ export class ApiClient {
       { parameters: { id, run_id }, signal },
     );
   }
-  /** A file's bytes, for a preview the browser draws itself (an image, finding F1); downloads use downloadUrl. */
+  /** A file's bytes, for a preview the browser draws itself (an image); downloads use downloadUrl. */
   fileBlob(id: string, path: string, signal?: AbortSignal) {
     return this.transport.request(
       "fileDownload",
@@ -378,7 +378,7 @@ export class ApiClient {
   downloadUrl(id: string, path: string): string {
     return pathFor("fileDownload", { id }, new URLSearchParams({ path }));
   }
-  /** An HTML page for the panel's frame; the gateway sandboxes it by its headers (the file previews design). */
+  /** An HTML page for the panel's frame; the gateway sandboxes it by its headers. */
   viewUrl(id: string, path: string): string {
     return pathFor("fileView", { id }, new URLSearchParams({ path }));
   }

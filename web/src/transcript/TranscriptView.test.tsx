@@ -23,7 +23,7 @@ describe("WEB-U-001 transcript presentation", () => {
     expect(
       screen.getByText(/^Thought for /).closest("details"),
     ).not.toHaveAttribute("open");
-    // The latest tool's card opens with its group (finding T2).
+    // The latest tool's card opens with its group.
     expect(
       screen.getByRole("button", { name: "Ran a command: ls" }),
     ).toHaveAttribute("aria-expanded", "true");
@@ -45,7 +45,7 @@ describe("WEB-U-001 transcript presentation", () => {
 });
 
 // WEB-U-222 (ADR-0034 S6): time-placed lines (a team's log) sit among the turns by time, each run of them one list
-// read as one log, never spaced as turns are (the S6 web review).
+// read as one log, never spaced as turns are.
 describe("WEB-U-222 lines among the turns", () => {
   it("puts earlier lines before the turn in one list, and later ones after it in another", () => {
     const state = transcriptFrames.reduce(apply, emptyTranscript());
@@ -107,7 +107,7 @@ describe("WEB-U-020 attachments in the transcript", () => {
   });
 });
 
-// Task 093: a Messages run records a reasoning.state before each step's tool calls. Replayed, every tool card still
+// A Messages run records a reasoning.state before each step's tool calls. Replayed, every tool card still
 // opens and nothing of the state shows (WEB-U-037).
 describe("WEB-U-037 a replayed Messages run", () => {
   it("opens every tool card after reasoning state", async () => {
@@ -121,7 +121,7 @@ describe("WEB-U-037 a replayed Messages run", () => {
     fireEvent.click(
       screen.getByRole("button", { name: /^Created hello\/README\.md/ }),
     );
-    // The latest card is already open (finding T2); opening it again would close it.
+    // The latest card is already open; opening it again would close it.
     const latest = screen.getByRole("button", {
       name: /^Ran a command: cat hello\/README\.md/,
     });
@@ -132,7 +132,7 @@ describe("WEB-U-037 a replayed Messages run", () => {
     expect(
       screen.getByRole("article", { name: "write_file tool call" }),
     ).toBeVisible();
-    // Finding A5: a command that succeeded says nothing of its exit code.
+    // A command that succeeded says nothing of its exit code.
     expect(
       within(
         screen.getByRole("article", { name: "shell tool call" }),
@@ -142,7 +142,7 @@ describe("WEB-U-037 a replayed Messages run", () => {
   });
 });
 
-// Task 095: a push that failed for lack of a credential (or a refused one) points to the person's keys. The owner's
+// A push that failed for lack of a credential (or a refused one) points to the person's keys. The owner's
 // direction (c8): it asks for the key for the site, in plain words, never a "Git credential".
 describe("WEB-U-038 push credential hint", () => {
   const push = (content: string, remote?: string) =>

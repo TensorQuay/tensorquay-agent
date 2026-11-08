@@ -115,7 +115,7 @@ describe("WEB-U-016 event river", () => {
       screen.getByRole("button", { name: /Ran a command: python3 hello.py/ }),
     ).toHaveTextContent("Failed");
   });
-  // The 13f screens, smaller items (WEB-U-180): a command that exited non-zero said it twice, "· didn't succeed" and the
+  // A screen review before 17.0 (WEB-U-180): a command that exited non-zero said it twice, "· didn't succeed" and the
   // "Failed" mark. The mark stays (its tone matches the run status); the line's words don't repeat it.
   it("WEB-U-180 says a failed command failed once, with its mark", () => {
     const state = riverFrames()
@@ -210,7 +210,7 @@ describe("WEB-U-016 event river", () => {
     expect(turns[0]?.activityLabel).toBe(
       "Worked for 3 s · created 1 file, ran 1 command",
     );
-    // The footer says what changed; the rest waits in its tooltip (finding T-e).
+    // The footer says what changed; the rest waits in its tooltip.
     expect(turns[0]?.summary).toBe("1 file changed");
     expect(turns[0]?.summaryDetails).toContain(
       "4 steps · 1 file changed · 1 command · 100 input · 20 output tokens",
@@ -338,7 +338,7 @@ describe("WEB-U-016 event river", () => {
       expect(
         screen.getByRole("button", { name: /Worked for/ }),
       ).toHaveAttribute("aria-expanded", "true");
-      // A failure says what to do next; a stop says only "Stopped." (the c8 review, WEB-U-016).
+      // A failure says what to do next; a stop says only "Stopped." (a review before 17.0, WEB-U-016).
       if (status === "failed")
         expect(
           screen.getByText(/Send the message again in a moment/),
@@ -351,7 +351,7 @@ describe("WEB-U-016 event river", () => {
           screen.queryByText(/Send a new message|Send the message again/),
         ).toBeNull();
       }
-      // Finding T9: a stopped command says so in one phrase, not "Ran … Cancelled".
+      // A stopped command says so in one phrase, not "Ran … Cancelled".
       if (status === "failed")
         expect(
           screen.getByRole("button", {
@@ -451,7 +451,7 @@ describe("WEB-U-016 tool summaries", () => {
     expect(label.length).toBeLessThanOrEqual(180);
     expect(label).toContain("start-");
     expect(label).toContain("…");
-    // Finding A3: a command keeps its first words, and a non-zero exit reads as not succeeding.
+    // A command keeps its first words, and a non-zero exit reads as not succeeding.
     expect(label).toMatch(/^Ran a command: start-a+… · didn't succeed$/);
     expect(toolSummary({ ...tool, arguments: { command: "true" } })).toBe(
       "Ran a command: true",
@@ -459,7 +459,7 @@ describe("WEB-U-016 tool summaries", () => {
   });
 });
 
-// SEC-001 (061 addendum 2): a refusal explained by its tool line is said once; an unexplained one keeps its notice.
+// SEC-001: a refusal explained by its tool line is said once; an unexplained one keeps its notice.
 // The owner dropped the environment suggestion (10 Oct 2026; ADR-0039 §8 amended): no agent tool suggests a switch,
 // the person switches with the environment picker. A model that still calls the old name gets an unknown tool's
 // failure, shown as any failed step is, never hidden and never a card.
@@ -570,4 +570,4 @@ describe("SEC-001 one sentence per refusal", () => {
   });
 });
 
-// The lead's decision (UX review 0927): a decided approval reads on its own tool's line, in the order it happened
+// A decided approval reads on its own tool's line, in the order it happened

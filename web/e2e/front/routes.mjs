@@ -58,7 +58,7 @@ const seeds = () => [
     seed: null,
     last_set_by: "admin",
   }),
-  // The first-hour install's second route (F8): a real description and a real key's reference, which the table
+  // The first-hour install's second route: a real description and a real key's reference, which the table
   // must fit at 1024 and 1280 without breaking the key one character per line.
   seeded("small-mac", {
     display_name: "Local, small Mac (4k context)",
@@ -169,11 +169,10 @@ function remove(name, url, answer) {
 
 /** Answers /api/v1/admin/routes*; returns false for any other path. */
 /**
- * A route check (099b-2): "local" is verified, any other route fails as unreachable; a route without its key is 409.
- * A "schema-" route stands for a provider refusing JSON Schema keywords: its check fails with a 400
- * and suggests Schema keywords basic, and passes once the route keeps basic keywords only. A "thinker-" route passes
- * but its model thinks unasked (F16, WEB-U-133). A "slow-" route's check runs out of time (the c14b first hour, F6;
- * WEB-U-264).
+ * A route check: "local" is verified, any other route fails as unreachable; a route without its key is 409. A "schema-"
+ * route stands for a provider refusing JSON Schema keywords: its check fails with a 400 and suggests Schema keywords
+ * basic, and passes once the route keeps basic keywords only. A "thinker-" route passes but its model thinks unasked
+ * (WEB-U-133). A "slow-" route's check runs out of time (a first-hour check before 17.0; WEB-U-264).
  */
 /**
  * An Ollama-like local route (WEB-U-269): an "ollama-small-" route's server gives the model 4,096 tokens, under the
@@ -224,7 +223,7 @@ function ollamaProbe(name, item, answer) {
 }
 
 /**
- * The Models page review's cases (WEB-E2E-039): a "desktop-" route at localhost is unreachable and its gateway reaches
+ * WEB-E2E-039's cases: a "desktop-" route at localhost is unreachable and its gateway reaches
  * host.docker.internal (container_host true), and it passes once its address uses that name; a "linux-" one is
  * unreachable and host.docker.internal doesn't resolve (false); a "wrongpath-" route answers 404 at the protocol's own
  * request (endpoint_missing); a "nousage-" route's server refuses usage reporting until the route stops asking; a

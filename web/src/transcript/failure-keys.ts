@@ -88,7 +88,8 @@ const TEAM_BUDGET: Failure = {
 
 /**
  * A helper stopped at its team's helpers' share of the budget (the gateway's `team_budget_helpers`, GW-I-304): its own
- * page says what happened to it and who writes up, never the lead's "carry on without them" (WEB-U-394, c16k B9b-3).
+ * page says what happened to it and who writes up, never the lead's "carry on without them" (WEB-U-394, real-world use
+ * before 17.0).
  */
 const TEAM_BUDGET_HELPER: Failure = {
   reason: "fail.teamBudgetHelper",

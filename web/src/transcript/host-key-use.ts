@@ -27,8 +27,8 @@ export function keyAddress({ host, port }: Pick<KeyUseView, "host" | "port">) {
 /**
  * A keyed call's line: what it did, or why the key wasn't sent; for a key the task used that isn't set up, the
  * Add page with its address (WEB-U-148). The key's name and the Add page are the run's sender's alone, whose key it
- * is; anyone else (`viewer` another person, or unknown) reads "a key" and gets no link (least exposure, the review of
- * cf653e47, item 19). The gateway sends them no name; one that came anyway isn't shown.
+ * is; anyone else (`viewer` another person, or unknown) reads "a key" and gets no link (least exposure). The gateway
+ * sends them no name; one that came anyway isn't shown.
  */
 export function keyUseWords(
   use: KeyUseView,

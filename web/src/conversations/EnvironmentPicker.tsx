@@ -11,7 +11,7 @@ export type EnvironmentChoice = {
   id: string;
   label: string;
   capabilities: readonly Capability[];
-  /** The administrator's one line on what it is for (general-purpose finding N1); null when there is none. */
+  /** The administrator's one line on what it is for; null when there is none. */
   description: string | null;
   /** Its effective CPUs and memory, shown at the end of its line (the sizes are each environment's). */
   size?: { cpus: number; memoryMib: number } | undefined;
@@ -53,7 +53,7 @@ export function EnvironmentPicker({
       </>
     );
   // Undescribed, the line lists the tools, and a desktop is marked after them as a described one is, never one more
-  // of their commas (the 16d page pass, Z09).
+  // of their commas (a pass over the pages before 17.0).
   const tools = (values: readonly Capability[]) => {
     const others = values.filter((value) => value !== "desktop");
     if (others.length === values.length) return capabilityNames(values, t);
@@ -79,8 +79,8 @@ export function EnvironmentPicker({
             title={capabilityNames(choice.capabilities, t)}
           >
             {choice.description}
-            {/* Described, its tools are only the tooltip; a desktop says so where it is read (the c16 UX review's
-                second pass, #29), as its size does. */}
+            {/* Described, its tools are only the tooltip; a desktop says so where it is read (a UX review before 17.0),
+                as its size does. */}
             {choice.capabilities.includes("desktop") &&
               ` · ${t("capability.desktop")}`}
             {size(choice)}

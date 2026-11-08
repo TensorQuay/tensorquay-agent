@@ -22,8 +22,8 @@ async function openFile(page: Page, folder: string, name: RegExp) {
   return panel;
 }
 
-// WEB-U-087 and WEB-U-088 in the browser (the file previews design): the agent's page runs in its sandbox, out of
-// the app's reach, and a spreadsheet reads as a table; at 1280 px in both themes.
+// WEB-U-087 and WEB-U-088 in the browser: the agent's page runs in its sandbox, out of the app's reach, and a
+// spreadsheet reads as a table; at 1280 px in both themes.
 for (const theme of ["light", "dark"] as const) {
   test(`WEB-U-087 a web page in the Files panel 1280 ${theme}`, async ({
     page,

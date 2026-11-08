@@ -8,7 +8,7 @@ import { settled } from "./motion";
 import { createConversation, signIn } from "./session";
 import { expect, test, type Page } from "./test";
 
-// Task 076 on the fake front: the Workspaces page, its dialogs and the picker (WEB-U-007 accessibility and keyboard,
+// On the fake front: the Workspaces page, its dialogs and the picker (WEB-U-007 accessibility and keyboard,
 // WEB-U-025 behaviour end to end). The real stack runs WEB-E2E-011 in workspaces-stack.spec.ts.
 async function serious(page: Page) {
   // Measure the settled layer: an open menu's entrance fade would lower contrast mid-way.
@@ -104,8 +104,8 @@ test("WEB-U-007 the Workspaces page and its dialogs pass the accessibility check
   await remove.getByRole("button", { name: "Cancel" }).click();
 });
 
-// The 14b page pass (W4): on a phone the share dialog gives the email its own row, wide enough for an address, with
-// the access and Share on the row below.
+// A pass over the pages before 17.0: on a phone the share dialog gives the email its own row, wide enough for an
+// address, with the access and Share on the row below.
 test("WEB-U-007 at 390 the share dialog's email has its own row", async ({
   page,
 }) => {

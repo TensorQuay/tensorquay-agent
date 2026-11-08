@@ -42,7 +42,7 @@ describe("WEB-U-221 All helpers", () => {
     expect(within(sheet).queryByRole("textbox")).toBeNull();
   });
 
-  // The review of 7 Oct: the team's exact figures, which the strip keeps in a tooltip, are here for a keyboard or a
+  // The team's exact figures, which the strip keeps in a tooltip, are here for a keyboard or a
   // touch screen too.
   it("says the team's exact figures under its title when given them", () => {
     render(

@@ -2,7 +2,7 @@ import { axeViolations } from "./a11y";
 import { signIn } from "./session";
 import { expect, test } from "./test";
 
-// WEB-E2E-088 (the 16f page pass, F-P37-1 and F-P07-1): an address with no page shows the app's own 404, in the
+// WEB-E2E-088 (a pass over the pages before 17.0): an address with no page shows the app's own 404, in the
 // reader's language and theme, with a way to the tasks (before: Next.js's default, always light and English, a dead
 // end); a channel that doesn't exist says so under the page's bar and leads back to the channels.
 

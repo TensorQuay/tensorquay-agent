@@ -420,9 +420,9 @@ test("E2E-AGENTS-022 Stop team while helpers work: the dialog, every helper stop
     ).toBe(200);
 });
 
-// E2E-AGENTS-037 (c17 U6, U7 on the real stack; WEB-U-411, 412): EDGE-R's lead starts a helper on its own files, so
-// the helper waits for the lead's run, then asks its person a question and waits for the answer. Stop team then ends
-// a question that is no longer needed and a helper that never started.
+// E2E-AGENTS-037 (17.0's release candidate on the real stack; WEB-U-411, 412): EDGE-R's lead starts a helper on its own
+// files, so the helper waits for the lead's run, then asks its person a question and waits for the answer. Stop team
+// then ends a question that is no longer needed and a helper that never started.
 test("E2E-AGENTS-037 Stop team with a question open and a helper not started: each says why", async ({
   page,
   baseURL,

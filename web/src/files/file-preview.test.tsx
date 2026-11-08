@@ -77,7 +77,7 @@ const downloads = () =>
     String(input).includes("/files/download"),
   ).length;
 
-// The general-purpose walk-through (findings F1-F3): the files panel shows what the agent made, not only code.
+// The files panel shows what the agent made, not only code.
 describe("WEB-U-022 previews by kind", () => {
   it("F1: shows a PNG as an image, from its bytes typed by the file's extension", async () => {
     answers["out/chart.png"] = content("out/chart.png", null);
@@ -89,9 +89,9 @@ describe("WEB-U-022 previews by kind", () => {
     expect(screen.getByRole("link", { name: "Download" })).toBeVisible();
   });
 
-  // The review of 9b1297d3 (a MUST): a blob: URL has the page's origin, so an SVG opened from it in a new tab would run
-  // its script with the session. An SVG shows from a data: URL: a data: document has an opaque origin, so its script
-  // can't reach this origin or the session.
+  // A blob: URL has the page's origin, so an SVG opened from it in a new tab would run its script with the session. An
+  // SVG shows from a data: URL: a data: document has an opaque origin, so its script can't reach this origin or the
+  // session.
   it("F1: shows an SVG only as an image from a data: URL, never blob: and never as markup", async () => {
     answers["logo.svg"] = content(
       "logo.svg",
@@ -205,7 +205,7 @@ describe("WEB-U-022 previews by kind", () => {
     expect(within(table).getByText("3")).toBeVisible();
   });
 
-  // The review of 9b1297d3: a remount (closing and reopening the panel) gets a fresh object URL, never a revoked one.
+  // A remount (closing and reopening the panel) gets a fresh object URL, never a revoked one.
   it("F1: makes a fresh image URL when it shows again, and lets go of the old one", async () => {
     answers["out/chart.png"] = content("out/chart.png", null);
     const first = show("out/chart.png");

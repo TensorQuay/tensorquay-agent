@@ -18,7 +18,7 @@ const CLOSED = {
  * The lead's question to its person in the lead task's transcript (UI-GUIDELINES §13b, WEB-U-224): a warn-tinted card
  * with the question that points to the message box; once answered, it says Answered quietly, and once the team no longer
  * waits for it, No longer needed, and why: the person stopped the team, it ended or is stopping, or the lead asked
- * something else (WEB-U-411, c17 U6: a bare "No longer needed" after Stop team said neither).
+ * something else (WEB-U-411, 17.0's release candidate: a bare "No longer needed" after Stop team said neither).
  */
 export function WaitingCard({
   question,

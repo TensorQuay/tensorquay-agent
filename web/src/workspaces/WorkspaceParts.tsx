@@ -69,8 +69,8 @@ export function LeaseLine({ workspace }: { workspace: Workspace }) {
   const state = leaseState(workspace);
   let text;
   const { lease } = workspace;
-  // In use only while the holder's run is going; a done task whose environment is kept is where it's open (the 13h UI
-  // review, #3).
+  // In use only while the holder's run is going; a done task whose environment is kept is where it's open (a UI review
+  // before 17.0).
   if (lease?.running)
     text =
       lease.title === null
@@ -162,7 +162,7 @@ export function SizeMeter({
 
 /**
  * When the size was measured: it is a past measurement, taken while the workspace was free or during a run, so it never
- * shows alone (the 13h UI review, #4: "0 B" for a workspace holding a file was taken before the file existed).
+ * shows alone (a UI review before 17.0: "0 B" for a workspace holding a file was taken before the file existed).
  */
 function Measured({ at, note }: { at: string | null; note: boolean }) {
   const t = useT();

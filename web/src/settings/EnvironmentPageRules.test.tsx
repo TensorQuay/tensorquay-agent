@@ -81,8 +81,7 @@ describe("WEB-U-047 environment sizes", () => {
       }).api,
     );
     const row = await screen.findByRole("row", { name: /Big data/ });
-    // Lowered at start: the stored size (what tasks get), marked, with what it was (review of the sizes, SHOULD 5), in
-    // the row's muted line (17.3).
+    // Lowered at start: the stored size (what tasks get), marked, with what it was, in the row's muted line (17.3).
     expect(cellNote(row, "8 CPUs, lowered from 100 CPUs · 4 GB")).toBeVisible();
     fireEvent.click(
       within(row).getByRole("link", { name: "Edit environment Big data" }),
@@ -93,7 +92,7 @@ describe("WEB-U-047 environment sizes", () => {
     );
   });
 
-  // Review of the sizes (D1): the list shows the stored size, which is what tasks get, never the ceiling itself; they
+  // The list shows the stored size, which is what tasks get, never the ceiling itself; they
   // differ once the ceiling is raised after a start lowered a size.
   it("shows the stored size of a lowered environment, not the current ceiling", async () => {
     show(
@@ -114,7 +113,7 @@ describe("WEB-U-047 environment sizes", () => {
 });
 
 describe("WEB-U-047 a lowered default environment", () => {
-  // Review of the sizes (MUST 1): its CPUs are locked (it is the default) and above the ceiling; it still saves.
+  // Its CPUs are locked (it is the default) and above the ceiling; it still saves.
   it("saves a default whose locked size the ceiling has since lowered", async () => {
     const fake = fakeTemplates({
       environments: [
@@ -159,7 +158,7 @@ describe("WEB-U-047 the environment page and dialogs", () => {
     );
   });
 
-  // General-purpose finding N1: what an environment is for, in one line, shown where people pick it.
+  // What an environment is for, in one line, shown where people pick it.
   it("keeps an environment's one-line description, checked before sending, and shows it in the list", async () => {
     const fake = fakeTemplates({ environments: LISTED });
     show(fake.api);

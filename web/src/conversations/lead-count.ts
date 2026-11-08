@@ -14,7 +14,7 @@ export function leadCount(
   team: {
     helpers: number;
     attention: { stuck: number; failed: number };
-    /** The team's state: once it no longer runs, nothing in it needs the person (the c16 UX review, #2). */
+    /** The team's state: once it no longer runs, nothing in it needs the person (a UX review before 17.0). */
     state?: string;
   },
   t: Translate,

@@ -32,7 +32,7 @@ export const hostOf = (address: string) => {
     return address;
   }
 };
-/** The Address hint for where the model runs; editing, or Something else, has the general one (the Models page review, P2 #2). */
+/** The Address hint for where the model runs; editing, or Something else, has the general one. */
 const ADDRESS_HINT: Readonly<Record<Where, MessageKey>> = {
   hosted: "models.baseUrlHintHosted",
   network: "models.baseUrlHintNetwork",
@@ -144,7 +144,7 @@ export function Basics({
         name="display_name"
         labelKey="models.displayName"
       />
-      {/* What it is good for, where people pick it (general-purpose finding X1). */}
+      {/* What it is good for, where people pick it. */}
       <Text
         section={section}
         name="description"

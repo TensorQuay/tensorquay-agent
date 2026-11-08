@@ -28,7 +28,7 @@ function remember(value: "open" | "closed") {
 }
 
 /**
- * Closed until the person opens it (candidate12 F6, WEB-U-124: it never opens by itself, even on a new, empty task).
+ * Closed until the person opens it (found before 17.0, WEB-U-124: it never opens by itself, even on a new, empty task).
  * Where it docks beside the conversation (`docks`, use-task-layout: the layout's own width, WEB-U-170) their choice is
  * remembered per browser; where it would lie over the whole column it opens on request only. Closing returns focus to
  * the bar's toggle.
@@ -39,7 +39,7 @@ export function useFilesPanel(docks: boolean) {
   const open = choice ?? (docks && remembered() === "open");
   // The chosen tab survives closing and reopening the panel.
   const [tab, setTab] = useState<PanelTab>("files");
-  // A file to show, numbered so the same file can be asked for again (a finished turn's Open, findings D1-D2).
+  // A file to show, numbered so the same file can be asked for again (a finished turn's Open).
   const [target, setTarget] = useState<FileTarget | null>(null);
   // Stable functions: the transcript takes show and showFile, and re-renders only when they change (WEB-U-151).
   const change = useCallback(

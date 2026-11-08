@@ -76,7 +76,7 @@ export function turnSummary(
   const commands = tools.filter(
     (tool) => tool.name === "shell" && tool.ran,
   ).length;
-  // Finding A1: research reads pages; the heading counts them, as it counts commands.
+  // Research reads pages; the heading counts them, as it counts commands.
   const pages = tools.filter(
     (tool) => tool.name === "fetch_url" && tool.status === "ok",
   ).length;
@@ -144,7 +144,7 @@ export function turnSummary(
         }
       : run?.status === "cancelled"
         ? {
-            // "Stopped." alone: the composer already offers the next message (the c8 review, WEB-U-016).
+            // "Stopped." alone: the composer already offers the next message (a review before 17.0, WEB-U-016).
             reason: t("summary.cancelled"),
             next: null,
             provider: null,
@@ -152,7 +152,7 @@ export function turnSummary(
             code: null,
           }
         : null;
-  // A clear next step only (never "undo": there is no reliable one). Findings D1-D2: one file is the footer's own
+  // A clear next step only (never "undo": there is no reliable one). One file is the footer's own
   // Open; among several, the chart and the documents it made open, and a changed test file offers every test.
   const testChanged = written.some(
     (path) => TEST_FILE.test(path) && !NOT_CODE.test(path),
@@ -181,8 +181,8 @@ export function turnSummary(
             chart: charts.length === 1 && charts[0] === path,
           }))
       : [];
-  // At most two, and Run all the tests always keeps its place: it is the one step that sends something. The live
-  // review of c8 (L8): named Open buttons only when they cover every file the run changed, and then no Open changes;
+  // At most two, and Run all the tests always keeps its place: it is the one step that sends something. A live check
+  // before 17.0: named Open buttons only when they cover every file the run changed, and then no Open changes;
   // otherwise one Open changes and no names.
   const room = testChanged ? 1 : 2;
   const covered = files > 1 && opens.length === files && files <= room;
@@ -204,7 +204,8 @@ export function turnSummary(
     // A turn its run didn't finish says nothing of files when it changed none: its failure says what happened, and
     // the files may have come in an earlier run (WEB-U-373, a lead whose team used its budget). Nor does a turn that
     // led the team and changed none itself: its helpers' changes are on their own runs, and the team's end note says
-    // what they handed back (WEB-U-389, c16k D2: "No files changed" right above "Handed back: a.txt, b.txt").
+    // what they handed back (WEB-U-389, real-world use before 17.0: "No files changed" right above
+    // "Handed back: a.txt, b.txt").
     summary:
       files === 0 &&
       (run?.status === "failed" ||

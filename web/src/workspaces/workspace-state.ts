@@ -1,7 +1,7 @@
 import { english, type Translate } from "../i18n/translate";
 import type { Workspace } from "../protocol/generated/api";
 
-/** The size meter's colour: warning from 80 % of the quota, danger from 95 % (task 076). */
+/** The size meter's colour: warning from 80 % of the quota, danger from 95 %. */
 export type MeterLevel = "ok" | "warn" | "danger";
 const WARN_SHARE = 0.8;
 const DANGER_SHARE = 0.95;
@@ -24,7 +24,7 @@ export function leaseState(workspace: Workspace): LeaseState {
 }
 
 /**
- * The delete confirmation, from the gateway's rules (answers-076 Q9): refused while a task's run works in it or
+ * The delete confirmation, from the gateway's rules: refused while a task's run works in it or
  * while it is being copied; bound tasks go with it only when all are the owner's. `mine` is the reader's own active tasks on it,
  * or `null` when the task list is not fully loaded (the gateway still refuses other people's tasks).
  */
@@ -41,7 +41,8 @@ export function deletePlan(
 ): DeletePlan {
   if (workspace.state === "forking")
     return { kind: "blocked", reason: "notReady" };
-  // Only a going run blocks it: a done task's kept, idle environment is retired by the delete (the 13h UI review, #3).
+  // Only a going run blocks it: a done task's kept, idle environment is retired by the delete (a UI review
+  // before 17.0).
   if (workspace.lease?.running) return { kind: "blocked", reason: "working" };
   // A pinned task keeps its environment on (FR-33): the delete doesn't retire it.
   if (workspace.lease?.pinned) return { kind: "blocked", reason: "pinned" };
@@ -74,7 +75,7 @@ export function recentFirst(a: Workspace, b: Workspace) {
 
 /**
  * The name shown for a workspace; an administrator's metadata view has none. A helper's own copy of its lead's files
- * (kind helper_copy) says so in the reader's words, whatever its name (the 14b page pass, H4).
+ * (kind helper_copy) says so in the reader's words, whatever its name (a pass over the pages before 17.0).
  */
 export function workspaceName(
   workspace: Workspace,

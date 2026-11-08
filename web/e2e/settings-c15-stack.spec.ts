@@ -5,7 +5,7 @@ import { expect, test, type BrowserContext, type Page } from "@playwright/test";
 import { afterStart, budget } from "./stack-start";
 import { signedIn } from "./ux/flow";
 
-// The c15 feature matrix's gaps in Settings (feature-matrix-c15, N8, D13 and D7): what had a unit test and a fake-front
+// The feature matrix's gaps in Settings before 17.0 (N8, D13 and D7): what had a unit test and a fake-front
 // spec but no real-stack test. On the settings suite's stack, before its own spec (files run in name order), so the
 // installation still has no internet access rule when N8 looks; D13 takes off what it adds. It writes no result.
 test.skip(

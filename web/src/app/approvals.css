@@ -44,12 +44,12 @@
 .approval-target code {
   margin-top: 0;
 }
-/* An argument wraps, collapsed or shown in full, rather than running sideways (UX review 0927). */
+/* An argument wraps, collapsed or shown in full, rather than running sideways. */
 .approval-target .approval-argument {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
-/* Flush with the value above it, not inset by the button's padding (UX review 0927). */
+/* Flush with the value above it, not inset by the button's padding. */
 .approval-target .approval-show-full {
   min-width: 0;
   padding-inline: 0;
@@ -85,7 +85,7 @@
   color: var(--warn);
 }
 
-/* A task-wide grant's scope, shown in full above the decision; it wraps like an argument (UX review 0927). */
+/* A task-wide grant's scope, shown in full above the decision; it wraps like an argument. */
 .approval-scope pre {
   margin: 0;
   white-space: pre-wrap;

@@ -56,7 +56,7 @@ export function Shell({ children }: { children: ReactNode }) {
         <main id="main" className="app-content">
           {children}
         </main>
-        {/* The one task search and its Ctrl/Cmd K (the review of d9fb1917); a match opened closes the drawer too. */}
+        {/* The one task search and its Ctrl/Cmd K; a match opened closes the drawer too. */}
         <TaskSearchHost onNavigate={() => setNavigationOpen(false)} />
         {navigationOpen && (
           <Suspense

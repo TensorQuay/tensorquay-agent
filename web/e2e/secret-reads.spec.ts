@@ -2,7 +2,7 @@ import { signIn } from "./session";
 import { axe, capture, fitsColumn, rowMenu } from "./settings-page";
 import { expect, resetFront, test } from "./test";
 
-// Vault slice 2 on the fake front (WEB-U-053 browser part): who read a secret, newest first with older pages, from the
+// WEB-U-053's browser part, on the fake front: who read a secret, newest first with older pages, from the
 // Keys › Shared for an administrator and from a person's own project key, keyboard first, at the widths
 // UI-GUIDELINES §17.2 asks for in both themes.
 for (const width of [1024, 1280] as const)
@@ -41,7 +41,7 @@ for (const width of [1024, 1280] as const)
       await expect(rows.filter({ hasText: "tracker" })).not.toContainText(
         "Run unknown",
       );
-      // Every column shows: the table fits the dialog without scrolling sideways (UX review 0927b, item 1).
+      // Every column shows: the table fits the dialog without scrolling sideways.
       expect(
         await dialog
           .locator(".data-table-scroll")

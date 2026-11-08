@@ -84,7 +84,7 @@ function ranges(period: Period, now: Date) {
 const tokens = (values: UsageFigures) =>
   values.prompt_tokens + values.completion_tokens;
 
-/** Token usage for administrators (FR-21, task 090): the period's total and its change, then who and which model. */
+/** Token usage for administrators (FR-21): the period's total and its change, then who and which model. */
 export function UsageSettings({
   me,
   api,
@@ -197,7 +197,7 @@ function Report({
 }) {
   const t = useT();
   const number = (value: number) => formatNumber(value, t.locale);
-  // A route without a display name reads as the model picker names it (candidate12 F21: not "local").
+  // A route without a display name reads as the model picker names it (found before 17.0: not "local").
   const catalogue = useModels();
   const routeName = (row: UsageRow) =>
     row.label ??
@@ -216,9 +216,9 @@ function Report({
     value === null ? t("usage.notReportedShort") : number(value);
   return (
     <div className="stack">
-      {/* The one number first (the owner's redesign): the period's tokens and their change. */}
+      {/* The one number first: the period's tokens and their change. */}
       <section className="usage-headline" aria-label={t("usage.total")}>
-        {/* Written as every other number on the page (candidate12 F21: no "59.2K" above "59 200"). */}
+        {/* Written as every other number on the page (found before 17.0: no "59.2K" above "59 200"). */}
         <p className="type-display">
           {t("usage.headline", { tokens: number(now) })}
         </p>

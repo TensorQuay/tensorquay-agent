@@ -27,7 +27,7 @@ export function PanelTabs({
 }: {
   current: PanelTab;
   onTab: (tab: PanelTab) => void;
-  /** The tabs there is something to show in (the Context tab only once a run loaded something, finding F6). */
+  /** The tabs there is something to show in (the Context tab only once a run loaded something). */
   shown?: readonly PanelTab[];
 }) {
   const t = useT();

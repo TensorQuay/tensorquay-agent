@@ -123,7 +123,7 @@ describe("WEB-U-243 the Screen tab in a desktop task", () => {
     expect(show).not.toHaveBeenCalled();
   });
 
-  // The c16 UX review, #14: with the panel closed, the toggle says when the agent is acting on the desktop, by its
+  // A UX review before 17.0: with the panel closed, the toggle says when the agent is acting on the desktop, by its
   // name and tooltip, and a dot; only while a desktop action runs.
   it("tells from the toggle that the agent is acting on the desktop", () => {
     const running = [
@@ -152,7 +152,7 @@ describe("WEB-U-243 the Screen tab in a desktop task", () => {
     expect(screen.getByRole("button", { name: "Screen" })).toBeVisible();
   });
 
-  // The c16 UX review's second pass, #21: only the task's owner sees its screen (the guide), so nobody else is offered
+  // A UX review before 17.0: only the task's owner sees its screen (the guide), so nobody else is offered
   // the toggle, the tab or the opening by itself, only to be refused.
   it("offers the screen only to the task's owner, in a task with a desktop", () => {
     const desktop = { capabilities: ["shell", "desktop"] };

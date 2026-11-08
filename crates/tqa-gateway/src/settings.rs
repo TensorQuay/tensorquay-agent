@@ -46,7 +46,7 @@ pub(crate) struct Snapshot {
     pub(crate) decision_engines: Vec<crate::decision_engines::EngineDocument>,
     /// The environment templates (ADR-0032), by name.
     pub(crate) templates: Vec<templates::StoredTemplate>,
-    /// Which routes and connectors may use each shared secret (vault slice 3).
+    /// Which routes and connectors may use each shared secret.
     pub(crate) bindings: crate::secrets::bindings::Bindings,
 }
 

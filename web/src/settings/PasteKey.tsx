@@ -33,7 +33,7 @@ export function PasteKey({
   api: RoutesApi;
   route: string;
   open: boolean;
-  /** `allowed` is false when the secret was stored but could not yet be allowed for the route (vault slice 3). */
+  /** `allowed` is false when the secret was stored but could not yet be allowed for the route. */
   onStored: (ref: string, allowed: boolean) => void;
 }) {
   const t = useT();
@@ -118,8 +118,7 @@ export function PasteKey({
       </div>
     );
   return (
-    // An inset panel of its own, its buttons inside it: Save stays the page's one primary action
-    // (UX review 0927b, item 2).
+    // An inset panel of its own, its buttons inside it: Save stays the page's one primary action.
     <fieldset className="paste-key-panel stack">
       <legend className="type-label">{t("models.pasteTitle")}</legend>
       <Input

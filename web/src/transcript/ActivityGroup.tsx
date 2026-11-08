@@ -76,7 +76,7 @@ export function ActivityGroup({
   const stepSaid = step && named ? named(step, t) : null;
   // The thinking shows itself while the model thinks (17.3); folding it is the person's choice, kept for the turn.
   const [thinkingOpen, setThinkingOpen] = useState(true);
-  // The card's code loads on the intent to open a step (the 13h UI review, #10), never just because the turn shows:
+  // The card's code loads on the intent to open a step (a UI review before 17.0), never just because the turn shows:
   // that kept it out of every task page's first load (WEB-U-014).
   const warm = turn.activities.length > 0 ? warmToolCard : undefined;
   const liveId = useId();
@@ -89,7 +89,7 @@ export function ActivityGroup({
     choice?.status === turn.status
       ? choice.open
       : turn.status !== "completed" || opened;
-  // Finding T2: the latest tool's card opens with the group; earlier ones stay folded.
+  // The latest tool's card opens with the group; earlier ones stay folded.
   // A call waiting for approval stays folded: the approval card says the same, once.
   const lastTool = turn.work.findLast((item) => item.kind === "tool");
   const latestTool =
@@ -303,7 +303,8 @@ function Arriving({ text }: { text: string }) {
 
 /**
  * The retries' tooltip: their words, then their codes after a "Details:" label (WEB-U-304). `said`, the words the
- * done step's summary already says, are left out, and with none left only the codes remain (the 16d page pass, Z27).
+ * done step's summary already says, are left out, and with none left only the codes remain (a pass over the pages
+ * before 17.0).
  */
 function retriesTitle(
   t: ReturnType<typeof useT>,
@@ -329,7 +330,7 @@ function Retries({ turn, id }: { turn: TurnView; id: string }) {
   const t = useT();
   const last = turn.retries.at(-1);
   if (!last) return null;
-  // Done, they are counted on the step's summary line by the last reason (finding T-c); the other reasons and the codes
+  // Done, they are counted on the step's summary line by the last reason; the other reasons and the codes
   // are read here, by any means, and the summary's reason isn't said twice (Z27).
   if (turn.status === "completed")
     return (
@@ -347,7 +348,8 @@ function Retries({ turn, id }: { turn: TurnView; id: string }) {
         {last.reason === "gateway_link"
           ? // The runtime's link to the gateway dropped (a restart, say) and came back. The model call it was waiting on
             // is gone with it, so the step is asked again from the start: the line says so, never a bare "reconnected"
-            // that hides the work starting over (first-hour F7). No attempt was spent, so it isn't a failure either.
+            // that hides the work starting over (a first-hour check). No attempt was spent, so it isn't a failure
+            // either.
             t("notice.askedAgain", {
               seconds: Math.max(1, Math.round(last.delayMs / 1000)),
             })

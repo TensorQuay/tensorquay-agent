@@ -55,8 +55,9 @@ function start(
 
 const admin = { ...me, role: "admin", internet: "some" };
 
-// The c16 first hour (P2-1): on a fresh install the person reading New task is often the administrator, so a missing
-// model or environment is said to them as theirs to add, with the way there; a member is still told to ask (WEB-U-317).
+// A first-hour check before 17.0: on a fresh install the person reading New task is often the administrator, so a
+// missing model or environment is said to them as theirs to add, with the way there; a member is still told to ask
+// (WEB-U-317).
 describe("WEB-U-317 an administrator is never told to ask an administrator", () => {
   it("tells an administrator with no model route where to add one", async () => {
     start(admin, { models: [] });
@@ -97,8 +98,8 @@ describe("WEB-U-317 an administrator is never told to ask an administrator", () 
   });
 });
 
-// The c16 first hour (P2-2): with agent teams on, a team starts when a person asks a task to lead, so one example says
-// how; with them off, nothing about teams shows (WEB-U-318).
+// A first-hour check before 17.0: with agent teams on, a team starts when a person asks a task to lead, so one example
+// says how; with them off, nothing about teams shows (WEB-U-318).
 describe("WEB-U-318 New task shows how to start a team while agent teams are on", () => {
   const TEAM =
     "Lead two helpers: have each compare one note-taking app, then recommend one";

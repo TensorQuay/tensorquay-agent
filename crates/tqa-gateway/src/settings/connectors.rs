@@ -208,7 +208,7 @@ pub(crate) async fn write(
     write: ConnectorWrite,
 ) -> Result<(bool, StoredConnector), GatewayError> {
     let name = write.document.name.clone();
-    // A shared secret must be bound to the connector first (vault slice 3).
+    // A shared secret must be bound to the connector first.
     if let Some(reference) = write.document.secret_ref.as_deref() {
         crate::secrets::bindings::require(connection, reference, ("connector", &name), write.actor)
             .await?;

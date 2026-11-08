@@ -41,7 +41,8 @@ const marks = {
 
 /**
  * A desktop call refused by a per-run cap (or a screen too detailed to send) is the limit doing its job, not a failure
- * (the 16d page pass, Z25; WEB-U-330): its line says what happens next, and its mark is a muted "Limit reached".
+ * (a pass over the pages before 17.0; WEB-U-330): its line says what happens next, and its mark is a muted
+ * "Limit reached".
  */
 const LIMITS = new Set([
   "screenshot_limit",
@@ -55,7 +56,7 @@ export function ActivityLine({
   latest = false,
 }: {
   activity: TurnView["activities"][number];
-  /** The turn's latest tool: its card starts open (finding T2), until the person closes it. */
+  /** The turn's latest tool: its card starts open, until the person closes it. */
   latest?: boolean;
 }) {
   // The person's choice outlives re-renders and replays of the transcript (step-state.tsx).
@@ -90,7 +91,7 @@ export function ActivityLine({
       ? durationLabel(tool.durationMs, t)
       : null;
   return (
-    // The row and its card are one item: one surface while open, and the chevron turns with it (the review of 049).
+    // The row and its card are one item: one surface while open, and the chevron turns with it.
     <li className="activity-line" data-open={open || undefined}>
       <button
         type="button"
@@ -104,7 +105,7 @@ export function ActivityLine({
         onPointerEnter={warmToolCard}
         onPointerDown={warmToolCard}
         onFocus={warmToolCard}
-        // Finding A1: a page's whole address where the line shortens it.
+        // A page's whole address where the line shortens it.
         title={toolTitle(tool) ?? undefined}
         onClick={() => setOpen(!open)}
       >

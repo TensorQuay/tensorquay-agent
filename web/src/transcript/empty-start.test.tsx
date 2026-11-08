@@ -77,8 +77,8 @@ beforeEach(() => {
 });
 afterEach(() => vi.restoreAllMocks());
 
-// The 13f screen review, #1: a task opened on a workspace with files said "Your workspace starts empty." beside a Files
-// panel listing them. The line says so only when the workspace's top folder is empty.
+// A screen review before 17.0: a task opened on a workspace with files said "Your workspace starts empty." beside a
+// Files panel listing them. The line says so only when the workspace's top folder is empty.
 describe("WEB-U-152 a new task's first line is true to its workspace", () => {
   it("says the workspace starts empty when it is", async () => {
     vi.spyOn(api, "files").mockResolvedValue(root([]));

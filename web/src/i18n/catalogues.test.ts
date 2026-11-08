@@ -24,8 +24,8 @@ const sample = (pattern: string) =>
 describe("WEB-U-019 catalogues", () => {
   const files = readdirSync(LOCALES).filter((name) => name.endsWith(".json"));
 
-  // Task 088 (D3, owner decision): a language is complete exactly when it translates every reference message, as
-  // `pnpm i18n:report` counts; the menu marks the others partial (WEB-U-032).
+  // A language is complete exactly when it translates every reference message, as `pnpm i18n:report` counts; the menu
+  // marks the others partial (WEB-U-032).
   it("WEB-U-032 marks a language complete only when it has every reference message", () => {
     const reference = Object.keys(english.messages);
     for (const entry of LANGUAGES) {
@@ -153,7 +153,7 @@ describe("WEB-U-215 nothing in the app is specific to git", () => {
   });
 });
 
-// WEB-U-201 (the 13h UI review, #5): a size reads the same everywhere. The app writes sizes as `formatSize` does, in
+// WEB-U-201 (a UI review before 17.0): a size reads the same everywhere. The app writes sizes as `formatSize` does, in
 // binary steps named kB, MB and GB (WEB-U-185); a message naming KiB, MiB, GiB or TiB is another convention.
 describe("WEB-U-201 one way to write a size", () => {
   it("names no binary unit in any catalogue", () => {

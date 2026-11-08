@@ -82,7 +82,7 @@ type Open =
   { kind: "new" } | { kind: "fork" | "share" | "delete"; workspace: Workspace };
 
 /**
- * The Workspaces page (task 076; UI-GUIDELINES §6 and §7): a bar with the one primary action; search, filter
+ * The Workspaces page (UI-GUIDELINES §6 and §7): a bar with the one primary action; search, filter
  * and sort on the server, kept in the address; 25 workspaces at a time, most recently used first, with "Show more"; a
  * table, or cards on a phone; skeleton cards while loading; the empty states.
  */

@@ -83,7 +83,7 @@ describe("WEB-U-062 the channels list", () => {
     expect(within(retro).getByText("Ended")).toBeVisible();
   });
 
-  // General-purpose finding C1: what a channel is for, in plain words and with an example that isn't only coding.
+  // What a channel is for, in plain words and with an example that isn't only coding.
   it("says what a channel is for, with an example", async () => {
     show(fakeChannels().api);
     expect(
@@ -241,7 +241,7 @@ describe("WEB-U-062 the channels list", () => {
     ).toBeVisible();
   });
 
-  // One label style in the dialog, and More options reads as a disclosure (review points a and b).
+  // One label style in the dialog, and More options reads as a disclosure.
   it("labels every part alike, and shows More options as a disclosure", async () => {
     show(fakeChannels().api);
     await open();
@@ -355,7 +355,7 @@ describe("WEB-U-062 the channels list", () => {
     ).toBeNull();
     fireEvent.change(search, { target: { value: "" } });
     fireEvent.focus(search);
-    // Says why nothing is offered: no tasks yet (F1 review point c).
+    // Says why nothing is offered: no tasks yet.
     expect(
       await within(dialog()).findByText("You have no tasks yet."),
     ).toBeVisible();
@@ -398,7 +398,8 @@ describe("WEB-U-062 the channels list", () => {
   });
 });
 
-// WEB-U-362 (the 16f page pass, E17): Channels starts its bar with Open navigation, for the drawer below 768 px.
+// WEB-U-362 (a pass over the pages before 17.0): Channels starts its bar with Open navigation, for the drawer below
+// 768 px.
 describe("WEB-U-362 Open navigation on Channels", () => {
   it("opens the shell's navigation", async () => {
     const openNavigation = vi.fn<() => void>();

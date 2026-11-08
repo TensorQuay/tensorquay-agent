@@ -157,7 +157,7 @@ impl Telemetry {
             .increment(1);
     }
 
-    /// How many secrets are due for rotation (vault slice 1).
+    /// How many secrets are due for rotation.
     pub fn secrets_rotation_due(&self, count: u64) {
         #[expect(
             clippy::cast_precision_loss,

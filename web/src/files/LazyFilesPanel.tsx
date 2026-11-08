@@ -34,7 +34,7 @@ export function LazyFilesPanel(props: ComponentProps<typeof Panel>) {
   const t = useT();
   return (
     <PanelBoundary
-      // E5 (the 14b page pass; WEB-U-253): a panel that can't be shown keeps its frame, its name and its close.
+      // WEB-U-253: a panel that can't be shown keeps its frame, its name and its close.
       fallback={(retry) => (
         <aside
           className="files-panel"

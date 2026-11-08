@@ -12,10 +12,10 @@ const RECENT_RUNS = 20;
 const closed = (data: RunChanges | undefined) => data?.live === false;
 
 /**
- * Which files each finished run changed, from its recorded changes (review of 068c): shell writes count too. A run
+ * Which files each finished run changed, from its recorded changes: shell writes count too. A run
  * recorded before changes were (or any failure) is left out, and its turn keeps the count from file-edit tools; the
  * turn adds the files its own calls wrote to these paths (WEB-U-365).
- * Shares the Changes tab's cache. Bounded (answers-076 item 0): only the latest runs are asked, as the gateway keeps
+ * Shares the Changes tab's cache. Bounded: only the latest runs are asked, as the gateway keeps
  * no older snapshots, and a closed run's answer (`live: false`) never changes, so it is fetched once.
  */
 export function useChangedFiles(

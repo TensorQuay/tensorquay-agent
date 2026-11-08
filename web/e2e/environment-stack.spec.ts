@@ -70,7 +70,7 @@ test("E2E-ENV-010 retained file, pytest and headless browser after a switch", as
     }),
   ).toHaveCount(2);
   // A command is named on its line, and its card (the line's own list item) holds the output. The latest line opens
-  // with its group (finding T2), so each is opened only if it is closed.
+  // with its group, so each is opened only if it is closed.
   const result = async (command: RegExp) => {
     const line = page.getByRole("button", { name: command });
     await openCard(line);
@@ -88,7 +88,7 @@ test("E2E-ENV-010 retained file, pytest and headless browser after a switch", as
   ).toContainText("Saved environment/page.png");
   const commands = page.getByRole("article", { name: "shell tool call" });
   for (const command of await commands.all())
-    // Finding A5: a command that succeeded says nothing of its exit code; one that failed would say so.
+    // A command that succeeded says nothing of its exit code; one that failed would say so.
     await expect(command.getByText(/Didn't succeed/)).toHaveCount(0);
   await page.locator(".activity-heading").last().click();
   await page

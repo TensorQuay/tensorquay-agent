@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { nameProblem, suggestName } from "./names";
 
-// ADR-0037 §1 and the reviewed sketch's §9: a name suggested from the host (a built-in list for well-known hosts,
-// else its first label), unique across the person's own keys and the shared keys they may use.
+// ADR-0037 §1: a name suggested from the host (a built-in list for well-known hosts, else its first label), unique
+// across the person's own keys and the shared keys they may use.
 describe("WEB-U-140 a key's name", () => {
   it.each([
     ["github.com", "GITHUB_TOKEN"],
@@ -25,7 +25,7 @@ describe("WEB-U-140 a key's name", () => {
     expect(suggestName(host, [])).toBe(name);
   });
 
-  // The review of 36740156, item 8: a long first label is cut so the whole name fits 64 characters.
+  // A long first label is cut so the whole name fits 64 characters.
   it("keeps a suggestion within 64 characters, numbered or not", () => {
     const label = "a".repeat(63);
     const plain = suggestName(`${label}.example`, []);

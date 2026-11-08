@@ -49,7 +49,8 @@ describe("WEB-U-007 deleting a task", () => {
       .spyOn(api, "deleteConversation")
       .mockResolvedValue(undefined);
     const { onClose, invalidate, dialog } = show();
-    // WEB-U-256 (the 14b page pass, S4): deleting is for good, and the workspace's files stay (PRD §12 item 18).
+    // WEB-U-256 (a pass over the pages before 17.0): deleting is for good, and the workspace's files stay (PRD
+    // §12 item 18).
     expect(dialog).toHaveTextContent(
       "Delete “Workspace review”? This stops its environment and deletes the task for good: it can't be undone. The files in its workspace stay.",
     );

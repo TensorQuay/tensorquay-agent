@@ -1,5 +1,5 @@
 // @vitest-environment node
-// WEB-U-090 (the UI standard's Page), one column since the owner's review (WEB-U-131): each field's label above it at
+// WEB-U-090 (the UI standard's Page), one column (WEB-U-131): each field's label above it at
 // every width, fields at most --field-width wide, lists the whole column; Save with Cancel pinned at the bottom of the
 // view, within the Settings content column.
 import { readFileSync } from "node:fs";

@@ -93,7 +93,7 @@ describe("WEB-U-220 helpers under their lead in the task list", () => {
     const row = await screen.findByRole("link", { name: /^Report on Q3/ });
     expect(row).toHaveAccessibleName(/2 helpers$/);
     expect(row).toHaveTextContent("2");
-    // The count's words show on hover too, not only to a screen reader (WEB-U-310's review, P3).
+    // The count's words show on hover too, not only to a screen reader (WEB-U-310).
     expect(row.querySelector("[title='2 helpers']")).not.toBeNull();
     const toggle = screen.getByRole("button", {
       name: "Helpers of Report on Q3",
@@ -164,7 +164,7 @@ describe("WEB-U-220 helpers under their lead in the task list", () => {
     expect(await screen.findByRole("list", { name: "Helpers" })).toBeVisible();
   });
 
-  // The review of 7 Oct, seen in a browser: the lead's count said "1 stuck" from the list's poll while the open helper
+  // Seen in a browser, the lead's count said "1 stuck" from the list's poll while the open helper
   // row still said Working… The rows read the team again whenever the list's view of the team changes.
   it("reads the open helpers again when the list's view of the team changes, and only then", async () => {
     const { SidebarHelpers } = await import("./SidebarHelpers");
@@ -302,8 +302,8 @@ describe("WEB-U-226 deleting a lead task", () => {
   });
 });
 
-// WEB-U-409 (c17 U4; 16p live T4, c16p-W3-01-t4-header (b)): the sidebar showed the red failed mark on a lead whose
-// last step had failed while its team ran on; its page said it waits for its helpers, who wake it. While its team
+// WEB-U-409 (17.0's release candidate; a live check before 17.0): the sidebar showed the red failed mark on a lead
+// whose last step had failed while its team ran on; its page said it waits for its helpers, who wake it. While its team
 // runs, a lead's failed run is not the task's outcome: no red mark until the team has ended.
 describe("WEB-U-409 no red failure mark on a lead whose team still runs", () => {
   it("shows none while the team runs", async () => {

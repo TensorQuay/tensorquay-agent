@@ -262,7 +262,7 @@ describe("WEB-U-034/035 the usage and secrets admin client", () => {
   });
 });
 
-// Vault slice 3: who may use a shared secret, set with the version read; a route or connector allows one by adding
+// Who may use a shared secret, set with the version read; a route or connector allows one by adding
 // itself to the secret's current list (WEB-U-054).
 describe("WEB-U-054 the secret bindings client", () => {
   const stored = {
@@ -332,7 +332,7 @@ describe("WEB-U-054 the secret bindings client", () => {
   });
 });
 
-// Vault slice 2: an administrator's view of a shared secret's reads, paged (WEB-U-053).
+// An administrator's view of a shared secret's reads, paged (WEB-U-053).
 describe("WEB-U-053 the secret reads admin client", () => {
   it("pages with limit and before", async () => {
     const page = {
@@ -365,7 +365,7 @@ describe("WEB-U-053 the secret reads admin client", () => {
   });
 });
 
-// Vault slice 1: a secret's rotation reminder, set or cleared with the version read (WEB-U-052).
+// A secret's rotation reminder, set or cleared with the version read (WEB-U-052).
 describe("WEB-U-052 the rotation reminder client", () => {
   it("sends the days, or null, with the version read, and parses the secret", async () => {
     const stored = {
@@ -529,7 +529,7 @@ describe("WEB-U-227 the helpers' settings client", () => {
   });
 });
 
-// The Models page's route check (099b-2; WEB-U-039): one POST with an Idempotency-Key; a failed check is a result.
+// The Models page's route check (WEB-U-039): one POST with an Idempotency-Key; a failed check is a result.
 describe("WEB-U-039 the route check client", () => {
   it("posts a check with its key and returns the observation, refusing a malformed answer", async () => {
     const failed = probeResult("failed", {

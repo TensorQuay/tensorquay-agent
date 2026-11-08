@@ -4,7 +4,7 @@ import { user } from "./fixtures.mjs";
 import { seededMap } from "./state.mjs";
 import { teamsOn } from "./teams.mjs";
 
-// Team accounts for the fake front (task 067): each sign-in starts a team with its administrator and one member, who
+// Team accounts for the fake front: each sign-in starts a team with its administrator and one member, who
 // owns two tasks the administrator may see only as metadata. Invitation links let a second browser join that team.
 const DAY_MS = 86_400_000;
 const invitationLinks = seededMap();

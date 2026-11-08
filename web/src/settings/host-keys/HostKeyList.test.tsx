@@ -31,8 +31,8 @@ const rows = async () =>
     .getAllByRole("row")
     .slice(1);
 
-// ADR-0037 and the reviewed Keys sketch §2: a person's keys by the name their tasks read, the web address, and when
-// each was last used and by which task; never a value.
+// ADR-0037: a person's keys by the name their tasks read, the web address, and when each was last used and by which
+// task; never a value.
 describe("WEB-U-141 the Mine list of host keys", () => {
   // Found at 390 px, where the settings menu's own headings aren't on the page (axe heading-order, WEB-U-141): the
   // section is the page's second level, as on every settings list.
@@ -44,7 +44,7 @@ describe("WEB-U-141 the Mine list of host keys", () => {
         level: 2,
       }),
     ).toBeVisible();
-    // WEB-U-262 (the c14b first hour, F1): what the section is for, beside the connectors' keys below it.
+    // WEB-U-262 (a first-hour check before 17.0): what the section is for, beside the connectors' keys below it.
     expect(
       screen.getByText(
         "For a service your tasks call over the web, such as GitHub or a package registry. A task uses the key by its name and never sees it.",
@@ -259,7 +259,7 @@ describe("WEB-U-141 the Mine list of host keys", () => {
       screen.getByRole("link", { name: "Add a key for a web service" }),
     ).toHaveAttribute("href", "/settings/keys/new");
     // An empty state's one action is the primary (UI-GUIDELINES §7, 17.3), as the other sections' Add links are; it
-    // was a secondary button since the review of 36740156, item 1.
+    // was a secondary button before 17.3.
     expect(
       screen.getByRole("link", { name: "Add a key for a web service" }),
     ).toHaveAttribute("data-variant", "primary");

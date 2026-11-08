@@ -28,7 +28,7 @@ export function TeamStrip({
 }) {
   const t = useT();
   const budget = budgetLine(team, now, t);
-  // An ended team says how it ended, with no time left to count and no meter (the c16 UX review, #1).
+  // An ended team says how it ended, with no time left to count and no meter (a UX review before 17.0).
   const ended = endedLine(team, t);
   const shown = team.helpers.slice(0, CHIPS);
   const more = team.helpers.length - shown.length;

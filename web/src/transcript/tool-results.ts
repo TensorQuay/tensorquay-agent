@@ -97,7 +97,7 @@ export function keySite(tool: ToolView): string | null {
     : null;
 }
 
-/** A push that failed for lack of a stored credential, or because the repository refused it (task 095). */
+/** A push that failed for lack of a stored credential, or because the repository refused it. */
 export function needsGitCredential(tool: ToolView): boolean {
   return (
     tool.name === "git_push" &&

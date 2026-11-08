@@ -4,12 +4,12 @@ import { edgeLead, helperStates, stopStarted, team } from "./agents-stack-api";
 import { afterStart, budget } from "./stack-start";
 import { bootstrap } from "./ux/flow";
 
-// E2E-AGENTS-039 (c17 3a; GW-I-319, WEB-U-423): a lead woken by its helper's report and stopped by its person before
-// it read it isn't woken again for that report (teams::wake's rule), so the report waited unread and nothing said so
-// (the c16k wake review's S2). The lead's strip now says how many of the team's messages wait unread for it, and the
-// count follows a later report live, without a reload. On the real stack with the scripted model: EDGE-U's lead starts
-// "reporter-u", ends its turn, and holds its woken turn; reporter-u reports after 5 s and again 90 s later.
-// The file sorts before agents-stack.spec.ts, so E2E-AGENTS-020 stays last.
+// E2E-AGENTS-039 (17.0's release candidate; GW-I-319, WEB-U-423): a lead woken by its helper's report and stopped by
+// its person before it read it isn't woken again for that report (teams::wake's rule), so the report waited unread and
+// nothing said so (a review of the team wake before 17.0). The lead's strip now says how many of the team's messages
+// wait unread for it, and the count follows a later report live, without a reload. On the real stack with the scripted
+// model: EDGE-U's lead starts "reporter-u", ends its turn, and holds its woken turn; reporter-u reports after 5 s and
+// again 90 s later. The file sorts before agents-stack.spec.ts, so E2E-AGENTS-020 stays last.
 test.skip(
   process.env.TQA_STACK_SUITE !== "agents",
   "Requires the agents stack suite",

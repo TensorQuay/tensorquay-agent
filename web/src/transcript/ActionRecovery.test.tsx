@@ -178,14 +178,14 @@ describe("WEB-U-001 accepted action failure recovery", () => {
       "Waiting for a free slot · 2 ahead",
     );
     expect(screen.queryByRole("button", { name: "Sending" })).toBeNull();
-    // review-050: the composer carries one queued message, the helper line.
+    // The composer carries one queued message, the helper line.
     expect(screen.getByRole("textbox", { name: "Message" })).toHaveAttribute(
       "placeholder",
       "Reply…",
     );
-    // WEB-U-161 (the 13f screens, #6): the composer says what to do, not the state again.
+    // WEB-U-161 (a screen review before 17.0): the composer says what to do, not the state again.
     expect(screen.getByText("You can reply once it starts.")).toBeVisible();
-    // The model and environment wait behind the header's Change (finding T1).
+    // The model and environment wait behind the header's Change.
     await openTaskChoices();
     const model = screen.getByRole("button", { name: /^Model:/ });
     expect(model).toHaveAttribute("aria-disabled", "true");
@@ -286,7 +286,7 @@ describe("WEB-U-001 accepted action failure recovery", () => {
       );
       return Promise.resolve();
     });
-    // E1's failed start, the page the owner wanted seen (the 14b page pass): what happened and the way on.
+    // A failed start (a pass over the pages before 17.0): what happened and the way on.
     expect(
       within(screen.getByRole("article", { name: "Your message" })).getByText(
         "Not sent. The task's environment couldn't be started. Send the message again; if it fails again, choose another environment or ask an administrator.",

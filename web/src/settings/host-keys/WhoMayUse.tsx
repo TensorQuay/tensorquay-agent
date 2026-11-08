@@ -66,7 +66,7 @@ export function WhoMayUse({
             value=""
             options={choices}
             disabled={choices.length === 0}
-            // The picker takes the error and the focus: a fieldset can't be focused (the review of 938fa83c, item 14).
+            // The picker takes the error and the focus: a fieldset can't be focused.
             invalid={Boolean(error)}
             describedBy={error ? errorId : undefined}
             onChange={(id) => onChange([...chosen, id])}

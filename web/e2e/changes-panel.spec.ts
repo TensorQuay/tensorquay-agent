@@ -3,7 +3,7 @@ import { openFilesPanel } from "./files-panel";
 import { createConversation, signIn } from "./session";
 import { expect, test } from "./test";
 
-// Task 088 (D4): with a long run title the run picker squeezed its chevron to about 4 px, so the dropdown cue vanished.
+// With a long run title the run picker squeezed its chevron to about 4 px, so the dropdown cue vanished.
 test("WEB-U-029 the run picker keeps its chevron whole beside a long run title", async ({
   page,
 }) => {
@@ -43,7 +43,7 @@ test("WEB-U-029 the run picker keeps its chevron whole beside a long run title",
   expect(sizes).toEqual({ nameTruncated: true, chevron: [16, 16] });
 });
 
-// Task 088 (D6): the environment menu's rows once carried a column of capability icons. UI-GUIDELINES §0: each row
+// The environment menu's rows once carried a column of capability icons. UI-GUIDELINES §0: each row
 // names its tools in words under its name instead, and no row carries an icon row.
 test("WEB-U-030 environment menu rows name their tools in words", async ({
   page,

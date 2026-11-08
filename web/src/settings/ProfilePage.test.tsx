@@ -103,7 +103,8 @@ describe("WEB-U-104 the Agent profile page", () => {
       router,
       `/settings/agent-profiles/${TEAM.id}`,
     );
-    // WEB-U-359 (the 16f page pass, E6): a page that can't be edited is titled by the profile's name, never "Edit".
+    // WEB-U-359 (a pass over the pages before 17.0): a page that can't be edited is titled by the profile's name, never
+    // "Edit".
     await screen.findByRole("heading", { name: "Team default" });
     expect(screen.queryByRole("heading", { name: /^Edit / })).toBeNull();
     expect(page()).toHaveTextContent(
@@ -145,7 +146,7 @@ describe("WEB-U-104 the Agent profile page", () => {
   });
 });
 
-// WEB-U-105 (the owner's review): a profile's tools are never hidden. Every tool is listed in its group, ticked by
+// WEB-U-105: a profile's tools are never hidden. Every tool is listed in its group, ticked by
 // default, with one plain line on what it lets the agent do; All ticks or clears them at once.
 describe("WEB-U-105 a profile's tools", () => {
   it("lists every tool in its group, ticked, each with what it does", async () => {

@@ -64,8 +64,8 @@ function start(environment: object, vision: boolean) {
 const BLIND =
   "This model can't see images, so on a Desktop the agent can't see the screen. Choose a model that can.";
 
-// WEB-U-370 (16e's first hour, 8b): a Desktop with a route that can't see images leaves the agent blind, and nothing
-// said so; New task now says it in one line where the person picks them.
+// WEB-U-370 (a first-hour check before 17.0): a Desktop with a route that can't see images leaves the agent blind, and
+// nothing said so; New task now says it in one line where the person picks them.
 describe("WEB-U-370 a Desktop with a model that can't see", () => {
   it("says so in one line", async () => {
     start(desktop, false);

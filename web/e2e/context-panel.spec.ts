@@ -20,13 +20,13 @@ for (const [width, theme] of [
     await page.emulateMedia({ colorScheme: theme });
     await signIn(page);
     await page.goto(await createConversation(page));
-    // Below 1280 px the panel starts closed and floats over the transcript (finding T1): open it.
+    // Below 1280 px the panel starts closed and floats over the transcript: open it.
     const toggle = page.getByRole("button", { name: "Files", exact: true });
     if ((await toggle.getAttribute("aria-expanded")) !== "true")
       await toggle.click();
     const panel = page.getByRole("complementary", { name: "Files" });
     const tabs = panel.getByRole("tablist", { name: "Task views" });
-    // Finding F6: the tab is there only once a run has loaded something.
+    // The tab is there only once a run has loaded something.
     await expect(tabs.getByRole("tab", { name: "Context" })).toHaveCount(0);
     await run(page, "Load the context");
     await tabs.getByRole("tab", { name: "Files" }).focus();

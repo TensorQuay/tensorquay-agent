@@ -55,7 +55,7 @@ describe("WEB-U-221 the team strip", () => {
     ).toHaveAttribute("aria-valuenow", "20");
   });
 
-  // The review of 7 Oct (§13b): with four helpers or fewer the sheet was out of reach on a wide screen.
+  // With four helpers or fewer the sheet was out of reach on a wide screen.
   it("opens All helpers from its own button, whatever the count", () => {
     const onAll = vi.fn();
     render(

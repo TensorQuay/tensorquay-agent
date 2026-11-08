@@ -238,7 +238,7 @@ describe("WEB-U-063 the channel timeline", () => {
   });
 });
 
-// The 13f screen review, #8: the log's vote, decision, claim and report lines said "on #2", a number people had to go
+// A screen review before 17.0: the log's vote, decision, claim and report lines said "on #2", a number people had to go
 // and look up. They name the proposal's or task's title, a link to its post; "#n" only for a post not loaded.
 describe("WEB-U-165 a line names the proposal or task it is about", () => {
   it("names the title, as a link to its post, with the whole title in the tooltip", async () => {

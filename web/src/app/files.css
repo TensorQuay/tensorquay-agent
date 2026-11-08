@@ -23,7 +23,7 @@
 }
 /* The panel docks beside the transcript, which narrows, where the task's layout has room for both (DOCK_WIDTH in
    use-task-layout.ts: 360 + 24 + 516 px of conversation; WEB-U-022 at 1280, WEB-U-170 at 1024 with the rail). The layout's
-   own width decides, so an open sidebar counts (the fix's review). With less room the panel takes the whole column,
+   own width decides, so an open sidebar counts. With less room the panel takes the whole column,
    never part of it, from where the header ends (its lines vary: the pickers' second line on a phone, WEB-U-171) to
    above the composer, which stays usable with the panel open. */
 @container conversation-layout (max-width: 899px) {
@@ -146,7 +146,7 @@ button.file-open:hover {
   justify-content: space-between;
   gap: var(--space-2);
 }
-/* Findings F1-F3: an image, a rendered document or a table, as the agent made it; the text a toggle away. */
+/* An image, a rendered document or a table, as the agent made it; the text a toggle away. */
 .file-kind {
   gap: var(--space-2);
   min-width: 0;
@@ -197,7 +197,7 @@ button.file-open:hover {
   top: 0;
   background: var(--surface);
 }
-/* The file previews design: an agent's web page in a sandboxed frame, on the white a browser gives a page. */
+/* An agent's web page in a sandboxed frame, on the white a browser gives a page. */
 .file-page {
   display: block;
   width: 100%;
@@ -292,7 +292,7 @@ button.file-open:hover {
   align-items: center;
   gap: var(--space-2);
 }
-/* Expand (the file previews review): the same preview wide, over the conversation. */
+/* Expand: the same preview wide, over the conversation. */
 .preview-dialog {
   width: min(1200px, calc(100% - var(--space-8)));
   height: calc(100dvh - var(--space-8));
@@ -477,7 +477,7 @@ button.file-open:hover {
 .files-body:focus:not(:focus-visible) {
   outline: none;
 }
-/* Task 068c: the Files and Changes tabs, the changed-file list and a run's diff (§7 tool-card diff tints). */
+/* The Files and Changes tabs, the changed-file list and a run's diff (§7 tool-card diff tints). */
 .files-tabs {
   display: flex;
   flex: 1;
@@ -541,7 +541,7 @@ button.file-open:hover {
   border-radius: var(--control-radius);
   background: var(--code-bg);
 }
-/* Review of 068c: long lines wrap inside the panel; the +/- marker keeps its own first column. */
+/* Long lines wrap inside the panel; the +/- marker keeps its own first column. */
 .diff-line {
   display: flex;
   padding: 0 var(--space-3);
@@ -573,7 +573,7 @@ button.file-open:hover {
 .diff-section {
   min-width: 0;
 }
-/* Review of 068c: the run picker in the app's menu style; the diff headed like its list row. */
+/* The run picker in the app's menu style; the diff headed like its list row. */
 .changes-picker .picker-button {
   max-width: 100%;
 }

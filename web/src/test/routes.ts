@@ -155,7 +155,7 @@ export function fakeRoutes({
   probes?: Record<string, ProbeResult | ApiError>;
   /** Each route's model listing (WEB-U-067), or the gateway's refusal; by default its own model and one more. */
   listings?: Record<string, RouteModels | ApiError>;
-  /** Vault slice 3: the routes each secret is allowed for; a secret missing here (or no map) allows every route. */
+  /** The routes each secret is allowed for; a secret missing here (or no map) allows every route. */
   bindings?: Record<string, string[]>;
 } = {}) {
   const state: State = {
@@ -197,7 +197,7 @@ export function fakeRoutes({
       });
       return settle(() => {
         const ref = fields.key_ref;
-        // An existing secret not allowed for this route is refused without details (vault slice 3).
+        // An existing secret not allowed for this route is refused without details.
         if (ref && allowed.get(ref)?.includes(name) === false)
           throw refuse(409, "secret_not_allowed");
         return put(state, name, fields, version, key);

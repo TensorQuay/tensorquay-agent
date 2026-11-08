@@ -1,4 +1,4 @@
-// Administration for the fake front (task 090): the readiness detail the Status page reads, as the gateway serves it at
+// Administration for the fake front: the readiness detail the Status page reads, as the gateway serves it at
 // GET /readyz?detail=1 (administrators only; 503 with the same body when a check fails), and the admin usage and
 // secrets API (ADR-0028, ADR-0033).
 import { connectorsRoute } from "./connectors.mjs";
@@ -65,7 +65,7 @@ export function readinessRoute(
 // A small seeded store with versions, 409s, 400 details with the closed reason list, and Idempotency-Key replay.
 // Values are accepted and dropped at once; nothing here ever holds one.
 const NAME = /^[A-Za-z0-9_-]{1,120}$/;
-// Personal Git and connector credentials own these prefixes, in any case (bc96026).
+// Personal Git and connector credentials own these prefixes, in any case.
 const RESERVED = /^(git|connector)-/i;
 const secrets = seededMap(
   [
@@ -75,7 +75,7 @@ const secrets = seededMap(
       last_set_by: "seed",
       routes: ["local"],
       consumers: [{ kind: "route", name: "local" }],
-      // Vault slice 1: last changed long ago, with a reminder that is due.
+      // Last changed long ago, with a reminder that is due.
       rotated_at: "2026-05-01T09:00:00Z",
       rotate_after_days: 90,
       rotation_due: true,
@@ -236,7 +236,7 @@ function putSecret(name, input, key, response, json) {
 }
 
 /**
- * A secret's reads (vault slice 2), newest first: a first page whose `next` leads to one older read. Each read is the
+ * A secret's reads, newest first: a first page whose `next` leads to one older read. Each read is the
  * caller's own, so the admin view names a person the Users page knows.
  */
 function secretReads(name, url, member, json, response) {
@@ -283,7 +283,7 @@ function secretReads(name, url, member, json, response) {
   });
 }
 
-/** Replaces who may use a secret, with the version read (vault slice 3); sorted by kind, then name. */
+/** Replaces who may use a secret, with the version read; sorted by kind, then name. */
 function putConsumers(name, input, response, json) {
   const item = secrets.get(`secrets/${name}`);
   const list = input.consumers;
@@ -315,7 +315,7 @@ function putConsumers(name, input, response, json) {
 }
 
 /**
- * Whether a route or connector may name a secret (vault slice 3): an existing secret only when it is bound to it; one
+ * Whether a route or connector may name a secret: an existing secret only when it is bound to it; one
  * that does not exist yet is left to key_missing.
  */
 function mayUse(ref, kind, name) {
@@ -326,7 +326,7 @@ function mayUse(ref, kind, name) {
   );
 }
 
-/** Sets or clears a secret's rotation reminder with the version read (vault slice 1). */
+/** Sets or clears a secret's rotation reminder with the version read. */
 function putReminder(name, input, response, json) {
   const item = secrets.get(`secrets/${name}`);
   const days = input.rotate_after_days;

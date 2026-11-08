@@ -51,7 +51,7 @@ const rows = () =>
     // The tooltip's title and workspace; its last part is the full time, which depends on the time zone.
     .map((link) => link.getAttribute("title")?.replace(/ · [^·]+$/, ""));
 
-// Task 076: the task list names a task's workspace and filters by one (answers-076 Q8); since UI-GUIDELINES §7 the name is on
+// The task list names a task's workspace and filters by one; since UI-GUIDELINES §7 the name is on
 // hover, in the row's title, never a second line.
 describe("WEB-U-025 task list and workspaces", () => {
   it("names the workspace on hover when it is not the task's own", async () => {

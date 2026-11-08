@@ -108,7 +108,7 @@ function show(user: User = me) {
   );
 }
 
-// Task 067 Q4: a person's tasks as metadata rows, each opening the private view; nothing from the tasks' content.
+// A person's tasks as metadata rows, each opening the private view; nothing from the tasks' content.
 describe("WEB-U-023 a person's tasks", () => {
   it("lists only that person's tasks as metadata with links to the private view", async () => {
     serve([
@@ -140,7 +140,7 @@ describe("WEB-U-023 a person's tasks", () => {
     );
   });
 
-  // The dev screen review (011e8972), #3: every row was named "Private task", and the environment and model were raw
+  // A screen review before 17.0: every row was named "Private task", and the environment and model were raw
   // ids. The created date opens the details; the environment and model read as everywhere else.
   it("WEB-U-172 names no row Private task, and shows the environment and model by name", async () => {
     serve([
@@ -170,13 +170,13 @@ describe("WEB-U-023 a person's tasks", () => {
       "href",
       "/c/0195d8c0-0000-7000-8000-0000000000a1",
     );
-    // The fix's review: same-day tasks must not share one link name (WCAG 2.4.4); the details tell them apart, no title.
+    // Same-day tasks must not share one link name (WCAG 2.4.4); the details tell them apart, no title.
     expect(within(first!).getByRole("link")).toHaveAccessibleName(
       "Task created Jan 1, 2026, Workstation, Local model",
     );
   });
 
-  // The fix's review: the ids flashed before the names arrived. The table waits for both lists; a list that fails
+  // The ids flashed before the names arrived. The table waits for both lists; a list that fails
   // leaves the ids, set as code, rather than waiting forever.
   it("WEB-U-172 shows no raw id while the names load, and the ids if a list fails", async () => {
     serve([task("0195d8c0-0000-7000-8000-0000000000a1")]);
@@ -218,8 +218,8 @@ describe("WEB-U-023 a person's tasks", () => {
   });
 });
 
-// WEB-U-357 (the 16f page pass, E4): an id that isn't one of this installation's people reads as not found, with the
-// way back, never an endless skeleton.
+// WEB-U-357 (a pass over the pages before 17.0): an id that isn't one of this installation's people reads as not found,
+// with the way back, never an endless skeleton.
 describe("WEB-U-357 a person who isn't here", () => {
   it("says so once the people are read", async () => {
     serve([]);

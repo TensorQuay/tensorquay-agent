@@ -124,7 +124,7 @@ function setId(id: string) {
 
 // Settings → Profiles (ADR-0012, WEB-U-049): a person's own profiles and the shared ones, narrowing only.
 describe("WEB-U-049 the profiles list", () => {
-  // The owner's review: say in one line what a profile is for, with an example that isn't only coding, and how it
+  // Say in one line what a profile is for, with an example that isn't only coding, and how it
   // differs from a model or an environment.
   it("says what an agent profile is for, with a general example", async () => {
     show(fakeProfiles({ profiles: LISTED }).api);
@@ -136,7 +136,7 @@ describe("WEB-U-049 the profiles list", () => {
     ).toBeVisible();
   });
 
-  // Finding 9: with nothing on either list, one empty state with the way to add one, not two empty headings.
+  // With nothing on either list, one empty state with the way to add one, not two empty headings.
   it("shows one empty state with Add agent profile when there are none at all", async () => {
     show(fakeProfiles({ profiles: [] }).api);
     const empty = await screen.findByRole("region", {

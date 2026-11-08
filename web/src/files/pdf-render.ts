@@ -1,10 +1,10 @@
-// The PDF view's pdf.js side (the file previews design), in its own module so pdf.js loads only when a PDF opens.
-// The document is untrusted: pdf.js 6 has no eval path at all (the isEvalSupported option is gone with it), its
-// JavaScript never runs (the core renderer runs no document scripts; the
-// scripting sandbox is a viewer component we don't load), XFA forms are off, and pages are drawn to canvas with their
-// text laid over them as plain text (pdf.js's text layer, WEB-U-277): a screen reader reads it and a person can select
-// it. No annotation layer and no images handler, so no link in a PDF is ever clickable. The bytes arrive as an
-// ArrayBuffer; the PDF never gets a URL of its own. The worker is a chunk of this build, served from our own origin.
+// The PDF view's pdf.js side, in its own module so pdf.js loads only when a PDF opens. The document is untrusted:
+// pdf.js 6 has no eval path at all (the isEvalSupported option is gone with it), its JavaScript never runs (the core
+// renderer runs no document scripts; the scripting sandbox is a viewer component we don't load), XFA forms are off, and
+// pages are drawn to canvas with their text laid over them as plain text (pdf.js's text layer, WEB-U-277): a screen
+// reader reads it and a person can select it. No annotation layer and no images handler, so no link in a PDF is ever
+// clickable. The bytes arrive as an ArrayBuffer; the PDF never gets a URL of its own. The worker is a chunk of this
+// build, served from our own origin.
 import {
   getDocument,
   GlobalWorkerOptions,

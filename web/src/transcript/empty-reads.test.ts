@@ -39,8 +39,9 @@ const work = (...reads: ReturnType<typeof read>[]) => {
   return present(transcript)[0]?.work ?? [];
 };
 
-// WEB-U-238 (the 14b page pass, H02): a lead waiting on its helpers reads again and again; reads in a row that found
-// nothing are one quiet line, "Checked for reports 3 times · nothing new", never the same empty line three times.
+// WEB-U-238 (a pass over the pages before 17.0): a lead waiting on its helpers reads again and again; reads in a row
+// that found nothing are one quiet line, "Checked for reports 3 times · nothing new", never the same empty line three
+// times.
 describe("WEB-U-238 empty team reads in a row fold to one line", () => {
   it("folds three empty reads into one line with their count", () => {
     const items = work(

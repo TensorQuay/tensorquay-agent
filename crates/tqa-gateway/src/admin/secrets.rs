@@ -31,14 +31,14 @@ pub(crate) struct Item {
     seed: Option<String>,
     last_set_by: String,
     routes: Vec<String>,
-    /// When the value last changed (vault slice 1).
+    /// When the value last changed.
     #[serde(with = "time::serde::rfc3339")]
     rotated_at: time::OffsetDateTime,
     /// The rotation reminder's interval in days, or `null` for none.
     rotate_after_days: Option<i32>,
     /// Whether the reminder's interval has passed since the value last changed.
     rotation_due: bool,
-    /// The routes and connectors that may use it (vault slice 3); a new secret allows none.
+    /// The routes and connectors that may use it; a new secret allows none.
     consumers: Vec<crate::secrets::bindings::Consumer>,
 }
 
@@ -259,7 +259,7 @@ fn reminder(body: &[u8]) -> Result<(Option<i32>, i64), GatewayError> {
 }
 
 /// `PUT /api/v1/admin/secrets/{name}/reminder` `{rotate_after_days, version}` (administrator, session): sets or clears
-/// the rotation reminder of the version read (vault slice 1). A reminder never stops a secret from working.
+/// the rotation reminder of the version read. A reminder never stops a secret from working.
 ///
 /// # Errors
 /// `400 invalid_request` with details, `403`, `404`, `409 conflict`, store failure.
@@ -291,7 +291,7 @@ pub(crate) async fn remind(
 }
 
 /// `GET /api/v1/admin/secrets/{name}/reads?limit&before` (administrator, session or token): which consumers read a
-/// shared secret, for which conversation, user and run, newest first; never its value (vault slice 2). Users' own
+/// shared secret, for which conversation, user and run, newest first; never its value. Users' own
 /// credentials are not shown here.
 ///
 /// # Errors
@@ -311,7 +311,7 @@ pub(crate) async fn reads(
 }
 
 /// `PUT /api/v1/admin/secrets/{name}/consumers` `{consumers: [{kind: route|connector, name}], version}`
-/// (administrator, session): the routes and connectors that may use a shared secret (vault slice 3). Versioned and
+/// (administrator, session): the routes and connectors that may use a shared secret. Versioned and
 /// audited; a route or connector naming a secret that is not bound to it cannot be saved, and cannot read it.
 ///
 /// # Errors

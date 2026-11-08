@@ -41,7 +41,7 @@ function show(token = "synthetic-invitation-token") {
   );
 }
 
-// Task 067 / GW-I-002: joining by an email-bound invitation link; every unusable link is one plain state.
+// GW-I-002: joining by an email-bound invitation link; every unusable link is one plain state.
 describe("WEB-U-023 join", () => {
   it("shows whom the link is for and joins with a password", async () => {
     fetch
@@ -127,7 +127,7 @@ describe("WEB-U-023 join", () => {
     );
   });
 });
-// WEB-U-355 (the 16f page pass, E1): a short password is said under the field in the app's words, never the
+// WEB-U-355 (a pass over the pages before 17.0): a short password is said under the field in the app's words, never the
 // browser's own bubble, and nothing is sent.
 describe("WEB-U-355 join's password, said by the page", () => {
   it("says a short password and sends nothing", async () => {

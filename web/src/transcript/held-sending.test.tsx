@@ -29,7 +29,7 @@ function answer(held: boolean) {
   );
 }
 
-// WEB-U-367 (the lead's live session on 16e): a message sent while the person had control of the desktop read
+// WEB-U-367 (a live check before 17.0): a message sent while the person had control of the desktop read
 // "Sending…" in the header and under its bubble, while the composer said "Sends when you hand back the desktop". 16e's
 // gateway didn't answer it held; dev's does (GW-I-219). Held, for a run or for Take over, it is the composer's line
 // alone: nothing on the page says it is sending.

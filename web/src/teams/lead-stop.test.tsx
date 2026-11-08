@@ -37,7 +37,7 @@ describe("WEB-U-307 a lead's Stop while its helpers work", () => {
     expect(onStopTeam).toHaveBeenCalledOnce();
   });
 
-  // WEB-U-307's review (P3): a helper waiting for its lead has ended its run, so it can't wake the lead; the strip and the
+  // WEB-U-307: a helper waiting for its lead has ended its run, so it can't wake the lead; the strip and the
   // Stop hint mustn't say helpers still work for it.
   it("counts a helper at work, queued, stuck or unreadable, but not one waiting for the lead, done, stopped or failed", () => {
     const only = (state: TeamHelper["state"]) =>

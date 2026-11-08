@@ -87,9 +87,9 @@ type PageProps = {
 };
 
 /**
- * Add a key, or a key's own page (ADR-0037; the reviewed Keys sketch §3 and §4), the UI standard's Page. With an `id`,
- * the key is the person's own, found in their list; one that no longer exists says so. A save that another change beat
- * shows the key as it is now, saying why.
+ * Add a key, or a key's own page (ADR-0037), the UI standard's Page. With an `id`, the key is the person's own, found
+ * in their list; one that no longer exists says so. A save that another change beat shows the key as it is now, saying
+ * why.
  */
 export function HostKeyPage({ id, ...props }: PageProps & { id?: string }) {
   const t = useT();
@@ -189,7 +189,7 @@ function KeyForm({
   );
   const [initial] = useState(draft);
   // The name follows the address, and the names the person's runs already get as they load, until the person types
-  // one (the review of 36740156, item 3); a saved key's name never follows.
+  // one; a saved key's name never follows.
   const [named, setNamed] = useState(item !== null);
   const current: HostKeyDraft = named
     ? draft
@@ -202,8 +202,8 @@ function KeyForm({
       };
   const [replacing, setReplacing] = useState(false);
   const [tried, setTried] = useState(false);
-  // The address is checked once the person leaves its field with something in it, then as they type (the c14b first
-  // hour, F2; WEB-U-266): "Keys are sent only over https." shouldn't wait for Save.
+  // The address is checked once the person leaves its field with something in it, then as they type (a first-hour check
+  // before 17.0; WEB-U-266): "Keys are sent only over https." shouldn't wait for Save.
   const [addressLeft, setAddressLeft] = useState(false);
   const [refused, setRefused] = useState<Problems>({});
   const [failure, setFailure] = useState<string | null>(null);
@@ -235,7 +235,7 @@ function KeyForm({
       done(t("hostKeys.saved", { name: made.name }));
     } catch (error) {
       // Someone changed the key meanwhile: as every settings form, keep the person's draft and take the new
-      // version (the review of b608b50f, item 10), so saving again replaces their change.
+      // version, so saving again replaces their change.
       if (error instanceof ApiError && error.code === "conflict") {
         setFailure(t("hostKeys.conflict"));
         void own.refetch();

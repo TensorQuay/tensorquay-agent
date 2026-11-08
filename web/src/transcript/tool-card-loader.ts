@@ -8,7 +8,7 @@ let loading: Promise<Card> | null = null;
 /**
  * Starts loading the tool card's code, once. A step's or a group's toggle calls it on the person's intent to open one
  * (warmToolCard), and the card's own lazy path when it opens, so a card renders at once instead of behind a
- * placeholder (the 13h UI review, #10: skeletons only after 300 ms).
+ * placeholder (a UI review before 17.0: skeletons only after 300 ms).
  */
 export function preloadToolCard(): Promise<Card> {
   loading ??= import("./ToolCard").then(

@@ -9,7 +9,7 @@ const StartContext = createContext<
 
 /**
  * Starts a fresh composer even when the empty conversation route is already open, optionally on a chosen
- * workspace (task 076: "New task" on a workspace, "Start a task in the fork").
+ * workspace ("New task" on a workspace, "Start a task in the fork").
  */
 export function StartProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<Start>({ version: 0 });

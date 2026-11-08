@@ -32,7 +32,7 @@ function write(key: string) {
 /**
  * Whether a task's page offers its screen (ADR-0039 §5): its environment declares a desktop, and the person viewing is
  * the task's owner. Nobody else may see the screen (the gateway refuses them), so nobody else is offered its toggle,
- * its tab or its opening by itself (the c16 UX review's second pass, #21).
+ * its tab or its opening by itself (a UX review before 17.0).
  */
 export function screenOffered(
   environment: { capabilities: readonly string[] } | undefined,
@@ -55,7 +55,7 @@ export function actedOnDesktop(transcript: Transcript): boolean {
   );
 }
 
-/** Whether the agent is acting on the desktop right now: a `computer` call running (the c16 UX review, #14). */
+/** Whether the agent is acting on the desktop right now: a `computer` call running (a UX review before 17.0). */
 export function actingOnDesktop(transcript: Transcript): boolean {
   return transcript.items.some(
     (item) =>
@@ -88,8 +88,8 @@ export function useScreenAutoOpen({
   const acted = desktop && actedOnDesktop(transcript);
   const visit = useRef({ opened: false, closed: false });
   // Opened by itself in this visit, and not touched by the person since (a press or a key inside the panel, or another
-  // tab): such a panel gives the conversation back at the run's end where it lies over it (the 16d page pass, Z25 at
-  // 390; WEB-U-332), so the run's outcome is in sight. One the person touched or opened stays as it is.
+  // tab): such a panel gives the conversation back at the run's end where it lies over it (a pass over the pages
+  // before 17.0, at 390; WEB-U-332), so the run's outcome is in sight. One the person touched or opened stays as it is.
   const untouched = useRef(false);
   const { open, tab, show, close } = panel;
   useEffect(() => {
@@ -119,7 +119,7 @@ export function useScreenAutoOpen({
     };
   }, [open, tab]);
   // Not "when the run ends" but "while no run is going": a quick run's first desktop action and its end can arrive
-  // together, so the panel may open after the run has already ended (the page pass's fake front, Z25 at 390).
+  // together, so the panel may open after the run has already ended (seen on the fake front at 390).
   const running = ["queued", "running"].includes(transcript.run.status);
   useEffect(() => {
     if (running || docks || !open || tab !== "screen" || !untouched.current)

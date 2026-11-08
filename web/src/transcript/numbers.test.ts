@@ -18,7 +18,7 @@ const language = (code: string) =>
     ),
   );
 
-// Review of 059: the run status, "Worked for" and tool durations use the reader's own units.
+// The run status, "Worked for" and tool durations use the reader's own units.
 describe("WEB-U-019 duration labels", () => {
   it("rounds run and turn durations to whole seconds", () => {
     expect(secondsLabel(5_400, english)).toBe("5 s");
@@ -37,8 +37,9 @@ describe("WEB-U-019 duration labels", () => {
   });
 });
 
-// WEB-U-395 (16n T7; c16k real-world B9, 17 Oct 2026): "Worked for 837 s · created 1 file, ran 27 commands". Past a
-// minute a duration reads in minutes and seconds, past an hour in hours and minutes, in the reader's units.
+// WEB-U-395 (a review and real-world use before 17.0, 17 Oct 2026):
+// "Worked for 837 s · created 1 file, ran 27 commands". Past a minute a duration reads in minutes and seconds, past an
+// hour in hours and minutes, in the reader's units.
 describe("WEB-U-395 durations past a minute", () => {
   it("reads minutes and seconds under an hour, hours and minutes past it", () => {
     expect(secondsLabel(59_400, english)).toBe("59 s");

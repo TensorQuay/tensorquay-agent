@@ -293,8 +293,8 @@ describe("WEB-U-015 composer resumes following", () => {
     ).toHaveLength(2);
   });
 
-  // WEB-U-274 (the accessibility review of the core screens): Jump to latest goes once the view is at the end, so the
-  // focus of someone using it with the keyboard fell to the page; the transcript, showing the latest, keeps it.
+  // WEB-U-274: Jump to latest goes once the view is at the end, so the focus of someone using it with the keyboard fell
+  // to the page; the transcript, showing the latest, keeps it.
   it("leaves the focus on the transcript after Jump to latest", () => {
     vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockReturnValue(200);
     vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockReturnValue(
@@ -363,8 +363,8 @@ describe("WEB-U-007 bar divider", () => {
   });
 });
 
-// The review of cf653e47, item 19: a host key's name shows in a task's steps only to the run's sender, whose key it is
-// (ADR-0037 §2); in a shared task that may not be the task's owner.
+// A host key's name shows in a task's steps only to the run's sender, whose key it is (ADR-0037 §2); in a shared task
+// that may not be the task's owner.
 describe("WEB-U-148 a keyed call's key named to the run's sender only", () => {
   const person = (id: string): User => ({
     id,

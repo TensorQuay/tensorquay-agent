@@ -32,7 +32,7 @@ describe("WEB-U-001 queued, sleeping and waking copy", () => {
         frame(1, { type: "run.started", run_id: runId }),
         frame(2, { type: "run.completed", run_id: runId }),
       ].reduce(apply, emptyTranscript());
-      // Finding T-d: people don't manage environments; a sleeping one isn't news in the header.
+      // People don't manage environments; a sleeping one isn't news in the header.
       expect(
         runPresentation({ ...completed, sandbox }, 0).environment,
       ).toBeNull();
@@ -78,7 +78,7 @@ describe("WEB-U-001 queued, sleeping and waking copy", () => {
       />,
     );
     const input = screen.getByRole("textbox", { name: "Message" });
-    // review-050: one queued message - the helper line - and the ordinary placeholder.
+    // One queued message - the helper line - and the ordinary placeholder.
     expect(input).toHaveAttribute("placeholder", "Reply…");
     // WEB-U-161: the composer says what to do; the state itself is the header's.
     expect(screen.getByText("You can reply once it starts.")).toBeVisible();

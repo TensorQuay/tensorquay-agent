@@ -55,8 +55,8 @@ export const APPLIES: Partial<
     short: "limits.appliesNextDesktop",
     whole: "limits.appliesNextDesktopWhole",
   },
-  // The helpers' limits, as the gateway's `applies` has them (next_member, next_team, next_check; the teams UX review,
-  // #6): a section intro can't say three timings at once.
+  // The helpers' limits, as the gateway's `applies` has them (next_member, next_team, next_check): a section intro
+  // can't say three timings at once.
   "agent_teams.max_members": {
     short: "limits.appliesNextMember",
     whole: "limits.appliesNextMemberWhole",

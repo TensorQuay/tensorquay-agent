@@ -13,7 +13,7 @@ import type { LimitsApi } from "./limits";
 import type { RoutesApi } from "./routes";
 import type { TemplatesApi } from "./templates";
 
-/** Adds one route, connector or engine to who may use a secret, on the secret's current version (vault slice 3). */
+/** Adds one route, connector or engine to who may use a secret, on the secret's current version. */
 async function allowFor(
   on: ReturnType<typeof adminRequests>,
   ref: string,

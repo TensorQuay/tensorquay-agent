@@ -21,7 +21,7 @@ const blocked =
 async function capture(page: Page, name: string) {
   const directory = process.env.TQA_WEB_EVIDENCE_DIR;
   if (!directory) return;
-  // Evidence shows rendered content, never a loading skeleton (061 addendum 2).
+  // Evidence shows rendered content, never a loading skeleton.
   await expect(page.locator(".skeleton")).toHaveCount(0);
   await mkdir(directory, { recursive: true });
   await page.screenshot({ path: join(directory, `egress-real-${name}.png`) });

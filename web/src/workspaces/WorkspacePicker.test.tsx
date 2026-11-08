@@ -40,7 +40,7 @@ const lease = {
   pinned: false,
 };
 
-// Task 076: the workspace choice in the one-line task bar.
+// The workspace choice in the one-line task bar.
 describe("WEB-U-025 workspace picker", () => {
   it("defaults to a new workspace and lists recent ones with owner and state", () => {
     const sales = workspace({

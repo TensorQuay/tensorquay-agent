@@ -92,7 +92,8 @@ const dialog = () => screen.getByRole("dialog");
 describe("WEB-U-076 keys, by service", () => {
   it("lists every key in one table by its service, with no git words", async () => {
     show();
-    // WEB-U-262 (the c14b first hour, F1): the connectors' keys have their own heading and say what they are for.
+    // WEB-U-262 (a first-hour check before 17.0): the connectors' keys have their own heading and say what they are
+    // for.
     expect(
       screen.getByRole("heading", { level: 2, name: "Keys for connectors" }),
     ).toBeVisible();

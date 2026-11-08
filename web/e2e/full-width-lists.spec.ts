@@ -2,10 +2,10 @@ import { signIn } from "./session";
 import { axe, capture } from "./settings-page";
 import { expect, test, type Locator, type Page } from "./test";
 
-// WEB-U-131 (the owner's review of the Agent profile page; UI-GUIDELINES "Long lists use the full width"): a list of
-// choices spans the whole content width, never one narrow column beside an empty label column; a profile's Tools are
-// a grid of group cards, about three to a row at 1280 and one on a phone, with All above. The page is one column: each
-// field's label above it, fields at most about 640 px wide. At 1280 and 390 in both themes.
+// WEB-U-131 (UI-GUIDELINES "Long lists use the full width"): a list of choices spans the whole content width, never one
+// narrow column beside an empty label column; a profile's Tools are a grid of group cards, about three to a row at 1280
+// and one on a phone, with All above. The page is one column: each field's label above it, fields at most about 640 px
+// wide. At 1280 and 390 in both themes.
 
 async function box(locator: Locator) {
   const found = await locator.boundingBox();

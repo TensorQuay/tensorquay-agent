@@ -20,7 +20,7 @@ describe("WEB-U-001 human run and environment status", () => {
       ...frame(2, { type: "run.completed", run_id: runId }),
       ts: new Date(Date.parse(started.ts) + 22300).toISOString(),
     });
-    // Finding T-d: "Done" alone; how long it took waits in the tooltip.
+    // "Done" alone; how long it took waits in the tooltip.
     expect(
       runPresentation(finished, Date.parse(started.ts) + 90000),
     ).toMatchObject({ label: "Done", took: "Took 22 s" });
@@ -77,7 +77,7 @@ describe("WEB-U-001 human run and environment status", () => {
     expect(runPresentation(failed, 0).label).toBe(
       "Failed: The task's environment couldn't be reached",
     );
-    // Task 072: a failure code with its own plain copy replaces the runtime's wording.
+    // A failure code with its own plain copy replaces the runtime's wording.
     const unreadable = apply(
       state,
       frame(2, {
@@ -228,7 +228,7 @@ describe("WEB-U-122 the live count on the reader's clock", () => {
   });
 });
 
-// WEB-U-414 (c17 U9; 16u live L2, c16u-L2 pages.json b-mid-2, b-mid-3): a fresh page on an ended lead task read
+// WEB-U-414 (17.0's release candidate; a live check before 17.0): a fresh page on an ended lead task read
 // "Working… · 4 min 46 s" for a moment while the stream replayed, before Done: the replay had its run's start but
 // not yet its end. A run that started before the task's record was last active ended as the record says; a run that
 // started after it is new, and works.

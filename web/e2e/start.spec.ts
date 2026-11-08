@@ -87,7 +87,7 @@ for (const width of [1024, 1440]) {
       ).toHaveAttribute("title", /^Summarize the workspace\. · /);
       await capture(page, `finished-${width}-${theme}`);
       await group.press("Enter");
-      // The latest card opens with its group (finding T2).
+      // The latest card opens with its group.
       await openCard(
         page.getByRole("button", { name: "Ran a command: ls", exact: true }),
       );
@@ -150,11 +150,11 @@ for (const width of [1024, 1440]) {
           .evaluate((element) => getComputedStyle(element).color),
       );
 
-      // WEB-U-157 (the 13f screens): Thinking is marked as something to open, not a bare word.
+      // WEB-U-157 (a screen review before 17.0): Thinking is marked as something to open, not a bare word.
       await expect(
         page.locator("details.reasoning > summary svg").first(),
       ).toBeVisible();
-      // WEB-U-155 (the 13f screens, #4): the status is one word, and the title keeps its room.
+      // WEB-U-155 (a screen review before 17.0): the status is one word, and the title keeps its room.
       await expect(page.getByLabel("Run status")).toHaveAttribute(
         "data-short",
         "Failed",
@@ -185,8 +185,8 @@ for (const width of [1024, 1440]) {
   }
 }
 
-// The review's carry-overs for New task (UI-GUIDELINES §0/§5b): on a phone the title sits beside the menu button,
-// not floated right; the box's placeholder doesn't repeat the heading; the suggestions read as body text, not bold.
+// New task (UI-GUIDELINES §0/§5b): on a phone the title sits beside the menu button, not floated right; the box's
+// placeholder doesn't repeat the heading; the suggestions read as body text, not bold.
 test("WEB-U-017 New task at 390: title beside the menu, a placeholder of its own, light suggestions", async ({
   page,
 }) => {

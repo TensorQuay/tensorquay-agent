@@ -45,7 +45,7 @@ export const WARNINGS: Readonly<
   swallowed_calls: "models.warnSwallowedCalls",
   thinks_unasked: "models.warnThinksUnasked",
   usage_missing: "models.warnUsageMissing",
-  // Shown as the verdict itself, with the speed, by RouteCheck (the c16d first hour, F2), never from this table.
+  // Shown as the verdict itself, with the speed, by RouteCheck (a first-hour check before 17.0), never from this table.
   slow_answers: "models.checkVerifiedSlowly",
   // Shown with the sizes and its one click by RouteCheck (WEB-U-269), never from this table.
   context_window_differs: "models.warnContextWindowDiffers",

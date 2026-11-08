@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { createConversation, signIn } from "./session";
 import { expect, test, type Page } from "./test";
 
-// Task 084: a Markdown table's short columns squeezed until words and numbers broke ("Siz/e", "2,1/24 B"). Short
+// A Markdown table's short columns squeezed until words and numbers broke ("Siz/e", "2,1/24 B"). Short
 // columns keep their words whole, prose columns wrap, and a table too wide for the column scrolls in its own region.
 async function measure(page: Page) {
   return page.evaluate(() => {

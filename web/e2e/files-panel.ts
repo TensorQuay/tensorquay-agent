@@ -2,7 +2,7 @@ import { expect, type Page } from "@playwright/test";
 
 /**
  * Opens a task's Files panel from the header's Files icon, unless it is open already (a wide screen remembers the
- * person's choice), and returns it. It never opens by itself (candidate12 F6, WEB-U-124).
+ * person's choice), and returns it. It never opens by itself (found before 17.0, WEB-U-124).
  */
 export async function openFilesPanel(page: Page) {
   const toggle = page

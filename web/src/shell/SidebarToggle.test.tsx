@@ -49,7 +49,7 @@ describe("WEB-U-007 sidebar toggle", () => {
   });
 
   // Before hydration the server can't know the width or the stored choice: the stylesheet shows the layout, so the
-  // toggle carries both names and the stylesheet's own rule hides the one that doesn't apply (the polish review).
+  // toggle carries both names and the stylesheet's own rule hides the one that doesn't apply.
   it("leaves its name to the stylesheet's layout before hydration", () => {
     const host = document.createElement("div");
     host.innerHTML = renderToString(<SidebarToggle />);

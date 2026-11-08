@@ -27,9 +27,9 @@ const FAILURES: Record<PdfFailure, MessageKey> = {
 };
 
 /**
- * A PDF's first pages, drawn by pdf.js in this page (the file previews design, the lead's decision 2): the same in
- * every browser, the PDF's own JavaScript never runs, and only pages are drawn, so nothing in it is clickable. pdf.js
- * loads only here (`./pdf-render`). A file over the preview limit isn't fetched.
+ * A PDF's first pages, drawn by pdf.js in this page: the same in every browser, the PDF's own JavaScript never runs,
+ * and only pages are drawn, so nothing in it is clickable. pdf.js loads only here (`./pdf-render`). A file over the
+ * preview limit isn't fetched.
  */
 export function PdfPreview({
   conversationId,

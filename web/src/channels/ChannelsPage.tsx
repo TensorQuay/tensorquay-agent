@@ -110,7 +110,7 @@ export function ChannelsPage({ api }: { api: ChannelsApi }) {
 
 function ChannelCard({ item }: { item: Channel }) {
   const t = useT();
-  // C2 (the 14b page pass): under its title, only what the purpose adds.
+  // WEB-U-250: under its title, only what the purpose adds.
   const beyond = purposeBeyond(item.purpose, item.name);
   return (
     <li className="channel-card stack">

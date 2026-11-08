@@ -101,7 +101,7 @@ afterEach(() => {
   for (const entry of toastStore.snapshot()) toastStore.dismiss(entry.id);
 });
 
-// Task 076: the Workspaces page (UI-GUIDELINES §6 and §7).
+// The Workspaces page (UI-GUIDELINES §6 and §7).
 describe("WEB-U-025 workspaces page", () => {
   it("loads with skeleton cards, never a spinner", () => {
     show(() => new Promise<Response>(() => undefined));
@@ -133,8 +133,7 @@ describe("WEB-U-025 workspaces page", () => {
       "sr-only",
     );
     expect(rows[0]!.querySelector(".status-pill")).toBeNull();
-    // The owner in every row: "You" for yours, never a blank cell (the review of 047b8713), and someone else's
-    // by email with your access.
+    // The owner in every row: "You" for yours, never a blank cell, and someone else's by email with your access.
     const owner = (row: HTMLElement) =>
       within(row).getAllByRole("cell")[1]?.textContent;
     expect(rows.map(owner)).toEqual([
@@ -370,7 +369,7 @@ describe("WEB-U-025 workspaces page", () => {
   });
 });
 
-// Task 076 Q9: the confirmation follows the gateway's delete rules.
+// The confirmation follows the gateway's delete rules.
 describe("WEB-U-025 deleting a workspace", () => {
   const answer = (status: number) =>
     status === 204
@@ -404,8 +403,8 @@ describe("WEB-U-025 deleting a workspace", () => {
     return { dialog: screen.getByRole("dialog"), ...gateway };
   }
 
-  // WEB-U-275 (the accessibility review of the core screens): the deleted card takes the ⋯ that opened its confirmation
-  // with it, so the focus would fall to the page; the page's heading takes it once the card is gone.
+  // WEB-U-275: the deleted card takes the ⋯ that opened its confirmation with it, so the focus would fall to the page;
+  // the page's heading takes it once the card is gone.
   it("gives the focus to the page's heading once the deleted card is gone", async () => {
     const value = workspace({ name: "Old notes" });
     let current = [value];
@@ -497,7 +496,7 @@ describe("WEB-U-025 deleting a workspace", () => {
     expect(within(dialog).queryByRole("button", { name: "Delete" })).toBeNull();
   });
 
-  // The 13h UI review (#3): a done task's kept environment doesn't block the delete; the gateway retires it.
+  // A UI review before 17.0: a done task's kept environment doesn't block the delete; the gateway retires it.
   it("offers the delete when a done task's environment is only kept", async () => {
     const value = workspace({
       name: "Kept",

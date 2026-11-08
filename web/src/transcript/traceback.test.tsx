@@ -5,7 +5,7 @@ import { ToolCard } from "./ToolCard";
 import { foldTraceback } from "./traceback";
 import type { ToolView } from "./types";
 
-// c16k real-world B9 (17 Oct 2026), B9-03: a failed step showed ~20 lines of `[stderr] File "/usr/lib/python3.13/…"`
+// Real-world use before 17.0 (17 Oct 2026): a failed step showed ~20 lines of `[stderr] File "/usr/lib/python3.13/…"`
 // down to the one that mattered, "HTTP Error 429: Too Many Requests".
 const TRACE = [
   "[stdout] fetching Kinkaku-ji",
@@ -19,8 +19,8 @@ const TRACE = [
   "[stderr] urllib.error.HTTPError: HTTP Error 429: Too Many Requests",
 ].join("\n");
 
-// WEB-U-400 (16n T7): a failed step's Python traceback reads as its last line, what went wrong; the whole trace is
-// behind Show more.
+// WEB-U-400 (a review before 17.0): a failed step's Python traceback reads as its last line, what went wrong; the whole
+// trace is behind Show more.
 describe("WEB-U-400 a traceback folded to its last line", () => {
   it("keeps the output around a trace and its last line, and says when it folded", () => {
     expect(foldTraceback(TRACE)).toEqual({

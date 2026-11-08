@@ -108,7 +108,7 @@ async function addRoute(page: Page) {
   await axe(page);
   const save = page.getByRole("button", { name: "Save" });
   await save.click();
-  // Vault slice 3: the seeded secret is bound to its own route only, so the gateway refuses a new route naming it
+  // The seeded secret is bound to its own route only, so the gateway refuses a new route naming it
   // (409 secret_not_allowed) and the form offers to allow it; the admin does, then saves again (WEB-U-054).
   const dialog = page.locator("form.settings-form-page");
   await expect(
@@ -162,7 +162,7 @@ async function memberFetches(page: Page, link: string) {
   await expect(guest.getByLabel("Message", { exact: true })).toBeVisible();
   await fetchInNewConversation(guest, "second");
   await expect(guest.getByText(blocked(), { exact: true })).toHaveCount(0);
-  // The fetch's own result, from the upstream: the path it served. Finding A1: a fetch's line names the page it read.
+  // The fetch's own result, from the upstream: the path it served. A fetch's line names the page it read.
   await openCard(guest.getByRole("button", { name: /^Read / }));
   // Only the upstream's own answer carries these keys (upstream.py); the URL alone is in the arguments too.
   await expect(

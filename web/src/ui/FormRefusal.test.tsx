@@ -49,7 +49,7 @@ function Form({ later = false }: { later?: boolean }) {
   );
 }
 
-// WEB-U-110 (the lead's first hour, F14): a save the form refuses never does "nothing": the first field to fix gets the
+// WEB-U-110 (a first-hour check): a save the form refuses never does "nothing": the first field to fix gets the
 // focus and comes into view, and a line by Save says how many are left.
 describe("WEB-U-110 a refused save shows where", () => {
   it("focuses the first invalid field, brings it into view, and counts what is left", () => {

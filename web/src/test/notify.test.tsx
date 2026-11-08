@@ -59,7 +59,7 @@ describe("WEB-U-195 query notifications never outlive their test", () => {
     expect(delivered).toBeGreaterThan(0);
   });
 
-  // A test that ends with fake timers still on and a notification pending (review of f1480992): the wait runs the
+  // A test that ends with fake timers still on and a notification pending: the wait runs the
   // faked notification and its bound stays on real time, so it settles, or fails within 1 s naming it.
   it("a test ending with fake timers on and a notification pending still settles", async () => {
     const client = new QueryClient();

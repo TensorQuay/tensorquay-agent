@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-// Workspaces for the fake front (task 076): each task's own workspace, workspaces made on the page, forks that are
+// Workspaces for the fake front: each task's own workspace, workspaces made on the page, forks that are
 // copied for a moment, and two workspaces another person shares with the session, behind the gateway's routes and
 // rules (owner-only share, rename and delete; share by exact email; no delete while in use or with others' tasks).
 const GiB = 1024 ** 3;
@@ -111,7 +111,7 @@ function view(workspace, conversations) {
           conversation_id: holder.id,
           title: holder.title ?? null,
           running: Boolean(running),
-          // The holder's keep-alive pin, as the gateway reports it beside running (2ece77b6).
+          // The holder's keep-alive pin, as the gateway reports it beside running.
           pinned: Boolean(holder.pinned),
         }
       : null);

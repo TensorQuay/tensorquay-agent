@@ -46,7 +46,7 @@ type Props = {
   /** Chips above the text for what "+" added (a workspace, a profile), each with its ×. */
   chips?: ReactNode;
   /**
-   * Messages waiting for the running run (finding T4; GW-I-129): while the agent works the box stays usable, and Send
+   * Messages waiting for the running run (GW-I-129): while the agent works the box stays usable, and Send
    * after this (or Enter) sends a message the gateway holds until the run ends. Its author or the task's owner can
    * cancel it; a failed or stopped run drops it, to send again or dismiss.
    */
@@ -103,7 +103,7 @@ export function Composer({
   const submitting = useRef(false);
   const helpId = useId();
   const noticeId = useId();
-  // A touch keyboard has no Shift+Enter: the hint is for keyboards only (the 13f screens, #3, WEB-U-154).
+  // A touch keyboard has no Shift+Enter: the hint is for keyboards only (a screen review before 17.0, WEB-U-154).
   const hint = !useCoarsePointer();
   const t = useT();
   const active = !sending && run.status === "running" && run.id !== null;
@@ -339,7 +339,7 @@ export function Composer({
             onClick={(event) => {
               if (!active) return;
               // Send and Stop are one button: the second click of a double-click on Send (the browser counts
-              // it) never stops the run it just started; any deliberate click does (the review of ea1e1a3b).
+              // it) never stops the run it just started; any deliberate click does.
               if (event.detail > 1) return;
               void onStop();
             }}

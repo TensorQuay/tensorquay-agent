@@ -148,7 +148,7 @@ describe("WEB-U-246 a desktop action's pictures", () => {
   });
 });
 
-// The c16 UX review, #8: on a desktop step's card the pictures are what it did, so they come first, then its output,
+// A UX review before 17.0: on a desktop step's card the pictures are what it did, so they come first, then its output,
 // and its arguments (an element's ref, "e7", that only the model reads) last, under their own label.
 describe("WEB-U-246 a desktop step's card puts its pictures first", () => {
   it("shows the pictures, then the output, then what it was given", () => {

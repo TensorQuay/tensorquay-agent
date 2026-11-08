@@ -24,7 +24,7 @@ const shownLines = (lines: Locator) =>
 /** A named step in the run's log (the list reporter prints steps): the log shows every part the test reached. */
 const step = (title: string) => test.step(title, () => undefined);
 
-// WEB-E2E-021 (task 068c): on the real stack, an upload reaches the workspace, the agent reads it and writes files,
+// WEB-E2E-021: on the real stack, an upload reaches the workspace, the agent reads it and writes files,
 // the panel shows them, and the Changes tab shows each run's changes with a diff. demo_files.py then checks the disk.
 test.skip(!process.env.TQA_STACK_URL, "Requires the owned files demo stack");
 test.beforeAll(async ({ browser, baseURL }) => {
@@ -284,7 +284,7 @@ test("WEB-E2E-021 uploads, workspace files and run changes on the real stack", a
   await expect(send).toBeEnabled();
   await send.click();
   await expect(status).toHaveText(/^Done/, { timeout: afterStart(30_000) });
-  // Review of 068c: the shell wrote both files, and the turn summary says so.
+  // The shell wrote both files, and the turn summary says so.
   await step("the upload is read and the run writes two files");
   await expect(page.locator(".turn-summary")).toHaveText("2 files changed");
   await expect(
@@ -332,7 +332,7 @@ test("WEB-E2E-021 uploads, workspace files and run changes on the real stack", a
     "Createdreport.md+3",
     "Createdrows.txt+1",
   ]);
-  // Finding F5 (T25): a file the run created opens as the file itself, not as a diff of nothing.
+  // A file the run created opens as the file itself, not as a diff of nothing.
   await step("G2 T25: a created file opens from Changes as the file");
   await list.getByRole("button", { name: /report\.md/ }).click();
   await expect(panel.getByRole("tab", { name: "Files" })).toHaveAttribute(

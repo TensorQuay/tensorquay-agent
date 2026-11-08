@@ -162,7 +162,8 @@ describe("WEB-U-001 sequence and replay", () => {
     );
   });
 
-  // WEB-U-234: the gateway's shutdown frame is the reconnect it announces (UI-GUIDELINES §14; the 14b page pass, E4).
+  // WEB-U-234: the gateway's shutdown frame is the reconnect it announces (UI-GUIDELINES §14; a pass over the pages
+  // before 17.0).
   it("reads a restarting gateway as a reconnect, not a banner", () => {
     const state = apply(apply(emptyTranscript(), ready), {
       type: "error",
@@ -247,7 +248,8 @@ describe("WEB-U-013 attempts and interleaved calls", () => {
     expect(apply(state, warning)).toEqual(state);
   });
 
-  // WEB-U-252 (the 14b page pass, H7): "Time budget: 1530 of 1800 s used" read raw beside "Worked for 1 643 s".
+  // WEB-U-252 (a pass over the pages before 17.0): "Time budget: 1530 of 1800 s used" read raw beside
+  // "Worked for 1 643 s".
   it.each([
     ["wall_clock", "Time budget: 1\u202f530 of 1\u202f800 s used"],
     ["steps", "Step budget: 1\u202f200 of 1\u202f500 steps used"],
@@ -515,7 +517,7 @@ describe("SEC-001 blocked network attempts", () => {
   });
 });
 
-// Task 069b: an event kind the web does not know advances the cursor, dedups and replays like any event, renders
+// An event kind the web does not know advances the cursor, dedups and replays like any event, renders
 // nothing and never raises the error banner.
 describe("WEB-U-001 unknown event kinds", () => {
   const unknown = (seq: number) =>
@@ -572,7 +574,7 @@ describe("WEB-U-001 unknown event kinds", () => {
   });
 });
 
-// Task 070: the context was compacted before a model call; the activity log says so once, quietly.
+// The context was compacted before a model call; the activity log says so once, quietly.
 describe("WEB-U-001 compaction", () => {
   const compaction = (seq: number) =>
     frame(seq, {
@@ -612,7 +614,7 @@ describe("WEB-U-001 compaction", () => {
   });
 });
 
-// Task 072: the fallback tool-call parser gave up; the transcript says so in plain words, once.
+// The fallback tool-call parser gave up; the transcript says so in plain words, once.
 describe("WEB-U-001 run failure copy", () => {
   it("shows the plain copy for fallback_parse in the notice and the turn outcome", () => {
     const state = replay([
@@ -632,7 +634,7 @@ describe("WEB-U-001 run failure copy", () => {
   });
 });
 
-// Task 076 (074's event): the model route switched to its fallback; one quiet status line says which and why.
+// The model route switched to its fallback; one quiet status line says which and why.
 describe("WEB-U-025 route fallback line", () => {
   const fallback = (seq: number) =>
     frame(seq, {

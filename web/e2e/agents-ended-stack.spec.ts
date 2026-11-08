@@ -11,7 +11,7 @@ import {
 import { afterStart, budget } from "./stack-start";
 import { bootstrap } from "./ux/flow";
 
-// WEB-E2E-062: an ended team reads as ended (the c16 UX review, #1-#3; WEB-U-310, GW-U-169), on the agents stack
+// WEB-E2E-062: an ended team reads as ended (a UX review before 17.0; WEB-U-310, GW-U-169), on the agents stack
 // suite with EDGE-A's script in deploy/tests/fixtures/agents.json, whose helper "ghost" has no script and fails. It
 // runs between agents-edges-stack.spec.ts and agents-stack.spec.ts (name order), so E2E-AGENTS-020 stays last.
 test.skip(
@@ -93,13 +93,14 @@ test("WEB-E2E-062 an ended team reads as ended: the strip says how, the count is
   await expect(leadRow(page, leadId)).toHaveAccessibleName(/1 helper$/);
 });
 
-// WEB-E2E-091 (c17 U9 on the real stack; WEB-U-414): a run the task's record says ended never reads Working while the
-// page's stream replays it (16u live L2: "Working… · 4 min 46 s" for a moment on an ended lead's fresh page). It reads
-// WEB-E2E-062's ended team, so it runs after it (this file's order): the lead, stopped, and its helper "ghost",
-// failed. A small stack replays too fast to catch that moment, so the test holds it: it reads each task's real
-// replay from the gateway's stream with the page's own session, and serves the page that replay cut just after the
-// last run's start (no reconnect for 10 min), the moment 16u's page was in. Every text the header holds is recorded
-// from before the first paint; none may say Working, while the task list's record says the run ended.
+// WEB-E2E-091 (17.0's release candidate on the real stack; WEB-U-414): a run the task's record says ended never reads
+// Working while the page's stream replays it (a live check before 17.0: "Working… · 4 min 46 s" for a moment on an
+// ended lead's fresh page). It reads WEB-E2E-062's ended team, so it runs after it (this file's order): the lead,
+// stopped, and its helper "ghost", failed. A small stack replays too fast to catch that moment, so the test holds it:
+// it reads each task's real replay from the gateway's stream with the page's own session, and serves the page that
+// replay cut just after the last run's start (no reconnect for 10 min), the moment 16u's page was in. Every text the
+// header holds is recorded from before the first paint; none may say Working, while the task list's record says the run
+// ended.
 test("WEB-E2E-091 an ended team's pages opened fresh never read Working while they replay", async ({
   page,
   baseURL,

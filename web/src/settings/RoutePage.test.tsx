@@ -27,7 +27,7 @@ const page = () => {
   return form;
 };
 
-// WEB-U-115 (the first hour, F9): adding or editing a model route is a page of its own, like an environment's.
+// WEB-U-115 (a first-hour check): adding or editing a model route is a page of its own, like an environment's.
 describe("WEB-U-115 the model route page", () => {
   it("opens Add and Edit as pages of their own from the list", async () => {
     const at = showModels(

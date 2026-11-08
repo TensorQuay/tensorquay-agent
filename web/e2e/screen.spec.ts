@@ -132,7 +132,7 @@ for (const width of [390, 1280] as const)
       await capture(page, `stopped-${width}-${colorScheme}`);
     });
 
-// A restart under a Take over (the gateway's 1e5f33f1): the holder's socket goes with the old process, the new one
+// A restart under a Take over: the holder's socket goes with the old process, the new one
 // records the hand-back the restart cut short before it listens (ended restart, no time), and the page, back on its streams, reads it:
 // the panel watches again without control, offers Take over, and the transcript says the desktop was handed back.
 test("WEB-E2E-037 a Take over cut short by a gateway restart is handed back", async ({
@@ -304,9 +304,10 @@ test("WEB-E2E-037 a screenshot not kept, and one refused as too detailed", async
   expect(await serious(page)).toEqual([]);
 });
 
-// WEB-E2E-037, Expand in control at a laptop's height (the 16d page pass, Z14): at 1280×800 the picture filled the
-// dialog's width at 16:10 and pushed Hand back, ⋯ and the lines below the fold. The whole dialog fits without scrolling:
-// the status, the picture, its controls and the lines, at each size; the picture keeps a usable size.
+// WEB-E2E-037, Expand in control at a laptop's height (a pass over the pages before 17.0): at 1280×800 the picture
+// filled the dialog's width at 16:10 and pushed Hand back, ⋯ and the lines below the fold. The whole dialog fits
+// without scrolling: the status, the picture, its controls and the lines, at each size; the picture keeps a usable
+// size.
 for (const [width, height] of [
   [1280, 800],
   [1280, 720],

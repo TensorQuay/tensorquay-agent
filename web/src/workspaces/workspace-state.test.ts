@@ -16,7 +16,7 @@ import {
   workspaceName,
 } from "./workspace-state";
 
-// Task 076: the rules behind the workspace card, the picker and the delete confirmation.
+// The rules behind the workspace card, the picker and the delete confirmation.
 describe("WEB-U-025 workspace state", () => {
   it("warns at 80 % of the quota and turns danger at 95 %; no meter without a quota or a size", () => {
     expect(meterLevel(7.9 * GB, 10 * GB)).toBe("ok");
@@ -67,7 +67,7 @@ describe("WEB-U-025 workspace state", () => {
       kind: "blocked",
       reason: "othersTasks",
     });
-    // Only a going run blocks it; a kept, idle environment is retired by the delete (the 13h UI review, #3).
+    // Only a going run blocks it; a kept, idle environment is retired by the delete (a UI review before 17.0).
     const held = (running: boolean) =>
       workspace({
         task_count: 1,
@@ -130,9 +130,9 @@ describe("WEB-U-025 workspace state", () => {
   });
 });
 
-// The 14b page pass (H4): a helper's own copy (kind helper_copy, named by its task's title) says so in the reader's
-// words, renamed or not, and searches as shown; a person's own workspace shows its name as it is, even one that ends
-// in "(helper copy)".
+// A pass over the pages before 17.0: a helper's own copy (kind helper_copy, named by its task's title) says so in the
+// reader's words, renamed or not, and searches as shown; a person's own workspace shows its name as it is, even one
+// that ends in "(helper copy)".
 describe("WEB-U-025 a helper's copy is named in the reader's words", () => {
   const chinese = translator("zh-Hans", catalogue(zh));
   const copy = workspace({ name: "researcher", kind: "helper_copy" });

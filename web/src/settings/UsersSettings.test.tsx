@@ -149,7 +149,7 @@ const row = async (email: string) => {
   return within(found);
 };
 
-// Task 067 / GW-I-046: user administration for administrators, in plain words, with the gateway's guards.
+// GW-I-046: user administration for administrators, in plain words, with the gateway's guards.
 describe("WEB-U-023 users", () => {
   it("tells members this is for administrators and asks nothing", () => {
     show({ ...me, role: "member" });
@@ -171,7 +171,7 @@ describe("WEB-U-023 users", () => {
       `/settings/people/${colleague.id}`,
     );
     expect(theirs.getByText("Active")).toBeInTheDocument();
-    // A long address wraps rather than being cut off, since the table has room (finding 12).
+    // A long address wraps rather than being cut off, since the table has room.
     expect(theirs.getByText(colleague.email).closest(".data-name")).toHaveClass(
       "data-name-wrap",
     );
@@ -228,7 +228,7 @@ describe("WEB-U-023 users", () => {
     });
   });
 
-  // The dev screen review (011e8972), #4: Disable was a bare red button on every row, one click from a destructive
+  // A screen review before 17.0: Disable was a bare red button on every row, one click from a destructive
   // action. It is a danger item under the row's ⋯, as on the other admin tables; your own row has no ⋯.
   it("WEB-U-169 keeps Disable and Enable under the row's ⋯, Disable as danger", async () => {
     standard();
@@ -251,8 +251,8 @@ describe("WEB-U-023 users", () => {
     expect(mine.queryByRole("button", { name: /^More actions/ })).toBeNull();
   });
 
-  // The fix's review: the row's ⋯ kept the pending guard the bare buttons had; while a change is saved,
-  // Disable and Enable say so instead of acting twice.
+  // The row's ⋯ kept the pending guard the bare buttons had; while a change is saved, Disable and Enable say so instead
+  // of acting twice.
   it("WEB-U-169 holds Disable while another change is being saved", async () => {
     standard();
     const answer = fetch.getMockImplementation();
@@ -316,7 +316,7 @@ describe("WEB-U-023 users", () => {
     expect(item).toHaveAttribute("aria-disabled", "true");
   });
 
-  // WEB-U-117 (the first hour's F19): a role is chosen with the standard picker, at once; the gateway's
+  // WEB-U-117 (a first-hour check): a role is chosen with the standard picker, at once; the gateway's
   // last-administrator rule still reads plainly if a race brings it.
   it("changes a role at once with the standard picker, and shows the last-administrator rule plainly", async () => {
     standard();
@@ -449,8 +449,8 @@ describe("WEB-U-023 users", () => {
     );
   });
 
-  // Adversarial review (Users P3): closed invitations stay listed forever. Pending ones stay, and an expired one for a
-  // week so it can be sent again; accepted and revoked ones go.
+  // Closed invitations stay listed forever. Pending ones stay, and an expired one for a week so it can be sent again;
+  // accepted and revoked ones go.
   it("lists pending invitations, and expired ones for a week only", async () => {
     standard();
     const invitation = (email: string, extra: Partial<Invitation>) => ({
@@ -524,8 +524,8 @@ describe("WEB-U-023 users", () => {
   });
 });
 
-// The 13f screen review, #7: People opened on an empty Invite form, the people below it. The people come first, then the
-// pending invitations, then Invite someone.
+// A screen review before 17.0: People opened on an empty Invite form, the people below it. The people come first, then
+// the pending invitations, then Invite someone.
 // 17.3 (UI-GUIDELINES §7 Table): a table's numbers align on the right, in tabular figures; names and words on the left.
 describe("WEB-U-443 People's counts on the right", () => {
   it("aligns the task counts and their column's label on the right", async () => {
@@ -565,8 +565,8 @@ describe("WEB-U-156 People lists the people first", () => {
   });
 });
 
-// WEB-U-355 (the 16f page pass, E1): Invite says an empty or malformed email under the field in the app's words, never
-// the browser's own bubble, and sends nothing.
+// WEB-U-355 (a pass over the pages before 17.0): Invite says an empty or malformed email under the field in the app's
+// words, never the browser's own bubble, and sends nothing.
 describe("WEB-U-355 the invitee's email, said by the page", () => {
   it.each([
     ["", "Enter the person's email."],

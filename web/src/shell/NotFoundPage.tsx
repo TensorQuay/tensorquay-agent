@@ -11,7 +11,8 @@ import { TabTitle } from "./TabTitle";
 /**
  * An address with no page (and `/design` on a release build): the product's own words in the reader's language and
  * theme, laid out as the sign-in pages are, with one way on. Before, Next.js's default 404 showed: always light, always
- * English, and a dead end (the 16f page pass, F-P37-1; WEB-U-381). Signed out, Go to your tasks leads to Sign in.
+ * English, and a dead end (a pass over the pages before 17.0; WEB-U-381). Signed out, Go to your tasks leads to Sign
+ * in.
  */
 export function NotFoundPage() {
   const t = useT();

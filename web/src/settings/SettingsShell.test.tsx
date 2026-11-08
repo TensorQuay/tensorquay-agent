@@ -195,8 +195,8 @@ describe("WEB-U-023/075 settings", () => {
   });
 });
 
-// WEB-U-362 (the 16f page pass, E17): below 768 px the sidebar is a drawer, so Settings starts with Open navigation,
-// as every page in the shell does; outside the shell there is nothing to open.
+// WEB-U-362 (a pass over the pages before 17.0): below 768 px the sidebar is a drawer, so Settings starts with Open
+// navigation, as every page in the shell does; outside the shell there is nothing to open.
 // 17.3: every Settings section opens with its name as the heading (20/1.25), then its one muted line and its primary
 // action; a page inside a section (adding or editing one item) keeps its own title under its way back.
 describe("WEB-U-442 a section opens with its name", () => {

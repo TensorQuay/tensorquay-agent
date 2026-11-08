@@ -29,7 +29,7 @@ describe("WEB-U-019 error copy by code", () => {
     expect(screen.queryByText(/Private diagnostic/)).toBeNull();
   });
 
-  // Finding 3: a server error whose body isn't JSON read as "could not be read", which misleads.
+  // A server error whose body isn't JSON read as "could not be read", which misleads.
   it.each([500, 502, 503])(
     "says a %s is the server's problem, whatever its body",
     (status) => {

@@ -21,7 +21,7 @@ import { previewKind } from "./file-kind";
 /** A run by its message's first line and when it started. */
 export type RunChoice = { id: string; label: string; startedAt: string | null };
 
-/** The files runs of this task changed (task 068c): the latest run by default, any earlier one on request. */
+/** The files runs of this task changed: the latest run by default, any earlier one on request. */
 export function ChangesView({
   conversationId,
   runs,
@@ -32,7 +32,7 @@ export function ChangesView({
   /** In order; the last is the latest run. */
   runs: readonly RunChoice[];
   running: boolean;
-  /** Shows a file as what it is in the Files tab (finding F5): a created file, or a changed image. */
+  /** Shows a file as what it is in the Files tab: a created file, or a changed image. */
   onOpenFile?: (path: string) => void;
 }) {
   const t = useT();
@@ -109,7 +109,7 @@ export function ChangesView({
 }
 
 /**
- * Finding F5: a file the run created, or an image it changed, is shown as what it is; a diff of lines helps only for
+ * A file the run created, or an image it changed, is shown as what it is; a diff of lines helps only for
  * text it edited.
  */
 export const opensAsFile = (change: FileChange) =>

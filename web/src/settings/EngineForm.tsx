@@ -85,7 +85,7 @@ function useEngineSave({ item, api, onSaved, onStale }: FormProps) {
   const [pending, setPending] = useState(false);
   /** The fields waiting for the widening to be confirmed. */
   const [confirming, setConfirming] = useState<EngineFields | null>(null);
-  /** The secret a save named but may not use yet (vault slice 3: 409 secret_not_allowed). */
+  /** The secret a save named but may not use yet (409 secret_not_allowed). */
   const [notAllowed, setNotAllowed] = useState<string | null>(null);
   const name = item?.name ?? draftName(draft);
   const set = (change: Partial<EngineDraft>) => {

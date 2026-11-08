@@ -43,7 +43,7 @@ const INVITATION_TONES = {
 } as const;
 
 /**
- * An email that may break only after its @ or a dot, never inside a word (WEB-U-117, the first hour's F19): read whole,
+ * An email that may break only after its @ or a dot, never inside a word (WEB-U-117, a first-hour check): read whole,
  * on one line wherever the table has room.
  */
 function breakable(email: string) {
@@ -147,7 +147,7 @@ function Administration({ me, clock }: { me: User; clock: () => Date }) {
   for (const task of tasks.data ?? [])
     counts.set(task.owner_id, (counts.get(task.owner_id) ?? 0) + 1);
 
-  // Pending invitations, and expired ones for a week (adversarial review, Users): the rest is history.
+  // Pending invitations, and expired ones for a week: the rest is history.
   const listed = (invitations.data?.items ?? []).filter(
     (invitation) =>
       invitation.status === "pending" ||
@@ -221,7 +221,7 @@ function Administration({ me, clock }: { me: User; clock: () => Date }) {
                           }))}
                           value={account.role}
                           disabled={change.pending}
-                          // Your own role is another administrator's to change (WEB-U-117, the first hour's F19).
+                          // Your own role is another administrator's to change (WEB-U-117, a first-hour check).
                           disabledReason={own ? t("users.ownRole") : undefined}
                           onChange={(role) =>
                             void update(account, {
@@ -371,7 +371,7 @@ function Administration({ me, clock }: { me: User; clock: () => Date }) {
         </>
       )}
 
-      {/* Invite someone after the people and the pending invitations (the 13f screens, #7, WEB-U-156). */}
+      {/* Invite someone after the people and the pending invitations (a screen review before 17.0, WEB-U-156). */}
       <h2 className="type-heading" id="invite-heading">
         {t("users.inviteTitle")}
       </h2>

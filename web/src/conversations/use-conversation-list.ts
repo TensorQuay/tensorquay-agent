@@ -53,7 +53,7 @@ export function useNoTasksYet() {
 }
 
 /** The reader's tasks whose title contains `q`, searched on the server over every task (GW-I-121). */
-/** Every task whose title holds `q`, a page at a time (the review of d9fb1917, SHOULD 2: older matches stay reachable). */
+/** Every task whose title holds `q`, a page at a time, so older matches stay reachable. */
 export function useTaskSearch(q: string) {
   const session = useSession();
   return useInfiniteQuery({

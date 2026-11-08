@@ -3,7 +3,7 @@ import { signIn } from "./session";
 import { axe, capture, type } from "./settings-page";
 import { expect, test, type Page } from "./test";
 
-// WEB-E2E-039: the Models page review's changes in the browser (WEB-U-281, -287, -288, -289), on the fake front's
+// WEB-E2E-039: the Models page's changes in the browser (WEB-U-281, -287, -288, -289), on the fake front's
 // review routes (e2e/front/routes.mjs): a route at localhost whose check can't reach it, with the one click only where
 // the gateway reaches host.docker.internal; a server without the route's protocol endpoint; the offer to check a route
 // just added; and a server refusing usage reporting, whose suggestion lands on its box.

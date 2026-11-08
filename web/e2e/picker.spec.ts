@@ -31,7 +31,7 @@ const route = (name: string) => ({
   vision: false,
   native_tools: true,
   reasoning: { allowed: ["off", "medium"], default: "medium" },
-  // Required since 841f1cdd: where the route runs (the model's second line, WEB-U-103).
+  // Required: where the route runs (the model's second line, WEB-U-103).
   runs_on: { where: "this_computer", provider: null },
 });
 

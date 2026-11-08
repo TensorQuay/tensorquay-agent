@@ -93,7 +93,7 @@ describe("WEB-U-080 the task page's lists", () => {
   });
 });
 
-// The live review of c7 (L1-L2): every task row has one layout, whatever its label: the title in sans on one line with
+// A live check before 17.0: every task row has one layout, whatever its label: the title in sans on one line with
 // an ellipsis, the muted time right-aligned after it, and the status mark in its own space at the end. "Show more" is a
 // small ghost button (17.3, UI-GUIDELINES §7 Conversation list item), so it reads as an action, never as a muted task.
 describe("WEB-U-070 one task row layout", () => {
@@ -132,8 +132,8 @@ describe("WEB-U-070 one task row layout", () => {
   });
 });
 
-// The review of 7e282fc0 (SHOULD 1): at phone width the drawer was 260 px, so a row's title and time left too little of
-// the title to tell two tasks apart. The drawer is wider on narrow screens, never wider than the screen allows.
+// At phone width the drawer was 260 px, so a row's title and time left too little of the title to tell two tasks apart.
+// The drawer is wider on narrow screens, never wider than the screen allows.
 describe("WEB-U-070 the drawer at phone width", () => {
   // At 390 px (WEB-U-070): the drawer's rows showed the task icon, which the expanded sidebar hides; it took title room.
   it("shows no task icon in the drawer, as in the expanded sidebar", () => {
@@ -164,12 +164,12 @@ describe("WEB-U-080 one left edge in the sidebar", () => {
   });
 });
 
-// The UX review of the dev tip (WEB-U-022): at 1280 the floating panel covered the answer mid-word; it docked from
-// 1280 px. The dev screen review (011e8972), #1: at 1024 it still covered the person's own messages. It docks from
-// 1024 px (WEB-U-170), the conversation narrowing beside it; below that it takes the whole column, never part of it,
-// and starts where the header ends (WEB-U-171).
+// WEB-U-022: at 1280 the floating panel covered the answer mid-word; it docked from 1280 px. A screen review
+// before 17.0: at 1024 it still covered the person's own messages. It docks from 1024 px (WEB-U-170), the conversation
+// narrowing beside it; below that it takes the whole column, never part of it, and starts where the header ends
+// (WEB-U-171).
 describe("WEB-U-170 the files panel never covers part of the transcript", () => {
-  // The fix's review: by the layout's own width (a container), not the window's, so the sidebar's width counts.
+  // By the layout's own width (a container), not the window's, so the sidebar's width counts.
   const narrow =
     new RegExp(
       `@container conversation-layout \\(max-width: ${DOCK_WIDTH - 1}px\\) \\{\\s*\\.files-panel \\{([^}]*)\\}`,

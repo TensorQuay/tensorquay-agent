@@ -52,13 +52,13 @@ export function RunStatus({
    */
   teamPending?: boolean;
   /**
-   * A lead whose team its person stopped, its last run started before the stop (WEB-U-413, c17 U8): that run's end
-   * reads Stopped, not Done above "You stopped the team."
+   * A lead whose team its person stopped, its last run started before the stop (WEB-U-413, 17.0's release candidate):
+   * that run's end reads Stopped, not Done above "You stopped the team."
    */
   teamStopped?: boolean;
   /**
-   * A helper its team's stop stopped before it ran (WEB-U-425, c17's candidate shots): it reads Stopped, never Ready, as
-   * its page says it was stopped before it started.
+   * A helper its team's stop stopped before it ran (WEB-U-425, the screenshots of 17.0's release candidate): it reads
+   * Stopped, never Ready, as its page says it was stopped before it started.
    */
   helperStopped?: boolean;
 }) {

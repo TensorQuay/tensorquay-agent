@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { createConversation, signIn } from "./session";
 import { expect, test, type Page } from "./test";
 
-// WEB-U-112 on the page (candidate12 F18/F18b): a long failure in the task header truncates, whole in its tooltip, and
+// WEB-U-112 on the page (found before 17.0): a long failure in the task header truncates, whole in its tooltip, and
 // never pushes out the model and environment pickers (WEB-U-113), the Files icon or the ⋯; under 768 px it reads
 // "Failed", its reason being the turn's outcome.
 async function capture(page: Page, name: string) {

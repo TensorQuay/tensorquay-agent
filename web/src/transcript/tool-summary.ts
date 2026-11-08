@@ -82,7 +82,7 @@ const readFile: Summary = (tool, t) => {
 };
 /**
  * The words a regular expression looks for: its longest literal run, with escapes, classes, anchors and quantifiers
- * taken out; null when there is none worth saying (finding A4).
+ * taken out; null when there is none worth saying.
  */
 export function literal(pattern: unknown): string | null {
   if (typeof pattern !== "string") return null;
@@ -119,7 +119,7 @@ const KINDS: ReadonlySet<string> = new Set([
   "yaml",
   "yml",
 ]);
-// Finding A4: the words it looked for, where; the expression itself stays in the card.
+// The words it looked for, where; the expression itself stays in the card.
 const grep: Summary = (tool, t) => {
   const words = literal(argument(tool, "pattern"));
   const path = argument(tool, "path");
@@ -140,7 +140,7 @@ const grep: Summary = (tool, t) => {
     count(tool, t)
   );
 };
-// Finding A4: how many files of a kind it found; the glob itself stays in the card.
+// How many files of a kind it found; the glob itself stays in the card.
 const glob: Summary = (tool, t) => {
   const pattern = argument(tool, "pattern");
   const extension =
@@ -163,7 +163,7 @@ const glob: Summary = (tool, t) => {
 };
 // WEB-U-390: a finished script given inline (a heredoc, or a multi-line -c or -e, to an interpreter) is named by its
 // language; any other multi-line command, or a script still running, shows its first line that isn't blank, a comment
-// or `set …`, without a heredoc's marker, and "…". Finding A3: "a command" and its first words; a non-zero exit
+// or `set …`, without a heredoc's marker, and "…". "a command" and its first words; a non-zero exit
 // "didn't succeed", its code in the card.
 /**
  * A command as its line says it (WEB-U-390): without the workspace's `cd`; of several lines, the first that isn't blank,
@@ -200,7 +200,7 @@ const shell: Summary = (tool, t) => {
   // "Running …" ends in its own "…".
   if (tool.status === "running") return t("tool.running", { command });
   if (many && !command.endsWith("…")) command += " …";
-  // Finding T9: a command stopped part way says so, not "Ran … Cancelled".
+  // A command stopped part way says so, not "Ran … Cancelled".
   if (tool.status === "cancelled" && tool.ran)
     return t("tool.stopped", { command });
   const ran = tool.ran ? "yes" : "no";
@@ -210,7 +210,7 @@ const shell: Summary = (tool, t) => {
     (tool.exitCode && tool.status !== "error" ? t("tool.didNotSucceed") : "")
   );
 };
-// Finding A1: the page it read, never the tool's name; a refusal keeps the allow-list's words, read from the call's
+// The page it read, never the tool's name; a refusal keeps the allow-list's words, read from the call's
 // failure, never from the result's words (C1, WEB-U-126).
 const fetchUrl: Summary = (tool, t) => {
   const target =
@@ -227,7 +227,7 @@ const fetchUrl: Summary = (tool, t) => {
     values,
   );
 };
-// Finding A2: the other built-ins in plain words. A channel tool names the channel's id, not its name, and the task
+// The other built-ins in plain words. A channel tool names the channel's id, not its name, and the task
 // page doesn't load the channel, so it says "the channel".
 const plain =
   (
@@ -287,11 +287,11 @@ function connectorCall(
     values,
   );
 }
-// The agent-team tools in plain words (ADR-0034; the 14b page pass, H02): what the lead or helper did, naming the
-// helper where the call does, never the tool's name.
+// The agent-team tools in plain words (ADR-0034; a pass over the pages before 17.0): what the lead or helper did,
+// naming the helper where the call does, never the tool's name.
 const helper = (tool: ToolView, key: string, t: Translate) =>
   bounded(argument(tool, key), t("tool.aHelper"), 48);
-// A start that failed never says "Started" beside its Failed mark (WEB-U-399, c16k B5).
+// A start that failed never says "Started" beside its Failed mark (WEB-U-399, real-world use before 17.0).
 const startMember: Summary = (tool, t) =>
   t(tool.status === "error" ? "tool.startHelperFailed" : "tool.startedHelper", {
     name: helper(tool, "role", t),

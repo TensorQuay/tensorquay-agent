@@ -102,7 +102,7 @@ describe("WEB-U-043 the connectors list", () => {
 
   it("says what an empty registry means, and shows members nothing", async () => {
     show(fakeConnectors().api);
-    // Finding 20: what a connector is for, with a concrete example that isn't only about code.
+    // What a connector is for, with a concrete example that isn't only about code.
     expect(
       await screen.findByText(
         "Connectors give the agent tools from other services, such as searching your team's documents or filing an issue in your tracker. The gateway holds their credentials and sends them; the agent never sees one. A change applies from each task’s next connection.",

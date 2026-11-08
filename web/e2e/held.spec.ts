@@ -2,7 +2,7 @@ import { HOLD } from "./front/stream.mjs";
 import { createConversation, signIn } from "./session";
 import { expect, test, type Page } from "./test";
 
-// Finding T4 (GW-I-129): a message sent while the agent works is held by the gateway, listed in the composer, and sent
+// GW-I-129: a message sent while the agent works is held by the gateway, listed in the composer, and sent
 // as the next turn when the run ends; a stopped run drops it, to send again or dismiss.
 async function working(page: Page, text: string) {
   await signIn(page);

@@ -43,7 +43,7 @@ pub struct SecretStoreConfig {
     pub seed_bytes: usize,
     /// Maximum stored references, default 4096, maximum 16384.
     pub references: u32,
-    /// How long secret read records are kept, in days: default 30, 1 through 365 (vault slice 2).
+    /// How long secret read records are kept, in days: default 30, 1 through 365.
     pub read_audit_days: u32,
     /// How long administration audit records are kept, in days: default 365, 1 through 3650.
     pub admin_audit_days: u32,

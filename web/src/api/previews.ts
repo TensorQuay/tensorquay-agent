@@ -40,7 +40,7 @@ export function runChangeDiff(
   );
 }
 
-/** One sheet of a spreadsheet as display text (the file previews design); the first sheet when none is named. */
+/** One sheet of a spreadsheet as display text; the first sheet when none is named. */
 export function fileSheet(
   client: ApiClient,
   id: string,

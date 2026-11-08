@@ -162,7 +162,8 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-// WEB-U-410 (c17 U5) on the page: a helper waiting for its turn on the lead's files says so where a phone shows it.
+// WEB-U-410 (17.0's release candidate) on the page: a helper waiting for its turn on the lead's files says so where a
+// phone shows it.
 describe("WEB-U-410 a waiting helper's page says what it waits for", () => {
   it("says the turn on the lead's files in the composer", async () => {
     await show(helperRecord({}), [
@@ -247,7 +248,7 @@ describe("WEB-U-419 a waiting helper's page names the task using the lead's file
   });
 });
 
-// WEB-U-412 (c17 U7; 16u live L3, pages-stop-10s-helper-helper-c): a helper the team's stop stopped before it ever ran
+// WEB-U-412 (17.0's release candidate; a live check before 17.0): a helper the team's stop stopped before it ever ran
 // read "Send a message to begin. Your workspace starts empty.": wrong for a helper on the lead's files, and silent
 // about the stop. It says it was stopped before it started and made no changes.
 describe("WEB-U-412 a helper stopped before it started says so", () => {
@@ -266,9 +267,9 @@ describe("WEB-U-412 a helper stopped before it started says so", () => {
   });
 });
 
-// WEB-U-413 (c17 U8; 16u live L3): after Stop team on a lead whose own turn had already ended, its header read Done
-// above "You stopped the team." A lead whose team its person stopped reads Stopped; a run the person starts after the
-// stop reads Done again when it completes.
+// WEB-U-413 (17.0's release candidate; a live check before 17.0): after Stop team on a lead whose own turn had already
+// ended, its header read Done above "You stopped the team." A lead whose team its person stopped reads Stopped; a run
+// the person starts after the stop reads Done again when it completes.
 describe("WEB-U-413 a lead whose team a person stopped reads Stopped", () => {
   const lead = record({
     run_status: "completed",
@@ -333,9 +334,10 @@ describe("WEB-U-413 a lead whose team a person stopped reads Stopped", () => {
   });
 });
 
-// WEB-U-424 (c17's candidate shots, S4): the end card said "1 report from late-files" under the gateway's line that
-// late-files "stopped before it reported". The gateway's hand-back of a helper's work (GW-I-311) isn't that helper's
-// report: the card counts only the reports the helpers wrote; what the gateway handed back stays listed as files.
+// WEB-U-424 (the screenshots of 17.0's release candidate): the end card said "1 report from late-files" under the
+// gateway's line that late-files "stopped before it reported". The gateway's hand-back of a helper's work (GW-I-311)
+// isn't that helper's report: the card counts only the reports the helpers wrote; what the gateway handed back stays
+// listed as files.
 describe("WEB-U-424 the team's end card counts only the helpers' own reports", () => {
   it("leaves the gateway's hand-back out of the count", async () => {
     vi.mocked(readTeam).mockResolvedValue(
@@ -409,9 +411,9 @@ describe("WEB-U-424 the team's end card counts only the helpers' own reports", (
   });
 });
 
-// WEB-U-425 (c17's candidate shots, S5): a helper stopped before it started said so in its page, but its header read
-// Ready, as if it could begin. Its header reads Stopped. A helper stopped after it started reads as it did before:
-// its own run's end.
+// WEB-U-425 (the screenshots of 17.0's release candidate): a helper stopped before it started said so in its page, but
+// its header read Ready, as if it could begin. Its header reads Stopped. A helper stopped after it started reads as it
+// did before: its own run's end.
 describe("WEB-U-425 a helper stopped before it started reads Stopped in its header", () => {
   it("reads Stopped, never Ready", async () => {
     await show(helperRecord({ state: "ended", helper_state: "stopped" }), [

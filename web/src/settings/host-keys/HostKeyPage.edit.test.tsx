@@ -57,8 +57,8 @@ const field = (name: string) => screen.getByLabelText(name, { exact: true });
 const save = () =>
   fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
-// ADR-0037 §9 and the reviewed Keys sketch §4: a key's own page shows what it is and when it was used, never its value;
-// its fields change and save as a whole; the value is replaced in place; deleting asks first.
+// ADR-0037 §9: a key's own page shows what it is and when it was used, never its value; its fields change and save as a
+// whole; the value is replaced in place; deleting asks first.
 describe("WEB-U-143 a key's own page", () => {
   it("shows the key: its name, address and way, its last use, and when its value was set", async () => {
     const item = key();
@@ -188,8 +188,8 @@ describe("WEB-U-143 a key's own page", () => {
     expect(items).toEqual([]);
   });
 
-  // The review of b608b50f, item 10: as every settings form, a conflict keeps the person's edits and takes the new
-  // version, so saving again replaces the other change.
+  // As every settings form, a conflict keeps the person's edits and takes the new version, so saving again replaces the
+  // other change.
   it("keeps the person's edits when someone changed the key meanwhile, and saves them over it next time", async () => {
     const item = key();
     const { api, items, updated } = fakeHostKeys({ keys: [item] });
@@ -220,7 +220,7 @@ describe("WEB-U-143 a key's own page", () => {
     });
   });
 
-  // The review of b608b50f, item 11: a delete that a change beat takes the new version, so deleting again works.
+  // A delete that a change beat takes the new version, so deleting again works.
   it("takes the key's new version when a delete was refused as changed, and deletes on the next try", async () => {
     const item = key();
     const { api, items } = fakeHostKeys({ keys: [item] });

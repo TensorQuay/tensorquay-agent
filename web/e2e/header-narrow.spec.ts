@@ -150,8 +150,8 @@ for (const width of [1280, 390])
     if ((await files.getAttribute("aria-expanded")) === "true")
       await files.click();
     await expect(files).toHaveAttribute("aria-expanded", "false");
-    // WEB-U-154 (the 13f screens, #3): on a phone a task's title comes first, whole, and its model and environment
-    // take a quiet line under it, with their names.
+    // WEB-U-154 (a screen review before 17.0): on a phone a task's title comes first, whole, and its model and
+    // environment take a quiet line under it, with their names.
     const { header, model } = await pickers(page, width, true);
     const title = header.getByRole("heading", { level: 1 });
     expect(
@@ -173,7 +173,7 @@ for (const width of [1280, 390])
     await capture(page, `narrow-task-${width}`);
   });
 
-// WEB-U-106 (the S6 web review, #1): at 390 a title too long for the first line truncates, and the status, the Files
+// WEB-U-106: at 390 a title too long for the first line truncates, and the status, the Files
 // icon and ⋯ stay beside it, never on a line of their own; the pickers keep the line under it.
 test("WEB-U-106 a long task title at 390 truncates beside ⋯", async ({
   page,
@@ -248,7 +248,7 @@ test("WEB-U-125 a task header beside the Files panel at 1280 keeps its names", a
   await capture(page, "narrow-task-files-1280");
 });
 
-// WEB-U-154 (the 13f screens, #3): a touch keyboard has no Shift+Enter, so a phone isn't told to use it.
+// WEB-U-154 (a screen review before 17.0): a touch keyboard has no Shift+Enter, so a phone isn't told to use it.
 test.describe("on a touch screen", () => {
   test.use({
     isMobile: true,

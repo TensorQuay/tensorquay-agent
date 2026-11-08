@@ -40,7 +40,7 @@ const CONSUMERS: Readonly<Record<SecretRead["consumer_kind"], MessageKey>> = {
 };
 
 /**
- * Who read a secret, for which task and with what outcome, newest first, 50 at a time (vault slice 2; WEB-U-053). There
+ * Who read a secret, for which task and with what outcome, newest first, 50 at a time (WEB-U-053). There
  * is never a value to show. `emails` is given only to administrators, who see each read's person.
  */
 export function SecretReads({

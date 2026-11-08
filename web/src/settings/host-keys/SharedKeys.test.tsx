@@ -74,8 +74,8 @@ const jira = hostKey({
   ],
 });
 
-// The reviewed Keys sketch §5 (ADR-0037 §1, §9): administrators make shared keys and choose who may use them; they see
-// members' own keys only to delete them.
+// ADR-0037 §1, §9: administrators make shared keys and choose who may use them; they see members' own keys only to
+// delete them.
 describe("WEB-U-145 Keys › Shared for administrators", () => {
   it("heads the shared keys at the page's second level, for administrators and members", async () => {
     const admin = wrap(
@@ -125,7 +125,7 @@ describe("WEB-U-145 Keys › Shared for administrators", () => {
     expect(second).toHaveTextContent(
       /JIRA_BOT.*acme\.atlassian\.net.*2 people.*Never used/,
     );
-    // Not on hover only: a button that keyboard and touch can open too (the review of 938fa83c, item 17).
+    // Not on hover only: a button that keyboard and touch can open too.
     fireEvent.click(
       within(second as HTMLElement).getByRole("button", { name: "2 people" }),
     );
@@ -156,7 +156,7 @@ describe("WEB-U-145 Keys › Shared for administrators", () => {
     expect(document.body).not.toHaveTextContent("GITHUB_WORK");
     // Never a link to change it: an administrator may only delete it.
     expect(within(row as HTMLElement).queryByRole("link")).toBeNull();
-    // The row's ⋯ with one danger item, as every settings table (the review of 938fa83c, item 16).
+    // The row's ⋯ with one danger item, as every settings table.
     fireEvent.click(
       within(row as HTMLElement).getByRole("button", {
         name: "More actions for ana@acme.test's key for github.com",
@@ -177,8 +177,8 @@ describe("WEB-U-145 Keys › Shared for administrators", () => {
     expect(list.map((item) => item.id)).toEqual([pypi.id]);
   });
 
-  // Least exposure (the review of 5121d0d0, item 23): a member's key's last use is its time alone for an administrator,
-  // never the member's task, nor whether it was refused and why.
+  // Least exposure: a member's key's last use is its time alone for an administrator, never the member's task, nor
+  // whether it was refused and why.
   it("shows when a member's key was last used, and nothing about the task", async () => {
     const used = {
       ...memberKey(),
@@ -260,8 +260,7 @@ describe("WEB-U-145 Keys › Shared for administrators", () => {
   });
 });
 
-// The reviewed Keys sketch §6 and decision 2: members see the shared keys they may use, read-only, with only their own
-// last use, and no one else's names.
+// Members see the shared keys they may use, read-only, with only their own last use, and no one else's names.
 describe("WEB-U-146 Keys › Shared for members", () => {
   it("lists the shared keys they may use, read-only, with their own last use", async () => {
     const mine = {
@@ -292,7 +291,7 @@ describe("WEB-U-146 Keys › Shared for members", () => {
     expect(row).toHaveTextContent(
       /PYPI_MIRROR.*pypi\.acme\.lan.*Today, 09:40 · Build wheels/,
     );
-    // No column that says the same on every row (the review of 938fa83c, item 18).
+    // No column that says the same on every row.
     expect(
       within(table)
         .getAllByRole("columnheader")
@@ -389,7 +388,7 @@ describe("WEB-U-144 who may use a shared key", () => {
     expect(
       await screen.findByText("Choose at least one person, or Everyone."),
     ).toBeVisible();
-    // The picker can take the focus; the choice's fieldset can't (the review of 938fa83c, item 14).
+    // The picker can take the focus; the choice's fieldset can't.
     const picker = screen.getByRole("button", { name: /^Add a person/ });
     expect(picker).toHaveAttribute("aria-invalid", "true");
     expect(picker).toHaveAccessibleDescription(

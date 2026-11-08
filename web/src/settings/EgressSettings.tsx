@@ -237,7 +237,7 @@ function RuleTable({
   onDelete: (item: EgressRule) => void;
 }) {
   const t = useT();
-  // The rules under a heading of their own, below the ready-made lists (the 13f screens, #10, WEB-U-162). Not a
+  // The rules under a heading of their own, below the ready-made lists (a screen review before 17.0, WEB-U-162). Not a
   // landmark: the table's scroll region already is one, by the same name.
   return (
     <div className="stack">

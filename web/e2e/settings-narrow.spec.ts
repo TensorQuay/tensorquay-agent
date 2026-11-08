@@ -1,8 +1,8 @@
 import { signIn } from "./session";
 import { expect, resetFront, test } from "./test";
 
-// WEB-U-356 (the 16f page pass, E3): below 768 px a settings section's intro and its main button stack, the intro over
-// the button, so the intro keeps the column's width instead of a word or two a line beside the button.
+// WEB-U-356 (a pass over the pages before 17.0): below 768 px a settings section's intro and its main button stack, the
+// intro over the button, so the intro keeps the column's width instead of a word or two a line beside the button.
 for (const [path, intro] of [
   ["/settings/keys", "For a connector your administrator set up"],
   ["/settings/keys/shared", "Keys the gateway uses to reach model providers"],

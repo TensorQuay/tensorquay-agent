@@ -5,7 +5,7 @@ import type { Conversation, Workspace } from "../protocol/generated/api";
 
 import { LIMITS } from "./user";
 
-/** Synthetic people and workspaces shared by the workspace UI tests (task 076). */
+/** Synthetic people and workspaces shared by the workspace UI tests. */
 export const stamp = "2026-01-01T00:00:00Z";
 export const me = {
   id: "0195d8c0-0000-7000-8000-000000000001",

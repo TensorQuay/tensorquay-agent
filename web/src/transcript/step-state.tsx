@@ -35,8 +35,8 @@ export function useKept<T>(
   );
   return [
     choice,
-    // The choice is worked out first, then kept and set: no side effect inside a state updater (the review of
-    // d8dd6bf7). A click handler's closure holds the current choice.
+    // The choice is worked out first, then kept and set: no side effect inside a state updater. A click handler's
+    // closure holds the current choice.
     (next) => {
       const value =
         typeof next === "function"

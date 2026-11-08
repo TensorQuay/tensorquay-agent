@@ -44,7 +44,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-// Task 076 (answers-076 Q4 and mockup change 4): share by exact email; no directory of accounts.
+// Share by exact email; no directory of accounts.
 describe("WEB-U-025 share dialog", () => {
   // The UI standard's audit: each change applies at once, so nothing is left to confirm; × and Esc close it, no Done.
   it("has no Done: its own close button closes it", async () => {
@@ -88,7 +88,7 @@ describe("WEB-U-025 share dialog", () => {
     expect(email).toHaveValue("");
   });
 
-  // The dev screen review (011e8972), #5: a quick share granted write access. The least access is the default.
+  // A screen review before 17.0: a quick share granted write access. The least access is the default.
   it("WEB-U-173 shares as Can view unless Can edit is chosen", async () => {
     const { calls } = show({
       [`GET ${base}`]: () => Response.json({ items: [] }),
@@ -112,7 +112,7 @@ describe("WEB-U-025 share dialog", () => {
     );
   });
 
-  // The fix's review: after a share with Can edit, the next person starts at Can view again.
+  // After a share with Can edit, the next person starts at Can view again.
   it("WEB-U-173 starts the next share at Can view again", async () => {
     show({
       [`GET ${base}`]: () => Response.json({ items: [] }),

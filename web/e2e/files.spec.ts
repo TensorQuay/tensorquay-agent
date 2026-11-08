@@ -50,7 +50,7 @@ for (const width of [1024, 1440])
       await toggle.click();
       await expect(panel.getByRole("button", { name: "src" })).toBeVisible();
       await expect(panel.getByText(".tqa")).toHaveCount(0);
-      // WEB-U-152 (the 13f screens, #1): beside files, the page never says the workspace starts empty.
+      // WEB-U-152 (a screen review before 17.0): beside files, the page never says the workspace starts empty.
       await expect(
         page.getByText("Send a message to begin.", { exact: true }),
       ).toBeVisible();
@@ -180,7 +180,7 @@ test("WEB-U-020 a message naming a missing upload is refused", async ({
   });
 });
 
-// WEB-U-024 (task 068c): the Changes tab shows what each run added, modified or deleted, with a tinted diff.
+// WEB-U-024: the Changes tab shows what each run added, modified or deleted, with a tinted diff.
 for (const [width, theme] of [
   [1440, "light"],
   [1024, "dark"],
@@ -195,7 +195,7 @@ for (const [width, theme] of [
     const status = page.getByLabel("Run status");
     const message = page.getByLabel("Message", { exact: true });
     const panel = page.getByRole("complementary", { name: "Files" });
-    // Review of 068c: below 1280 px the floating panel ends above the composer, so sending works with it open.
+    // Below 1280 px the floating panel ends above the composer, so sending works with it open.
     async function send(text: string) {
       await message.fill(text);
       await page.getByRole("button", { name: "Send" }).click({ trial: true });
@@ -216,7 +216,7 @@ for (const [width, theme] of [
     await page.getByRole("button", { name: "Send" }).click();
     await expect(status).toHaveText(/^Done/, { timeout: 30_000 });
 
-    // Review of 068c: the turn summary counts the run's recorded changes, not only file-edit tools; finding T-b: the
+    // The turn summary counts the run's recorded changes, not only file-edit tools; it says the
     // count alone, and Open changes (WEB-U-016) shows them in the files panel at any width.
     await expect(page.locator(".turn-summary")).toHaveText("1 file changed");
     await page.getByRole("button", { name: "Open changes" }).click();
@@ -236,7 +236,7 @@ for (const [width, theme] of [
     ).toBeVisible();
     await capture(page, `changes-list-${suffix}`);
     await audit(page, `changes-list-${suffix}`, width === 1440);
-    // Finding F5: a file the run created opens as what it is, in the Files tab, not as a diff.
+    // A file the run created opens as what it is, in the Files tab, not as a diff.
     await list.getByRole("button", { name: /summary\.md/ }).click();
     await expect(panel.getByRole("tab", { name: "Files" })).toHaveAttribute(
       "aria-selected",
@@ -258,12 +258,12 @@ for (const [width, theme] of [
     await expect(diff.locator('[data-kind="added"]').first()).toBeVisible();
     await expect(diff.locator('[data-kind="removed"]').first()).toBeVisible();
     await expect(diff.getByText("+++ b/results/summary.md")).toHaveCount(0);
-    // WEB-U-164 (the 13f screens, #9): where the change is, in words; never the diff's "@@" notation.
+    // WEB-U-164 (a screen review before 17.0): where the change is, in words; never the diff's "@@" notation.
     await expect(diff).not.toContainText("@@");
     await expect(diff.locator('[data-kind="hunk"]').first()).toHaveText(
       /^Lines? 1\b/,
     );
-    // Review of 068c (walk-through): a long line wraps inside the panel, its marker kept, nothing clipped.
+    // A long line wraps inside the panel, its marker kept, nothing clipped.
     const long = diff.locator("li", { hasText: /deliberately long line/ });
     await expect(long).toBeVisible();
     expect(
@@ -309,7 +309,7 @@ for (const [width, theme] of [
     ]);
   });
 
-// The review of WEB-U-170: the layout's own width decides. At 1100, and at 1024 with the sidebar expanded, there is
+// WEB-U-170: the layout's own width decides. At 1100, and at 1024 with the sidebar expanded, there is
 // no room beside the conversation: the open panel takes the whole column, and the composer stays whole and reachable.
 for (const [width, theme] of [
   [1100, "light"],

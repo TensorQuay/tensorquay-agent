@@ -179,7 +179,7 @@ export function fromDraft(
   draft: EnvironmentDraft,
   creating: boolean,
   ceiling?: EnvironmentSize,
-  /** The environment as loaded: a size whose field wasn't edited is sent as stored, exactly (the sizes review). */
+  /** The environment as loaded: a size whose field wasn't edited is sent as stored, exactly. */
   original?: EnvironmentItem | null,
 ) {
   const loaded = original ? toDraft(original) : null;

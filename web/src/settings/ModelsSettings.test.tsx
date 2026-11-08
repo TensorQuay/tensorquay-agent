@@ -92,7 +92,7 @@ function choose(route: string, action: string) {
 }
 
 describe("WEB-U-039 model routes", () => {
-  // The 13f screens, smaller items (WEB-U-181, decision a): the Key column showed `secrets/provider-ga…`, the
+  // A screen review before 17.0 (WEB-U-181): the Key column showed `secrets/provider-ga…`, the
   // configuration's notation, cut where keys differ. It shows the key's name, as Keys › Shared does, on one line,
   // with the full reference on hover.
   it("WEB-U-181 names a route's key without secrets/, with the full reference on hover", async () => {
@@ -124,7 +124,7 @@ describe("WEB-U-039 model routes", () => {
     expect(screen.queryByText("Chat Completions")).toBeNull();
   });
 
-  // Review 7 Oct, P2-1: a file-managed list keeps its source, the only place that says so; and when every route has
+  // A file-managed list keeps its source, the only place that says so; and when every route has
   // left the file, its marker is what says to delete them. It is each route's muted line (17.3).
   it.each([
     ["current", "Configuration file"],
@@ -457,7 +457,7 @@ describe("WEB-U-039 model routes", () => {
     expect(within(dialog).getByLabelText("Route name")).toHaveValue("qwen");
   });
 
-  // General-purpose finding X1: an optional purpose line, shown where people pick the model, and in the list.
+  // An optional purpose line, shown where people pick the model, and in the list.
   it("keeps a route's one-line description, checked before sending, and shows it in the list", async () => {
     const fake = fakeRoutes({ routes: listed, secrets: ["secrets/local"] });
     show(fake.api);
@@ -703,7 +703,7 @@ describe("WEB-U-039 model routes", () => {
   });
 });
 
-// 099b-2: each route can be checked from the list; the check runs in its own dialog (WEB-U-039).
+// Each route can be checked from the list; the check runs in its own dialog (WEB-U-039).
 // The route form lists the saved route's models to pick Model from (WEB-U-067).
 describe("WEB-U-067 List models in the route form", () => {
   it("offers it when editing, fills Model with the pick, and waits for an unsaved address to be saved", async () => {
@@ -767,7 +767,7 @@ describe("WEB-U-039 checking a route from the list", () => {
   });
 });
 
-// WEB-U-111 (the lead's first hour, F14): the README's quick-start route has no display name. It is shown by its
+// WEB-U-111 (a first-hour check): the README's quick-start route has no display name. It is shown by its
 // model's name, as the model picker shows it, and editing any other field saves; a display name is asked for only when
 // adding a route.
 describe("WEB-U-111 a route without a display name", () => {
@@ -808,7 +808,7 @@ describe("WEB-U-111 a route without a display name", () => {
   });
 });
 
-// WEB-U-283 (the Models page review, P2 #7): with no route nobody can start a task, so the empty list says what to do.
+// WEB-U-283: with no route nobody can start a task, so the empty list says what to do.
 describe("WEB-U-283 an installation without routes", () => {
   it("says to add one so people can start tasks", async () => {
     show(fakeRoutes({ routes: [] }).api);
@@ -821,8 +821,8 @@ describe("WEB-U-283 an installation without routes", () => {
   });
 });
 
-// WEB-U-285 (the Models page review, P2 #2 and #4): Address gives an example that fits where the model runs, and, while
-// adding, Model says List models comes once the route is saved.
+// WEB-U-285: Address gives an example that fits where the model runs, and, while adding, Model says List models comes
+// once the route is saved.
 describe("WEB-U-285 the route form's hints", () => {
   it("fits the Address example to where the model runs, and says when List models comes", async () => {
     show(fakeRoutes({ routes: listed }).api);
@@ -866,8 +866,8 @@ describe("WEB-U-285 the route form's hints", () => {
   });
 });
 
-// WEB-U-286 (the Models page review, P2 #5): adding a hosted route with the Key left empty, the gateway's refusal
-// names what is on screen, not a secret to choose or a setting under Advanced.
+// WEB-U-286: adding a hosted route with the Key left empty, the gateway's refusal names what is on screen, not a secret
+// to choose or a setting under Advanced.
 describe("WEB-U-286 adding a route without its key", () => {
   it("says to paste the key or use a shared one", async () => {
     const fake = fakeRoutes({ routes: listed });
@@ -891,8 +891,8 @@ describe("WEB-U-286 adding a route without its key", () => {
   });
 });
 
-// WEB-U-293 (the Models page review, P3 #18): a route from the configuration file says it stays deleted after a
-// restart, unless its entry in the file changes; one added here doesn't.
+// WEB-U-293: a route from the configuration file says it stays deleted after a restart, unless its entry in the file
+// changes; one added here doesn't.
 describe("WEB-U-293 deleting a route from the configuration file", () => {
   it("says it stays deleted after a restart", async () => {
     show(

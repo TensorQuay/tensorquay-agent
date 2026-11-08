@@ -97,8 +97,7 @@ export function SharedKeyPage({
 }
 
 /**
- * "Everyone", or "2 people" that opens the list, by pointer, keyboard or touch alike (the review of 938fa83c,
- * item 17).
+ * "Everyone", or "2 people" that opens the list, by pointer, keyboard or touch alike.
  */
 function WhoMayUseCell({ item }: { item: HostKey }) {
   const t = useT();
@@ -134,9 +133,9 @@ function WhoMayUseCell({ item }: { item: HostKey }) {
 }
 
 /**
- * Keys › Shared for administrators (the reviewed Keys sketch §5): the shared keys, with who may use each and its last
- * use (by whom on hover), and Add a shared key; then members' own keys, which an administrator may only delete. A
- * gateway without host keys answers 404, and the tab leaves them out.
+ * Keys › Shared for administrators: the shared keys, with who may use each and its last use (by whom on hover), and Add
+ * a shared key; then members' own keys, which an administrator may only delete. A gateway without host keys answers
+ * 404, and the tab leaves them out.
  */
 export function AdminSharedKeys({
   api,
@@ -156,7 +155,7 @@ export function AdminSharedKeys({
   useEffect(() => {
     cache.removeQueries({ queryKey: HOST_KEYS_NOTICE, exact: true });
   }, [cache]);
-  // By id, so a refetch after a conflict gives the dialog the key as it is now (the review of 938fa83c, item 15).
+  // By id, so a refetch after a conflict gives the dialog the key as it is now.
   const [deleting, setDeleting] = useState<string | null>(null);
   const keys = useQuery({
     queryKey: ADMIN_HOST_KEYS,
@@ -387,8 +386,8 @@ function DeletePersonal({
 }
 
 /**
- * Keys › Shared for members (the reviewed Keys sketch §6, decision 2): the shared keys they may use, read-only, with
- * their own last use only; no actions and no one else's names.
+ * Keys › Shared for members: the shared keys they may use, read-only, with their own last use only; no actions and no
+ * one else's names.
  */
 export function MemberSharedKeys({
   api,

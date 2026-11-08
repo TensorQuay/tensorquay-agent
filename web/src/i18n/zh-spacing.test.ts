@@ -96,8 +96,8 @@ describe("WEB-U-305 Simplified Chinese spaces numbers from the words around them
     );
   });
 
-  // The 16d page pass (Z28): only a number takes the space; a placeholder that ends in Chinese ("4 096 个进程") meets
-  // the next Chinese word with none ("个进程和"), while one that starts with a number ("100 GB") keeps its own.
+  // A pass over the pages before 17.0: only a number takes the space; a placeholder that ends in Chinese ("4 096 个进程")
+  // meets the next Chinese word with none ("个进程和"), while one that starts with a number ("100 GB") keeps its own.
   it("joins the environment ceiling's words with no space between Chinese", () => {
     const sentence = chinese("limits.ceiling", {
       cpus: display(chinese, "millicores", 8000),

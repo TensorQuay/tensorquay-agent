@@ -4,8 +4,8 @@ import { argument } from "./tool-results";
 import type { ToolView } from "./types";
 
 /**
- * Why a helper couldn't start, in plain words under its step (WEB-U-399; c16k real-world B5: the page showed the
- * runtime's line "unknown_reference: unknown reference: profile"). The runtime's line stays folded in the step's
+ * Why a helper couldn't start, in plain words under its step (WEB-U-399; real-world use before 17.0: the page showed
+ * the runtime's line "unknown_reference: unknown reference: profile"). The runtime's line stays folded in the step's
  * Result; a code without words here adds nothing beyond the step's own line.
  */
 export function teamFailure(

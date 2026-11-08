@@ -64,7 +64,8 @@ describe("WEB-U-001 composer states", () => {
       run: { id: null, status: "queued" as const },
       reason: "You can reply once it starts.",
     },
-    // A wait for a free desktop says when one frees, which the header's "Waiting…" leaves out (the 16d page pass, Z24).
+    // A wait for a free desktop says when one frees, which the header's "Waiting…" leaves out (a pass over the pages
+    // before 17.0).
     {
       sending: false,
       sandbox: "queued" as const,
@@ -117,9 +118,9 @@ describe("WEB-U-001 composer states", () => {
     await waitFor(() => expect(input).toHaveValue("One copy while sending"));
   });
 
-  // The review of ea1e1a3b (SHOULD): Send and Stop are one button, so the second click of a double-click on Send must
-  // not stop the run it just started. Only that second click is ignored (the browser counts it): a deliberate click on
-  // Stop, however soon, stops (WEB-E2E-004 clicks Stop as soon as the run shows Working…).
+  // Send and Stop are one button, so the second click of a double-click on Send must not stop the run it just started.
+  // Only that second click is ignored (the browser counts it): a deliberate click on Stop, however soon, stops
+  // (WEB-E2E-004 clicks Stop as soon as the run shows Working…).
   it("ignores the second click of a double-click on Send, never a deliberate Stop", () => {
     const onStop = vi.fn(() => Promise.resolve());
     const { rerender } = render(<Composer {...defaults} onStop={onStop} />);
@@ -197,7 +198,7 @@ describe("WEB-U-017 composer card controls", () => {
   });
 });
 
-// Finding T4 (GW-I-129): while the agent works, a message can be written and sent; the gateway holds it until the run
+// GW-I-129: while the agent works, a message can be written and sent; the gateway holds it until the run
 // ends, and the composer lists what waits, what was dropped, and who may cancel it.
 describe("WEB-U-079 send after this", () => {
   const running: Transcript["run"] = { id: "run-1", status: "running" };
@@ -368,8 +369,8 @@ describe("WEB-U-079 send after this", () => {
   });
 });
 
-// The 13f screen review, #3: a phone was told "Enter to send · Shift+Enter for a new line", which a touch keyboard can't
-// do. With a coarse pointer the hint isn't shown, and the field isn't described by it.
+// A screen review before 17.0: a phone was told "Enter to send · Shift+Enter for a new line", which a touch keyboard
+// can't do. With a coarse pointer the hint isn't shown, and the field isn't described by it.
 describe("WEB-U-154 no keyboard hint on a touch screen", () => {
   it("leaves the hint out where the pointer is a finger", () => {
     vi.stubGlobal(
@@ -399,9 +400,9 @@ describe("WEB-U-154 no keyboard hint on a touch screen", () => {
   });
 });
 
-// WEB-U-273 (the accessibility review of the core screens): Stop pressed with the keyboard became natively disabled
-// while the stop was sent, then an empty Send, so the focus fell to the page. While the button has the focus it stays
-// focusable and says it's unavailable; activating it then does nothing. Not focused, it is disabled as before.
+// WEB-U-273: Stop pressed with the keyboard became natively disabled while the stop was sent, then an empty Send, so
+// the focus fell to the page. While the button has the focus it stays focusable and says it's unavailable; activating
+// it then does nothing. Not focused, it is disabled as before.
 describe("WEB-U-273 Send and Stop keep the keyboard's focus", () => {
   it("keeps the focus through the stop and the empty Send after it", () => {
     const onStop = vi.fn(() => Promise.resolve());

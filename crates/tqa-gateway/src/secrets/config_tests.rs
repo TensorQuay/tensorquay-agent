@@ -1,4 +1,4 @@
-//! GW-U-055: the read audit's and the audit retention's settings (vault slice 2).
+//! GW-U-055: the read audit's and the audit retention's settings.
 use super::SecretStoreConfig;
 use crate::GatewayError;
 

@@ -11,9 +11,9 @@ const LONGEST = 1024;
 /**
  * Add a key, opened for an address when a task links to `?address=` ("Add a key for {host}", WEB-U-148). The address
  * comes from the router, never window.location, which still shows the page the person came from while this one first
- * renders on a client navigation (the review of f8780321, item 1). It is taken off the page's address once read, so a
- * reload or Back doesn't ask again; the page checks it as it checks anything typed. The route that renders this wraps
- * it in Suspense, as useSearchParams needs.
+ * renders on a client navigation. It is taken off the page's address once read, so a reload or Back doesn't ask again;
+ * the page checks it as it checks anything typed. The route that renders this wraps it in Suspense, as useSearchParams
+ * needs.
  */
 export function NewHostKeyPage(
   props: Omit<ComponentProps<typeof HostKeyPage>, "id" | "address">,

@@ -23,7 +23,8 @@ describe("WEB-U-062 a channel's suggested title", () => {
   });
 });
 
-// The 14b page pass, C2: a channel made from its purpose alone showed that text twice, as its title and in full under it.
+// A pass over the pages before 17.0: a channel made from its purpose alone showed that text twice, as its title and in
+// full under it.
 describe("WEB-U-250 a channel's purpose under its title", () => {
   const long =
     "Plan the spring newsletter: agree the topics and who drafts each part.";

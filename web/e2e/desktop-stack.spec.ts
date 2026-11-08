@@ -216,8 +216,9 @@ async function liveBrightness(page: Page) {
 }
 
 /**
- * Brighter than this isn't the black frame: c16k's read about 0 (A7-black), and the desktop's white or a page reads far
- * above. Low on purpose: a browser with a dark toolbar, or a busy page, can read well under 200 without being black.
+ * Brighter than this isn't the black frame: the one real-world use met before 17.0 read about 0, and the desktop's
+ * white or a page reads far above. Low on purpose: a browser with a dark toolbar, or a busy page, can read well under
+ * 200 without being black.
  */
 const NOT_BLACK = 60;
 
@@ -324,7 +325,7 @@ test("WEB-E2E-072 Take over and Hand back: control, Expand, the keyboard, a relo
       "Taking over stops the agent. After you hand back, send a message to let it carry on.",
     ),
   ).toBeVisible();
-  // C5 (SBX-C-024, c16k real-world A7): the desktop's browser restarts at the grant, and the Live picture is never
+  // SBX-C-024 (real-world use before 17.0): the desktop's browser restarts at the grant, and the Live picture is never
   // black meanwhile: at the grant, then 1 s and 2 s after it. One sample each, so a shorter black gap passes unseen.
   const seen: { at: number; width: number; height: number; mean: number }[] =
     [];
@@ -554,10 +555,10 @@ test("WEB-E2E-077 a desktop task waits for a free desktop, says so, and starts w
   }
 });
 
-// The c16d first hour (F1): a Desktop task's transcript filled with "Blocked network access to accounts.google.com …"
-// and the like, the desktop browser's own background calls, before the model answered anything. The browser now makes
-// none (images/runtime: the managed policy and the switches file), so a fresh Desktop's first minute, its browser up
-// and idle, adds no such notice on a stack whose allow-list is empty.
+// A first-hour check before 17.0: a Desktop task's transcript filled with
+// "Blocked network access to accounts.google.com …" and the like, the desktop browser's own background calls, before
+// the model answered anything. The browser now makes none (images/runtime: the managed policy and the switches file),
+// so a fresh Desktop's first minute, its browser up and idle, adds no such notice on a stack whose allow-list is empty.
 test("WEB-E2E-082 a fresh Desktop's first minute adds no blocked-network notice", async ({
   page,
 }) => {

@@ -1,9 +1,8 @@
 import { useSyncExternalStore } from "react";
 
 /**
- * The task search's shared state (the review of d9fb1917, MUST 1): whether it is open, and whether a list is long
- * enough to offer it. Every mounted list (the sidebar's, the phone drawer's) says the second; the shell holds the one
- * shortcut and the one overlay.
+ * The task search's shared state: whether it is open, and whether a list is long enough to offer it. Every mounted list
+ * (the sidebar's, the phone drawer's) says the second; the shell holds the one shortcut and the one overlay.
  */
 /**
  * `available` is null until a list has said (it is loading): a shortcut pressed then is remembered, not lost (WEB-U-218).

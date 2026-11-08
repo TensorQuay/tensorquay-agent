@@ -36,7 +36,7 @@ export function KeySummary({
   item: HostKey;
   api: HostKeysApi;
   onDeleted: (notice: string) => void;
-  /** The key changed meanwhile: its page takes the new version (the review of b608b50f, item 11). */
+  /** The key changed meanwhile: its page takes the new version. */
   onChanged: () => void;
 }) {
   const t = useT();

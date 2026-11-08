@@ -101,8 +101,8 @@ beforeEach(() => {
 });
 afterEach(() => vi.restoreAllMocks());
 
-// The 13f screen review, #6 (GW-I-173): a message waiting for a free slot couldn't be taken back. It shows with Cancel,
-// from the gateway's list, so a reload or another tab can cancel it too; the task then stops waiting.
+// A screen review before 17.0 (GW-I-173): a message waiting for a free slot couldn't be taken back. It shows with
+// Cancel, from the gateway's list, so a reload or another tab can cancel it too; the task then stops waiting.
 describe("WEB-U-167 a message waiting for a slot can be cancelled", () => {
   it("shows the waiting message with Cancel after a reload, when the tab never sent it", async () => {
     vi.spyOn(api, "queuedMessages").mockResolvedValue({ items: [waiting] });
@@ -222,7 +222,7 @@ describe("WEB-U-167 a message waiting for a slot can be cancelled", () => {
   });
 });
 
-// WEB-U-387 (the c16j team demo, finding 1; GW-I-298): the lead's wake, waiting for a slot or for its turn on the files,
+// WEB-U-387 (a team demo before 17.0; GW-I-298): the lead's wake, waiting for a slot or for its turn on the files,
 // showed as the person's own message: the model's sentence, raw, with Cancel, which would have withdrawn the wake. The
 // list marks it (`team_wake`): it reads as the gateway's quiet notice, as the transcript's wake does (WEB-U-237), with
 // no Cancel, and never takes the place of the person's own message.
@@ -381,7 +381,7 @@ describe("WEB-U-387 a waiting team wake is the gateway's notice", () => {
   });
 });
 
-// WEB-U-388 (the c16j team demo, finding 1, as for the wake; GW-I-300): a helper's first turn is queued as the wake is,
+// WEB-U-388 (a team demo before 17.0, as for the wake; GW-I-300): a helper's first turn is queued as the wake is,
 // so while it waits (for a slot, or for the lead's files) the helper's page showed the gateway's frame as the person's
 // own message, with Cancel, which would have left the helper without its brief. The list marks it (`lead_brief`): it
 // reads as the quiet "Brief from the lead", with no Cancel; the brief itself shows once the turn goes out.

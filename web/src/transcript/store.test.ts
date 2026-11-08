@@ -143,7 +143,7 @@ describe("WEB-U-002 reconnect and disposal", () => {
 
   it("stops malformed input, ignores detached sources, and exposes an error banner", () => {
     const { store, sources } = setup();
-    // A known kind with a bad field; an unknown kind is ignored instead (task 069b).
+    // A known kind with a bad field; an unknown kind is ignored instead.
     sources[0]?.send({ type: "heartbeat", run_id: 5 });
     expect(sources[0]?.close).toHaveBeenCalledOnce();
     const banner = store.getSnapshot().transcript.banner;
@@ -205,7 +205,7 @@ describe("SEC-001 blocked network attempts in the live stream", () => {
 // A store keeps its subscribers across a dispose and a new connect: React re-runs a hook's effect on the same store
 // (Strict Mode mounts, unmounts and mounts again), while its useSyncExternalStore subscription stays. Clearing them on
 // dispose left the page subscribed to nothing: the stream came back, the page never re-rendered.
-// Regression (TEST-PLAN §19, fixed in 348c2b21).
+// Regression (TEST-PLAN §19).
 describe("WEB-U-158 a store reconnected after dispose still notifies its subscribers", () => {
   it("notifies the subscriber of frames from the new stream", () => {
     const { store, sources, scheduled } = setup();

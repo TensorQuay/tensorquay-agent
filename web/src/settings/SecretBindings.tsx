@@ -34,7 +34,7 @@ export function consumerLabel(consumer: SecretConsumer, t: Translate): string {
 }
 
 /**
- * Changes which routes and connectors may use one secret, with the version the page read (vault slice 3; WEB-U-054).
+ * Changes which routes and connectors may use one secret, with the version the page read (WEB-U-054).
  * A bound route or connector that no longer exists stays listed, ticked, until someone unticks it.
  */
 export function SecretBindings({

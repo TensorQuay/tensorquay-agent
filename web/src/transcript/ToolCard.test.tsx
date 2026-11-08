@@ -101,7 +101,7 @@ describe("WEB-U-001 tool card behavior", () => {
         tool={{ ...tool, status: "error", exitCode: 1, durationMs: 1250 }}
       />,
     );
-    // Finding A5: a non-zero exit reads as not succeeding, its code kept.
+    // A non-zero exit reads as not succeeding, its code kept.
     expect(screen.getByText("Didn't succeed (code 1)")).toBeVisible();
     // The shell's 127 is a missing command: said so, with the code kept (the owner's Mac test).
     rerender(
@@ -193,7 +193,7 @@ describe("a called command that has not started reads as starting (no approvals,
   });
 });
 
-// The c16 live check (LC-04): a step-in reached the lead as a read whose Output was the raw block for the model.
+// A live check before 17.0: a step-in reached the lead as a read whose Output was the raw block for the model.
 describe("WEB-U-327 a team read's card", () => {
   const block =
     '<signed-in-person source="person" seq="5" type="person_message" from="your person" id="b332b4cc72cc104b">\n' +
@@ -260,7 +260,7 @@ describe("WEB-U-327 a team read's card", () => {
   });
 });
 
-// WEB-U-363 (the 16e first hour, v01 and v02): a desktop step's output and a web page's result never show the
+// WEB-U-363 (a first-hour check before 17.0): a desktop step's output and a web page's result never show the
 // model's marker lines, open or folded; what's inside them stays.
 describe("WEB-U-363 a tool card without the model's marker lines", () => {
   const id = "c0fa72a57fe9b250";
@@ -315,8 +315,8 @@ describe("WEB-U-363 a tool card without the model's marker lines", () => {
   });
 });
 
-// WEB-U-368 (the lead's live session on 16e): a desktop step's output read "Typed 17 characters into e8; the screen
-// changed." A ref is the model's handle, meaningless to a person: the output names the element as the step's title
+// WEB-U-368 (a live check before 17.0): a desktop step's output read "Typed 17 characters into e8; the screen changed."
+// A ref is the model's handle, meaningless to a person: the output names the element as the step's title
 // does (its name quoted, else its role in words), and a snapshot's element list after it keeps its refs.
 describe("WEB-U-368 a desktop step's output names its element, never its ref", () => {
   const id = "0123456789abcdef";

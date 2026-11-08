@@ -66,7 +66,7 @@ function sheetFailure(code: string): MessageKey {
 }
 
 /**
- * A spreadsheet's sheet as a read-only table (the file previews design): the gateway reads it (calamine, and its own
+ * A spreadsheet's sheet as a read-only table: the gateway reads it (calamine, and its own
  * counting reader for .ods) and answers display text only, at most 500 rows by 50 columns. Cells are plain text, never
  * markup or links, even when they read like a URL or `=HYPERLINK(…)`. A file over the preview limit isn't fetched.
  */

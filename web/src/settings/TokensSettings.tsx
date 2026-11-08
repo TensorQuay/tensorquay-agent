@@ -159,7 +159,7 @@ export function TokensSettings({
             </thead>
             <tbody>
               {tokens.data.items.map((token) => {
-                // An expired token is listed until revoked, greyed and marked (finding 18).
+                // An expired token is listed until revoked, greyed and marked.
                 const expired =
                   new Date(token.expires_at).getTime() <= clock().getTime();
                 return (

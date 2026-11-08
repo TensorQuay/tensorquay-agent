@@ -29,8 +29,8 @@ const start = (content: string, profile: string | null = "researcher") =>
     }),
   ].reduce(apply, emptyTranscript());
 
-// WEB-U-399 (16n T7; c16k real-world B5, 17 Oct 2026): "Started a helper: DuckDB researcher · Failed" over the
-// runtime's line "unknown_reference: unknown reference: profile". A helper that couldn't start says so, and why in
+// WEB-U-399 (a review and real-world use before 17.0, 17 Oct 2026): "Started a helper: DuckDB researcher · Failed" over
+// the runtime's line "unknown_reference: unknown reference: profile". A helper that couldn't start says so, and why in
 // words under its step; the runtime's line stays folded in the step's Result.
 describe("WEB-U-399 a helper that couldn't start, in words", () => {
   it("names the agent profile that doesn't exist", () => {

@@ -30,7 +30,7 @@ async function addConnector(page: Page, name: string) {
   // PRD FR-10, superseded: no kind of action; no permission rules apply to a connector's tools.
   await expect(dialog.getByLabel("Kind of action")).toHaveCount(0);
   await axe(page);
-  // Vault slice 3 (WEB-U-054): the shared secret must be allowed for the connector first; the form offers it.
+  // WEB-U-054: the shared secret must be allowed for the connector first; the form offers it.
   await dialog.getByRole("button", { name: "Save connector" }).click();
   await expect(
     dialog.getByText("spare isn't allowed for this connector. Allow it first."),

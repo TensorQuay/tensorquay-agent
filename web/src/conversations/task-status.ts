@@ -15,8 +15,8 @@ export function taskStatus(
     case "running":
       return "working";
     case "failed":
-      // A lead's failed run while its team runs isn't the task's outcome: a helper's report wakes it (WEB-U-409, c17
-      // U4; its page says it waits for its helpers).
+      // A lead's failed run while its team runs isn't the task's outcome: a helper's report wakes it (WEB-U-409, 17.0's
+      // release candidate; its page says it waits for its helpers).
       return team?.role === "lead" && team.state === "running"
         ? null
         : "failed";

@@ -13,7 +13,7 @@ type Run =
   | undefined;
 
 /**
- * A failed run's secondary code line: the provider's classification and status ("http 400", UX review 0927b item 4),
+ * A failed run's secondary code line: the provider's classification and status ("http 400"),
  * or a code this web has no words for (the gateway's too), after its plain sentence. Null when the words say it all.
  */
 export function failureCode(run: {

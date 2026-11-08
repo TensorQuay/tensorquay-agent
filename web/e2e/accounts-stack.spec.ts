@@ -62,7 +62,7 @@ async function curl(origin: string, token: string) {
   return Number(stdout);
 }
 
-// Task 067 / FR-26 / GW-I-002 / GW-I-023: invite -> accept -> the member's token works with curl -> revoked -> refused.
+// FR-26 / GW-I-002 / GW-I-023: invite -> accept -> the member's token works with curl -> revoked -> refused.
 test("WEB-E2E-020 team accounts on the real stack", async ({
   page,
   browser,
@@ -147,7 +147,7 @@ test("WEB-E2E-020 team accounts on the real stack", async ({
     );
 });
 
-// Task 090 (FR-21, FR-22, FR-28): the administration pages against the real gateway's admin API.
+// FR-21, FR-22, FR-28: the administration pages against the real gateway's admin API.
 test("WEB-E2E-022 status, secrets and usage on the real stack", async ({
   page,
 }) => {

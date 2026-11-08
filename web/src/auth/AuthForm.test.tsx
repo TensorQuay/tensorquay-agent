@@ -128,7 +128,8 @@ describe("WEB-U-007 authentication forms", () => {
     fireEvent.click(screen.getByRole("button", { name: "Hide password" }));
     expect(input).toHaveAttribute("type", "password");
     expect(document.getElementById("setup-help")).toHaveTextContent(
-      // WEB-U-371 (16e's first hour, s01/s02): the help names the file the install writes, not an installer output.
+      // WEB-U-371 (a first-hour check before 17.0): the help names the file the install writes, not an installer
+      // output.
       /^The setup token is TQA_BOOTSTRAP_TOKEN in compose\.env, in the folder you installed into\.$/,
     );
   });
@@ -150,7 +151,7 @@ describe("WEB-U-007 authentication forms", () => {
       "Email or password is incorrect",
     );
     // WEB-U-380: the refusal is said on the password, which is marked and focused again once the form is enabled
-    // (the 16f page pass, F-P01-1); a new email clears it.
+    // (a pass over the pages before 17.0); a new email clears it.
     const password = screen.getByLabelText("Password", { exact: true });
     await waitFor(() => expect(password).toHaveFocus());
     expect(password).toHaveAttribute("aria-invalid", "true");
@@ -180,7 +181,7 @@ describe("WEB-U-007 authentication forms", () => {
       "That setup token is not correct. Copy it again from compose.env.",
     );
     expect(alert).not.toHaveTextContent(/authentication required/i);
-    // WEB-U-179 (the 13f screens, smaller items): the variable is named once, in the help that says where the token is.
+    // WEB-U-179 (a screen review before 17.0): the variable is named once, in the help that says where the token is.
     expect(alert).not.toHaveTextContent("TQA_BOOTSTRAP_TOKEN");
     expect(document.body.textContent?.split("TQA_BOOTSTRAP_TOKEN").length).toBe(
       2,
@@ -190,8 +191,8 @@ describe("WEB-U-007 authentication forms", () => {
     );
     expect(screen.getByLabelText("Email")).toHaveValue("admin@example.invalid");
     expect(replace).not.toHaveBeenCalled();
-    // WEB-U-380: the token field carries the refusal, marked and focused again (the 16f page pass, F-P02-1); typing
-    // a new token clears it.
+    // WEB-U-380: the token field carries the refusal, marked and focused again (a pass over the pages before 17.0);
+    // typing a new token clears it.
     const token = screen.getByLabelText("Setup token");
     await waitFor(() => expect(token).toHaveFocus());
     expect(token).toHaveAttribute("aria-invalid", "true");
@@ -215,8 +216,8 @@ describe("WEB-U-007 authentication forms", () => {
     expect(screen.getByLabelText("Email")).not.toHaveAttribute("aria-invalid");
   });
   it("accepts only an app-local return path", () => {
-    // The 14b page pass (E6): the app's own pages, so a person signed out on Workspaces, a channel or a settings page
-    // comes back to it, not to New task.
+    // A pass over the pages before 17.0: the app's own pages, so a person signed out on Workspaces, a channel or a
+    // settings page comes back to it, not to New task.
     for (const path of [
       "/",
       `/c/${conversationId}`,
@@ -262,8 +263,8 @@ describe("WEB-U-007 authentication forms", () => {
   });
 
   // TEST: WEB-U-257
-  // WEB-U-257 (the 14b page pass, E6): after an expired session, sign-in brought a person back only to New task or a
-  // task; from Workspaces, Settings or a channel they landed on New task. The app's own pages come back now.
+  // WEB-U-257 (a pass over the pages before 17.0): after an expired session, sign-in brought a person back only to New
+  // task or a task; from Workspaces, Settings or a channel they landed on New task. The app's own pages come back now.
   it("returns to the app's own pages, without their query", () => {
     for (const path of [
       "/workspaces",
@@ -281,8 +282,8 @@ describe("WEB-U-007 authentication forms", () => {
   });
 });
 
-// WEB-U-355 (the 16f page pass, E1): sign-in and setup say an empty or malformed field under it in the app's words,
-// never the browser's own bubble, and send nothing.
+// WEB-U-355 (a pass over the pages before 17.0): sign-in and setup say an empty or malformed field under it in the
+// app's words, never the browser's own bubble, and send nothing.
 describe("WEB-U-355 sign-in and setup fields, said by the page", () => {
   function empty(mode: "login" | "setup") {
     render(

@@ -5,10 +5,10 @@ import { fileURLToPath } from "node:url";
 import { createConversation, signIn } from "./session";
 import { expect, resetFront, test, type Page } from "./test";
 
-// WEB-E2E-086 (the 16f page pass, E17): below 768 px the app sidebar is a drawer (globals.css), so every page inside the
-// app shell must bring its own Open navigation button, or a phone is stuck on it. The routes are read from the app
-// folder itself, so a new page is walked without editing this list; a new dynamic route needs its id below, and fails
-// by name until it has one.
+// WEB-E2E-086 (a pass over the pages before 17.0): below 768 px the app sidebar is a drawer (globals.css), so every
+// page inside the app shell must bring its own Open navigation button, or a phone is stuck on it. The routes are read
+// from the app folder itself, so a new page is walked without editing this list; a new dynamic route needs its id
+// below, and fails by name until it has one.
 
 const APP = fileURLToPath(new URL("../src/app/(app)/", import.meta.url));
 /** Not a product page: the design reference exists only in test builds (P37). */
@@ -130,8 +130,8 @@ test("WEB-E2E-086 Open navigation in Simplified Chinese", async ({ page }) => {
   ).toBeVisible();
 });
 
-// WEB-E2E-087 (the 16f page pass, F1): the sidebar's account row is hidden below 768 px, so the drawer holds the
-// account menu at its foot. From it a phone reaches Settings, and signs out; each closes the drawer.
+// WEB-E2E-087 (a pass over the pages before 17.0): the sidebar's account row is hidden below 768 px, so the drawer
+// holds the account menu at its foot. From it a phone reaches Settings, and signs out; each closes the drawer.
 test("WEB-E2E-087 the drawer's account menu at 390 px: Settings, then sign out", async ({
   page,
   request,

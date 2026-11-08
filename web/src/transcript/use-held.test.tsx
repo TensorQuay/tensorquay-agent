@@ -35,7 +35,7 @@ function provider() {
 
 afterEach(() => vi.restoreAllMocks());
 
-// Finding T4 (GW-I-129): the composer's list is the gateway's, read again whenever the stream says it changed.
+// GW-I-129: the composer's list is the gateway's, read again whenever the stream says it changed.
 describe("WEB-U-079 the task's held messages", () => {
   it("lists held and dropped messages, not sent ones, and reads them again on a message.queue frame", async () => {
     const list = vi.spyOn(api, "queuedMessages").mockResolvedValue({
@@ -86,7 +86,7 @@ describe("WEB-U-079 the task's held messages", () => {
   });
 });
 
-// The 13f screen review, #6 (GW-I-173): a message waiting for a free slot, or for its sandbox to start, is listed so
+// A screen review before 17.0 (GW-I-173): a message waiting for a free slot, or for its sandbox to start, is listed so
 // every viewer can cancel it; one that had already started says so in its own words.
 describe("WEB-U-167 a message waiting for a slot", () => {
   it("lists waiting messages apart from held ones", async () => {

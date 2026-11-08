@@ -156,7 +156,7 @@ describe("WEB-U-053 the reads of a secret", () => {
     ).toEqual(["When", "Used by", "Task", "Outcome"]);
   });
 
-  // The dev screen review (011e8972), #7: a Task column with "No task" on every row, and "Not set then", which made
+  // A screen review before 17.0: a Task column with "No task" on every row, and "Not set then", which made
   // an administrator guess. A column shows only when a row fills it (UI-GUIDELINES §7); the outcome says what happened.
   it("WEB-U-183 hides the Task column when no read has a task, and words a missing value plainly", async () => {
     wrap(

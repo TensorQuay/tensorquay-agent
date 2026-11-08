@@ -41,8 +41,7 @@ export function ModelPicker({
       icon={Sparkles}
       options={
         models?.map((model) => {
-          // What it is good for, in the administrator's words (general-purpose finding X1); else where it runs and
-          // what it can do (WEB-U-103).
+          // What it is good for, in the administrator's words; else where it runs and what it can do (WEB-U-103).
           const line = model.description ?? modelLine(model, t);
           // A person picking a failing route by hand knows first (WEB-U-322); the closed button never says it.
           const failing = model.verified === false;

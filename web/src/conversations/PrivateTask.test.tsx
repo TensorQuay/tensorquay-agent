@@ -77,7 +77,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-// Task 067 / SEC-005: an administrator sees another user's task as metadata only - no content, no actions.
+// SEC-005: an administrator sees another user's task as metadata only - no content, no actions.
 describe("WEB-U-023 private task", () => {
   it("shows the owner and details, and never opens the transcript", async () => {
     const cache = new QueryClient({

@@ -27,7 +27,7 @@ import {
 import { SheetPreview } from "./SheetPreview";
 import "./changes-catalogue";
 
-/** The gateway's preview bound (answers-068 Q4); the note names it when a preview stops early. */
+/** The gateway's preview bound; the note names it when a preview stops early. */
 const PREVIEW_BYTES = 512 * 1024;
 /** The gateway's default preview limits, until sign-in's own arrive (the gateway enforces them either way). */
 const PREVIEW_LIMITS = {
@@ -37,8 +37,8 @@ const PREVIEW_LIMITS = {
 };
 
 /**
- * One file, shown as what it is (findings F1-F3; the file previews design): an image, a rendered document, a table, a
- * web page in a sandboxed frame, a PDF's pages, a spreadsheet's sheet, or text with line numbers; a plain note for other binary,
+ * One file, shown as what it is: an image, a rendered document, a table, a web page in a sandboxed frame, a PDF's
+ * pages, a spreadsheet's sheet, or text with line numbers; a plain note for other binary,
  * empty and cut-short files; always a download link.
  */
 export function FilePreview({
@@ -75,8 +75,8 @@ export function FilePreview({
   }
   const file = content.data;
   const kind = previewKind(name);
-  // A page, PDF or sheet opens wide; one over its preview limit shows only a note, so it has nothing to expand (the
-  // 14b page pass, F8; WEB-U-255).
+  // A page, PDF or sheet opens wide; one over its preview limit shows only a note, so it has nothing to expand (a pass
+  // over the pages before 17.0; WEB-U-255).
   const previewLimit =
     kind === "page"
       ? limits.preview_html_bytes

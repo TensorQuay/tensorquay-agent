@@ -5,7 +5,7 @@ import { THINK } from "./front/stream.mjs";
 import { createConversation, signIn } from "./session";
 import { expect, test, type Locator, type Page } from "./test";
 
-// WEB-U-123 and WEB-U-122 on the page (candidate12 F13, F5): a model thinking at length shows it is at work. The live
+// WEB-U-123 and WEB-U-122 on the page (found before 17.0): a model thinking at length shows it is at work. The live
 // line counts on, and opens what it is thinking; the header's "Working… · N s" counts on too.
 async function capture(page: Page, name: string) {
   if (!process.env.TQA_WEB_EVIDENCE_DIR) return;

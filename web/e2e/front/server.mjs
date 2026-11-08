@@ -251,7 +251,7 @@ async function handle(request, response) {
     return;
   }
   // Test control: the gateway restarting under a task's open page (WEB-U-234). With `gateway_link_ms`, it restarted
-  // under a step: the runtime then gives the lost model call back (first-hour F7).
+  // under a step: the runtime then gives the lost model call back (a first-hour check).
   if (url.pathname === "/__fake/restart" && request.method === "POST") {
     const id = url.searchParams.get("conversation");
     const linkMs = Number(url.searchParams.get("gateway_link_ms") ?? 0);

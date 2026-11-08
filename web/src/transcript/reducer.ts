@@ -69,7 +69,7 @@ export function apply(state: Transcript, frame: ParsedFrame): Transcript {
     case "screen.upload":
     case "screen.sign_out.done":
     case "screen.reset":
-    // An unknown frame or event kind only moves the cursor (task 069b).
+    // An unknown frame or event kind only moves the cursor.
     case "ignored":
       return state;
     // The task's held messages changed (GW-I-129): the composer reads them again; the transcript shows nothing.
@@ -228,8 +228,8 @@ function applyLive(
 }
 
 /**
- * Onto the step it names, even when that step has ended (the review of cf653e47, item 20), once per key, address and
- * outcome (the gateway already limits repeats to one a minute). A step not on this page shows nothing.
+ * Onto the step it names, even when that step has ended, once per key, address and outcome (the gateway already limits
+ * repeats to one a minute). A step not on this page shows nothing.
  */
 function keyUse(
   state: Transcript,
@@ -562,7 +562,7 @@ function budgetNotice(budget: BudgetKind, used: number, limit: number): Copy {
       return message("budget.steps", { used, limit });
     case "wall_clock":
       return message("budget.wallClock", { used, limit });
-    // Finding A8: a reply's length as a share of the task's limit, not tokens; no progress in plain words.
+    // A reply's length as a share of the task's limit, not tokens; no progress in plain words.
     case "output_tokens":
       return message("budget.outputTokens", {
         percent: limit > 0 ? Math.round((used * 100) / limit) : 100,

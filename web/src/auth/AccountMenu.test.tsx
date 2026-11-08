@@ -75,7 +75,7 @@ describe("WEB-U-007 single account menu", () => {
     document.documentElement.removeAttribute("data-theme");
   });
 
-  // Task 088 (D3, owner decision): languages that are not fully translated say so in the menu (WEB-U-032).
+  // Languages that are not fully translated say so in the menu (WEB-U-032).
   it("WEB-U-032 labels partly translated languages partial in the reader's language", async () => {
     const cache = new QueryClient();
     cache.setQueryData(["session"], {

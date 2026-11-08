@@ -48,7 +48,7 @@ export function TeamEndNote({ note }: { note: TeamEndView }) {
         {t(REASONS[note.reason] ?? "team.endOther")}
       </p>
       {note.reason === "budget" && (
-        // The goal may not be met: the next step, in words (WEB-U-394, c16k B9b).
+        // The goal may not be met: the next step, in words (WEB-U-394, real-world use before 17.0).
         <p className="type-small">{t("team.endBudgetNext")}</p>
       )}
       {/* The lead's own words, formatted as its reply is: never raw Markdown marks (WEB-U-396). */}

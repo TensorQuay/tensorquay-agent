@@ -85,7 +85,7 @@ describe("WEB-U-244 WEB-U-259 Clear the desktop browser's sign-ins", () => {
     expect(screen.queryByText("Clearing the browser's sign-ins…")).toBeNull();
   });
 
-  // The c16 UX review, #16: the outcome is the transcript's to keep; under the panel it goes once a run starts, or at
+  // A UX review before 17.0: the outcome is the transcript's to keep; under the panel it goes once a run starts, or at
   // the next Take over, so an old "cleared" never sits beside a new sign-in.
   it("lets the outcome line go when a run starts", async () => {
     const cleared = [notice("screen.signed_out")];
@@ -145,7 +145,7 @@ describe("WEB-U-244 WEB-U-259 Clear the desktop browser's sign-ins", () => {
     );
   });
 
-  // The c16 UX review, #6b: each run ends signed out, so with no sign-in left the action says so instead of clearing
+  // A UX review before 17.0: each run ends signed out, so with no sign-in left the action says so instead of clearing
   // what is already clear; offered whenever the page can't tell (the prop's default).
   it("says the browser is already signed out when no sign-in can remain", async () => {
     const { ScreenPanel } = await import("./ScreenPanel");
