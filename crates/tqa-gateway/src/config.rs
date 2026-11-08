@@ -249,7 +249,7 @@ pub(crate) struct Limits {
     pub password_seconds: u64,
     pub page_size: u32,
     pub idempotency_hours: u32,
-    /// How long an invitation link stays valid (task 063).
+    /// How long an invitation link stays valid.
     pub invitation_hours: u32,
     pub idempotency_purge_seconds: u64,
     pub token_reservation_secs: u32,

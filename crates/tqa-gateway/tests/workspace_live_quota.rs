@@ -1,4 +1,4 @@
-//! The live workspace quota on Docker (N4): a running workspace past its quota plus the margin has its run cancelled
+//! The live workspace quota on Docker: a running workspace past its quota plus the margin has its run cancelled
 //! with a typed notice (GW-I-089), a runtime that does not stop loses its sandbox without a replacement (GW-I-090), and
 //! the conversation's runtime state past `sandbox.state_bytes` stops the run too (GW-I-091). The files are sparse: they
 //! are charged their full length, and cost the test nothing.

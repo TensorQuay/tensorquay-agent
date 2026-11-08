@@ -163,7 +163,7 @@ fn gw_i_048_a_linked_root_is_refused() -> Result {
     Ok(())
 }
 
-// Review of 068c: the agent controls the workspace, so the walk is bounded in work, not only in recorded files.
+// The agent controls the workspace, so the walk is bounded in work, not only in recorded files.
 // TEST: GW-I-013
 #[test]
 fn gw_i_048_many_empty_directories_stop_at_the_entry_budget() -> Result {
@@ -214,7 +214,7 @@ fn gw_i_048_a_passed_deadline_stops_the_walk() -> Result {
     Ok(())
 }
 
-// Review of 068c (walk-through): generated caches are noise in every task's changes.
+// Generated caches are noise in every task's changes.
 // TEST: GW-I-013
 #[test]
 fn gw_i_048_well_known_caches_are_left_out_at_any_depth() -> Result {

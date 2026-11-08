@@ -1,5 +1,5 @@
 //! The proxy's rules for a keyed request (ADR-0037 §3, §5): where a placeholder may sit, and whether a found one may be
-//! used there. Pure: the proxy gathers the facts and acts on the answer (G6).
+//! used there. Pure: the proxy gathers the facts and acts on the answer.
 use super::placeholders::Bound;
 use base64::Engine as _;
 use uuid::Uuid;
@@ -272,7 +272,7 @@ fn inside(prefix: Option<&str>, path: &str) -> bool {
         return false;
     }
     let decoded = percent_decoded(path.as_bytes());
-    // A dot segment, also before a `;` parameter, as Tomcat-style servers read `..;` (L3).
+    // A dot segment, also before a `;` parameter, as Tomcat-style servers read `..;`.
     let dotted = decoded.split(|byte| *byte == b'/').any(|segment| {
         let name = segment
             .split(|byte| *byte == b';')

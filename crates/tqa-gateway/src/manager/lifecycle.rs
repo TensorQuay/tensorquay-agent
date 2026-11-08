@@ -193,7 +193,7 @@ impl SandboxManager {
     ) -> Result<(WorkspaceSource, StateMount, Option<tqa_sandbox::ByteSize>), GatewayError> {
         let storage = &self.services.storage;
         if self.config.firecracker.is_some() {
-            // A new image holds the workspace's own quota: the backend adds ext4's metadata (D6, SBX-F-025). Existing
+            // A new image holds the workspace's own quota: the backend adds ext4's metadata (SBX-F-025). Existing
             // images keep their size.
             let quota = tqa_sandbox::ByteSize::new(quota).map_err(|_| {
                 GatewayError::Configuration("a workspace quota is not a valid size")

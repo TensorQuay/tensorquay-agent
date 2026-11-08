@@ -1,7 +1,8 @@
 //! GW-I-059 (ADR-0028): model routes live in the database, seeded from models.toml; a seed route applies only when it
 //! changed since it was last imported, so an administrator's change survives a restart and a file edit still wins.
-//! GW-I-216 (N2): a file route's `display_name` goes to the route's display name, never into its stored record; a route
-//! without one keeps its digest, a file without one keeps an administrator's, and an unclean one stops the start.
+//! GW-I-216 (ADR-0028's N2): a file route's `display_name` goes to the route's display name, never into its stored
+//! record; a route without one keeps its digest, a file without one keeps an administrator's, and an unclean one stops
+//! the start.
 
 #[path = "support/fixture.rs"]
 mod support;

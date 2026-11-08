@@ -328,7 +328,7 @@ pub enum Event {
         status: ToolStatus,
         /// A process exit status when the tool exposes one.
         exit_code: Option<i32>,
-        /// Why the call failed, as data for clients (revision 10, C1); absent when it didn't fail or from older
+        /// Why the call failed, as data for clients (revision 10); absent when it didn't fail or from older
         /// runtimes.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         failure: Option<crate::ToolFailure>,

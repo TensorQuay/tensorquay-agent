@@ -148,7 +148,7 @@ pub(crate) struct Readiness {
 /// and `answers` saw its UI and page answer through that handle, each in what the steps before left of the bound. Not
 /// ready when the launch failed or outlasted the bound, the window never took the focus, or the browser didn't answer.
 /// The launch itself is never cut off: dropped part way, its Chromium's helper processes (a process group of their own)
-/// would stay on the profile, untracked and unspared, and the next launch would meet the profile's lock (the review of
+/// would stay on the profile, untracked and unspared, and the next launch would meet the profile's lock (found on
 /// 18 Oct 2026). It has its own bound for the debugging port, and runs to its end.
 pub(crate) async fn reopened<L, Launched, H, F, Focused, A, Answered>(
     launch: L,

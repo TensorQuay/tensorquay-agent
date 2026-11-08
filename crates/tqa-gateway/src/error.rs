@@ -113,7 +113,7 @@ pub enum GatewayError {
     /// and forks wait for the runtime file service.
     #[error("workspace files are not available on the microVM backend yet")]
     FilesUnavailable,
-    /// No active account has that email (task 076g); the same answer for unknown and inactive accounts.
+    /// No active account has that email; the same answer for unknown and inactive accounts.
     #[error("no account uses that email")]
     UserNotFound,
     /// A named thing this caller may address doesn't exist, under its own code (an agent team's `unknown_member`).
@@ -196,7 +196,7 @@ pub enum GatewayError {
     /// A secret could not be read, authenticated or persisted.
     #[error("secret store is unavailable")]
     SecretUnavailable,
-    /// A key was read but its use could not be recorded, so it was not used (D4).
+    /// A key was read but its use could not be recorded, so it was not used (GW-I-147).
     #[error("The key could not be used: its use could not be recorded. Try again.")]
     KeyUseUnrecorded,
     /// Host storage could not complete an operation.

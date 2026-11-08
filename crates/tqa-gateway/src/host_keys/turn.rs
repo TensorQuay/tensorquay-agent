@@ -62,7 +62,7 @@ pub(crate) async fn would_have_keys(
 }
 
 /// The keys of the run going in the task, newly minted for `sandbox`, whose runtime just registered: the run gets them
-/// back when it resumes (G4b). Only keys it was given that still exist, still allowed and still the sender's.
+/// back when it resumes (GW-I-165). Only keys it was given that still exist, still allowed and still the sender's.
 ///
 /// # Errors
 /// Storage failure, or no randomness.

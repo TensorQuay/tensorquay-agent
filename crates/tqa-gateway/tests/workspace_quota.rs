@@ -1,4 +1,4 @@
-//! GW-I-030 (066c): a workspace over its quota refuses new runs, and retention deletes only long-unused workspaces
+//! GW-I-030: a workspace over its quota refuses new runs, and retention deletes only long-unused workspaces
 //! that no active task is bound to (and nothing at all by default). SBX-C-015's retention clause: expired workspaces
 //! are deleted and logged (the ages are set in the store, standing in for a fake clock).
 #[path = "support/log_capture.rs"]

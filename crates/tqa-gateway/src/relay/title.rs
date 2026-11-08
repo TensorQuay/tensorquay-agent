@@ -1,4 +1,4 @@
-//! Short task titles (L7): after a task's first run completes, one small call on the task's own route names it in 3 to
+//! Short task titles: after a task's first run completes, one small call on the task's own route names it in 3 to
 //! 6 words. The call goes the relay's way (the runtime's encoding, the relay's shaping, the route's key and limiter,
 //! never queueing behind real traffic), is recorded as `title` usage, and changes a title only while nobody has set it
 //! (`title_source` is still `message`). Real work always comes first: the call gives up its slot the moment any request
@@ -104,7 +104,7 @@ pub(crate) fn request(asked: &str, route: &Route) -> CompletionRequest {
     } else {
         PLAIN_TOKENS
     };
-    // Naming the writing system keeps a small model from answering in another language (F23, GW-U-096).
+    // Naming the writing system keeps a small model from answering in another language (GW-U-096).
     let instruction = script(&asked).map_or_else(
         || "Name this task in 3 to 6 words, in its own language. Reply with the name only.".to_owned(),
         |script| {
@@ -222,8 +222,8 @@ pub(crate) fn script(text: &str) -> Option<Script> {
         .map(|(script, _)| script)
 }
 
-/// Whether a title is in the writing system of the task's words (F23): a Japanese task may be named in kanji alone.
-/// With no letters on either side there is nothing to compare, so it fits.
+/// Whether a title is in the writing system of the task's words (GW-U-096): a Japanese task may be named in kanji
+/// alone. With no letters on either side there is nothing to compare, so it fits.
 pub(crate) fn fits(task: &str, title: &str) -> bool {
     match (script(task), script(title)) {
         (Some(Script::Japanese), Some(Script::Han)) | (None, _) | (_, None) => true,
@@ -407,7 +407,7 @@ async fn name(state: &State, id: &ConversationId) -> Result<(), GatewayError> {
 }
 
 /// The answer as the task's title, or why not, at warn: a model that named nothing usable, or named it in another
-/// writing system than the task's (F23), leaves the task its first words.
+/// writing system than the task's (GW-U-096), leaves the task its first words.
 fn usable(id: &ConversationId, route: &str, task: &str, answer: &Completion) -> Option<String> {
     let Some(title) = clean(&answer.text) else {
         tracing::warn!(

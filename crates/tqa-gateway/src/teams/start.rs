@@ -27,7 +27,7 @@ pub(crate) struct Joined {
 }
 
 /// How often a name taken meanwhile is tried again. Under the lead's lock no other start can take one, so this is a
-/// backstop (re-review note on `lower(name)`): a unique violation never becomes a 500.
+/// backstop: a unique violation never becomes a 500.
 const NAME_ATTEMPTS: usize = 3;
 
 /// Adds `joining.member` to the lead's open team, creating the team with its first member.

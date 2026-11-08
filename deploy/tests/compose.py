@@ -309,7 +309,7 @@ def prepare(directory, env, *, runtime=None, port=0, host="127.0.0.1", max_live=
     # The start's bounds are written out (the gateway's defaults), not left implicit: the soak reads its readiness wait
     # from them (soak.ready_wait), so the harness and the gateway it drives use the same numbers.
     write(directory / "gateway.toml", "listen='0.0.0.0:8080'\nmetrics_listen=false\npublic_origin='" + origin + "'\nmodels_path='/etc/tqa/models.toml'\n[storage]\nroot=" + json.dumps(str(storage)) + "\n[runtime]\nbackend='docker'\nimage=" + json.dumps(runtime) + "\n[sandbox]\ncreate_budget_seconds=120\nready_seconds=30\ngateway_url=\"http://gateway:8080\"\nnetwork=" + json.dumps(env["TQA_SANDBOX_NETWORK"]) + "\ngateway_container=" + json.dumps(env["TQA_GATEWAY_CONTAINER"]) + "\n[sandbox.network_pool]\ncidr=" + json.dumps(pool) + "\nprefix=29\n[web]\nupstream=\"http://web:3000\"\n"
-          # The short-title call (L7) would take a reply the fake model scripted for a task: off in test stacks.
+          # The short-title call would take a reply the fake model scripted for a task: off in test stacks.
           "[tasks]\nauto_title=false\n")
     if not stand:
         config = directory / "gateway.toml"

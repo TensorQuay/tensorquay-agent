@@ -1,4 +1,4 @@
-//! GW-I-031 (066b): one read-write sandbox per workspace. The write lease is the workspace's live sandbox: a second
+//! GW-I-031: one read-write sandbox per workspace. The write lease is the workspace's live sandbox: a second
 //! task waits (or is refused) while the holder runs, an idle holder hands over at once, and a dead holder's lease
 //! expires.
 #[path = "support/fixture.rs"]

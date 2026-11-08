@@ -1,4 +1,4 @@
-//! GW-I-156 (F20): internet-access presets, built-in named rule sets. `GET /api/v1/admin/egress/presets` lists them with
+//! GW-I-156: internet-access presets, built-in named rule sets. `GET /api/v1/admin/egress/presets` lists them with
 //! how much of each is applied; `POST …/{id}` adds a preset's missing rules tagged with it, keeping a host that already
 //! has a rule; `DELETE …/{id}` removes the rules still tagged. An administrator's edit untags a rule. `open_web` is the
 //! only way to store the any-host rule '*'. Members see only whether their tasks reach anything (`/auth/me`).

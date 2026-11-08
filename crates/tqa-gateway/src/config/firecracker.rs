@@ -30,7 +30,7 @@ pub(super) struct FirecrackerInput {
     gateway_address: Ipv4Addr,
     /// Default: the port of `[sandbox] gateway_url` and, when egress is configured, the policy proxy's port.
     gateway_ports: Option<Vec<u16>>,
-    /// Deprecated (D6, SBX-F-025): a new workspace image is sized from the workspace quota plus ext4 metadata. Still
+    /// Deprecated (SBX-F-025): a new workspace image is sized from the workspace quota plus ext4 metadata. Still
     /// accepted and validated; setting it logs a warning at start-up.
     #[serde(default)]
     workspace_bytes: Option<u64>,

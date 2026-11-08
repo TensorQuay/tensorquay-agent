@@ -1,4 +1,4 @@
-//! The live workspace quota on Docker (N4): while a run is in progress its workspace and its
+//! The live workspace quota on Docker: while a run is in progress its workspace and its
 //! conversation's runtime state directory are measured with a bounded walk on the blocking pool, scheduled by
 //! `live_usage`. Past the quota the owner is told once and the run continues; past the quota plus its margin (or the
 //! state directory past `sandbox.state_bytes`) the run is cancelled with a typed notice, and a runtime that does not

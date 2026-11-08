@@ -1,5 +1,4 @@
-//! `/api/v1/workspaces` (task 066a). Personal API tokens may call every operation: this is user work, not account
-//! administration (answers-063 Q3).
+//! `/api/v1/workspaces`. Personal API tokens may call every operation: this is user work, not account administration.
 use super::{Access, access, valid_name};
 use crate::{
     GatewayError,
@@ -41,12 +40,12 @@ pub(crate) struct Workspace {
     size_bytes: Option<i64>,
     #[serde(with = "time::serde::rfc3339::option")]
     size_measured_at: Option<time::OffsetDateTime>,
-    /// What it is (H4): `helper_copy` for an agent team member's own copy, else `standard`.
+    /// What it is (GW-I-215): `helper_copy` for an agent team member's own copy, else `standard`.
     kind: crate::workspaces::Kind,
-    /// For a fork: its source, and whether the source had no live sandbox while it was copied (066c).
+    /// For a fork: its source, and whether the source had no live sandbox while it was copied.
     #[serde(skip_serializing_if = "Option::is_none")]
     fork: Option<Fork>,
-    /// Task 076g: who owns it, its quota, and whether a task holds it now.
+    /// Who owns it, its quota, and whether a task holds it now.
     owner: Owner,
     quota_bytes: Option<u64>,
     lease: Option<Lease>,
@@ -212,7 +211,7 @@ pub(crate) struct ShareBody {
     access: ShareAccess,
 }
 
-/// `PUT .../shares {email, access}` (task 076g): share by exact email, never by listing accounts.
+/// `PUT .../shares {email, access}`: share by exact email, never by listing accounts.
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct ShareByEmail {
@@ -570,7 +569,7 @@ pub(crate) async fn delete(
         owned(&state, &user, workspace).await?;
         let mut transaction = state.pool.begin().await?;
         let current = sqlx::query_scalar!("SELECT state FROM workspaces WHERE id=$1 FOR UPDATE", workspace).fetch_one(&mut *transaction).await?;
-        // A fork still copying into this directory finishes (or fails) first (066c).
+        // A fork still copying into this directory finishes (or fails) first.
         if current == "forking" {
             return Err(GatewayError::Conflict("workspace_not_ready"));
         }
@@ -670,7 +669,7 @@ pub(crate) async fn share(
     }).await
 }
 
-/// `PUT /api/v1/workspaces/{id}/shares {email, access}` (owner, task 076g, GW-I-049): shares with the one active
+/// `PUT /api/v1/workspaces/{id}/shares {email, access}` (owner, GW-I-049): shares with the one active
 /// account whose email matches exactly (case-insensitive). Unknown and inactive addresses run the same lookup and get
 /// the same `404 user_not_found`, and attempts are limited per caller, so nothing enumerates accounts.
 ///

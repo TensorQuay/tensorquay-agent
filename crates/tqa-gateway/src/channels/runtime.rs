@@ -1,4 +1,4 @@
-//! `/runtime/channels…` (ADR-0014 points 4 and 6; G4): a run reads and posts to the channels its conversation belongs
+//! `/runtime/channels…` (ADR-0014 points 4 and 6): a run reads and posts to the channels its conversation belongs
 //! to, with its runtime token, from its sandbox's address. Membership is the authority: a conversation that isn't a
 //! member gets `403 not_member`, checked on every call, so a removal takes effect at once. The author is always the
 //! run's conversation.

@@ -17,7 +17,7 @@ pub(crate) enum Admission {
     Retiring,
     /// No slot is free (or the owner is at the per-user cap): the work waits in the fair queue.
     Waiting,
-    /// Another task's sandbox holds the workspace's write lease (066b); `handoff` says it may be retired now.
+    /// Another task's sandbox holds the workspace's write lease; `handoff` says it may be retired now.
     WaitingForWorkspace(super::lease::Block),
 }
 
@@ -59,7 +59,7 @@ impl SandboxManager {
         }
         let mut held = None;
         if phase.is_none() {
-            // One read-write mount per workspace: a held lease comes before any slot (066b).
+            // One read-write mount per workspace: a held lease comes before any slot.
             let caps = super::lease::Caps::of(
                 &self.services.settings.current().limits,
                 self.config.io_timeout(),
@@ -206,7 +206,7 @@ impl SandboxManager {
             sqlx::query!("DELETE FROM sandbox_instances WHERE conversation_id=$1", id)
                 .execute(&mut *transaction)
                 .await?;
-            // The workspace's one read-write mount is gone: its lease is free (066b).
+            // The workspace's one read-write mount is gone: its lease is free.
             sqlx::query!("UPDATE workspaces SET lease_conversation_id=NULL, lease_expires_at=NULL WHERE lease_conversation_id=$1", id)
                 .execute(&mut *transaction)
                 .await?;
@@ -214,7 +214,7 @@ impl SandboxManager {
             Ok(())
         })
         .await?;
-        // No sandbox has the workspace mounted now: measure it for the quota (066c).
+        // No sandbox has the workspace mounted now: measure it for the quota.
         crate::workspaces::measure_later(
             &self.services.pool,
             &self.services.storage,

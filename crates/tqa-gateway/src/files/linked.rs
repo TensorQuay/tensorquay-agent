@@ -211,7 +211,7 @@ const USAGE_PAGES: usize = 20;
 /// Entries per page when counting.
 const USAGE_PAGE: usize = 500;
 
-/// Bytes of regular files in `uploads/` (none when it does not exist yet). Advisory (review note 3): the runtime reports
+/// Bytes of regular files in `uploads/` (none when it does not exist yet). Advisory: the runtime reports
 /// the sizes, and code in the sandbox can change them; the workspace image's size is what really bounds a microVM
 /// workspace.
 ///

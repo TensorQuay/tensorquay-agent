@@ -1,4 +1,4 @@
-//! The two containers the harness runs itself (design 085 §1 and D1). The seed step writes the task's
+//! The two containers the harness runs itself. The seed step writes the task's
 //! seed into a new workspace directory, which rootless Docker can only do from a container because the
 //! storage belongs to the runtime's uid 1000. The check runs on the downloaded copy with no network.
 use super::classify::CheckOutcome;

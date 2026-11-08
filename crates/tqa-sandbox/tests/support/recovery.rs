@@ -53,8 +53,8 @@ pub async fn exercise(
     .await
 }
 
-/// SBX-C-018 (F26): how long destroying an idle runtime takes: linked to the gateway and registered, with no run.
-/// The slot a waiting task needs frees only when this ends.
+/// SBX-C-018 (GW-I-158's case): how long destroying an idle runtime takes: linked to the gateway and registered, with
+/// no run. The slot a waiting task needs frees only when this ends.
 pub async fn idle_destroy() -> Result<Duration, Box<dyn Error>> {
     let mut elapsed = Duration::ZERO;
     support::run(async |fixture| {

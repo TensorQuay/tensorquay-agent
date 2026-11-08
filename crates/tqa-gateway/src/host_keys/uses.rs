@@ -1,6 +1,6 @@
 //! A host key's last use, from its read audit rows (ADR-0037 §8, the plan §1.1): what each viewer may see of it. A member
 //! sees their own use only, with the task's title for their own task; an administrator sees a shared key's last use and
-//! who made it; of a member's own key, only when (least exposure, Amendment 1 and the review's item 23).
+//! who made it; of a member's own key, only when (least exposure, Amendment 1).
 use super::api::Row;
 use crate::GatewayError;
 use serde_json::{Value, json};

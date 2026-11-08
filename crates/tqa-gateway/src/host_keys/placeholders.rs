@@ -66,7 +66,7 @@ pub(crate) async fn mint(
 }
 
 /// Mints new placeholders for the keys of `run`, already going, in `sandbox`: what its runtime gives the run when it
-/// resumes after registering again (G4b). The run's earlier placeholders stay bound to it.
+/// resumes after registering again (GW-I-165). The run's earlier placeholders stay bound to it.
 ///
 /// # Errors
 /// Storage failure, or no randomness.
@@ -170,7 +170,7 @@ pub(crate) async fn find(
     // The key as it is now, not as it was at minting: its address and form, and whether the
     // sender may still use it (its owner, or one of a shared key's people). A key gone or no longer the sender's reads
     // as gone (no `key_id`), so a use is `revoked`; while the key exists its value's reference stays, so that refusal
-    // is still a counted row (R4). The value itself is never read for it.
+    // is still a counted row (ADR-0037's R4). The value itself is never read for it.
     let row = sqlx::query!(
         "SELECT CASE WHEN usable THEN p.key_id END AS \"key_id?\", k.secret_ref \
          AS \"secret_ref?\", p.conversation_id, p.sandbox_id, p.run_id, p.ended_at IS NOT NULL AS \"ended!\", \

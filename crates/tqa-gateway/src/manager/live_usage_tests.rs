@@ -1,4 +1,4 @@
-//! GW-U-052: the live quota's margin and its measurement schedule (N4).
+//! GW-U-052: the live quota's margin and its measurement schedule.
 use super::{MAX_MARGIN, MIN_MARGIN, Sample, hard_limit, next_due};
 use std::time::{Duration, Instant};
 

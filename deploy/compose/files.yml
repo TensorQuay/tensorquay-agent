@@ -1,4 +1,4 @@
-# WEB-E2E-021 (task 068c): uploads, the files panel and run changes against a real runtime and a scripted model.
+# WEB-E2E-021: uploads, the files panel and run changes against a real runtime and a scripted model.
 services:
   fake-model:
     command: ["--scenario", "/scenarios/files.json"]

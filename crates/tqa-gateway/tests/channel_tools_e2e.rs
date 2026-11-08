@@ -1,9 +1,9 @@
 //! TOOL-I-015: the channel tools end to end: the runtime's client and the four tools against the gateway's runtime
-//! routes (ADR-0014 point 6; G4). A member run lists its channels, posts once per call key and reads what it posted as
+//! routes (ADR-0014 point 6). A member run lists its channels, posts once per call key and reads what it posted as
 //! marked channel content; a run whose conversation isn't a member gets the gateway's `not_member`. A wait returns as
-//! soon as someone posts, says so when it runs out, and ends promptly when cancelled (G5). A task posted by the run is
+//! soon as someone posts, says so when it runs out, and ends promptly when cancelled. A task posted by the run is
 //! claimed once by it (a repeat is its existing claim), refused `already_claimed` to another run when full, and a
-//! message that isn't a task is `not_a_task` (G6).
+//! message that isn't a task is `not_a_task`.
 #[path = "support/fixture.rs"]
 mod support;
 use reqwest::Method;

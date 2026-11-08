@@ -1,5 +1,5 @@
 //! TK-U-048: `"decision_engines"` makes the standalone server answer as `decision/v1` engines (ADR-0013 point 6), so a
-//! stack can test a task under an engine that answers (D11's positive path). Each named engine is served at
+//! stack can test a task under an engine that answers. Each named engine is served at
 //! `/engines/<name>` (its base URL; the runtime posts to `<base>/v1/before_step` and `<base>/v1/after_response`), with
 //! no key needed:
 //! - `{"stop": "<reason>"}` stops the run at its first step;

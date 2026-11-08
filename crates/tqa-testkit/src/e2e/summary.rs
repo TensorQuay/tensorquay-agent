@@ -1,4 +1,4 @@
-//! `summary.md` for one run (design 085 §4, D2, decision Q3 of 085b). Completion counts each task's final
+//! `summary.md` for one run. Completion counts each task's final
 //! attempt; harness failures count every attempt, including a provider failure a rerun superseded, so a
 //! rerun can never hide one. A real-model attempt of a task that expects compaction but recorded none is
 //! listed as `harness.expectation`: a finding about the harness, not counted against the model.

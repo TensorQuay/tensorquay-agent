@@ -1,4 +1,4 @@
-//! Why a tool call failed, as data for clients (revision 10, C1): the model reads the tool's own words, and a client
+//! Why a tool call failed, as data for clients (revision 10): the model reads the tool's own words, and a client
 //! words the failure itself from this, never from the model's text.
 use schemars::JsonSchema;
 use serde::{Deserialize, Deserializer, Serialize, de::Error as _};

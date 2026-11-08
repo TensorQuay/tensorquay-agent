@@ -1,4 +1,4 @@
-//! The decision evaluator (ADR-0014 point 9; G7): a proposal's outcome from its voting members' latest votes, the
+//! The decision evaluator (ADR-0014 point 9): a proposal's outcome from its voting members' latest votes, the
 //! rule and whether its window is still open. Pure, so the rules are tested apart from storage (GW-U-065).
 use tqa_types::{DecisionRule, Outcome, VoteChoice};
 

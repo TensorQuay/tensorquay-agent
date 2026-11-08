@@ -1,4 +1,4 @@
-//! GW-I-030 and SEC-014 (066a): workspaces as owned entities that conversations bind to, shared read or write.
+//! GW-I-030 and SEC-014: workspaces as owned entities that conversations bind to, shared read or write.
 #[path = "support/fixture.rs"]
 mod support;
 
@@ -122,8 +122,8 @@ async fn gw_i_030_tasks_bind_to_a_workspace_and_its_directory_is_what_the_sandbo
         let mounted = f.backend.mounted(&first).ok_or("mounted")?;
         assert!(mounted.ends_with(&id), "{}", mounted.display());
         f.forget_runtime(&first)?;
-        // The second task mounts the same directory once the first's sandbox is gone (the lease, 066b;
-        // workspace_lease.rs). A task on another workspace mounts another directory, alongside.
+        // The second task mounts the same directory once the first's sandbox is gone (the lease; workspace_lease.rs). A
+        // task on another workspace mounts another directory, alongside.
         let _ = &second;
         f.gateway.sandboxes().ensure(&own).await?;
         assert_ne!(f.backend.mounted(&own), Some(mounted));
@@ -429,7 +429,7 @@ async fn gw_i_030_delete_refuses_bound_tasks_and_live_sandboxes_and_removes_the_
             .await?
         };
         // A bound task refuses it. (With its tasks, a kept, idle environment is retired for the delete and a run going
-        // refuses it: GW-I-199, since the 13h review.)
+        // refuses it: GW-I-199, since before 17.0.)
         assert_eq!(delete(&base).await?, (409, "workspace_in_use".into()));
         let with_tasks = format!("{base}?with_conversations=true");
         // The idle sandbox retires after the idle window; the task stays. The clock moves on until it has: the worker

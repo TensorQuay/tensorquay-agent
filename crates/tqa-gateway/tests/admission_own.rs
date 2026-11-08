@@ -1,4 +1,4 @@
-//! GW-I-158 (F26): a task whose only wait is its owner's own idle sandbox retiring to make room is queued with the
+//! GW-I-158: a task whose only wait is its owner's own idle sandbox retiring to make room is queued with the
 //! reason `own_sandbox`, so the page says it is starting, not waiting for a free slot. A wait behind another person's
 //! work stays `slot`. The idle sandbox's destroy is held, so the retirement is caught while it is in flight. GW-I-309:
 //! a sandbox whose turn its runtime took, with its run not yet started, isn't evicted for that work until the run ends.

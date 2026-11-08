@@ -1,4 +1,4 @@
-//! Runs the E2E task set against a stack through its public API (TEST-PLAN §16, design 085).
+//! Runs the E2E task set against a stack through its public API (TEST-PLAN §16).
 //! Exit status: 0 when the run was recorded, 1 when it could not be, 2 for unusable flags or tasks.
 //! `--check-only` runs one task's check on a workspace another tool left (E2E-CMP-003); it exits 0 once the verdict is
 //! recorded, whatever the verdict, and 1 or 2 as above. `--seed-only` seeds an empty workspace as an attempt's is seeded.

@@ -203,8 +203,8 @@ fn run_states(
 // TEST: CORE-U-084
 /// Reading the density costs one frame, on any route: a long conversation (400 runs, a recorded usage on each of its
 /// 800 calls) on a route that replays states, kept under the threshold by a compaction every 10 runs that keeps the
-/// last 5, starts its next turn as fast as a short one. The review of 7 Oct measured 7.3 s there for a density
-/// recomputed by walking the chain.
+/// last 5, starts its next turn as fast as a short one. On 7 Oct, a density recomputed by walking the chain took 7.3 s
+/// there.
 #[tokio::test]
 async fn core_u_084_the_density_costs_one_frame_on_a_route_with_states() -> TestResult {
     const RUNS_LONG: usize = 400;

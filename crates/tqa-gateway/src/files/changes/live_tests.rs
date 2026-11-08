@@ -1,4 +1,4 @@
-//! GW-I-048 (review of 068c): readers of one workspace share one live scan at a time.
+//! GW-I-048: readers of one workspace share one live scan at a time.
 use super::*;
 use std::{
     sync::atomic::{AtomicUsize, Ordering},

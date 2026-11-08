@@ -300,7 +300,7 @@ async fn relay(
     // The holder is copied out first: the watch's read guard must not live across an await.
     let now = *holder.borrow_and_update();
     // The last control frame this viewer was sent: a change that says nothing new to it (another viewer's late grant
-    // settled, the CU review's #20) isn't sent again.
+    // settled) isn't sent again.
     let mut sent = control(now, viewer);
     if socket.send(sent.clone()).await.is_err() {
         return None;

@@ -1,4 +1,4 @@
-//! SEC-033 (the review of 7 Oct 2026): a key pasted where a secret's name belongs. Every admin write refuses it with
+//! SEC-033 (found on 7 Oct 2026): a key pasted where a secret's name belongs. Every admin write refuses it with
 //! `400 name_key_shaped` naming the field, before anything is written, bound, audited or kept for a replay, and the
 //! value is in no response, table or log line: a route's `key_ref`, a connector's `secret_ref`, a decision engine's
 //! `key_ref`, and a new shared key's name. A configuration file's is never refused, since an upgrade must start: it is
@@ -137,7 +137,7 @@ async fn sec_033_every_admin_write_refuses_a_key_where_a_name_belongs(pool: PgPo
 async fn sec_033_a_readable_name_is_still_taken(pool: PgPool) -> TestResult {
     support::run(pool, async |f| {
         let (_, cookie) = f.admin().await?;
-        // The route first: naming a secret that doesn't exist yet binds it to the route (D11); naming an existing,
+        // The route first: naming a secret that doesn't exist yet binds it to the route; naming an existing,
         // unbound one would be `secret_not_allowed`.
         let body = json!({"protocol": "openai_chat", "base_url": "https://models.example/v1", "model": "m",
                           "auth": {"kind": "bearer"}, "key_ref": "secrets/hf_token"});

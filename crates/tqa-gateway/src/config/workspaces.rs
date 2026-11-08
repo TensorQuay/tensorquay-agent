@@ -1,8 +1,8 @@
-//! `[workspaces]`: the write lease (task 066b, ARCHITECTURE §4.6). A second task that wants to run on a workspace
+//! `[workspaces]`: the write lease (ARCHITECTURE §4.6). A second task that wants to run on a workspace
 //! whose lease another task's running sandbox holds either waits (`wait`, the default) or is refused
 //! (`refuse`, `409 workspace_busy`). Agent profiles may override the policy later (Phase 6). The quota and
-//! retention bound what workspaces hold and how long an unused one is kept (task 066c); on Docker a running workspace
-//! is also measured during its run and its run stopped past the quota plus a margin (N4).
+//! retention bound what workspaces hold and how long an unused one is kept; on Docker a running workspace
+//! is also measured during its run and its run stopped past the quota plus a margin.
 use crate::GatewayError;
 use serde::Deserialize;
 use std::time::Duration;
@@ -21,11 +21,11 @@ pub(super) struct WorkspacesInput {
     busy_policy: BusyPolicy,
     /// How long a lease lasts without a renewal; heartbeats of the holder's run renew it.
     lease_ttl_seconds: u32,
-    /// The most a workspace may hold (task 066c): a fork beyond it fails; a workspace over it starts no new run.
+    /// The most a workspace may hold: a fork beyond it fails; a workspace over it starts no new run.
     quota_bytes: u64,
     /// Workspaces unused this long, with no active task, are deleted; 0 keeps them for ever (the default).
     retention_days: u32,
-    /// Whether a running Docker sandbox's workspace is measured during its run (N4); Firecracker's image is the bound.
+    /// Whether a running Docker sandbox's workspace is measured during its run; Firecracker's image is the bound.
     live_check: bool,
     /// How often a running workspace is measured, far from its limit (sooner near it or when it grows fast).
     check_seconds: u32,

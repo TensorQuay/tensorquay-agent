@@ -53,8 +53,8 @@ const THINKS_UNASKED: &str = "thinks_unasked";
 /// The server refused `stream_options`: the check went on without it to see the rest, and fails with this code and the
 /// suggestion to turn usage off, since the route's tasks would be refused the same way.
 const USAGE_REFUSED: &str = "usage_refused";
-/// The model server gives the model less context than tasks need (F3): the check fails, suggesting the route's Context
-/// window be set to what the server has, so tasks compact in time until the server's setting is raised.
+/// The model server gives the model less context than tasks need (GW-U-153): the check fails, suggesting the route's
+/// Context window be set to what the server has, so tasks compact in time until the server's setting is raised.
 const CONTEXT_TOO_SMALL: &str = "context_too_small";
 /// The server's context is enough but the route's Context window says otherwise (or nothing): a warning, with the same
 /// one click.
@@ -119,7 +119,7 @@ pub(super) struct Failure {
     pub container_host: Option<bool>,
 }
 
-/// What the probe observed; stored as the route's latest probe (099b-2).
+/// What the probe observed; stored as the route's latest probe.
 #[derive(Debug, Serialize)]
 pub(super) struct Observation {
     pub ok: bool,
@@ -147,8 +147,8 @@ pub(super) struct Observation {
     /// a value (ADR-0027, Chat tool-call extras).
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub tool_call_extras: Vec<String>,
-    /// What the model server says the route's model runs with (F3): Ollama's loaded context, on a local route whose
-    /// check worked; absent when unknown.
+    /// What the model server says the route's model runs with (GW-U-153): Ollama's loaded context, on a local route
+    /// whose check worked; absent when unknown.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub server_context: Option<super::probe_context::ServerContext>,
     /// The server's refusal of `stream_options` earlier in this check: its later requests go without it, and the check

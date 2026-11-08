@@ -236,7 +236,7 @@ pub struct Attempt {
     pub task_id: String,
     /// 1-based attempt number within the run.
     pub attempt: u32,
-    /// The attempt this one reruns after a provider failure (design 085 D2).
+    /// The attempt this one reruns after a provider failure.
     pub rerun_of: Option<u32>,
     /// The conversation, when one was created.
     pub conversation_id: Option<ConversationId>,

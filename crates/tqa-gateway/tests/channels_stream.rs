@@ -1,4 +1,4 @@
-//! GW-I-101 (ADR-0014 point 11; G8): `GET /api/v1/channels/{id}/events?stream=1` replays a channel's messages in seq
+//! GW-I-101 (ADR-0014 point 11): `GET /api/v1/channels/{id}/events?stream=1` replays a channel's messages in seq
 //! order and then goes live, whoever posts (a person or a run); `Last-Event-ID` replays exactly what was missed; ending
 //! the channel sends `channel.state`; a stranger gets `404`.
 #[path = "support/fixture.rs"]

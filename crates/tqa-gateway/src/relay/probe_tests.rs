@@ -1,5 +1,5 @@
 //! GW-I-037 (engine): the route probe against the scripted fake model, through the relay's own shaping, credential,
-//! limiter and decoder. The HTTP API and storage are tested separately (099b-2).
+//! limiter and decoder. The HTTP API and storage are tested separately (GW-I-037).
 
 use super::{
     RelayConfig,

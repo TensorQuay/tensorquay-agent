@@ -139,9 +139,9 @@ fn within_profile(input: &Patch, profile: &crate::profiles::Profile) -> Result<(
     Ok(())
 }
 
-/// Tells the live runtime of every active task whose route is `name`, or falls back to it, its route as it now is (F12):
-/// a route an administrator changes applies from each task's next message, not its environment's next start. Called
-/// after the change is committed and the settings refreshed; never fails the administrator's write.
+/// Tells the live runtime of every active task whose route is `name`, or falls back to it, its route as it now is
+/// (GW-I-157): a route an administrator changes applies from each task's next message, not its environment's next
+/// start. Called after the change is committed and the settings refreshed; never fails the administrator's write.
 pub(crate) async fn route_changed(state: &State, name: &str) {
     let settings = state.settings.current();
     let routes: Vec<String> = settings

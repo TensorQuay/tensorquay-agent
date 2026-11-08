@@ -147,7 +147,7 @@ impl Telemetry {
             .increment(1);
     }
 
-    /// A secret read whose audit row could not be written in time; a key read then is not used (D4).
+    /// A secret read whose audit row could not be written in time; a key read then is not used (GW-I-147).
     pub fn secret_read_unrecorded(&self) {
         self.recorder
             .register_counter(

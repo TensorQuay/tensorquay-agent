@@ -431,8 +431,8 @@ async fn largest_request(tenths: u64, padding: usize) -> Result<(u64, usize), Bo
 // TEST: CORE-U-044
 /// The density each request was built at, from the journal the runner itself wrote: on a route that counts up to 3.5x
 /// the estimate and replays states, no step request asks the server for more than its window (its input at its real
-/// size plus the output it allows), whatever the states' size. The review of 7 Oct's sweep, made
-/// self-consistent: every call reports its real count, as the runner's own journal would hold it.
+/// size plus the output it allows), whatever the states' size. The sweep of 7 Oct, made self-consistent: every call
+/// reports its real count, as the runner's own journal would hold it.
 #[tokio::test]
 async fn core_u_084_no_request_passes_the_window_at_a_real_density() -> TestResult {
     let capacity = u64::from(WINDOW);

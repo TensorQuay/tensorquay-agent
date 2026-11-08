@@ -35,7 +35,7 @@ pub(super) async fn dispatch_copying(
     conversations::authorize(state, user, id, false).await?;
     // Outside the transaction below, which holds the task's row: a sandbox for the check may be started here.
     if let tqa_types::ClientFrame::UserMessage { attachments, .. } = &action.frame {
-        // The person comes first: a title call holding the route's only slot gives it up (L7).
+        // The person comes first: a title call holding the route's only slot gives it up.
         crate::relay::title::interrupt(state, id);
         Box::pin(crate::files::prepare_attachments(
             state,
@@ -70,7 +70,7 @@ pub(super) async fn dispatch_copying(
         if let tqa_types::ClientFrame::UserMessage { attachments, .. } = &action.frame {
             // Boxed: its filesystem walk would otherwise enlarge every action future (clippy::large_futures).
             Box::pin(crate::files::check_attachments(state, user, id, attachments)).await?;
-            // A new run needs a ready workspace within its quota (066c): refused, nothing is queued.
+            // A new run needs a ready workspace within its quota: refused, nothing is queued.
             let workspace = sqlx::query!("SELECT w.state, w.size_bytes, w.quota_bytes FROM workspaces w JOIN conversations c ON c.workspace_id=w.id WHERE c.id=$1", conversation)
                 .fetch_one(&mut *transaction).await?;
             if workspace.state != "ready" { return Err(GatewayError::Conflict("workspace_not_ready")); }
@@ -89,7 +89,7 @@ pub(super) async fn dispatch_copying(
         }
         // A new sandbox's slot comes with its admission and is held until its worker is scheduled (PERF-020).
         let (admission, _slot) = state.manager.admit(&mut transaction,conversation).await?;
-        // `refuse`: a task that would wait for another task's running sandbox on its workspace is refused (066b).
+        // `refuse`: a task that would wait for another task's running sandbox on its workspace is refused.
         if let crate::manager::Admission::WaitingForWorkspace(block) = admission
             && !block.handoff
             && !action.always_wait
@@ -147,7 +147,7 @@ async fn record(
         .execute(&mut *transaction)
         .await?;
     }
-    // Exact bytes: a message may contain U+0000, which `jsonb` cannot hold (task 056).
+    // Exact bytes: a message may contain U+0000, which `jsonb` cannot hold.
     let frame = serde_json::to_vec(&action.frame)?;
     let ordinal = sqlx::query_scalar!("INSERT INTO idempotency (key,user_id,route,response_status,response_body,body_hash,conversation_id,queued_frame,execution_status,held) VALUES ($1,$2,$3,202,$4,$5,$6,$7,'queued',$8) RETURNING ordinal AS \"ordinal!\"", action.key, user.id, action.route, serde_json::to_vec(&response)?,action.fingerprint.as_slice(),conversation,frame,held)
             .fetch_one(&mut *transaction).await?;

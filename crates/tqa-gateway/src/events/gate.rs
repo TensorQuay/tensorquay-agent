@@ -1,6 +1,6 @@
 //! Hold points in a stream's open, kept by the event store that owns its subscription, for tests only: after its
 //! checks (before it subscribes) and after it subscribed and read the task's state again. They make a delete landing on
-//! either side reproducible (the purge review's race). Nothing holds them unless a test asks; there is no endpoint.
+//! either side reproducible. Nothing holds them unless a test asks; there is no endpoint.
 use std::sync::{Arc, Mutex, PoisonError};
 use tokio::sync::Notify;
 

@@ -98,7 +98,7 @@ fn gw_u_085_an_answer_is_one_clean_short_line_or_nothing() {
 }
 
 // TEST: GW-U-096
-/// F23 (candidate 12, qwen2.5): an English request got a Chinese title. The call names the writing system the task's
+/// Found before 17.0 (qwen2.5): an English request got a Chinese title. The call names the writing system the task's
 /// words are in, and a title in another one is refused, so the task keeps its first words.
 #[test]
 fn gw_u_096_the_writing_system_of_a_task_is_its_letters_majority() {

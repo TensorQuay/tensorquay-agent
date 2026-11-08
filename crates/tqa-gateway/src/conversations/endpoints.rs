@@ -30,7 +30,7 @@ pub(crate) struct Create {
     // Absent keeps the request fingerprint of clients that predate environments.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     template: Option<String>,
-    /// A workspace the caller owns or holds a write share on; absent creates a new empty one (task 066a).
+    /// A workspace the caller owns or holds a write share on; absent creates a new empty one.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub(super) workspace_id: Option<uuid::Uuid>,
 }

@@ -1,4 +1,4 @@
-//! One attempt through the public API (design 085 §2): create the conversation on the seeded workspace,
+//! One attempt through the public API (TEST-PLAN §16): create the conversation on the seeded workspace,
 //! send the task, follow the stream while enforcing the task budgets,
 //! then replay the authoritative log for the integrity check.
 use super::{integrity::seq, manifest::Manifest, sse::SseDecoder};

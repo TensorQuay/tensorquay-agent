@@ -1,4 +1,4 @@
-//! A frame whose strings or keys contain NUL (U+0000) is stored and replayed unchanged (task 056).
+//! A frame whose strings or keys contain NUL (U+0000) is stored and replayed unchanged.
 #[path = "support/fixture.rs"]
 mod support;
 

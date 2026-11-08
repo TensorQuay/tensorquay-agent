@@ -11,11 +11,11 @@ use axum_extra::extract::{
 use secrecy::ExposeSecret;
 use std::{net::SocketAddr, sync::Arc};
 
-/// The caller, by session cookie or by personal API token (task 063). A request with an `Authorization` header is
+/// The caller, by session cookie or by personal API token. A request with an `Authorization` header is
 /// authenticated only by that token: a cookie on the same request is ignored, and a bad token is `401`.
 pub(crate) struct Authz(pub User);
 
-/// The caller by session cookie only: token and user administration (task 063, answers-063 Q3).
+/// The caller by session cookie only: token and user administration.
 pub(crate) struct SessionAuthz(pub User);
 
 /// Personal API tokens carry this prefix; runtime tokens never do, so neither can stand in for the other.
@@ -52,7 +52,7 @@ impl FromRequestParts<Arc<State>> for SessionAuthz {
     }
 }
 
-/// Records that the account was active, at most once a minute (066a addendum): a no-op update otherwise.
+/// Records that the account was active, at most once a minute: a no-op update otherwise.
 async fn active(state: &State, user: uuid::Uuid) -> Result<(), GatewayError> {
     crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
         sqlx::query!("UPDATE users SET last_active_at=CURRENT_TIMESTAMP WHERE id=$1 AND (last_active_at IS NULL OR last_active_at<CURRENT_TIMESTAMP-INTERVAL '1 minute')", user)

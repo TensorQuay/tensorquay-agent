@@ -102,13 +102,13 @@ impl ToolError {
                 return bound(&format!("{code}: {detail}"), MAX_ERROR_CHARS);
             }
             Self::InvalidArgs { path, detail } => format!("{path}: {detail}"),
-            // C1: plain words and who can change it; the code is for the logs and tool.end's failure (TOOL-U-040).
+            // Plain words and who can change it; the code is for the logs and tool.end's failure (TOOL-U-040).
             Self::EgressDenied { target } => {
                 let site = match target.port() {
                     80 | 443 => target.host().to_owned(),
                     port => format!("{} (port {port})", target.host()),
                 };
-                // Without the code prefix: the model passes on what it reads (C1).
+                // Without the code prefix: the model passes on what it reads (TOOL-U-040).
                 return bound(
                     &format!(
                         "{site} isn't on this task's allowed sites. An administrator can allow it in Settings > \
@@ -161,7 +161,7 @@ impl ToolError {
             detail: detail.to_owned(),
         }
     }
-    /// The destination a refusal names, for clients' own wording (C1); `None` for every other failure.
+    /// The destination a refusal names, for clients' own wording (PROTO-U-031); `None` for every other failure.
     #[must_use]
     pub const fn target(&self) -> Option<&tqa_types::ErrorTarget> {
         match self {

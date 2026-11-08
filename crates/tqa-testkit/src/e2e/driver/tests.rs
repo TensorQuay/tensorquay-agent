@@ -232,7 +232,7 @@ fn tk_u_009_each_task_runs_in_its_template_and_is_checked_in_its_image() -> Test
 
 #[test]
 fn tk_u_009_the_task_set_keeps_its_gate_requirements() -> TestResult {
-    // Design 085 §5 and the 085d brief: at least 5 fallback-relevant tasks (E2E-FALLBACK-004), exactly 10 in the
+    // The task set's gate requirements: at least 5 fallback-relevant tasks (E2E-FALLBACK-004), exactly 10 in the
     // comparison subset (E2E-CMP-003) and at least 2 long tasks that expect compaction.
     let tasks = load_tasks(&repository_tasks(), &[])?;
     let tagged = |tag: &str| {

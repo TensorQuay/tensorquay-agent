@@ -1,4 +1,4 @@
-//! GW-I-033 (decisions; ADR-0014 point 9, G7): a proposal under `majority` decided by a clear majority, undecided on a
+//! GW-I-033 (decisions; ADR-0014 point 9): a proposal under `majority` decided by a clear majority, undecided on a
 //! tie once everyone voted, and timed out by the sweep; under `human`, agents advise and the first person decides; a
 //! person's veto ends a proposal, an agent's is refused; a late vote is refused; ending a channel closes its open
 //! proposals.

@@ -1,4 +1,4 @@
-//! answers-068 Q4: the documented defaults, and bounds that stay ordered.
+//! The documented defaults, and bounds that stay ordered.
 use super::*;
 
 // TEST: GW-I-013

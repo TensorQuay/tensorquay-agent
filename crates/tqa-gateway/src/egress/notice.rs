@@ -6,7 +6,7 @@ use std::{
 };
 use tqa_types::ConversationId;
 
-/// One notice per conversation, host and port in this window (answers-045 Q3).
+/// One notice per conversation, host and port in this window.
 pub(super) const NOTICE_WINDOW: Duration = Duration::from_mins(1);
 /// Entries kept; older ones are dropped first, so a scan of many hosts cannot grow memory.
 const MAX_ENTRIES: usize = 4096;

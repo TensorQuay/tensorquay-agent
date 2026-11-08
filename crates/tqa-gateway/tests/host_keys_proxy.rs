@@ -7,8 +7,8 @@
 //! GW-I-176 (ADR-0037 Amendment 2): a key for an exact IPv4 or IPv6 address is used through that address's own allow
 //! rule, with an IP-SAN leaf and upstream verified by the address; an address without its rule, or another address on
 //! its tunnel, never gets it.
-//! GW-I-175 (G9a): a keyed host behind an internal certificate authority is reached when `egress.ca_file` names the
-//! authority, on the release build's code path (no test hook).
+//! GW-I-175 (ADR-0037's G9a): a keyed host behind an internal certificate authority is reached when `egress.ca_file`
+//! names the authority, on the release build's code path (no test hook).
 #[path = "support/keyed.rs"]
 mod keyed;
 #[path = "support/fixture.rs"]
@@ -49,7 +49,7 @@ async fn gw_i_166_a_placeholder_in_its_place_is_swapped_and_the_answer_scrubbed(
             .await?,
             (200, "ok".to_owned())
         );
-        // An answer that sends the key back carries the placeholder in its place, in a header and the body (G7).
+        // An answer that sends the key back carries the placeholder in its place, in a header and the body.
         let (header, body) = echo(&mut client, get(HOST, "/echo", Some(&bearer))?).await?;
         assert_eq!(
             (header.as_str(), body),
@@ -572,7 +572,7 @@ async fn gw_i_166_a_key_changed_mid_run_is_judged_as_it_is_now(pool: PgPool) -> 
             status == 403 && words.contains("can no longer use it"),
             "{status} {words}"
         );
-        // The refused use is still a counted row (R4), whoever may no longer use the key.
+        // The refused use is still a counted row (ADR-0037's R4), whoever may no longer use the key.
         let reads = format!(
             "/api/v1/admin/host-keys/{}/reads?limit=10",
             added["id"].as_str().ok_or("id")?

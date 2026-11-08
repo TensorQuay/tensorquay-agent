@@ -558,7 +558,7 @@ async fn gw_i_230_with_no_reset_control_comes_10_s_after_the_press_marked_not_re
                 && waited < std::time::Duration::from_secs(13),
             "{waited:?}"
         );
-        // The reset lands after all (the CU review's #20): the late grant is settled, and the holder is told so with
+        // The reset lands after all: the late grant is settled, and the holder is told so with
         // plain control, which the page reads as ready.
         runtime
             .send(&ServerFrame::Event {
@@ -690,7 +690,7 @@ async fn gw_u_156_a_new_sandbox_starts_without_the_unclean_warning(pool: PgPool)
 
 // TEST: GW-U-156
 /// A deleted task keeps no unclean mark: the delete's in-memory cleanup forgets it with the task's link and streams
-/// (the takeover P3 review's gap: nothing tested that call).
+/// (nothing tested that call before).
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
 async fn gw_u_156_a_deleted_task_keeps_no_unclean_mark(pool: PgPool) -> TestResult {

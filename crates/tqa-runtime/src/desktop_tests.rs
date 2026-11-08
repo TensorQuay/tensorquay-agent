@@ -364,7 +364,7 @@ async fn rt_i_055_a_reset_says_ready_only_when_the_browser_is_up_and_focused_in_
         "its window never took the focus: not ready"
     );
     // A slow launch under load is never cut off: dropping it mid-launch would leave its Chromium's helper processes on
-    // the profile, untracked and unspared, and the next launch would meet the profile's lock (the review of 18 Oct).
+    // the profile, untracked and unspared, and the next launch would meet the profile's lock (found on 18 Oct).
     // It runs to its end, so the session keeps the browser it started, and only the answer says not ready.
     let finished = Arc::new(std::sync::atomic::AtomicBool::new(false));
     let slow = {

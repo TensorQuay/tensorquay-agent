@@ -40,8 +40,8 @@ const MAX_ENTRY_BYTES: usize = 4096 + 64 + 128;
 const OVERHEAD: usize = 64;
 
 /// How much of a reply the gateway holds before checking it: parts, and estimated bytes. Every part is buffered
-/// before its reply is checked, so both bound what a runtime can make the gateway hold (reviews R1 of slices 2 and
-/// 4/5): about what a legitimate reply to the request needs, never the part bound times a full frame.
+/// before its reply is checked, so both bound what a runtime can make the gateway hold: about what a legitimate reply
+/// to the request needs, never the part bound times a full frame.
 #[derive(Clone, Copy, Debug)]
 pub(super) struct Bound {
     pub parts: usize,

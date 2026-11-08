@@ -187,7 +187,7 @@ pub(super) fn valid_title(title: &str) -> Result<&str, GatewayError> {
             "conversation title or route exceeds its bound",
         ));
     }
-    // PostgreSQL text cannot hold U+0000: refuse it here instead of failing the store (answers-056 Q1).
+    // PostgreSQL text cannot hold U+0000: refuse it here instead of failing the store.
     if title.contains('\0') {
         return Err(GatewayError::BadRequest(
             "conversation title contains a NUL character",

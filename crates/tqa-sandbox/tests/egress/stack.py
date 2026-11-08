@@ -118,7 +118,7 @@ class Stack(robustness.Stack):
         if self.backend == "firecracker":
             self.microvm = firecracker_stack()
             # Drawn first, as the microVM stack does, so a teardown after any failure can interpolate the overlay; its
-            # gateway address is pinned in gateway.toml (deploy/firecracker/stack.py claim_network, since f2c83ac2).
+            # gateway address is pinned in gateway.toml (deploy/firecracker/stack.py claim_network).
             self.gateway_address = self.microvm.claim_network(self.env)
         pin = self.env.get("TQA_GATEWAY_IMAGE", "")
         if not (pin.startswith("sha256:") or "@sha256:" in pin):

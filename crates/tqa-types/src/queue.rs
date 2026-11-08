@@ -14,8 +14,8 @@ pub enum QueueReason {
     Slot,
     /// The workspace, whose write lease another task's sandbox holds.
     Workspace,
-    /// Nothing but the same person's own idle sandbox, retiring to make room (revision 10, F26): from their side the
-    /// task is starting, not queued behind anyone.
+    /// Nothing but the same person's own idle sandbox, retiring to make room (revision 10, GW-I-158): from their side
+    /// the task is starting, not queued behind anyone.
     OwnSandbox,
     /// A free Desktop: as many desktop sandboxes as `desktop.max_sessions` allows are live (revision 14, ADR-0039).
     DesktopSessions,

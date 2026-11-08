@@ -1,4 +1,4 @@
-//! Bounded workspace walks (066c): the fork copy and the size measurement. Blocking; callers run them on the
+//! Bounded workspace walks: the fork copy and the size measurement. Blocking; callers run them on the
 //! blocking pool. The source is a directory a sandbox writes to, so it is walked one directory descriptor at a time
 //! with `O_NOFOLLOW`: a link (or anything swapped in for an entry while the walk runs) is never followed. A link is
 //! copied as a link; other special files are skipped. Each file is written under a temporary name and renamed, so a
@@ -274,7 +274,7 @@ fn copy_file(
 }
 
 /// What one entry costs the workspace's disk: its allocated blocks, and for a regular file at least its length (a
-/// sparse file counts its full length). The same charge applies between runs and during one (N4, D2).
+/// sparse file counts its full length). The same charge applies between runs and during one (GW-U-053).
 fn charged(stat: &sys::Stat) -> u64 {
     let blocks = u64::try_from(stat.st_blocks)
         .unwrap_or(0)

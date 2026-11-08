@@ -1,4 +1,4 @@
-//! The live workspace quota on Docker (N4): when the next measurement of a running sandbox's workspace is due, and the
+//! The live workspace quota on Docker: when the next measurement of a running sandbox's workspace is due, and the
 //! hard limit past which its run is stopped. Pure; the worker measures and acts.
 use std::time::{Duration, Instant};
 

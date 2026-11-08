@@ -1,4 +1,4 @@
-//! `tqa-e2e` flags and the cost guards for paid routes (design 085 §6).
+//! `tqa-e2e` flags and the cost guards for paid routes.
 use super::{DriverError, Manifest, Options};
 use std::path::PathBuf;
 

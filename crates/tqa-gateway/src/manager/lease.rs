@@ -1,4 +1,4 @@
-//! The workspace write lease (task 066b, GW-I-031, answers-066 Q1). The lease is the workspace's one live
+//! The workspace write lease (GW-I-031). The lease is the workspace's one live
 //! sandbox: its holder is the conversation whose sandbox record exists. Another conversation of the same workspace
 //! waits; an idle (or dead: its lease lapsed without heartbeats) holder hands over at once; a holder with an active
 //! run, or a pinned one, is never interrupted.
@@ -14,7 +14,7 @@ pub(crate) struct Block {
 }
 
 /// A workspace's lease as it stands: held only while its holder has a sandbox record (the one definition of "held",
-/// used by [`block`] and by the workspace view, task 076g).
+/// used by [`block`] and by the workspace view).
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) struct Held {
     pub workspace: Uuid,

@@ -945,7 +945,7 @@ def main():
     run_seconds(options.hours, options.rehearsal)
     soak_real.check_mode(options.model, options.hours, options.rehearsal, options.conversations)
     check_rotate_after(options.rotate_after, options.rehearsal)
-    # The real-model run (R4) keeps to reconnect faults and hourly restarts: the GPU slot is not where the engine and the
+    # The real-model run keeps to reconnect faults and hourly restarts: the GPU slot is not where the engine and the
     # database are also stressed.
     options.reconnect_only = options.reconnect_only or options.model == "real"
     require(os.environ.get("TQA_DOCKER_TESTS") == "1", "Docker tests require TQA_DOCKER_TESTS=1")
@@ -960,7 +960,7 @@ def main():
     previous = signal.signal(signal.SIGTERM, interrupted)
     result = {"status": "failed", "seed": options.seed, "gate_evidence": False}
     try:
-        # A microVM's workspace is its own block image; the bounded tmpfs is a Docker-backend fault (H5).
+        # A microVM's workspace is its own block image; the bounded tmpfs is a Docker-backend fault.
         bounded = not options.reconnect_only and options.backend == "docker" and "disk_full" not in options.exclude
         stack.prepare(options.rehearsal, options.conversations, engine_proxy=not options.reconnect_only,
                       storage_mib=options.storage_mib if bounded else None)

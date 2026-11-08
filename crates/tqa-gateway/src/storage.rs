@@ -312,7 +312,7 @@ impl Storage {
         Ok(directory.join(format!("{id}.ext4")))
     }
 
-    /// A conversation's runtime state directory, without creating it (the live quota measures it, N4).
+    /// A conversation's runtime state directory, without creating it (the live quota measures it).
     pub fn runtime_state_path(&self, id: uuid::Uuid) -> PathBuf {
         self.root.join("runtime-state").join(id.to_string())
     }

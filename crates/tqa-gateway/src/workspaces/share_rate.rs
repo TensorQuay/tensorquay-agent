@@ -1,4 +1,4 @@
-//! Share-by-email attempts per caller (task 076g, GW-I-049): the sign-in window (`auth/rate.rs` `LoginRate`, 10 attempts
+//! Share-by-email attempts per caller (GW-I-049): the sign-in window (`auth/rate.rs` `LoginRate`, 10 attempts
 //! a minute) keyed by user instead of address, so an owner cannot probe many addresses for accounts.
 use crate::GatewayError;
 use std::{

@@ -92,7 +92,7 @@ fn prompt_u_009_the_list_changes_the_prompt_and_nothing_else() {
 // TEST: PROMPT-U-018
 #[test]
 fn prompt_u_018_a_blocked_site_is_explained_in_plain_words_never_as_a_status_code() {
-    // C1: the model passes on what the prompt tells it, so the Network lines say what to tell the person and who can
+    // The model passes on what the prompt tells it, so the Network lines say what to tell the person and who can
     // change it, never the proxy's status or codes (prompt version 9).
     for network in [
         NetworkSnapshot::default(),
@@ -117,7 +117,7 @@ fn prompt_u_018_a_blocked_site_is_explained_in_plain_words_never_as_a_status_cod
 // TEST: PROMPT-U-009
 #[test]
 fn prompt_u_009_the_any_host_rule_reads_as_any_website_never_as_a_star() {
-    // F20: the open_web preset stores the any-host rule '*'. The model reads what it means, on the ports the rule has
+    // The open_web preset stores the any-host rule '*'. The model reads what it means, on the ports the rule has
     // (an administrator may have edited them), never the pattern itself.
     for (ports, line) in [
         (&[80, 443][..], "- any website on ports 80 and 443\n"),

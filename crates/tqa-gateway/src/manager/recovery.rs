@@ -62,7 +62,7 @@ impl SandboxManager {
         let lost_now = !idle.losses.pending();
         let next = idle.losses.next(now);
         if lost_now && let Err(error) = self.clear_lost(slot, handle).await {
-            // A failed cleanup is never the task's failure (R2): the removal is retried in the background while the
+            // A failed cleanup is never the task's failure: the removal is retried in the background while the
             // task shows it is starting, and nothing starts beside the old instance until it is gone (GW-I-160).
             tracing::warn!(conversation_id = %id, code = error.code(),
                 "a lost sandbox's removal failed; retrying it in the background");

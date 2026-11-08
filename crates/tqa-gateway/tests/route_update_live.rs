@@ -1,4 +1,4 @@
-//! GW-I-157 (F12): a route an administrator changes reaches every open task that uses it, directly or as a fallback, from
+//! GW-I-157: a route an administrator changes reaches every open task that uses it, directly or as a fallback, from
 //! its next message: the gateway sends the task's live runtime a `session.update` with its route and fallbacks as they
 //! now are, so following an error's advice ("raise Max output on the route") and replying works without restarting the
 //! environment. A task on another route gets nothing.

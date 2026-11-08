@@ -1,4 +1,4 @@
-# WEB-E2E-011 (task 076): a task on a shared workspace waits for its lease; a fork runs at once in its own copy.
+# WEB-E2E-011: a task on a shared workspace waits for its lease; a fork runs at once in its own copy.
 services:
   fake-model:
     command: ["--scenario", "/scenarios/workspaces.json"]

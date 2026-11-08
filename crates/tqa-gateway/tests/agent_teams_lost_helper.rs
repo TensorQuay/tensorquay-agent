@@ -198,7 +198,7 @@ async fn gw_i_254_a_helper_whose_sandbox_keeps_stopping_is_told_to_the_lead_as_f
         );
         // The wake starts a new sandbox. Its runtime resumes the cut run from its journal (it reads unfinished there
         // too), which makes the helper working again; the wake's turn waits for that run's end and then goes out,
-        // once (the review of 7 Oct 2026).
+        // once.
         let created = f.backend.creates.load(Ordering::SeqCst);
         tokio::time::timeout(support::DEADLINE, async {
             while f.backend.creates.load(Ordering::SeqCst) == created && sandbox_of(f, &id).await.is_err() {
@@ -292,7 +292,7 @@ async fn failures_and_wakes(
 // TEST: GW-I-254
 // Given up, woken, and given up again before the new sandbox's runtime stores any run event: each give-up counts once
 // and is told once, and the helper isn't left failed with nothing to start it, since the first wake's turn still waits
-// and starts a new sandbox (the review of 7 Oct 2026).
+// and starts a new sandbox.
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
 async fn gw_i_254_a_helper_given_up_twice_counts_both_and_is_started_again(

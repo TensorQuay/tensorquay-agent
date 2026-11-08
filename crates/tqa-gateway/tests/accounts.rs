@@ -1,4 +1,4 @@
-//! GW-I-002, GW-I-023 and GW-I-046: invitations, user administration and personal API tokens (task 063).
+//! GW-I-002, GW-I-023 and GW-I-046: invitations, user administration and personal API tokens.
 #[path = "support/fixture.rs"]
 mod support;
 

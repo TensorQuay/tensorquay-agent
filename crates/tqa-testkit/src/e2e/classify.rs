@@ -1,4 +1,4 @@
-//! Failure classification (TK-U-004, design 085 §3). The first matching rule wins; anything the rules do
+//! Failure classification (TK-U-004). The first matching rule wins; anything the rules do
 //! not recognise is a harness failure, so an unexplained outcome can never count as the model's fault.
 use super::{integrity::IntegrityFault, integrity::seq};
 use serde::Serialize;

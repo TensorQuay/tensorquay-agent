@@ -10,7 +10,7 @@ struct Context {
     timestamp: OffsetDateTime,
     /// The run lifecycle event type, recorded apart from the frame so blob-stored frames count too.
     lifecycle: Option<&'static str>,
-    /// A `tool.call`'s call id, so the Git relay finds the exact approved call (065g).
+    /// A `tool.call`'s call id, so the Git relay finds the exact approved call.
     call_id: Option<String>,
 }
 
@@ -270,7 +270,7 @@ fn run_end(frame: &ServerFrame) -> Option<String> {
 }
 
 /// `PostgreSQL` `jsonb` cannot hold U+0000, which serialized JSON always writes as the escape `\u0000`. Such frames
-/// go to the blob store unchanged (task 056); an escaped backslash followed by `u0000` only matches harmlessly.
+/// go to the blob store unchanged; an escaped backslash followed by `u0000` only matches harmlessly.
 fn contains_nul(bytes: &[u8]) -> bool {
     bytes.windows(6).any(|window| window == br"\u0000")
 }

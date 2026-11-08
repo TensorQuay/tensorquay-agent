@@ -782,7 +782,7 @@ async fn notice(
     host_keys::notify(state, &call, outcome).await;
 }
 
-/// Why a keyed request was refused, for the model: plain words, no codes (C1).
+/// Why a keyed request was refused, for the model: plain words, no codes.
 fn words(outcome: Outcome, bound: Option<&host_keys::Bound>) -> String {
     match outcome {
         Outcome::ForeignRun => "This key's placeholder belongs to another run; use the variable as it is set now.".into(),

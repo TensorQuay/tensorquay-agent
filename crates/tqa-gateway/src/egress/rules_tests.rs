@@ -232,8 +232,8 @@ fn gw_i_061_each_rule_error_keeps_the_file_loaders_message() {
 
 #[test]
 fn gw_i_012_every_reserved_range_is_guarded_to_its_boundary() -> TestResult {
-    // Each reserved range at its edges, and for IPv4 the public address just outside it (ARCHITECTURE §4.2,
-    // review-045). IPv6 neighbours of fc00::/7 and fe80::/10 are left out on purpose: whether deprecated site-local
+    // Each reserved range at its edges, and for IPv4 the public address just outside it (ARCHITECTURE §4.2). IPv6
+    // neighbours of fc00::/7 and fe80::/10 are left out on purpose: whether deprecated site-local
     // fec0::/10 should be guarded is an open question, and this test must not settle it.
     let reserved = [
         "224.0.0.1",

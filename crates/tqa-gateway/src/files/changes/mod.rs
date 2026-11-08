@@ -1,4 +1,4 @@
-//! Run changes (task 068c, answers-068 Q2): the gateway snapshots a task's workspace when it delivers a user message,
+//! Run changes (GW-I-048): the gateway snapshots a task's workspace when it delivers a user message,
 //! before the run can write, and a run's changes are the difference between its snapshot and the next one (or the
 //! live workspace for the latest run). Bounded by `[files]`. A block-image workspace is read through its runtime
 //! (ADR-0030, `linked`).

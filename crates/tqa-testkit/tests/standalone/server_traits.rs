@@ -1,10 +1,10 @@
 //! Two model-server traits a scenario can ask for, so a stack can test the Models check's findings on them (c16):
 //! - TK-U-046: `"ollama"` names models and the context each is loaded with; the server then answers Ollama's own
-//!   `GET /api/version` and `GET /api/ps` (no key, as Ollama), which the route check reads (D5). Without it, both are
+//!   `GET /api/version` and `GET /api/ps` (no key, as Ollama), which the route check reads. Without it, both are
 //!   404, as before.
 //! - TK-U-047: `"refuses_stream_options"` names models whose Chat Completions requests carrying `stream_options` get a
 //!   400 naming it, as some OpenAI-compatible servers answer; the same request without `stream_options` gets the
-//!   script, so the route check's retry without usage passes (D6's usage setting).
+//!   script, so the route check's retry without usage passes.
 use super::support::*;
 use serde_json::{Value, json};
 

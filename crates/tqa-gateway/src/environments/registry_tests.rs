@@ -18,9 +18,10 @@ fn binding(template: &str, digest: &str, capabilities: Vec<Capability>) -> Bindi
 const PIN: &str = "sha256:1111111111111111111111111111111111111111111111111111111111111111";
 
 // TEST: GW-U-108
-/// A release blocker from F3 (GW-U-101): Minimal now declares Shell and Python, but a task bound before templates had
-/// pins (template `minimal`, no digest) must still get its legacy environment, the only form the wire allows without a
-/// pin, instead of `store_unavailable` and a runtime that never starts. A pinned Minimal gets what its template says.
+/// A release blocker from a first-hour check (GW-U-101): Minimal now declares Shell and Python, but a task bound before
+/// templates had pins (template `minimal`, no digest) must still get its legacy environment, the only form the wire
+/// allows without a pin, instead of `store_unavailable` and a runtime that never starts. A pinned Minimal gets what its
+/// template says.
 #[test]
 fn gw_u_108_a_legacy_minimal_binding_forms_the_legacy_environment_whatever_minimal_declares()
 -> Result<(), Box<dyn std::error::Error>> {

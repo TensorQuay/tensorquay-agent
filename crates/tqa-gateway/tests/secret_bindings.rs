@@ -83,7 +83,7 @@ async fn sec_032_a_route_or_connector_may_use_only_a_secret_bound_to_it(
         assert_eq!(status, 201, "{body}");
         let (status, body) = call(f, Method::PUT, "/api/v1/admin/connectors/other", &cookie, (Some(connector("secrets/provider")), None)).await?;
         assert_eq!(status, 201, "{body}");
-        // D11: a secret that does not exist yet is bound to the route that names it (nothing to protect yet), and an
+        // A secret that does not exist yet is bound to the route that names it (nothing to protect yet), and an
         // administrator who later sets its value sees the binding.
         let (status, body) = call(f, Method::PUT, "/api/v1/admin/routes/early", &cookie, (Some(route("secrets/later")), None)).await?;
         assert_eq!(status, 201, "{body}");

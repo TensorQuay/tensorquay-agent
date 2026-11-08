@@ -1,4 +1,4 @@
-//! Invitations (task 063, GW-I-002): an administrator invites one email address with a single-use, expiring link.
+//! Invitations (GW-I-002): an administrator invites one email address with a single-use, expiring link.
 //! Only the token's SHA-256 is stored. Every unusable token gets the same `invitation_invalid` answer.
 use super::{Role, SessionAuthz, User, policy, sessions, token};
 use crate::{GatewayError, app::State, request::ApiJson};

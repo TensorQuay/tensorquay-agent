@@ -1,4 +1,4 @@
-//! GW-I-045 and GW-I-047 (task 068a): a task's workspace files and uploads over HTTP - storage under `uploads/`,
+//! GW-I-045 and GW-I-047: a task's workspace files and uploads over HTTP - storage under `uploads/`,
 //! limits refused before storing, paths that climb refused, and access only by workspace ownership or share (the
 //! administrator role grants no content). The walker's link and race cases are unit tests in `src/files/`.
 //! GW-I-013's caps: the tree page size and paging, the preview cut and the download limit.
@@ -230,7 +230,7 @@ async fn gw_i_045_access_is_workspace_access_and_administrators_get_no_content(
                 .status(),
             201
         );
-        // The administrator role grants metadata only, never files (answers-066 Q7).
+        // The administrator role grants metadata only, never files.
         for cookie in [&admin, &reader_cookie] {
             assert_eq!(code(files(f, cookie, &id, "").send().await?).await?.0, 403);
             assert_eq!(
@@ -400,7 +400,7 @@ async fn gw_i_045_a_message_attaches_only_files_that_were_uploaded(pool: PgPool)
     .await
 }
 
-// GW-I-048 (task 068c): a run's changes are the difference between the workspace snapshot taken when its message was
+// GW-I-048: a run's changes are the difference between the workspace snapshot taken when its message was
 // delivered and the next one; the latest run is compared with the live workspace. The fake runtime plays the agent:
 // it reports the run lifecycle while the test writes to the mounted workspace.
 fn run_event(sequence: u64, run: &str, event: tqa_types::Event) -> Result<tqa_types::ServerFrame> {

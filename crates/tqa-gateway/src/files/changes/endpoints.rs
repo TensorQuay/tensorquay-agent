@@ -91,7 +91,7 @@ async fn compared(
 }
 
 /// The workspace's live manifest compared with `before`: one live scan per workspace at a time, bounded like any
-/// request (review of 068c). On Firecracker it is read through the runtime of a sandbox on the workspace, the owner's
+/// request. On Firecracker it is read through the runtime of a sandbox on the workspace, the owner's
 /// started if none is (ADR-0030 D1).
 async fn live_manifest(
     state: &State,

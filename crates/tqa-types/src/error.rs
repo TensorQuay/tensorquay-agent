@@ -50,7 +50,7 @@ pub enum ErrorCode {
     /// An accepted action failed to execute; retry with a new action key after recovery.
     ActionFailed,
     /// The workspace is over its quota; the run stops past the quota plus a margin, and new runs start only once it
-    /// holds less again (N4).
+    /// holds less again.
     WorkspaceQuota,
     /// The conversation's runtime state is over its bound; its run was stopped and an administrator must intervene.
     StateQuota,

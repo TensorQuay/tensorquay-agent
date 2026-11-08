@@ -246,7 +246,7 @@ impl Supervisor {
             tqa_context::resume_point(&self.history).map_err(|_| RuntimeError::History)?,
             tqa_context::ResumePoint::Idle { .. }
         );
-        // A run interrupted by the runtime's restart resumes with its keys, newly minted for this sandbox (G4b).
+        // A run interrupted by the runtime's restart resumes with its keys, newly minted for this sandbox (GW-I-165).
         let host_keys = session.run_host_keys.clone();
         self.session = Some(session);
         self.start(None, host_keys)?;

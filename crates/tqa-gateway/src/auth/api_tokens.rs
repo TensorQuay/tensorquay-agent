@@ -1,4 +1,4 @@
-//! Personal API tokens (task 063): a program acts as its user until the token expires or is revoked. Only the
+//! Personal API tokens (GW-I-023): a program acts as its user until the token expires or is revoked. Only the
 //! SHA-256 of a token is stored; the token itself is returned once, at creation. Management needs a session.
 use super::{SessionAuthz, TOKEN_PREFIX, token};
 use crate::{GatewayError, app::State, request::ApiJson};
@@ -13,7 +13,7 @@ use std::sync::Arc;
 
 /// Live tokens one user may hold at once.
 const MAX_TOKENS: i64 = 50;
-/// The longest lifetime a token may have (answers-063 Q3).
+/// The longest lifetime a token may have.
 const MAX_DAYS: u32 = 365;
 
 #[derive(Deserialize)]

@@ -29,7 +29,7 @@ pub struct EventStore {
     pool: PgPool,
     storage: Storage,
     hub: Arc<hub::Hub>,
-    /// A test-only hold point around a stream's subscription (the purge review's race); nothing holds it otherwise.
+    /// A test-only hold point around a stream's subscription (a delete racing it); nothing holds it otherwise.
     open_gate: Arc<gate::OpenGate>,
     timeout: std::time::Duration,
     cancel: CancellationToken,

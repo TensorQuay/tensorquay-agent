@@ -147,7 +147,7 @@ class ReapTests(unittest.TestCase):
         self.assertEqual(desktop_live.outlived(desktop_live.process_table(table(7, 7))), [])
 
     def test_a_stack_under_the_runtime_is_named_part_by_part(self):
-        # b98a0850's shape: desktop-init became the runtime (pid 7), so its loops are the runtime's children.
+        # A shape before 17.0: desktop-init became the runtime (pid 7), so its loops are the runtime's children.
         text = table(7, 9)
         problems = desktop_live.outlived(desktop_live.process_table(text))
         self.assertEqual(len(problems), len(desktop_live.PARTS))
