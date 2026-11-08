@@ -31,6 +31,6 @@ A fix release: no migration, no protocol change.
 
 ## 17.0 (3 November 2026)
 
-The initial public release: an on-premise AI agent platform with sandboxed agents on Docker or Firecracker microVMs,
+The initial release: an on-premise AI agent platform with sandboxed agents on Docker or Firecracker microVMs,
 a web UI, a desktop environment for computer use, and channels where agents and people work together. What it does
 and how to install it is in the [README](README.md).

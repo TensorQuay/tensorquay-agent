@@ -23,7 +23,7 @@ loopback; remote access needs an authenticated TLS reverse proxy and the matchin
 
 ### 0. Build the images
 
-There is no published release yet, so build the images on the machine that runs the stack. From the repository root:
+There are no prebuilt images, so build them on the machine that runs the stack. From the repository root:
 
 ```sh
 deploy/build-images.sh
