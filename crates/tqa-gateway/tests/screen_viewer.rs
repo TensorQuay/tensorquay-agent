@@ -370,7 +370,7 @@ async fn gw_i_219_take_over_cancels_the_run_and_holds_turns_until_the_hand_back(
             .await?;
         assert_eq!(accepted.status(), 202);
         // And it says so: held, as a message behind a run is (GW-I-129), so the page lists it as waiting for the
-        // hand-back rather than sending (the 16d page pass, Z15: it read "Sending…" until the hand-back).
+        // hand-back rather than sending (a pass over the pages before 17.0: it read "Sending…" until the hand-back).
         let body: Value = accepted.json().await?;
         assert_eq!(body["held"], json!(true), "{body}");
         assert!(

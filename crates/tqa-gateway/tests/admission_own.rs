@@ -149,8 +149,8 @@ fn frame(seq: u64, event: Event) -> ServerFrame {
 }
 
 // TEST: GW-I-309
-// 16o live V4 (18 Oct 2026): a sandbox retired between its runtime taking a turn and starting its run strands the turn.
-// Eviction for queued work is such a retirement: the sandbox stays until that run has ended.
+// A live check before 17.0 (18 Oct 2026): a sandbox retired between its runtime taking a turn and starting its run
+// strands the turn. Eviction for queued work is such a retirement: the sandbox stays until that run has ended.
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
 async fn gw_i_309_a_sandbox_whose_turn_was_taken_isnt_evicted_until_its_run_ends(

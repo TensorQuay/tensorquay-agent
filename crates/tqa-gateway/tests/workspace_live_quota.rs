@@ -248,7 +248,7 @@ async fn recorded(
 async fn gw_i_200_a_workspace_is_measured_when_its_run_ends(pool: PgPool) -> TestResult {
     support::run(pool, async |f| {
         // The first measurement, due at once when the run starts, finds the workspace empty: "0 B" before the run
-        // has written anything (the 13h UI review's item 4).
+        // has written anything (a UI review before 17.0).
         let (id, _, mut runtime, _, workspace) = running(f, |_, _| Ok(())).await?;
         tokio::time::timeout(support::DEADLINE, async {
             while recorded(f, &id).await?.is_none() {

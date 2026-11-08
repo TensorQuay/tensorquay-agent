@@ -238,8 +238,9 @@ impl SandboxManager {
     }
 
     /// Whether a hand-over or an eviction asked of this sandbox waits instead: a turn its runtime took and hasn't
-    /// started a run for would be stranded with the sandbox, as nothing sends it again (16o live V4, GW-I-309). The
-    /// admission asks again once the run has ended; an eviction it was counting on is released so another can go.
+    /// started a run for would be stranded with the sandbox, as nothing sends it again (a live check before 17.0,
+    /// GW-I-309). The admission asks again once the run has ended; an eviction it was counting on is released so
+    /// another can go.
     async fn gives_way_later(
         self: &Arc<Self>,
         id: &ConversationId,

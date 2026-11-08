@@ -293,8 +293,8 @@ async fn lifecycle(
 async fn gw_u_201_a_holder_whose_turn_is_delivered_but_not_started_isnt_handed_over(
     pool: PgPool,
 ) -> TestResult {
-    // 16o live V4 (18 Oct 2026): a my_files helper's first turn reached its runtime, and 70 ms later, before its run
-    // started, its sandbox was handed over to the waiting helper; the turn was lost with it.
+    // A live check before 17.0 (18 Oct 2026): a my_files helper's first turn reached its runtime, and 70 ms later,
+    // before its run started, its sandbox was handed over to the waiting helper; the turn was lost with it.
     let owner = person(&pool).await?;
     let shared = workspace(&pool, owner).await?;
     let holder = task(&pool, owner, shared).await?;

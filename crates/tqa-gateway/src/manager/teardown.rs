@@ -6,7 +6,7 @@ use std::{sync::Arc, time::Duration};
 use tqa_types::{ConversationId, SandboxState, ServerFrame};
 
 /// The waits before the first background retries of a sandbox's teardown; after them it retries every
-/// [`RETRY_EVERY`] until [`RETRY_CAP`] (the R2 soak on candidate 13d: an engine outage of two minutes outlasted 65 s).
+/// [`RETRY_EVERY`] until [`RETRY_CAP`] (a soak before 17.0: an engine outage of two minutes outlasted 65 s).
 const RETIRE_RETRIES: [Duration; 5] = [
     Duration::from_secs(5),
     Duration::from_secs(15),

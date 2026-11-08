@@ -31,8 +31,8 @@ fn gw_u_106_a_placeholder_over_plain_http_is_caught_in_any_spelling() {
 
 // TEST: GW-U-206
 /// A tunnel that keeps moving bytes, either way, stays open well past the idle bound; once nothing moves for the
-/// bound it ends with `TimedOut`, and not before (the c16y review's E1: the whole tunnel was cut at 300 s, traffic
-/// or not, so a long download through the proxy failed).
+/// bound it ends with `TimedOut`, and not before (a review before 17.0: the whole tunnel was cut at 300 s, traffic or
+/// not, so a long download through the proxy failed).
 #[tokio::test(start_paused = true)]
 async fn gw_u_206_a_busy_tunnel_outlives_the_idle_bound_and_an_idle_one_ends_at_it() -> TestResult {
     let idle = Duration::from_mins(5);
