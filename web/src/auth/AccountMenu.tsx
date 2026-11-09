@@ -1,6 +1,6 @@
 "use client";
 
-import { lazy, Suspense, useRef, useState } from "react";
+import { lazy, Suspense, useId, useRef, useState } from "react";
 
 import { useT } from "../i18n/I18nProvider";
 import { useNavTip } from "../shell/nav-tip";
@@ -24,6 +24,8 @@ export function AccountMenu({ onNavigate }: { onNavigate?: () => void } = {}) {
   const [open, setOpen] = useState(false);
   const anchor = useRef<HTMLButtonElement>(null);
   const email = useSession().data?.email ?? "";
+  // Which account is signed in, to a screen reader too: the email describes the button (its name is "Account").
+  const signedIn = useId();
   const t = useT();
   // The email names the row; where it is hidden (the rail) or cut, the app's own tooltip shows it whole (§6).
   const { handlers, tip } = useNavTip(email || t("account.label"));
@@ -38,6 +40,7 @@ export function AccountMenu({ onNavigate }: { onNavigate?: () => void } = {}) {
         aria-label={t("account.label")}
         aria-haspopup="menu"
         aria-expanded={open}
+        aria-describedby={signedIn}
         onClick={() => setOpen(!open)}
         {...handlers}
         onPointerEnter={(event) => {
@@ -59,7 +62,11 @@ export function AccountMenu({ onNavigate }: { onNavigate?: () => void } = {}) {
         <span className="account-avatar type-label" aria-hidden="true">
           {initials(email)}
         </span>
-        <span className="account-email type-small" data-nav-label="">
+        <span
+          className="account-email type-small"
+          id={signedIn}
+          data-nav-label=""
+        >
           {email}
         </span>
       </button>
