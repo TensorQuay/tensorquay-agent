@@ -7,6 +7,8 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Changed
 
+- **The MCP client library is rmcp 3.9.0** (it was 3.4.1), past RUSTSEC-2026-0457, -0461 and -0462. None of the
+  affected code was built in. A server that stops mid-call now fails the call at once.
 - **Releases are tagged.** Each release is a `vMAJOR.MINOR.PATCH` tag with a page on GitHub's Releases; the README
   and the install guide start from the newest release, and CONTRIBUTING.md says how branches, pull requests and
   releases work.
