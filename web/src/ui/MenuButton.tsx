@@ -1,7 +1,14 @@
 "use client";
 
 import { ChevronDown, type LucideIcon } from "lucide-react";
-import { useId, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 import { useT } from "../i18n/I18nProvider";
 
@@ -92,8 +99,18 @@ export function MenuButton({
     Boolean(disabledReason) ||
     (!current && placeholder === undefined);
   const open = expanded && !unavailable;
+  // Closed without a choice, however it closes (Esc or a press outside, before its list's code arrives or after, or
+  // that code couldn't come): the caller hears it. One stable function, reading the latest onDismiss.
+  const dismissed = useRef(onDismiss);
+  useEffect(() => {
+    dismissed.current = onDismiss;
+  });
+  const dismiss = useCallback(() => {
+    setExpanded(false);
+    dismissed.current?.();
+  }, []);
   // Its list's code comes when it is about to open (WEB-U-014's budget); a picker that can't get it closes.
-  const menus = useMenus(open, setExpanded, anchor);
+  const menus = useMenus(open, dismiss, anchor);
   const shownName =
     current?.label ?? placeholder ?? fallback ?? t("menu.unavailable");
   const name = t("menu.current", { label, value: shownName });
@@ -175,10 +192,7 @@ export function MenuButton({
           searchable={options.length >= SEARCH_FROM}
           oneLine={oneLine}
           rowDecorations={rowDecorations}
-          onClose={() => {
-            setExpanded(false);
-            onDismiss?.();
-          }}
+          onClose={dismiss}
           onChoose={choose}
         />
       )}
