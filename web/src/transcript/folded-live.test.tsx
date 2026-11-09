@@ -62,14 +62,16 @@ describe("WEB-U-462 a folded group shows the step it is on", () => {
     );
   });
 
-  it("keeps the button's name steady while the time goes on", () => {
+  it("keeps the button's name steady while the time goes on", async () => {
     vi.useFakeTimers({ now: BASE + 34_000 });
     show(reading);
     const button = toggle();
     if (!button) throw new Error("the group has its toggle");
     fireEvent.click(button);
     expect(button).toHaveAccessibleName("Working…");
-    act(() => vi.advanceTimersByTime(3_000));
+    await act(() => {
+      vi.advanceTimersByTime(3_000);
+    });
     expect(shown()).toHaveTextContent(/ · 7 s$/);
     expect(button).toHaveAccessibleName("Working…");
   });
