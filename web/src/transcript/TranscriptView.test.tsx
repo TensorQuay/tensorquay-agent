@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { frame, transcriptFrames } from "../test/frames";
 import { settleLazy } from "../test/lazy";
@@ -106,6 +106,35 @@ describe("WEB-U-020 attachments in the transcript", () => {
         .getAllByRole("listitem")
         .map((item) => item.textContent),
     ).toEqual(["a.csv", "Q3_report-2.pdf"]);
+  });
+});
+
+describe("WEB-U-464 a message whose files' list can't load", () => {
+  it("keeps the message and the transcript, without the list (a tab older than an upgrade)", async () => {
+    vi.resetModules();
+    vi.doMock("../files/SentAttachments", () => {
+      throw new Error("Failed to fetch dynamically imported module");
+    });
+    try {
+      const { TranscriptView: Fresh } = await import("./TranscriptView");
+      const state = apply(
+        emptyTranscript(),
+        frame(1, {
+          type: "message.user",
+          text: "Compare these",
+          attachments: ["uploads/a.csv"],
+        }),
+      );
+      render(<Fresh transcript={state} />);
+      await settleLazy();
+      expect(
+        screen.getByRole("article", { name: "Your message" }),
+      ).toHaveTextContent("Compare these");
+      expect(screen.queryByRole("list", { name: "Attached files" })).toBeNull();
+    } finally {
+      vi.doUnmock("../files/SentAttachments");
+      vi.resetModules();
+    }
   });
 });
 
