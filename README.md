@@ -38,7 +38,7 @@ one administrator. The full argument is in [PRD §1](docs/PRD.md#1-mission).
 
 ## Try it
 Install a release, not `main`: the newest is on the [Releases page](https://github.com/TensorQuay/tensorquay-agent/releases/latest)
-(`git clone --branch v17.3.0 https://github.com/TensorQuay/tensorquay-agent.git`). `main` is where development happens.
+(`git clone --branch v17.4.0 https://github.com/TensorQuay/tensorquay-agent.git`). `main` is where development happens.
 The one-box Docker install is in [deploy/README.md](deploy/README.md#install): build the images with
 `deploy/build-images.sh`, point it at a model server (a local OpenAI-compatible one, or a hosted provider; or
 build the scripted test model with `--fake-model` to try it without one), start it, and open the page in a browser. It runs on Linux and on a Mac with Docker Desktop. Without a GPU, a
