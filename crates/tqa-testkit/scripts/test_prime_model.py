@@ -49,12 +49,14 @@ if mode == "unexpected":
 server = socket.socket()
 server.bind(("127.0.0.1", 0))
 server.listen()
-def stop(*_):
-    state.with_suffix(".stopped").write_text("terminated")
-    sys.exit(9 if mode == "bad_exit" else 0)
-signal.signal(signal.SIGTERM, stop)
+# SIGTERM is held from before the ready line until sigwait takes it, so one sent at any moment after the line waits
+# for it. A handler with signal.pause() can lose it: a SIGTERM delivered after the interpreter's last signal check
+# but before pause() starts only marks the handler due, and pause() then waits for a signal that never comes.
+signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGTERM})
 print("listening 127.0.0.1:" + str(server.getsockname()[1]), flush=True)
-signal.pause()
+signal.sigwait({signal.SIGTERM})
+state.with_suffix(".stopped").write_text("terminated")
+sys.exit(9 if mode == "bad_exit" else 0)
 '''
 
 
