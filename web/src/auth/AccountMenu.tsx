@@ -4,8 +4,8 @@ import { lazy, Suspense, useRef, useState } from "react";
 
 import { useT } from "../i18n/I18nProvider";
 import { useNavTip } from "../shell/nav-tip";
+import { prefetchMenus, useMenus } from "../ui/lazy-menus";
 import { PanelBoundary } from "../ui/PanelBoundary";
-import { Popover } from "../ui/Popover";
 
 import { initials } from "./initials";
 import { useSession } from "./use-session";
@@ -27,6 +27,8 @@ export function AccountMenu({ onNavigate }: { onNavigate?: () => void } = {}) {
   const t = useT();
   // The email names the row; where it is hidden (the rail) or cut, the app's own tooltip shows it whole (§6).
   const { handlers, tip } = useNavTip(email || t("account.label"));
+  // Its menu's frame comes when it is about to open (WEB-U-014's budget); a menu that can't get it closes.
+  const menus = useMenus(open, () => setOpen(false));
   return (
     <>
       <button
@@ -38,6 +40,15 @@ export function AccountMenu({ onNavigate }: { onNavigate?: () => void } = {}) {
         aria-expanded={open}
         onClick={() => setOpen(!open)}
         {...handlers}
+        onPointerEnter={(event) => {
+          prefetchMenus();
+          handlers.onPointerEnter(event);
+        }}
+        onPointerDown={prefetchMenus}
+        onFocus={(event) => {
+          prefetchMenus();
+          handlers.onFocus(event);
+        }}
         onKeyDown={(event) => {
           if (["ArrowDown", "ArrowUp"].includes(event.key)) {
             event.preventDefault();
@@ -53,8 +64,8 @@ export function AccountMenu({ onNavigate }: { onNavigate?: () => void } = {}) {
         </span>
       </button>
       {tip}
-      {open && (
-        <Popover
+      {open && menus && (
+        <menus.Popover
           anchor={anchor}
           label={t("account.actions")}
           placement="above-start"
@@ -77,7 +88,7 @@ export function AccountMenu({ onNavigate }: { onNavigate?: () => void } = {}) {
               />
             </Suspense>
           </PanelBoundary>
-        </Popover>
+        </menus.Popover>
       )}
     </>
   );
