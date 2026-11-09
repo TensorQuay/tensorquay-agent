@@ -445,7 +445,6 @@ button.file-open:hover {
    where the page has a Files panel, and only then drawn as one. */
 .sent-picture {
   display: block;
-  max-width: 100%;
   padding: 0;
   overflow: hidden;
   border: var(--border-width) solid var(--line);
@@ -457,9 +456,11 @@ button.sent-picture {
 }
 .sent-picture img {
   display: block;
-  /* An absolute cap, not min(240px, 100%): the list sizes each item to its content and leaves a percentage max-width out
-     of that size, so the frame kept the width of the picture at its height cap, an empty band beside it (17.4 fix). */
-  max-width: 240px;
+  /* No percentage here: the list sizes each item to its content and leaves a percentage max-width out of that size, so
+     with min(240px, 100%) the frame kept the width of the picture at its height cap, an empty band beside it (17.4
+     fix). Viewport units do count there: the second cap keeps the picture inside its message on a phone narrower than
+     it, the page's and the bubble's side padding (64 px) and the frame's borders taken off. */
+  max-width: min(240px, 100vw - 72px);
   max-height: 240px;
   object-fit: contain;
 }
