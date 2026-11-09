@@ -297,7 +297,7 @@ test("WEB-E2E-118 the composer's placeholder fits one row in every language at 3
   await context.close();
 });
 
-// WEB-E2E-118 on a phone while a run goes, with a draft (the review of 9 Nov 2026): "Send after this" sits under the row,
+// WEB-E2E-118 on a phone while a run goes, with a draft (decided on 9 Nov 2026): "Send after this" sits under the row,
 // so the text keeps at least 60 % of the row's width, and nothing runs past the card.
 for (const width of [360, 390] as const)
   test(`WEB-E2E-118 the composer while a run goes, with a draft, at ${width}`, async ({

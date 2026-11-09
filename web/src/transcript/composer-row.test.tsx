@@ -125,7 +125,7 @@ describe("WEB-U-457 the composer's one row", () => {
     ).toBe(true);
   });
   // While a run goes, "Send after this" sits on its own line under the row, after Send, so the text keeps the row's
-  // width on a phone (the review of 9 Nov 2026).
+  // width on a phone (decided on 9 Nov 2026).
   it("puts Send after this under the row, after Send", () => {
     render(<Harness run={running} held={holding([])} />);
     fireEvent.change(screen.getByRole("textbox", { name: "Message" }), {

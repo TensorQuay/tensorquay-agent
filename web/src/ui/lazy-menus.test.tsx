@@ -149,7 +149,7 @@ describe("WEB-U-014 a menu's open state loads when it is wanted", () => {
     ).toBeVisible();
     expect(tries).toBe(2);
   });
-  // A menu waiting for its code is dismissed as an open one is (the review of 9 Nov 2026): Escape, a press outside its
+  // A menu waiting for its code is dismissed as an open one is (decided on 9 Nov 2026): Escape, a press outside its
   // trigger, or the focus leaving the trigger closes it, the trigger says so, and the menu never opens later.
   for (const [how, dismiss] of [
     [

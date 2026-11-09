@@ -31,7 +31,7 @@ describe("WEB-U-007 single account menu", () => {
     // No native title: the email names it; where the email is hidden (the rail) or cut, the app's own tooltip shows it
     // whole (UI-GUIDELINES §6; in the test's layout nothing has a size, as on the rail).
     expect(trigger).not.toHaveAttribute("title");
-    // Which account is signed in, for a screen reader too (the review of 9 Nov 2026): the email describes the button.
+    // Which account is signed in, for a screen reader too (decided on 9 Nov 2026): the email describes the button.
     expect(trigger).toHaveAccessibleDescription("member@example.invalid");
     fireEvent.pointerEnter(trigger);
     expect(document.querySelector(".action-tooltip")).toHaveTextContent(

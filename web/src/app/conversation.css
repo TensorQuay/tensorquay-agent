@@ -670,7 +670,7 @@ textarea.composer-input {
   align-items: center;
 }
 /* While a run goes, "Send after this" (WEB-U-079) on its own line under the row's end, so the text keeps the row's
-   width on a phone too (the review of 9 Nov 2026). */
+   width on a phone too (decided on 9 Nov 2026). */
 .composer-card > .composer-queue {
   display: flex;
   width: fit-content;
