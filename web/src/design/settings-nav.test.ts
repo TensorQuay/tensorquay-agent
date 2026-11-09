@@ -11,7 +11,7 @@ const settings = readFileSync("src/app/settings.css", "utf8").replace(
 );
 const tokens = readFileSync("src/app/globals.css", "utf8");
 
-/** The pixels of a value that is one token, `var(--name)`, as globals.css defines it. */
+/** The pixels of a value that is one CSS variable reference, as globals.css defines that variable. */
 function px(value: string | undefined): number {
   const name = value?.match(/^var\((--[a-z0-9-]+)\)$/)?.[1];
   const found = name && tokens.match(new RegExp(`${name}:\\s*(\\d+)px;`));
