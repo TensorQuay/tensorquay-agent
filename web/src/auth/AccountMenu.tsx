@@ -28,7 +28,10 @@ export function AccountMenu({ onNavigate }: { onNavigate?: () => void } = {}) {
   const signedIn = useId();
   const t = useT();
   // The email names the row; where it is hidden (the rail) or cut, the app's own tooltip shows it whole (§6).
-  const { handlers, tip } = useNavTip(email || t("account.label"));
+  const { handlers, tip } = useNavTip(
+    email || t("account.label"),
+    prefetchMenus,
+  );
   // Its menu's frame comes when it is about to open (WEB-U-014's budget); a menu that can't get it closes.
   const menus = useMenus(open, setOpen, anchor);
   return (
@@ -43,14 +46,6 @@ export function AccountMenu({ onNavigate }: { onNavigate?: () => void } = {}) {
         aria-describedby={signedIn}
         onClick={() => setOpen(!open)}
         {...handlers}
-        onPointerEnter={(event) => {
-          prefetchMenus();
-          handlers.onPointerEnter(event);
-        }}
-        onFocus={(event) => {
-          prefetchMenus();
-          handlers.onFocus(event);
-        }}
         onKeyDown={(event) => {
           if (["ArrowDown", "ArrowUp"].includes(event.key)) {
             event.preventDefault();

@@ -22,8 +22,12 @@ function labelShows(item: HTMLElement) {
  * A sidebar item's name as the app's own tooltip (UI-GUIDELINES §6): on the rail, where only its icon shows, or where
  * its label is cut (a long email), beside it on hover or keyboard focus. Where its label shows whole, nothing: the label
  * names it, and no native title repeats it (WEB-E2E-115). The tip is a layer of its own on the page, as IconAction's (WEB-U-429), and never the item's content.
+ * `intent` hears the item about to be used (the pointer over it, the keyboard's focus), as IconAction's `onIntent`.
  */
-export function useNavTip(name: string): {
+export function useNavTip(
+  name: string,
+  intent?: () => void,
+): {
   handlers: {
     onPointerEnter: (event: PointerEvent<HTMLElement>) => void;
     onPointerLeave: () => void;
@@ -35,6 +39,7 @@ export function useNavTip(name: string): {
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const bubble = useRef<HTMLSpanElement>(null);
   const show = (item: HTMLElement) => {
+    intent?.();
     if (!labelShows(item)) setAnchor(item);
   };
   useLayoutEffect(() => {
