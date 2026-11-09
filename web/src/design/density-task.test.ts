@@ -191,3 +191,136 @@ describe("WEB-U-170 the files panel never covers part of the transcript", () => 
     );
   });
 });
+
+/** The bodies of every `@media <query>` block in `css`, braces balanced, joined. */
+function media(css: string, query: string): string {
+  const bodies: string[] = [];
+  let from = css.indexOf(`@media ${query} {`);
+  while (from >= 0) {
+    const open = css.indexOf("{", from);
+    let depth = 0;
+    let index = open;
+    for (; index < css.length; index += 1) {
+      if (css[index] === "{") depth += 1;
+      if (css[index] === "}") depth -= 1;
+      if (depth === 0) break;
+    }
+    bodies.push(css.slice(open + 1, index));
+    from = css.indexOf(`@media ${query} {`, index);
+  }
+  return bodies.join("\n");
+}
+
+// WEB-U-449 (UI-GUIDELINES §7 Conversation list item): a task row's ⋯ is part of the row, never a chip over it. It sits
+// inside the row's end at one even inset, square, its corners concentric with the row's, with no fill of its own; its
+// hover and press are the quiet tints inside the row's backdrop; what lies under it gives way while it shows; on a
+// touch screen, where it always shows, the title ends before it.
+describe("WEB-U-449 the task row's ⋯ is part of the row", () => {
+  const tokens = rule(globals, ":root");
+  const holder = rule(conversation, ".conversation-row > .task-more");
+  const button = rule(conversation, ".conversation-row > .task-more > .button");
+  const showing = [
+    ".conversation-row:has(> .task-more):hover",
+    ".conversation-row:has(> .task-more):focus-within",
+    '.conversation-row:has(> .task-more [aria-expanded="true"])',
+  ];
+
+  it("sits inside the row's end at one even inset, square, its corners concentric with the row's", () => {
+    expect(declared(tokens, "--row-inset")).toBe("var(--space-half)");
+    expect(declared(tokens, "--row-action-size")).toBe(
+      "calc(var(--row-height-nav) - 2 * var(--row-inset))",
+    );
+    expect(declared(tokens, "--row-action-radius")).toBe(
+      "calc(var(--control-radius) - var(--row-inset))",
+    );
+    expect(declared(holder, "position")).toBe("absolute");
+    expect(declared(holder, "top")).toBe("var(--row-inset)");
+    expect(declared(holder, "right")).toBe("var(--row-inset)");
+    // On the row's own line: an open lead's ⋯ stays by its title, never half-way down its helpers.
+    expect(declared(holder, "transform")).toBe(undefined);
+    expect(declared(button, "width")).toBe("var(--row-action-size)");
+    expect(declared(button, "height")).toBe("var(--row-action-size)");
+    expect(declared(button, "border-radius")).toBe("var(--row-action-radius)");
+  });
+
+  it("has no fill of its own: its hover and press are the quiet tints inside the row's backdrop", () => {
+    expect(declared(button, "background")).toBe("transparent");
+    expect(
+      declared(
+        rule(
+          conversation,
+          ".conversation-row > .task-more > .button:hover:not(:disabled)",
+        ),
+        "background",
+      ),
+    ).toBe("var(--hover-tint)");
+    expect(
+      declared(
+        rule(
+          conversation,
+          ".conversation-row > .task-more > .button:active:not(:disabled)",
+        ),
+        "background",
+      ),
+    ).toBe("var(--press-tint)");
+    expect(conversation).not.toMatch(/task-more[^{}]*\{[^}]*--surface/);
+  });
+
+  it("keeps the row's backdrop while it shows by keyboard or for its open menu, below the open task's fill", () => {
+    // :where() keeps these as light as the hover rule, so the open task's selected fill, set after, stays.
+    expect(
+      declared(
+        rule(
+          conversation,
+          '.conversation-row:where(:focus-within, :has(> .task-more [aria-expanded="true"]))',
+        ),
+        "background",
+      ),
+    ).toBe("var(--hover-tint)");
+  });
+
+  it("fades out what lies under it while it shows: the row's marks, and a title that reaches it", () => {
+    const hover = media(conversation, "(hover: hover)");
+    for (const state of showing) {
+      expect(
+        declared(
+          rule(hover, `${state} > .conversation-link > .task-mark`),
+          "opacity",
+        ),
+      ).toBe("0");
+      expect(
+        declared(
+          rule(
+            hover,
+            `${state} > .conversation-link:not(:has(> .task-mark)) > .conversation-link-text`,
+          ),
+          "mask-image",
+        ),
+      ).toBe(
+        "linear-gradient(to left, transparent var(--row-action-reach), var(--ink) calc(var(--row-action-reach) + var(--space-4)))",
+      );
+    }
+    // The fade starts where the ⋯ and its inset reach past the row's own end padding.
+    expect(declared(tokens, "--row-action-reach")).toBe(
+      "calc(var(--row-action-size) + var(--row-inset) - var(--nav-pad-inline))",
+    );
+    // Without hover, titles keep the full width: no mask anywhere else.
+    expect(conversation.replace(hover, "")).not.toMatch(/mask-image/);
+  });
+
+  it("always shows it on a touch screen, where the title and the marks end before it", () => {
+    const touch = media(conversation, "(hover: none)");
+    expect(
+      declared(
+        rule(touch, ".conversation-row > .task-more > .button"),
+        "opacity",
+      ),
+    ).toBe("1");
+    expect(
+      declared(
+        rule(touch, ".conversation-row:has(> .task-more) > .conversation-link"),
+        "padding-inline-end",
+      ),
+    ).toBe("calc(var(--row-action-size) + var(--row-inset) + var(--space-2))");
+  });
+});
