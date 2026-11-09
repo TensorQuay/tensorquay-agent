@@ -47,7 +47,7 @@ public-content rules. It is for documentation prose only. Test code and product 
 always get the full line-by-line review of their tier.
 
 **The second reviewer** on the high tier is a team member, never the change's author, who reads it line by line like
-the technical lead. The project owner reviews no code. The owner's approval is needed only for a release, for
+the technical lead. The Product Owner reviews no code. The Product Owner's approval is needed only for a release, for
 publishing or announcing anything, and for anything that handles credentials; it comes on top of the tier's review and
 never replaces it.
 

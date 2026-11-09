@@ -55,7 +55,7 @@ night 1's results aren't pooled with later nights' team arm.
 **One side, and a side left out (night 3, 13 Oct 2026).** `runner.py --side team` runs the team side only (the sides
 run are a setting a resume keeps): night 3 runs fri-d's and fri-s's tasks as `fri-d-team` and `fri-s-team` with the
 brief. Night 1's team side is then left out of the judging and the numbers, and night 3's team attempts are compared
-with night 1's single attempts, task by task (the technical lead, 12 Oct 2026):
+with night 1's single attempts, task by task (decided on 12 Oct 2026):
 ```sh
 python3 tests/e2e/teams_eval/report.py packets fri-d fri-s sat-l sat-d fri-d-team fri-s-team <judging> \
   --leave-out fri-d:team --leave-out fri-s:team
