@@ -581,15 +581,22 @@ async fn gw_i_306_no_reminder_with_a_turn_queued_on_the_lead(pool: PgPool) -> Te
             .send()
             .await?;
         assert_eq!(sent.status().as_u16(), 202);
-        let queued: i64 = sqlx::query_scalar(
-            "SELECT count(*) FROM idempotency WHERE conversation_id = $1::uuid AND execution_status = 'queued'",
+        // On its way to the lead, in remind_lead's own terms: queued, or sending or delivered to its runtime and not yet
+        // started. The delivery pass takes it from `queued` as soon as the lead's run has ended, which a slow
+        // (instrumented) runner can let happen before this read.
+        let on_its_way: i64 = sqlx::query_scalar(
+            "SELECT count(*) FROM idempotency WHERE conversation_id = $1::uuid \
+             AND execution_status IN ('queued', 'sending', 'delivered')",
         )
         .bind(t.lead.0.as_str())
         .fetch_one(&f.pool)
         .await?;
-        assert_eq!(queued, 1, "the person's turn waits to start the lead");
+        assert_eq!(on_its_way, 1, "the person's turn is on its way to the lead");
         quiet(f, &t).await?;
-        assert!(reminders(f, t.id).await?.is_empty(), "a turn is queued on the lead");
+        assert!(
+            reminders(f, t.id).await?.is_empty(),
+            "a turn is on its way to the lead"
+        );
         Ok(())
     })
     .await

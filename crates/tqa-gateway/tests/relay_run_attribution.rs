@@ -115,17 +115,21 @@ async fn gw_i_151_only_a_run_of_the_callers_own_task_is_recorded(pool: PgPool) -
             .await?;
         let relay = token(f, &mine.id, "attribution-relay").await?;
         // Its own run is kept; another task's run and no run at all are recorded as none, and counted. A run the
-        // store already holds adds no wait; one it doesn't waits at most the 1 s bound for its run.started.
+        // store already holds adds no wait; one it doesn't waits at most the 1 s bound for its run.started. No run at
+        // all goes first: it pays the first call's one-time costs (the route, the key, the model server's connection),
+        // so the two calls measured next differ only in the wait.
+        assert_eq!(completion(f, &relay, None).await?, 200);
         let started_at = std::time::Instant::now();
         assert_eq!(completion(f, &relay, Some("run-mine")).await?, 200);
         let hit = started_at.elapsed();
         let started_at = std::time::Instant::now();
         assert_eq!(completion(f, &relay, Some("run-other")).await?, 200);
         let miss = started_at.elapsed();
-        assert_eq!(completion(f, &relay, None).await?, 200);
+        // A known run is measured against the unknown one, which waits the 1 s bound: on a slow (instrumented)
+        // runner both calls cost more, but only a wait for run.started puts the known one within 500 ms of it.
         assert!(
-            hit < std::time::Duration::from_millis(500),
-            "a known run waited: {hit:?}"
+            hit + std::time::Duration::from_millis(500) < miss,
+            "a known run waited: {hit:?} (an unknown one: {miss:?})"
         );
         assert!(
             miss >= std::time::Duration::from_secs(1)
