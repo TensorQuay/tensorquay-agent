@@ -58,6 +58,7 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **A sent picture's frame hugs the picture (WEB-U-464).** A wide picture no longer has an empty band beside it.
 - **The Settings menu and engine budgets (WEB-U-460, WEB-U-461).** Only the menu scrolls to show the current section,
   never the page, an administrator's section included; a budget's short figures never misstate where it stands
   ("29.9M of 30M tokens" with headroom left, "30M of 29.9M" when spent), and its tooltip and screen readers get the

@@ -441,10 +441,11 @@ button.file-open:hover {
 .sent-attachments {
   align-items: flex-start;
 }
-/* A sent picture: up to 240 px a side, whole (never cropped), in a frame; a button that opens its preview where the
-   page has a Files panel, and only then drawn as one. */
+/* A sent picture: up to 240 px a side, whole (never cropped), in a frame that hugs it; a button that opens its preview
+   where the page has a Files panel, and only then drawn as one. */
 .sent-picture {
   display: block;
+  max-width: 100%;
   padding: 0;
   overflow: hidden;
   border: var(--border-width) solid var(--line);
@@ -456,7 +457,9 @@ button.sent-picture {
 }
 .sent-picture img {
   display: block;
-  max-width: min(240px, 100%);
+  /* An absolute cap, not min(240px, 100%): the list sizes each item to its content and leaves a percentage max-width out
+     of that size, so the frame kept the width of the picture at its height cap, an empty band beside it (17.4 fix). */
+  max-width: 240px;
   max-height: 240px;
   object-fit: contain;
 }
