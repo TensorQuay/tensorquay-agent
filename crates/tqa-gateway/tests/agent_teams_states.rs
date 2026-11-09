@@ -565,7 +565,7 @@ async fn gw_i_306_no_reminder_while_the_leads_question_to_the_person_is_open(
 // TEST: GW-I-306
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
-async fn gw_i_306_no_reminder_with_a_turn_queued_on_the_lead(pool: PgPool) -> TestResult {
+async fn gw_i_306_no_reminder_with_a_turn_on_its_way_to_the_lead(pool: PgPool) -> TestResult {
     // The person writes to the lead after its turn ended: an ordinary turn, which will start the lead anyway (the wake's
     // own guard). The helpers then go quiet; the lead isn't reminded on top of the person's words.
     support::run_configured(pool, None, ENABLED, async |f| {
@@ -581,15 +581,32 @@ async fn gw_i_306_no_reminder_with_a_turn_queued_on_the_lead(pool: PgPool) -> Te
             .send()
             .await?;
         assert_eq!(sent.status().as_u16(), 202);
-        let queued: i64 = sqlx::query_scalar(
-            "SELECT count(*) FROM idempotency WHERE conversation_id = $1::uuid AND execution_status = 'queued'",
-        )
-        .bind(t.lead.0.as_str())
-        .fetch_one(&f.pool)
-        .await?;
-        assert_eq!(queued, 1, "the person's turn waits to start the lead");
+        // The lead's run has ended and its runtime is connected, so the delivery pass hands the turn over: the test
+        // waits until it has, so it checks one known state however fast the runner is. Delivered and not yet started
+        // is a turn on its way to the lead in remind_lead's terms (as queued and sending are), so no reminder comes.
+        let deadline = tokio::time::Instant::now()
+            + tqa_testkit::deadline::scaled(std::time::Duration::from_secs(5));
+        loop {
+            let delivered: i64 = sqlx::query_scalar(
+                "SELECT count(*) FROM idempotency WHERE conversation_id = $1::uuid AND execution_status = 'delivered'",
+            )
+            .bind(t.lead.0.as_str())
+            .fetch_one(&f.pool)
+            .await?;
+            if delivered == 1 {
+                break;
+            }
+            assert!(
+                tokio::time::Instant::now() < deadline,
+                "the person's turn reaches the lead's runtime"
+            );
+            tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+        }
         quiet(f, &t).await?;
-        assert!(reminders(f, t.id).await?.is_empty(), "a turn is queued on the lead");
+        assert!(
+            reminders(f, t.id).await?.is_empty(),
+            "a turn delivered to the lead and not yet started is on its way to it"
+        );
         Ok(())
     })
     .await
