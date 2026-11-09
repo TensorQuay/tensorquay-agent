@@ -160,6 +160,6 @@ if [[ "$skip_audit" == true ]]; then
 else
     run_gate G-10-audit python3 tools/git-guard.py audit
 fi
-run_gate G-10-unit python3 -m unittest tools/test_git_guard.py
+run_gate G-10-unit python3 -m unittest tools/test_git_guard.py tools/test_install_gitleaks.py
 run_gate G-10-secrets python3 tools/check-secrets.py
 finish
