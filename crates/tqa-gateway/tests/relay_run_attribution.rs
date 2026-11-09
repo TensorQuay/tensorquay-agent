@@ -115,21 +115,20 @@ async fn gw_i_151_only_a_run_of_the_callers_own_task_is_recorded(pool: PgPool) -
             .await?;
         let relay = token(f, &mine.id, "attribution-relay").await?;
         // Its own run is kept; another task's run and no run at all are recorded as none, and counted. A run the
-        // store already holds adds no wait; one it doesn't waits at most the 1 s bound for its run.started. No run at
-        // all goes first: it pays the first call's one-time costs (the route, the key, the model server's connection),
-        // so the two calls measured next differ only in the wait.
+        // store already holds adds no wait (under 500 ms); one it doesn't waits at most the 1 s bound for its
+        // run.started. The order pays every one-time cost before the measured known run: no run first (the route, the
+        // key, the model server's connection), then the unknown run (the run lookup's first queries, and its wait).
         assert_eq!(completion(f, &relay, None).await?, 200);
-        let started_at = std::time::Instant::now();
-        assert_eq!(completion(f, &relay, Some("run-mine")).await?, 200);
-        let hit = started_at.elapsed();
         let started_at = std::time::Instant::now();
         assert_eq!(completion(f, &relay, Some("run-other")).await?, 200);
         let miss = started_at.elapsed();
-        // A known run is measured against the unknown one, which waits the 1 s bound: on a slow (instrumented)
-        // runner both calls cost more, but only a wait for run.started puts the known one within 500 ms of it.
+        let started_at = std::time::Instant::now();
+        assert_eq!(completion(f, &relay, Some("run-mine")).await?, 200);
+        let hit = started_at.elapsed();
+        // Not scaled by the deadline scale: a scaled bound would let the 1 s wait through.
         assert!(
-            hit + std::time::Duration::from_millis(500) < miss,
-            "a known run waited: {hit:?} (an unknown one: {miss:?})"
+            hit < std::time::Duration::from_millis(500),
+            "a known run waited: {hit:?}"
         );
         assert!(
             miss >= std::time::Duration::from_secs(1)
