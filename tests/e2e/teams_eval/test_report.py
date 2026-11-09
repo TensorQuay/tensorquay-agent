@@ -120,6 +120,7 @@ class FromRunToReport(unittest.TestCase):
             self.assertEqual(waiting, [split])
             self.assertNotIn("not yet fully scored", text)
             self.assertIn("**Not final:** 1 packet(s)", text)
+            self.assertIn("Gateway restarts to switch sides (1, requested on 5 Oct 2026):", text)
             self.assertIn("| 2026-10-07T09:00:00Z | R1 | team | 8.5 |", text)
             fill(out / "third.csv", lambda packet: (2, 2, 2, 2, 1) if packet == split else ("",) * 5)
             text, waiting = report.make_report(run, out)
