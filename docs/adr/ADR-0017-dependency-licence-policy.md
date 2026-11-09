@@ -3,8 +3,8 @@
 ## Status
 
 Accepted; amended 2026-09-27 (point 0, the Product Owner's rule; the scope; point 8, third-party images); point 9
-(an advisory ignore for zip) accepted 2026-10-17 by the owner, its zip ignore removed 2026-10-21 (calamine 0.37.0
-takes zip 9); point 10 (unmaintained notices are resolved, not ignored) 2026-10-18 by the owner
+(an advisory ignore for zip) accepted 2026-10-17 by the Product Owner, its zip ignore removed 2026-10-21 (calamine
+0.37.0 takes zip 9); point 10 (unmaintained notices are resolved, not ignored) 2026-10-18 by the Product Owner
 
 ## Date
 
@@ -69,8 +69,7 @@ database or service of their own), which is chosen by its own licence.
    - **What it was:** RUSTSEC-2026-0367, RUSTSEC-2026-0368 and RUSTSEC-2026-0369, in zip 8.6.0 and fixed in zip
      9.0.0, all in zip's extraction API (`ZipArchive::extract` and its variants, `ZipStreamReader::extract`). Ignored
      on 17 Oct 2026 because calamine 0.36.1, then the newest release, required `zip ^8.6`, and neither our code nor
-     calamine calls that API: both open an archive and read its entries (the decision: the owner, 17 Oct, in session:
-     "go ahead").
+     calamine calls that API: both open an archive and read its entries (the Product Owner's decision, 17 Oct 2026).
    - **Why it went (21 Oct 2026):** calamine 0.37.0 (18 Oct) requires `zip ^9.0`. The gateway pins calamine 0.37.0
      and zip 9.0.5, the three IDs left `deny.toml`, and the TEST-PLAN §19a entry went with them, as this point said
      they would. Our zip calls (`ZipArchive::new`, `len`, `by_index`, `by_name`, `ZipFile::size`,
@@ -82,12 +81,12 @@ database or service of their own), which is chosen by its own licence.
      names the extraction API. We only read entries, and zip 9.0.1 to 9.0.3 fixed that API again. Its stale check
      covers only these three IDs: if `deny.toml` ignores any of them again, it fails once the lock holds no zip 8 or
      calamine moves on from 0.36.1. Any other ignore needs its own gate, as this point asks.
-10. **An unmaintained notice is resolved, not ignored** (the owner, 18 Oct 2026). `unmaintained = "all"` stays, and
-    point 9's ignore is for a flaw our code can't reach, never for a crate nobody maintains: such a crate is removed or
-    replaced. The first case: RUSTSEC-2026-0370, RUSTSEC-2026-0371 and RUSTSEC-2026-0372 (`zvariant`, `zbus_names` and
-    `zvariant_derive`, merged into zbus 6.0.0) came in through the `atspi` crate (0.30) on zbus 5, which has no release
-    on zbus 6. The computer tool's accessibility reader is now our own on zbus 6 (ADR-0039 slice 2, amended the same
-    day), and the lock holds no zbus 5 crate.
+10. **An unmaintained notice is resolved, not ignored** (the Product Owner, 18 Oct 2026). `unmaintained = "all"` stays,
+    and point 9's ignore is for a flaw our code can't reach, never for a crate nobody maintains: such a crate is removed
+    or replaced. The first case: RUSTSEC-2026-0370, RUSTSEC-2026-0371 and RUSTSEC-2026-0372 (`zvariant`, `zbus_names`
+    and `zvariant_derive`, merged into zbus 6.0.0) came in through the `atspi` crate (0.30) on zbus 5, which has no
+    release on zbus 6. The computer tool's accessibility reader is now our own on zbus 6 (ADR-0039 slice 2, amended the
+    same day), and the lock holds no zbus 5 crate.
 
 ## Consequences
 

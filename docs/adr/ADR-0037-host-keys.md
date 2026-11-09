@@ -23,7 +23,7 @@ checks host and port against the task's network list, resolves DNS itself, refus
 copies bytes: it never sees inside TLS. The secret store (ADR-0033) keeps values write-only in PostgreSQL, and its
 read audit records reference, consumer, conversation, user, run and outcome.
 
-The owner's rules for per-service keys:
+The Product Owner's rules for per-service keys:
 
 | # | Rule |
 |---|------|
@@ -60,7 +60,7 @@ A **host key** is a secret in the built-in store plus where and how it may be us
 | `users` | shared keys only: everyone, or listed members (bound like `secret_consumers`) |
 
 - Values are **write-only**, as every secret is: set or replace, never read back, in the UI, the API or the seed file.
-- **Only administrators create shared keys** (owner's decision 5). Members create personal keys.
+- **Only administrators create shared keys** (the Product Owner's decision 5). Members create personal keys.
 - **A personal key belongs to its owner alone (R6):** it is never bound to anyone else, never offered to another
   member's run, and an administrator can delete it but can't use it or bind it. Personal keys are private to their
   owner: an administrator sees that they exist (their owner, web address and last use) and their audit rows, never
@@ -79,8 +79,8 @@ keys are, at its start:
    enforces and the prompt shows);
 3. minus deleted keys and keys of a disabled member.
 
-A spawned agent's run (ADR-0034) gets at most its caller's keys, as its network list is at most its caller's. (The
-second review's L9. Built as (12 Oct 2026): a helper's turn is sent as the team's person, the same sender as its lead's
+A spawned agent's run (ADR-0034) gets at most its caller's keys, as its network list is at most its caller's. (Built
+as (12 Oct 2026): a helper's turn is sent as the team's person, the same sender as its lead's
 run, so a helper's run gets its lead run's keys by construction and minting passes no caller; the filter stays
 unit-tested. The end-to-end test is SEC-046's team case.) In a
 shared workspace, a channel or a team run, each run gets **its own sender's** keys only (R6): a teammate's run on the
@@ -104,15 +104,15 @@ active, the sender is still its owner or one of a shared key's people (taken off
 review's M2, 1 Oct), and the task's network list still allows the host. Anywhere else a placeholder is inert.
 
 The task's network list, at minting and at each use, is the installation's allow-list as it is at that moment: a task
-has no narrower list of its own today (the second review's M4). If one comes (a profile's list, say), both places take
+has no narrower list of its own today. If one comes (a profile's list, say), both places take
 it together.
 
-Known limit (the second review's M3): at use, the proxy takes the run's sender to be the task's owner, for the audit
+Known limit: at use, the proxy takes the run's sender to be the task's owner, for the audit
 row's person, the notice's sender and who sees the key's name; minting takes the authors of the turn's messages.
 They are the same person today, since only a task's owner posts to it. Before channel or team runs let anyone else
 start a run, the proxy must take the sender from the placeholder instead.
 
-### 4. The proxy opens TLS only for keyed hosts (owner's decision 2)
+### 4. The proxy opens TLS only for keyed hosts (the Product Owner's decision 2)
 
 1. `CONNECT host:443` arrives; the proxy identifies the caller and checks the list, exactly as today.
 2. **If the caller's current run holds no key for this host, the tunnel is opened as today, unseen.** Only a host
@@ -123,21 +123,21 @@ start a run, the proxy must take the sender from the placeholder instead.
    a refusal, never a fallback to a tunnel or to plain text.
 4. For each request it checks that `Host` / `:authority` equals the CONNECT host, and that the request target is a
    path only (an absolute or authority-form target, which a server or a shared front may route by over `Host`, is
-   refused before anything else; the second review's H1, 1 Oct), finds placeholders, validates each
+   refused before anything else), finds placeholders, validates each
    (§3) and its position (§5), writes the audit row (§8), and only then replaces the placeholder with the value and
    forwards the request, re-serialising the headers (never forwarding the client's bytes as they are). Bodies stream
    both ways without buffering. The first slice speaks HTTP/1.1 only (ALPN `http/1.1`, both ways) and passes no
-   upgrades: `Upgrade` and `Connection` are hop-by-hop and dropped, so a WebSocket on a keyed host doesn't open (the
-   second review's L8). HTTP/2 through hyper, and upgrades passed after the swap, are a later step (Consequences).
+   upgrades: `Upgrade` and `Connection` are hop-by-hop and dropped, so a WebSocket on a keyed host doesn't open.
+   HTTP/2 through hyper, and upgrades passed after the swap, are a later step (Consequences).
 5. A request without a placeholder on a keyed host is forwarded unchanged. A placeholder over plain `http://` is
    refused: a value is never substituted into cleartext. The proxy reads a plain request's head for a placeholder,
    raw or percent-encoded; a body after it streams unread, so an inert placeholder there can leave in cleartext,
-   never a value (the second review's L4).
+   never a value.
 
 A refusal is a plain `403` whose body says why in words ("this placeholder belongs to another run", "this key goes
-only in the Authorization header"), and nothing reaches the host. A placeholder in a request body is refused the same way, counted and told as `wrong_position`, and never sent; because bodies stream, the request's head and the body before it may already have gone, and a swap of the same request's header placeholder stands, counted `ok` (the second review's M1, 1 Oct).
+only in the Authorization header"), and nothing reaches the host. A placeholder in a request body is refused the same way, counted and told as `wrong_position`, and never sent; because bodies stream, the request's head and the body before it may already have gone, and a swap of the same request's header placeholder stands, counted `ok`.
 
-### 5. Headers only (owner's decision 3)
+### 5. Headers only (the Product Owner's decision 3)
 
 | Scheme | Accepted form |
 |--------|---------------|
@@ -149,7 +149,7 @@ A placeholder anywhere else (another header, the path, the query, the body) is r
 learns the rule and a mistake can't become a leak. Duplicates of the key's header are refused. Query-string and body
 placement are not in this decision.
 
-### 6. The install CA, rotated on demand (owner's decision 4)
+### 6. The install CA, rotated on demand (the Product Owner's decision 4)
 
 At first start the gateway creates an install CA (ECDSA P-256) whose private key is a private file beside the install
 key (0600, gateway-only). It issues leaf certificates on demand, one per keyed host (SAN exactly that host, 24 h,
@@ -166,7 +166,7 @@ a certificate error; the admin guide lists the settings.
 its common encodings (base64 of `user:value`, URL encoding) with the placeholder, with a streaming matcher and a
 bounded window. It asks upstream for `Accept-Encoding: identity`; a compressed response is refused. This is defence
 in depth, not a guarantee (see Security analysis, T1). What it scrubs is learned at swaps and shared by person and
-address (the second review's H2, 1 Oct): a value any of a person's runs swapped is scrubbed on every keyed connection of
+address: a value any of a person's runs swapped is scrubbed on every keyed connection of
 theirs to that host and port, from its first byte, whichever run, task or connection swapped it. It lives only in the
 gateway's memory, bounded, and a key's change or deletion forgets its address. Known limit: a host that sends back a
 value it stored earlier, before that person's first swap since the gateway started, isn't scrubbed; closing it would
@@ -175,7 +175,7 @@ mean reading every key's value when a connection opens.
 **What the gateway sees.** Plaintext of keyed hosts' requests for the running task only. It logs no body and no
 header value; the audit keeps the host, never the method or path.
 
-### 7. Git over HTTPS; `git_push` and the Git relay are retired (owner's decision 1)
+### 7. Git over HTTPS; `git_push` and the Git relay are retired (the Product Owner's decision 1)
 
 For a `basic` key on a git host the runtime configures a credential helper through `GIT_CONFIG_*`: it answers the
 stored user name and the placeholder, with `credential.useHttpPath=true` when the key has a path prefix. Bearer git
@@ -214,7 +214,7 @@ Settings › Keys, as sketched and reviewed (the team's UI sketch, 30 Sep 2026):
   list of the shared keys they may use, names and addresses only.
 - Every refusal has plain words on the task's page and in the list's "last try" (the UI standard: no codes).
 
-### 10. Not decided here (owner's decision 6)
+### 10. Not decided here (the Product Owner's decision 6)
 
 - **Per-key method and path limits** (for example read-only GETs): later, on this same interception, each its own
   decision. ADR-0035 §2 point 5 stays open for the network list.
@@ -255,8 +255,8 @@ Agreed between the gateway and web halves of the build, after the team's review 
   and leaves the Git credentials API read-only, its writes answering `410 Gone` (`moved_to_host_keys`, pointing to
   Settings > Keys); the next removes the tables and the routes. No build holds a usable credential twice or keeps
   `git_push` without a way to add its key.
-- **Nothing specific to git in the UI or setup** (the owner's decision of 2 Oct 2026, PRD §12 item 22) joins the same
-  two releases. The first deprecates, and the web stops using: a profile's `repositories` switch (which granted
+- **Nothing specific to git in the UI or setup** (the Product Owner's decision of 2 Oct 2026, PRD §12 item 22) joins the
+  same two releases. The first deprecates, and the web stops using: a profile's `repositories` switch (which granted
   `git_push`), and a git address on a new workspace or task (`git_url`, shown back as `source_url`) with the clone the
   workspace's first sandbox makes from it. They are still accepted and documented as deprecated. The second removes
   them with the relay, `git_push_operations` and the Git credentials' tables and routes. A task clones and pushes with
@@ -277,7 +277,7 @@ Agreed between the gateway and web halves of the build, after the team's review 
 
 ## Amendment 2 (1 Oct 2026): a key for an exact IP address
 
-Decided by the lead with the owner (1 Oct 2026), found while planning the stack suite (G9): the egress guard lets a task
+Decided with the Product Owner on 1 Oct 2026, found while planning the stack suite (G9): the egress guard lets a task
 reach a private or reserved address only through an allow rule for that exact address (ADR-0035), and §1 allowed a key
 only for a host name. So a server reached by address, such as an internal git server, could use the Git relay (whose
 `git_push.ca_file` trusted its authority) but no key, and retiring the relay would have left it with nothing.
@@ -295,8 +295,8 @@ only for a host name. So a server reached by address, such as an internal git se
   `egress.ca_file` (G9a).
 - **The runtime:** a grant's host may be an address in canonical form (revision 11, unreleased, so in place); git's
   settings put an IPv6 address in brackets in their URLs.
-- **Still open:** a *named* internal server (a name that resolves to a private address) is the owner's per-rule switch
-  in ADR-0035's amendment of the same day, built next.
+- **Still open:** a *named* internal server (a name that resolves to a private address) is the Product Owner's per-rule
+  switch in ADR-0035's amendment of the same day, built next.
 
 Tests: GW-U-102 (an address is one exact address in canonical form), GW-U-115 (rules compare an address by value),
 PROTO-U-033, TOOL-U-041, GW-I-176.
@@ -305,7 +305,7 @@ PROTO-U-033, TOOL-U-041, GW-I-176.
 
 §6 put the install CA beside the install key. A deployment mounts the install key and the secrets seed read-only
 (`deploy/compose/docker.yml`), so the gateway couldn't make the CA there and didn't start; found by G9b's first stack
-run, a defect of G5a (TEST-PLAN §19, GW-I-179). Decided by the lead: the CA lives in its own private directory,
+run, a defect of G5a (TEST-PLAN §19, GW-I-179). Decided: the CA lives in its own private directory,
 `[host_keys] ca_directory`, by default `<storage.root>/host-ca` (0700, its files 0600), which no sandbox mounts; the
 gateway refuses a place inside a sandbox mount or an existing directory others can read; `rotate-host-ca` reads the
 same setting from the gateway's configuration file. The keys release has never shipped, so no install has CA files
@@ -392,8 +392,8 @@ system, an administrator with shell access to the gateway.
   header rule, scrubbing, an install CA, and a new dependency to review under ADR-0017 (`rcgen` for leaf
   certificates).
 - Clients with pinned or compiled-in roots fail on keyed hosts only; documented.
-- Known limits of the first slice (the second review, 1 Oct): keyed hosts speak HTTP/1.1 only (ALPN `http/1.1`); a
-  `header` key is refused (`scheme_not_supported`); upgrades such as WebSocket don't pass on keyed hosts (L8). A
+- Known limits of the first slice: keyed hosts speak HTTP/1.1 only (ALPN `http/1.1`); a
+  `header` key is refused (`scheme_not_supported`); upgrades such as WebSocket don't pass on keyed hosts. A
   placeholder kept from an earlier run and sent to a
   host the current run holds no key for goes through a plain tunnel, not intercepted, so it isn't counted `expired`;
   no value moves (L5). A keyed request's or answer's body has no time bound of its own, only the head and the

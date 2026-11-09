@@ -2,9 +2,9 @@
 
 ## Status
 
-Accepted (5 Oct 2026, with the owner's answers to its five questions; design, DEV-PLAN Phase 11). Written before any
-code, with its own security review, as ADR-0034's slice contracts were: the sandbox and gateway side with the security
-review, and the runtime and tools side with the slices.
+Accepted (5 Oct 2026, with the Product Owner's answers to its five questions; design, DEV-PLAN Phase 11). Written before
+any code, with its own security review, as ADR-0034's slice contracts were: the sandbox and gateway side with the
+security review, and the runtime and tools side with the slices.
 
 ## Date
 
@@ -18,7 +18,7 @@ Playwright (ARCHITECTURE §4.1), which covers much of the web but no desktop app
 view. ARCHITECTURE §4.7 sketched a desktop for a later phase; this record decides it, with its own security review,
 before any code (DEV-PLAN Phase 11).
 
-The owner's principles hold:
+The Product Owner's principles hold:
 - **General purpose.** A desktop is one more environment a task can switch to, not a separate product.
 - **No approvals.** The network allow-list is the only guardrail (ADR-0035). There is no "confirm this click"; the
   person can watch any desktop live and take it over.
@@ -33,8 +33,8 @@ Those are what the security review below is about.
 
 - **An environment, not a product.** A first-party **Desktop** template (Xvfb at 1280×800, a window manager, a headed
   browser and a few applications) declares `desktop`; a task switches to it like any environment, by the person's
-  choice in the environment picker. (Amended 10 Oct 2026 from the owner's decision: the agent no longer suggests the
-  switch; see section 8.)
+  choice in the environment picker. (Amended 10 Oct 2026 from the Product Owner's decision: the agent no longer suggests
+  the switch; see section 8.)
 - **One `computer` tool, structure first:** DOM refs in the browser, accessibility (AT-SPI) refs elsewhere, pixels only
   as the fallback and only on routes with vision. A route with its own computer-use tool gets that tool for pixels, on
   the same executor. The model gets the last 3 screenshots as images, older ones as a line; two per-run caps bound the
@@ -75,7 +75,7 @@ Those are what the security review below is about.
   to Workstation's packages: the image is an aggregate, they are outside the allow list, and each release publishes
   the image's package list with exact versions and where their sources are (REL-I-001's SBOM). The runtime reaches
   the accessibility bus over D-Bus, a socket; the Rust client it links for that is project code and passes `cargo deny`
-  like any crate. It is our own reader on `zbus` 6 (amended 18 Oct 2026, the owner's decision): the six AT-SPI
+  like any crate. It is our own reader on `zbus` 6 (amended 18 Oct 2026, the Product Owner's decision): the six AT-SPI
   interfaces the tool calls (Accessible, Action, Component, EditableText, Text and Value) as zbus proxies, the
   accessibility bus's address from `org.a11y.Bus`, and AT-SPI2's state bits and interface names decoded in
   `a11y/atspi_wire.rs`. It replaced the `atspi` crate (0.30), whose zbus 5 tree carries three unmaintained notices
@@ -111,8 +111,8 @@ screenshot, then pixels):
   one only. A ref from an older snapshot, or one whose element has gone, is refused (`stale_ref`), and the result tells
   the model to observe again. Refs never carry over a window change: focusing another window ends the snapshot.
 
-**Marks, between structure and pixels** (set-of-marks; amended 5 Oct 2026 from the owner's question: how does a vision
-model know where to click? The tool side's design, folded in). Models that see an image well still place a click
+**Marks, between structure and pixels** (set-of-marks; amended 5 Oct 2026 from the Product Owner's question: how does a
+vision model know where to click? The tool side's design, folded in). Models that see an image well still place a click
 poorly from raw pixels, so on a route with `vision` the screenshot carries numbered marks and the model answers with a
 number, not a point:
 - **A screenshot is also an observation.** `screenshot` first takes a fresh snapshot, as `observe` does (a new snapshot
@@ -124,7 +124,7 @@ number, not a point:
   bare number as a ref (`"7"` is `e7`), since that is what a model reads off the picture. A marked click goes the
   structure-first path (the element's own action, with XTEST at its centre as the fallback), never to where the label
   was drawn, and lives for one snapshot (`stale_ref`). The model needs no coordinates for anything that has a mark.
-  (Amended in slice 3, from its review, decided by the technical lead.)
+  (Amended in slice 3.)
   - A bare number is accepted only while its screenshot's snapshot is the latest. Otherwise it is refused
     `stale_ref`: "mark 7 belongs to an earlier screenshot; take a screenshot or observe again".
   - A result names a mark as "mark 7 (e7)".
@@ -160,14 +160,14 @@ number, not a point:
   asked three ways on every candidate route: by ref from the text alone, by mark from a marked screenshot, and by
   coordinates from an unmarked one (a hit when the point falls inside the target's box). The screens are captured once
   and replayed, so every route sees the same pixels. The result is a hit rate per way per route, with Wilson
-  intervals. **Decided** (the technical lead, 5 Oct 2026, on the owner's delegation): a route gets `pixel_grounding`
+  intervals. **Decided** (5 Oct 2026): a route gets `pixel_grounding`
   only when its coordinate hit rate's Wilson lower bound (95 %) is at least 90 %, which over 200 targets means at
   least 189 hits. The admin guide lists the routes measured and their numbers.
 
 **Typing and keys:** `type` takes `text` (at most 4,000 bytes; with a `ref`, into that element; without one, into the
 focus). `key` takes `keys`, an xdotool-style combination (`ctrl+s`, `Return`, `alt+Tab`), at most 8 keys. Text reaches
 the application as XTEST key events or the element's set-text action, never through the clipboard (section 7 decides
-the clipboard). **Amended 12 Oct 2026 by the technical lead:** on the desktop, `key` and `type` without a
+the clipboard). **Amended 12 Oct 2026:** on the desktop, `key` and `type` without a
 `ref` always go through XTEST, as a person's keyboard does, whichever window has the focus, so the browser's own UI
 (ctrl+l and its address bar) gets them as well as the page. Slice 2's driver sent them to the focused page as debugging
 protocol input events, which Chromium's UI never sees, so a model's ctrl+l and URL left the page on `about:blank`. The
@@ -218,7 +218,7 @@ thing.
 
 - **Every action is a tool call,** so it counts toward the run's steps and its token budget as any tool call does.
   Desktop tasks take many small steps, so a task whose environment declares `desktop` gets a default of 500 steps
-  (the owner, question 4). The person's own controls are its budget and time; the step cap stays as a bound because
+  (answer 4). The person's own controls are its budget and time; the step cap stays as a bound because
   some model servers report no usage, which leaves the token budget nothing to count.
 - **Images:** at most 3 in a request (section 3), each counted as 1,600 tokens, so a request holds at most 4,800
   image tokens however long the run is. Resending all of a run's 100 screenshots would put 160,000 into its last
@@ -309,8 +309,8 @@ thing.
 - **Sign-ins.** A person who needs the agent to work in an account signs in by hand during Take over. The agent never
   types a password the person gave it in a message, and no credential of the gateway's (ADR-0037's host keys included)
   enters the desktop.
-- **Every run starts signed out, except that a sign-in made during a Take over serves the run that follows it** (the
-  owner, question 2; amended by the lead, 7 Oct 2026). The desktop browser's profile (cookies, saved logins, site data)
+- **Every run starts signed out, except that a sign-in made during a Take over serves the run that follows it**
+  (answer 2; amended 7 Oct 2026). The desktop browser's profile (cookies, saved logins, site data)
   lives in its own tmpfs, `/run/tqa-browser` (section 10), never in the workspace or the conversation's state. When any
   run of a desktop session ends (completed, failed or cancelled, a Take over's cancel included), the runtime closes the
   browser and empties its profile; the next action starts the browser fresh. No protocol frame tells the runtime about a
@@ -328,7 +328,7 @@ thing.
     without a graceful close (the profile is emptied straight after). So if the browser dies between a sign-in and
     the next run (a crash), a sign-in from its last ~30 s can be lost and the person signs in again. A runtime restart
     empties the profile anyway (below). This fails safe (amended 12 Oct 2026: SEC-059).
-- **Take over always finds the runtime's browser** (the lead, 7 Oct 2026). After every reset (a run's end, Sign out
+- **Take over always finds the runtime's browser** (decided on 7 Oct 2026). After every reset (a run's end, Sign out
   everywhere, and the session's start) the runtime starts its browser again, blank, on the emptied profile, so the
   person signs in there and nowhere else. A browser started by hand is the same profile too: the Desktop image's
   `/etc/chromium.d/tqa-desktop-profile` gives every headed `/usr/bin/chromium` that names no profile of its own
@@ -337,7 +337,7 @@ thing.
   Applications menus are empty, as `menu` and `obamenu` aren't installed), xterm, and a link an application opens. On
   that profile Chromium's own single-instance lock hands a second start to the runtime's browser, so a sign-in never
   lands in the sandbox's home, where no reset would reach it.
-- **Every reset fails safe** (the lead, 7 Oct 2026). A run's end and Sign out everywhere stop any process still
+- **Every reset fails safe** (decided on 7 Oct 2026). A run's end and Sign out everywhere stop any process still
   holding `/run/tqa-browser/profile` (a browser started by hand after the person closed the runtime's, say): SIGTERM,
   2 seconds' grace, then SIGKILL. Then the profile is emptied and the blank runtime browser started again. Only a
   holder that survives SIGKILL leaves the profile as it is: the reset reports `profile_in_use` and logs that process's
@@ -395,9 +395,8 @@ thing.
 - **The network:** the conversation's allow-list, enforced at the sandbox's network as for every sandbox (ADR-0035).
   The sandbox has no route except the egress proxy, so a desktop application that ignores proxy settings gets nothing,
   rather than a way round. A desktop gets the same allow-list as any other task, with nothing added for it: full access
-  (the **Open web** list) stays off unless an administrator turns it on, as for every task (the owner, 5 Oct 2026;
-  question 1).
-- **The clipboard: paste in during Take over, never copy out** (the owner, question 3). The gateway forwards
+  (the **Open web** list) stays off unless an administrator turns it on, as for every task (answer 1, 5 Oct 2026).
+- **The clipboard: paste in during Take over, never copy out** (answer 3). The gateway forwards
   `ClientCutText` only from the viewer holding Take over, so the person can paste a long address or a password from
   their own password manager, and drops it from every view-only viewer. Nothing leaves the sandbox through the person's
   clipboard, because the sandbox never produces it. x11vnc runs with `-noclipboard -noprimary -seldir recv`: it only
@@ -414,9 +413,9 @@ thing.
 
 ### 8. The switch suggestion (not in this version)
 
-**Amended 10 Oct 2026 from the owner's decision, by the basic-tools principle (7 Oct 2026):** no agent tool suggests
-an environment switch. The `suggest_environment` tool, its card and its refusal are dropped before they shipped (the
-tool was never built; the card had no trigger on a real install). The switch stays the person's, through the
+**Amended 10 Oct 2026 from the Product Owner's decision, by the basic-tools principle (7 Oct 2026):** no agent tool
+suggests an environment switch. The `suggest_environment` tool, its card and its refusal are dropped before they shipped
+(the tool was never built; the card had no trigger on a real install). The switch stays the person's, through the
 environment picker and `PUT /api/v1/conversations/{id}/environment` (ARCHITECTURE §4.7), as every environment change
 is. A model that still calls the name gets an unknown tool's failure, shown as any failed step. A later ADR may
 revisit a suggestion.
@@ -492,7 +491,7 @@ revisit a suggestion.
   browser's profile is a tmpfs, so the person's sign-ins would go with it, unasked. The waiter starts once a Desktop
   ends (it idles out, its task is deleted, or the cap rises), and the waiting line says so ("One frees when another
   task has been idle for a while"; each sandbox keeps the idle limit it started with, and a task kept on never idles,
-  so the line names no number) (GW-I-224, WEB-U-001). **Amended 17 Oct 2026 by the lead** (c16k real-world A4 and A6:
+  so the line names no number) (GW-I-224, WEB-U-001). **Amended 17 Oct 2026** (real-world use before 17.0:
   desktop tasks waited 3 min 20 s and 9.5 min behind desktops whose tasks had finished): an idle Desktop gives way to
   a waiting one when its browser's profile is known empty, so no sign-in goes with it. That is: a clean run-end reset
   (or Sign out everywhere) came, and no Take over since. A hand sign-in serves the run after it (section 6), so a
@@ -503,7 +502,7 @@ revisit a suggestion.
   restart every desktop counts as possibly signed in until its next reset: it fails safe, and such a desktop waits out
   its idle limit as before. The waiting line reads "One frees soon after another task finishes" (GW-I-305, GW-U-200,
   WEB-U-397).
-- **What the runtime's reaper leaves on a desktop** (the technical lead, 12 Oct 2026: the first shell command of a desktop
+- **What the runtime's reaper leaves on a desktop** (found on 12 Oct 2026: the first shell command of a desktop
   run killed the browser, and no application the agent opened survived the call). The runtime is a child-subreaper and
   kills every direct child it didn't record after each shell call and each run (ADR-0016's amendment, TOOL-U-008). On a
   desktop it also leaves alone: its own browser, started as the leader of a group of its own and recorded as an MCP
@@ -561,7 +560,7 @@ screenshots.
 | T16 | The marks reveal more of the screen to the model's provider | Labels are digits drawn by the tool, never text taken from the screen, and the outlines show only boxes the screenshot already shows; the snapshot's text is what `observe` would send anyway. No exposure beyond the screenshot itself (T10's rule applies to both) | TOOL-U-048: labels hold only the ref's digits |
 | T13 | A hostile page exploits the browser's renderer (Chromium runs with `--no-sandbox`, as the Workstation's browser already does) | The task's sandbox is the boundary: the exploit lands where the agent's own code already runs, as the sandbox user with no secret, so it gains nothing beyond what any command in the task could do, and the allow-list still bounds its network | SEC-058's probes, which show that nothing in a Desktop sandbox reaches beyond the allow-list |
 
-Residual risks, accepted with the owner's principles: an agent acting in a signed-in account (T7), what a model
+Residual risks, accepted with the Product Owner's principles: an agent acting in a signed-in account (T7), what a model
 provider receives in screenshots (T10, as for any content sent to a remote model), and a renderer exploit inside the
 task's own sandbox (T13), which the sandbox and the allow-list bound as they bound the agent's code.
 
@@ -835,7 +834,7 @@ desktop until an administrator offers a template with `desktop`. Each slice merg
   the upgrade path if the spike shows VNC too slow for video-heavy work. **WebRTC-only transports** need media ports and
   relays that conflict with the sealed sandbox network (ARCHITECTURE §4.7's check, 23 Sep 2026).
 
-## The owner's answers (5 Oct 2026)
+## The Product Owner's answers (5 Oct 2026)
 
 1. **The network for a desktop:** the same allow-list as other tasks, and no full access. Any site (the **Open web**
    list) stays off unless an administrator turns it on, as for every task (section 7).

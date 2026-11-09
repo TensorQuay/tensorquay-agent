@@ -6,9 +6,9 @@ Accepted (2026-10-02; the open points were decided that day, under "Decisions (2
 and slice by slice (DEV-PLAN Phase 10), behind an install switch, `[agent_teams] enabled`, off by default; it merges
 into the development branch behind that switch, and the internal releases then in testing keep first call on
 testing time. Point 14a is in v1.0.
-Revised on 2026-10-02 for the owner's decisions of that morning, which replace the 2026-09-28 design ("team runs on
-channels": team profiles, `quorum` and `lead` votes, git bundles and `agent_spawn`). What changed, and why, is under "Changes from the
-28 Sep version". The file name is kept so that links stay valid.
+Revised on 2026-10-02 for the Product Owner's decisions of that morning, which replace the 2026-09-28 design ("team runs
+on channels": team profiles, `quorum` and `lead` votes, git bundles and `agent_spawn`). What changed, and why, is under
+"Changes from the 28 Sep version". The file name is kept so that links stay valid.
 
 ## Date
 
@@ -302,8 +302,8 @@ of that forum, with every member reading the channel and the team deciding by vo
      `question_seq` may name the lead's `question` or a member's `ask` (4 Oct 2026).
      Members see it with their next read, or are woken with it.
    - A person who disagrees tells the lead, in the lead's task ("No, use format Y"), and the lead reads it like any
-     person's message and decides again. There is no separate veto control or message type: one way to say it (the
-     designer review, 2 Oct 2026). The owner's "people can veto" is met this way.
+     person's message and decides again. There is no separate veto control or message type: one way to say it
+     (decided on 2 Oct 2026). The Product Owner's requirement that people can veto is met this way.
    - **Team notes** (proposal B, decided): the lead's decisions so far are the team's notes. A new member gets all of
      them in its first turn, after the brief, and every member gets each new one as it is made. So helpers don't make
      conflicting choices on their own, and there is no second document to keep in step.
@@ -383,7 +383,7 @@ of that forum, with every member reading the channel and the team deciding by vo
      - `stop_member`'s `member_stopped` notice is the gateway's fixed sentence. The lead's reason stays in the lead's
        own tool call, as notices carry no agent text.
    - **A budget and a deadline:** point 8. The lead is told once, with a `deadline_near` notice, when min(10 minutes,
-     20 % of `deadline_minutes`) remains: 60 minutes warns at 10 left, 20 at 4, 5 at 1 (the lead's decision of 2 Oct
+     20 % of `deadline_minutes`) remains: 60 minutes warns at 10 left, 20 at 4, 5 at 1 (decided on 2 Oct
      2026).
    - **An idle stop:** the agent team stops after `idle_stop_minutes` with no message and no active run.
    - **A lead's turn that ends without `done`** (GW-I-306, 17 Oct 2026, the c16k campaign's B2): while its team runs, a
@@ -448,7 +448,7 @@ of that forum, with every member reading the channel and the team deciding by vo
 
       Each step is idempotent, so a restart part way through finishes on the next pass with one note. A log over its
       day's messages still ends, without the note.
-    - **The end note is a team message of type `ended` to the lead** (the lead's decision of 2 Oct 2026): no new
+    - **The end note is a team message of type `ended` to the lead** (decided on 2 Oct 2026): no new
       transcript event, no protocol revision and no wake.
       - Its body has the reason, the summary for `done`, the tokens, the reports, the files handed back
         (`[{member, seq, name, size}]`) and `text`, the whole note in the gateway's fixed sentences.
@@ -476,9 +476,9 @@ of that forum, with every member reading the channel and the team deciding by vo
 13. **Room for swarms (later; designed in ADR-0038).** Addressing is by conversation, and the gateway delivers by
     addressee.
     So "a lead writes to another agent team's lead" is the same operation with one more kind of addressee.
-    - **The owner's scope (2 Oct 2026):** one person's own teams only; each part of a goal is a new lead task from an
-      agent profile the person picks (their own or one an administrator shared); no publishing and no sharing between
-      people (ARCHITECTURE §16.4, DEV-PLAN Phase 12).
+    - **The Product Owner's scope (2 Oct 2026):** one person's own teams only; each part of a goal is a new lead task
+      from an agent profile the person picks (their own or one an administrator shared); no publishing and no sharing
+      between people (ARCHITECTURE §16.4, DEV-PLAN Phase 12).
     - Depth stays 1 for `start_member`. A swarm links agent teams; it doesn't nest them.
     - Proposal I (A2A for other systems' agents) is outside that scope. It stays listed as a later option, not part
       of the swarm phase.
@@ -516,14 +516,14 @@ of that forum, with every member reading the channel and the team deciding by vo
 | D | An acceptance step: the lead checks each report before marking work done, with an optional admin acceptance rule (for example "tests must pass") | **Taken.** The lead reviews each report; the administrator's optional `agent_teams.acceptance_check` runs before `done` (points 7 and 10) |
 | E | Model mix: a strong lead, with members on the local model by default; cost shown live on the team panel | **Taken.** `agent_teams.member_route` puts helpers on, for example, the local model; the team strip shows the budget used live (point 3) |
 | F | Default: no agent team. Members are started only when the work splits; the panel shows tokens so far against a single task; "Make it a team" is suggested only for long or parallel work | **Taken,** as the lead's guidance: no team unless the work splits (point 3). The in-product "Make it a team" suggestion is left out, because UI-GUIDELINES §13b adds no control for starting a team; the agent suggests it in words when it fits |
-| G | People may message any member directly, and the lead is told | **Decided by the owner on 2 Oct 2026:** a person can type to any member directly, like typing into any developer's terminal window, and the lead is told (point 1) |
+| G | People may message any member directly, and the lead is told | **Decided by the Product Owner on 2 Oct 2026:** a person can type to any member directly, like typing into any developer's terminal window, and the lead is told (point 1) |
 | H | Liveness: the gateway tells the lead when a member is idle, stuck or failed | **Taken;** point 9 requires it |
 | I | A2A for leads, for swarms and outside agents | **Out of scope** (owner): no outside agents (ADR-0038 point 1) |
 | J | Evaluation before v1.1 ships: about 20 representative team tasks (research, report, code) with judged results, single agent against agent team at the same token budget | **Taken.** The evaluation runs before v1.1 ships (DEV-PLAN Phase 10, slice 7) |
 
 ## Decisions (2 Oct 2026)
 
-The owner left the open points to the technical lead, who decided them on 2 Oct 2026:
+The open points were decided on 2 Oct 2026:
 1. **Build now,** test-first and slice by slice, behind `[agent_teams] enabled` (off by default); it merges into the
    development branch behind the switch, and the internal releases then in testing keep first call on testing time.
 2. **Members per lead:** 3 by default, at most 8, and never more than the slots minus one (point 3).
@@ -539,8 +539,8 @@ The owner left the open points to the technical lead, who decided them on 2 Oct 
   and people found it harder to follow than one lead.
 - **No multi-agent at all.** The published critique holds for sequential work. The design keeps a single task as the
   default and lets a lead split work only when it splits (proposal F), with a budget.
-- **Teams set up by a person** (team profiles). Dropped by the owner: the lead writes each brief, as our technical
-  lead does.
+- **Teams set up by a person** (team profiles). Dropped by the Product Owner: the lead writes each brief, as a
+  technical lead does.
 - **Git as the hand-back** (bundles and merges). Dropped: the product is general purpose, so files travel through
   reports. A lead on a git workspace can still use git on what it takes.
 - **Members on one shared workspace at once.** That would break the lease and invite overwrites (a known failure).
@@ -864,7 +864,7 @@ shows team parts only while it is true.
 | `helper_state` | as in the team below |
 | `can_stop` | as in the team below |
 
-**Who sees what (SEC-005; the review of 2 Oct 2026, H1).** Only the task's own person gets `team` as above. For anyone
+**Who sees what (SEC-005).** Only the task's own person gets `team` as above. For anyone
 else, such as an administrator's `GET /api/v1/conversations?all=true`, `team` keeps only `role`, `id`, `state`, and for
 a lead `helpers` and `attention` (counts), for a member `lead: {id}`: no `lead.title`, no `name`, no `helper_state`, no `can_stop` and
 no `waiting_for_you`, as `title` is dropped for them today. A helper's name and the lead's title are the person's
@@ -903,7 +903,7 @@ list is unchanged. With `q`, `scope=top` is ignored: a search finds a member, wi
 ### The team's messages
 `GET /api/v1/conversations/{id}/team/messages?after=<seq>&limit=<n>` (any team task's id; `after` default 0; `limit`
 1–200, default 100: deliberately above the runtime read's 50, since a page reads the log whole) answers `{"items": [...], "last_seq", "more"}` (`last_seq`: the last item's seq, or `after` when there is none), in seq order: every message of the team (people
-read everything, the S1 contract's "who reads what"), in the S1 read shape. A person's own messages carry `by`, the user's id, so the page says "You" (decided in the review of 2 Oct 2026: the
+read everything, the S1 contract's "who reads what"), in the S1 read shape. A person's own messages carry `by`, the user's id, so the page says "You" (decided on 2 Oct 2026: the
 stored message's own `by` and sender name are the fixed "your person", which is all the lead's runtime read shows, so
 no email or other personal data reaches the model; the lead acts for one person). The end note is one more type, written by the gateway when the team stops (point 10):
 
@@ -911,7 +911,7 @@ no email or other personal data reaches the model; the lead acts for one person)
 |---|---|---|
 | `ended` | gateway → `lead` | `reason` (as `stop_reason`), `summary` (the lead's `done` text, when it was `done`), `tokens: {total, members: [{name, tokens}]}`, `reports: [{member, seq}]`, `files: [{member, seq, name, size}]` (what each report handed back: the report's seq, no path). `text` holds the stop path's own fixed sentences ("handed back", never "taken"); the page words the fields itself and shows `text` only to a client that doesn't know them |
 
-Decided 2 Oct 2026 (the lead): the end note is this stored message, not a task event, so no protocol change; point 10's
+Decided 2 Oct 2026: the end note is this stored message, not a task event, so no protocol change; point 10's
 "posts the gateway's end note into the lead's task" means it shows there. Members never read `ended` (it is the lead's,
 and the team has stopped), and a lead's read after `stopping` is `team_stopped`, so in practice only people read it; a
 runtime that meets it reads it as a marked unknown block (TOOL-U-036). The lead task's

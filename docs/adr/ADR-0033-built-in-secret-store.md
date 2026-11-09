@@ -66,7 +66,7 @@ task's `run.started` or `run.resumed` is stored, waiting at most 1 s, and only w
 run is recorded as none, and `tqa_relay_unattributed_total{route,reason}` counts it (`missing` or `foreign`). The id
 never authorizes anything; a malformed header is still refused. A Git push's key reads name the run of the journaled
 call that its setup verified. The MCP proxy takes no call context (ADR-0035), so connector reads name no run. Requiring
-the header, once every supported runtime sends it, is the owner's decision.
+the header, once every supported runtime sends it, is the Product Owner's decision.
 
 ## History
 

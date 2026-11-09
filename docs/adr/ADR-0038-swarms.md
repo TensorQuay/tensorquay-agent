@@ -2,8 +2,8 @@
 
 ## Status
 
-Accepted (design; built after agent teams, DEV-PLAN Phase 12). The owner agreed this shape on 2026-10-02, and the
-two open points were decided that day (under "Decisions (2 Oct 2026)").
+Accepted (design; built after agent teams, DEV-PLAN Phase 12). The Product Owner agreed this shape on 2026-10-02, and
+the two open points were decided that day (under "Decisions (2 Oct 2026)").
 
 ## Date
 
@@ -82,7 +82,7 @@ who talks to whom, what a person sees and does, and what stays out.
    - **Stop** a helper, a team (from its lead's ⋯) or the whole goal (from the goal page's ⋯). Stopping the goal stops
      every team in it; stopping one team tells the coordinator.
 
-6. **What a person sees** (the goal-page mock-up agreed with the owner).
+6. **What a person sees** (the goal-page mock-up agreed with the Product Owner).
    - **The goal page:**
      - the header: the goal's title, its status, and ⋯;
      - a summary line: the number of teams, "Budget 34 % used" and the time left;

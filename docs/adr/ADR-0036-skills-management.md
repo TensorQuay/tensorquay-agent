@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed (draft for the owner; slice 1 only). No code before the owner's OK.
+Proposed (draft for the Product Owner; slice 1 only). No code before the Product Owner's OK.
 
 ## Date
 
@@ -47,9 +47,9 @@ It keeps the `SKILL.md` format of Anthropic's Agent Skills, so skills move betwe
 
 ### Checks on every write (upload, edit, import)
 A `SKILL.md` at the top with a valid name and description (YAML front matter, as today's parser reads it); at most
-10 MB unpacked and 500 files (the owner decides 10 or 30 MB); no symbolic or hard links, no absolute path, no `..`, no
-special files; a zip is unpacked with the same bounds, so a zip bomb fails on its unpacked size; path names are UTF-8
-without control characters. Each problem is named in `skill_invalid`'s details.
+10 MB unpacked and 500 files (the Product Owner decides 10 or 30 MB); no symbolic or hard links, no absolute path, no
+`..`, no special files; a zip is unpacked with the same bounds, so a zip bomb fails on its unpacked size; path names are
+UTF-8 without control characters. Each problem is named in `skill_invalid`'s details.
 
 ### The eight endpoints (`/api/v1/skills`, session or personal token)
 | Method and path | What it does | Who |
@@ -107,7 +107,7 @@ digest, tier precedence. DB: the eight endpoints (access per tier, versions, ide
 audit), `skill_in_use`, the mount set per profile choice and per owner, a running sandbox keeping its versions after
 an edit, version retention with a live set, the upgrade import (good and bad folders).
 
-## Decisions for the owner
+## Decisions for the Product Owner
 - Go ahead after the guardrail work (candidate 9)?
 - Size limit per skill: 10 MB unpacked (proposed), or 30 MB as Anthropic's?
 - May members share a skill with everyone, or administrators only (proposed)?

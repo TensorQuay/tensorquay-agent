@@ -24,12 +24,12 @@ same digest could run under it (SEC-003, CORE-S-015); the Git relay authorised o
 
 ## Why it was superseded
 
-- **No approvals** (ADR-0035, the product owner's decision of 29 Sep 2026): the product must not rely on a person
+- **No approvals** (ADR-0035, the Product Owner's decision of 29 Sep 2026): the product must not rely on a person
   approving the agent's steps. The sandbox is the wall and the network allow-list the one guardrail, so there is no
   approval for a binding to protect. ADR-0035's threat table: a forged or replayed approval is "moot: there are no
   approvals". SEC-003, CORE-S-015 and the other approval rows are void; the approval tables were dropped.
-- **No push binding** (ADR-0037 §7, the owner's decision of 30 Sep 2026): a push is plain git with a host key, the
-  `git_push` tool and the Git relay are removed, and the binding of a push to one journaled call is given up
+- **No push binding** (ADR-0037 §7, the Product Owner's decision of 30 Sep 2026): a push is plain git with a host key,
+  the `git_push` tool and the Git relay are removed, and the binding of a push to one journaled call is given up
   knowingly; the key's scopes and the git host's rules decide.
 
 ## Consequences
