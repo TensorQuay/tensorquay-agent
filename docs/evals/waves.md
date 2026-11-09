@@ -22,7 +22,7 @@ baseline.
     `model.tool_args` (our tool refused its arguments until the run stopped, reviewed by hand), `model.stuck` (the
     same call failing until the run stopped, or no progress), `model.unreadable` (replies that couldn't be read as a
     tool call) and `model.budget` (the attempt ran past its steps or tokens). Until 7 Oct 2026 the stuck and
-    unreadable stops were labelled `model.budget` too (backlog #16); the rows below keep the label each run recorded
+    unreadable stops were labelled `model.budget` too; the rows below keep the label each run recorded
     and give the new one beside it;
   - harness failures: `harness.timeout` (no end within the task's wall clock plus 60 s), `harness.lost_event`,
     `harness.provider` (the model's calls failed after the runtime's retries), `harness.tool`, `harness.check` (a
@@ -73,7 +73,7 @@ row, each time differently: a length of 40 where the output is 39, then a traili
 drops, then `…ab` where a space becomes a hyphen (`…a-b`). It never changed `src/slug.ts`. The third failure of the
 same command, `node --test test/*.test.ts`, ended the run `repeated_failure` (CORE-E-012), and the harness classed it
 `model.budget` by its rule then for three failures of the model's own making (TK-U-004); since 7 Oct such a run is
-`model.stuck` (backlog #16), which says what happened: no budget ran out. Not a harness failure, and no
+`model.stuck`, which says what happened: no budget ran out. Not a harness failure, and no
 product fault: the tests the model wrote asserted behaviour `slugify` doesn't have. The same task passed in the
 wave's other two rounds (10 and 14 steps). One more refusal earlier in the run was the model's too: a `write_file`
 without its required `create_parents`, which it corrected at once.
@@ -132,7 +132,7 @@ task (ts-long-http-migration) running out of its budget; the wave as a whole too
 
 ## Limits
 - Three attempts per task. The 95 % interval on a rate near 95 % over 60 attempts is about ±6 points.
-- One model and one server build. M1 names the model class. Which local model stands for that class is the product
-  owner's decision, and the result holds for this model.
+- One model and one server build. M1 names the model class. Which local model stands for that class is the Product
+  Owner's decision, and the result holds for this model.
 - Eight at a time measures the harness and the host under load, not a model: the model's own throughput limits how
   much faster the wave runs.

@@ -36,7 +36,7 @@ ADR-0035), so 50 IDs are live: 28 P0 and 22 P1. Plus the phase demo (DEV-PLAN Ph
 | Run | What it shows | Evidence |
 |---|---|---|
 | 24 Sep 2026, 2 h, the Gate 2 shape (`3781de25`) | The commit records it passed: "108 runs completed, all eight receipt logs equal stored history" | **No result file was kept** |
-| 15b's 24 h soak, from 9 Oct 12:48 (SOAK-001…004) | Passed by the owner's rule (PRD §12 item 25), **with the gap the owner accepted**: at hour 24 the harness's sign-in had expired (HTTP 401), so "the end-of-run receipt and run checks of the last 8 of its 72 conversations didn't run" (`gate-9.md`) | `gate-9.md`, M5 row; the soak's `result.json` says `failed` for that reason |
+| 15b's 24 h soak, from 9 Oct 12:48 (SOAK-001…004) | Passed by the Product Owner's rule (PRD §12 item 25), **with the gap the Product Owner accepted**: at hour 24 the harness's sign-in had expired (HTTP 401), so "the end-of-run receipt and run checks of the last 8 of its 72 conversations didn't run" (`gate-9.md`) | `gate-9.md`, M5 row; the soak's `result.json` says `failed` for that reason |
 | 11 Oct 2026, 2 h, the sign-in renewal rehearsal (15c's images) | Every end-of-run check ran and passed. **Not gate evidence** by design: it shortens the session to 60 s to exercise the renewal | the rehearsal's result (`gate_evidence` false) |
 
 ## Phase demo
@@ -54,8 +54,8 @@ transcript is complete." No single test does all three in one run; each part pas
 ## Limits of the acceptance
 - **Retrospective.** The evidence is the v1.0 release's (10 Oct 2026), not Phase 2's own.
 - **SOAK-002's exactly-once check has no complete gate-evidence run on disk:** the 24 Sep run kept nothing, and
-  15b's soak missed its last 8 end-of-run checks (accepted by the owner for 15b). **c16's soak must complete every
-  end-of-run check**; that closes it.
+  15b's soak missed its last 8 end-of-run checks (accepted by the Product Owner for 15b). **c16's soak must complete
+  every end-of-run check**; that closes it.
 - **The demo is shown in parts,** not in one run.
 - **By test name, not clause by clause** (How it was checked).
 - **The references are dev's (`3940a08d`), the results 15b's (`23112f6b`).** Every reference has a result line.

@@ -9,7 +9,7 @@ After 16j, a real-world campaign on 16k (17 Oct) gave agent teams goals a person
 and those the live checks on the real model found after, were fixed in 16m to 16x and checked again live on 16o, 16p,
 16q and 16u (below).
 
-**The primary evidence for 16y's team behaviour** (the technical lead, 21 Oct):
+**The primary evidence for 16y's team behaviour** (decided on 21 Oct 2026):
 - 16k's real-world team cases;
 - the live checks on 16o and 16p;
 - 16u's live checks L2, L2b and L3.
@@ -27,8 +27,8 @@ What isn't done yet:
 - the Evaluation below.
 
 ## Scope
-The TEST-PLAN §17 Gate 10 row (the technical lead, 12 Oct 2026; the rows added since, 21 Oct) holds:
-- every P0 and P1 row on agent teams: those that name ADR-0034, and the agent-team features and the owner's edge
+The TEST-PLAN §17 Gate 10 row (set on 12 Oct 2026; the rows added since, 21 Oct) holds:
+- every P0 and P1 row on agent teams: those that name ADR-0034, and the agent-team features and the Product Owner's edge
   cases of 7 Oct that don't;
 - the phase demo.
 
@@ -46,7 +46,7 @@ The evaluation is the gate's measurement.
   same budget. It doesn't pass or fail the gate. It decides the guides' advice and whether agent teams stay
   experimental. Agent teams stay behind `[agent_teams] enabled`, off by default, either way.
 
-**The rows added on 21 Oct** (the technical lead) are the P1 rows on agent teams written since 12 Oct. Each has its
+**The rows added on 21 Oct** are the P1 rows on agent teams written since 12 Oct. Each has its
 tests, and each passed in the 16y integration:
 - a team's budget counts a call that was cut off or reported no usage: LLM-U-054, GW-U-186, GW-I-275 (the
   evaluation's night 2);
@@ -83,7 +83,7 @@ Failed gates 0, cut 0; one failed step, release-mode performance (below).
   - vitest 2,823 of 2,823.
 - **The agents suite** (`int-5a59ad1d5-demo-agents.log`): **17 passed** in 6.9 min:
   - E2E-AGENTS-020, end to end and again across a gateway restart;
-  - E2E-AGENTS-021…030, the owner's edge cases;
+  - E2E-AGENTS-021…030, the Product Owner's edge cases;
   - WEB-E2E-062;
   - added since 16j: E2E-AGENTS-031 (a message to a leading lead), 032 (a lead that ends its turns without `done`),
     033 (two helpers on the lead's files), 034 (a team's ends in words) and 035 (a stopped helper's hand-back).
@@ -185,7 +185,7 @@ One helper caught a wrong example in the lead's brief and built the rule the bri
   at once. That is by design (ADR-0034 point 6), but the parts were independent. `start_member`'s guidance should
   steer independent parts to `own_copy`; then measure again.
 
-The team code changed after 16j, so the demo is supporting evidence only (the technical lead, 21 Oct). The primary
+The team code changed after 16j, so the demo is supporting evidence only (decided on 21 Oct 2026). The primary
 evidence for 16y is listed at the top of this page. On those runs, real-model teams ended by `done` on 16k (B1, B3,
 B4, B9c, B10b) and in the live checks on 16o and 16p, and E2E-AGENTS-020 passed on 16y.
 
@@ -208,7 +208,7 @@ teams.
 
 ## What's still open
 1. **The soak with agent teams in its mix.** Every c16 soak has run with agent teams off: 16e's (passed, 12 to 13 Oct),
-   16j's (passed, 14 to 15 Oct), 16u's (stopped by the technical lead at 9 h 33 min on 18 Oct, once 16u could no longer
+   16j's (passed, 14 to 15 Oct), 16u's (stopped at 9 h 33 min on 18 Oct, once 16u could no longer
    be the candidate), 16x's (passed by the growth rule, with an idle-connection leak found and fixed as 16y) and 16y's
    (running, to Thu 22 Oct). ADR-0034 adds resources that build up over time: helpers' sandboxes and copies, the team
    log, wakes, and budget reservations (GW-I-252). No long run has had a team in it. Adding teams to the soak's mix is a

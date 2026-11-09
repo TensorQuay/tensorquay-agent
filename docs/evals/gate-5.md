@@ -118,7 +118,7 @@ A step that can't finish before the window's end is skipped and reported, never 
   the waves as a member**, the path real users take.
 
 **The technical lead's acceptance (10 Oct, 22:50):** "compaction-50 passed (151 steps, 2.1 M tokens, 690 s, check
-passed), REPORT.md 49 part lines + 'Audit reference: KESTREL-4471'. Accepted." **The lead's call (11 Oct): Gate 5 is
+passed), REPORT.md 49 part lines + 'Audit reference: KESTREL-4471'. Accepted." **The verdict (11 Oct): Gate 5 is
 reached on 15b**: every run passed, M6 is met, and the phase demo is accepted.
 
 ## Release candidate c14b-rc (5 to 7 Oct 2026)
@@ -154,7 +154,7 @@ checkout of `16589e55`.
 - **E2E-WAVE-001: pass, 60/60** (route `local`, tools declared natively), no harness failure and no `provider.retry`.
 - **E2E-WAVE-002** (8 at once): **59/60 = 98.3 %** (91.1–99.7 %), no harness failure. The one miss
   (`ts-add-tests-slug`) the harness labelled `model.budget`, after 12 steps and with no retry: `repeated_failure`,
-  now `model.stuck` (backlog #16); classified by hand as the model's own wrong tests ([waves.md](waves.md)).
+  now `model.stuck`; classified by hand as the model's own wrong tests ([waves.md](waves.md)).
   The admission step (route `local` at concurrency 8; admission already 8 and 8) was applied at 06:59:52 and restored
   at 07:11:13, both logged.
 - **E2E-FALLBACK-004: 26/30 = 86.7 %** (70.3–94.7 %) on `local-text`, with no harness failure: the row's
@@ -163,7 +163,7 @@ checkout of `16589e55`.
   The misses are the model's: two did the wrong work (`py-add-tests`, `sh-add-tests-strings`), and two stopped after
   three replies in a row that couldn't be read (`sh-build-fix`, `ts-feature-status-filter`, three retries each).
   The harness labelled those two `model.budget`, a budget stop they weren't (`fallback_parse`); they are
-  `model.unreadable` since 7 Oct (backlog #16), still the model's.
+  `model.unreadable` since 7 Oct, still the model's.
   The recovery of
   a swallowed reply fired as on 13h: `provider.retry` 23 times for `fallback_parse` and 16 for `native_tools` (one
   more counted as `malformed`).
@@ -243,7 +243,7 @@ E2E-WAVE-002 (Gate 9) last, the server restarted at 8 sequences.
   fix it went 69 steps (18 before) and then ended `repeated_failure` on three refusals of
   `grep {"cursor": "None", "file_type": "None", "glob": "None", …}`: this model fills optional fields with the word
   "None". The harness classed it `model.tool_args`, the refused call in the evidence; the hand review finds our
-  strictness, so it is **reclassified as a harness failure**. Fixed for the next release by the lead's rule of 2 Oct: a
+  strictness, so it is **reclassified as a harness failure**. Fixed for the next release by a rule decided on 2 Oct: a
   null-word (`None`, `null`, `undefined`, any case) counts as absent wherever the field can't really hold it, every
   cursor and every closed list (an `enum`, and `grep`'s file type), but never in a free string such as a path or a
   pattern (TOOL-U-001, TOOL-U-034). The demo reruns on that build after 13h's 24-hour run.
@@ -277,7 +277,7 @@ the TEST-PLAN audit of it (1 Oct 2026), each row checked against the logs.
 1. PERF-030 in a plain `--run-ignored` run (no coverage) on the candidate, against the 26 Sep baseline.
 2. PERF-040, `pnpm run perf:transcript`, on the candidate (≤ 2 s to interactive, p50 over 50 runs).
 3. E2E-WAVE-001 on the candidate's images with the local model (≥ 90 %, no harness failure).
-4. E2E-FALLBACK-004 on the candidate's images, judged by its row as written (the technical lead, 1 Oct 2026): a success
+4. E2E-FALLBACK-004 on the candidate's images, judged by its row as written (decided on 1 Oct 2026): a success
    rate reported per model and no harness failures, with no completion threshold. So the 28 Sep run (10/30, no harness
    failure) met it and the 29 Sep run (one harness failure, its rerun passed) did not; the history below judged both by
    their rates, which the row doesn't ask for.

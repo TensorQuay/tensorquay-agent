@@ -1,6 +1,6 @@
 # Gate 0: Foundation
 
-**State:** **technical criteria met; open on the product owner's MS0**, by the technical lead's evaluation below (12 Oct 2026). Until then the page was a draft. Phase 0 was built before this folder had pages: the
+**State:** **technical criteria met; open on the Product Owner's MS0**, by the technical lead's evaluation below (12 Oct 2026). Until then the page was a draft. Phase 0 was built before this folder had pages: the
 repository's first import (`a50bac90`, 23 Sep 2026) already held the workspace, the guardrails and the protocol
 types, and no Gate 0 report was written then. This page assesses the gate on the v1.0 release's evidence, 15b's full
 integration (10 Oct 2026, 14:56 to 17:51; 15c, its server with a new web image, is on main as
