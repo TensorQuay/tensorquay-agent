@@ -34,6 +34,15 @@ describe("WEB-U-461 short counts", () => {
     expect(formatCompact(29_960_000, "en")).toBe("30M");
   });
 
+  // Round 2: a use at or over its limit rounds up, and a limit above its use rounds up too.
+  it("rounds up when asked", () => {
+    expect(
+      [29_940_000, 30_040_000, 30_000_000, 999_901].map((value) =>
+        formatCompact(value, "en", "up"),
+      ),
+    ).toEqual(["30M", "30.1M", "30M", "1M"]);
+  });
+
   // The Usage tables shorten every cell: one formatter per language and rounding, not one per call.
   it("builds one formatter per language and rounding", () => {
     const Real = Intl.NumberFormat;
