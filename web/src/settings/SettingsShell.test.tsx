@@ -120,7 +120,7 @@ describe("WEB-U-023/075 settings", () => {
     ]);
   });
 
-  // The owner's ask: a 16 px line icon before each section, as in the main sidebar; decorative, so names don't change.
+  // Decided before 17.0: a 16 px line icon before each section, as in the main sidebar; decorative, so no name changes.
   it("puts one hidden line icon before each section's name", () => {
     show({
       id: "0195d8c0-0000-7000-8000-000000000001",

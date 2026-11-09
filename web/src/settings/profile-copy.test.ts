@@ -105,7 +105,7 @@ describe("WEB-U-049 profile drafts", () => {
 // WEB-U-105: a profile's tools are always listed and ticked by default; the saved shape stays as before, every tool
 // being no allow-list at all.
 describe("WEB-U-105 a profile's tools", () => {
-  it("groups every built-in tool once, in the owner's order", () => {
+  it("groups every built-in tool once, in WEB-U-105's order", () => {
     expect(TOOL_GROUPS.map(([group]) => group)).toEqual([
       "files",
       "finding",

@@ -55,7 +55,7 @@
 .settings-select {
   display: none;
 }
-/* The owner's ask: a 16 px line icon before each section, 12 px from its name; it takes the item's colour (muted,
+/* Decided before 17.0: a 16 px line icon before each section, 12 px from its name; it takes the item's colour (muted,
    ink when active or hovered). */
 .settings-nav .nav-item {
   gap: var(--nav-pad-inline);

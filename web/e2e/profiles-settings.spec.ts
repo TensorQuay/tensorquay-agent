@@ -23,7 +23,7 @@ for (const width of [1024, 1280] as const)
       await page.setViewportSize({ width, height: 900 });
       await page.emulateMedia({ colorScheme });
       await signIn(page);
-      // Renamed from Task profiles (the owner's ask); the old address still leads here.
+      // Renamed from Task profiles (WEB-U-049); the old address still leads here.
       await page.goto("/settings/profiles");
       await page.waitForURL("**/settings/agent-profiles");
       await expect(page).toHaveTitle("Agent profiles · TensorQuay Agent");

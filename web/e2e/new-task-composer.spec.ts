@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { signIn } from "./session";
 import { expect, test, type Page } from "./test";
 
-// WEB-U-102 on the page, as the owner corrected it (WEB-U-113): New task's model and environment are two small pickers
+// WEB-U-102 on the page, corrected on 30 Sep 2026 (WEB-U-113): New task's model and environment are two small pickers
 // in its top bar; the composer's "+" offers Attach files, Workspace… and Agent profile…; a workspace or profile shows
 // as a chip whose picker opens at once, and its × goes back to the default. No quiet line, no Change panel.
 async function capture(page: Page, name: string) {

@@ -41,7 +41,7 @@ export const TOOLS: readonly ProfileTool[] = [
   "channel_wait",
   "task_claim",
 ];
-/** The groups the Tools section lists them in (WEB-U-105, the owner's order); every tool is in one. */
+/** The groups the Tools section lists them in (WEB-U-105's order); every tool is in one. */
 export const TOOL_GROUPS: readonly (readonly [
   "files" | "finding" | "commands" | "notes" | "web" | "skills" | "channels",
   readonly ProfileTool[],

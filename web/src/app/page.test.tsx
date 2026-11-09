@@ -353,7 +353,7 @@ describe("WEB-U-017 composer-first start", () => {
   });
   // UI-GUIDELINES §0: no choices before the first word. What the task will use is one quiet line under the box, and
   // Change opens the workspace, model and environment together.
-  // WEB-U-102 as the owner corrected it (WEB-U-113): New task's model and environment are two small pickers in its top
+  // WEB-U-102, corrected on 30 Sep 2026 (WEB-U-113): New task's model and environment are two small pickers in its top
   // bar; the workspace and profile come from the composer's "+" (Attach files, Workspace…, Agent profile…) as chips; the
   // composer holds only "+", the text and Send; no quiet line, no Change panel.
   it("offers the model and environment in the top bar and the rest from +, and example chips only fill the composer", async () => {
