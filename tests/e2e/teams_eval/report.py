@@ -332,7 +332,7 @@ def markdown(found, lines, waiting, switches=(), incomplete=(), guesses=None, le
     harness = [line for line in final_of(lines) if line.get("passed") is None and line.get("problem")]
     out.append(f"- not counted (the harness's): {len(harness)}")
     if switches:
-        out += ["", f"Gateway restarts to switch sides ({len(switches)}, the lead's request of 5 Oct 2026):", ""]
+        out += ["", f"Gateway restarts to switch sides ({len(switches)}, requested on 5 Oct 2026):", ""]
         if any("batch" in entry for entry in switches):
             out += ["| Batch | At (UTC) | Before | To | Seconds |", "|---|---|---|---|---|"]
             out += [f"| {entry.get('batch', '')} | {entry['at']} | {entry['before']} | {entry['side']} | "
