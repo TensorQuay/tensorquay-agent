@@ -109,7 +109,10 @@ for (const [width, colorScheme] of [
     await expect(chart.locator("figcaption")).toHaveText(
       /^Tokens per day\. Busiest: /,
     );
-    await expect(total).not.toContainText(/\d(\.\d)?[KMB]\b/);
+    // WEB-U-461: token counts show short (139.3K); the exact figures stay for screen readers.
+    await expect(total.locator('[aria-hidden="true"]').first()).toHaveText(
+      /^\d+(\.\d)?[KMB] tokens$/,
+    );
     expect(await serious(page)).toEqual([]);
     await capture(page, `usage-${width}-${colorScheme}`);
     await page.getByRole("button", { name: "Show each day" }).focus();

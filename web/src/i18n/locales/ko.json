@@ -320,6 +320,17 @@
     "picker.noProfile": "없음",
     "quota.workspaceOver": "이 작업 공간이 저장 용량 한도를 넘었습니다. 실행은 계속되며, 파일을 삭제해 한도 안으로 돌아오세요.",
     "quota.workspaceStopped": "실행이 중지되었습니다. 이 작업 공간이 저장 용량 한도를 크게 넘었습니다. 파일을 삭제한 뒤 메시지를 다시 보내세요.",
-    "workspaces.helperCopyName": "{name}(도우미 사본)"
+    "workspaces.helperCopyName": "{name}(도우미 사본)",
+    "account.roleAdmin": "관리자",
+    "account.roleMember": "멤버",
+    "account.usage": "사용량",
+    "account.help": "도움말",
+    "account.feedback": "피드백 보내기",
+    "account.apiTokens": "API 토큰",
+    "account.about": "정보",
+    "account.whatsNew": "새로운 기능",
+    "account.source": "소스 코드",
+    "account.licence": "라이선스",
+    "account.newTab": "(새 탭에서 열림)"
   }
 }

@@ -326,6 +326,17 @@
     "picker.noProfile": "なし",
     "quota.workspaceOver": "このワークスペースはストレージの上限を超えています。実行は続きます。ファイルを削除して上限内に戻してください。",
     "quota.workspaceStopped": "実行は停止しました。このワークスペースはストレージの上限を大きく超えました。ファイルを削除してから、もう一度メッセージを送信してください。",
-    "workspaces.helperCopyName": "{name}（ヘルパーのコピー）"
+    "workspaces.helperCopyName": "{name}（ヘルパーのコピー）",
+    "account.roleAdmin": "管理者",
+    "account.roleMember": "メンバー",
+    "account.usage": "使用量",
+    "account.help": "ヘルプ",
+    "account.feedback": "フィードバックを送る",
+    "account.apiTokens": "API トークン",
+    "account.about": "このアプリについて",
+    "account.whatsNew": "新機能",
+    "account.source": "ソースコード",
+    "account.licence": "ライセンス",
+    "account.newTab": "（新しいタブで開きます）"
   }
 }

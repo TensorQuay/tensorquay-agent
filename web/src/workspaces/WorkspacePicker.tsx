@@ -17,6 +17,7 @@ import {
   workspaceName,
 } from "./workspace-state";
 import "../i18n/deferred-catalogue";
+import "../conversations/start-catalogue";
 
 /** Recent workspaces shown without a search; a search field appears once there are more. */
 const RECENT = 8;

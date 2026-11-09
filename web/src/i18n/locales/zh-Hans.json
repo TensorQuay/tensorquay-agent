@@ -2850,6 +2850,17 @@
     "notFound.tab": "找不到页面 · {product}",
     "notFound.title": "找不到页面",
     "notFound.body": "此地址没有内容。链接可能有误，或页面已移动。",
-    "notFound.home": "前往你的任务"
+    "notFound.home": "前往你的任务",
+    "account.roleAdmin": "管理员",
+    "account.roleMember": "成员",
+    "account.usage": "用量",
+    "account.help": "帮助",
+    "account.feedback": "发送反馈",
+    "account.apiTokens": "API 令牌",
+    "account.about": "关于",
+    "account.whatsNew": "新功能",
+    "account.source": "源代码",
+    "account.licence": "许可证",
+    "account.newTab": "（在新标签页中打开）"
   }
 }

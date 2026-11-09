@@ -31,6 +31,7 @@ import { useModels } from "./use-models";
 import { useProfiles } from "./use-profiles";
 import { useTemplates } from "./use-templates";
 import "../i18n/deferred-catalogue";
+import "./start-catalogue";
 
 /**
  * Reads models, environments and workspaces; its first send creates the conversation (on the chosen workspace, or a

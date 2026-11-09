@@ -843,6 +843,15 @@ textarea.form-control {
     display: contents;
   }
 }
+/* Words for screen readers only, such as the exact number behind a short count (WEB-U-461). */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 .sidebar-toggle-name {
   position: absolute;
   width: 1px;

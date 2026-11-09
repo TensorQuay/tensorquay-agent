@@ -320,6 +320,17 @@
     "picker.noProfile": "ไม่มี",
     "quota.workspaceOver": "พื้นที่ทำงานนี้ใช้พื้นที่จัดเก็บเกินโควตา การทำงานยังดำเนินต่อ ลบไฟล์เพื่อให้กลับมาอยู่ในโควตา",
     "quota.workspaceStopped": "การทำงานหยุดแล้ว พื้นที่ทำงานนี้ใช้พื้นที่จัดเก็บเกินโควตามากเกินไป ลบไฟล์ แล้วส่งข้อความของคุณอีกครั้ง",
-    "workspaces.helperCopyName": "{name} (สำเนาของผู้ช่วย)"
+    "workspaces.helperCopyName": "{name} (สำเนาของผู้ช่วย)",
+    "account.roleAdmin": "ผู้ดูแลระบบ",
+    "account.roleMember": "สมาชิก",
+    "account.usage": "การใช้งาน",
+    "account.help": "ความช่วยเหลือ",
+    "account.feedback": "ส่งความคิดเห็น",
+    "account.apiTokens": "โทเค็น API",
+    "account.about": "เกี่ยวกับ",
+    "account.whatsNew": "มีอะไรใหม่",
+    "account.source": "ซอร์สโค้ด",
+    "account.licence": "สัญญาอนุญาต",
+    "account.newTab": "(เปิดในแท็บใหม่)"
   }
 }

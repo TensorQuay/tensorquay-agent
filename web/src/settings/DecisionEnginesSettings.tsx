@@ -7,6 +7,7 @@ import { useState } from "react";
 import { newActionKey } from "../api/action-key";
 import { ApiError } from "../api/error";
 import { useT } from "../i18n/I18nProvider";
+import { formatCompact } from "../i18n/message";
 import type { Translate } from "../i18n/translate";
 import type { User } from "../protocol/generated/api";
 import { ActionMenu } from "../ui/ActionMenu";
@@ -210,8 +211,8 @@ function budgetWords(item: Engine, t: Translate): string[] {
   if (budget.tokens !== undefined)
     lines.push(
       t("engines.budgetUseTokens", {
-        used: used.tokens,
-        limit: budget.tokens,
+        used: formatCompact(used.tokens, t.locale),
+        limit: formatCompact(budget.tokens, t.locale),
         period,
         date,
       }),

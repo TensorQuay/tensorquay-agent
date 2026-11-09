@@ -1,0 +1,21 @@
+{
+  "language": "English",
+  "messages": {
+    "account.signOut": "Sign out",
+    "account.signingOut": "Signing out…",
+    "account.signIn": "Sign in",
+    "account.languageCurrent": "Language · {language}",
+    "account.settings": "Settings",
+    "account.roleAdmin": "Administrator",
+    "account.roleMember": "Member",
+    "account.usage": "Usage",
+    "account.help": "Help",
+    "account.feedback": "Send feedback",
+    "account.apiTokens": "API tokens",
+    "account.about": "About",
+    "account.whatsNew": "What’s new",
+    "account.source": "Source code",
+    "account.licence": "Licence",
+    "account.newTab": "(opens in a new tab)"
+  }
+}

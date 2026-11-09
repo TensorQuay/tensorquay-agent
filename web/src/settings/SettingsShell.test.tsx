@@ -275,3 +275,42 @@ describe("WEB-U-362 Open navigation in Settings", () => {
     ).toBeNull();
   });
 });
+
+// WEB-U-460: a menu taller than the window scrolls on its own; the current section is never left out of view.
+describe("WEB-U-460 the Settings menu stays in view", () => {
+  it("keeps the current section in view when the menu scrolls on its own", () => {
+    // jsdom has no layout: give it the method, then watch which item asks to be shown, and how.
+    const had = "scrollIntoView" in Element.prototype;
+    if (!had) Element.prototype.scrollIntoView = () => undefined;
+    const seen: [Element, unknown][] = [];
+    const scroll = vi
+      .spyOn(Element.prototype, "scrollIntoView")
+      .mockImplementation(function (
+        this: Element,
+        options?: boolean | ScrollIntoViewOptions,
+      ) {
+        seen.push([this, options]);
+      });
+    try {
+      show(
+        {
+          id: "0195d8c0-0000-7000-8000-000000000002",
+          email: "member@example.invalid",
+          role: "member",
+          internet: "none",
+          limits: LIMITS,
+          features: { agent_teams: false },
+        },
+        "keys",
+      );
+      const nav = screen.getByRole("navigation", { name: "Settings sections" });
+      const current = within(nav).getByRole("link", { current: "page" });
+      expect(seen).toEqual([[current, { block: "nearest" }]]);
+    } finally {
+      scroll.mockRestore();
+      if (!had)
+        delete (Element.prototype as { scrollIntoView?: unknown })
+          .scrollIntoView;
+    }
+  });
+});
