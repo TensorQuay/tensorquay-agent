@@ -43,7 +43,7 @@ pub(crate) fn request_ceiling(config: &super::RelayConfig) -> Duration {
 const NONCE_PREFIX: &str = "tqa-route-probe:";
 
 /// How long after a probe of a route the next one of the same version may start. A changed route (a new version) is a
-/// new thing to check, so its first probe may start at once (the lead, 12 Oct 2026: a fix saved from a check's
+/// new thing to check, so its first probe may start at once (decided on 12 Oct 2026: a fix saved from a check's
 /// suggestion is checked again at once).
 pub(super) const PER_ROUTE: Duration = Duration::from_secs(30);
 /// Probes one administrator may start in [`PER_ADMIN_WINDOW`].

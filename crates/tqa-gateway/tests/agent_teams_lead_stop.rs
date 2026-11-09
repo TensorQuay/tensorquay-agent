@@ -1,4 +1,4 @@
-//! GW-I-250 (the owner's edge cases, 7 Oct 2026): the composer's Stop on the lead stops only the lead's own run
+//! GW-I-250 (the Product Owner's edge cases, 7 Oct 2026): the composer's Stop on the lead stops only the lead's own run
 //! (ADR-0034, Stop: "The composer's Stop still stops only that task's own run"). The team keeps running, its helpers
 //! keep working and are never cancelled, and what they report while the lead was stopped isn't lost: the lead reads it
 //! at its next run, which the gateway's wake starts once the stopped run has ended.

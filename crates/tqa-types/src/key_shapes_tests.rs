@@ -194,9 +194,9 @@ fn caught(length: usize, alphabet: &[u8]) -> usize {
 // TEST: SEC-033
 #[test]
 fn sec_033_most_random_bodies_are_key_shaped() {
-    // Conservative by design (the lead, 7 Oct): measured over 10,000 bodies, the rules catch about 88 % of 24-character
-    // and 99 % of 32-character base62 bodies, and 76 to 84 % of 32- to 64-character hex ones. The floors leave room
-    // for these 1000 seeds' spread.
+    // Conservative by design (decided on 7 Oct 2026): measured over 10,000 bodies, the rules catch about 88 % of
+    // 24-character and 99 % of 32-character base62 bodies, and 76 to 84 % of 32- to 64-character hex ones. The floors
+    // leave room for these 1000 seeds' spread.
     for (length, alphabet, floor) in [
         (24, BASE62, 820),
         (32, BASE62, 970),

@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 
 SIDES = ("single", "team")
 KINDS = ("research", "report", "code", "mixed", "dependent", "long")
-# The bars' "split work": the research and report tasks (the design's proposal for the lead's decision).
+# The bars' "split work": the research and report tasks (as the design proposed).
 SPLIT = ("research", "report")
 # The results' groups (section 3): the short tasks of the first set, the dependent ones and the long ones.
 SHORT = ("research", "report", "code", "mixed")
@@ -178,7 +178,7 @@ def group(attempts, kinds):
 
 
 def bars(attempts):
-    """The proposed bars (for the lead's decision): recommend for split work when the team's judged score is higher
+    """The proposed bars: recommend for split work when the team's judged score is higher
     (the paired mean difference over the tasks, as the interval is), its interval on research and report tasks
     excludes no gain, it costs at most 1.5x the wall time (paired per task), and no team-only failure class shows in
     more than 10 % of its attempts; otherwise keep experimental."""

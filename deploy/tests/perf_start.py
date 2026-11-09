@@ -2,7 +2,7 @@
 without a sandbox to that run's first `run.started` (the runtime is linked, configured and its tools registered).
 Target p50 <= 3 s. Each sample uses a new conversation, so each creates a fresh sandbox; the backend split (gateway to
 container created, Docker create to start, start to run.started) locates a regression. Then the returning task as a
-person sees it on Docker (PERF-010-returning-task, the owner's 3 s): a task that already ran, its sandbox removed
+person sees it on Docker (PERF-010-returning-task, PRD M3's 3 s): a task that already ran, its sandbox removed
 after the idle window, so its next message starts a new container on the same workspace with the image warm; from the
 message accepted to run.started, with the same split. Run with no other stack running on the host:
     TQA_DOCKER_TESTS=1 python3 deploy/tests/perf_start.py
@@ -198,7 +198,7 @@ def vm_split(sent, created, running, ready, started, end="run_started"):
 
 
 def vm_summary(totals, splits):
-    """p50 and p99 of the totals, each stage's p50, and both targets: PERF-011's verdict and the owner's 3 s."""
+    """p50 and p99 of the totals, each stage's p50, and both targets: PERF-011's verdict and PRD M3's 3 s."""
     summary = {"p50_ms": perf_common.percentile(totals, 50), "p99_ms": perf_common.percentile(totals, 99)}
     for name in splits[0]:
         summary[name.replace("_ms", "_p50_ms")] = perf_common.percentile([split[name] for split in splits], 50)

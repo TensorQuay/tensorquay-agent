@@ -14,7 +14,7 @@ A canvas target (one with an "anchor", no element of its own) counts only on the
 scored over the other targets, as the runner asks them.
 
 A hit: the point falls inside the target's box (mapped to the screen as the tool maps it), or the ref names the
-target's element. The recommendation is decided (the technical lead, 5 Oct 2026): `pixel_grounding` only when the
+target's element. The recommendation was decided on 5 Oct 2026: `pixel_grounding` only when the
 coordinates' Wilson 95 % lower bound is at least 90 % over the whole set.
 """
 

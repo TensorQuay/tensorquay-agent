@@ -437,7 +437,7 @@ impl Execution<'_> {
         meter.estimated_input = Some(built.needed);
         meter.estimated_route = Some(self.route().name.clone());
         // Its image tokens, attachments and screenshots alike, so the density takes both out of the prompt
-        // (CORE-U-084; the lead, 7 Oct: estimated_images counts CU's screenshots).
+        // (CORE-U-084; decided on 7 Oct 2026: estimated_images counts CU's screenshots).
         let (mut request, images) = self.with_images(built).await?;
         meter.estimated_images = Some(images);
         request.run_id.clone_from(&self.context.run_id);

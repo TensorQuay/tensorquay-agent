@@ -2,8 +2,9 @@
 
 The guest's limit is its sandbox cgroup's `pids.max`, which the guest init sets from the per-sandbox configuration
 device, that is from the gateway's `[sandbox] pids`. The storm reads it in the guest and starts that many background
-sleeps plus PAST_THE_LIMIT: spawns past the limit fail and are not retried, so nothing spins (the owner's rule for this
-machine). It then reads the cgroup's count and events, prints one report line, and reaps every sleep.
+sleeps plus PAST_THE_LIMIT: spawns past the limit fail and are not retried, so nothing spins (no artificial CPU or
+memory load on the machine that runs it). It then reads the cgroup's count and events, prints one report line, and
+reaps every sleep.
 """
 import re
 

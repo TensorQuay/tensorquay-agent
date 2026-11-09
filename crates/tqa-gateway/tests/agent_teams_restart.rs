@@ -1,8 +1,8 @@
-//! GW-I-255 (the owner's edge cases, 7 Oct 2026): a gateway restart while a team works. GW-I-106, GW-I-108 and GW-I-109
-//! restart it mid-start, mid-stop and across a single read; here the lead's and a helper's runs are going, a report is
-//! read but its result not stored yet, and another helper's run has ended. After the restart nothing is lost or doubled:
-//! the read answers the same and its cursor moves once, states and the team carry on, the next decision wakes the idle
-//! helper once, and the reconciler finds nothing to say.
+//! GW-I-255 (the Product Owner's edge cases, 7 Oct 2026): a gateway restart while a team works. GW-I-106, GW-I-108 and
+//! GW-I-109 restart it mid-start, mid-stop and across a single read; here the lead's and a helper's runs are going, a
+//! report is read but its result not stored yet, and another helper's run has ended. After the restart nothing is lost
+//! or doubled: the read answers the same and its cursor moves once, states and the team carry on, the next decision
+//! wakes the idle helper once, and the reconciler finds nothing to say.
 #[path = "support/agent_team.rs"]
 mod agent_team;
 #[path = "support/fixture.rs"]

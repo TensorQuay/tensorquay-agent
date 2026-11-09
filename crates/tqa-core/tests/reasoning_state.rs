@@ -337,7 +337,7 @@ async fn core_u_044_a_new_model_on_the_same_route_does_not_get_the_old_state() -
 #[tokio::test]
 async fn core_u_044_a_short_window_drops_the_oldest_states_and_keeps_the_latest_turns() -> TestResult
 {
-    // The lead's decision (a): replayed states from earlier turns are optional to the providers; only the latest
+    // Decided (option a): replayed states from earlier turns are optional to the providers; only the latest
     // assistant turn's (for its tool calls) must go back. On the harness route's 32k window, two steps' 70 KB states
     // don't both fit: the older goes, the latest stays, and the run never fails for states alone.
     let (older, latest) = (item("rs_old", 70_000), item("rs_new", 70_000));

@@ -5,7 +5,7 @@ use tqa_types::{
     ServerFrame, WireProtocol, WorkspaceSnapshot,
 };
 
-/// A desktop task's step limit is at least this (ADR-0039 section 4, the owner's question 4); a profile may narrow it.
+/// A desktop task's step limit is at least this (ADR-0039 section 4 and answer 4); a profile may narrow it.
 const DESKTOP_MAX_STEPS: u32 = 500;
 
 /// The install's run limits for this environment: a desktop task takes many small steps, so its limit is at least

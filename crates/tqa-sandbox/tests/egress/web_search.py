@@ -10,7 +10,7 @@ model makes the hint's calls, as a model following it would:
   3. `fetch_url` on example.com, whose result must arrive marked untrusted;
   4. `fetch_url` on a host off the list, the control, refused in plain words.
 The search site may answer an automated client with its own challenge page: any HTTP answer proves the path, so the
-check is on the plumbing, never on the results. One query a run and no retries (the technical lead, 7 Oct 2026). The sandbox has no
+check is on the plumbing, never on the results. One query a run and no retries (decided on 7 Oct 2026). The sandbox has no
 route but the proxy (SBX-C-004), so an answer at all means the proxy carried it.
 
 Run from the repository root (public network; Docker):
@@ -98,7 +98,7 @@ def finished(stream):
 
 def check(stack, stream, evidence):
     """The five calls' durable results, as described above. `evidence` fills as each is read, so a failure keeps what
-    was seen up to it (the owner's log needs the why, not only the assertion)."""
+    was seen up to it (the log needs the why, not only the assertion)."""
     finished(stream)
     frames = stack.request(stack.path + "/events?after=0&limit=1000")["items"]
     evidence["events"] = frames
@@ -154,7 +154,7 @@ def chromium_reason(err, lines=12):
 
 
 def keep(evidence, directory, error=None):
-    """The run's evidence, for the owner's log, whether it passed or not: the events and tool results, the pages, and
+    """The run's evidence, kept whether it passed or not: the events and tool results, the pages, and
     a summary with the verdict."""
     directory.mkdir(parents=True, exist_ok=True)
     for name in ("facts.json", "search.html", "dom.html", "chromium.err"):

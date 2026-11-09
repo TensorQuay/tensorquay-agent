@@ -87,7 +87,7 @@ RUN python3 -c 'import sys, urllib.request; urllib.request.urlretrieve(open(sys.
 # The Workstation's files, without the runtime binary: the workstation target (below) copies it last.
 FROM runtime-base AS workstation-os
 USER 0:0
-# pandas, matplotlib and openpyxl for data work (F24) are Debian's, by the owner's licence decision; their licence audit
+# pandas, matplotlib and openpyxl for data work (F24) are Debian's, as decided on 30 Sep 2026; their licence audit
 # is WORKSTATION-DATA-LICENCES.md, and PACKAGES.md lists every package of each build.
 # A signed immutable snapshot pins transitive distribution versions and verifies package hashes. Its date, 2026-10-29
 # 12:00 UTC, is after Debian 13's security updates for the c17 release dry run's vulnerability gate: Chromium

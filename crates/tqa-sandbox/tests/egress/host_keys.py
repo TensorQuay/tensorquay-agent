@@ -705,7 +705,7 @@ def wait_for_file(stack, conversation, name, seconds=120):
 
 
 def sec_055(stack):
-    """A gateway restart during a keyed call (ADR-0037's supporting tests; the second review's T-d). A run holds a keyed
+    """A gateway restart during a keyed call (ADR-0037's supporting tests). A run holds a keyed
     connection and has made one call; the gateway stops (the task's stream ends with `restarting`) and starts again
     (healthy, the task's stream reopened). The held connection ends with the gateway's process, never a hang or an
     answer from nowhere; a fresh connection's call with the same placeholder, made at once, is swapped and answered:
