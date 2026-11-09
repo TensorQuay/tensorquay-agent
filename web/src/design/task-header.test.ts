@@ -70,7 +70,7 @@ describe("WEB-U-456 the task header spans the main area", () => {
   it("floats the environment's question under the header's end, at most the column's width", () => {
     const notice = rule(conversation, ".choices-notice");
     expect(declared(notice, "inset-inline")).toBe(undefined);
-    expect(declared(notice, "right")).toBe("var(--space-2)");
+    expect(declared(notice, "inset-inline-end")).toBe("var(--space-2)");
     expect(declared(notice, "width")).toBe(
       "min(100% - 2 * var(--space-2), var(--transcript-width) - 2 * var(--space-2))",
     );

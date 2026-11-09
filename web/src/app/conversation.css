@@ -627,7 +627,7 @@ textarea.composer-input {
 .choices-notice {
   position: absolute;
   top: 100%;
-  right: var(--space-2);
+  inset-inline-end: var(--space-2);
   width: min(
     100% - 2 * var(--space-2),
     var(--transcript-width) - 2 * var(--space-2)

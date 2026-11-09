@@ -312,7 +312,7 @@ familiar chat apps, not sparse. One rule, set once as tokens in `globals.css`; n
   900 px wide (from 1024 px with the rail, from 1208 px with the full sidebar) the right panel docks beside the
   transcript, which narrows; with less room it takes the whole content column, from under the bar (its second line too,
   on a phone) to above the composer, and never covers part of the conversation (WEB-U-170, WEB-U-171). The layout's
-  width decides, not the window's. It never opens by itself (candidate12 F6): closed until the person opens it, their
+  width decides, not the window's. It never opens by itself (WEB-U-124): closed until the person opens it, their
   choice remembered on wide screens; Open, Open changes and a file link open it on what they name.
 - **Admin and settings:** an 800 px content column (760 px before the type step of 9 Nov 2026, §4) with section
   headings on the left on wide screens.
