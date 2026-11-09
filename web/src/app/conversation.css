@@ -9,12 +9,22 @@
   align-items: center;
   justify-content: space-between;
 }
-.conversation-list,
-.conversation-page {
+.conversation-list {
   max-width: var(--transcript-width);
   width: 100%;
   margin-inline: auto;
   min-width: 0;
+}
+/* §7 Conversation bar (decided on 9 Nov 2026): a task's page fills the main area, so its header spans it; everything
+   under the header (the transcript, the composer and what comes between) keeps the centred reading column. */
+.conversation-page {
+  width: 100%;
+  min-width: 0;
+}
+.conversation-page > :not(.conversation-bar) {
+  width: 100%;
+  max-width: var(--transcript-width);
+  margin-inline: auto;
 }
 .conversation-rows {
   list-style: none;
@@ -638,11 +648,16 @@ textarea.composer-input {
 .composer-submit .button[data-variant="primary"] .button-label > svg {
   transform: translateY(-1px);
 }
-/* An environment's question to switch, and a choice that failed, float just under the header (WEB-U-031). */
+/* An environment's question to switch, and a choice that failed, float just under the header (WEB-U-031): under its
+   end, where the pickers are, at most the reading column's width, as the header spans the main area. */
 .choices-notice {
   position: absolute;
   top: 100%;
-  inset-inline: var(--space-2);
+  right: var(--space-2);
+  width: min(
+    100% - 2 * var(--space-2),
+    var(--transcript-width) - 2 * var(--space-2)
+  );
   z-index: 5;
   padding: var(--space-3);
   border-radius: var(--control-radius);

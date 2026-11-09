@@ -41,6 +41,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   labels that tint under the pointer, with no underline and no bold. The arrow keys move between the tabs and choose,
   Home and End go to the first and last, and only the chosen tab is in the Tab order. Tabs wider than a phone's screen
   scroll sideways in their own row.
+- **The task header uses the full width (WEB-U-456, WEB-E2E-117).** A task's header runs across the main area: its
+  title and state at the start, the model and environment pickers, Files and ⋯ at the end, while the conversation keeps
+  its centred column; with the Files panel open it ends where the panel starts. A long title gives way first, then the
+  pickers show their icons, and nothing wraps. New task's header and a channel's header span the page the same way. On
+  a phone nothing changes.
 
 ## 17.3 (8 November 2026)
 

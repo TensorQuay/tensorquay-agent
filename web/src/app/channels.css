@@ -174,14 +174,13 @@
   margin: 0;
 }
 
-/* One channel's page (WEB-U-063): its bar, the log and the composer in the transcript's column. */
+/* One channel's page (WEB-U-063): its bar across the main area, as a task's header (§7 Conversation bar); the log and
+   the composer in the transcript's column under it. */
 .channel-page {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
   width: 100%;
-  max-width: var(--transcript-width);
-  margin-inline: auto;
   padding-bottom: var(--space-8);
 }
 /* A channel that couldn't be opened (WEB-U-381): its bar, then the message and its way on, centred as a task's is. */
@@ -189,6 +188,10 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+  width: 100%;
+}
+.channel-page > :not(.channel-bar),
+.channel-missing > :not(.channel-bar) {
   width: 100%;
   max-width: var(--transcript-width);
   margin-inline: auto;
@@ -327,26 +330,26 @@
 .member-actions {
   flex: none;
 }
+/* From 1280 px the side sits beside the log: the two in the middle, the space left on either side, the bar across all. */
 @media (min-width: 1280px) {
   .channel-page {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) var(--channel-side-width);
-    column-gap: var(--space-6);
+    grid-template-columns:
+      [wide-start] minmax(0, 1fr) [log-start] minmax(0, var(--transcript-width))
+      [log-end] var(--space-6) [side-start] var(--channel-side-width)
+      [side-end] minmax(0, 1fr) [wide-end];
+    column-gap: 0;
     align-items: start;
-    max-width: calc(
-      var(--transcript-width) + var(--channel-side-width) + var(--space-6)
-    );
   }
-  .channel-bar {
-    grid-column: 1 / -1;
+  /* Everything on the page reads in the log's column (its idle agents, its first step, its composer), unless placed. */
+  .channel-page > * {
+    grid-column: log;
   }
-  .channel-page > .channel-log,
-  .channel-page > .channel-composer,
-  .channel-page > p {
-    grid-column: 1;
+  .channel-page > .channel-bar {
+    grid-column: wide;
   }
-  .channel-side {
-    grid-column: 2;
+  .channel-page > .channel-side {
+    grid-column: side;
     grid-row: 2 / span 2;
     position: sticky;
     top: var(--space-4);
