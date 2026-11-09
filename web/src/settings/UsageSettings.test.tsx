@@ -177,22 +177,21 @@ describe("WEB-U-034 usage", () => {
   it("leads with this month's tokens and their change against the same days of last month", async () => {
     const { api, usage } = fake(answers());
     show(api);
-    expect(
-      await screen.findByText(`66${GROUP}566 tokens`, exactly),
-    ).toBeVisible();
+    expect(await screen.findByText("66.6K tokens", exactly)).toBeVisible();
+    // WEB-U-461: the exact figure stays for screen readers; the short one is what shows.
+    expect(screen.getByText(`66${GROUP}566 tokens`, exactly)).toHaveClass(
+      "visually-hidden",
+    );
     // 66 566 against 56 410: 18 % more.
     expect(screen.getByText("+18% vs the same days of August")).toBeVisible();
     expect(
       screen.getByText(
-        `24 requests · 60${GROUP}726 tokens in · 5${GROUP}840 tokens out`,
+        "24 requests · 60.7K tokens in · 5.8K tokens out",
         exactly,
       ),
     ).toBeVisible();
     expect(
-      screen.getByText(
-        `Cached: 2${GROUP}048 · Reasoning: not reported`,
-        exactly,
-      ),
+      screen.getByText("Cached: 2K · Reasoning: not reported", exactly),
     ).toBeVisible();
     expect(usage.mock.calls.map(([query]) => query)).toEqual(
       expect.arrayContaining([
@@ -234,11 +233,15 @@ describe("WEB-U-034 usage", () => {
         .map((line) =>
           within(line)
             .getAllByRole("cell")
-            .map((cell) => cell.textContent),
+            .map(
+              (cell) =>
+                (cell.querySelector('[aria-hidden="true"]') ?? cell)
+                  .textContent,
+            ),
         ),
     ).toEqual([
-      ["member@example.invalid", `55${GROUP}000`, "83%"],
-      ["Removed account", `11${GROUP}566`, "17%"],
+      ["member@example.invalid", "55K", "83%"],
+      ["Removed account", "11.6K", "17%"],
     ]);
     const byModel = screen.getByRole("table", { name: "Usage by model" });
     expect(within(byModel).getAllByRole("row")[1]).toHaveTextContent(
