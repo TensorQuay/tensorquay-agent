@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { Pencil, Trash2 } from "lucide-react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -17,6 +17,7 @@ async function cold(arrive: () => Promise<void> = () => Promise.resolve()) {
     ...(await import("./ActionMenu")),
     ...(await import("./MenuButton")),
     ...(await import("../auth/AccountMenu")),
+    ...(await import("./lazy-menus")),
   };
 }
 
@@ -148,4 +149,48 @@ describe("WEB-U-014 a menu's open state loads when it is wanted", () => {
     ).toBeVisible();
     expect(tries).toBe(2);
   });
+  // A menu waiting for its code is dismissed as an open one is (the review of 9 Nov 2026): Escape, a press outside its
+  // trigger, or the focus leaving the trigger closes it, the trigger says so, and the menu never opens later.
+  for (const [how, dismiss] of [
+    [
+      "Escape",
+      (button: HTMLElement) => fireEvent.keyDown(button, { key: "Escape" }),
+    ],
+    ["a press outside", () => fireEvent.pointerDown(document.body)],
+    [
+      "the focus leaving its trigger",
+      () =>
+        act(() => {
+          screen.getByRole("textbox", { name: "Note" }).focus();
+        }),
+    ],
+  ] as const)
+    it(`closes a menu waiting for its code on ${how}, and never opens it later`, async () => {
+      let release: () => void = () => undefined;
+      const gate = new Promise<void>((resolve) => {
+        release = () => resolve();
+      });
+      const { ActionMenu, loadMenus } = await cold(() => gate);
+      render(
+        <>
+          <ActionMenu label="More actions for Report" actions={actions} />
+          <input aria-label="Note" />
+        </>,
+      );
+      const button = screen.getByRole("button", {
+        name: "More actions for Report",
+      });
+      act(() => button.focus());
+      fireEvent.click(button);
+      expect(button).toHaveAttribute("aria-expanded", "true");
+      dismiss(button);
+      expect(button).toHaveAttribute("aria-expanded", "false");
+      const focused = document.activeElement;
+      await act(async () => {
+        release();
+        await loadMenus();
+      });
+      expect(screen.queryByRole("menu")).toBeNull();
+      expect(document.activeElement).toBe(focused);
+    });
 });

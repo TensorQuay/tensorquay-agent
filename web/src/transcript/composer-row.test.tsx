@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { useAttachments } from "../files/use-attachments";
@@ -123,5 +123,17 @@ describe("WEB-U-457 the composer's one row", () => {
     expect(
       follows(chips, screen.getByRole("textbox", { name: "Message" })),
     ).toBe(true);
+  });
+  // While a run goes, "Send after this" sits on its own line under the row, after Send, so the text keeps the row's
+  // width on a phone (the review of 9 Nov 2026).
+  it("puts Send after this under the row, after Send", () => {
+    render(<Harness run={running} held={holding([])} />);
+    fireEvent.change(screen.getByRole("textbox", { name: "Message" }), {
+      target: { value: "Also check the totals" },
+    });
+    const after = screen.getByRole("button", { name: "Send after this" });
+    const stop = screen.getByRole("button", { name: "Stop" });
+    expect(after.closest(".composer-row")).toBeNull();
+    expect(follows(stop, after)).toBe(true);
   });
 });

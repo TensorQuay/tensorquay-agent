@@ -296,3 +296,67 @@ test("WEB-E2E-118 the composer's placeholder fits one row in every language at 3
   await page.evaluate(() => localStorage.removeItem("tensorquay-language"));
   await context.close();
 });
+
+// WEB-E2E-118 on a phone while a run goes, with a draft (the review of 9 Nov 2026): "Send after this" sits under the row,
+// so the text keeps at least 60 % of the row's width, and nothing runs past the card.
+for (const width of [360, 390] as const)
+  test(`WEB-E2E-118 the composer while a run goes, with a draft, at ${width}`, async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({
+      viewport: { width, height: 800 },
+      deviceScaleFactor: 2,
+      isMobile: true,
+      hasTouch: true,
+      reducedMotion: "reduce",
+    });
+    const page = await context.newPage();
+    await signIn(page);
+    await page.goto(await createConversation(page));
+    const input = page.getByRole("textbox", { name: "Message", exact: true });
+    await input.fill(HOLD);
+    await input.press("Enter");
+    await expect(page.getByRole("button", { name: "Stop" })).toBeVisible();
+    await input.fill("Also check the totals for the north region");
+    await expect(
+      page.getByRole("button", { name: "Send after this" }),
+    ).toBeVisible();
+    const sizes = await page.evaluate(() => {
+      const card = document.querySelector(".composer-card");
+      const row = card?.querySelector(".composer-row");
+      const field = row?.querySelector(".field");
+      const after = [...(card?.querySelectorAll("button") ?? [])].find(
+        (button) => button.textContent?.trim() === "Send after this",
+      );
+      if (!card || !row || !field || !after)
+        throw new Error("The composer must be laid out");
+      const box = (element: Element) => element.getBoundingClientRect();
+      return {
+        row: box(row).width,
+        field: box(field).width,
+        card: { left: box(card).left, right: box(card).right },
+        after: { left: box(after).left, right: box(after).right },
+        past:
+          card.scrollWidth > card.clientWidth + 1 ||
+          row.scrollWidth > row.clientWidth + 1,
+      };
+    });
+    expect
+      .soft(
+        sizes.field / sizes.row >= 0.6,
+        `the text's share (${sizes.field} of ${sizes.row})`,
+      )
+      .toBe(true);
+    expect
+      .soft(
+        sizes.after.left >= sizes.card.left &&
+          sizes.after.right <= sizes.card.right,
+        "Send after this in the card",
+      )
+      .toBe(true);
+    expect.soft(sizes.past, "nothing past the card").toBe(false);
+    await shot(page, `composer-task-running-draft-${width}`);
+    const task = new URL(page.url()).pathname.split("/").at(-1) ?? "";
+    await page.request.post(`/api/v1/conversations/${task}/fixture-resume`);
+    await context.close();
+  });
