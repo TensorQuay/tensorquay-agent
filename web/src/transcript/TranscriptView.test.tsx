@@ -87,7 +87,7 @@ describe("WEB-U-222 lines among the turns", () => {
 });
 
 describe("WEB-U-020 attachments in the transcript", () => {
-  it("shows each attached file by name under the message", () => {
+  it("shows each attached file by name under the message, loaded with the first message that has files", async () => {
     const state = apply(
       emptyTranscript(),
       frame(1, {
@@ -98,7 +98,9 @@ describe("WEB-U-020 attachments in the transcript", () => {
     );
     render(<TranscriptView transcript={state} />);
     const message = screen.getByRole("article", { name: "Your message" });
-    const files = within(message).getByRole("list", { name: "Attached files" });
+    const files = await within(message).findByRole("list", {
+      name: "Attached files",
+    });
     expect(
       within(files)
         .getAllByRole("listitem")

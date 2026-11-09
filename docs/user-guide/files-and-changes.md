@@ -11,7 +11,9 @@ Each file appears as a chip above your message while it uploads; **Remove** take
 25 MiB per file and 32 files per message. Files are uploaded in the order you added them; you can send the message
 once every upload has finished.
 
-Attached files are saved in the workspace, so the agent can open them and they stay for later tasks on the same
+Under a sent message, an image shows as its picture and any other file as its name; choose one to open its preview
+in the Files panel. Attached files are saved in the workspace, so the agent can open them and they stay for later
+tasks on the same
 workspace. If you attach images and the task's model accepts images, the agent sees up to four of them with your message; with
 a model that does not, the agent gets only their paths in the workspace.
 

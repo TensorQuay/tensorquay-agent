@@ -10,6 +10,8 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **Releases are tagged.** Each release is a `vMAJOR.MINOR.PATCH` tag with a page on GitHub's Releases; the README
   and the install guide start from the newest release, and CONTRIBUTING.md says how branches, pull requests and
   releases work.
+- **Sent images show as pictures (WEB-U-464).** Under your message, an image you attached shows as its picture and
+  any file opens its preview in the Files panel with one click.
 
 ## 17.3 (8 November 2026)
 

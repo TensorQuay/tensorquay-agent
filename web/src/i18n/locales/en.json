@@ -2850,6 +2850,7 @@
     "notFound.tab": "Page not found · {product}",
     "notFound.title": "Page not found",
     "notFound.body": "There's nothing at this address. The link may be wrong, or the page may have moved.",
-    "notFound.home": "Go to your tasks"
+    "notFound.home": "Go to your tasks",
+    "attach.open": "Open {name}"
   }
 }

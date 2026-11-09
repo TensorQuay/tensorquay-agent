@@ -415,6 +415,52 @@ button.file-open:hover {
   padding-right: var(--space-2);
   background: var(--paper);
 }
+/* WEB-U-464: a sent chip opens its file's preview; the button is the chip's whole content, in the chip's own type. */
+.attachment-open {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.attachment-open:hover .attachment-name {
+  text-decoration: underline;
+}
+/* A sent message's pictures: each up to 240 px a side, whole (never cropped), a button that opens its preview. */
+.sent-pictures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.sent-picture {
+  display: block;
+  padding: 0;
+  overflow: hidden;
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+  background: var(--paper);
+  cursor: zoom-in;
+}
+.sent-picture img {
+  display: block;
+  max-width: min(240px, 100%);
+  max-height: 240px;
+  object-fit: contain;
+}
+.sent-picture-waiting {
+  display: block;
+  width: 160px;
+  height: 120px;
+  background: var(--hover-tint);
+}
 .attachment-chip[data-status="failed"] {
   border-color: var(--danger);
 }

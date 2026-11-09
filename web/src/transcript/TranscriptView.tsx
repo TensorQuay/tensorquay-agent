@@ -1,6 +1,5 @@
 import { Fragment, lazy, memo, type ReactNode, Suspense } from "react";
 
-import { SentAttachments } from "../files/SentAttachments";
 import { useT } from "../i18n/I18nProvider";
 import { Button } from "../ui/Button";
 import { Skeleton } from "../ui/Skeleton";
@@ -19,6 +18,13 @@ import type { Transcript } from "./types";
 const BriefCard = lazy(() =>
   import("../teams/BriefCard").then(({ BriefCard }) => ({
     default: BriefCard,
+  })),
+);
+// A message's files and pictures (WEB-U-464): only a message that has files loads them, off the first load of every
+// task page (WEB-U-014).
+const SentAttachments = lazy(() =>
+  import("../files/SentAttachments").then(({ SentAttachments }) => ({
+    default: SentAttachments,
   })),
 );
 
@@ -70,11 +76,14 @@ function TranscriptTurns({
   onOpenChanges,
   onFollowUp,
   onOpenFile,
+  conversationId,
   viewer = null,
   lines = NO_LINES,
   failedNext = null,
 }: {
   transcript: Transcript;
+  /** The task, for a sent picture's bytes (WEB-U-464). */
+  conversationId?: string;
   templateNames?: Readonly<Record<string, string>>;
   /** Files each run changed, from its recorded changes (use-changed-files); absent ones use the tool count. */
   changedFiles?: Readonly<Record<string, readonly string[]>>;
@@ -122,7 +131,15 @@ function TranscriptTurns({
             {turn.prompt && !turn.prompt.brief && !turn.prompt.wake && (
               <article className="user-message" aria-label={t("prompt.yours")}>
                 <p className="message-text">{turn.prompt.text}</p>
-                <SentAttachments paths={turn.prompt.attachments} />
+                {turn.prompt.attachments.length > 0 && (
+                  <Suspense fallback={null}>
+                    <SentAttachments
+                      paths={turn.prompt.attachments}
+                      conversationId={conversationId}
+                      onOpenFile={onOpenFile}
+                    />
+                  </Suspense>
+                )}
               </article>
             )}
             {(turn.activities.length > 0 ||

@@ -2850,6 +2850,7 @@
     "notFound.tab": "找不到页面 · {product}",
     "notFound.title": "找不到页面",
     "notFound.body": "此地址没有内容。链接可能有误，或页面已移动。",
-    "notFound.home": "前往你的任务"
+    "notFound.home": "前往你的任务",
+    "attach.open": "打开 {name}"
   }
 }
