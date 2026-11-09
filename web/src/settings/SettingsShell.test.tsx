@@ -285,7 +285,10 @@ describe("WEB-U-460 the Settings menu stays in view", () => {
     const seen: [Element, unknown][] = [];
     const scroll = vi
       .spyOn(Element.prototype, "scrollIntoView")
-      .mockImplementation(function (this: Element, options?: boolean | ScrollIntoViewOptions) {
+      .mockImplementation(function (
+        this: Element,
+        options?: boolean | ScrollIntoViewOptions,
+      ) {
         seen.push([this, options]);
       });
     try {
@@ -305,7 +308,9 @@ describe("WEB-U-460 the Settings menu stays in view", () => {
       expect(seen).toEqual([[current, { block: "nearest" }]]);
     } finally {
       scroll.mockRestore();
-      if (!had) delete (Element.prototype as { scrollIntoView?: unknown }).scrollIntoView;
+      if (!had)
+        delete (Element.prototype as { scrollIntoView?: unknown })
+          .scrollIntoView;
     }
   });
 });

@@ -58,7 +58,7 @@ table first.
 
 Never: a control opened on top of another control, a "Done" button to close a picker, or a long form in a dialog.
 
-**Settings.** Each section opens the same way: its name as the heading (20/1.25), one muted line saying what it is,
+**Settings.** From 768 px the section menu stays in view while a long section scrolls; a menu taller than the window scrolls on its own, the current section kept in view (WEB-U-460). Each section opens the same way: its name as the heading (20/1.25), one muted line saying what it is,
 then its primary action (People invites after its list, WEB-U-156); a view of it, such as the shared keys, opens the same,
 and a page inside it has its own title under its way back instead. Each section is a list first: one row per item (name,
 one muted line, status badges, Edit and ⋯; Edit is one small ghost button, the same whether it opens a page or a

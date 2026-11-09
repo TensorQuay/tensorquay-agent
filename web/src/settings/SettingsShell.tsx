@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 
 import { useSession } from "../auth/use-session";
 import { useT } from "../i18n/I18nProvider";
@@ -95,6 +95,13 @@ function Shell({
   })).filter((group) => group.entries.length > 0);
   const current = SECTIONS.find((entry) => entry.id === section);
   const title = current ? t(current.label) : t("settings.title");
+  // WEB-U-460: a menu taller than the window scrolls on its own, so the current section is brought into its view.
+  const menu = useRef<HTMLElement>(null);
+  useEffect(() => {
+    menu.current
+      ?.querySelector('[aria-current="page"]')
+      ?.scrollIntoView?.({ block: "nearest" });
+  }, [section]);
   return (
     <div className="settings-page">
       <TabTitle>
@@ -104,7 +111,11 @@ function Shell({
         <NavigationButton />
         <h1 className="type-heading">{t("settings.title")}</h1>
       </div>
-      <nav className="settings-nav" aria-label={t("settings.sections")}>
+      <nav
+        ref={menu}
+        className="settings-nav"
+        aria-label={t("settings.sections")}
+      >
         {groups.map((group) => (
           <div
             key={group.id}

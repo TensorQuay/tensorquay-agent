@@ -22,11 +22,22 @@
   font-size: var(--heading-size);
   line-height: var(--heading-line-height);
 }
+/* WEB-U-460: the menu stays in view while a long section scrolls, under the page's top padding; a menu taller than the
+   window scrolls inside its own area. Its padding gives the 2 px focus ring room there, and the matching negative
+   margin keeps the items where they were. Below 768 px the menu is the Section select instead. */
 .settings-nav {
   grid-area: nav;
   display: flex;
   flex-direction: column;
   gap: var(--group-gap);
+  position: sticky;
+  top: var(--space-6);
+  align-self: start;
+  max-height: calc(100dvh - 2 * var(--space-6));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-1);
+  margin: calc(-1 * var(--space-1));
 }
 /* WEB-U-075: the sections in three groups, each under a quiet label. */
 .settings-group {
