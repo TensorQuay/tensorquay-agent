@@ -13,6 +13,8 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   Chinese); the exact number shows on hover and is what screen readers read.
 - **A folded group shows the step it is on (WEB-U-462).** While a task runs, a folded activity group is headed by its
   live line (the step, a soft shimmer and the time) instead of a static "Working…".
+- **The account menu (WEB-U-463).** Your email and role, then Settings, Usage (administrators), Language, Help, Send
+  feedback, API tokens and About, each with its icon. Theme moved to Settings › Account.
 
 ## 17.3 (8 November 2026)
 

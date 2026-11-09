@@ -155,6 +155,17 @@
     "workspaces.startInFork": "Start a task in the copy",
     "picker.profile": "Agent",
     "picker.noProfile": "None",
-    "environment.setByProfile": "This task's agent profile sets its environment."
+    "environment.setByProfile": "This task's agent profile sets its environment.",
+    "account.roleAdmin": "Administrator",
+    "account.roleMember": "Member",
+    "account.usage": "Usage",
+    "account.help": "Help",
+    "account.feedback": "Send feedback",
+    "account.apiTokens": "API tokens",
+    "account.about": "About",
+    "account.whatsNew": "What’s new",
+    "account.source": "Source code",
+    "account.licence": "Licence",
+    "account.newTab": "(opens in a new tab)"
   }
 }

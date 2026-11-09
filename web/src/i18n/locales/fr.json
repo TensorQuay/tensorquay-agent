@@ -320,6 +320,17 @@
     "picker.noProfile": "Aucun",
     "quota.workspaceOver": "Cet espace de travail dépasse son quota de stockage. L’exécution continue ; supprimez des fichiers pour repasser en dessous.",
     "quota.workspaceStopped": "L’exécution s’est arrêtée : cet espace de travail a trop dépassé son quota de stockage. Supprimez des fichiers, puis renvoyez votre message.",
-    "workspaces.helperCopyName": "{name} (copie de l’assistant)"
+    "workspaces.helperCopyName": "{name} (copie de l’assistant)",
+    "account.roleAdmin": "Administrateur",
+    "account.roleMember": "Membre",
+    "account.usage": "Utilisation",
+    "account.help": "Aide",
+    "account.feedback": "Envoyer un avis",
+    "account.apiTokens": "Jetons d’API",
+    "account.about": "À propos",
+    "account.whatsNew": "Nouveautés",
+    "account.source": "Code source",
+    "account.licence": "Licence",
+    "account.newTab": "(s’ouvre dans un nouvel onglet)"
   }
 }
