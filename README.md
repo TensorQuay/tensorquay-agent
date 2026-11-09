@@ -37,6 +37,8 @@ one administrator. The full argument is in [PRD §1](docs/PRD.md#1-mission).
 - **Lean Rust harness, TypeScript web UI, Apache-2.0.**
 
 ## Try it
+Install a release, not `main`: the newest is on the [Releases page](https://github.com/TensorQuay/tensorquay-agent/releases/latest)
+(`git clone --branch v17.3.0 https://github.com/TensorQuay/tensorquay-agent.git`). `main` is where development happens.
 The one-box Docker install is in [deploy/README.md](deploy/README.md#install): build the images with
 `deploy/build-images.sh`, point it at a model server (a local OpenAI-compatible one, or a hosted provider; or
 build the scripted test model with `--fake-model` to try it without one), start it, and open the page in a browser. It runs on Linux and on a Mac with Docker Desktop. Without a GPU, a
@@ -44,7 +46,8 @@ local model works but slowly, minutes a step, too slow for helpers or the deskto
 without a GPU](docs/user-guide/tasks.md#running-without-a-gpu) section.
 
 ## Status
-**Releases are listed in the [changelog](CHANGELOG.md).** The one-box install runs end to end: accounts, tasks in
+**Releases are on the [Releases page](https://github.com/TensorQuay/tensorquay-agent/releases), each with its
+notes from the [changelog](CHANGELOG.md).** The one-box install runs end to end: accounts, tasks in
 isolated sandboxes, models through the gateway, workspaces, connectors and channels (the
 [development plan](docs/DEV-PLAN.md) has what is done and what is next). There are no prebuilt images, so the images
 are built locally, and interfaces will still change.

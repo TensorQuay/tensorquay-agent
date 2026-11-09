@@ -7,6 +7,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Changed
 
+- **Releases are tagged.** Each release is a `vMAJOR.MINOR.PATCH` tag with a page on GitHub's Releases; the README
+  and the install guide start from the newest release, and CONTRIBUTING.md says how branches, pull requests and
+  releases work.
 - **Settings menu (WEB-U-460).** From 768 px the section menu stays in view while a long section scrolls; a menu taller
   than the window scrolls on its own, with the current section in view.
 - **Token counts in short form (WEB-U-461).** 2.8M instead of 2 824 643, in each language's own way (282.5万 in
