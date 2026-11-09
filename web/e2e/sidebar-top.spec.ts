@@ -90,6 +90,7 @@ function parts(area: Locator) {
       groups: labels.map((group) => box(group)),
       title: box(normal?.querySelector(".task-title") ?? null),
       leadTitle: box(lead?.querySelector(".task-title") ?? null),
+      chevron: box(lead?.querySelector(".task-helpers-toggle svg") ?? null),
       toggle: box(root.querySelector(".sidebar-toggle")),
       avatar: box(root.querySelector(".account-avatar")),
     };
@@ -101,8 +102,8 @@ const near = (a: number | undefined, b: number | undefined, by = 1) =>
 
 // WEB-E2E-115 (UI-GUIDELINES §6; the owner, 9 Nov 2026): the sidebar's top block is New task, Workspaces and Channels,
 // in that order and in the same row style, then the task groups; the bottom keeps only the account. One left edge for
-// the logo, every item's icon and the group labels; the task titles start where the top items' labels do; the rows at
-// the scale's height, 8 px under the header, one group gap before the first group and between groups; the toggle on
+// the logo, every item's icon, the group labels and the task titles (a lead's chevron, its title just after it); the
+// rows at the scale's height, 8 px under the header, one group gap before the first group and between groups; the toggle on
 // the ⋯ column. No native tooltip where a label shows; on the rail its icons share one axis and the app's own tooltip
 // names each item.
 for (const colorScheme of ["light", "dark"] as const)
@@ -138,9 +139,12 @@ for (const colorScheme of ["light", "dark"] as const)
     for (const icon of at.icons)
       expect.soft(near(icon?.left, at.mark?.left)).toBe(true);
     expect.soft(near(at.label ?? undefined, at.mark?.left)).toBe(true);
-    // The task titles start where the top items' labels do.
-    expect.soft(near(at.title?.left, at.words[0]?.left)).toBe(true);
-    expect.soft(near(at.leadTitle?.left, at.words[0]?.left)).toBe(true);
+    // The task titles start on the same edge, with no icon column; a lead's chevron icon too, its title just after it.
+    expect.soft(near(at.title?.left, at.mark?.left)).toBe(true);
+    expect.soft(near(at.chevron?.left, at.mark?.left)).toBe(true);
+    expect
+      .soft(near((at.leadTitle?.left ?? 0) - (at.chevron?.right ?? 0), 4))
+      .toBe(true);
     // 8 px under the header; one group gap (16 px) before the first group and between groups.
     expect
       .soft(near((first?.top ?? 0) - (at.brand?.bottom ?? 0), 8))
@@ -203,7 +207,7 @@ for (const colorScheme of ["light", "dark"] as const)
       expect
         .soft((row?.bottom ?? 0) - (row?.top ?? 0))
         .toBeGreaterThanOrEqual(44);
-    expect.soft(near(at.title?.left, at.words[0]?.left)).toBe(true);
+    expect.soft(near(at.title?.left, at.icons[0]?.left)).toBe(true);
     const current = await drawer
       .locator(".conversation-row:has([aria-current='page'])")
       .evaluate((row) => {

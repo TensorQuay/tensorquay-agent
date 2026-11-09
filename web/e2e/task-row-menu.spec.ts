@@ -120,8 +120,8 @@ const away = (page: Page) => page.mouse.move(1100, 700);
 // inside that backdrop; the title fades out under it while it shows and keeps the full width without hover. The same
 // on the open task's row and on a lead's row with its chevron, in both themes. A click leaves no ⋯ behind: the
 // clicked row's link keeps its focus, and only the row under the pointer, or with keyboard focus, shows one. A lead's
-// row reads as one row (§13b, §6): its chevron spans the row's start padding and icon column (28 px, as tall as the
-// row), its title starts where every task title does (12 px after the icon), its helpers start where its title does.
+// row reads as one row (§13b, §6): its chevron spans the row's start padding and its icon (28 px, as tall as the row),
+// the icon on the sidebar's one left edge, its title just after it (4 px), its helpers starting where its title does.
 for (const colorScheme of ["light", "dark"] as const)
   test(`WEB-E2E-114 the task row's ⋯ is part of the row at 1280 ${colorScheme}`, async ({
     browser,
@@ -190,14 +190,14 @@ for (const colorScheme of ["light", "dark"] as const)
         expect.soft(box.radius).toBe(ROW_RADIUS - INSET);
         // The title, where it reaches the ⋯, fades out under it.
         if (name === "row") expect.soft(await masked(row)).toBe(true);
-        // A lead's row reads as one row: a 28 px chevron target at its start, the title 12 px after the icon, its
+        // A lead's row reads as one row: a 28 px chevron target at its start, the title 4 px after the icon, its
         // helpers starting where the title does.
         if (name.startsWith("chevron")) {
           const shape = await lead(row);
           expect.soft(shape.atStart).toBe(0);
           expect.soft(shape.width).toBe(28);
           expect.soft(shape.height).toBe(box.lineHeight);
-          expect.soft(Math.abs(shape.gap - 12)).toBeLessThan(0.6);
+          expect.soft(Math.abs(shape.gap - 4)).toBeLessThan(0.6);
           if (name === "chevron-open")
             expect.soft(Math.abs(shape.helpers ?? 99)).toBeLessThan(0.6);
         }
@@ -327,7 +327,7 @@ for (const colorScheme of ["light", "dark"] as const)
     expect.soft(shape.atStart).toBe(0);
     expect.soft(shape.width).toBe(28);
     expect.soft(shape.height).toBe(44);
-    expect.soft(Math.abs(shape.gap - 12)).toBeLessThan(0.6);
+    expect.soft(Math.abs(shape.gap - 4)).toBeLessThan(0.6);
     expect.soft(Math.abs(shape.helpers ?? 99)).toBeLessThan(0.6);
     await context.close();
   });

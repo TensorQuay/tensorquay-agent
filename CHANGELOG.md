@@ -13,18 +13,18 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   shows. It shows on hover, on keyboard focus and while its menu is open, never because a click left focus behind,
   so one row at a time shows it. On a phone it always shows, calm, and titles end before it. A row's title no longer
   underlines on hover.
-- **A lead task's row reads as one row (WEB-U-450).** Its chevron sits in the icon column and its title starts
-  where every task title does; its helpers start where its title starts; an open lead's ⋯ stays on its own line.
+- **A lead task's row reads as one row (WEB-U-450).** Its chevron sits on the sidebar's left edge with its title just
+  after it; its helpers start where its title starts; an open lead's ⋯ stays on its own line.
 - **The whole app is one type step bigger (WEB-U-451).** Body text is 16 px on a 24 px line, small text 14, the
   sidebar, the Settings menu and the menus 15, labels 13, page headings 22 and a task's title 18. Controls are at
   least 32 px high and list and menu rows 36 px (44 px on touch screens, as before). Every size comes from one set
   of tokens. The Settings column is 800 px wide (it was 760) and menus up to 240 px, so they hold what they held; a
   table's controls stay 32 px and its two-line rows are 68 px.
 - **The sidebar's top block, and one left edge (WEB-U-452, WEB-U-453, WEB-E2E-115).** New task, Workspaces and
-  Channels sit together at the top, then the tasks; the account alone at the foot. The logo, the icons and the group
-  labels share one left edge, task titles start where the top items' labels do, and the spacing is even. On the rail
-  the logo sits on the icons' axis and each icon shows its name in a tooltip; no item whose name shows repeats it in
-  a browser tooltip. The phone's drawer follows: the same order, its rows inset as the sidebar's.
+  Channels sit together at the top, then the tasks; the account alone at the foot. The logo, the icons, the group
+  labels and the task titles share one left edge, and the spacing is even. On the rail the logo sits on the icons'
+  axis and each icon shows its name in a tooltip; no item whose name shows repeats it in a browser tooltip. The
+  phone's drawer follows: the same order, its rows inset as the sidebar's.
 
 ## 17.3 (8 November 2026)
 

@@ -269,8 +269,6 @@ export function ConversationList({
                       void list.fetchNextPage();
                   }}
                 >
-                  {/* The task rows' hidden icon column, so its label starts where their titles do (§6). */}
-                  <span className="task-more-slot" aria-hidden="true" />
                   {t("list.showMore")}
                 </Button>
               )}

@@ -1223,29 +1223,15 @@ textarea.composer-input {
     );
   }
 }
-/* §6: the expanded sidebar and the phone's drawer show titles without the task icon, but keep its column, so a task's
-   title starts where the top items' labels do (the row's padding, the 16 px icon, the 12 px gap); the rail shows only
-   the icon. A lead's chevron takes the column's place. */
+/* §6: the expanded sidebar and the phone's drawer show titles without the task icon: a task's title starts at the
+   sidebar's one left edge, with the top items' icons and the group labels; the rail shows only the icon. */
 @container sidebar (min-width: 121px) {
   .app-sidebar .task-icon {
-    visibility: hidden;
+    display: none;
   }
 }
 .navigation-drawer .task-icon {
-  visibility: hidden;
-}
-.conversation-row:has(> .task-helpers-toggle)
-  > .conversation-link
-  > .task-icon {
   display: none;
-}
-/* Show more sits on the same columns: a hidden icon's width and the rows' gap before its label. */
-.task-more-button .button-label {
-  gap: var(--space-3);
-}
-.task-more-slot {
-  flex-shrink: 0;
-  width: var(--icon-text);
 }
 /* On the rail the status sits on the task's icon, a small badge in its corner. */
 @container sidebar (max-width: 120px) {

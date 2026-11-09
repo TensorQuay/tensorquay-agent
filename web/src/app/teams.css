@@ -260,8 +260,8 @@
 .task-helpers-count[data-tone="danger"] {
   color: var(--danger);
 }
-/* §13b: the chevron spans the row's start padding and its icon column, its icon on the top items' icon column, as
-   tall as the row (44 px on touch screens); the title then starts where every task title does (§6). */
+/* §13b: the chevron spans the row's start padding and its icon, which sits on the sidebar's one left edge (§6), as
+   tall as the row (44 px on touch screens); the lead's title follows just after it. */
 .task-helpers-toggle {
   display: inline-flex;
   align-items: center;
@@ -285,13 +285,13 @@
 .conversation-row:has(> .task-helpers-note) {
   flex-wrap: wrap;
 }
-/* The lead's title starts where every task title does: no gap between the chevron and the link, then the icon's
-   12 px gap. Its helpers' rows start where that title starts: 24 px, then 16 px of each helper's link. */
+/* The lead's title just after the chevron: no gap between the chevron and the link, then 4 px of the link's own
+   start. Its helpers' rows start where that title starts: 16 px, then 16 px of each helper's link. */
 .conversation-row:has(> .task-helpers-toggle) {
   column-gap: 0;
 }
 .conversation-row:has(> .task-helpers-toggle) > .conversation-link {
-  padding-inline-start: var(--space-3);
+  padding-inline-start: var(--space-1);
 }
 .task-helpers,
 .task-helpers-note {
@@ -299,13 +299,13 @@
   margin: 0;
 }
 .task-helpers {
-  padding-inline-start: var(--space-6);
+  padding-inline-start: var(--space-4);
 }
 .conversation-row > .task-helpers .conversation-link {
   padding-inline-start: var(--space-4);
 }
 .task-helpers-note {
-  padding-inline-start: var(--space-6);
+  padding-inline-start: var(--space-4);
   margin-inline-start: var(--space-4);
 }
 .task-helpers {

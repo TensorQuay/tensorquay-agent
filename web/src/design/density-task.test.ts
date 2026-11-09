@@ -135,13 +135,9 @@ describe("WEB-U-070 one task row layout", () => {
 describe("WEB-U-070 the drawer at phone width", () => {
   // At 390 px (WEB-U-070): the drawer's rows showed the task icon, which the expanded sidebar hides; it took title room.
   it("shows no task icon in the drawer, as in the expanded sidebar", () => {
-    // Hidden, keeping its column, so the titles start where the top items' labels do (WEB-U-453).
     expect(
-      declared(
-        rule(conversation, ".navigation-drawer .task-icon"),
-        "visibility",
-      ),
-    ).toBe("hidden");
+      declared(rule(conversation, ".navigation-drawer .task-icon"), "display"),
+    ).toBe("none");
   });
 
   it("is up to 320 px wide, and at most 85% of the screen", () => {
@@ -380,8 +376,8 @@ describe("WEB-U-449 the task row's ⋯ is part of the row", () => {
 });
 
 // WEB-U-450 (UI-GUIDELINES §13b and §6): a lead task's row reads as one row. Its chevron spans the row's start padding
-// and its icon column, its icon on the top items' icon column, as tall as the row (44 px on touch screens); its title
-// starts where every task title does; its helpers' rows start where its title starts.
+// and its icon, which sits on the sidebar's one left edge, as tall as the row (44 px on touch screens); its title follows
+// just after it; its helpers' rows start where its title starts.
 describe("WEB-U-450 a lead's row reads as one row", () => {
   const flat = (value: string | undefined) =>
     value?.replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")");
@@ -402,7 +398,7 @@ describe("WEB-U-450 a lead's row reads as one row", () => {
     expect(declared(toggle, "padding-inline-end")).toBe(undefined);
   });
 
-  it("starts the lead's title where every task title does: no gap, then the icon's 12 px", () => {
+  it("starts the lead's title just after its chevron: no gap, then 4 px of the link's own start", () => {
     expect(
       declared(
         rule(teams, ".conversation-row:has(> .task-helpers-toggle)"),
@@ -417,12 +413,12 @@ describe("WEB-U-450 a lead's row reads as one row", () => {
         ),
         "padding-inline-start",
       ),
-    ).toBe("var(--space-3)");
+    ).toBe("var(--space-1)");
   });
 
   it("starts the helpers' rows where the lead's title starts, on the spacing scale", () => {
     expect(declared(rule(teams, ".task-helpers"), "padding-inline-start")).toBe(
-      "var(--space-6)",
+      "var(--space-4)",
     );
     expect(
       declared(
@@ -431,15 +427,15 @@ describe("WEB-U-450 a lead's row reads as one row", () => {
       ),
     ).toBe("var(--space-4)");
     const note = rule(teams, ".task-helpers-note");
-    expect(declared(note, "padding-inline-start")).toBe("var(--space-6)");
+    expect(declared(note, "padding-inline-start")).toBe("var(--space-4)");
     expect(declared(note, "margin-inline-start")).toBe("var(--space-4)");
   });
 });
 
 // WEB-U-453 (UI-GUIDELINES §6; the owner, 9 Nov 2026, against a reference): the sidebar reads as one tidy list. One left
-// edge for the logo, every item's icon and the group labels; the task titles start where the top items' labels do; the
-// rows at the scale's height, the top block's 2 px apart, 8 px under the header, one group gap before the first group;
-// the drawer's rows inset as the sidebar's.
+// edge for the logo, every item's icon, the group labels and the task titles; the rows at the scale's height, the top
+// block's 2 px apart, 8 px under the header, one group gap before the first group; the drawer's rows inset as the
+// sidebar's.
 describe("WEB-U-453 the sidebar's one left edge and rhythm", () => {
   it("puts the logo on the items' icon column, 8 px above the top block", () => {
     // The top-level rule; the rail's own (a column, centred) sets it back to 0.
@@ -456,42 +452,25 @@ describe("WEB-U-453 the sidebar's one left edge and rhythm", () => {
     ).toBe("var(--nav-pad-inline)");
   });
 
-  it("starts the task titles where the top items' labels do: a row keeps its hidden icon's column", () => {
-    // A top item: the rows' padding, its 16 px icon, a 12 px gap, its label. A task row: the same padding and gap, its
-    // icon hidden in place (never removed), its title; so both start on one edge, every value on the spacing scale.
-    expect(declared(rule(globals, ".nav-item"), "gap")).toBe("var(--space-3)");
+  it("starts every task title at the one left edge, with no icon column", () => {
+    // A top item's icon and a group label start at the rows' 12 px padding; a task's title starts there too, its icon
+    // gone from the row (not hidden in place), and Show more's label as well (the Product Owner's reference).
     expect(declared(rule(globals, ".nav-item"), "padding")).toBe(
       "var(--nav-row-padding)",
-    );
-    expect(declared(rule(conversation, ".conversation-link"), "gap")).toBe(
-      "var(--space-3)",
     );
     expect(declared(rule(conversation, ".conversation-link"), "padding")).toBe(
       "var(--nav-row-padding)",
     );
     expect(
-      declared(rule(conversation, ".app-sidebar .task-icon"), "visibility"),
-    ).toBe("hidden");
-    expect(
       declared(rule(conversation, ".app-sidebar .task-icon"), "display"),
-    ).toBe(undefined);
-    // A lead's chevron takes the icon column's place.
-    expect(
-      declared(
-        ruleFlat(
-          conversation,
-          ".conversation-row:has(> .task-helpers-toggle) > .conversation-link > .task-icon",
-        ),
-        "display",
-      ),
     ).toBe("none");
-    // Show more's label starts on the same edge: a hidden icon's width, then the rows' gap.
-    expect(declared(rule(conversation, ".task-more-slot"), "width")).toBe(
-      "var(--icon-text)",
-    );
     expect(
-      declared(rule(conversation, ".task-more-button .button-label"), "gap"),
-    ).toBe("var(--space-3)");
+      declared(rule(conversation, ".app-sidebar .task-icon"), "visibility"),
+    ).toBe(undefined);
+    expect(conversation).not.toMatch(/task-more-slot/);
+    expect(
+      declared(rule(conversation, ".button.task-more-button"), "padding"),
+    ).toBe("0 var(--space-3)");
   });
 
   it("spaces the top block's rows 2 px apart and the task list one group gap below them", () => {
