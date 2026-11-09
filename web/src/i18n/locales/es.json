@@ -320,6 +320,17 @@
     "picker.noProfile": "Ninguno",
     "quota.workspaceOver": "Este espacio de trabajo supera su cuota de almacenamiento. La ejecución continúa; elimina archivos para volver a estar por debajo.",
     "quota.workspaceStopped": "La ejecución se detuvo: este espacio de trabajo superó con creces su cuota de almacenamiento. Elimina archivos y vuelve a enviar tu mensaje.",
-    "workspaces.helperCopyName": "{name} (copia del ayudante)"
+    "workspaces.helperCopyName": "{name} (copia del ayudante)",
+    "account.roleAdmin": "Administrador",
+    "account.roleMember": "Miembro",
+    "account.usage": "Uso",
+    "account.help": "Ayuda",
+    "account.feedback": "Enviar comentarios",
+    "account.apiTokens": "Tokens de API",
+    "account.about": "Acerca de",
+    "account.whatsNew": "Novedades",
+    "account.source": "Código fuente",
+    "account.licence": "Licencia",
+    "account.newTab": "(se abre en una pestaña nueva)"
   }
 }

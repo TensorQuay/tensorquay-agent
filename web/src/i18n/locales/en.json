@@ -2851,6 +2851,17 @@
     "notFound.title": "Page not found",
     "notFound.body": "There's nothing at this address. The link may be wrong, or the page may have moved.",
     "notFound.home": "Go to your tasks",
+    "account.roleAdmin": "Administrator",
+    "account.roleMember": "Member",
+    "account.usage": "Usage",
+    "account.help": "Help",
+    "account.feedback": "Send feedback",
+    "account.apiTokens": "API tokens",
+    "account.about": "About",
+    "account.whatsNew": "What’s new",
+    "account.source": "Source code",
+    "account.licence": "Licence",
+    "account.newTab": "(opens in a new tab)",
     "attach.open": "Open {name}"
   }
 }

@@ -176,7 +176,7 @@ for (const width of [1024, 1440])
       await expect(
         page
           .getByRole("menu", { name: "Account" })
-          .getByRole("menuitemradio", { name: "System", exact: true }),
+          .getByRole("menuitem", { name: "Settings", exact: true }),
       ).toBeVisible();
       await settled(page);
       await capture(page, `account-${suffix}`);

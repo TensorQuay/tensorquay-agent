@@ -177,22 +177,21 @@ describe("WEB-U-034 usage", () => {
   it("leads with this month's tokens and their change against the same days of last month", async () => {
     const { api, usage } = fake(answers());
     show(api);
-    expect(
-      await screen.findByText(`66${GROUP}566 tokens`, exactly),
-    ).toBeVisible();
+    expect(await screen.findByText("66.6K tokens", exactly)).toBeVisible();
+    // WEB-U-461: the exact figure stays for screen readers; the short one is what shows.
+    expect(screen.getByText(`66${GROUP}566 tokens`, exactly)).toHaveClass(
+      "visually-hidden",
+    );
     // 66 566 against 56 410: 18 % more.
     expect(screen.getByText("+18% vs the same days of August")).toBeVisible();
     expect(
       screen.getByText(
-        `24 requests · 60${GROUP}726 tokens in · 5${GROUP}840 tokens out`,
+        "24 requests · 60.7K tokens in · 5.8K tokens out",
         exactly,
       ),
     ).toBeVisible();
     expect(
-      screen.getByText(
-        `Cached: 2${GROUP}048 · Reasoning: not reported`,
-        exactly,
-      ),
+      screen.getByText("Cached: 2K · Reasoning: not reported", exactly),
     ).toBeVisible();
     expect(usage.mock.calls.map(([query]) => query)).toEqual(
       expect.arrayContaining([
@@ -234,11 +233,15 @@ describe("WEB-U-034 usage", () => {
         .map((line) =>
           within(line)
             .getAllByRole("cell")
-            .map((cell) => cell.textContent),
+            .map(
+              (cell) =>
+                (cell.querySelector('[aria-hidden="true"]') ?? cell)
+                  .textContent,
+            ),
         ),
     ).toEqual([
-      ["member@example.invalid", `55${GROUP}000`, "83%"],
-      ["Removed account", `11${GROUP}566`, "17%"],
+      ["member@example.invalid", "55K", "83%"],
+      ["Removed account", "11.6K", "17%"],
     ]);
     const byModel = screen.getByRole("table", { name: "Usage by model" });
     expect(within(byModel).getAllByRole("row")[1]).toHaveTextContent(
@@ -468,10 +471,14 @@ describe("WEB-U-127 usage reads the same on day one as later", () => {
     if (!figure) throw new Error("The chart is a figure");
     expect(within(figure).getByText("Sep 1, 2026")).toBeVisible();
     expect(within(figure).getByText("Sep 26, 2026")).toBeVisible();
-    // The busiest day, visible and the chart's name.
-    const caption = within(figure).getByText(/^Tokens per day\. Busiest: /);
-    expect(caption.tagName).toBe("FIGCAPTION");
-    expect(chart).toHaveAccessibleName(caption.textContent ?? "");
+    // The busiest day, visible in short form (WEB-U-461) and the chart's name with the exact figure.
+    const caption = figure.querySelector("figcaption");
+    expect(caption?.querySelector('[aria-hidden="true"]')).toHaveTextContent(
+      "Tokens per day. Busiest: Sep 26, 2026, 33.3K tokens.",
+    );
+    expect(chart).toHaveAccessibleName(
+      `Tokens per day. Busiest: Sep 26, 2026, 33${GROUP}283 tokens.`,
+    );
   });
 
   it("names a route without a display name as the model picker does, and one with its display name", async () => {
@@ -500,10 +507,18 @@ describe("WEB-U-127 usage reads the same on day one as later", () => {
     expect(within(table).queryByText("local")).toBeNull();
   });
 
-  it("writes every number the same way", async () => {
+  it("WEB-U-461 writes every count the same way: short on screen, never a long row of digits", async () => {
     const { api } = fake(answers());
     show(api);
-    await screen.findByText(`66${GROUP}566 tokens`, exactly);
-    expect(document.body.textContent).not.toMatch(/\d(\.\d)?[KMB]\b/);
+    await screen.findByText("66.6K tokens", exactly);
+    // What shows on screen: everything but the screen-reader twins.
+    const page = document.body.cloneNode(true) as HTMLElement;
+    for (const hidden of page.querySelectorAll(".visually-hidden"))
+      hidden.remove();
+    const long = page.textContent?.match(
+      new RegExp(`.{0,30}\\d${GROUP}\\d{3}.{0,30}`, "g"),
+    );
+    expect(long).toBeNull();
+    expect(page.textContent).toMatch(/\d(\.\d)?K\b/);
   });
 });

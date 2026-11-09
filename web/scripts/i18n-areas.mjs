@@ -22,6 +22,8 @@ export const AREAS = [
   // conversation page never imports it, so the page never loads it.
   { name: "workspaces", registration: "src/workspaces/catalogue.ts" },
   { name: "access", registration: "src/auth/catalogue.ts" },
+  // The account menu (WEB-U-463), which the shell loads only when the menu first opens.
+  { name: "account", registration: "src/auth/account-catalogue.ts" },
   { name: "channels", registration: "src/channels/catalogue.ts" },
   // The files panel's Changes tab and file preview, which the panel imports lazily (WEB-U-014).
   { name: "changes", registration: "src/files/changes-catalogue.ts" },
@@ -31,6 +33,10 @@ export const AREAS = [
   { name: "screen", registration: "src/screen/catalogue.ts" },
   // Copy the conversation page shows only from lazily loaded views: dialogs, menus, approvals, tool cards (WEB-U-014).
   { name: "deferred", registration: "src/i18n/deferred-catalogue.ts" },
+  // The New task page (its start, the first message, the workspace picker), which a task's page never loads. After
+  // deferred: those files also import deferred for the copy they share, and a later area wins a key all its namers
+  // register for.
+  { name: "start", registration: "src/conversations/start-catalogue.ts" },
   // The copy a run's failure shows, by key (WEB-U-392): src/i18n/translate.ts's FAILURE_KEYS, the same rule, loads it
   // on its first use. The browser's own refusals and the request errors stay core (they show when a download may not
   // work); failure-catalogue.test.tsx checks the two rules agree.

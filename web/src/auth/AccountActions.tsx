@@ -1,21 +1,41 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { Check, ChevronDown, ChevronRight } from "lucide-react";
+import {
+  BarChart3,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  CircleHelp,
+  ExternalLink,
+  Info,
+  Languages,
+  LogOut,
+  type LucideIcon,
+  MessageSquareText,
+  Settings,
+  Terminal,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useSyncExternalStore } from "react";
+import { type ReactNode, useState } from "react";
 
 import { api } from "../api/client";
 import { useRequest } from "../api/use-request";
 import { useLanguage, useT } from "../i18n/I18nProvider";
-import { currentTheme, setTheme, subscribeTheme } from "../shell/theme";
 import { ErrorMessage } from "../ui/ErrorMessage";
 import { Icon } from "../ui/Icon";
 import { Menu } from "../ui/Menu";
 
 import { useSession } from "./use-session";
-import "../i18n/deferred-catalogue";
+import "./account-catalogue";
+
+/** The project's public home and the pages the account menu links to (WEB-U-463). */
+const REPOSITORY_URL = "https://github.com/TensorQuay/tensorquay-agent";
+const HELP_URL = `${REPOSITORY_URL}/tree/main/docs/user-guide`;
+const FEEDBACK_URL = `${REPOSITORY_URL}/issues/new/choose`;
+const RELEASES_URL = `${REPOSITORY_URL}/releases`;
+const LICENCE_URL = `${REPOSITORY_URL}/blob/main/LICENSE`;
 
 /**
  * Account preferences load on demand; failed sign-out stays visible and can be retried. `onNavigate` (default
@@ -32,14 +52,11 @@ export function AccountActions({
   const request = useRequest();
   const query = useQueryClient();
   const router = useRouter();
-  const theme = useSyncExternalStore(
-    subscribeTheme,
-    currentTheme,
-    () => "system" as const,
-  );
   const t = useT();
   const { language, languages, setLanguage } = useLanguage();
   const [choosingLanguage, setChoosingLanguage] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
+  const admin = session.data?.role === "admin";
   const languageName =
     languages.find((entry) => entry.code === language)?.name ?? language;
   async function logout() {
@@ -54,35 +71,22 @@ export function AccountActions({
     <Menu label={t("account.label")}>
       {session.data ? (
         <>
-          <p className="menu-heading type-small muted">{session.data.email}</p>
-          <Link
-            role="menuitem"
-            tabIndex={-1}
-            className="menu-item"
-            href="/settings"
-            onClick={onNavigate}
-          >
+          {/* WEB-U-463: who is signed in, then what people reach for; theme lives in Settings › Account. */}
+          <p className="menu-heading type-small muted">
+            {`${session.data.email} · ${t(admin ? "account.roleAdmin" : "account.roleMember")}`}
+          </p>
+          <MenuLink href="/settings" icon={Settings} onNavigate={onNavigate}>
             {t("account.settings")}
-          </Link>
-          <div role="group" aria-label={t("theme.label")}>
-            <p className="menu-heading type-small muted">{t("theme.label")}</p>
-            {(["system", "light", "dark"] as const).map((value) => (
-              <button
-                type="button"
-                key={value}
-                role="menuitemradio"
-                className="menu-item"
-                tabIndex={-1}
-                aria-checked={theme === value}
-                onClick={() => setTheme(value)}
-              >
-                <span>{t(`theme.${value}`)}</span>
-                <span className="menu-check">
-                  {theme === value && <Icon glyph={Check} size={16} />}
-                </span>
-              </button>
-            ))}
-          </div>
+          </MenuLink>
+          {admin && (
+            <MenuLink
+              href="/settings/usage"
+              icon={BarChart3}
+              onNavigate={onNavigate}
+            >
+              {t("account.usage")}
+            </MenuLink>
+          )}
           <button
             type="button"
             role="menuitem"
@@ -91,6 +95,7 @@ export function AccountActions({
             aria-expanded={choosingLanguage}
             onClick={() => setChoosingLanguage(!choosingLanguage)}
           >
+            <Icon glyph={Languages} className="menu-icon" />
             <span>
               {t("account.languageCurrent", { language: languageName })}
             </span>
@@ -130,6 +135,62 @@ export function AccountActions({
               ))}
             </div>
           )}
+          <ExternalItem
+            href={HELP_URL}
+            icon={CircleHelp}
+            newTab={t("account.newTab")}
+          >
+            {t("account.help")}
+          </ExternalItem>
+          <ExternalItem
+            href={FEEDBACK_URL}
+            icon={MessageSquareText}
+            newTab={t("account.newTab")}
+          >
+            {t("account.feedback")}
+          </ExternalItem>
+          <hr className="menu-separator" />
+          <MenuLink
+            href="/settings/tokens"
+            icon={Terminal}
+            onNavigate={onNavigate}
+          >
+            {t("account.apiTokens")}
+          </MenuLink>
+          <button
+            type="button"
+            role="menuitem"
+            className="menu-item"
+            tabIndex={-1}
+            aria-expanded={aboutOpen}
+            onClick={() => setAboutOpen(!aboutOpen)}
+          >
+            <Icon glyph={Info} className="menu-icon" />
+            <span>{t("account.about")}</span>
+            <Icon glyph={aboutOpen ? ChevronDown : ChevronRight} />
+          </button>
+          {aboutOpen && (
+            <div role="group" aria-label={t("account.about")}>
+              <ExternalItem
+                href={RELEASES_URL}
+                newTab={t("account.newTab")}
+                sub
+              >
+                {t("account.whatsNew")}
+              </ExternalItem>
+              <ExternalItem
+                href={REPOSITORY_URL}
+                newTab={t("account.newTab")}
+                sub
+              >
+                {t("account.source")}
+              </ExternalItem>
+              <ExternalItem href={LICENCE_URL} newTab={t("account.newTab")} sub>
+                {t("account.licence")}
+              </ExternalItem>
+            </div>
+          )}
+          <hr className="menu-separator" />
           <ErrorMessage error={request.error} />
           <button
             type="button"
@@ -141,7 +202,10 @@ export function AccountActions({
               void logout();
             }}
           >
-            {t(request.pending ? "account.signingOut" : "account.signOut")}
+            <Icon glyph={LogOut} className="menu-icon" />
+            <span>
+              {t(request.pending ? "account.signingOut" : "account.signOut")}
+            </span>
           </button>
         </>
       ) : (
@@ -156,5 +220,63 @@ export function AccountActions({
         </Link>
       )}
     </Menu>
+  );
+}
+
+/** An item that opens a page of the app: its icon, its words (WEB-U-463). */
+function MenuLink({
+  href,
+  icon,
+  onNavigate,
+  children,
+}: {
+  href: string;
+  icon: LucideIcon;
+  onNavigate: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <Link
+      role="menuitem"
+      tabIndex={-1}
+      className="menu-item"
+      href={href}
+      onClick={onNavigate}
+    >
+      <Icon glyph={icon} className="menu-icon" />
+      <span>{children}</span>
+    </Link>
+  );
+}
+
+/** An item that opens the project's site in a new tab, and says so to screen readers (WEB-U-463). */
+function ExternalItem({
+  href,
+  icon,
+  newTab,
+  sub = false,
+  children,
+}: {
+  href: string;
+  icon?: LucideIcon;
+  newTab: string;
+  sub?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <a
+      role="menuitem"
+      tabIndex={-1}
+      className={sub ? "menu-item menu-subitem" : "menu-item"}
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {icon && <Icon glyph={icon} className="menu-icon" />}
+      <span>
+        {children} <span className="visually-hidden">{newTab}</span>
+      </span>
+      <Icon glyph={ExternalLink} size={16} />
+    </a>
   );
 }

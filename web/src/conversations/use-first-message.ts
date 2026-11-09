@@ -12,6 +12,7 @@ import type { Conversation, Profile } from "../protocol/generated/api";
 
 import { firstTitle } from "./first-title";
 import "../i18n/deferred-catalogue";
+import "./start-catalogue";
 
 type Intent = {
   text: string;

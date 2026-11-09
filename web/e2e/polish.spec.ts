@@ -161,13 +161,12 @@ for (const width of [1024, 1440])
         }),
         "account: no overlay intercepts the conversation",
       ).toBe(true);
-      await expect(account.getByRole("menuitemradio")).toHaveCount(3);
-      await account
-        .getByRole("menuitemradio", {
-          name: theme === "dark" ? "Dark" : "Light",
-          exact: true,
-        })
-        .click();
+      // WEB-U-463: the menu goes places; theme is in Settings › Account, not here.
+      await expect(account.getByRole("menuitemradio")).toHaveCount(0);
+      await expect(
+        account.getByRole("menuitem", { name: "Settings", exact: true }),
+      ).toBeVisible();
+      await expect(account.getByRole("separator")).toHaveCount(2);
       await settled(page);
       await capture(page, `account-popover-${suffix}`);
       expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
