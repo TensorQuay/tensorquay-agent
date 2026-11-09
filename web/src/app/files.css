@@ -441,8 +441,8 @@ button.file-open:hover {
 .sent-attachments {
   align-items: flex-start;
 }
-/* A sent picture: up to 240 px a side, whole (never cropped), in a frame; a button that opens its preview where the
-   page has a Files panel, and only then drawn as one. */
+/* A sent picture: up to 240 px a side, whole (never cropped), in a frame that hugs it; a button that opens its preview
+   where the page has a Files panel, and only then drawn as one. */
 .sent-picture {
   display: block;
   padding: 0;
@@ -456,7 +456,15 @@ button.sent-picture {
 }
 .sent-picture img {
   display: block;
-  max-width: min(240px, 100%);
+  /* No percentage here: the list sizes each item to its content and leaves a percentage max-width out of that size, so
+     with min(240px, 100%) the frame kept the width of the picture at its height cap, an empty band beside it (17.4
+     fix). Container units do count there. On a column narrower than the picture, the second cap keeps it inside its
+     message: the conversation's width less the transcript's and the bubble's side padding, the frame's borders and
+     room for a classic scrollbar (18 px). */
+  max-width: min(
+    240px,
+    100cqi - 2 * (var(--space-1) + var(--space-4) + var(--border-width)) - 18px
+  );
   max-height: 240px;
   object-fit: contain;
 }
