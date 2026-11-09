@@ -1,4 +1,4 @@
-"""WEB-E2E-032's driver side (the file previews design): the agent writes an HTML report, PDFs and spreadsheets on the
+"""WEB-E2E-032's driver side (the Files panel's previews): the agent writes an HTML report, PDFs and spreadsheets on the
 real stack, and the browser checks each preview and each failure. The files are built here, byte for byte, and the
 scripted model's one shell call writes them into the workspace with `base64 -d` (which even the minimal image has), so
 the suite runs on the Docker and the microVM backends alike.

@@ -1,5 +1,5 @@
 //! `GET /conversations/{id}/files/sheet?path=&sheet=`: a spreadsheet of the task's workspace as a bounded table of
-//! display text, for the Files panel (the file previews design). The file is untrusted: formulas show their cached
+//! display text, for the Files panel's preview. The file is untrusted: formulas show their cached
 //! values and are never evaluated, macros and external links are ignored, and no cell is ever markup or a link.
 //!
 //! The bounds hold whatever the file claims. The file is at most `files.preview_sheet_bytes`; its zip directory is

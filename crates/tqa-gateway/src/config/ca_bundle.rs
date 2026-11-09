@@ -1,5 +1,5 @@
 //! The certificates `[egress] ca_file` names: trusted beside the public roots for keyed hosts behind an internal
-//! certificate authority (G9a, ADR-0037 §4). The file is read
+//! certificate authority (ADR-0037 §4). The file is read
 //! once at start, bounded, and must hold certificate sections only, each an authority (basicConstraints `cA` true).
 //! There is no certificate parser here (ADR-0037 §6: rcgen without one), so the authority check walks only the DER the
 //! RFC 5280 path to that one field needs, bounded by the input, and treats anything unexpected as malformed.

@@ -86,7 +86,7 @@ const REMINDERS: i64 = 2;
 
 /// Reminds `conversation`'s lead, when it leads a running team and nothing else can wake it: no helper queued, starting
 /// or working (each will run and report, and its report wakes the lead; the read tool tells a lead to end its turn and
-/// wait for it, 16n integration), no question to its person still open (the answer wakes it), no turn on its way to it
+/// wait for it), no question to its person still open (the answer wakes it), no turn on its way to it
 /// (queued, sending, or delivered since its last run event and not yet started: it starts the lead anyway, as the
 /// wake's own guard has it), and nothing unread but the gateway's own reminders (a wake brings it back for anything
 /// else); and fewer than [`REMINDERS`] reminders since its own last post.

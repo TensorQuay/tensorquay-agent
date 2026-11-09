@@ -353,8 +353,8 @@ async fn gw_i_031_the_lease_is_renewed_by_heartbeats_and_released_with_the_sandb
 }
 
 // TEST: GW-I-247
-// H5's stall (7 Oct 2026): a sandbox made for a queued turn has no active run until its runtime registers and the turn
-// is delivered. A waiter on the same workspace must not hand it over in that window, or the two tasks take the
+// A stall in a soak (7 Oct 2026): a sandbox made for a queued turn has no active run until its runtime registers and
+// the turn is delivered. A waiter on the same workspace must not hand it over in that window, or the two tasks take the
 // workspace from each other and neither turn is delivered. Ordinary tasks, no agent team.
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]

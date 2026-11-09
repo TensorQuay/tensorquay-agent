@@ -1,4 +1,4 @@
-"""SOAK-001…004: the seeded plan of gateway kills, database faults, sandbox kills and link cuts (H3)."""
+"""SOAK-001…004: the seeded plan of gateway kills, database faults, sandbox kills and link cuts."""
 import unittest
 
 from soak_chaos import restart_times, schedule

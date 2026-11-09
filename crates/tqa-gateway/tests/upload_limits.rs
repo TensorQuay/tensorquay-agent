@@ -60,7 +60,7 @@ async fn gw_i_142_me_carries_a_smaller_configured_upload_limit(pool: PgPool) -> 
 }
 
 // TEST: GW-I-144
-// The file previews design: the web learns each preview limit from the same answer, so it says a file is too large to
+// The web learns each preview limit from the same answer, so it says a file is too large to
 // preview before fetching it.
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]

@@ -1,4 +1,4 @@
-//! GW-I-143 (the file previews design): an agent's HTML page served sandboxed by its headers, and a spreadsheet's
+//! GW-I-143 (the Files panel's previews): an agent's HTML page served sandboxed by its headers, and a spreadsheet's
 //! sheet as a table of display text, over HTTP: each answer, each refusal, and access and paths as for the download.
 #[path = "support/files_api.rs"]
 mod files_api;
@@ -22,7 +22,7 @@ fn view(f: &Fixture, cookie: &str, task: &str, path: &str) -> reqwest::RequestBu
 }
 
 // TEST: GW-I-143
-// The file previews design: an agent's HTML page is served for the panel's frame, sandboxed by its headers; any other
+// An agent's HTML page is served for the panel's frame, sandboxed by its headers; any other
 // type has no view; a page over the preview limit is only downloaded; access and paths are as for the download.
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
@@ -167,7 +167,7 @@ fn workbook(sheets: &[(&str, &[&str])]) -> Result<Vec<u8>> {
 }
 
 // TEST: GW-I-143
-// The file previews design: a spreadsheet's sheet is served as a table of display text; any other type has no table;
+// A spreadsheet's sheet is served as a table of display text; any other type has no table;
 // a file over the preview limit, a damaged file and a missing sheet each say so; access and paths are as for the
 // download.
 #[sqlx::test]

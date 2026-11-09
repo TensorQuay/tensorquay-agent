@@ -1,4 +1,4 @@
-"""SOAK-001…004: the seeded plan of gateway kills, database faults, sandbox kills and link cuts (H3).
+"""SOAK-001…004: the seeded plan of gateway kills, database faults, sandbox kills and link cuts.
 
 The plan has its own random stream, so the reconnect plan of a seed (soak_chaos.schedule) stays what it was. Global
 faults (gateway kill, database restart, outage, crash) never overlap each other or a restart; a slot's faults (sandbox

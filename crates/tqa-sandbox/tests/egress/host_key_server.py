@@ -1,4 +1,4 @@
-"""A keyed host for the host-keys stack suite (G9b, ADR-0037): HTTPS on 8443 with a certificate from the fixture's own
+"""A keyed host for the host-keys stack suite (ADR-0037): HTTPS on 8443 with a certificate from the fixture's own
 authority, for an exact address (Amendment 2). `/echo` answers the Authorization it received in a header and the body
 (so the proxy's scrubbing shows), and prints one line per request with what it received, for the test to read from the
 container's log: the proof that the proxy swapped the placeholder for the value.

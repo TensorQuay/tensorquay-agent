@@ -1,4 +1,4 @@
-"""H6: the end-of-run orphan audit, on synthetic listings (no Docker)."""
+"""The end-of-run orphan audit, on synthetic listings (no Docker)."""
 import unittest
 
 from soak_orphans import findings, parse_rows

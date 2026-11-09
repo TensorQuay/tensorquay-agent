@@ -7,7 +7,7 @@
 //! GW-I-176 (ADR-0037 Amendment 2): a key for an exact IPv4 or IPv6 address is used through that address's own allow
 //! rule, with an IP-SAN leaf and upstream verified by the address; an address without its rule, or another address on
 //! its tunnel, never gets it.
-//! GW-I-175 (ADR-0037's G9a): a keyed host behind an internal certificate authority is reached when `egress.ca_file`
+//! GW-I-175 (ADR-0037 §4): a keyed host behind an internal certificate authority is reached when `egress.ca_file`
 //! names the authority, on the release build's code path (no test hook).
 #[path = "support/keyed.rs"]
 mod keyed;

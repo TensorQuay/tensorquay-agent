@@ -448,9 +448,9 @@ async fn lead_starts(f: &Fixture, t: &Team, sequence: u64, run: &str) -> TestRes
 async fn gw_i_306_no_reminder_while_a_helper_works_is_queued_or_starting(
     pool: PgPool,
 ) -> TestResult {
-    // The 16n integration (17 Oct 2026): a lead ended its turn to wait for its helper's report, as the read tool tells
-    // it to; the reminder came first, the lead called done, and the helper's run was cancelled. A helper that will run
-    // and report wakes the lead itself: the reminder is only for a lead nothing else can wake.
+    // Found in an integration before 17.0 (17 Oct 2026): a lead ended its turn to wait for its helper's report, as the
+    // read tool tells it to; the reminder came first, the lead called done, and the helper's run was cancelled. A
+    // helper that will run and report wakes the lead itself: the reminder is only for a lead nothing else can wake.
     support::run_configured(pool, None, ENABLED, async |f| {
         let t = team(f).await?;
         lead_turn(f, &t, 2, "r-1").await?;

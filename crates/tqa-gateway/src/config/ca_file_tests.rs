@@ -1,4 +1,4 @@
-//! GW-U-114 (G9a, ADR-0037 §4): `[egress] ca_file` names authorities trusted beside the public roots for keyed hosts.
+//! GW-U-114 (ADR-0037 §4): `[egress] ca_file` names authorities trusted beside the public roots for keyed hosts.
 //! It must be a readable PEM file of authority certificates only, up to 1 MiB, or the start stops. Its old alias,
 //! `[git_push] ca_file`, was removed with the Git relay (ADR-0037 §7): a file that still has the section stops the start,
 //! naming the setting to use instead.

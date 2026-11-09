@@ -41,7 +41,7 @@ POOL_SANDBOXES = 16  # compose.prepare's /24 pool of /29 networks
 
 
 def firecracker_stack():
-    """The microVM stack's own helpers (deploy/firecracker/stack.py), loaded only for a microVM soak (H7)."""
+    """The microVM stack's own helpers (deploy/firecracker/stack.py), loaded only for a microVM soak."""
     import importlib.util
     source = Path(__file__).resolve().parents[1] / "firecracker" / "stack.py"
     spec = importlib.util.spec_from_file_location("firecracker_stack", source)
@@ -179,7 +179,7 @@ class Stack:
             self.on_slow(measurement)
 
     def start_engine_proxy(self):
-        """The gateway reaches the engine through the stall proxy (H4), from a directory only this user can enter."""
+        """The gateway reaches the engine through the stall proxy, from a directory only this user can enter."""
         upstream = self.env.get("TQA_DOCKER_SOCKET")
         require(bool(upstream), "TQA_DOCKER_SOCKET must name the engine socket for the stall proxy")
         private = self.directory.parent / "engine"
@@ -194,7 +194,7 @@ class Stack:
             self.proxy.stop()
 
     def bound_storage(self, mib):
-        """The storage root on a `mib` MiB tmpfs in the engine's namespace (H5), before anything starts."""
+        """The storage root on a `mib` MiB tmpfs in the engine's namespace, before anything starts."""
         runtime_dir = os.environ.get("XDG_RUNTIME_DIR") or "/run/user/{}".format(os.getuid())
         self.storage = BoundedStorage(self.env["TQA_STORAGE_ROOT"], mib, engine_child_pid(runtime_dir),
                                       self.images["runtime"], lambda arguments: self.command(arguments, timeout=120))

@@ -1,4 +1,4 @@
-"""H4: an engine-stall proxy for the soak. It sits on a Unix socket between the soak's gateway and the container
+"""An engine-stall proxy for the soak. It sits on a Unix socket between the soak's gateway and the container
 engine's socket and, during an `engine_stall` fault, holds, fails (500) or drops the calls that change containers
 (create, start, stop, kill, wait, delete); everything else passes. It changes nothing on the host and loads nothing:
 the effect of a slow or failing engine, reproduced deterministically.

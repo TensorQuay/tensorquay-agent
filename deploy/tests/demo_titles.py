@@ -1,4 +1,4 @@
-"""L7 short task titles on the real stack: a task the model names after its first completed run, and one the person
+"""Short task titles on the real stack: a task the model names after its first completed run, and one the person
 renamed first, which the gateway must never rename. The browser (titles-stack.spec.ts) reads both tasks back from the
 gateway's API into the result."""
 

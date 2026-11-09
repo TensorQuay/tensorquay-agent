@@ -221,7 +221,7 @@ impl Route {
 pub struct RouteConfig {
     /// The logical route name users pick.
     pub name: String,
-    /// The name people see, from the file (the page pass's N2): the relay never reads it, and the gateway stores it
+    /// The name people see, from the file: the relay never reads it, and the gateway stores it
     /// beside the route record, never in it. Unset, it is never written, so an existing record is unchanged.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub display_name: Option<String>,

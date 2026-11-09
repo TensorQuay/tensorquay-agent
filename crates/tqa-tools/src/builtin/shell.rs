@@ -175,7 +175,7 @@ impl Tool for Shell {
             let bypass = format!("{},{LOOPBACK_BYPASS}", proxy.host());
             command.env("NO_PROXY", &bypass);
             command.env("no_proxy", &bypass);
-            // Node's fetch and https ignore the variables above unless told (Node 24's env proxy; G9c, SBX-C-019).
+            // Node's fetch and https ignore the variables above unless told (Node 24's env proxy; SBX-C-019).
             command.env("NODE_USE_ENV_PROXY", "1");
         }
         cx.check()?;
@@ -194,8 +194,8 @@ impl Tool for Shell {
     }
 }
 
-/// What a Desktop session's shell result ends with when its command names an X input tool (TOOL-U-064, c16k real-world
-/// A10 and A12b). A nudge, not a control: the command has run.
+/// What a Desktop session's shell result ends with when its command names an X input tool (TOOL-U-064, real-world use
+/// before 17.0). A nudge, not a control: the command has run.
 const SCREEN_INPUT_NOTE: &str = "\n[the desktop's screen is the computer tool's: input sent from the shell isn't \
                                  checked, counted or shown to the person]";
 /// What a Desktop session's commands get from the runtime's own environment (TOOL-U-141).
