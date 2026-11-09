@@ -23,7 +23,9 @@ loopback; remote access needs an authenticated TLS reverse proxy and the matchin
 
 ### 0. Build the images
 
-There are no prebuilt images, so build them on the machine that runs the stack. From the repository root:
+There are no prebuilt images, so build them on the machine that runs the stack, from a release: clone the newest tag
+from the [Releases page](https://github.com/TensorQuay/tensorquay-agent/releases/latest) (for example
+`git clone --branch v17.3.0 https://github.com/TensorQuay/tensorquay-agent.git`), not `main`. From the repository root:
 
 ```sh
 deploy/build-images.sh
