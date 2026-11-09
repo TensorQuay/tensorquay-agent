@@ -458,9 +458,13 @@ button.sent-picture {
   display: block;
   /* No percentage here: the list sizes each item to its content and leaves a percentage max-width out of that size, so
      with min(240px, 100%) the frame kept the width of the picture at its height cap, an empty band beside it (17.4
-     fix). Viewport units do count there: the second cap keeps the picture inside its message on a phone narrower than
-     it, the page's and the bubble's side padding (64 px) and the frame's borders taken off. */
-  max-width: min(240px, 100vw - 72px);
+     fix). Container units do count there. On a column narrower than the picture, the second cap keeps it inside its
+     message: the conversation's width less the transcript's and the bubble's side padding, the frame's borders and
+     room for a classic scrollbar (18 px). */
+  max-width: min(
+    240px,
+    100cqi - 2 * (var(--space-1) + var(--space-4) + var(--border-width)) - 18px
+  );
   max-height: 240px;
   object-fit: contain;
 }
