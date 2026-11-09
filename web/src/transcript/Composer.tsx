@@ -294,16 +294,6 @@ export function Composer({
               }
             }}
           />
-          {holds && draft.trim() && (
-            <Button
-              variant="secondary"
-              type="button"
-              className="composer-queue"
-              onClick={() => void send()}
-            >
-              {t("composer.sendAfter")}
-            </Button>
-          )}
           {/* The bar's round icon button, as "+" is: filled with ink only while there is something to send. */}
           <IconAction
             className="composer-submit"
@@ -334,6 +324,17 @@ export function Composer({
             </span>
           )}
         </div>
+        {/* While a run goes, on its own line under the row's end, so the text keeps the row (§7 Composer). */}
+        {holds && draft.trim() && (
+          <Button
+            variant="secondary"
+            type="button"
+            className="composer-queue"
+            onClick={() => void send()}
+          >
+            {t("composer.sendAfter")}
+          </Button>
+        )}
         {reason && (
           <p className="type-small muted composer-reason" id={helpId}>
             {reason}
