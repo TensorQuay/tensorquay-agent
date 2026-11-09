@@ -61,9 +61,11 @@ appear under a namespace, and they must obey the same permission policy (ARCHITE
    **Amended 9 Nov 2026: 3.9.0.** Three advisories against 3.4.1 (RUSTSEC-2026-0457, -0461 and -0462) concern code this
    build doesn't compile (the OAuth client and both Streamable HTTP transports), but `cargo deny` refuses the version, so
    the pin moved instead of three ignores. rmcp 3.9.0 adds `sha2` 0.11 and `libc` to its own dependencies, both already
-   in the lockfile. Two changes reach this client: a server that dies mid-call fails the call at once (TOOL-I-012's crash
-   case, `Crashed`), and a `tools/call` reply with no `content` (only `_meta`) is no longer read as a result, so it is a
-   `protocol_error`. The bounded construction is unchanged, and its tests pass.
+   in the lockfile. What reaches this client: a `tools/call` reply with no `content` (only `_meta`) is no longer read as a
+   result, so it is a `protocol_error`; a server's `ping` during the handshake is answered; a message with both `result`
+   and `error` no longer decodes, so our reader ends the stream there (`protocol_error` at start, `Crashed` for a pending
+   call); and a `tools/list` that our handshake timeout drops is cancelled with a notice. A crash mid-call is `Crashed`
+   at once in both versions (TOOL-I-012). The bounded construction is unchanged, and its tests pass.
 
 ## Consequences
 
@@ -77,8 +79,8 @@ appear under a namespace, and they must obey the same permission policy (ARCHITE
 - The rmcp dependency is pinned exactly and reviewed like any other; a future transport change that removes the bounded
   construction would fail its test.
 
-- rmcp's own `AsyncRwTransport` buffers each stdio line (with no bound before 3.6.0, 16 MiB by default since) and
-  silently skips lines that aren't
+- rmcp's own `AsyncRwTransport` buffers each stdio line (with no bound before 3.6.0; since then 16 MiB by default, and
+  an over-long line is dropped while the connection stays open) and silently skips lines that aren't
   JSON, so the runtime never uses it; rmcp is given only our transport, a `FramedRead` with
   `JsonRpcMessageCodec::new_with_max_length` (1 MiB) that ends the stream at the first over-long or non-JSON line
   (TOOL-I-012 pins both as `protocol_error`). Any rmcp upgrade must keep that construction and re-run those tests.
