@@ -190,6 +190,15 @@
   --nav-pad-inline: var(--space-3);
   --nav-row-padding: var(--nav-pad-block) var(--nav-pad-inline);
   --nav-row-gap: var(--space-half);
+  /* §7 Conversation list item: a task row's ⋯ is part of the row. It sits inside the row's end at one even inset,
+     square at the row's height less two insets, its corners concentric with the row's (the row's radius less the
+     inset). A title that reaches it fades out over the last `--row-action-reach` of its box while it shows. */
+  --row-inset: var(--space-half);
+  --row-action-size: calc(var(--row-height-nav) - 2 * var(--row-inset));
+  --row-action-radius: calc(var(--control-radius) - var(--row-inset));
+  --row-action-reach: calc(
+    var(--row-action-size) + var(--row-inset) - var(--nav-pad-inline)
+  );
   --nav-font-size: 14px;
   --nav-line-height: 20px;
   --group-gap: var(--space-4);
@@ -975,6 +984,20 @@ textarea.form-control {
   }
   .app-sidebar .conversation-row {
     padding-right: 0;
+  }
+  /* The rail has no ⋯ (above), so nothing gives way under it: the open task's run mark stays under the pointer. */
+  .app-sidebar
+    .conversation-row:has(> .task-more):hover
+    > .conversation-link
+    > .task-mark,
+  .app-sidebar
+    .conversation-row:has(> .task-more):has(
+      > :focus-visible,
+      > .task-more :focus-visible
+    )
+    > .conversation-link
+    > .task-mark {
+    opacity: 1;
   }
   .app-sidebar .nav-label {
     position: absolute;

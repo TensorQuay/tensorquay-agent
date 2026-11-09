@@ -3,6 +3,17 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
+## Unreleased
+
+### Changed
+
+- **The task list's ⋯ is part of its row (WEB-U-449, WEB-E2E-114).** It shows inside the row's hover backdrop at the
+  row's end, square and evenly inset, its corners concentric with the row's, with no fill of its own; its own hover
+  is a quiet tint. A long title fades out under it instead of being cut, and the row's marks give way while it
+  shows. It shows on hover, on keyboard focus and while its menu is open, never because a click left focus behind,
+  so one row at a time shows it. On a phone it always shows, calm, and titles end before it. A row's title no longer
+  underlines on hover.
+
 ## 17.3 (8 November 2026)
 
 A fix release of the web app: no migration, no protocol change, no gateway or runtime change.

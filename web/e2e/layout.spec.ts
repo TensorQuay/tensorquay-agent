@@ -185,7 +185,8 @@ const opacity = (page: Page, selector: string) =>
     .first()
     .evaluate((element) => getComputedStyle(element).opacity);
 
-// The task row's actions menu sits inside the row, 8 px from its right edge, and shows on hover or keyboard focus.
+// The task row's actions menu sits inside the row, 2 px from its right edge (the row's even inset, WEB-E2E-114), and
+// shows on hover or keyboard focus.
 test("WEB-U-007 task row actions appear on hover and focus", async ({
   page,
 }) => {
@@ -198,7 +199,7 @@ test("WEB-U-007 task row actions appear on hover and focus", async ({
   const rowBox = await row.boundingBox();
   const removeBox = await remove.boundingBox();
   if (!rowBox || !removeBox) throw new Error("The task row must be visible");
-  expect(rowBox.x + rowBox.width - (removeBox.x + removeBox.width)).toBe(8);
+  expect(rowBox.x + rowBox.width - (removeBox.x + removeBox.width)).toBe(2);
   expect(await opacity(page, ".conversation-row > .task-more > .button")).toBe(
     "0",
   );
@@ -210,7 +211,11 @@ test("WEB-U-007 task row actions appear on hover and focus", async ({
   await expect
     .poll(() => opacity(page, ".conversation-row > .task-more > .button"))
     .toBe("0");
+  // Keyboard focus (a focus a click leaves behind shows nothing, WEB-E2E-114): onto the ⋯, then back to the link.
   await row.getByRole("link").focus();
+  await page.keyboard.press("Tab");
+  await page.keyboard.press("Shift+Tab");
+  await expect(row.getByRole("link")).toBeFocused();
   await expect
     .poll(() => opacity(page, ".conversation-row > .task-more > .button"))
     .toBe("1");

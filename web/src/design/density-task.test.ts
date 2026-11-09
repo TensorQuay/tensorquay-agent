@@ -49,13 +49,11 @@ describe("WEB-U-080 the sidebar's tasks", () => {
     const helper = rule(teams, '.task-helper:has([aria-current="page"])');
     expect(declared(helper, "background")).toBe("var(--selected-fill)");
     expect(declared(helper, "font-weight")).toBe(undefined);
-    // Under the pointer it keeps its fill (never darker) and gains no underline.
-    expect(
-      declared(
-        rule(conversation, '.conversation-link[aria-current="page"]:hover'),
-        "text-decoration",
-      ),
-    ).toBe("none");
+    // Under the pointer it keeps its fill (never darker) and gains no underline: no row's title underlines on hover,
+    // since the row's backdrop shows it (§7 Conversation list item).
+    expect(conversation).not.toMatch(
+      /\.conversation-link[^{}]*:hover[^{}]*\{[^}]*underline/,
+    );
     expect(conversation).not.toMatch(/border-left[^;]*var\(--accent\)/);
     expect(
       declared(rule(conversation, ".conversation-row"), "border-left"),
@@ -192,6 +190,29 @@ describe("WEB-U-170 the files panel never covers part of the transcript", () => 
   });
 });
 
+/**
+ * `rule` for selectors with commas or line breaks of their own (`:where(a, b)`, a long list the formatter wraps): the
+ * list is split only at its top-level commas, and selectors and declarations are read with their whitespace collapsed.
+ */
+function ruleFlat(css: string, selector: string): string {
+  const flat = (text: string) =>
+    text.replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")").trim();
+  const found: string[] = [];
+  for (const match of css.matchAll(/([^{};]+)\{([^{}]*)\}/g)) {
+    const parts = [""];
+    let depth = 0;
+    for (const char of match[1] ?? "") {
+      if (char === "(") depth += 1;
+      if (char === ")") depth -= 1;
+      if (char === "," && depth === 0) parts.push("");
+      else parts[parts.length - 1] += char;
+    }
+    if (parts.map(flat).includes(flat(selector)))
+      found.push(flat(match[2] ?? ""));
+  }
+  return found.join(";");
+}
+
 /** The bodies of every `@media <query>` block in `css`, braces balanced, joined. */
 function media(css: string, query: string): string {
   const bodies: string[] = [];
@@ -217,11 +238,14 @@ function media(css: string, query: string): string {
 // touch screen, where it always shows, the title ends before it.
 describe("WEB-U-449 the task row's ⋯ is part of the row", () => {
   const tokens = rule(globals, ":root");
-  const holder = rule(conversation, ".conversation-row > .task-more");
-  const button = rule(conversation, ".conversation-row > .task-more > .button");
+  const holder = ruleFlat(conversation, ".conversation-row > .task-more");
+  const button = ruleFlat(
+    conversation,
+    ".conversation-row > .task-more > .button",
+  );
   const showing = [
     ".conversation-row:has(> .task-more):hover",
-    ".conversation-row:has(> .task-more):focus-within",
+    ".conversation-row:has(> .task-more):has(> :focus-visible, > .task-more :focus-visible)",
     '.conversation-row:has(> .task-more [aria-expanded="true"])',
   ];
 
@@ -247,7 +271,7 @@ describe("WEB-U-449 the task row's ⋯ is part of the row", () => {
     expect(declared(button, "background")).toBe("transparent");
     expect(
       declared(
-        rule(
+        ruleFlat(
           conversation,
           ".conversation-row > .task-more > .button:hover:not(:disabled)",
         ),
@@ -256,7 +280,7 @@ describe("WEB-U-449 the task row's ⋯ is part of the row", () => {
     ).toBe("var(--hover-tint)");
     expect(
       declared(
-        rule(
+        ruleFlat(
           conversation,
           ".conversation-row > .task-more > .button:active:not(:disabled)",
         ),
@@ -266,13 +290,31 @@ describe("WEB-U-449 the task row's ⋯ is part of the row", () => {
     expect(conversation).not.toMatch(/task-more[^{}]*\{[^}]*--surface/);
   });
 
+  it("shows it for the row's own keyboard focus, never for a focus a click left behind", () => {
+    // The owner's report (two rows with a ⋯ at once): a clicked link keeps its focus, so focus-within kept the ⋯.
+    expect(
+      declared(
+        ruleFlat(
+          conversation,
+          ".conversation-row:has(> :focus-visible, > .task-more :focus-visible) > .task-more > .button",
+        ),
+        "opacity",
+      ),
+    ).toBe("1");
+    expect(conversation).not.toMatch(
+      /\.conversation-row:focus-within[^{}]*task-more/,
+    );
+    expect(conversation).not.toMatch(/task-more\):focus-within/);
+    expect(globals).not.toMatch(/task-more\):focus-within/);
+  });
+
   it("keeps the row's backdrop while it shows by keyboard or for its open menu, below the open task's fill", () => {
     // :where() keeps these as light as the hover rule, so the open task's selected fill, set after, stays.
     expect(
       declared(
-        rule(
+        ruleFlat(
           conversation,
-          '.conversation-row:where(:focus-within, :has(> .task-more [aria-expanded="true"]))',
+          '.conversation-row:where(:has(> :focus-visible, > .task-more :focus-visible), :has(> .task-more [aria-expanded="true"]))',
         ),
         "background",
       ),
@@ -284,13 +326,13 @@ describe("WEB-U-449 the task row's ⋯ is part of the row", () => {
     for (const state of showing) {
       expect(
         declared(
-          rule(hover, `${state} > .conversation-link > .task-mark`),
+          ruleFlat(hover, `${state} > .conversation-link > .task-mark`),
           "opacity",
         ),
       ).toBe("0");
       expect(
         declared(
-          rule(
+          ruleFlat(
             hover,
             `${state} > .conversation-link:not(:has(> .task-mark)) > .conversation-link-text`,
           ),
@@ -301,7 +343,12 @@ describe("WEB-U-449 the task row's ⋯ is part of the row", () => {
       );
     }
     // The fade starts where the ⋯ and its inset reach past the row's own end padding.
-    expect(declared(tokens, "--row-action-reach")).toBe(
+    expect(
+      declared(tokens, "--row-action-reach")
+        ?.replace(/\s+/g, " ")
+        .replace(/\( /g, "(")
+        .replace(/ \)/g, ")"),
+    ).toBe(
       "calc(var(--row-action-size) + var(--row-inset) - var(--nav-pad-inline))",
     );
     // Without hover, titles keep the full width: no mask anywhere else.
@@ -312,13 +359,16 @@ describe("WEB-U-449 the task row's ⋯ is part of the row", () => {
     const touch = media(conversation, "(hover: none)");
     expect(
       declared(
-        rule(touch, ".conversation-row > .task-more > .button"),
+        ruleFlat(touch, ".conversation-row > .task-more > .button"),
         "opacity",
       ),
     ).toBe("1");
     expect(
       declared(
-        rule(touch, ".conversation-row:has(> .task-more) > .conversation-link"),
+        ruleFlat(
+          touch,
+          ".conversation-row:has(> .task-more) > .conversation-link",
+        ),
         "padding-inline-end",
       ),
     ).toBe("calc(var(--row-action-size) + var(--row-inset) + var(--space-2))");

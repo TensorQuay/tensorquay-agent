@@ -37,9 +37,6 @@
   text-decoration: none;
   overflow-wrap: anywhere;
 }
-.conversation-link:hover {
-  text-decoration: underline;
-}
 /* The first transcript line starts within 64 px of the window top (§6): the 56 px bar plus a 4 px gap. */
 .conversation-page {
   position: relative;
@@ -975,13 +972,11 @@ textarea.composer-input {
   background: var(--hover-tint);
 }
 /* UI-GUIDELINES §5c: the open task is the selected fill at the body weight, as the Settings menu's item; no accent bar.
-   Under the pointer it keeps the fill (this rule follows the hover's) and its title gains no underline (17.3). */
+   Under the pointer it keeps the fill (this rule follows the hover's). No row's title underlines on hover: the
+   row's backdrop shows it (§7 Conversation list item). */
 .conversation-row:has([aria-current="page"]),
 .conversation-row:has([data-current]) {
   background: var(--selected-fill);
-}
-.conversation-link[aria-current="page"]:hover {
-  text-decoration: none;
 }
 /* §5c: a task is a 32 px navigation row with 14/20 text. */
 .conversation-link {
@@ -1140,29 +1135,91 @@ textarea.composer-input {
   padding: 0 var(--space-3);
   font-size: var(--nav-font-size);
 }
-/* The task's menu button appears over the row's end on hover or keyboard focus, so the title keeps the row's width. */
+/* §7 Conversation list item: the task's ⋯ is part of its row, never a chip over it. On hover or keyboard focus it shows
+   inside the row's backdrop at the row's end: square, one even inset above, below and at the end, its corners
+   concentric with the row's, with no fill of its own. Pinned to the row's own line, so an open lead's ⋯ stays by its
+   title. Keyboard focus is the row's own (its link, chevron or ⋯), never a focus a click left behind, nor a helper's. */
 .conversation-list .conversation-row {
   position: relative;
 }
 .conversation-row > .task-more {
   position: absolute;
-  top: 50%;
-  right: var(--space-2);
-  transform: translateY(-50%);
+  top: var(--row-inset);
+  right: var(--row-inset);
 }
-/* The ⋯ itself (inside its tooltip's holder) is what shows and hides. */
+/* The ⋯ itself (inside its tooltip's holder) is what shows and hides. Its hover and press are the quiet tints over the
+   row's backdrop: the ghost button's own hover mixes the surface colour, which would draw a chip. */
 .conversation-row > .task-more > .button {
-  background: var(--surface);
+  width: var(--row-action-size);
+  height: var(--row-action-size);
+  border-radius: var(--row-action-radius);
+  background: transparent;
   opacity: 0;
 }
+.conversation-row > .task-more > .button:hover:not(:disabled) {
+  background: var(--hover-tint);
+}
+.conversation-row > .task-more > .button:active:not(:disabled) {
+  background: var(--press-tint);
+}
 .conversation-row:hover > .task-more > .button,
-.conversation-row:focus-within > .task-more > .button,
+.conversation-row:has(> :focus-visible, > .task-more :focus-visible)
+  > .task-more
+  > .button,
 .conversation-row > .task-more > .button[aria-expanded="true"] {
   opacity: 1;
+}
+/* While the ⋯ shows for keyboard focus or its open menu, its row keeps the backdrop it sits in. :where() keeps this as
+   light as the hover rule, so the open task's selected fill, set after it, stays. */
+.conversation-row:where(
+  :has(> :focus-visible, > .task-more :focus-visible),
+  :has(> .task-more [aria-expanded="true"])
+) {
+  background: var(--hover-tint);
+}
+/* While the ⋯ shows, what lies under it gives way: the marks at the link's end (status, waiting dot, helper count) fade
+   out, and a title that reaches the ⋯ fades out before its edge (a mask), never cut by it. Without hover, titles keep
+   the full width. Only where there is hover: on a touch screen the ⋯ always shows, and the title ends before it. */
+@media (hover: hover) {
+  .conversation-row:has(> .task-more):hover > .conversation-link > .task-mark,
+  .conversation-row:has(> .task-more):has(
+      > :focus-visible,
+      > .task-more :focus-visible
+    )
+    > .conversation-link
+    > .task-mark,
+  .conversation-row:has(> .task-more [aria-expanded="true"])
+    > .conversation-link
+    > .task-mark {
+    opacity: 0;
+  }
+  .conversation-row:has(> .task-more):hover
+    > .conversation-link:not(:has(> .task-mark))
+    > .conversation-link-text,
+  .conversation-row:has(> .task-more):has(
+      > :focus-visible,
+      > .task-more :focus-visible
+    )
+    > .conversation-link:not(:has(> .task-mark))
+    > .conversation-link-text,
+  .conversation-row:has(> .task-more [aria-expanded="true"])
+    > .conversation-link:not(:has(> .task-mark))
+    > .conversation-link-text {
+    mask-image: linear-gradient(
+      to left,
+      transparent var(--row-action-reach),
+      var(--ink) calc(var(--row-action-reach) + var(--space-4))
+    );
+  }
 }
 @media (hover: none) {
   .conversation-row > .task-more > .button {
     opacity: 1;
+  }
+  .conversation-row:has(> .task-more) > .conversation-link {
+    padding-inline-end: calc(
+      var(--row-action-size) + var(--row-inset) + var(--space-2)
+    );
   }
 }
 /* The expanded sidebar shows titles without the task icon; the rail shows only the icon. */

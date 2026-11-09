@@ -165,14 +165,15 @@ export function TaskRow({
             <span className="type-small muted task-under">{under}</span>
           )}
         </span>
+        {/* The marks at the link's end share `task-mark`: they give way together under the ⋯ while it shows. */}
         <StatusDot status={status} />
         {lead?.waitingForYou && (
           // §13b: a filled amber dot; the row's name carries the words.
-          <span className="task-waiting" aria-hidden="true" />
+          <span className="task-waiting task-mark" aria-hidden="true" />
         )}
         {lead?.count && (
           <span
-            className="type-small task-helpers-count"
+            className="type-small task-helpers-count task-mark"
             data-tone={lead.count.tone}
             aria-hidden="true"
             // Its words for sighted people too: a lone "2" beside a spinner read as unread messages (a UX review
@@ -222,7 +223,7 @@ function StatusDot({ status }: { status: TaskStatus | null }) {
   if (!status) return null;
   return (
     <span
-      className="task-status"
+      className="task-status task-mark"
       data-status={status}
       title={t(`list.status.${status}`)}
       aria-hidden="true"
