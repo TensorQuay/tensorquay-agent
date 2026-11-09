@@ -41,6 +41,8 @@ pub struct Fixture {
     pub prefix: String,
     /// This fixture's slice of the sandbox network pool.
     pub pool: tqa_sandbox::docker::SubnetPool,
+    /// The slice's lock on this host, held for the fixture's life (`slice_lock`).
+    _pool_lock: std::fs::File,
     pub workspace: TempDir,
     pub storage: TempDir,
     pub state: TempDir,
@@ -104,20 +106,22 @@ impl Fixture {
         let storage = tempfile::tempdir()?;
         let docker = bounded(Docker::connect_with_defaults()?.negotiate_version()).await?;
         let gateway = format!("{prefix}-gateway");
-        let (backend, pool) = match connect(&docker, &prefix, &gateway, &storage, counter).await {
-            Ok(connected) => connected,
-            Err(error) => {
-                return Err(setup_failed(
-                    error,
-                    cleanup_resources(&docker, &prefix, storage.path()).await,
-                ));
-            }
-        };
+        let (backend, pool, pool_lock) =
+            match connect(&docker, &prefix, &gateway, &storage, counter).await {
+                Ok(connected) => connected,
+                Err(error) => {
+                    return Err(setup_failed(
+                        error,
+                        cleanup_resources(&docker, &prefix, storage.path()).await,
+                    ));
+                }
+            };
         let fixture = Self {
             backend,
             docker,
             prefix,
             pool,
+            _pool_lock: pool_lock,
             workspace: tempfile::tempdir()?,
             storage,
             state: tempfile::tempdir()?,
@@ -401,15 +405,23 @@ impl Fixture {
     }
 }
 
+/// What `connect` hands the fixture: its backend, its pool slice and the slice's lock (`slice_lock`).
+type Connected = (
+    DockerBackend,
+    tqa_sandbox::docker::SubnetPool,
+    std::fs::File,
+);
+
 /// Starts the gateway stand-in on a control network of its own (a container with no network cannot join others),
-/// then connects the backend with a pool slice of its own, so parallel test processes don't compete for subnets.
+/// then connects the backend with a pool slice of its own, so parallel test processes don't compete for subnets. The
+/// slice's lock comes back with the backend: the fixture holds it while it lives.
 async fn connect(
     docker: &Docker,
     prefix: &str,
     gateway: &str,
     storage: &TempDir,
     counter: u64,
-) -> Result<(DockerBackend, tqa_sandbox::docker::SubnetPool), Box<dyn Error>> {
+) -> Result<Connected, Box<dyn Error>> {
     pull(docker).await?;
     let control = format!("{prefix}-control");
     bounded(
@@ -448,7 +460,9 @@ async fn connect(
     .await?;
     bounded(docker.start_container(&created.id, None)).await?;
     // Parallel test processes each need a pool slice no other one uses: start from a spread-out slice and move on
-    // while the backend's start-up check finds it taken.
+    // while another process holds its lock, or the backend's start-up check finds it taken. The check alone isn't
+    // enough: it sees only the networks that exist now, so two processes could pass it on one slice, and the first
+    // network either makes there fails the other's later backends (a test that connects one of its own) at theirs.
     let start = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)?
         .subsec_nanos();
@@ -456,6 +470,9 @@ async fn connect(
         let slice =
             (u64::from(start) + u64::from(std::process::id()) * 31 + counter * 7 + attempt * 37)
                 % 256;
+        let Some(lock) = slice_lock(slice)? else {
+            continue;
+        };
         let mut config = DockerBackendConfig::new(prefix.to_owned(), storage.path())?;
         config.test_command_override = Some(vec![
             "sh".into(),
@@ -465,12 +482,33 @@ async fn connect(
         let pool = tqa_sandbox::docker::SubnetPool::new(&format!("10.213.{slice}.0/24"), 29)?;
         config.set_sandbox_network(pool, Some(gateway.to_owned()))?;
         match DockerBackend::connect(config).await {
-            Ok(backend) => return Ok((backend, pool)),
+            Ok(backend) => return Ok((backend, pool, lock)),
             Err(tqa_sandbox::SandboxError::Preflight(reason)) if reason.contains("overlaps") => {}
             Err(error) => return Err(error.into()),
         }
     }
     Err("no free sandbox network pool slice for this test".into())
+}
+
+/// This host's lock on pool slice `slice` for test processes, or `None` while another one holds it (or another user
+/// made its file). The lock goes with the file: it lasts while the file stays open.
+fn slice_lock(slice: u64) -> Result<Option<std::fs::File>, Box<dyn Error>> {
+    let path = std::env::temp_dir().join(format!("tqa-test-pool-10.213.{slice}.lock"));
+    let file = match std::fs::OpenOptions::new()
+        .create(true)
+        .truncate(false)
+        .write(true)
+        .open(path)
+    {
+        Ok(file) => file,
+        Err(error) if error.kind() == std::io::ErrorKind::PermissionDenied => return Ok(None),
+        Err(error) => return Err(error.into()),
+    };
+    match file.try_lock() {
+        Ok(()) => Ok(Some(file)),
+        Err(std::fs::TryLockError::WouldBlock) => Ok(None),
+        Err(std::fs::TryLockError::Error(error)) => Err(error.into()),
+    }
 }
 
 async fn pull(docker: &Docker) -> TestResult {
