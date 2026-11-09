@@ -77,7 +77,7 @@ describe("WEB-U-014 a menu's open state loads when it is wanted", () => {
       </QueryClientProvider>,
     );
     expect(account.fetched).not.toHaveBeenCalled();
-    fireEvent.pointerDown(screen.getByRole("button", { name: "Account" }));
+    fireEvent.pointerEnter(screen.getByRole("button", { name: "Account" }));
     await vi.waitFor(() => expect(account.fetched).toHaveBeenCalledTimes(1));
   });
 

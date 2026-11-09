@@ -93,7 +93,7 @@ export function MenuButton({
     (!current && placeholder === undefined);
   const open = expanded && !unavailable;
   // Its list's code comes when it is about to open (WEB-U-014's budget); a picker that can't get it closes.
-  const menus = useMenus(open, () => setExpanded(false));
+  const menus = useMenus(open, setExpanded, anchor);
   const shownName =
     current?.label ?? placeholder ?? fallback ?? t("menu.unavailable");
   const name = t("menu.current", { label, value: shownName });
@@ -122,7 +122,6 @@ export function MenuButton({
             .join(" ") || undefined
         }
         onPointerEnter={prefetchMenus}
-        onPointerDown={prefetchMenus}
         onFocus={prefetchMenus}
         onClick={() => {
           if (unavailable) return;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore, type RefObject } from "react";
 
 type Menus = typeof import("./MenuSurfaces");
 
@@ -35,19 +35,40 @@ export function prefetchMenus() {
 
 /**
  * The open menus' code once it is here, and null until then; fetched while `open`. A menu opened before it arrives
- * opens when it does; `onFailed` hears that it couldn't come, so the menu closes and the next opening tries again.
+ * opens when it does. Until then it is dismissed as an open menu is: Escape, a press outside its trigger or the focus
+ * leaving the trigger calls `close`, as a fetch that failed does, so the trigger never says it is expanded with nothing
+ * open and the menu never opens later by itself. The next opening tries again. `setOpen` is the trigger's own state
+ * setter, which React keeps the same.
  */
-export function useMenus(open: boolean, onFailed: () => void): Menus | null {
+export function useMenus(
+  open: boolean,
+  setOpen: (open: boolean) => void,
+  trigger: RefObject<HTMLElement | null>,
+): Menus | null {
   const ready = useSyncExternalStore(subscribe, current, absent);
-  const failed = useRef(onFailed);
   useEffect(() => {
-    failed.current = onFailed;
-  });
-  useEffect(() => {
-    if (open && !ready) loadMenus().catch(() => failed.current());
-  }, [open, ready]);
+    if (!open || ready) return;
+    loadMenus().catch(() => setOpen(false));
+    // Once the code is here the menu hears these itself (Popover), and its focusing its first item is no leaving.
+    const dismiss = (event: Event) => {
+      if (menus) return;
+      if ("key" in event) {
+        if (event.key !== "Escape") return;
+        event.preventDefault();
+        event.stopPropagation();
+      } else if (trigger.current?.contains(event.target as Node | null)) return;
+      setOpen(false);
+    };
+    for (const kind of KINDS) addEventListener(kind, dismiss, true);
+    return () => {
+      for (const kind of KINDS) removeEventListener(kind, dismiss, true);
+    };
+  }, [open, ready, setOpen, trigger]);
   return ready;
 }
+
+/** What dismisses a menu still waiting for its code: Escape, a press, the focus moving. */
+const KINDS = ["keydown", "pointerdown", "focusin"];
 
 function subscribe(wake: () => void) {
   waiting.add(wake);

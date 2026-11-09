@@ -3,7 +3,6 @@
 import { Ellipsis, type LucideIcon } from "lucide-react";
 import {
   useEffect,
-  useId,
   useImperativeHandle,
   useRef,
   useState,
@@ -71,9 +70,8 @@ export function ActionMenu({
   const [open, setOpen] = useState(false);
   const anchor = useRef<HTMLButtonElement>(null);
   useImperativeHandle(ref, () => anchor.current as HTMLButtonElement);
-  const id = useId();
   // Its open list's code comes when it is about to open (WEB-U-014's budget); a menu that can't get it closes.
-  const menus = useMenus(open, () => setOpen(false));
+  const menus = useMenus(open, setOpen, anchor);
   const show = () => {
     onOpen?.();
     setOpen(true);
@@ -119,7 +117,6 @@ export function ActionMenu({
         <menus.ActionMenuSurface
           anchor={anchor}
           label={label}
-          id={id}
           actions={actions}
           onClose={() => setOpen(false)}
           onChoose={choose}

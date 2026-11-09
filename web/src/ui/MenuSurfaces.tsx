@@ -4,6 +4,7 @@ import { Check } from "lucide-react";
 import Link from "next/link";
 import {
   isValidElement,
+  useId,
   useLayoutEffect,
   useRef,
   useState,
@@ -29,20 +30,19 @@ export { Popover };
 export function ActionMenuSurface({
   anchor,
   label,
-  id,
   actions,
   onClose,
   onChoose,
 }: {
   anchor: RefObject<HTMLButtonElement | null>;
   label: string;
-  /** The menu's own id, which its items' lines are named from. */
-  id: string;
   actions: readonly MenuAction[];
   onClose: () => void;
   /** An available action chosen: the menu closes, focus goes back to the ⋯, and then it runs. */
   onChoose: (action: MenuAction) => void;
 }) {
+  // What its items' lines are named from, for as long as it is open.
+  const id = useId();
   return (
     <Popover anchor={anchor} label={label} onClose={onClose}>
       <Menu label={label}>

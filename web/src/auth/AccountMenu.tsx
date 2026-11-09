@@ -30,7 +30,7 @@ export function AccountMenu({ onNavigate }: { onNavigate?: () => void } = {}) {
   // The email names the row; where it is hidden (the rail) or cut, the app's own tooltip shows it whole (§6).
   const { handlers, tip } = useNavTip(email || t("account.label"));
   // Its menu's frame comes when it is about to open (WEB-U-014's budget); a menu that can't get it closes.
-  const menus = useMenus(open, () => setOpen(false));
+  const menus = useMenus(open, setOpen, anchor);
   return (
     <>
       <button
@@ -47,7 +47,6 @@ export function AccountMenu({ onNavigate }: { onNavigate?: () => void } = {}) {
           prefetchMenus();
           handlers.onPointerEnter(event);
         }}
-        onPointerDown={prefetchMenus}
         onFocus={(event) => {
           prefetchMenus();
           handlers.onFocus(event);
