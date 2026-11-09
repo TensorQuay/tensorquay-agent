@@ -193,4 +193,43 @@ describe("WEB-U-014 a menu's open state loads when it is wanted", () => {
       expect(screen.queryByRole("menu")).toBeNull();
       expect(document.activeElement).toBe(focused);
     });
+  // A picker that opened at once (New task's chip) and is dismissed while its code loads, or whose code can't come,
+  // says so with onDismiss, as its open list does, so New task drops the empty chip (the review's second round).
+  for (const [how, fails, dismiss] of [
+    [
+      "Escape",
+      false,
+      () => fireEvent.keyDown(document.body, { key: "Escape" }),
+    ],
+    ["a press outside", false, () => fireEvent.pointerDown(document.body)],
+    ["a failed load", true, () => undefined],
+  ] as const)
+    it(`calls a picker's onDismiss once on ${how} before its code arrives`, async () => {
+      let release: () => void = () => undefined;
+      const gate = new Promise<void>((resolve) => {
+        release = () => resolve();
+      });
+      const { MenuButton, loadMenus } = await cold(() =>
+        fails ? Promise.reject(new Error("offline")) : gate,
+      );
+      const onDismiss = vi.fn();
+      render(
+        <MenuButton
+          label="Workspace"
+          options={choices}
+          value=""
+          placeholder="Choose a workspace"
+          defaultOpen
+          onChange={() => undefined}
+          onDismiss={onDismiss}
+        />,
+      );
+      dismiss();
+      await act(async () => {
+        release();
+        await loadMenus().catch(() => undefined);
+      });
+      expect(onDismiss).toHaveBeenCalledTimes(1);
+      expect(screen.queryByRole("menu")).toBeNull();
+    });
 });
