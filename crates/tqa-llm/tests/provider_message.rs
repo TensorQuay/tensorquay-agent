@@ -127,7 +127,7 @@ fn llm_u_036_only_http_errors_carry_the_providers_words() {
 fn llm_u_040_each_providers_error_shape_yields_its_message() {
     for (shape, body, expected) in [
         (
-            "flat detail (observed via the owner's proxy, 2026-09-27)",
+            "flat detail (observed on 27 Sep 2026)",
             r#"{"detail":"System messages are not allowed"}"#,
             "System messages are not allowed",
         ),

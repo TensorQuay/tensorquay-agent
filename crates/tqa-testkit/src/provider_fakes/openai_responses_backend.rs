@@ -6,7 +6,7 @@ use serde_json::{Value, json};
 
 pub(super) const PATH: &str = "/v1/responses";
 
-const OBSERVED: &str = "observed via the owner's proxy, 2026-09-27";
+const OBSERVED: &str = "observed on 27 Sep 2026";
 
 /// `{"detail": "..."}`, as observed.
 pub(super) fn error_body(_status: u16, violation: &Violation) -> Value {
@@ -62,7 +62,7 @@ pub(super) const RULES: &[Rule] = &[
     Rule {
         name: "strict_all_required",
         source: Source::Observed(
-            "observed via the owner's proxy, 2026-09-27: \"Invalid schema for function 'edit_file': In context=('properties', 'edits', 'items'), 'required' is required to be supplied and to be an array including every key in properties. Missing 'replace_all'.\"",
+            "observed on 27 Sep 2026: \"Invalid schema for function 'edit_file': In context=('properties', 'edits', 'items'), 'required' is required to be supplied and to be an array including every key in properties. Missing 'replace_all'.\"",
         ),
         status: 400,
         check: |body| strict::first(body, strict::all_required),

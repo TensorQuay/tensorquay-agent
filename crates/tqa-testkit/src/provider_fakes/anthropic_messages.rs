@@ -44,7 +44,7 @@ pub(super) const RULES: &[Rule] = &[
     Rule {
         name: "system_text_non_empty",
         source: Source::Observed(
-            "2026-09-27 23:14 +0800, the owner's proxy to the hosted Messages API: HTTP 400 for a system text block \"\"",
+            "observed on 27 Sep 2026 from the hosted Messages API: HTTP 400 for a system text block \"\"",
         ),
         status: 400,
         check: |body| {
