@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """The local release pipeline (DEV-PLAN §7, Phase 9 item 3). It builds and records everything a release names, from
-a clean export of one commit, and publishes nothing: pushing images, tagging and uploading need the owner.
+a clean export of one commit, and publishes nothing: the Product Owner pushes the images, tags and uploads.
 
     TQA_DOCKER_TESTS=1 python3 tools/release/release.py --version X.Y.Z --commit <sha> [--out dist] [--kernel]
                                                        [--tracker <debian tracker json>] [--candidate]
@@ -60,7 +60,7 @@ def guard(run):
     def guarded(arguments, **options):
         arguments = [str(argument) for argument in arguments]
         if tuple(arguments[:2]) in FORBIDDEN:
-            raise checks.Refused("the release pipeline never runs `{}`: publishing needs the owner".format(
+            raise checks.Refused("the release pipeline never runs `{}`: publishing needs the Product Owner".format(
                 " ".join(arguments[:2])))
         return run(arguments, **options)
     return guarded
@@ -251,7 +251,8 @@ def main():
     parser.add_argument("--version", required=True)
     parser.add_argument("--commit", required=True)
     parser.add_argument("--out", type=Path, default=Path("dist"))
-    parser.add_argument("--kernel", action="store_true", help="also build the guest kernel (shipping it: the owner)")
+    parser.add_argument("--kernel", action="store_true",
+                        help="also build the guest kernel (shipping it is the Product Owner's decision)")
     parser.add_argument("--tracker", type=Path, help="a saved Debian security tracker file (offline gate)")
     parser.add_argument("--candidate", action="store_true", help="a dry run of a commit not on main; not releasable")
     args = parser.parse_args()

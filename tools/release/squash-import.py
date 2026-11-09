@@ -192,7 +192,8 @@ def report(commit, parent, public, source, first_import, ref, fixture_line):
         dropped = int(git("rev-list", "--count", public, "^" + commit).strip())
         lines.append("a push replaces the public main {}: its {} commits after the first import leave main's history"
                      .format(short(public), dropped))
-        lines.append("that is a force-push (owner approval; TQ_GUARD_ALLOW_FORCE=1 for that one push), for example:")
+        lines.append("that is a force-push (the Product Owner's approval; TQ_GUARD_ALLOW_FORCE=1 for that one push), "
+                     "for example:")
         lines.append("  TQ_GUARD_ALLOW_FORCE=1 git push --force-with-lease=main:{} origin {}:refs/heads/main"
                      .format(public, commit))
     else:

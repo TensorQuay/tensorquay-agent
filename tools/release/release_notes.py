@@ -67,14 +67,15 @@ def render(manifest, evaluations):
         out += ["**Candidate dry run: not releasable.**", ""]
     out += ["Commit: `{}` ({}). Tag: {} ({}{}).".format(
                 commit, manifest["commit_time"], tag["tag"], tag["state"],
-                ", by the owner" if tag["state"] == "to create" else ""),
+                ", by the Product Owner" if tag["state"] == "to create" else ""),
             "Protocol revision: {}.".format(manifest["protocol_revision"]), "",
             "## Highlights", "", "_To write._", "",
             "## Breaking changes and upgrade", "", "_To write._",
             "See the upgrade notes in `deploy/README.md`.", "",
             "## Pinned versions", "", "| Component | Version |", "| --- | --- |"]
     out += ["| {} | {} |".format(label, manifest["pins"][key]) for key, label in PIN_NAMES if key in manifest["pins"]]
-    out += ["", "## Images", "", "Referenced by image ID; registry digests exist once the owner pushes them.", "",
+    out += ["", "## Images", "",
+            "Referenced by image ID; registry digests exist once the Product Owner pushes them.", "",
             "| Image | ID | Size |", "| --- | --- | --- |"]
     out += ["| {} | `{}` | {:.0f} MB |".format(name, image["id"], image["size"] / 1e6)
             for name, image in sorted(manifest["images"].items())]
@@ -83,7 +84,8 @@ def render(manifest, evaluations):
             for name, rootfs in sorted(manifest["rootfs"].items())]
     kernel = manifest.get("kernel")
     out += ["- Guest kernel: " + ("`vmlinux` SHA-256 `{}`".format(kernel["sha256"]) if kernel
-                                  else "not built for this release (shipping it is the owner's decision)"), ""]
+                                  else "not built for this release "
+                                       "(shipping it is the Product Owner's decision)"), ""]
     vulns = manifest["vulnerabilities"]
     out += ["## Software bills of materials and known vulnerabilities", "",
             "SPDX 2.3 documents and package lists for every artefact are in `sbom/`. The release vulnerability gate "
@@ -95,5 +97,5 @@ def render(manifest, evaluations):
         for page in evaluations]
     out += ["", "## Known limits", "", "Collected from each evaluation page's limits of the acceptance.", ""]
     out += ["- {}: {}".format(_gate(page), limit) for page in evaluations for limit in page["limits"]]
-    out += ["", "---", "", "Publishing this release needs the owner's approval.", ""]
+    out += ["", "---", "", "Publishing this release needs the Product Owner's approval.", ""]
     return "\n".join(out)

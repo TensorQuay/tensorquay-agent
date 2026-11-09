@@ -322,7 +322,7 @@ G-13-suites, on SBX-F-009's host memory.
   - the release directory complete, with no partial left, and `SHA256SUMS` verifying;
   - `release.json` saying candidate, not releasable, not published;
   - every image ID matching the local engine;
-  - the notes saying it needs the owner;
+  - the notes saying it needs the Product Owner;
   - the vulnerability gate's report written;
   - no tag `v1.0.0-rc.1` created, and nothing pushed.
 

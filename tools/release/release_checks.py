@@ -35,7 +35,7 @@ def commit(rev_parse):
 
 
 def tag(release_version, sha, rev_parse):
-    """`vX.Y.Z`: absent (the owner creates it), on this commit, or moved (refused). `rev_parse` is
+    """`vX.Y.Z`: absent (the Product Owner creates it), on this commit, or moved (refused). `rev_parse` is
     `git rev-parse -q --verify refs/tags/vX.Y.Z^{commit}`, empty when the tag is absent."""
     name = "v" + release_version
     tagged = rev_parse.strip()
