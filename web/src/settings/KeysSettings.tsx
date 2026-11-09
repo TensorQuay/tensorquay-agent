@@ -41,9 +41,9 @@ type Open =
 
 /**
  * Your account › Keys (WEB-U-076, UI-GUIDELINES §7): keys for web services (ADR-0037), then the keys connectors take,
- * each by the service it is for (the owner's direction, c8: people never need to know git). A key for a Git host is a
- * key for a web service: since ADR-0037 §7 the gateway keeps no separate project keys (WEB-U-149). Everyone switches to
- * the shared keys from here.
+ * each by the service it is for (the Product Owner's direction: people never need to know git). A key for a Git host is
+ * a key for a web service: since ADR-0037 §7 the gateway keeps no separate project keys (WEB-U-149). Everyone switches
+ * to the shared keys from here.
  */
 export function KeysSettings({
   me,

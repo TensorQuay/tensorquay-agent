@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { createConversation, signIn } from "./session";
 import { expect, test, type Locator, type Page } from "./test";
 
-// WEB-U-092 on the page (the owner's "this edit on top sucks"): renaming a task turns the title itself into the field,
+// WEB-U-092 on the page: renaming a task turns the title itself into the field,
 // at its font, size and place, reaching to the header's controls, all of it selected, with no label, no buttons and
 // one quiet underline for focus; the status and the pickers don't move. Enter or a click elsewhere saves, Esc puts it
 // back, and an empty title keeps the old one. The sidebar row's Rename works the same way.

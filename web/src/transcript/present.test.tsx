@@ -460,7 +460,7 @@ describe("WEB-U-016 tool summaries", () => {
 });
 
 // SEC-001: a refusal explained by its tool line is said once; an unexplained one keeps its notice.
-// The owner dropped the environment suggestion (10 Oct 2026; ADR-0039 §8 amended): no agent tool suggests a switch,
+// The environment suggestion was dropped (10 Oct 2026; ADR-0039 §8 amended): no agent tool suggests a switch,
 // the person switches with the environment picker. A model that still calls the old name gets an unknown tool's
 // failure, shown as any failed step is, never hidden and never a card.
 describe("WEB-U-016 a call to the dropped suggestion tool is an ordinary step", () => {

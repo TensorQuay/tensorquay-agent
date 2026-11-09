@@ -97,7 +97,7 @@ describe("WEB-U-092 in-place edit", () => {
   });
 });
 
-// WEB-U-114 (the title edit as on Claude.ai): the field shows a focus ring only when the keyboard opened it (the ⋯'s
+// WEB-U-114 (the title's in-place edit): the field shows a focus ring only when the keyboard opened it (the ⋯'s
 // Rename chosen by keys); opened by a click it is the text with its thin underline and no ring.
 describe("WEB-U-114 the in-place edit's focus ring", () => {
   it("has no ring when a pointer opened it", () => {

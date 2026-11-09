@@ -932,7 +932,7 @@ textarea.composer-input {
   background: var(--paper);
 }
 /*
- * The title edits as on Claude.ai (WEB-U-114): at rest plain text; on hover only a subtle tint behind it, no box and no
+ * The title edits in place (WEB-U-114): at rest plain text; on hover only a subtle tint behind it, no box and no
  * pencil. The tint is a spread shadow, so it takes no room and nothing moves (the title block clips 4 px out).
  */
 .conversation-title h1[data-renamable] {

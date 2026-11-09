@@ -164,7 +164,7 @@ export function NewConversation({
       <TabTitle>{t("tab.newTask", { product: APP_NAME })}</TabTitle>
       <ConversationBar
         title={t("shell.newTask")}
-        // The model and environment in the top bar, as on a task's header (the owner's correction, WEB-U-113).
+        // The model and environment in the top bar, as on a task's header (WEB-U-113).
         choices={
           <span
             role="group"

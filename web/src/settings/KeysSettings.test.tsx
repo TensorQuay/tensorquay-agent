@@ -87,8 +87,8 @@ const table = () => screen.findByRole("table", { name: "Your keys" });
 const row = (name: RegExp) => screen.getByRole("row", { name });
 const dialog = () => screen.getByRole("dialog");
 
-// The owner's direction (c8): people never need to know git. One page for a person's keys, listed by the service each
-// is for, one main action, and an administrator's shared keys one switch away (WEB-U-076, UI-GUIDELINES §7).
+// The Product Owner's direction: people never need to know git. One page for a person's keys, listed by the service
+// each is for, one main action, and an administrator's shared keys one switch away (WEB-U-076, UI-GUIDELINES §7).
 describe("WEB-U-076 keys, by service", () => {
   it("lists every key in one table by its service, with no git words", async () => {
     show();

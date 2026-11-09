@@ -26,9 +26,9 @@ function lead(stillWorking: boolean, onStopTeam = vi.fn()) {
   return onStopTeam;
 }
 
-// WEB-U-307 (GW-I-250; the lead, 7 Oct): a lead's Stop ends only its own step, and a helper's report can wake it again.
-// The Stop button says so in its tooltip and description; on a touch screen, where no tooltip shows, the lead's strip
-// says the helpers still work once the lead is stopped, with Stop team.
+// WEB-U-307 (GW-I-250; decided on 7 Oct 2026): a lead's Stop ends only its own step, and a helper's report can wake it
+// again. The Stop button says so in its tooltip and description; on a touch screen, where no tooltip shows, the lead's
+// strip says the helpers still work once the lead is stopped, with Stop team.
 describe("WEB-U-307 a lead's Stop while its helpers work", () => {
   it("says the helpers still work once the lead is stopped, with Stop team, and only then", () => {
     const onStopTeam = lead(true);

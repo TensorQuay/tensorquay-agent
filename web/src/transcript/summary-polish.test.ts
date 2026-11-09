@@ -18,8 +18,8 @@ const shell: ToolView = {
 };
 
 describe("WEB-U-016 quiet recorded summaries", () => {
-  // Lead (2026-09-26): a push reads as a line naming where it went, not as "Used git_push" and raw JSON. The owner's
-  // direction (c8): no git words for users, so it names the project, never a branch, a push or a commit.
+  // Decided on 26 Sep 2026: a push reads as a line naming where it went, not as "Used git_push" and raw JSON. The
+  // Product Owner's direction: no git words for users, so it names the project, never a branch, a push or a commit.
   it("names the project a push saves changes to while it runs, once it saved and when it failed", () => {
     const target = {
       remote: "https://git.example.invalid/team/demo.git",

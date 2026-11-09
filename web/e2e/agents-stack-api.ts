@@ -66,10 +66,10 @@ export async function events(page: Page, task: string) {
   return frames.flatMap((frame) => (frame.event ? [frame.event] : []));
 }
 
-// The edge cases (E2E-AGENTS-021..025, the owner's acceptance bar of 7 Oct, point 2), each a lead of its own whose
-// person's message holds the EDGE- phrase that picks its script in agents.json. Helpers named "holder-…" hold every
-// reply for ten minutes, so they stay working until stopped, deleted or restarted; "ghost" has no script, so the fake
-// model refuses it and its run fails. Every case stops its team at the end, so held helpers never keep a slot.
+// The edge cases (E2E-AGENTS-021..025, the Product Owner's acceptance bar of 7 Oct, point 2), each a lead of its own
+// whose person's message holds the EDGE- phrase that picks its script in agents.json. Helpers named "holder-…" hold
+// every reply for ten minutes, so they stay working until stopped, deleted or restarted; "ghost" has no script, so the
+// fake model refuses it and its run fails. Every case stops its team at the end, so held helpers never keep a slot.
 export type EdgeHelper = { conversation: string; name: string; state: string };
 
 /** Starts a leadId with `phrase` in its person's message, as a person would, and returns its id. */

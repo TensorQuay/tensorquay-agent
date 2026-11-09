@@ -63,7 +63,7 @@ async function menuItem(display: string, item: string) {
   fireEvent.click(screen.getByRole("menuitem", { name: item }));
 }
 describe("WEB-U-047 environment sizes", () => {
-  // The owner's direction: sizes belong to each environment, never above the configuration file's ceiling.
+  // The Product Owner's direction: sizes belong to each environment, never above the configuration file's ceiling.
   it("names an environment's own size under its name, and a size the ceiling lowered", async () => {
     show(
       fakeTemplates({

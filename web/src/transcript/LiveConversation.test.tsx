@@ -115,10 +115,10 @@ async function inHeader(name: string) {
   return screen.findByRole("button", { name });
 }
 
-// The owner's correction of step 2 B (WEB-U-113, which replaces WEB-U-096's composer row): the model and environment are
+// The correction of step 2 B (WEB-U-113, which replaces WEB-U-096's composer row): the model and environment are
 // two small pickers in the task header, right of the title and status; no ⚙ and no "Model and environment" panel.
 describe("WEB-U-113 the task's choices sit in its header", () => {
-  // WEB-U-113 (the owner's correction): the pickers are back in the header, right of the title and status.
+  // WEB-U-113: the pickers are back in the header, right of the title and status.
   it("offers the model and environment in the header, right of the status, and none in the composer", async () => {
     page();
     const header = screen.getByRole("region", { name: "Task header" });

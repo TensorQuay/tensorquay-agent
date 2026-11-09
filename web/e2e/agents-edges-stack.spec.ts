@@ -17,11 +17,11 @@ import { recordTexts } from "./header-texts";
 import { afterStart, budget } from "./stack-start";
 import { bootstrap } from "./ux/flow";
 
-// The owner's edge cases that agents-stack.spec.ts doesn't cover (E2E-AGENTS-026..030; the acceptance bar of 7 Oct,
-// point 2) and 16n's and 16p's team fixes (E2E-AGENTS-031..035), on the real stack with the scripted model: each lead's
-// EDGE- phrase picks its script in deploy/tests/fixtures/agents.json. They run before agents-stack.spec.ts (files run
-// in name order on one worker), so E2E-AGENTS-020 stays last. Every case stops its team at the end; the afterEach stops
-// any a failure left running.
+// The Product Owner's edge cases that agents-stack.spec.ts doesn't cover (E2E-AGENTS-026..030; the acceptance bar of
+// 7 Oct, point 2) and 16n's and 16p's team fixes (E2E-AGENTS-031..035), on the real stack with the scripted model: each
+// lead's EDGE- phrase picks its script in deploy/tests/fixtures/agents.json. They run before agents-stack.spec.ts
+// (files run in name order on one worker), so E2E-AGENTS-020 stays last. Every case stops its team at the end; the
+// afterEach stops any a failure left running.
 test.skip(
   process.env.TQA_STACK_SUITE !== "agents",
   "Requires the agents stack suite",

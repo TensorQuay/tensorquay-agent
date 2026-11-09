@@ -405,7 +405,7 @@ function ResetLimit({
 }
 
 /**
- * The configuration file's ceiling for every environment's size (the owner's direction: sizes belong to each
+ * The configuration file's ceiling for every environment's size (the Product Owner's direction: sizes belong to each
  * environment), read-only here; the sizes themselves are set on Environments.
  */
 function Largest({ ceiling }: { ceiling: EnvironmentSize }) {

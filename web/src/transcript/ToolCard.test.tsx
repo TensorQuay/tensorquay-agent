@@ -22,7 +22,7 @@ const tool: ToolView = {
 };
 
 describe("WEB-U-001 tool card behavior", () => {
-  // The owner's direction (c8): the line names the project; the card, for those who open it, says what the changes
+  // The Product Owner's direction: the line names the project; the card, for those who open it, says what the changes
   // were saved as.
   it("says what a saved push's changes were saved as", () => {
     render(

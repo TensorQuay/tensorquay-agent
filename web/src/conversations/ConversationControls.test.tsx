@@ -134,8 +134,8 @@ describe("WEB-U-007 conversation bar", () => {
     expect(document.title).toBe("Private task · TensorQuay Agent");
   });
 
-  // The owner's correction (WEB-U-113): the header holds the title, the status and the model and environment as two
-  // small pickers, with no ⚙ and no Done.
+  // The correction of 30 Sep 2026 (WEB-U-113): the header holds the title, the status and the model and environment as
+  // two small pickers, with no ⚙ and no Done.
   it("holds the title, the status and the model and environment pickers", async () => {
     page();
     const bar = screen.getByRole("region", { name: "Task header" });
@@ -234,7 +234,7 @@ describe("WEB-U-007 conversation bar", () => {
     expect(screen.queryByRole("menu")).toBeNull();
     expect(fetch).not.toHaveBeenCalled();
   });
-  // The owner's "this edit on top sucks": the title itself becomes the field (the UI standard's In-place edit), from a
+  // The title itself becomes the field (the UI standard's In-place edit), from a
   // click on the title or the pencil, with no label, Save or Cancel; Esc puts it back and returns to the pencil.
   // The UI standard's header: the title at 16 px weight 600, the status, a quiet Files icon and one ⋯ (Rename, Delete
   // task); no pencil. Renaming still starts from a click on the title.

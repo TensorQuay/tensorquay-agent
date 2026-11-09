@@ -81,7 +81,7 @@ export function turnSummary(
   const pages = tools.filter(
     (tool) => tool.name === "fetch_url" && tool.status === "ok",
   ).length;
-  // The owner's direction (c8): the projects it saved changes to, by site and path, never "pushed".
+  // The Product Owner's direction: the projects it saved changes to, by site and path, never "pushed".
   const projects = new Set(
     tools
       .filter((tool) => tool.name === "git_push" && tool.status === "ok")

@@ -46,7 +46,7 @@ beforeAll(async () => {
   await loadStepWords();
 });
 
-// The owner, 9 Nov 2026: a folded group that only says "Working…" looks stuck. Folded while the run works, its heading
+// Found on 9 Nov 2026: a folded group that only says "Working…" looks stuck. Folded while the run works, its heading
 // is the live line: the step it is on, the soft shimmer and the time (WEB-U-462).
 describe("WEB-U-462 a folded group shows the step it is on", () => {
   it("shows the running call's step and its time, with the shimmer on the words only", () => {

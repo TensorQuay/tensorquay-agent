@@ -300,7 +300,7 @@ describe("WEB-U-016 steps in plain words", () => {
   });
 });
 
-// The owner's direction (c8): people never need to know git. A task that saved its changes to a project says so in
+// The Product Owner's direction: people never need to know git. A task that saved its changes to a project says so in
 // the step group's heading, in the same plain words as its line.
 describe("WEB-U-016 no git words", () => {
   it("counts the projects a run saved its changes to", () => {

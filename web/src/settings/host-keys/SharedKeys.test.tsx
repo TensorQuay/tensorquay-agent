@@ -28,7 +28,7 @@ afterEach(() => vi.restoreAllMocks());
 const now = () => new Date("2026-09-30T21:00:00Z");
 /**
  * A member's own key as an administrator lists it, with the member's name for it included as a gateway might still
- * send it: the page must never show it (the owner's rule, least exposure: a member's key is exposed only to them).
+ * send it: the page must never show it (least exposure: a member's key is exposed only to them).
  */
 const memberKey = () => ({
   ...personalRow({ host: "github.com", last_use: null }),
