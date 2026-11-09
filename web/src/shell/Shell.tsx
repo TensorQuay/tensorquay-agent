@@ -9,11 +9,10 @@ import { useT } from "../i18n/I18nProvider";
 import { APP_NAME } from "../lib/app";
 import { Skeleton } from "../ui/Skeleton";
 
-import { ChannelsLink } from "./ChannelsLink";
+import { useNavTip } from "./nav-tip";
 import { Navigation } from "./Navigation";
 import { ShellContext } from "./shell-context";
 import { SidebarToggle } from "./SidebarToggle";
-import { WorkspacesLink } from "./WorkspacesLink";
 
 const NavigationDrawer = lazy(() =>
   import("./NavigationDrawer").then(({ NavigationDrawer }) => ({
@@ -25,6 +24,7 @@ const NavigationDrawer = lazy(() =>
 export function Shell({ children }: { children: ReactNode }) {
   const [navigationOpen, setNavigationOpen] = useState(false);
   const t = useT();
+  const brand = useNavTip(APP_NAME);
   return (
     <ShellContext.Provider
       value={{ openNavigation: () => setNavigationOpen(true) }}
@@ -37,18 +37,17 @@ export function Shell({ children }: { children: ReactNode }) {
               prefetch={false}
               className="product-name"
               aria-label={APP_NAME}
-              title={APP_NAME}
+              {...brand.handlers}
             >
               <span className="brand-mark" aria-hidden="true" />
-              <span className="product-label type-body">{APP_NAME}</span>
+              <span className="product-label type-body" data-nav-label="">
+                {APP_NAME}
+              </span>
             </Link>
+            {brand.tip}
             <SidebarToggle />
           </div>
           <Navigation />
-          <div className="sidebar-footer">
-            <WorkspacesLink />
-            <ChannelsLink />
-          </div>
           <div className="sidebar-account">
             <AccountMenu />
           </div>

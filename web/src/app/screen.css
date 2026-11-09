@@ -59,12 +59,12 @@
   min-width: 0;
 }
 /* In the dialog the picture's width is also held to the height left for it at 16:10, so the status, Hand back, ⋯ and
-   the lines stay in view at a laptop's height (a pass over the pages before 17.0); 22.5rem is the rest of the dialog,
-   its lines wrapped at that width. The status, the controls and the lines take the picture's width, so they start where
-   it does. */
+   the lines stay in view at a laptop's height (a pass over the pages before 17.0); 23.5rem is the rest of the
+   dialog, its lines wrapped at that width, at the type scale of 9 Nov 2026 (§4: 22.5rem before it, 8 px short at
+   1280×720). The status, the controls and the lines take the picture's width, so they start where it does. */
 .preview-dialog .screen-panel {
   width: 100%;
-  max-width: min(1280px, calc((100dvh - 22.5rem) * 16 / 10));
+  max-width: min(1280px, calc((100dvh - 23.5rem) * 16 / 10));
   margin-inline: auto;
 }
 /* A desktop action's pictures on its card (ADR-0039 §9): side by side where they fit, one above the other when not. */

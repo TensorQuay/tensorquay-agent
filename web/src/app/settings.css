@@ -18,7 +18,7 @@
   gap: var(--space-3);
 }
 .settings-title h1 {
-  /* §5c: the page heading is 20/28, not display size; the column starts 24 px under it (the grid's row gap). */
+  /* §5c: the page heading is 22/30, not display size; the column starts 24 px under it (the grid's row gap). */
   font-size: var(--heading-size);
   line-height: var(--heading-line-height);
 }
@@ -106,15 +106,7 @@
     gap: var(--space-2);
   }
 }
-/* Keys and credentials: an administrator's Mine | Shared, and the page's purpose beside its one main action. */
-.keys-views {
-  display: flex;
-  gap: var(--space-1);
-}
-.keys-views .nav-item[aria-current="page"] {
-  background: var(--selected-fill);
-  color: var(--ink);
-}
+/* Keys and credentials: the page's purpose beside its one main action (its Mine | Shared are §7 Tabs). */
 .settings-bar {
   display: flex;
   align-items: flex-start;
@@ -183,11 +175,16 @@
   width: 100%;
 }
 .data-table td .button {
-  height: var(--row-height-nav);
-  min-height: var(--row-height-nav);
+  height: var(--table-control-height);
+  min-height: var(--table-control-height);
 }
 .data-table td .icon-button {
-  width: var(--row-height-nav);
+  width: var(--table-control-height);
+}
+/* A value set in code in a cell (an API token's hint) keeps its line within the cell's: at the 16 px body size the
+   code face's taller ascent made a one-line row 42 px instead of 40 (§7 Table). */
+.data-table td code {
+  line-height: var(--compact-leading);
 }
 /* A control or a link in a cell sits in the line's middle, never on its baseline (which leaves room for descenders). */
 .data-table td :is(.button, .icon-action, a) {

@@ -3,11 +3,19 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { useComposerSize } from "./use-composer-size";
 
-function Box({ draft, focus }: { draft: string; focus: boolean }) {
-  const input = useComposerSize(draft, focus);
+function Box({
+  draft,
+  focus,
+  least,
+}: {
+  draft: string;
+  focus: boolean;
+  least?: number;
+}) {
+  const input = useComposerSize(draft, focus, least);
   return <textarea aria-label="Message" ref={input} defaultValue={draft} />;
 }
-/** A line of 20 px, 8 px padding and 1 px border each side: 2 lines = 58 px, 8 lines = 178 px. */
+/** A line of 20 px, 8 px padding and 1 px border each side: 1 line = 38 px, 2 lines = 58 px, 8 lines = 178 px. */
 // The padding is what jsdom's computed style reports, not a style this test sets, so it is named rather than inline.
 const COMPUTED_PADDING = "8px";
 function style(lineHeight: string) {
@@ -28,21 +36,35 @@ function content(height: number) {
 }
 afterEach(() => vi.restoreAllMocks());
 
-// The composer grows with its text between two and eight lines, without moving the page (WEB-U-430 / §7).
+// The composer grows with its text between one and eight lines, without moving the page (WEB-U-430 / §7; one row at
+// rest, decided on 9 Nov 2026): two lines only where it is asked to start there (New task's keyboard hint).
 describe("WEB-U-020 the composer's height", () => {
-  it("stays between two and eight lines of its own text", () => {
+  it("stays between one and eight lines of its own text", () => {
     style("20px");
     content(10);
     const { getByLabelText, rerender } = render(
       <Box draft="a" focus={false} />,
     );
     const box = getByLabelText("Message");
-    expect(box.style.height).toBe("58px");
+    expect(box.style.height).toBe("38px");
     content(100);
     rerender(<Box draft="a longer draft" focus={false} />);
     expect(box.style.height).toBe("102px");
     content(1000);
     rerender(<Box draft={"line\n".repeat(40)} focus={false} />);
+    expect(box.style.height).toBe("178px");
+  });
+
+  it("starts at two lines when asked, and still grows to eight", () => {
+    style("20px");
+    content(10);
+    const { getByLabelText, rerender } = render(
+      <Box draft="" focus={false} least={2} />,
+    );
+    const box = getByLabelText("Message");
+    expect(box.style.height).toBe("58px");
+    content(1000);
+    rerender(<Box draft={"line\n".repeat(40)} focus={false} least={2} />);
     expect(box.style.height).toBe("178px");
   });
 

@@ -6,7 +6,7 @@ import { auditView } from "./ux/polish-audit";
 
 // WEB-U-021 for the sidebar on its own (the workspaces audit of UI-GUIDELINES §5b found its paddings off the scale):
 // the expanded sidebar, the rail and the phone drawer, with enough tasks for Show more and the Search row, keep every
-// padding, gap and radius on the scale; and its navigation rows are 32 px with a mouse, 44 px on a touch screen (§5c).
+// padding, gap and radius on the scale; and its navigation rows are 36 px with a mouse, 44 px on a touch screen (§5c).
 async function tasks(page: Page) {
   await signIn(page);
   for (let n = 1; n <= 10; n += 1) {
@@ -54,7 +54,7 @@ for (const width of [1024, 1440, 1920])
       expect(await auditView(page, `sidebar ${width}`, sidebar)).toEqual([]);
       const heights = await rowHeights(page, sidebar);
       expect(heights.length).toBeGreaterThan(5);
-      expect(new Set(heights)).toEqual(new Set([32]));
+      expect(new Set(heights)).toEqual(new Set([36]));
       await page.getByRole("button", { name: "Collapse sidebar" }).click();
       expect(await auditView(page, `rail ${width}`, sidebar)).toEqual([]);
     });

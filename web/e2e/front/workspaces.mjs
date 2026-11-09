@@ -67,7 +67,8 @@ function all(member, conversations) {
       if (!state.made.has(task.id))
         state.made.set(task.id, {
           id: task.id,
-          name: task.title ?? "Untitled task",
+          // As the gateway names it (workspaces.rs): the title's first 100 characters, the most a name may hold.
+          name: [...(task.title ?? "Untitled task")].slice(0, 100).join(""),
           state: "ready",
           created_at: task.created_at,
           size_bytes: 64 * 1024,

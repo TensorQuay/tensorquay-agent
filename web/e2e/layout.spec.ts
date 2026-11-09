@@ -78,9 +78,13 @@ for (const width of [1024, 1440])
           first.y,
           "first transcript line within 64 px",
         ).toBeLessThanOrEqual(64);
-        const column = await box(page, ".conversation-page");
-        // The UI standard: one conversation width, 720 px, whether the sidebar is expanded or a rail.
-        expect(column.width).toBeLessThanOrEqual(720);
+        // The UI standard: one conversation width, 720 px, whether the sidebar is expanded or a rail: the reading
+        // column, the transcript and the composer (the header above it spans the main area, WEB-E2E-117).
+        for (const part of [
+          ".transcript-scroll",
+          ".conversation-page > .composer",
+        ])
+          expect((await box(page, part)).width, part).toBeLessThanOrEqual(720);
         await expect(page.locator(".conversation-page")).toHaveAttribute(
           "data-scrolled",
           "false",
@@ -185,7 +189,8 @@ const opacity = (page: Page, selector: string) =>
     .first()
     .evaluate((element) => getComputedStyle(element).opacity);
 
-// The task row's actions menu sits inside the row, 8 px from its right edge, and shows on hover or keyboard focus.
+// The task row's actions menu sits inside the row, 2 px from its right edge (the row's even inset, WEB-E2E-114), and
+// shows on hover or keyboard focus.
 test("WEB-U-007 task row actions appear on hover and focus", async ({
   page,
 }) => {
@@ -198,7 +203,7 @@ test("WEB-U-007 task row actions appear on hover and focus", async ({
   const rowBox = await row.boundingBox();
   const removeBox = await remove.boundingBox();
   if (!rowBox || !removeBox) throw new Error("The task row must be visible");
-  expect(rowBox.x + rowBox.width - (removeBox.x + removeBox.width)).toBe(8);
+  expect(rowBox.x + rowBox.width - (removeBox.x + removeBox.width)).toBe(2);
   expect(await opacity(page, ".conversation-row > .task-more > .button")).toBe(
     "0",
   );
@@ -210,7 +215,11 @@ test("WEB-U-007 task row actions appear on hover and focus", async ({
   await expect
     .poll(() => opacity(page, ".conversation-row > .task-more > .button"))
     .toBe("0");
+  // Keyboard focus (a focus a click leaves behind shows nothing, WEB-E2E-114): onto the ⋯, then back to the link.
   await row.getByRole("link").focus();
+  await page.keyboard.press("Tab");
+  await page.keyboard.press("Shift+Tab");
+  await expect(row.getByRole("link")).toBeFocused();
   await expect
     .poll(() => opacity(page, ".conversation-row > .task-more > .button"))
     .toBe("1");

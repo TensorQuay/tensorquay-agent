@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useId, useState } from "react";
 
 import { useT } from "../i18n/I18nProvider";
+import { TabList, tabPanelIds } from "../ui/Tabs";
 
 import { ChannelMembers } from "./ChannelMembers";
 import type {
@@ -99,8 +100,8 @@ export function ChannelSide({
     retry: false,
   });
   const tabs = [
-    ["tasks", t("channels.tasks")],
-    ["members", t("channels.membersTitle")],
+    { value: "tasks", label: t("channels.tasks") },
+    { value: "members", label: t("channels.membersTitle") },
   ] as const;
   return (
     <aside
@@ -109,27 +110,14 @@ export function ChannelSide({
       // Tooltips inside stay within the side panel.
       data-tip-bounds
     >
-      <div role="tablist" className="channel-tabs">
-        {tabs.map(([value, label]) => (
-          <button
-            key={value}
-            type="button"
-            role="tab"
-            id={`${base}-${value}`}
-            className="channel-tab type-label"
-            aria-selected={tab === value}
-            aria-controls={`${base}-${value}-panel`}
-            onClick={() => setTab(value)}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-      <div
-        role="tabpanel"
-        id={`${base}-${tab}-panel`}
-        aria-labelledby={`${base}-${tab}`}
-      >
+      <TabList
+        id={base}
+        label={t("channels.side")}
+        views={tabs}
+        current={tab}
+        onChoose={setTab}
+      />
+      <div role="tabpanel" {...tabPanelIds(base, tab)}>
         {tab === "tasks" ? (
           tasks.data ? (
             <TaskBoard

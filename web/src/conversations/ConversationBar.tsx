@@ -69,7 +69,7 @@ export function ConversationBar({
   extra?: readonly MenuAction[];
   saving?: boolean;
   /**
-   * The task's model and environment, two small pickers right of the title and status (the owner's correction,
+   * The task's model and environment, two small pickers right of the title and status (the Product Owner's correction,
    * WEB-U-113); icons alone where the header is narrow (WEB-U-106).
    */
   choices?: ReactNode;

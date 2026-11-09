@@ -4,9 +4,7 @@ import { AccountMenu } from "../auth/AccountMenu";
 import { useT } from "../i18n/I18nProvider";
 import { Dialog } from "../ui/Dialog";
 
-import { ChannelsLink } from "./ChannelsLink";
 import { Navigation } from "./Navigation";
-import { WorkspacesLink } from "./WorkspacesLink";
 import "../i18n/deferred-catalogue";
 
 /**
@@ -25,8 +23,6 @@ export function NavigationDrawer({ onClose }: { onClose: () => void }) {
       placement="start"
     >
       <Navigation onNavigate={onClose} />
-      <WorkspacesLink onNavigate={onClose} />
-      <ChannelsLink onNavigate={onClose} />
       <div className="sidebar-account drawer-account">
         <AccountMenu onNavigate={onClose} />
       </div>

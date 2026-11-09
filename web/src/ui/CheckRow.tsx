@@ -18,7 +18,7 @@ import { Icon } from "./Icon";
 
 /**
  * The standard check row (UI-GUIDELINES §7 Checkbox, WEB-U-434): a checkbox or radio and its words, the whole row its
- * label. The native control stays, for its keyboard, its label and its form, filling a 28 px target, transparent, and
+ * label. The native control stays, for its keyboard, its label and its form, filling a 32 px target, transparent, and
  * the standard 16 px box (a circle for a radio) is drawn under it. Its box follows `checked`, so it is controlled.
  */
 export function CheckRow({

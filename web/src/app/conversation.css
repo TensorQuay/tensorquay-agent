@@ -9,12 +9,22 @@
   align-items: center;
   justify-content: space-between;
 }
-.conversation-list,
-.conversation-page {
+.conversation-list {
   max-width: var(--transcript-width);
   width: 100%;
   margin-inline: auto;
   min-width: 0;
+}
+/* §7 Conversation bar (decided on 9 Nov 2026): a task's page fills the main area, so its header spans it; everything
+   under the header (the transcript, the composer and what comes between) keeps the centred reading column. */
+.conversation-page {
+  width: 100%;
+  min-width: 0;
+}
+.conversation-page > :not(.conversation-bar) {
+  width: 100%;
+  max-width: var(--transcript-width);
+  margin-inline: auto;
 }
 .conversation-rows {
   list-style: none;
@@ -36,9 +46,6 @@
   gap: var(--space-1);
   text-decoration: none;
   overflow-wrap: anywhere;
-}
-.conversation-link:hover {
-  text-decoration: underline;
 }
 /* The first transcript line starts within 64 px of the window top (§6): the 56 px bar plus a 4 px gap. */
 .conversation-page {
@@ -263,26 +270,7 @@
 textarea.composer-input {
   resize: none;
   line-height: var(--body-leading);
-  min-height: calc(
-    var(--body-size) * var(--body-leading) * 2 + var(--space-2) +
-      var(--border-width) * 2
-  );
-  max-height: calc(
-    var(--body-size) * var(--body-leading) * 8 + var(--space-2) +
-      var(--border-width) * 2
-  );
   overflow-y: auto;
-}
-.composer-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  margin-top: var(--space-3);
-}
-.composer-controls .row {
-  flex-shrink: 0;
 }
 /* §8: the thin caret after the last word while text streams (17.3), blinking about once a second; reduced motion
    holds it still. */
@@ -308,10 +296,6 @@ textarea.composer-input {
   .conversation-link {
     flex-basis: 100%;
   }
-  /* The composer's row stays one row on a phone: its pickers give way before Send does. */
-  .composer-controls {
-    flex-wrap: nowrap;
-  }
 }
 
 /* The turn keeps operational detail quieter than the answer. */
@@ -329,7 +313,7 @@ textarea.composer-input {
   width: 100%;
   text-align: left;
   cursor: pointer;
-  /* §5c: a step's line is a 32 px row with 14/20 text, as the task's lists are. */
+  /* §5c: a step's line is a 36 px row with 15/22 text, as the task's lists are. */
   min-height: var(--row-height-nav);
   padding-block: var(--nav-pad-block);
   font-size: var(--nav-font-size);
@@ -503,8 +487,9 @@ textarea.composer-input {
   border: 0;
 }
 /*
- * A task's model and environment (the owner's correction, WEB-U-113): two small quiet pickers in the task header,
- * right of the title and status (New task: its top bar). They keep their size; the title and status give way first.
+ * A task's model and environment (the Product Owner's correction, WEB-U-113): two small quiet pickers in the task
+ * header, right of the title and status (New task: its top bar). They keep their size; the title and status give way
+ * first.
  */
 .header-choices {
   display: flex;
@@ -633,19 +618,21 @@ textarea.composer-input {
   background: transparent;
   padding-inline: var(--space-3) var(--space-1);
 }
-.composer-controls .composer-submit {
-  margin-inline-start: auto;
-}
 /* The send arrow's visual weight is in its head: drawn 1 px high it sits at the disc's optical centre (§5b). Stop's
    square (the secondary variant) is centred as drawn. */
 .composer-submit .button[data-variant="primary"] .button-label > svg {
   transform: translateY(-1px);
 }
-/* An environment's question to switch, and a choice that failed, float just under the header (WEB-U-031). */
+/* An environment's question to switch, and a choice that failed, float just under the header (WEB-U-031): under its
+   end, where the pickers are, at most the reading column's width, as the header spans the main area. */
 .choices-notice {
   position: absolute;
   top: 100%;
-  inset-inline: var(--space-2);
+  inset-inline-end: var(--space-2);
+  width: min(
+    100% - 2 * var(--space-2),
+    var(--transcript-width) - 2 * var(--space-2)
+  );
   z-index: 5;
   padding: var(--space-3);
   border-radius: var(--control-radius);
@@ -657,14 +644,65 @@ textarea.composer-input {
   border: var(--border-width) solid var(--line);
   border-radius: var(--composer-radius);
   box-shadow: var(--elevation);
-  /* §5b's table: 12 px by 16 px, so the empty card is two lines and the bar in 122 px (WEB-U-430). */
-  padding: var(--space-3) var(--space-4);
+  /* §5b's table: 8 px around the row, so at rest the card is one row of 36 px buttons, 54 px with its border
+     (WEB-U-430, WEB-U-458). */
+  padding: var(--space-2);
 }
+/* §7 Composer (decided on 9 Nov 2026): its focus is the card's thin border in the focus colour (3:1 and more against
+   the page in either theme), not a 2 px ring around it. */
 .composer-card:focus-within {
-  outline: var(--focus-width) solid var(--focus);
-  outline-offset: var(--focus-offset);
-  border-color: transparent;
-  box-shadow: none;
+  border-color: var(--focus);
+}
+/* One row (§7 Composer): + at its start, the text, then what sends or stops at its end. The text grows line by line
+   above them, which stay at the row's bottom ends, so nothing they show moves while a line is typed. */
+.composer-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+/* As tall as the round buttons, its one line at their middle; taller as the text grows. */
+.composer-row > .field {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--composer-button-size);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+/* While a run goes, "Send after this" (WEB-U-079) on its own line under the row's end, so the text keeps the row's
+   width on a phone too (decided on 9 Nov 2026). */
+.composer-card > .composer-queue {
+  display: flex;
+  width: fit-content;
+  margin-top: var(--space-2);
+  margin-inline-start: auto;
+}
+/* What waits for the agent (WEB-U-079): a row of chips above the text, only while there are any, each its words cut on
+   one line and its own actions. */
+.composer-held {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+.composer-queued {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  max-width: 100%;
+  min-width: 0;
+  padding-inline-start: var(--space-3);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--pill-radius);
+  background: var(--surface);
+}
+.composer-queued > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .composer-card .field > label {
   position: absolute;
@@ -675,19 +713,18 @@ textarea.composer-input {
   white-space: nowrap;
 }
 .composer-card textarea.composer-input {
+  flex: 1;
+  min-width: 0;
   background: var(--paper);
   border: 0;
   outline: none;
   box-shadow: none;
-  padding: 0;
-  /* Two lines when empty, growing to eight (§7 Composer, WEB-U-430). */
-  min-height: calc(var(--body-size) * var(--body-leading) * 2);
-  max-height: calc(var(--body-size) * var(--body-leading) * 8);
-}
-.composer-controls {
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-end;
+  padding: var(--space-1) 0;
+  /* One line at rest (two while New task's keyboard hint shows), growing to eight (§7 Composer, WEB-U-430). */
+  min-height: calc(var(--body-size) * var(--body-leading) + 2 * var(--space-1));
+  max-height: calc(
+    var(--body-size) * var(--body-leading) * 8 + 2 * var(--space-1)
+  );
 }
 .composer-reason {
   margin-top: var(--space-2);
@@ -956,7 +993,7 @@ textarea.composer-input {
   min-width: 0;
   text-wrap: balance;
 }
-/* §5b's small button: 28 px tall, 12 px each side. */
+/* §5b's small button: 32 px tall, 12 px each side. */
 .start-notice .start-notice-action {
   height: var(--min-control-height);
   padding: 0 var(--space-3);
@@ -978,8 +1015,9 @@ textarea.composer-input {
   /* Past the chevron's 16 px and the gap, where a tool line's words start. */
   padding-inline-start: calc(var(--space-4) + var(--space-2));
 }
+/* §6: the task list starts one group gap under the top block, the gap between its groups (decided on 9 Nov 2026). */
 .conversation-list {
-  margin-block: var(--space-4);
+  margin-block: var(--group-gap) var(--space-4);
 }
 /* One highlighted row per task: the delete action sits inside it and appears on hover or keyboard focus. */
 .conversation-row {
@@ -992,15 +1030,13 @@ textarea.composer-input {
   background: var(--hover-tint);
 }
 /* UI-GUIDELINES §5c: the open task is the selected fill at the body weight, as the Settings menu's item; no accent bar.
-   Under the pointer it keeps the fill (this rule follows the hover's) and its title gains no underline (17.3). */
+   Under the pointer it keeps the fill (this rule follows the hover's). No row's title underlines on hover: the
+   row's backdrop shows it (§7 Conversation list item). */
 .conversation-row:has([aria-current="page"]),
 .conversation-row:has([data-current]) {
   background: var(--selected-fill);
 }
-.conversation-link[aria-current="page"]:hover {
-  text-decoration: none;
-}
-/* §5c: a task is a 32 px navigation row with 14/20 text. */
+/* §5c: a task is a 36 px navigation row with 15/22 text. */
 .conversation-link {
   flex-direction: row;
   align-items: center;
@@ -1060,7 +1096,7 @@ textarea.composer-input {
 
 /* "From {profile}" under a task's title (ADR-0012): one small line, truncated with the title. */
 .conversation-origin {
-  line-height: 1.2;
+  line-height: var(--compact-leading);
 }
 /* A task that could not load keeps its header; the transcript's place says so, centred. */
 .conversation-failure {
@@ -1109,7 +1145,7 @@ textarea.composer-input {
 .sidebar-label {
   padding-inline-start: var(--nav-pad-inline);
 }
-/* §5c: rows 2 px apart, groups 16 px apart, a group's 12 px label 4 px above its rows. */
+/* §5c: rows 2 px apart, groups 16 px apart, a group's 13 px label 4 px above its rows. */
 .task-group {
   display: flex;
   flex-direction: column;
@@ -1148,7 +1184,7 @@ textarea.composer-input {
   color: var(--danger);
 }
 /* §7 Conversation list item (17.3): Show more reads as an action, never as one more muted task: §5b's small ghost
-   button (28 px, 12 px each side) at its own width, in the ghost's ink and weight and the list's text size, its label
+   button (32 px, 12 px each side) at its own width, in the ghost's ink and weight and the list's text size, its label
    starting where the titles do. */
 .button.task-more-button {
   align-self: flex-start;
@@ -1157,38 +1193,100 @@ textarea.composer-input {
   padding: 0 var(--space-3);
   font-size: var(--nav-font-size);
 }
-/* The task's menu button appears over the row's end on hover or keyboard focus, so the title keeps the row's width. */
+/* §7 Conversation list item: the task's ⋯ is part of its row, never a chip over it. On hover or keyboard focus it shows
+   inside the row's backdrop at the row's end: square, one even inset above, below and at the end, its corners
+   concentric with the row's, with no fill of its own. Pinned to the row's own line, so an open lead's ⋯ stays by its
+   title. Keyboard focus is the row's own (its link, chevron or ⋯), never a focus a click left behind, nor a helper's. */
 .conversation-list .conversation-row {
   position: relative;
 }
 .conversation-row > .task-more {
   position: absolute;
-  top: 50%;
-  right: var(--space-2);
-  transform: translateY(-50%);
+  top: var(--row-inset);
+  right: var(--row-inset);
 }
-/* The ⋯ itself (inside its tooltip's holder) is what shows and hides. */
+/* The ⋯ itself (inside its tooltip's holder) is what shows and hides. Its hover and press are the quiet tints over the
+   row's backdrop: the ghost button's own hover mixes the surface colour, which would draw a chip. */
 .conversation-row > .task-more > .button {
-  background: var(--surface);
+  width: var(--row-action-size);
+  height: var(--row-action-size);
+  border-radius: var(--row-action-radius);
+  background: transparent;
   opacity: 0;
 }
+.conversation-row > .task-more > .button:hover:not(:disabled) {
+  background: var(--hover-tint);
+}
+.conversation-row > .task-more > .button:active:not(:disabled) {
+  background: var(--press-tint);
+}
 .conversation-row:hover > .task-more > .button,
-.conversation-row:focus-within > .task-more > .button,
+.conversation-row:has(> :focus-visible, > .task-more :focus-visible)
+  > .task-more
+  > .button,
 .conversation-row > .task-more > .button[aria-expanded="true"] {
   opacity: 1;
+}
+/* While the ⋯ shows for keyboard focus or its open menu, its row keeps the backdrop it sits in. :where() keeps this as
+   light as the hover rule, so the open task's selected fill, set after it, stays. */
+.conversation-row:where(
+  :has(> :focus-visible, > .task-more :focus-visible),
+  :has(> .task-more [aria-expanded="true"])
+) {
+  background: var(--hover-tint);
+}
+/* While the ⋯ shows, what lies under it gives way: the marks at the link's end (status, waiting dot, helper count) fade
+   out, and a title that reaches the ⋯ fades out before its edge (a mask), never cut by it. Without hover, titles keep
+   the full width. Only where there is hover: on a touch screen the ⋯ always shows, and the title ends before it. */
+@media (hover: hover) {
+  .conversation-row:has(> .task-more):hover > .conversation-link > .task-mark,
+  .conversation-row:has(> .task-more):has(
+      > :focus-visible,
+      > .task-more :focus-visible
+    )
+    > .conversation-link
+    > .task-mark,
+  .conversation-row:has(> .task-more [aria-expanded="true"])
+    > .conversation-link
+    > .task-mark {
+    opacity: 0;
+  }
+  .conversation-row:has(> .task-more):hover
+    > .conversation-link:not(:has(> .task-mark))
+    > .conversation-link-text,
+  .conversation-row:has(> .task-more):has(
+      > :focus-visible,
+      > .task-more :focus-visible
+    )
+    > .conversation-link:not(:has(> .task-mark))
+    > .conversation-link-text,
+  .conversation-row:has(> .task-more [aria-expanded="true"])
+    > .conversation-link:not(:has(> .task-mark))
+    > .conversation-link-text {
+    mask-image: linear-gradient(
+      to left,
+      transparent var(--row-action-reach),
+      var(--ink) calc(var(--row-action-reach) + var(--space-4))
+    );
+  }
 }
 @media (hover: none) {
   .conversation-row > .task-more > .button {
     opacity: 1;
   }
+  .conversation-row:has(> .task-more) > .conversation-link {
+    padding-inline-end: calc(
+      var(--row-action-size) + var(--row-inset) + var(--space-2)
+    );
+  }
 }
-/* The expanded sidebar shows titles without the task icon; the rail shows only the icon. */
+/* §6: the expanded sidebar and the phone's drawer show titles without the task icon: a task's title starts at the
+   sidebar's one left edge, with the top items' icons and the group labels; the rail shows only the icon. */
 @container sidebar (min-width: 121px) {
   .app-sidebar .task-icon {
     display: none;
   }
 }
-/* The phone drawer is never a rail: its rows are titles too, with no icon taking their room. */
 .navigation-drawer .task-icon {
   display: none;
 }
@@ -1272,6 +1370,12 @@ textarea.composer-input {
   .conversation-bar-main:has(.task-choices) {
     flex-wrap: wrap;
     row-gap: 0;
+    /* With the type one step up (§4), the first line spends 4 px between the icon buttons, which carry their own
+       padding, and keeps 8 px between the title and its status (below), so a title that fitted still does. */
+    column-gap: var(--space-1);
+  }
+  .conversation-bar-main:has(.task-choices) > .conversation-status {
+    margin-inline-start: var(--space-1);
   }
   /* Lines break on each item's own width, before anything shrinks: a long title would push ⋯ under it. With no width
      of its own, the title breaks no line; it then grows first, up to its whole text, before the status takes the rest,

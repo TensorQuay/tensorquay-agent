@@ -1,10 +1,10 @@
 "use client";
 
-import { Check, ChevronDown, type LucideIcon } from "lucide-react";
+import { ChevronDown, type LucideIcon } from "lucide-react";
 import {
-  isValidElement,
+  useCallback,
+  useEffect,
   useId,
-  useLayoutEffect,
   useRef,
   useState,
   type ReactNode,
@@ -14,8 +14,7 @@ import { useT } from "../i18n/I18nProvider";
 
 import { Button } from "./Button";
 import { Icon } from "./Icon";
-import { Menu } from "./Menu";
-import { Popover } from "./Popover";
+import { prefetchMenus, useMenus } from "./lazy-menus";
 
 /** Identity stays separate from the human label; decorations may show declared capabilities. */
 export type MenuChoice = {
@@ -33,15 +32,6 @@ export type MenuChoice = {
 
 /** More choices than this get a search field (the UI standard's Popover). */
 export const SEARCH_FROM = 8;
-
-/** The words of a choice's line, for search: its text, however it is wrapped. */
-function words(node: ReactNode): string {
-  if (typeof node === "string" || typeof node === "number") return String(node);
-  if (Array.isArray(node)) return node.map(words).join(" ");
-  if (isValidElement<{ children?: ReactNode }>(node))
-    return words(node.props.children);
-  return "";
-}
 
 /** A focusable picker whose disabled explanation appears on hover or focus, never in the transcript. */
 export function MenuButton({
@@ -109,71 +99,26 @@ export function MenuButton({
     Boolean(disabledReason) ||
     (!current && placeholder === undefined);
   const open = expanded && !unavailable;
+  // Closed without a choice, however it closes (Esc or a press outside, before its list's code arrives or after, or
+  // that code couldn't come): the caller hears it. One stable function, reading the latest onDismiss.
+  const dismissed = useRef(onDismiss);
+  useEffect(() => {
+    dismissed.current = onDismiss;
+  });
+  const dismiss = useCallback(() => {
+    setExpanded(false);
+    dismissed.current?.();
+  }, []);
+  // Its list's code comes when it is about to open (WEB-U-014's budget); a picker that can't get it closes.
+  const menus = useMenus(open, dismiss, anchor);
   const shownName =
     current?.label ?? placeholder ?? fallback ?? t("menu.unavailable");
   const name = t("menu.current", { label, value: shownName });
-  const [query, setQuery] = useState("");
-  const find = useRef<HTMLInputElement>(null);
-  const searchable = options.length >= SEARCH_FROM;
-  const needle = query.trim().toLocaleLowerCase();
-  const shown = needle
-    ? options.filter((option) =>
-        `${option.label} ${words(option.detail)}`
-          .toLocaleLowerCase()
-          .includes(needle),
-      )
-    : options;
-  // With a search field, typing starts there (after the menu has focused its current row).
-  useLayoutEffect(() => {
-    if (open && searchable) find.current?.focus();
-  }, [open, searchable]);
-  function close() {
-    setExpanded(false);
-    setQuery("");
-    anchor.current?.focus();
-  }
-  /** The shown choices by group, in their first appearance's order, when any has one. */
-  const groups = shown.some((option) => option.group)
-    ? [...new Set(shown.map((option) => option.group ?? ""))].map(
-        (group) =>
-          [
-            group,
-            shown.filter((option) => (option.group ?? "") === group),
-          ] as const,
-      )
-    : null;
-  /** One choice's row in the menu. */
-  const row = (option: MenuChoice) => (
-    <button
-      key={option.id}
-      type="button"
-      role="menuitemradio"
-      tabIndex={-1}
-      aria-checked={option.id === value}
-      aria-disabled={option.disabled ? true : undefined}
-      className="menu-item"
-      onClick={() => choose(option)}
-    >
-      <span className="menu-choice">
-        <span lang={option.lang}>{option.label}</span>
-        {/* A word break for the row's name (label, then its line); the column shows none. */}
-        {option.disabled || option.detail ? " " : null}
-        {option.disabled ? (
-          <span className="type-small muted">{option.disabled}</span>
-        ) : (
-          option.detail
-        )}
-      </span>
-      {rowDecorations && option.decoration}
-      <span className="menu-check">
-        {option.id === value && <Icon glyph={Check} size={16} />}
-      </span>
-    </button>
-  );
   function choose(option: MenuChoice) {
     if (option.disabled) return;
     if (option.id !== value) onChange(option.id);
-    close();
+    setExpanded(false);
+    anchor.current?.focus();
   }
   return (
     <div className="menu-picker">
@@ -185,7 +130,7 @@ export function MenuButton({
         aria-label={name}
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-controls={open ? id : undefined}
+        aria-controls={open && menus ? id : undefined}
         aria-disabled={unavailable || undefined}
         aria-invalid={invalid || undefined}
         aria-describedby={
@@ -193,6 +138,8 @@ export function MenuButton({
             .filter(Boolean)
             .join(" ") || undefined
         }
+        onPointerEnter={prefetchMenus}
+        onFocus={prefetchMenus}
         onClick={() => {
           if (unavailable) return;
           if (!open) setIconic(showsIcon(anchor.current));
@@ -233,72 +180,21 @@ export function MenuButton({
           )}
         </span>
       )}
-      {open && (
-        <Popover
+      {open && menus && (
+        <menus.PickerSurface
           anchor={anchor}
-          label={t("menu.choices", { label })}
+          id={id}
+          label={label}
+          title={icon && iconic ? name : null}
           placement={placement}
-          onClose={() => {
-            setExpanded(false);
-            setQuery("");
-            onDismiss?.();
-          }}
-        >
-          {icon && iconic && (
-            <p className="picker-title type-small muted" aria-hidden="true">
-              {name}
-            </p>
-          )}
-          {searchable && (
-            <div className="menu-find">
-              <input
-                ref={find}
-                type="search"
-                className="form-control menu-search"
-                aria-label={t("menu.find")}
-                placeholder={t("menu.findPlaceholder")}
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "ArrowDown") {
-                    event.preventDefault();
-                    document
-                      .getElementById(id)
-                      ?.querySelector<HTMLElement>('[role="menuitemradio"]')
-                      ?.focus();
-                  } else if (event.key === "Enter") {
-                    event.preventDefault();
-                    const first = shown.find((option) => !option.disabled);
-                    if (first) choose(first);
-                  }
-                }}
-              />
-            </div>
-          )}
-          {shown.length === 0 && (
-            <p className="menu-empty type-small muted">{t("menu.noMatch")}</p>
-          )}
-          <Menu label={label} id={id} lines={oneLine ? "one" : undefined}>
-            {groups
-              ? groups.map(([group, members], index) => (
-                  <div
-                    key={group}
-                    role="group"
-                    aria-labelledby={`${id}-group-${index}`}
-                    className="menu-group"
-                  >
-                    <p
-                      id={`${id}-group-${index}`}
-                      className="menu-group-label type-label muted"
-                    >
-                      {group}
-                    </p>
-                    {members.map(row)}
-                  </div>
-                ))
-              : shown.map(row)}
-          </Menu>
-        </Popover>
+          options={options}
+          value={value}
+          searchable={options.length >= SEARCH_FROM}
+          oneLine={oneLine}
+          rowDecorations={rowDecorations}
+          onClose={dismiss}
+          onChoose={choose}
+        />
       )}
     </div>
   );

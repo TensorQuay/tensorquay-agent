@@ -49,13 +49,11 @@ describe("WEB-U-080 the sidebar's tasks", () => {
     const helper = rule(teams, '.task-helper:has([aria-current="page"])');
     expect(declared(helper, "background")).toBe("var(--selected-fill)");
     expect(declared(helper, "font-weight")).toBe(undefined);
-    // Under the pointer it keeps its fill (never darker) and gains no underline.
-    expect(
-      declared(
-        rule(conversation, '.conversation-link[aria-current="page"]:hover'),
-        "text-decoration",
-      ),
-    ).toBe("none");
+    // Under the pointer it keeps its fill (never darker) and gains no underline: no row's title underlines on hover,
+    // since the row's backdrop shows it (§7 Conversation list item).
+    expect(conversation).not.toMatch(
+      /\.conversation-link[^{}]*:hover[^{}]*\{[^}]*underline/,
+    );
     expect(conversation).not.toMatch(/border-left[^;]*var\(--accent\)/);
     expect(
       declared(rule(conversation, ".conversation-row"), "border-left"),
@@ -189,5 +187,313 @@ describe("WEB-U-170 the files panel never covers part of the transcript", () => 
     expect(declared(narrow, "top")).toBe(
       "var(--bar-offset, var(--bar-height))",
     );
+  });
+});
+
+/**
+ * `rule` for selectors with commas or line breaks of their own (`:where(a, b)`, a long list the formatter wraps): the
+ * list is split only at its top-level commas, and selectors and declarations are read with their whitespace collapsed.
+ */
+function ruleFlat(css: string, selector: string): string {
+  const flat = (text: string) =>
+    text.replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")").trim();
+  const found: string[] = [];
+  for (const match of css.matchAll(/([^{};]+)\{([^{}]*)\}/g)) {
+    const parts = [""];
+    let depth = 0;
+    for (const char of match[1] ?? "") {
+      if (char === "(") depth += 1;
+      if (char === ")") depth -= 1;
+      if (char === "," && depth === 0) parts.push("");
+      else parts[parts.length - 1] += char;
+    }
+    if (parts.map(flat).includes(flat(selector)))
+      found.push(flat(match[2] ?? ""));
+  }
+  return found.join(";");
+}
+
+/** The bodies of every `@media <query>` block in `css`, braces balanced, joined. */
+function media(css: string, query: string): string {
+  const bodies: string[] = [];
+  let from = css.indexOf(`@media ${query} {`);
+  while (from >= 0) {
+    const open = css.indexOf("{", from);
+    let depth = 0;
+    let index = open;
+    for (; index < css.length; index += 1) {
+      if (css[index] === "{") depth += 1;
+      if (css[index] === "}") depth -= 1;
+      if (depth === 0) break;
+    }
+    bodies.push(css.slice(open + 1, index));
+    from = css.indexOf(`@media ${query} {`, index);
+  }
+  return bodies.join("\n");
+}
+
+// WEB-U-449 (UI-GUIDELINES §7 Conversation list item): a task row's ⋯ is part of the row, never a chip over it. It sits
+// inside the row's end at one even inset, square, its corners concentric with the row's, with no fill of its own; its
+// hover and press are the quiet tints inside the row's backdrop; what lies under it gives way while it shows; on a
+// touch screen, where it always shows, the title ends before it.
+describe("WEB-U-449 the task row's ⋯ is part of the row", () => {
+  const tokens = rule(globals, ":root");
+  const holder = ruleFlat(conversation, ".conversation-row > .task-more");
+  const button = ruleFlat(
+    conversation,
+    ".conversation-row > .task-more > .button",
+  );
+  const showing = [
+    ".conversation-row:has(> .task-more):hover",
+    ".conversation-row:has(> .task-more):has(> :focus-visible, > .task-more :focus-visible)",
+    '.conversation-row:has(> .task-more [aria-expanded="true"])',
+  ];
+
+  it("sits inside the row's end at one even inset, square, its corners concentric with the row's", () => {
+    expect(declared(tokens, "--row-inset")).toBe("var(--space-half)");
+    expect(declared(tokens, "--row-action-size")).toBe(
+      "calc(var(--row-height-nav) - 2 * var(--row-inset))",
+    );
+    expect(declared(tokens, "--row-action-radius")).toBe(
+      "calc(var(--control-radius) - var(--row-inset))",
+    );
+    expect(declared(holder, "position")).toBe("absolute");
+    expect(declared(holder, "top")).toBe("var(--row-inset)");
+    expect(declared(holder, "right")).toBe("var(--row-inset)");
+    // On the row's own line: an open lead's ⋯ stays by its title, never half-way down its helpers.
+    expect(declared(holder, "transform")).toBe(undefined);
+    expect(declared(button, "width")).toBe("var(--row-action-size)");
+    expect(declared(button, "height")).toBe("var(--row-action-size)");
+    expect(declared(button, "border-radius")).toBe("var(--row-action-radius)");
+  });
+
+  it("has no fill of its own: its hover and press are the quiet tints inside the row's backdrop", () => {
+    expect(declared(button, "background")).toBe("transparent");
+    expect(
+      declared(
+        ruleFlat(
+          conversation,
+          ".conversation-row > .task-more > .button:hover:not(:disabled)",
+        ),
+        "background",
+      ),
+    ).toBe("var(--hover-tint)");
+    expect(
+      declared(
+        ruleFlat(
+          conversation,
+          ".conversation-row > .task-more > .button:active:not(:disabled)",
+        ),
+        "background",
+      ),
+    ).toBe("var(--press-tint)");
+    expect(conversation).not.toMatch(/task-more[^{}]*\{[^}]*--surface/);
+  });
+
+  it("shows it for the row's own keyboard focus, never for a focus a click left behind", () => {
+    // The Product Owner's report (two rows with a ⋯ at once): a clicked link keeps its focus, so focus-within kept
+    // the ⋯.
+    expect(
+      declared(
+        ruleFlat(
+          conversation,
+          ".conversation-row:has(> :focus-visible, > .task-more :focus-visible) > .task-more > .button",
+        ),
+        "opacity",
+      ),
+    ).toBe("1");
+    expect(conversation).not.toMatch(
+      /\.conversation-row:focus-within[^{}]*task-more/,
+    );
+    expect(conversation).not.toMatch(/task-more\):focus-within/);
+    expect(globals).not.toMatch(/task-more\):focus-within/);
+  });
+
+  it("keeps the row's backdrop while it shows by keyboard or for its open menu, below the open task's fill", () => {
+    // :where() keeps these as light as the hover rule, so the open task's selected fill, set after, stays.
+    expect(
+      declared(
+        ruleFlat(
+          conversation,
+          '.conversation-row:where(:has(> :focus-visible, > .task-more :focus-visible), :has(> .task-more [aria-expanded="true"]))',
+        ),
+        "background",
+      ),
+    ).toBe("var(--hover-tint)");
+  });
+
+  it("fades out what lies under it while it shows: the row's marks, and a title that reaches it", () => {
+    const hover = media(conversation, "(hover: hover)");
+    for (const state of showing) {
+      expect(
+        declared(
+          ruleFlat(hover, `${state} > .conversation-link > .task-mark`),
+          "opacity",
+        ),
+      ).toBe("0");
+      expect(
+        declared(
+          ruleFlat(
+            hover,
+            `${state} > .conversation-link:not(:has(> .task-mark)) > .conversation-link-text`,
+          ),
+          "mask-image",
+        ),
+      ).toBe(
+        "linear-gradient(to left, transparent var(--row-action-reach), var(--ink) calc(var(--row-action-reach) + var(--space-4)))",
+      );
+    }
+    // The fade starts where the ⋯ and its inset reach past the row's own end padding.
+    expect(
+      declared(tokens, "--row-action-reach")
+        ?.replace(/\s+/g, " ")
+        .replace(/\( /g, "(")
+        .replace(/ \)/g, ")"),
+    ).toBe(
+      "calc(var(--row-action-size) + var(--row-inset) - var(--nav-pad-inline))",
+    );
+    // Without hover, titles keep the full width: no mask anywhere else.
+    expect(conversation.replace(hover, "")).not.toMatch(/mask-image/);
+  });
+
+  it("always shows it on a touch screen, where the title and the marks end before it", () => {
+    const touch = media(conversation, "(hover: none)");
+    expect(
+      declared(
+        ruleFlat(touch, ".conversation-row > .task-more > .button"),
+        "opacity",
+      ),
+    ).toBe("1");
+    expect(
+      declared(
+        ruleFlat(
+          touch,
+          ".conversation-row:has(> .task-more) > .conversation-link",
+        ),
+        "padding-inline-end",
+      ),
+    ).toBe("calc(var(--row-action-size) + var(--row-inset) + var(--space-2))");
+  });
+});
+
+// WEB-U-450 (UI-GUIDELINES §13b and §6): a lead task's row reads as one row. Its chevron spans the row's start padding
+// and its icon, which sits on the sidebar's one left edge, as tall as the row (44 px on touch screens); its title follows
+// just after it; its helpers' rows start where its title starts.
+describe("WEB-U-450 a lead's row reads as one row", () => {
+  const flat = (value: string | undefined) =>
+    value?.replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")");
+
+  it("makes the chevron the row's start padding and its icon column, as tall as the row", () => {
+    const base = /:root \{([^}]*)\}/.exec(globals)?.[1] ?? "";
+    expect(flat(declared(base, "--lead-toggle-width"))).toBe(
+      "calc(var(--nav-pad-inline) + var(--icon-text))",
+    );
+    // One width everywhere, so the lead's title keeps the titles' edge on touch screens too.
+    expect(globals).not.toMatch(
+      /--lead-toggle-width: var\(--row-height-touch\)/,
+    );
+    const toggle = rule(teams, ".task-helpers-toggle");
+    expect(declared(toggle, "width")).toBe("var(--lead-toggle-width)");
+    expect(declared(toggle, "min-height")).toBe("var(--row-height-nav)");
+    expect(declared(toggle, "justify-content")).toBe("flex-end");
+    expect(declared(toggle, "padding-inline-end")).toBe(undefined);
+  });
+
+  it("starts the lead's title just after its chevron: no gap, then 4 px of the link's own start", () => {
+    expect(
+      declared(
+        rule(teams, ".conversation-row:has(> .task-helpers-toggle)"),
+        "column-gap",
+      ),
+    ).toBe("0");
+    expect(
+      declared(
+        rule(
+          teams,
+          ".conversation-row:has(> .task-helpers-toggle) > .conversation-link",
+        ),
+        "padding-inline-start",
+      ),
+    ).toBe("var(--space-1)");
+  });
+
+  it("starts the helpers' rows where the lead's title starts, on the spacing scale", () => {
+    expect(declared(rule(teams, ".task-helpers"), "padding-inline-start")).toBe(
+      "var(--space-4)",
+    );
+    expect(
+      declared(
+        rule(teams, ".conversation-row > .task-helpers .conversation-link"),
+        "padding-inline-start",
+      ),
+    ).toBe("var(--space-4)");
+    const note = rule(teams, ".task-helpers-note");
+    expect(declared(note, "padding-inline-start")).toBe("var(--space-4)");
+    expect(declared(note, "margin-inline-start")).toBe("var(--space-4)");
+  });
+});
+
+// WEB-U-453 (UI-GUIDELINES §6; decided on 9 Nov 2026, against a reference): the sidebar reads as one tidy list. One
+// left edge for the logo, every item's icon, the group labels and the task titles; the rows at the scale's height, the
+// top block's 2 px apart, 8 px under the header, one group gap before the first group; the drawer's rows inset as the
+// sidebar's.
+describe("WEB-U-453 the sidebar's one left edge and rhythm", () => {
+  it("puts the logo on the items' icon column, 8 px above the top block", () => {
+    // The top-level rule; the rail's own (a column, centred) sets it back to 0.
+    const brand = /\n\.sidebar-brand \{([^}]*)\}/.exec(globals)?.[1] ?? "";
+    expect(declared(brand, "padding-inline-start")).toBe(
+      "var(--nav-pad-inline)",
+    );
+    expect(declared(rule(globals, ".app-sidebar"), "gap")).toBe(
+      "var(--space-2)",
+    );
+    // The group labels start on the same column (unchanged).
+    expect(
+      declared(rule(conversation, ".sidebar-label"), "padding-inline-start"),
+    ).toBe("var(--nav-pad-inline)");
+  });
+
+  it("starts every task title at the one left edge, with no icon column", () => {
+    // A top item's icon and a group label start at the rows' 12 px padding; a task's title starts there too, its icon
+    // gone from the row (not hidden in place), and Show more's label as well (the Product Owner's reference).
+    expect(declared(rule(globals, ".nav-item"), "padding")).toBe(
+      "var(--nav-row-padding)",
+    );
+    expect(declared(rule(conversation, ".conversation-link"), "padding")).toBe(
+      "var(--nav-row-padding)",
+    );
+    expect(
+      declared(rule(conversation, ".app-sidebar .task-icon"), "display"),
+    ).toBe("none");
+    expect(
+      declared(rule(conversation, ".app-sidebar .task-icon"), "visibility"),
+    ).toBe(undefined);
+    expect(conversation).not.toMatch(/task-more-slot/);
+    expect(
+      declared(rule(conversation, ".button.task-more-button"), "padding"),
+    ).toBe("0 var(--space-3)");
+  });
+
+  it("spaces the top block's rows 2 px apart and the task list one group gap below them", () => {
+    expect(declared(rule(globals, ".navigation"), "gap")).toBe(undefined);
+    expect(declared(rule(globals, ".nav-items"), "gap")).toBe(
+      "var(--nav-row-gap)",
+    );
+    expect(
+      declared(rule(conversation, ".conversation-list"), "margin-block"),
+    ).toBe("var(--group-gap) var(--space-4)");
+    expect(globals).not.toMatch(/\.sidebar-footer/);
+  });
+
+  it("insets the drawer's rows as the sidebar's, 8 px under its header", () => {
+    expect(
+      declared(rule(globals, ".dialog.navigation-drawer"), "padding-inline"),
+    ).toBe("var(--space-3)");
+    expect(
+      declared(
+        rule(globals, ".navigation-drawer .dialog-header"),
+        "margin-bottom",
+      ),
+    ).toBe("var(--space-2)");
   });
 });
