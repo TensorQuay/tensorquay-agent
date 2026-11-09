@@ -98,7 +98,7 @@ the floor, 10, up. The runtime writes the brief into the journal entry's text, i
 and never a person's message (RT-I-039, CORE-U-078).
 
 ## Note 2026-10-05: revision 13 leaves the floor at 10
-Decided as for revision 12. The page pass found a helper's page showing the gateway's wake
+Decided as for revision 12. A pass over the pages before 17.0 found a helper's page showing the gateway's wake
 sentence as the person's own message: the wake was a plain `user.message`. Revision 13 marks it (`team_wake`: the
 reader's place in the log, after which new team messages wait), the runtime journals the marker on `message.user`, and
 a client words the notice itself ("New team messages"). It names no writer: what waits may be the helpers', the

@@ -277,9 +277,9 @@ Agreed between the gateway and web halves of the build, after the team's review 
 
 ## Amendment 2 (1 Oct 2026): a key for an exact IP address
 
-Decided with the Product Owner on 1 Oct 2026, found while planning the stack suite (G9): the egress guard lets a task
-reach a private or reserved address only through an allow rule for that exact address (ADR-0035), and §1 allowed a key
-only for a host name. So a server reached by address, such as an internal git server, could use the Git relay (whose
+Decided with the Product Owner on 1 Oct 2026, found while planning the host-keys stack suite: the egress guard lets a
+task reach a private or reserved address only through an allow rule for that exact address (ADR-0035), and §1 allowed a
+key only for a host name. So a server reached by address, such as an internal git server, could use the Git relay (whose
 `git_push.ca_file` trusted its authority) but no key, and retiring the relay would have left it with nothing.
 
 - **The address:** a key's address may be an exact IPv4 or IPv6 address (`https://10.0.0.5`, `https://[fd00::5]:8443`),
@@ -292,7 +292,7 @@ only for a host name. So a server reached by address, such as an internal git se
   and nothing else is.
 - **Certificates:** the leaf the install CA issues for an address carries it as an IP subject name, and the proxy
   verifies the host's certificate against the address (`ServerName::IpAddress`), under the public roots and
-  `egress.ca_file` (G9a).
+  `egress.ca_file`.
 - **The runtime:** a grant's host may be an address in canonical form (revision 11, unreleased, so in place); git's
   settings put an IPv6 address in brackets in their URLs.
 - **Still open:** a *named* internal server (a name that resolves to a private address) is the Product Owner's per-rule
@@ -304,8 +304,8 @@ PROTO-U-033, TOOL-U-041, GW-I-176.
 ## Amendment 3 (1 Oct 2026): where the install CA lives
 
 §6 put the install CA beside the install key. A deployment mounts the install key and the secrets seed read-only
-(`deploy/compose/docker.yml`), so the gateway couldn't make the CA there and didn't start; found by G9b's first stack
-run, a defect of G5a (TEST-PLAN §19, GW-I-179). Decided: the CA lives in its own private directory,
+(`deploy/compose/docker.yml`), so the gateway couldn't make the CA there and didn't start; found by the host-keys
+stack suite's first run (TEST-PLAN §19, GW-I-179). Decided: the CA lives in its own private directory,
 `[host_keys] ca_directory`, by default `<storage.root>/host-ca` (0700, its files 0600), which no sandbox mounts; the
 gateway refuses a place inside a sandbox mount or an existing directory others can read; `rotate-host-ca` reads the
 same setting from the gateway's configuration file. The keys release has never shipped, so no install has CA files
@@ -396,9 +396,9 @@ system, an administrator with shell access to the gateway.
   `header` key is refused (`scheme_not_supported`); upgrades such as WebSocket don't pass on keyed hosts. A
   placeholder kept from an earlier run and sent to a
   host the current run holds no key for goes through a plain tunnel, not intercepted, so it isn't counted `expired`;
-  no value moves (L5). A keyed request's or answer's body has no time bound of its own, only the head and the
+  no value moves. A keyed request's or answer's body has no time bound of its own, only the head and the
   answer's start; a slow body holds a keyed connection, which the per-sandbox bound limits; and every CONNECT costs
-  one database query to tell keyed from plain (L10). Someone removed from a shared key while a run of theirs is
+  one database query to tell keyed from plain. Someone removed from a shared key while a run of theirs is
   going may see the key's name once more, in that run's live `revoked` refusal: the run held the key from its start.
   A task's stored key uses judge the name when read, so its old rows lose it at once.
 - Size: about 30 developer days with tests and a security review; a first slice can ship HTTP/1.1 only, `bearer` and

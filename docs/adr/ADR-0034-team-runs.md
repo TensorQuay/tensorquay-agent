@@ -236,10 +236,10 @@ of that forum, with every member reading the channel and the team deciding by vo
        still starting gets its brief instead, and a reader with an active run or a turn already queued isn't woken.
        A post wakes its readers just after its commit; the reconciler's pass does the same from stored state, so a
        wake lost to a restart still comes.
-     - **The wake is the gateway's, and says so (protocol revision 13, 5 Oct 2026; the page pass found a helper's page
-       showing the wake as the person's own message).** The wake's `user.message` carries `team_wake`: the reader's
-       place in the log, after which new team messages wait. It names no writer, since what waits may be several
-       writers' and the gateway's, and the log shows who wrote. The runtime journals it
+     - **The wake is the gateway's, and says so (protocol revision 13, 5 Oct 2026; a pass over the pages found a
+       helper's page showing the wake as the person's own message).** The wake's `user.message` carries `team_wake`: the
+       reader's place in the log, after which new team messages wait. It names no writer, since what waits may be
+       several writers' and the gateway's, and the log shows who wrote. The runtime journals it
        on `message.user`, and a client shows the gateway's notice in its own words and language, never the person's
        message; the turn's text, which the model reads, is unchanged. A wake is always a turn of its own, never joined
        with a person's held message, so the marker never covers the person's words. A team's lead or member whose
@@ -330,7 +330,7 @@ of that forum, with every member reading the channel and the team deciding by vo
    - **Overshoot** is bounded by the requests in flight: at most the members' runs at once times the route's
      `max_output`, plus their prompts.
    - **Notices and the stop:** at 80 % the lead gets a `notice` once, asking it to collect the work, and each working
-     member gets one asking it to report now with what it has (GW-I-304, 17 Oct 2026, the c16k campaign's B9b: a
+     member gets one asking it to report now with what it has (GW-I-304, 17 Oct 2026, real-world use before 17.0: a
      budget end handed nothing back). While a member is queued, starting or working, the lead's notice doesn't wake
      it: the members' reports do, and it reads the notice with them, so it doesn't finish before they come (18 Oct
      2026, found in review). Members already past their share aren't asked: they can't answer. At `agent_teams.helpers_stop_percent` (default 90, 1–99, `gateway.toml` only)
@@ -386,16 +386,16 @@ of that forum, with every member reading the channel and the team deciding by vo
      20 % of `deadline_minutes`) remains: 60 minutes warns at 10 left, 20 at 4, 5 at 1 (decided on 2 Oct
      2026).
    - **An idle stop:** the agent team stops after `idle_stop_minutes` with no message and no active run.
-   - **A lead's turn that ends without `done`** (GW-I-306, 17 Oct 2026, the c16k campaign's B2): while its team runs, a
-     completed lead run posts a fixed `lead_unfinished` notice to the lead, which wakes on it: call done (the finish
-     check runs then) or keep leading. Only when nothing else can wake the lead: no helper queued, starting or working
-     (each will run and report, and the read tool tells a lead to end its turn and wait for that; an integration run of
-     17 Oct 2026, where a reminder came first and the lead finished early), no question to its person still open (the
-     answer wakes it), no turn on its way to it (queued, sending, or taken and not yet started), and nothing unread but
-     its reminders. So it is also checked when a helper's run ends after the lead's last run did (not after a person's
-     cancel). At most two since the lead's own last post. The lead task's header says the team waits on the lead, not
-     Done (WEB-U-398).
-   - **What the person types to the lead while its team works** (GW-I-307, 17 Oct 2026, the c16k campaign's B5): a
+   - **A lead's turn that ends without `done`** (GW-I-306, 17 Oct 2026, real-world use before 17.0): while its team
+     runs, a completed lead run posts a fixed `lead_unfinished` notice to the lead, which wakes on it: call done (the
+     finish check runs then) or keep leading. Only when nothing else can wake the lead: no helper queued, starting or
+     working (each will run and report, and the read tool tells a lead to end its turn and wait for that; an integration
+     run of 17 Oct 2026, where a reminder came first and the lead finished early), no question to its person still open
+     (the answer wakes it), no turn on its way to it (queued, sending, or taken and not yet started), and nothing unread
+     but its reminders. So it is also checked when a helper's run ends after the lead's last run did (not after a
+     person's cancel). At most two since the lead's own last post. The lead task's header says the team waits on the
+     lead, not Done (WEB-U-398).
+   - **What the person types to the lead while its team works** (GW-I-307, 17 Oct 2026, real-world use before 17.0): a
      lead's one run spans its team, so a message held "until the agent finishes" waited for the whole team. While the
      team runs and the lead's run is active, the message is held as any other (listed, cancellable) and a
      `person_message` naming no member is copied into the team's log, linked from the message (migration 0103). The

@@ -104,8 +104,8 @@ task binds or switches only to a route an administrator made. Personal routes, w
 allowed "when allowed", are not built. TEST-PLAN GW-I-038.
 
 ## Amendment: a file route's display name (5 Oct 2026)
-A route in models.toml may name its `display_name` (the page pass's N2). The seed stores it in the route's
-display-name column, never in its record, under the routes API's rule; an unclean one stops the start. It is part
-of the seed record's digest only when set, so a route without one keeps the digest it had and an upgrade seeds
+A route in models.toml may name its `display_name` (a pass over the pages before 17.0). The seed stores it in the
+route's display-name column, never in its record, under the routes API's rule; an unclean one stops the start. It is
+part of the seed record's digest only when set, so a route without one keeps the digest it had and an upgrade seeds
 nothing again. A changed name is a seed change like any other; a file without one leaves an administrator's name
 as it is (GW-I-216, LLM-U-051).
