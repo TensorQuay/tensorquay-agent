@@ -9,6 +9,15 @@ const settings = readFileSync("src/app/settings.css", "utf8").replace(
   /\/\*[\s\S]*?\*\//g,
   "",
 );
+const tokens = readFileSync("src/app/globals.css", "utf8");
+
+/** The pixels of a value that is one token, `var(--name)`, as globals.css defines it. */
+function px(value: string | undefined): number {
+  const name = value?.match(/^var\((--[a-z0-9-]+)\)$/)?.[1];
+  const found = name && tokens.match(new RegExp(`${name}:\\s*(\\d+)px;`));
+  if (!found) throw new Error(`not one pixel token: ${value}`);
+  return Number(found[1]);
+}
 
 /** The declarations of every top-level rule whose selector list names `selector` exactly, joined. */
 function rule(css: string, selector: string): string {
@@ -39,13 +48,22 @@ describe("WEB-U-460 the Settings menu stays in view", () => {
     expect(declared(nav, "overscroll-behavior")).toBe("contain");
   });
 
-  // 17.4 fix: at the page's top the menu starts under the title row, so its foot sits that far below the window. As much
-  // room at its end (the heading's line, with the ring's room) lets the menu scroll its last section into view by
-  // itself, with the page left at its top.
+  // 17.4 fix: at the page's top the menu starts under the page's top padding, the title's line and the row gap, while
+  // its height is capped as when it sticks (the two gaps of `top`), so the window hides that much of its foot, less its
+  // ring margin. Room at its end of at least that, with the ring's room, lets the menu scroll its last section into
+  // view by itself, the page left at its top; the room is a step on the spacing scale (UI-GUIDELINES §5).
   it("has room at its foot for the part the window hides while the page is at its top", () => {
-    expect(declared(nav, "padding-bottom")).toBe(
-      "calc(var(--space-1) + var(--heading-line-height))",
-    );
+    const page = rule(settings, ".settings-page");
+    const ring = px("var(--space-1)");
+    const hidden =
+      px(declared(page, "padding-block")) +
+      px("var(--heading-line-height)") +
+      px(declared(page, "row-gap")) -
+      2 * px(declared(nav, "top")) -
+      ring;
+    const room = declared(nav, "padding-bottom");
+    expect(room).toMatch(/^var\(--space-\d+\)$/);
+    expect(px(room)).toBeGreaterThanOrEqual(hidden + ring);
   });
 
   it("keeps room for the 2 px focus ring at its 2 px offset inside its own scroll area", () => {
