@@ -145,9 +145,16 @@ describe("WEB-U-074 decision engines", () => {
     expect(
       within(row(/monthly/)).getByText(/^1\s204 of 3\s000 calls this month$/),
     ).toBeVisible();
-    // One muted line for both limits (17.3); no page says the use, so the line's tooltip holds it whole.
+    // One muted line for both limits (17.3); no page says the use, so the line's tooltip holds it whole, its figures
+    // exact (WEB-U-461).
     const typed = row(/typed/);
-    expect(cellNote(typed, "12 of 500 calls")).toHaveTextContent(
+    expect(
+      cellNote(
+        typed,
+        "12 of 500 calls",
+        "12 of 500 calls since Sep 29, 2026 · 4\u202f200 of 30\u202f000\u202f000 tokens since Sep 29, 2026",
+      ),
+    ).toHaveTextContent(
       /^12 of 500 calls since Sep 29, 2026 · 4\.2K of 30M tokens since Sep 29, 2026$/,
     );
     // A missing key's link leads the line, and the use still follows it.
@@ -159,6 +166,43 @@ describe("WEB-U-074 decision engines", () => {
       "Add it under Keys › Shared · 7 of 100 calls this month",
     );
     expect(within(row(/plain/)).queryByText(/ of /)).toBeNull();
+  });
+
+  // WEB-U-461 (17.4 fix): a use rounds down, so 29 960 000 of 30 000 000 reads "29.9M of 30M", never "30M of 30M"
+  // while 40 000 tokens are left; the row's tooltip gives both figures exactly, with or without the missing key's link.
+  it("never rounds a budget's use up to its limit, and keeps the exact figures one hover away", async () => {
+    const nearly = {
+      budget: { tokens: 30000000, period: "month" as const },
+      budget_used: { calls: 0, tokens: 29960000 },
+      budget_since: "2026-09-01T00:00:00Z",
+    };
+    show(
+      fakeEngines({
+        engines: [
+          engine("nearly", nearly),
+          engine("keyless", {
+            ...nearly,
+            key_ref: "secrets/gone",
+            key_missing: true,
+          }),
+        ],
+      }).api,
+    );
+    await screen.findByRole("table", { name: "Decision engines" });
+    const exact =
+      "29\u202f960\u202f000 of 30\u202f000\u202f000 tokens this month";
+    expect(cellNote(row(/nearly/), "tokens", exact)).toHaveTextContent(
+      /^29\.9M of 30M tokens this month$/,
+    );
+    expect(
+      cellNote(
+        row(/keyless/),
+        "Add it under Keys › Shared",
+        `Add it under Keys › Shared · ${exact}`,
+      ),
+    ).toHaveTextContent(
+      "Add it under Keys › Shared · 29.9M of 30M tokens this month",
+    );
   });
 
   it("shows members nothing, and says what an empty list means", async () => {

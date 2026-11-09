@@ -39,6 +39,15 @@ describe("WEB-U-460 the Settings menu stays in view", () => {
     expect(declared(nav, "overscroll-behavior")).toBe("contain");
   });
 
+  // 17.4 fix: at the page's top the menu starts under the title row, so its foot sits that far below the window. As much
+  // room at its end (the heading's line, with the ring's room) lets the menu scroll its last section into view by
+  // itself, with the page left at its top.
+  it("has room at its foot for the part the window hides while the page is at its top", () => {
+    expect(declared(nav, "padding-bottom")).toBe(
+      "calc(var(--space-1) + var(--heading-line-height))",
+    );
+  });
+
   it("keeps room for the 2 px focus ring at its 2 px offset inside its own scroll area", () => {
     // The padding gives the ring room; the matching negative margin keeps the items where they were.
     expect(declared(nav, "padding")).toBe("var(--space-1)");
