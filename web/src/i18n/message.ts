@@ -265,16 +265,19 @@ function pluralRule(locale: string): Intl.PluralRules {
 /** Short-form formatters, one per language and rounding: the Usage tables shorten every cell. */
 const compactFormats = new Map<string, Intl.NumberFormat>();
 
+/** How a short form rounds: to the nearest, or down or up to its step. */
+const ROUNDING = { nearest: "halfExpand", down: "floor", up: "ceil" } as const;
+
 /**
  * Formats a count in its language's short form (WEB-U-461): 2.8M, 282.5万, 2,8 M, with one decimal at most. Token
- * counts read this way; the exact number stays one step away (CompactCount). A use against its limit rounds `down`, so
- * it never reads as the limit before it is reached ("29.9M of 30M", not "30M of 30M"); anything else rounds to the
- * nearest.
+ * counts read this way; the exact number stays one step away (CompactCount). A use and its limit round `down` or `up`,
+ * so together they never misstate where a budget stands ("29.9M of 30M" with headroom, "30M of 29.9M" when spent);
+ * anything else rounds to the nearest.
  */
 export function formatCompact(
   value: number,
   locale: string,
-  rounding: "nearest" | "down" = "nearest",
+  rounding: keyof typeof ROUNDING = "nearest",
 ): string {
   const key = `${locale} ${rounding}`;
   let format = compactFormats.get(key);
@@ -283,7 +286,7 @@ export function formatCompact(
       notation: "compact",
       maximumFractionDigits: 1,
       // Every supported browser rounds this way (UI-GUIDELINES §16; Firefox from 116, Safari from 15.4).
-      roundingMode: rounding === "down" ? "floor" : "halfExpand",
+      roundingMode: ROUNDING[rounding],
     });
     compactFormats.set(key, format);
   }
