@@ -162,6 +162,8 @@
   --control-height: 36px;
   /* §5b: no interactive element is lower than this (small buttons, disclosure summaries). */
   --min-control-height: 32px;
+  /* §7 Tabs: a tab is a control, 32 px; on touch screens a tap target (below). */
+  --tab-height: var(--min-control-height);
   --pill-height: 22px;
   /* UI-GUIDELINES §6: the one-line conversation bar and the sidebar brand row. */
   --bar-height: 56px;
@@ -182,8 +184,8 @@
   /* A Settings page's field at most this wide, in one column (WEB-U-131). */
   --field-width: 640px;
   /* UI-GUIDELINES §3: text links in rows (the overview's actions) take the informational blue, in both themes. */
-  /* UI-GUIDELINES §5c, density: navigation rows (the Settings menu, the sidebar's tasks, Keys' tabs) and menu items,
-     table rows, and the height both grow to on touch screens. */
+  /* UI-GUIDELINES §5c, density: navigation rows (the Settings menu, the sidebar's tasks) and menu items, table rows,
+     and the height both grow to on touch screens. */
   --row-height-nav: 36px;
   --row-height-table: 40px;
   /* §7 Table: a control in a cell (Edit, a ⋯) is 32 px with 4 px around it, so a one-line row stays 40 px. */
@@ -236,6 +238,8 @@
   --border-width: 1px;
   --focus-width: 2px;
   --focus-offset: 2px;
+  /* How far the ring reaches outside a control: the room a strip that scrolls keeps around its controls (§7 Tabs). */
+  --focus-reach: calc(var(--focus-width) + var(--focus-offset));
   --status-tint: 12%;
   --motion-fast: 120ms;
   --motion-panel: 160ms;
@@ -258,6 +262,7 @@
     --row-height-nav: var(--row-height-touch);
     --row-height-table: var(--row-height-touch);
     --table-control-height: var(--row-height-touch);
+    --tab-height: var(--row-height-touch);
   }
 }
 [lang|="ja"] {
@@ -1106,6 +1111,47 @@ textarea.form-control {
 }
 /* Under the pointer the active item keeps its fill: the hover tint is the lighter step, never darker (17.3). */
 .nav-item[aria-current="page"]:hover {
+  background: var(--selected-fill);
+}
+/* §7 Tabs: one style for every tab list (a task's Files panel, a channel's side, Keys' Mine | Shared). The chosen tab
+   is the selected fill with its label in ink, as the active navigation row; the others are muted labels that take the
+   hover tint; one weight, no underline. A strip wider than its place scrolls sideways inside itself, never the page. */
+.tab-list {
+  display: flex;
+  gap: var(--space-1);
+  min-width: 0;
+  overflow-x: auto;
+  /* The strip scrolls, so it cuts off what reaches past its edges: room for the focus ring, which the margin takes back
+     so the tabs stay where they were. */
+  padding: var(--focus-reach);
+  margin: calc(-1 * var(--focus-reach));
+}
+.tab {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tab-height);
+  padding: 0 var(--nav-pad-inline);
+  border: 0;
+  border-radius: var(--control-radius);
+  background: transparent;
+  color: var(--muted);
+  font-size: var(--nav-font-size);
+  line-height: var(--nav-line-height);
+  font-weight: 400;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+}
+.tab:hover {
+  color: var(--ink);
+  background: var(--hover-tint);
+}
+/* After the hover rule, at its weight: under the pointer the chosen tab keeps its fill, never darker (§5c). */
+.tab[aria-selected="true"],
+.tab[aria-current="page"] {
+  color: var(--ink);
   background: var(--selected-fill);
 }
 .nav-item svg {

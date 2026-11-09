@@ -277,23 +277,6 @@
   background: var(--paper);
   min-width: 0;
 }
-.channel-tabs {
-  display: flex;
-  gap: var(--space-4);
-  border-bottom: var(--border-width) solid var(--line);
-}
-.channel-tab {
-  padding: var(--space-2) 0;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  background: none;
-  color: var(--muted);
-  cursor: pointer;
-}
-.channel-tab[aria-selected="true"] {
-  border-bottom-color: var(--ink);
-  color: var(--ink);
-}
 .task-board,
 .member-list {
   display: flex;

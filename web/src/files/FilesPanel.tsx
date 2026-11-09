@@ -15,6 +15,7 @@ import type { ScreenNoticeView } from "../transcript/types";
 import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
 import { Skeleton } from "../ui/Skeleton";
+import { tabPanelIds } from "../ui/Tabs";
 
 import type { RunChoice } from "./ChangesView";
 import { FileList } from "./FileList";
@@ -209,8 +210,7 @@ export function FilesPanel({
         // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
         tabIndex={0}
         role="tabpanel"
-        id={`${FILES_PANEL_ID}-${current}`}
-        aria-labelledby={`${FILES_PANEL_ID}-${current}-tab`}
+        {...tabPanelIds(FILES_PANEL_ID, current)}
       >
         {current === "screen" ? (
           <Suspense fallback={<Skeleton label={t("screen.connecting")} />}>

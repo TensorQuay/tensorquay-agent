@@ -296,14 +296,17 @@ export async function auditHover(page: Page, view: string): Promise<Finding[]> {
   for (let index = 0; index < count; index += 1) {
     const control = controls.nth(index);
     // Markdown links keep the prose style; the skip link is off-screen until focused; an open modal makes
-    // everything outside it inert; the active item keeps its look (above).
+    // everything outside it inert; the active item keeps its look (above, §5c): the current page's link, or a chosen
+    // tab, which says so the tabs' way (§7 Tabs). The other tabs still change.
     if (
       await control.evaluate((element) => {
         const modal = document.querySelector("dialog:modal");
         return (
           element.closest(".markdown, .skip-link") !== null ||
           (modal !== null && !modal.contains(element)) ||
-          element.getAttribute("aria-current") === "page"
+          element.getAttribute("aria-current") === "page" ||
+          (element.getAttribute("role") === "tab" &&
+            element.getAttribute("aria-selected") === "true")
         );
       })
     )

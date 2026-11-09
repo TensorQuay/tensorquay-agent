@@ -95,15 +95,7 @@
     gap: var(--space-2);
   }
 }
-/* Keys and credentials: an administrator's Mine | Shared, and the page's purpose beside its one main action. */
-.keys-views {
-  display: flex;
-  gap: var(--space-1);
-}
-.keys-views .nav-item[aria-current="page"] {
-  background: var(--selected-fill);
-  color: var(--ink);
-}
+/* Keys and credentials: the page's purpose beside its one main action (its Mine | Shared are §7 Tabs). */
 .settings-bar {
   display: flex;
   align-items: flex-start;

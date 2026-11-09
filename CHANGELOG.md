@@ -25,6 +25,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   labels and the task titles share one left edge, and the spacing is even. On the rail the logo sits on the icons'
   axis and each icon shows its name in a tooltip; no item whose name shows repeats it in a browser tooltip. The
   phone's drawer follows: the same order, its rows inset as the sidebar's.
+- **One tab style everywhere (WEB-U-454, WEB-U-455, WEB-E2E-116).** The Files panel's tabs, a channel's To-dos and
+  Members, and Keys' Mine and Shared look and work the same: the chosen tab is a soft filled pill, the others plain
+  labels that tint under the pointer, with no underline and no bold. The arrow keys move between the tabs and choose,
+  Home and End go to the first and last, and only the chosen tab is in the Tab order. Tabs wider than a phone's screen
+  scroll sideways in their own row.
 
 ## 17.3 (8 November 2026)
 
