@@ -22,12 +22,16 @@ const BriefCard = lazy(() =>
   })),
 );
 // A message's files and pictures (WEB-U-464): only a message that has files loads them, off the first load of every
-// task page (WEB-U-014). A tab older than an upgrade may not find their code any more: the message then shows without
-// them, and the transcript stays.
+// task page (WEB-U-014). Where their code can't load (a tab older than an upgrade, a dropped connection), the message
+// names its files in plain words, as it always did, and the transcript stays.
 const SentAttachments = lazy(() =>
   import("../files/SentAttachments").then(
     ({ SentAttachments }) => ({ default: SentAttachments }),
-    (): { default: typeof SentList } => ({ default: () => null }),
+    (): { default: typeof SentList } => ({
+      default: ({ paths }) => (
+        <p className="type-small muted">{paths.map(fileName).join(", ")}</p>
+      ),
+    }),
   ),
 );
 

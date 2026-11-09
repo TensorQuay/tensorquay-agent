@@ -20,6 +20,8 @@ export function useImageBytes(
     queryFn: async ({ signal }) =>
       (await api.fileBlob(conversationId, path, signal)).arrayBuffer(),
     enabled: file !== undefined && file.size <= MAX_IMAGE_BYTES,
+    // A version's bytes never change: neither showing the page again nor the window's focus reads them again.
+    staleTime: Infinity,
     retry: false,
   });
 }

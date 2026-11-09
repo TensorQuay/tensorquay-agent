@@ -21,10 +21,11 @@ import "./changes-catalogue";
 const PICTURE = /\.(png|jpe?g|gif|webp)$/i;
 
 /**
- * One sent image, drawn from its bytes as the Files panel draws one. Its size and version are read first, into the
- * cache the panel's preview reads (opening the file reads nothing again); its bytes only up to the panel's limit; and an
- * object URL of the type its name gives, so the picture needs nothing the page's policy doesn't already allow. A file
- * that can't be read, or one over the limit, gives way to the file's chip.
+ * One sent image, drawn from its bytes as the Files panel draws one. Nothing is read until it nears the screen. Then
+ * its size and version are read first, into the cache the panel's preview reads (opening the file reads nothing again);
+ * its bytes only up to the panel's limit; and an object URL of the type its name gives, so the picture needs nothing the
+ * page's policy doesn't already allow. A file that can't be read, or one over the limit, gives way to the file's chip; a
+ * picture already drawn stays when a later read of it fails.
  */
 function Picture({
   conversationId,
@@ -37,15 +38,36 @@ function Picture({
   alt: string;
   onBroken: () => void;
 }) {
+  // Near the screen (or a browser that can't tell): a long task's pictures load as they are scrolled to.
+  const [near, setNear] = useState(
+    () => typeof IntersectionObserver === "undefined",
+  );
+  const waiting = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const placeholder = waiting.current;
+    if (near || !placeholder) return;
+    const watch = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) setNear(true);
+      },
+      { rootMargin: "400px 0px" },
+    );
+    watch.observe(placeholder);
+    return () => watch.disconnect();
+  }, [near]);
   const file = useQuery({
     queryKey: ["file", conversationId, path],
     queryFn: ({ signal }) => fileContent(api, conversationId, path, signal),
+    enabled: near,
+    // A sent file is read again when the Files panel refreshes it, not on every focus of the window.
+    staleTime: Infinity,
     retry: false,
   });
   const bytes = useImageBytes(conversationId, path, file.data);
+  // Only a read that never succeeded: a refresh failing later leaves the picture as it was.
   const unshown =
-    file.isError ||
-    bytes.isError ||
+    (file.isError && file.data === undefined) ||
+    (bytes.isError && bytes.data === undefined) ||
     (file.data !== undefined && file.data.size > MAX_IMAGE_BYTES);
   // The latest callback, read when the picture can't be shown, so a parent's re-render never reads the file again.
   const fail = useEffectEvent(() => onBroken());
@@ -69,7 +91,12 @@ function Picture({
     // eslint-disable-next-line @next/next/no-img-element -- the workspace's own bytes (blob:); next/image can't serve them
     <img ref={image} alt={alt} decoding="async" onError={onBroken} />
   ) : (
-    <span className="sent-picture-waiting" role="img" aria-label={alt} />
+    <span
+      ref={waiting}
+      className="sent-picture-waiting"
+      role="img"
+      aria-label={alt}
+    />
   );
 }
 
