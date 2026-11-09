@@ -326,7 +326,7 @@ textarea.composer-input {
   width: 100%;
   text-align: left;
   cursor: pointer;
-  /* §5c: a step's line is a 32 px row with 14/20 text, as the task's lists are. */
+  /* §5c: a step's line is a 36 px row with 15/22 text, as the task's lists are. */
   min-height: var(--row-height-nav);
   padding-block: var(--nav-pad-block);
   font-size: var(--nav-font-size);
@@ -936,7 +936,7 @@ textarea.composer-input {
   min-width: 0;
   text-wrap: balance;
 }
-/* §5b's small button: 28 px tall, 12 px each side. */
+/* §5b's small button: 32 px tall, 12 px each side. */
 .start-notice .start-notice-action {
   height: var(--min-control-height);
   padding: 0 var(--space-3);
@@ -978,7 +978,7 @@ textarea.composer-input {
 .conversation-row:has([data-current]) {
   background: var(--selected-fill);
 }
-/* §5c: a task is a 32 px navigation row with 14/20 text. */
+/* §5c: a task is a 36 px navigation row with 15/22 text. */
 .conversation-link {
   flex-direction: row;
   align-items: center;
@@ -1038,7 +1038,7 @@ textarea.composer-input {
 
 /* "From {profile}" under a task's title (ADR-0012): one small line, truncated with the title. */
 .conversation-origin {
-  line-height: 1.2;
+  line-height: var(--compact-leading);
 }
 /* A task that could not load keeps its header; the transcript's place says so, centred. */
 .conversation-failure {
@@ -1087,7 +1087,7 @@ textarea.composer-input {
 .sidebar-label {
   padding-inline-start: var(--nav-pad-inline);
 }
-/* §5c: rows 2 px apart, groups 16 px apart, a group's 12 px label 4 px above its rows. */
+/* §5c: rows 2 px apart, groups 16 px apart, a group's 13 px label 4 px above its rows. */
 .task-group {
   display: flex;
   flex-direction: column;
@@ -1126,7 +1126,7 @@ textarea.composer-input {
   color: var(--danger);
 }
 /* §7 Conversation list item (17.3): Show more reads as an action, never as one more muted task: §5b's small ghost
-   button (28 px, 12 px each side) at its own width, in the ghost's ink and weight and the list's text size, its label
+   button (32 px, 12 px each side) at its own width, in the ghost's ink and weight and the list's text size, its label
    starting where the titles do. */
 .button.task-more-button {
   align-self: flex-start;
@@ -1312,6 +1312,12 @@ textarea.composer-input {
   .conversation-bar-main:has(.task-choices) {
     flex-wrap: wrap;
     row-gap: 0;
+    /* With the type one step up (§4), the first line spends 4 px between the icon buttons, which carry their own
+       padding, and keeps 8 px between the title and its status (below), so a title that fitted still does. */
+    column-gap: var(--space-1);
+  }
+  .conversation-bar-main:has(.task-choices) > .conversation-status {
+    margin-inline-start: var(--space-1);
   }
   /* Lines break on each item's own width, before anything shrinks: a long title would push ⋯ under it. With no width
      of its own, the title breaks no line; it then grows first, up to its whole text, before the status takes the rest,

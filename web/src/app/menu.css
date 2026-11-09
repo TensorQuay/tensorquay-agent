@@ -54,7 +54,7 @@
   justify-content: space-between;
   gap: var(--space-3);
   width: 100%;
-  /* §5c: menu items are nav rows: 32 px, 14 px text; 44 px on touch. */
+  /* §5c: menu items are nav rows: 36 px, 15 px text; 44 px on touch. */
   min-height: var(--row-height-nav);
   padding: var(--nav-row-padding);
   font-size: var(--nav-font-size);

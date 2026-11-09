@@ -139,3 +139,43 @@ for (const [width, colorScheme] of [
     });
     await context.close();
   });
+
+// WEB-U-451 at 200 % zoom (WCAG 1.4.4): a 1280 × 800 window zoomed to 200 % lays the app out at 640 × 400 CSS px at a
+// device scale of 2. With the bigger type, no page scrolls sideways: a task page, its list in the drawer, Settings.
+test("WEB-U-451 the type scale at 200 % zoom", async ({ browser }) => {
+  test.setTimeout(120_000);
+  const context = await browser.newContext({
+    viewport: { width: 640, height: 400 },
+    deviceScaleFactor: 2,
+    reducedMotion: "reduce",
+  });
+  const page = await context.newPage();
+  await resetFront(page.request, ["agent-teams"]);
+  await signIn(page);
+  const sideways = () =>
+    page.evaluate(() => {
+      const root = document.scrollingElement;
+      return root ? root.scrollWidth - root.clientWidth : 0;
+    });
+  await page.goto("/");
+  await page
+    .getByLabel("Message", { exact: true })
+    .fill("Summarise the release notes in three lines");
+  await page.getByRole("button", { name: "Send", exact: true }).click();
+  await expect(page.getByLabel("Run status")).toHaveText(/^Done/, {
+    timeout: 30_000,
+  });
+  await shot(page, "zoom-200-task");
+  expect(await sideways()).toBe(0);
+  await page.getByRole("button", { name: "Open navigation" }).click();
+  const drawer = page.getByRole("dialog", { name: "Navigation" });
+  await expect(drawer.locator(".conversation-row").first()).toBeVisible();
+  await shot(page, "zoom-200-list");
+  expect(await sideways()).toBe(0);
+  await page.keyboard.press("Escape");
+  await page.goto("/settings/models");
+  await expect(page.locator(".settings-title h1")).toBeVisible();
+  await shot(page, "zoom-200-settings");
+  expect(await sideways()).toBe(0);
+  await context.close();
+});

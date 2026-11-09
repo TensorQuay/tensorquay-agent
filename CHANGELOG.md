@@ -15,6 +15,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   underlines on hover.
 - **A lead task's row reads as one row (WEB-U-450).** Its chevron sits at the row's start with the title just after
   it, and its helpers start where its title starts; an open lead's ⋯ stays on its own line.
+- **The whole app is one type step bigger (WEB-U-451).** Body text is 16 px on a 24 px line, small text 14, the
+  sidebar, the Settings menu and the menus 15, labels 13, page headings 22 and a task's title 18. Controls are at
+  least 32 px high and list and menu rows 36 px (44 px on touch screens, as before). Every size comes from one set
+  of tokens. The Settings column is 800 px wide (it was 760) and menus up to 240 px, so they hold what they held; a
+  table's controls stay 32 px and its two-line rows are 68 px.
 
 ## 17.3 (8 November 2026)
 

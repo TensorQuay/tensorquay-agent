@@ -21,7 +21,7 @@ async function tasks(page: Page) {
 }
 
 // WEB-E2E-112 (17.3, UI-GUIDELINES §7 Conversation list item): Show more reads as an action, never as one more muted
-// task: §5b's small ghost button, 28 px high at its own width, its label in the ghost's ink and the buttons' weight,
+// task: §5b's small ghost button, 32 px high at its own width, its label in the ghost's ink and the buttons' weight,
 // starting where the task titles start.
 for (const colorScheme of ["light", "dark"] as const)
   test(`WEB-E2E-112 the sidebar's Show more is a small ghost button ${colorScheme}`, async ({
@@ -58,7 +58,7 @@ for (const colorScheme of ["light", "dark"] as const)
         weight: style.fontWeight,
       };
     });
-    expect(shape.height, "§5b's small button").toBe(28);
+    expect(shape.height, "§5b's small button").toBe(32);
     expect(shape.width, "at its own width").toBeLessThan(shape.rowWidth);
     expect(shape.color, "the ghost's ink").toBe(shape.ink);
     expect(shape.weight, "the buttons' weight").toBe("700");

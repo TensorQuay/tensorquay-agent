@@ -13,7 +13,7 @@ const SPACING = [0, 2, 4, 8, 12, 16, 20, 24, 32, 48, 64];
 // §5 radii: controls 6, dialogs 10, composer 16, pills and round icon buttons (999, or 50 % of a square).
 // The UI standard: 8 px corners, the composer 16 px (pills are exempt).
 const RADII = [0, 8, 16];
-const MIN_CONTROL_HEIGHT = 28;
+const MIN_CONTROL_HEIGHT = 32;
 const MAX_FINDINGS = 200;
 
 type Raw = Omit<Finding, "view">;
@@ -146,7 +146,7 @@ function measure(input: {
       continue;
     const box = element.getBoundingClientRect();
     if (box.height < input.minHeight - 0.5)
-      add("control lower than 28 px", element, `${Math.round(box.height)}px`);
+      add("control lower than 32 px", element, `${Math.round(box.height)}px`);
     const disabled = element.matches(":disabled, [aria-disabled='true']");
     const cursor = getComputedStyle(element).cursor;
     const textual = element.matches(

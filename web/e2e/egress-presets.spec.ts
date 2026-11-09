@@ -73,7 +73,7 @@ for (const width of [1280, 390] as const)
             height: Math.round(element.getBoundingClientRect().height),
           };
         });
-        expect(look).toEqual({ ghost: true, ink: true, height: 28 });
+        expect(look).toEqual({ ghost: true, ink: true, height: 32 });
         await allow.click();
         await expect(page).toHaveURL(/\/settings\/internet-access$/);
         await expect(lists(page).getByRole("group")).toHaveText([

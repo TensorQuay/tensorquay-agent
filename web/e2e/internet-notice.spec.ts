@@ -77,7 +77,7 @@ for (const [width, theme] of [
         fill: getComputedStyle(element).backgroundColor,
         height: Math.round(element.getBoundingClientRect().height),
       })),
-    ).toEqual({ fill: "rgba(0, 0, 0, 0)", height: 28 });
+    ).toEqual({ fill: "rgba(0, 0, 0, 0)", height: 32 });
     // Words on each line of the text: one line on a desktop, and never a word alone.
     const lines = await words(text);
     if (width >= 1024) expect(lines).toHaveLength(1);

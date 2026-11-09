@@ -105,7 +105,7 @@ span.files-step {
   align-items: center;
   gap: var(--space-2);
   width: 100%;
-  /* §5c: a file or change is a 32 px row with 14 px text. */
+  /* §5c: a file or change is a 36 px row with 15 px text. */
   min-height: var(--row-height-nav);
   padding: 0 var(--nav-pad-inline);
   font-size: var(--nav-font-size);

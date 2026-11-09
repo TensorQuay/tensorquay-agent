@@ -57,7 +57,7 @@ for (const [width, theme] of [
       }),
     );
     expect(chips.length).toBeGreaterThanOrEqual(3);
-    // One style: the surface fill and the line border, round ends, 13 px text in the body weight; every chip alike.
+    // One style: the surface fill and the line border, round ends, 14 px text in the body weight; every chip alike.
     for (const chip of chips)
       expect({
         ...chip,
@@ -67,7 +67,7 @@ for (const [width, theme] of [
         background: surface,
         border: line,
         radius: chip.radius,
-        size: "13px",
+        size: "14px",
         weight: "400",
         box: undefined,
         round: true,

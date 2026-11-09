@@ -84,7 +84,7 @@ async function reads(page: Page) {
 }
 
 /**
- * Judges every table in `scope`: even rows, two lines at most (`oneLine` px for a one-line table, 64 for a two-line one),
+ * Judges every table in `scope`: even rows, two lines at most (`oneLine` px for a one-line table, 68 for a two-line one),
  * a cut line's words whole in its tooltip; a column whose cells carry a muted line at least 16rem wide, the name column
  * at least 12ch and the rest of the room, except on Limits, where the value column takes the room and the names keep
  * their own width; a note's link never cut; every table and its ⋯ inside the column; and Models' route names whole.
@@ -183,7 +183,7 @@ async function judge(
       expect.soft(table.cutNotes, `${at}: a card's note wraps in full`).toBe(0);
       expect
         .soft(
-          table.actions.every((height) => height < 64),
+          table.actions.every((height) => height < 68),
           `${at}: no card cell keeps a row's height`,
         )
         .toBe(true);
@@ -198,7 +198,7 @@ async function judge(
       .toBe(true);
     expect
       .soft(tallest, `${at}: two lines at most`)
-      .toBeLessThanOrEqual((table.twoLine ? 64 : oneLine) + 1);
+      .toBeLessThanOrEqual((table.twoLine ? 68 : oneLine) + 1);
     expect
       .soft(
         table.cutWithoutTitle,
@@ -269,7 +269,7 @@ test("WEB-E2E-111 every table's cells are two lines at most, on even rows, names
 
 test.describe("on a touch screen", () => {
   test.use({ hasTouch: true, isMobile: true });
-  test("WEB-E2E-111 on a touch screen a one-line table's rows are 44 px and a two-line one's 64", async ({
+  test("WEB-E2E-111 on a touch screen a one-line table's rows are 44 px and a two-line one's 68", async ({
     page,
   }) => {
     test.setTimeout(120_000);
@@ -309,7 +309,7 @@ test("WEB-E2E-111 at phone width a table's rows are cards whose notes wrap in fu
           .toBe(0);
         expect
           .soft(
-            card.actions.every((height) => height < 64),
+            card.actions.every((height) => height < 68),
             `${href} ${card.name}: no cell keeps a row's height (${card.actions.join(", ")})`,
           )
           .toBe(true);

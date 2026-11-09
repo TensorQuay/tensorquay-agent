@@ -141,24 +141,27 @@
   /* §7 Composer: Send with nothing to send is an outline disc at this share of the ink (the §8 inactive look). */
   --inactive-share: 35%;
   --pill-radius: 999px;
-  --display-size: 28px;
-  --heading-size: 20px;
-  /* The UI standard: a task's title is 16 px, weight 700 (the app ships 400 and 700, §4). */
-  --task-title-size: 16px;
-  --body-size: 15px;
-  --small-size: 13px;
-  --label-size: 12px;
+  --display-size: 30px;
+  --heading-size: 22px;
+  /* The UI standard: a task's title is 18 px, weight 700 (the app ships 400 and 700, §4). The whole scale is one
+     step bigger since the owner's ask of 9 Nov 2026 ("bigger pls"): body 16/24, small 14, nav 15/22, labels 13. */
+  --task-title-size: 18px;
+  --body-size: 16px;
+  --small-size: 14px;
+  --label-size: 13px;
   --display-leading: 1.15;
   --heading-leading: 1.25;
-  --body-leading: 1.6;
+  --body-leading: 1.5;
   --small-leading: 1.5;
   --code-leading: 1.55;
+  /* One small line tight under a title (a task's "From {profile}"). */
+  --compact-leading: 1.2;
   --display-tracking: -0.04em;
   --heading-tracking: -0.03em;
   --label-tracking: 0.025em;
   --control-height: 36px;
   /* §5b: no interactive element is lower than this (small buttons, disclosure summaries). */
-  --min-control-height: 28px;
+  --min-control-height: 32px;
   --pill-height: 22px;
   /* UI-GUIDELINES §6: the one-line conversation bar and the sidebar brand row. */
   --bar-height: 56px;
@@ -174,16 +177,19 @@
   --search-results-height: 480px;
   --rail-width: 56px;
   --dialog-width: 480px;
-  --form-width: 760px;
+  /* The Settings column: 800 px since the type step of 9 Nov 2026 (760 before), so a table holds what it held. */
+  --form-width: 800px;
   /* A Settings page's field at most this wide, in one column (WEB-U-131). */
   --field-width: 640px;
   /* UI-GUIDELINES §3: text links in rows (the overview's actions) take the informational blue, in both themes. */
   /* UI-GUIDELINES §5c, density: navigation rows (the Settings menu, the sidebar's tasks, Keys' tabs) and menu items,
      table rows, and the height both grow to on touch screens. */
-  --row-height-nav: 32px;
+  --row-height-nav: 36px;
   --row-height-table: 40px;
+  /* §7 Table: a control in a cell (Edit, a ⋯) is 32 px with 4 px around it, so a one-line row stays 40 px. */
+  --table-control-height: var(--min-control-height);
   /* A table row whose cells have a muted second line: every row of that table (17.3, §7 Table). */
-  --row-height-table-two: 64px;
+  --row-height-table-two: 68px;
   --row-height-touch: 44px;
   --space-half: 2px;
   --nav-pad-block: var(--space-1);
@@ -203,11 +209,11 @@
      the target's end; the title starts 6 px after the icon, and the lead's helpers start there too. */
   --lead-toggle-width: var(--space-6);
   --lead-title-start: calc(var(--lead-toggle-width) + var(--space-1));
-  --nav-font-size: 14px;
-  --nav-line-height: 20px;
+  --nav-font-size: 15px;
+  --nav-line-height: 22px;
   --group-gap: var(--space-4);
   --group-label-gap: var(--space-1);
-  --heading-line-height: 28px;
+  --heading-line-height: 30px;
   --table-name-width: 180px;
   /* A table column whose cells carry a muted line keeps this much, before the name column takes the rest (17.3). */
   --table-note-width: 16rem;
@@ -252,6 +258,7 @@
   :root {
     --row-height-nav: var(--row-height-touch);
     --row-height-table: var(--row-height-touch);
+    --table-control-height: var(--row-height-touch);
     --lead-toggle-width: var(--row-height-touch);
   }
 }
@@ -1141,7 +1148,7 @@ textarea.form-control {
   gap: var(--space-2);
   min-height: var(--min-control-height);
 }
-/* The shared check row's control (§7 Checkbox, WEB-U-434): Lucide's 16 px box (a circle for a radio) in a 28 px target
+/* The shared check row's control (§7 Checkbox, WEB-U-434): Lucide's 16 px box (a circle for a radio) in a 32 px target
    that the native input fills, transparent, so the input keeps the pointer, the keyboard and the label; its focus ring
    is drawn around the target. */
 .check-control {

@@ -213,7 +213,7 @@ describe("WEB-U-448 the weights the app ships", () => {
 
 // WEB-U-451 (UI-GUIDELINES §4 and §5c; the owner's ask, 9 Nov 2026: "can we adjust all system wide ... bigger"): the
 // whole app one step bigger, set once in the tokens: body 16/24, small 14, the navigation 15/22, labels 13, page
-// headings 22/30, a task's title 18, display 30; controls at least 32 px; list and menu rows 36 px; pills 24 px. Every
+// headings 22/30, a task's title 18, display 30; controls at least 32 px; list and menu rows 36 px; two-line table rows 68 px. Every
 // stylesheet takes its sizes and lines from the tokens, so the whole app follows them.
 describe("WEB-U-451 one type scale, one step up", () => {
   it.each([
@@ -231,9 +231,40 @@ describe("WEB-U-451 one type scale, one step up", () => {
     ["compact-leading", "1.2"],
     ["min-control-height", "32px"],
     ["row-height-nav", "36px"],
-    ["pill-height", "24px"],
+    ["pill-height", "22px"],
+    ["row-height-table-two", "68px"],
   ])("sets --%s to %s", (name, value) => {
     expect(declared(root, `--${name}`)).toBe(value);
+  });
+
+  it("states the scale on the design reference as the tokens set it", () => {
+    const reference = readFileSync("src/design/TypeAndSpace.tsx", "utf8");
+    const stated = (role: string) =>
+      new RegExp(`"${role} · (\\d+) / ([\\d.]+)"`).exec(reference)?.slice(1);
+    const token = (name: string) =>
+      declared(root, `--${name}`)?.replace(/px$/, "");
+    expect(stated("Display")).toEqual([
+      token("display-size"),
+      token("display-leading"),
+    ]);
+    expect(stated("Heading")).toEqual([
+      token("heading-size"),
+      token("heading-leading"),
+    ]);
+    expect(stated("Body")).toEqual([token("body-size"), token("body-leading")]);
+    expect(stated("Small")).toEqual([
+      token("small-size"),
+      token("small-leading"),
+    ]);
+    // Labels take the body's leading (the theme's --text-label--line-height); code is set at the small size.
+    expect(stated("Label")).toEqual([
+      token("label-size"),
+      token("body-leading"),
+    ]);
+    expect(stated("Code")).toEqual([
+      token("small-size"),
+      token("code-leading"),
+    ]);
   });
 
   it("takes every font size and line height from a token", () => {
