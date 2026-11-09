@@ -91,6 +91,7 @@
     "changes.removedAtStart": "Removed at the start",
     "changes.lineAdded": "Added",
     "changes.lineRemoved": "Removed",
-    "changes.latestBadge": "Latest"
+    "changes.latestBadge": "Latest",
+    "attach.open": "Open {name}"
   }
 }

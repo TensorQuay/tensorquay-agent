@@ -2861,6 +2861,7 @@
     "account.whatsNew": "What’s new",
     "account.source": "Source code",
     "account.licence": "Licence",
-    "account.newTab": "(opens in a new tab)"
+    "account.newTab": "(opens in a new tab)",
+    "attach.open": "Open {name}"
   }
 }

@@ -18,6 +18,8 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   live line (the step, a soft shimmer and the time) instead of a static "Working…".
 - **The account menu (WEB-U-463).** Your email and role, then Settings, Usage (administrators), Language, Help, Send
   feedback, API tokens and About, each with its icon. Theme moved to Settings › Account.
+- **Sent images show as pictures (WEB-U-464).** Under your message, an image you attached shows as its picture and
+  any file opens its preview in the Files panel with one click.
 
 ## 17.3 (8 November 2026)
 
