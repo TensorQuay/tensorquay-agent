@@ -98,15 +98,20 @@ describe("WEB-U-379 the navigation drawer has the account menu", () => {
       within(menu)
         .getAllByRole("menuitem")
         .map((item) => item.textContent),
-    ).toEqual(["Settings", "Language · English", "Sign out"]);
-    expect(within(menu).getAllByRole("menuitemradio")).toHaveLength(3);
-    // A theme choice doesn't navigate: the drawer stays open.
-    fireEvent.click(within(menu).getByRole("menuitemradio", { name: "Dark" }));
+    ).toEqual([
+      "Settings",
+      "Language · English",
+      "Help (opens in a new tab)",
+      "Send feedback (opens in a new tab)",
+      "API tokens",
+      "About",
+      "Sign out",
+    ]);
+    // Opening a group in the menu doesn't navigate: the drawer stays open (WEB-U-463).
+    fireEvent.click(within(menu).getByRole("menuitem", { name: "About" }));
     expect(onClose).not.toHaveBeenCalled();
     fireEvent.click(within(menu).getByRole("menuitem", { name: "Settings" }));
     expect(onClose).toHaveBeenCalledTimes(1);
-    localStorage.clear();
-    document.documentElement.removeAttribute("data-theme");
   });
 
   it("signs out from the drawer, closing it on the way to the sign-in page", async () => {

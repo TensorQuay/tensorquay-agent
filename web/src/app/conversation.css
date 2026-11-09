@@ -333,6 +333,23 @@ textarea.composer-input {
   line-height: var(--nav-line-height);
   border-radius: var(--control-radius);
 }
+/* WEB-U-462: a folded group's live heading stays on one line; long step words end in an ellipsis, the time after
+   them never wraps. */
+/* While the live words show, the label before them leaves the screen but stays the button's name. */
+.activity-toggle > span:has(+ .activity-heading-live) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.activity-heading-live {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .activity-toggle:hover {
   color: var(--ink);
   background: var(--hover-tint);

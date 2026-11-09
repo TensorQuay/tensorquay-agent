@@ -132,9 +132,16 @@
 .menu[data-lines="one"] .menu-choice > :not(:first-child) {
   flex-shrink: 0;
 }
-.account-signout {
+/* WEB-U-463: the account menu's groups are set apart by a hairline; its words grow after their icon, so a trailing
+   chevron or external mark sits at the row's end. */
+.menu-separator {
+  margin: var(--space-1) 0;
+  border: 0;
   border-top: var(--border-width) solid var(--line);
-  border-radius: 0;
+}
+.menu-item > .menu-icon + span {
+  flex: 1;
+  min-width: 0;
 }
 .menu-picker {
   position: relative;

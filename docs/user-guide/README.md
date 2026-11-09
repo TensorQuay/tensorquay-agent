@@ -19,7 +19,7 @@ The sidebar starts with **New task**, **Workspaces** and **Channels**, then list
 them; your account is at its foot, with the Account menu. The button beside the product name (or the [ key) narrows
 it to icons, and pointing at an icon shows its name. On a phone, the menu button at the top left opens the same list.
 
-The app follows your browser's language; **Language** in the Account menu changes it. **Theme** in the same menu
-chooses **System**, **Light** or **Dark**. The agent's own answers are
+The app follows your browser's language; **Language** in the Account menu changes it. **Theme**, in Settings ›
+Account, chooses **System**, **Light** or **Dark**. The agent's own answers are
 not translated. For settings that only an administrator can change, see the
 [administrator's guide](../admin-guide/README.md).

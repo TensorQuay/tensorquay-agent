@@ -320,6 +320,17 @@
     "picker.noProfile": "எதுவுமில்லை",
     "quota.workspaceOver": "இந்தப் பணியிடம் அதன் சேமிப்பு ஒதுக்கீட்டைத் தாண்டிவிட்டது. இயக்கம் தொடர்கிறது; ஒதுக்கீட்டுக்குள் திரும்ப கோப்புகளை நீக்கவும்.",
     "quota.workspaceStopped": "இயக்கம் நின்றது: இந்தப் பணியிடம் அதன் சேமிப்பு ஒதுக்கீட்டை மிக அதிகமாகத் தாண்டிவிட்டது. கோப்புகளை நீக்கி, உங்கள் செய்தியை மீண்டும் அனுப்பவும்.",
-    "workspaces.helperCopyName": "{name} (உதவியாளரின் நகல்)"
+    "workspaces.helperCopyName": "{name} (உதவியாளரின் நகல்)",
+    "account.roleAdmin": "நிர்வாகி",
+    "account.roleMember": "உறுப்பினர்",
+    "account.usage": "பயன்பாடு",
+    "account.help": "உதவி",
+    "account.feedback": "கருத்தை அனுப்பு",
+    "account.apiTokens": "API டோக்கன்கள்",
+    "account.about": "பற்றி",
+    "account.whatsNew": "புதியவை",
+    "account.source": "மூலக் குறியீடு",
+    "account.licence": "உரிமம்",
+    "account.newTab": "(புதிய தாவலில் திறக்கும்)"
   }
 }

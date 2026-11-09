@@ -320,6 +320,17 @@
     "picker.noProfile": "Tiada",
     "quota.workspaceOver": "Ruang kerja ini melebihi kuota storannya. Larian diteruskan; padam fail untuk kembali di bawah kuota.",
     "quota.workspaceStopped": "Larian berhenti: ruang kerja ini terlalu jauh melebihi kuota storannya. Padam fail, kemudian hantar mesej anda sekali lagi.",
-    "workspaces.helperCopyName": "{name} (salinan pembantu)"
+    "workspaces.helperCopyName": "{name} (salinan pembantu)",
+    "account.roleAdmin": "Pentadbir",
+    "account.roleMember": "Ahli",
+    "account.usage": "Penggunaan",
+    "account.help": "Bantuan",
+    "account.feedback": "Hantar maklum balas",
+    "account.apiTokens": "Token API",
+    "account.about": "Perihal",
+    "account.whatsNew": "Apa yang baharu",
+    "account.source": "Kod sumber",
+    "account.licence": "Lesen",
+    "account.newTab": "(dibuka dalam tab baharu)"
   }
 }

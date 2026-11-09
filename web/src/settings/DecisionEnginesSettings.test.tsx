@@ -148,7 +148,7 @@ describe("WEB-U-074 decision engines", () => {
     // One muted line for both limits (17.3); no page says the use, so the line's tooltip holds it whole.
     const typed = row(/typed/);
     expect(cellNote(typed, "12 of 500 calls")).toHaveTextContent(
-      /^12 of 500 calls since Sep 29, 2026 · 4\s200 of 30\s000\s000 tokens since Sep 29, 2026$/,
+      /^12 of 500 calls since Sep 29, 2026 · 4\.2K of 30M tokens since Sep 29, 2026$/,
     );
     // A missing key's link leads the line, and the use still follows it.
     const keyless = row(/keyless/);
@@ -398,7 +398,7 @@ describe("WEB-U-074 decision engines", () => {
     fireEvent.change(field("Calls"), { target: { value: "3000" } });
     expect(
       within(dialog).getByText(
-        /^Up to 3\s000 calls and 30\s000\s000 tokens in total\.$/,
+        /^Up to 3\s000 calls and 30M tokens in total\.$/,
       ),
     ).toBeVisible();
     fireEvent.click(picker("Per", dialog));
@@ -410,7 +410,7 @@ describe("WEB-U-074 decision engines", () => {
     );
     expect(
       within(dialog).getByText(
-        /^Up to 3\s000 calls and 30\s000\s000 tokens each month \(UTC\)\.$/,
+        /^Up to 3\s000 calls and 30M tokens each month \(UTC\)\.$/,
       ),
     ).toBeVisible();
     expect(

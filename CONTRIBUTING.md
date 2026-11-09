@@ -143,3 +143,22 @@ CI on every pull request that changes a catalogue.
 - Review follows [`REVIEW.md`](REVIEW.md): its risk tier decides who reviews and what evidence the PR carries.
 - Conventional Commits under your own name (maintainers commit as TensorQuay); no attribution lines (AGENTS.md).
 - Describe what changed, why, and how it was verified. The maintainers run independent acceptance for milestones.
+- Add one line for each change people will notice to the "Unreleased" section at the top of
+  [`CHANGELOG.md`](CHANGELOG.md), in the same PR.
+
+## Branches, releases and tags
+- **`main` is where development happens.** Every change reaches it through a pull request that is squash-merged after
+  the required checks pass and a maintainer reviews it; `main` always builds and passes its checks, but it may hold
+  changes that aren't released yet. Branch from `main`, name the branch `<type>/<topic>` (`feat`, `fix`, `docs`,
+  `test`, `ci`, `chore`), keep it to one concern, and expect it to be deleted when it merges.
+- **People install releases, not `main`.** A release is an annotated tag `vMAJOR.MINOR.PATCH` on a commit of `main`,
+  with a page on [GitHub's Releases](https://github.com/TensorQuay/tensorquay-agent/releases) carrying its notes from
+  the changelog. The README and the install guide start from the newest one.
+- **Version numbers.** MAJOR for a feature release (a new capability, a database migration or a protocol change);
+  MINOR for an improvement release with none of those; PATCH for fixes only. Before 17.4 the changelog used two
+  numbers (17.3 is v17.3.0).
+- **Cutting a release** (maintainers): the checks of [DEV-PLAN §7](docs/DEV-PLAN.md#7-release-process) for its kind on
+  the candidate commit, then a pull request that turns "Unreleased" into the version and date (and moves the version
+  in the README's and the install guide's clone line), then the tag on its merge commit and the release page.
+- **Fixing an older release:** a `release/MAJOR.MINOR` branch from its tag, the fix cherry-picked from `main` (where it
+  lands first), and the next PATCH tag.

@@ -365,6 +365,15 @@ request carries the release notes and the evidence of steps 1 to 5, so the PO ca
   Desktop changes, step 4, and the audit of the TEST-PLAN IDs it touches. The 24-hour soak (step 3) is required only
   when it changes the gateway's connection handling, the runtime link, the sandbox lifecycle or the event store.
 
+**Amended 9 Nov 2026 (the repository is public): releases are tags; `main` is where development happens.**
+Reviewed pull requests reach `main` as they are ready, each with the required checks green; the steps above now
+decide a release, which is an annotated tag `vMAJOR.MINOR.PATCH` on one commit of `main` and a page on GitHub's
+Releases with its notes, not a squashed commit to `main`. MAJOR is a feature release, MINOR an improvement release
+(no new capability, migration or protocol change), PATCH a fix release; every pull request adds its line to the
+changelog's "Unreleased" section, and the release's pull request turns it into the version. A fix for an older
+release goes to a `release/MAJOR.MINOR` branch from its tag. The past releases were tagged once, v17.0.0 to
+v17.3.0 (CONTRIBUTING.md, "Branches, releases and tags").
+
 **Unchanged from v0.2:**
 - Semantic versions; `main` always releasable behind gates; release branches only for fixes.
 - A release produces: gateway, web and runtime images by digest; the Firecracker rootfs and kernel manifest; an

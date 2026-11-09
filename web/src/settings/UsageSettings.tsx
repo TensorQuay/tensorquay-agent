@@ -7,10 +7,11 @@ import { useId, useState } from "react";
 import { modelName } from "../conversations/model-name";
 import { useModels } from "../conversations/use-models";
 import { useT } from "../i18n/I18nProvider";
-import { formatNumber } from "../i18n/message";
+import { formatCompact, formatNumber } from "../i18n/message";
 import type { Translate } from "../i18n/translate";
 import type { User } from "../protocol/generated/api";
 import { Button } from "../ui/Button";
+import { CompactCount, ShortAndExact } from "../ui/CompactCount";
 import { Select } from "../ui/Select";
 import { Skeleton } from "../ui/Skeleton";
 import { TableScroll } from "../ui/TableScroll";
@@ -197,6 +198,8 @@ function Report({
 }) {
   const t = useT();
   const number = (value: number) => formatNumber(value, t.locale);
+  // WEB-U-461: token counts show short (66.6K); the exact figures stay for hover and screen readers.
+  const short = (value: number) => formatCompact(value, t.locale);
   // A route without a display name reads as the model picker names it (found before 17.0: not "local").
   const catalogue = useModels();
   const routeName = (row: UsageRow) =>
@@ -213,14 +216,17 @@ function Report({
   // otherwise not counted at all.
   const unreported = totals.requests - totals.reported - totals.estimated;
   const detail = (value: number | null) =>
-    value === null ? t("usage.notReportedShort") : number(value);
+    value === null ? t("usage.notReportedShort") : short(value);
   return (
     <div className="stack">
       {/* The one number first: the period's tokens and their change. */}
       <section className="usage-headline" aria-label={t("usage.total")}>
-        {/* Written as every other number on the page (found before 17.0: no "59.2K" above "59 200"). */}
+        {/* Written as every other number on the page: all short (WEB-U-461), never "59.2K" above "59 200". */}
         <p className="type-display">
-          {t("usage.headline", { tokens: number(now) })}
+          <ShortAndExact
+            short={t("usage.headline", { tokens: short(now) })}
+            exact={t("usage.headline", { tokens: number(now) })}
+          />
         </p>
         <p className="type-body">
           {then === 0
@@ -231,11 +237,18 @@ function Report({
               })}
         </p>
         <p className="type-small muted">
-          {t("usage.summary", {
-            requests: totals.requests,
-            input: totals.prompt_tokens,
-            output: totals.completion_tokens,
-          })}
+          <ShortAndExact
+            short={t("usage.summary", {
+              requests: totals.requests,
+              input: short(totals.prompt_tokens),
+              output: short(totals.completion_tokens),
+            })}
+            exact={t("usage.summary", {
+              requests: totals.requests,
+              input: totals.prompt_tokens,
+              output: totals.completion_tokens,
+            })}
+          />
         </p>
         {/* Only when a model server reported either: a line of "not reported" says nothing. */}
         {(totals.cached_tokens !== null ||
@@ -348,10 +361,16 @@ function DayBars({ report, range }: { report: UsageReport; range: Range }) {
         {last !== first && <span>{last}</span>}
       </div>
       <figcaption id={caption} className="type-small muted">
-        {t("usage.chart", {
-          day: dates.format(new Date(`${busiest[0]}T00:00:00Z`)),
-          tokens: busiest[1],
-        })}
+        <ShortAndExact
+          short={t("usage.chart", {
+            day: dates.format(new Date(`${busiest[0]}T00:00:00Z`)),
+            tokens: formatCompact(busiest[1], t.locale),
+          })}
+          exact={t("usage.chart", {
+            day: dates.format(new Date(`${busiest[0]}T00:00:00Z`)),
+            tokens: busiest[1],
+          })}
+        />
       </figcaption>
     </figure>
   );
@@ -410,7 +429,7 @@ function Ranking({
                 <tr key={row.key}>
                   <td className="cell-wrap">{name(row)}</td>
                   <td className="numeric">
-                    {formatNumber(tokens(row), t.locale)}
+                    <CompactCount value={tokens(row)} locale={t.locale} />
                   </td>
                   <td className="numeric">
                     <span
@@ -483,13 +502,13 @@ function EachDay({ report }: { report: UsageReport }) {
             <tr key={row.key}>
               <td>{dates.format(new Date(`${row.key}T00:00:00Z`))}</td>
               <td className="numeric">
-                {formatNumber(row.requests, t.locale)}
+                <CompactCount value={row.requests} locale={t.locale} />
               </td>
               <td className="numeric">
-                {formatNumber(row.prompt_tokens, t.locale)}
+                <CompactCount value={row.prompt_tokens} locale={t.locale} />
               </td>
               <td className="numeric">
-                {formatNumber(row.completion_tokens, t.locale)}
+                <CompactCount value={row.completion_tokens} locale={t.locale} />
               </td>
             </tr>
           ))}

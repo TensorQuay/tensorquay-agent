@@ -7,6 +7,17 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Changed
 
+- **Releases are tagged.** Each release is a `vMAJOR.MINOR.PATCH` tag with a page on GitHub's Releases; the README
+  and the install guide start from the newest release, and CONTRIBUTING.md says how branches, pull requests and
+  releases work.
+- **Settings menu (WEB-U-460).** From 768 px the section menu stays in view while a long section scrolls; a menu taller
+  than the window scrolls on its own, with the current section in view.
+- **Token counts in short form (WEB-U-461).** 2.8M instead of 2 824 643, in each language's own way (282.5万 in
+  Chinese); the exact number shows on hover and is what screen readers read.
+- **A folded group shows the step it is on (WEB-U-462).** While a task runs, a folded activity group is headed by its
+  live line (the step, a soft shimmer and the time) instead of a static "Working…".
+- **The account menu (WEB-U-463).** Your email and role, then Settings, Usage (administrators), Language, Help, Send
+  feedback, API tokens and About, each with its icon. Theme moved to Settings › Account.
 - **The task list's ⋯ is part of its row (WEB-U-449, WEB-E2E-114).** It shows inside the row's hover backdrop at the
   row's end, square and evenly inset, its corners concentric with the row's, with no fill of its own; its own hover
   is a quiet tint. A long title fades out under it instead of being cut, and the row's marks give way while it

@@ -320,6 +320,17 @@
     "picker.noProfile": "Không có",
     "quota.workspaceOver": "Không gian làm việc này vượt quá hạn mức lưu trữ. Lượt chạy vẫn tiếp tục; hãy xóa bớt tệp để trở lại dưới hạn mức.",
     "quota.workspaceStopped": "Lượt chạy đã dừng: không gian làm việc này vượt quá xa hạn mức lưu trữ. Hãy xóa bớt tệp rồi gửi lại tin nhắn của bạn.",
-    "workspaces.helperCopyName": "{name} (bản sao của trợ lý)"
+    "workspaces.helperCopyName": "{name} (bản sao của trợ lý)",
+    "account.roleAdmin": "Quản trị viên",
+    "account.roleMember": "Thành viên",
+    "account.usage": "Mức sử dụng",
+    "account.help": "Trợ giúp",
+    "account.feedback": "Gửi phản hồi",
+    "account.apiTokens": "Token API",
+    "account.about": "Giới thiệu",
+    "account.whatsNew": "Có gì mới",
+    "account.source": "Mã nguồn",
+    "account.licence": "Giấy phép",
+    "account.newTab": "(mở trong thẻ mới)"
   }
 }

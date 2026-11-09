@@ -117,30 +117,25 @@ test("loading buttons retain their width", async ({ page }) => {
 test("theme choice survives navigation and overrides the system preference", async ({
   page,
 }) => {
+  // WEB-U-463: the theme is chosen in Settings › Account (the account menu no longer holds it).
   await page.emulateMedia({ colorScheme: "dark" });
+  await page.goto("/settings/account");
+  const theme = page.getByRole("button", { name: /^Theme: / });
+  await expect(theme).toHaveAccessibleName("Theme: System");
+  await theme.click();
+  await page.getByRole("menuitemradio", { name: "Light", exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   await page.goto("/");
   await expect(
     page.getByRole("textbox", { name: "Message", exact: true }),
-  ).toBeFocused();
-  await page.getByRole("button", { name: "Account", exact: true }).click();
-  const theme = page.getByRole("menuitemradio", {
-    name: "System",
-    exact: true,
-  });
-  await theme.focus();
-  await expect(theme).toBeFocused();
-  await page.keyboard.press("l");
-  await page.keyboard.press("Enter");
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  await page.keyboard.press("Escape");
-  await page.reload();
-  await page.getByRole("button", { name: "Account", exact: true }).click();
-  await expect(
-    page.getByRole("menuitemradio", { name: "Light", exact: true }),
-  ).toHaveAttribute("aria-checked", "true");
+  ).toBeVisible();
   expect(
     await page
       .locator("html")
       .evaluate((element) => getComputedStyle(element).colorScheme),
   ).toBe("light");
+  await page.goto("/settings/account");
+  await expect(
+    page.getByRole("button", { name: /^Theme: / }),
+  ).toHaveAccessibleName("Theme: Light");
 });

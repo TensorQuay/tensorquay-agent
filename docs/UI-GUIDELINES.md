@@ -58,7 +58,7 @@ table first.
 
 Never: a control opened on top of another control, a "Done" button to close a picker, or a long form in a dialog.
 
-**Settings.** Each section opens the same way: its name as the heading (22/30), one muted line saying what it is,
+**Settings.** From 768 px the section menu stays in view while a long section scrolls; a menu taller than the window scrolls on its own, the current section kept in view (WEB-U-460). Each section opens the same way: its name as the heading (22/30), one muted line saying what it is,
 then its primary action (People invites after its list, WEB-U-156); a view of it, such as the shared keys, opens the same,
 and a page inside it has its own title under its way back instead. Each section is a list first: one row per item (name,
 one muted line, status badges, Edit and ⋯; Edit is one small ghost button, the same whether it opens a page or a
@@ -339,7 +339,7 @@ One implementation per component, in `web/src/ui/`, tokens only, keyboard operab
 | Channel post | A light row, not a card: the author's name ("Agent" beside a task's agent), a role badge only when it isn't a plain member, then the body; consecutive posts by one author within five minutes share one header line, as in chat apps; seq, time and Reply are one quiet line at the end of the author's line, shown on hover or focus (always on touch screens); replies indented under their parent; a proposal shows one tally bar with the counts in words; decisions are `--info` tinted; tasks show claim state |
 | Auth pages | Setup and sign-in: a centred 400 px column on `--paper` with no card; the wordmark, one heading, one line of help, bordered inputs, the primary button full width; password rules listed under the field and ticked as they are met; a show/hide toggle. Creating the first administrator signs them in. `/login` redirects to `/setup` while no account exists; a failed sign-in says "Email or password is incorrect" |
 | Sidebar | A "New conversation" button, then the conversation list (title, relative time, the open task in §5c's selected fill), and at the bottom the **account row** (avatar with initials, the email or name, truncated). Only built features appear; administration appears for administrators only. No disabled placeholders |
-| Account menu | Opened from the account row at the bottom of the sidebar (never the top bar), opening upward: the email (muted), Settings, Theme (System, Light, Dark), Language (the current language's own name, a submenu of all available languages each written in its own script), Sign out. Keyboard operable; Escape and outside click close it; focus returns to the row. On a collapsed sidebar the row shows the avatar only |
+| Account menu | Opened from the account row at the bottom of the sidebar (never the top bar), opening upward (WEB-U-463): the email and role (muted); Settings, Usage (administrators), Language (the current language's own name, a submenu of all available languages each written in its own script), Help and Send feedback (the project's pages, a new tab, said to screen readers); a hairline; API tokens, About (a submenu: what's new, the source code, the licence); a hairline; Sign out. Each item has its 16 px line icon. Theme is in Settings › Account, not here. Keyboard operable; Escape and outside click close it; focus returns to the row. On a collapsed sidebar the row shows the avatar only |
 | Dialog | Centred, 480 px, title in heading face, actions right-aligned, Escape closes, focus trapped |
 | In-place edit | For one short text (a task title, a workspace name), as on Claude.ai: at rest plain text; on hover only a subtle tint behind it, no box and no pencil; then the text itself becomes the field, at its own font, size and place, all of it selected, with no visible label, no buttons and one thin underline; a focus ring only when the keyboard opened it (the ⋯'s Rename by keys); nothing around it moves. Enter, a click elsewhere or moving focus away saves; Escape cancels and returns focus to what opened it; an empty or unchanged text keeps the old one; a save that fails keeps the text and says why. Built on `InlineEdit` and `useDismiss` (src/ui), never a one-off |
 | Action menu | Actions on one thing (a task row, a Settings row, a member, a workspace, a channel), from its ⋯ or a right-click on it: a 16 px line icon before every item, the word, and under it why an action can't run when it can't (the item stays reachable, dimmed); a destructive item in the danger colour; a setting turned on and off here is a checkbox item (`menuitemcheckbox`), its check at the row's end while on, with what it means or costs in one muted line under the word, at most 36 characters, so the menu keeps the standard 200 to 240 px (one type step up since 9 Nov 2026, §4). It closes after a choice, on Escape or a click elsewhere, and focus returns to the ⋯ before the action runs. Built on `ActionMenu` (src/ui), never a one-off |
@@ -400,7 +400,9 @@ drawings except the brand mark.
 - Plain, short, present tense. Sentence case everywhere, including buttons ("Allow once", not "ALLOW ONCE").
 - Say what happened and what the user can do: "The sandbox is waking. Your message will send in a moment."
 - No exclamation marks, no jokes, no anthropomorphising the agent beyond "the agent".
-- Times are relative in lists ("4 min ago") and absolute on hover. Numbers use narrow no-break spaces (U+202F) for thousands, so a number never breaks across lines.
+- Times are relative in lists ("4 min ago") and absolute on hover. Numbers use narrow no-break spaces (U+202F) for thousands, so a number never breaks across lines. Token counts read
+  in their language's short form (2.8M, 282.5万, 2,8 M; one decimal at most), every count on a page the same way; a
+  standalone figure keeps its exact number on hover and for screen readers (WEB-U-461).
 - Run status in words the user would use: "Working…" (with elapsed time), "Done · 22 s", "Stopped", "Failed: <reason>".
   The execution environment is mentioned only when it affects the user: "Starting the environment…", "The environment
   is asleep; it wakes when you send." Internal names (route ids, "sandbox", "idle") never appear in the product UI.
@@ -462,8 +464,9 @@ drawings except the brand mark.
   while the reader is at the bottom and never moves while they read earlier content (§8, ARCHITECTURE §11).
 - The transcript tells a story, not a log (ARCHITECTURE §11.2): each turn is the user's prompt, an activity group of
   one-line tool summaries ("Created `hello.py`", "Ran `python3 hello.py`"), and the answer as the visual anchor.
-  While the run is active the group is open with a live last line; when it completes the group folds into one line
-  ("Worked for 38 s · created 2 files, ran 3 commands"); a failure keeps it open at the failing line. Each line opens
+  While the run is active the group is open with a live last line (folded by the person, the live line is its heading
+  instead: the step, its shimmer and time, the button's name unchanged, WEB-U-462); when it completes the group folds
+  into one line ("Worked for 38 s · created 2 files, ran 3 commands"); a failure keeps it open at the failing line. Each line opens
   into the full tool card; long output is capped with "Show all"; copy is available on commands, code and output.
 - Reasoning is available but secondary and visually quieter than the answer: while the model thinks, it streams open
   under the live line (one click folds it); once the model writes or acts, each step's thinking folds in its place to
