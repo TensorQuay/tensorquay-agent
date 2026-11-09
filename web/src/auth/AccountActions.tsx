@@ -23,19 +23,19 @@ import { type ReactNode, useState } from "react";
 import { api } from "../api/client";
 import { useRequest } from "../api/use-request";
 import { useLanguage, useT } from "../i18n/I18nProvider";
-import {
-  FEEDBACK_URL,
-  HELP_URL,
-  LICENCE_URL,
-  RELEASES_URL,
-  REPOSITORY_URL,
-} from "../lib/app";
 import { ErrorMessage } from "../ui/ErrorMessage";
 import { Icon } from "../ui/Icon";
 import { Menu } from "../ui/Menu";
 
 import { useSession } from "./use-session";
-import "../i18n/deferred-catalogue";
+import "./account-catalogue";
+
+/** The project's public home and the pages the account menu links to (WEB-U-463). */
+const REPOSITORY_URL = "https://github.com/TensorQuay/tensorquay-agent";
+const HELP_URL = `${REPOSITORY_URL}/tree/main/docs/user-guide`;
+const FEEDBACK_URL = `${REPOSITORY_URL}/issues/new/choose`;
+const RELEASES_URL = `${REPOSITORY_URL}/releases`;
+const LICENCE_URL = `${REPOSITORY_URL}/blob/main/LICENSE`;
 
 /**
  * Account preferences load on demand; failed sign-out stays visible and can be retried. `onNavigate` (default
