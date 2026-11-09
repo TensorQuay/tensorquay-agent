@@ -1,5 +1,5 @@
 import { FileText } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 
 import { api } from "../api/client";
 import { useT } from "../i18n/I18nProvider";
@@ -27,9 +27,8 @@ function Picture({
   onBroken: () => void;
 }) {
   const [src, setSrc] = useState<string>();
-  // The latest callback, so a parent's re-render never reads the file again.
-  const broken = useRef(onBroken);
-  broken.current = onBroken;
+  // The latest callback, read when the bytes fail, so a parent's re-render never reads the file again.
+  const fail = useEffectEvent(() => onBroken());
   useEffect(() => {
     const stop = new AbortController();
     let url: string | undefined;
@@ -42,7 +41,7 @@ function Picture({
         if (!stop.signal.aborted) setSrc(url);
       },
       () => {
-        if (!stop.signal.aborted) broken.current();
+        if (!stop.signal.aborted) fail();
       },
     );
     return () => {
@@ -51,6 +50,7 @@ function Picture({
     };
   }, [conversationId, path]);
   return src ? (
+    // eslint-disable-next-line @next/next/no-img-element -- the workspace's own bytes (blob:); next/image can't serve them
     <img src={src} alt={alt} decoding="async" onError={onBroken} />
   ) : (
     <span className="sent-picture-waiting" role="img" aria-label={alt} />
