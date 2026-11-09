@@ -116,7 +116,7 @@ async fn gw_i_109_each_message_reaches_its_addressees_only(pool: PgPool) -> Test
         assert_eq!(
             seqs(&reviewer),
             Vec::<u64>::new(),
-            "a new read starts after the one still outstanding (review H1)"
+            "a new read starts after the one still outstanding"
         );
         let (_, repeat) = read(f, &t.reviewer.1, ("r-3:c-1", "r-3")).await?;
         assert_eq!(
