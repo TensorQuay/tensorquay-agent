@@ -56,6 +56,13 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   above the text, only while there are any. Its focus is a thin border in the focus colour instead of a 2 px ring. New
   task's box starts the same, at two lines while its placeholder shows the keyboard hint.
 
+### Fixed
+
+- **The Settings menu and engine budgets (WEB-U-460, WEB-U-461).** Only the menu scrolls to show the current section,
+  never the page, an administrator's section included; a budget's short figures never misstate where it stands
+  ("29.9M of 30M tokens" with headroom left, "30M of 29.9M" when spent), and its tooltip and screen readers get the
+  exact figures.
+
 ## 17.3 (8 November 2026)
 
 A fix release of the web app: no migration, no protocol change, no gateway or runtime change.
