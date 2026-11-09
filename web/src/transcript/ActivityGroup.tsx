@@ -122,32 +122,23 @@ export function ActivityGroup({
         onClick={() => setChoice({ status: turn.status, open: !open })}
       >
         <Icon glyph={ChevronDown} size={16} />
-        {!open && liveWords !== null ? (
-          // WEB-U-462: folded while the run works, the heading is the live line. Its words and time are for the eye;
-          // the button's name stays the turn's label, so the timer never makes a screen reader speak.
-          <>
-            <span className="visually-hidden">
-              <RecordedSummary text={turn.activityLabel} />
-            </span>
-            <span className="activity-heading-live" aria-hidden="true">
-              <span className="shimmer">{liveWords}</span>
-              {liveElapsed && (
-                <span className="run-elapsed">{` · ${liveElapsed}`}</span>
-              )}
-            </span>
-          </>
-        ) : (
-          <span
-            title={
-              retried
-                ? retriesTitle(
-                    t,
-                    turn.retries.map((retry) => retry.reason),
-                  )
-                : undefined
-            }
-          >
-            <RecordedSummary text={turn.activityLabel} />
+        {/* WEB-U-462: folded while the run works, the live words head the group; the label stays the button's
+            name (hidden on screen by the CSS), so the timer never makes a screen reader speak. */}
+        <span
+          title={
+            retried
+              ? retriesTitle(
+                  t,
+                  turn.retries.map((retry) => retry.reason),
+                )
+              : undefined
+          }
+        >
+          <RecordedSummary text={turn.activityLabel} />
+        </span>
+        {!open && liveWords !== null && (
+          <span className="activity-heading-live" aria-hidden="true">
+            <LiveWords words={liveWords} elapsed={liveElapsed} />
           </span>
         )}
       </button>
@@ -222,6 +213,22 @@ export function ActivityGroup({
   );
 }
 
+/** The live words with their shimmer, then the time without it (17.3; the folded heading's too, WEB-U-462). */
+function LiveWords({
+  words,
+  elapsed,
+}: {
+  words: string;
+  elapsed: string | null;
+}) {
+  return (
+    <>
+      <span className="shimmer">{words}</span>
+      {elapsed && <span className="run-elapsed">{` · ${elapsed}`}</span>}
+    </>
+  );
+}
+
 /**
  * The run at work (WEB-U-099, WEB-U-123): the step it is on and for how long, live, a soft shimmer across the words
  * while it runs (17.3); with thinking to show, its thinking shows open under it (the line folds it), so a long think
@@ -242,12 +249,7 @@ function LiveLine({
   onToggle: () => void;
   id: string;
 }) {
-  const text = (
-    <>
-      <span className="shimmer">{words}</span>
-      {elapsed && <span className="run-elapsed">{` · ${elapsed}`}</span>}
-    </>
-  );
+  const text = <LiveWords words={words} elapsed={elapsed} />;
   if (!thinking)
     return <p className="type-small muted activity-live">{text}</p>;
   return (
