@@ -110,7 +110,7 @@ describe("WEB-U-020 attachments in the transcript", () => {
 });
 
 describe("WEB-U-464 a message whose files' list can't load", () => {
-  it("keeps the message and the transcript, without the list (a tab older than an upgrade)", async () => {
+  it("keeps the message, the transcript and its files' names (a tab older than an upgrade)", async () => {
     vi.resetModules();
     vi.doMock("../files/SentAttachments", () => {
       throw new Error("Failed to fetch dynamically imported module");
@@ -130,7 +130,10 @@ describe("WEB-U-464 a message whose files' list can't load", () => {
       expect(
         screen.getByRole("article", { name: "Your message" }),
       ).toHaveTextContent("Compare these");
-      expect(screen.queryByRole("list", { name: "Attached files" })).toBeNull();
+      // Its files are still named, as plain words.
+      expect(
+        screen.getByRole("article", { name: "Your message" }),
+      ).toHaveTextContent("a.csv");
     } finally {
       vi.doUnmock("../files/SentAttachments");
       vi.resetModules();

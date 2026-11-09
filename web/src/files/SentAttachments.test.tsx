@@ -1,8 +1,13 @@
 // WEB-U-464: a sent message shows its images as pictures and opens any attached file's preview.
 import { readFileSync } from "node:fs";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
+  focusManager,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
+import {
+  act,
   fireEvent,
   render,
   screen,
@@ -30,6 +35,11 @@ const metadata = (path: string, size: number) =>
   });
 const png = () =>
   new Response(new Uint8Array([137, 80, 78, 71]), { status: 200 });
+/** Lets every read the page would start now start, and answer. */
+const settle = () =>
+  act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  });
 
 describe("WEB-U-464 sent attachments", () => {
   // As the file preview's tests do: the API's own fetch answers each file's metadata (4 bytes unless `sizes` says
@@ -42,6 +52,14 @@ describe("WEB-U-464 sent attachments", () => {
   const wrap = (node: ReactNode) => (
     <QueryClientProvider client={client}>{node}</QueryClientProvider>
   );
+  /** Waits for the picture itself: its placeholder is an image of the same name until the bytes are read. */
+  const drawn = (name: string) =>
+    waitFor(() =>
+      expect(screen.getByRole("img", { name })).toHaveAttribute(
+        "src",
+        "blob:sent/1",
+      ),
+    );
   const asked = (ending: string) =>
     fetch.mock.calls
       .map(([input]) => new URL(String(input), "http://localhost"))
@@ -66,6 +84,7 @@ describe("WEB-U-464 sent attachments", () => {
     Object.assign(URL, { createObjectURL: created, revokeObjectURL: revoked });
   });
   afterEach(() => {
+    focusManager.setFocused(undefined);
     client.clear();
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
@@ -117,7 +136,7 @@ describe("WEB-U-464 sent attachments", () => {
       }),
     ).toBeVisible();
     expect(items[1]).toHaveTextContent("notes.pdf");
-    await screen.findByRole("img", { name: "chart.png" });
+    await drawn("chart.png");
   });
 
   it("doesn't fetch a picture over the Files panel's 10 MiB limit: its chip opens the preview instead", async () => {
@@ -150,11 +169,18 @@ describe("WEB-U-464 sent attachments", () => {
         />,
       );
     const first = render(shown());
-    await screen.findByRole("img", { name: "chart.png" });
+    await drawn("chart.png");
     first.unmount();
     // The task's page shown again (another task and back): the picture comes from the cache.
     render(shown());
-    await screen.findByRole("img", { name: "chart.png" });
+    await drawn("chart.png");
+    // Nor does the window's focus coming back (the app's queries read again on focus by default).
+    act(() => {
+      focusManager.setFocused(false);
+      focusManager.setFocused(true);
+    });
+    await settle();
+    expect(asked("/files/content")).toEqual(["uploads/chart.png"]);
     expect(asked("/files/download")).toEqual(["uploads/chart.png"]);
     // The preview reads the same entries, so opening the picture's file reads nothing again.
     expect(
@@ -197,6 +223,85 @@ describe("WEB-U-464 sent attachments", () => {
     release();
     await new Promise((resolve) => setTimeout(resolve, 20));
     expect(created.mock.calls.length).toBe(revoked.mock.calls.length);
+  });
+
+  it("revokes the picture's object URL when it goes", async () => {
+    const view = render(
+      wrap(
+        <SentAttachments
+          paths={["uploads/chart.png"]}
+          conversationId={conversationId}
+          onOpenFile={vi.fn()}
+        />,
+      ),
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("img", { name: "chart.png" })).toHaveAttribute(
+        "src",
+        "blob:sent/1",
+      ),
+    );
+    view.unmount();
+    expect(created).toHaveBeenCalledTimes(1);
+    expect(revoked).toHaveBeenCalledWith("blob:sent/1");
+  });
+
+  it("keeps a drawn picture when a later read of its file fails (a refresh while the sandbox is away)", async () => {
+    render(
+      wrap(
+        <SentAttachments
+          paths={["uploads/chart.png"]}
+          conversationId={conversationId}
+          onOpenFile={vi.fn()}
+        />,
+      ),
+    );
+    await drawn("chart.png");
+    fetch.mockImplementation(() =>
+      Promise.resolve(
+        Response.json(
+          { error: { code: "sandbox_unavailable", message: "away" } },
+          { status: 503 },
+        ),
+      ),
+    );
+    // As the Files panel's refresh does.
+    await act(async () => {
+      await client.invalidateQueries({ queryKey: ["file", conversationId] });
+    });
+    await settle();
+    expect(screen.getByRole("img", { name: "chart.png" })).toBeVisible();
+  });
+
+  it("reads nothing for a picture until it nears the screen", async () => {
+    const watching: ((entries: { isIntersecting: boolean }[]) => void)[] = [];
+    vi.stubGlobal(
+      "IntersectionObserver",
+      class {
+        constructor(
+          callback: (entries: { isIntersecting: boolean }[]) => void,
+        ) {
+          watching.push(callback);
+        }
+        observe = vi.fn();
+        disconnect = vi.fn();
+      },
+    );
+    render(
+      wrap(
+        <SentAttachments
+          paths={["uploads/chart.png"]}
+          conversationId={conversationId}
+          onOpenFile={vi.fn()}
+        />,
+      ),
+    );
+    await settle();
+    expect(fetch).not.toHaveBeenCalled();
+    expect(watching).toHaveLength(1);
+    act(() => watching[0]?.([{ isIntersecting: true }]));
+    await drawn("chart.png");
+    expect(asked("/files/download")).toEqual(["uploads/chart.png"]);
   });
 
   it("falls back to the file's chip when its picture can't be read", async () => {
@@ -244,7 +349,7 @@ describe("WEB-U-464 sent attachments", () => {
         />,
       ),
     );
-    await screen.findByRole("img", { name: "chart.png" });
+    await drawn("chart.png");
     expect(screen.queryByRole("button")).toBeNull();
     // The chip's control class (a pointer and the hover tint) is on buttons only.
     expect(container.querySelector(".attachment-open")).toBeNull();
