@@ -13,7 +13,7 @@ import { useNavTip } from "./nav-tip";
 import { WorkspacesLink } from "./WorkspacesLink";
 
 /**
- * The sidebar's top block (UI-GUIDELINES §6; the owner, 9 Nov 2026): New task, Workspaces and Channels, in that order
+ * The sidebar's top block (UI-GUIDELINES §6; decided on 9 Nov 2026): New task, Workspaces and Channels, in that order
  * and one row style, before the task groups; the same in the phone's drawer. Each is named by its label, or on the
  * rail by the app's own tooltip.
  */

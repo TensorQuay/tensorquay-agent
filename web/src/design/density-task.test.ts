@@ -291,7 +291,8 @@ describe("WEB-U-449 the task row's ⋯ is part of the row", () => {
   });
 
   it("shows it for the row's own keyboard focus, never for a focus a click left behind", () => {
-    // The owner's report (two rows with a ⋯ at once): a clicked link keeps its focus, so focus-within kept the ⋯.
+    // The Product Owner's report (two rows with a ⋯ at once): a clicked link keeps its focus, so focus-within kept
+    // the ⋯.
     expect(
       declared(
         ruleFlat(
@@ -432,9 +433,9 @@ describe("WEB-U-450 a lead's row reads as one row", () => {
   });
 });
 
-// WEB-U-453 (UI-GUIDELINES §6; the owner, 9 Nov 2026, against a reference): the sidebar reads as one tidy list. One left
-// edge for the logo, every item's icon, the group labels and the task titles; the rows at the scale's height, the top
-// block's 2 px apart, 8 px under the header, one group gap before the first group; the drawer's rows inset as the
+// WEB-U-453 (UI-GUIDELINES §6; decided on 9 Nov 2026, against a reference): the sidebar reads as one tidy list. One
+// left edge for the logo, every item's icon, the group labels and the task titles; the rows at the scale's height, the
+// top block's 2 px apart, 8 px under the header, one group gap before the first group; the drawer's rows inset as the
 // sidebar's.
 describe("WEB-U-453 the sidebar's one left edge and rhythm", () => {
   it("puts the logo on the items' icon column, 8 px above the top block", () => {

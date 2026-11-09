@@ -51,7 +51,7 @@ vi.mock("../conversations/TaskSearchHost", () => ({
 }));
 afterEach(() => vi.restoreAllMocks());
 
-// WEB-U-452 (UI-GUIDELINES §6; the owner, 9 Nov 2026): the sidebar's top block is New task, Workspaces and Channels, in
+// WEB-U-452 (UI-GUIDELINES §6; decided on 9 Nov 2026): the sidebar's top block is New task, Workspaces and Channels, in
 // that order, before the task list, and its foot is the account alone. An item whose label shows has no native tooltip;
 // where its label is hidden (the rail), the app's own tooltip names it.
 describe("WEB-U-452 the sidebar's top block", () => {

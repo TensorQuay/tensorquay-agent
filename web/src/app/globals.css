@@ -144,7 +144,7 @@
   --display-size: 30px;
   --heading-size: 22px;
   /* The UI standard: a task's title is 18 px, weight 700 (the app ships 400 and 700, §4). The whole scale is one
-     step bigger since the owner's ask of 9 Nov 2026 ("bigger pls"): body 16/24, small 14, nav 15/22, labels 13. */
+     step bigger, decided on 9 Nov 2026: body 16/24, small 14, nav 15/22, labels 13. */
   --task-title-size: 18px;
   --body-size: 16px;
   --small-size: 14px;
@@ -906,7 +906,7 @@ textarea.form-control {
   container: sidebar / inline-size;
   display: flex;
   flex-direction: column;
-  /* §6: 8 px under the header (the owner, 9 Nov 2026). */
+  /* §6: 8 px under the header (decided on 9 Nov 2026). */
   gap: var(--space-2);
   min-height: 0;
   overflow: hidden;
@@ -927,7 +927,7 @@ textarea.form-control {
   gap: var(--space-2);
   min-height: var(--brand-row-height);
   /* §6: the logo starts on the items' icon column, so the logo, every item's icon and the group labels share one
-     left edge (the owner, 9 Nov 2026). */
+     left edge (decided on 9 Nov 2026). */
   padding-inline-start: var(--nav-pad-inline);
 }
 .sidebar-account {

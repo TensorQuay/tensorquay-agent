@@ -211,7 +211,7 @@ describe("WEB-U-448 the weights the app ships", () => {
   });
 });
 
-// WEB-U-451 (UI-GUIDELINES §4 and §5c; the owner's ask, 9 Nov 2026: "can we adjust all system wide ... bigger"): the
+// WEB-U-451 (UI-GUIDELINES §4 and §5c; decided on 9 Nov 2026): the
 // whole app one step bigger, set once in the tokens: body 16/24, small 14, the navigation 15/22, labels 13, page
 // headings 22/30, a task's title 18, display 30; controls at least 32 px; list and menu rows 36 px; two-line table rows 68 px. Every
 // stylesheet takes its sizes and lines from the tokens, so the whole app follows them.

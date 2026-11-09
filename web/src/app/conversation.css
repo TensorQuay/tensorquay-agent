@@ -975,7 +975,7 @@ textarea.composer-input {
   /* Past the chevron's 16 px and the gap, where a tool line's words start. */
   padding-inline-start: calc(var(--space-4) + var(--space-2));
 }
-/* §6: the task list starts one group gap under the top block, the gap between its groups (the owner, 9 Nov 2026). */
+/* §6: the task list starts one group gap under the top block, the gap between its groups (decided on 9 Nov 2026). */
 .conversation-list {
   margin-block: var(--group-gap) var(--space-4);
 }

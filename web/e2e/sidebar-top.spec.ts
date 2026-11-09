@@ -100,7 +100,7 @@ function parts(area: Locator) {
 const near = (a: number | undefined, b: number | undefined, by = 1) =>
   Math.abs((a ?? NaN) - (b ?? NaN)) <= by;
 
-// WEB-E2E-115 (UI-GUIDELINES §6; the owner, 9 Nov 2026): the sidebar's top block is New task, Workspaces and Channels,
+// WEB-E2E-115 (UI-GUIDELINES §6; decided on 9 Nov 2026): the sidebar's top block is New task, Workspaces and Channels,
 // in that order and in the same row style, then the task groups; the bottom keeps only the account. One left edge for
 // the logo, every item's icon, the group labels and the task titles (a lead's chevron, its title just after it); the
 // rows at the scale's height, 8 px under the header, one group gap before the first group and between groups; the toggle on

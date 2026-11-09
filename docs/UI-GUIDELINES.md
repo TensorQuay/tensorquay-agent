@@ -7,9 +7,9 @@ components use tokens only. Assets are in [`brand/`](../brand/README.md). Engine
 [ENGINEERING-GUARDRAILS §5](ENGINEERING-GUARDRAILS.md#5-typescript-react-and-nextjs).
 
 ## The TensorQuay UI standard (29 Sep 2026)
-The reference for every screen, agreed with the owner: one unified system in the style of ChatGPT and Claude. Where a
-section below says otherwise, this section wins; a change to the UI changes this section first, then every place that
-uses it, in the same piece of work.
+The reference for every screen, agreed with the Product Owner: one unified system in the style of ChatGPT and Claude.
+Where a section below says otherwise, this section wins; a change to the UI changes this section first, then every place
+that uses it, in the same piece of work.
 
 **Principles**
 1. **One system, not screens.** Every screen is built from the same few shared components (Popover, Menu, Dialog, Side
@@ -74,8 +74,8 @@ opens the field; the ID is fixed once the item exists. A save that a form refuse
 fix takes the focus and scrolls into view, and a line by Save says "Fix 1 field above" (or how many), on every
 settings form, page or dialog.
 
-**Long lists use the full width** (added 30 Sep 2026 after the owner's review of the Agent profile page). A settings
-page has no label column: short fields sit under their labels, at most 640 px wide. A section that is a list of
+**Long lists use the full width** (added 30 Sep 2026 after the Product Owner's review of the Agent profile page). A
+settings page has no label column: short fields sit under their labels, at most 640 px wide. A section that is a list of
 choices (tools, tool servers, skills, connectors) spans the whole content width as a grid of small group cards, about
 three per row at 1280 px and one on phones. Each item is one line (checkbox and name) with its description as a muted
 second line; a select-all control sits above the grid. A list never runs as one narrow column beside an empty label
@@ -264,7 +264,7 @@ active item of a navigation list keeps its selected fill under the pointer, §5c
 streaming. The technical lead's review adds the visual pass that tools cannot judge.
 
 ## 5c. Density: as calm and dense as a familiar chat app
-The owner's standard (29 Sep 2026): navigation, menus and tables should feel like the settings and sidebars of
+The Product Owner's standard (29 Sep 2026): navigation, menus and tables should feel like the settings and sidebars of
 familiar chat apps, not sparse. One rule, set once as tokens in `globals.css`; nothing sets its own row height.
 
 - **Navigation rows** (the Settings menu, the sidebar's tasks): `--row-height-nav` 36 px, padding 4 px 12 px
@@ -293,7 +293,7 @@ familiar chat apps, not sparse. One rule, set once as tokens in `globals.css`; n
     it, the top block, "New task", "Workspaces" and "Channels", in that order and one row style (navigation rows 2 px
     apart, §5c); one group gap (16 px) under it, the task list by date; the account row alone at the bottom (§7
     Account menu). One left edge for the mark, every item's icon, the group labels and the task titles (no icon column on
-    a task row; the owner, 9 Nov 2026); the toggle sits on the rows' ⋯ column. An item whose label shows
+    a task row; decided on 9 Nov 2026); the toggle sits on the rows' ⋯ column. An item whose label shows
     has no native tooltip. Conversation 720 px.
   - **Rail, 56 px:** the global actions only, each with its accessible name and the app's own tooltip beside it on
     hover or keyboard focus (never a native title; the toggle keeps its title with its key): the mark, the toggle, "New

@@ -43,7 +43,7 @@ const height = (element: Locator) =>
     .first()
     .evaluate((node) => Math.round(node.getBoundingClientRect().height));
 
-// WEB-U-451 (UI-GUIDELINES §4 and §5c; the owner's ask, 9 Nov 2026): the whole app one step bigger, through its
+// WEB-U-451 (UI-GUIDELINES §4 and §5c; decided on 9 Nov 2026): the whole app one step bigger, through its
 // tokens. The browser draws body text 16/24, small text 14 px, the navigation 15 px, page headings 22 px, a task's
 // title 18 px and labels 13 px; list and menu rows are 36 px (44 px on touch screens). On the task list, a task page,
 // Settings and the account menu, at 1280 and on a phone at 390, light and dark; each is captured for the reviewers.
