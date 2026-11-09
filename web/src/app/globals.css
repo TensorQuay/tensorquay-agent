@@ -199,6 +199,10 @@
   --row-action-reach: calc(
     var(--row-action-size) + var(--row-inset) - var(--nav-pad-inline)
   );
+  /* §13b: a lead task's chevron is a 24 px target at the row's start (the row's height on touch screens), its icon at
+     the target's end; the title starts 6 px after the icon, and the lead's helpers start there too. */
+  --lead-toggle-width: var(--space-6);
+  --lead-title-start: calc(var(--lead-toggle-width) + var(--space-1));
   --nav-font-size: 14px;
   --nav-line-height: 20px;
   --group-gap: var(--space-4);
@@ -248,6 +252,7 @@
   :root {
     --row-height-nav: var(--row-height-touch);
     --row-height-table: var(--row-height-touch);
+    --lead-toggle-width: var(--row-height-touch);
   }
 }
 [lang|="ja"] {

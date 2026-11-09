@@ -80,6 +80,30 @@ const masked = (row: Locator) =>
     .locator(":scope > .conversation-link .conversation-link-text")
     .evaluate((node) => getComputedStyle(node).maskImage !== "none");
 
+/**
+ * A lead's row (§13b): its chevron's target, how far its title starts after the chevron's icon, and, while its helpers
+ * show, how far the first helper's row content starts from that title.
+ */
+function lead(row: Locator) {
+  return row.evaluate((node) => {
+    const toggle = node.querySelector(":scope > .task-helpers-toggle");
+    const icon = toggle?.querySelector("svg");
+    const title = node.querySelector(":scope > .conversation-link .task-title");
+    if (!toggle || !icon || !title)
+      throw new Error("A lead's row has a chevron and a title");
+    const target = toggle.getBoundingClientRect();
+    const start = title.getBoundingClientRect().left;
+    const helper = node.querySelector(".task-helpers .helpers-dot");
+    return {
+      width: target.width,
+      height: target.height,
+      atStart: target.left - node.getBoundingClientRect().left,
+      gap: start - icon.getBoundingClientRect().right,
+      helpers: helper ? helper.getBoundingClientRect().left - start : null,
+    };
+  });
+}
+
 /** A computed colour's alpha: `rgba(r, g, b, a)`, or `color(srgb r g b / a)` as a `color-mix()` tint computes. */
 function alphaOf(colour: string) {
   const match =
@@ -95,7 +119,9 @@ const away = (page: Page) => page.mouse.move(1100, 700);
 // concentric with the row's (the row's radius less the inset), with no fill of its own; its own hover is a quiet tint
 // inside that backdrop; the title fades out under it while it shows and keeps the full width without hover. The same
 // on the open task's row and on a lead's row with its chevron, in both themes. A click leaves no ⋯ behind: the
-// clicked row's link keeps its focus, and only the row under the pointer, or with keyboard focus, shows one.
+// clicked row's link keeps its focus, and only the row under the pointer, or with keyboard focus, shows one. A lead's
+// row reads as one row (§13b): a 24 px chevron target at its start, its title 6 px after the icon, its helpers
+// starting where its title does.
 for (const colorScheme of ["light", "dark"] as const)
   test(`WEB-E2E-114 the task row's ⋯ is part of the row at 1280 ${colorScheme}`, async ({
     browser,
@@ -164,6 +190,17 @@ for (const colorScheme of ["light", "dark"] as const)
         expect.soft(box.radius).toBe(ROW_RADIUS - INSET);
         // The title, where it reaches the ⋯, fades out under it.
         if (name === "row") expect.soft(await masked(row)).toBe(true);
+        // A lead's row reads as one row: a 24 px chevron target at its start, the title 6 px after the icon, its
+        // helpers starting where the title does.
+        if (name.startsWith("chevron")) {
+          const shape = await lead(row);
+          expect.soft(shape.atStart).toBe(0);
+          expect.soft(shape.width).toBe(24);
+          expect.soft(shape.height).toBe(box.lineHeight);
+          expect.soft(Math.abs(shape.gap - 6)).toBeLessThan(0.6);
+          if (name === "chevron-open")
+            expect.soft(Math.abs(shape.helpers ?? 99)).toBeLessThan(0.6);
+        }
         // The ⋯'s own hover: a quiet tint inside the backdrop, never an opaque chip.
         await row.locator(":scope > .task-more > .button").hover();
         await shot(sidebar, `row-menu-${name}-button-hover-${colorScheme}`);
@@ -276,5 +313,21 @@ for (const colorScheme of ["light", "dark"] as const)
       });
       expect.soft(clear).toBe(true);
     }
+    const leadRow = rows.filter({
+      has: page.locator(":scope > .conversation-link", {
+        hasText: /^Report on Q3/,
+      }),
+    });
+    await leadRow
+      .getByRole("button", { name: "Helpers of Report on Q3" })
+      .tap();
+    await expect(leadRow.getByRole("list", { name: "Helpers" })).toBeVisible();
+    await shot(drawer, `row-menu-phone-open-${colorScheme}`);
+    const shape = await lead(leadRow);
+    expect.soft(shape.atStart).toBe(0);
+    expect.soft(shape.width).toBe(44);
+    expect.soft(shape.height).toBe(44);
+    expect.soft(Math.abs(shape.gap - 6)).toBeLessThan(0.6);
+    expect.soft(Math.abs(shape.helpers ?? 99)).toBeLessThan(0.6);
     await context.close();
   });

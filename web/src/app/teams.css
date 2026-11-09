@@ -260,14 +260,17 @@
 .task-helpers-count[data-tone="danger"] {
   color: var(--danger);
 }
+/* §13b: the chevron is a 24 px target at the row's start (the row's height on touch screens), its icon at the
+   target's end, so the title follows it after one small gap and the row reads as one row. */
 .task-helpers-toggle {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   flex-shrink: 0;
-  min-width: var(--row-height-nav);
+  width: var(--lead-toggle-width);
   min-height: var(--row-height-nav);
   padding: 0;
+  padding-inline-end: var(--space-half);
   border: 0;
   border-radius: var(--control-radius);
   background: transparent;
@@ -283,11 +286,24 @@
 .conversation-row:has(> .task-helpers-note) {
   flex-wrap: wrap;
 }
+/* The lead's title starts 6 px after the chevron's icon: no gap between the target and the link, and 4 px of the
+   link's own start. Its helpers' rows start where that title starts (their links keep the rows' inner padding). */
+.conversation-row:has(> .task-helpers-toggle) {
+  column-gap: 0;
+}
+.conversation-row:has(> .task-helpers-toggle) > .conversation-link {
+  padding-inline-start: var(--space-1);
+}
 .task-helpers,
 .task-helpers-note {
   flex-basis: 100%;
   margin: 0;
-  padding-inline-start: var(--space-6);
+}
+.task-helpers {
+  padding-inline-start: calc(var(--lead-title-start) - var(--nav-pad-inline));
+}
+.task-helpers-note {
+  padding-inline-start: var(--lead-title-start);
 }
 .task-helpers {
   list-style: none;

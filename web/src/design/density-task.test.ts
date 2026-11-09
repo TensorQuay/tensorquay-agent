@@ -374,3 +374,64 @@ describe("WEB-U-449 the task row's ⋯ is part of the row", () => {
     ).toBe("calc(var(--row-action-size) + var(--row-inset) + var(--space-2))");
   });
 });
+
+// WEB-U-450 (UI-GUIDELINES §13b): a lead task's row reads as one row. Its chevron is a 24 px target at the row's start
+// (the row's height on touch screens), its icon at the target's end; the title follows 6 px after the icon; the
+// helpers' rows start where the lead's title starts; a normal row's title doesn't move.
+describe("WEB-U-450 a lead's row reads as one row", () => {
+  const tokens = rule(globals, ":root");
+  const flat = (value: string | undefined) =>
+    value?.replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")");
+
+  it("makes the chevron a 24 px target at the row's start, the row's height on touch screens, its icon at the end", () => {
+    // The first :root block holds the pointer's value; the touch screens' block, read below, holds theirs.
+    const base = /:root \{([^}]*)\}/.exec(globals)?.[1] ?? "";
+    expect(declared(base, "--lead-toggle-width")).toBe("var(--space-6)");
+    const touch =
+      /@media \(pointer: coarse\) \{\s*:root \{([^}]*)\}/.exec(globals)?.[1] ??
+      "";
+    expect(declared(touch, "--lead-toggle-width")).toBe(
+      "var(--row-height-touch)",
+    );
+    const toggle = rule(teams, ".task-helpers-toggle");
+    expect(declared(toggle, "width")).toBe("var(--lead-toggle-width)");
+    expect(declared(toggle, "min-height")).toBe("var(--row-height-nav)");
+    expect(declared(toggle, "justify-content")).toBe("flex-end");
+    expect(declared(toggle, "padding-inline-end")).toBe("var(--space-half)");
+    expect(declared(toggle, "min-width")).toBe(undefined);
+  });
+
+  it("starts the title 6 px after the chevron's icon: no gap, then 4 px of the link's own start", () => {
+    expect(flat(declared(tokens, "--lead-title-start"))).toBe(
+      "calc(var(--lead-toggle-width) + var(--space-1))",
+    );
+    expect(
+      declared(
+        rule(teams, ".conversation-row:has(> .task-helpers-toggle)"),
+        "column-gap",
+      ),
+    ).toBe("0");
+    expect(
+      declared(
+        rule(
+          teams,
+          ".conversation-row:has(> .task-helpers-toggle) > .conversation-link",
+        ),
+        "padding-inline-start",
+      ),
+    ).toBe("var(--space-1)");
+    // A normal row's title doesn't move: the rows' own padding is unchanged.
+    expect(declared(rule(conversation, ".conversation-link"), "padding")).toBe(
+      "var(--nav-row-padding)",
+    );
+  });
+
+  it("starts the helpers' rows where the lead's title starts", () => {
+    expect(
+      flat(declared(rule(teams, ".task-helpers"), "padding-inline-start")),
+    ).toBe("calc(var(--lead-title-start) - var(--nav-pad-inline))");
+    expect(
+      declared(rule(teams, ".task-helpers-note"), "padding-inline-start"),
+    ).toBe("var(--lead-title-start)");
+  });
+});

@@ -13,6 +13,8 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   shows. It shows on hover, on keyboard focus and while its menu is open, never because a click left focus behind,
   so one row at a time shows it. On a phone it always shows, calm, and titles end before it. A row's title no longer
   underlines on hover.
+- **A lead task's row reads as one row (WEB-U-450).** Its chevron sits at the row's start with the title just after
+  it, and its helpers start where its title starts; an open lead's ⋯ stays on its own line.
 
 ## 17.3 (8 November 2026)
 
