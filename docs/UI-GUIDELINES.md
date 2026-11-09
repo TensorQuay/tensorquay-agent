@@ -448,8 +448,9 @@ drawings except the brand mark.
   while the reader is at the bottom and never moves while they read earlier content (§8, ARCHITECTURE §11).
 - The transcript tells a story, not a log (ARCHITECTURE §11.2): each turn is the user's prompt, an activity group of
   one-line tool summaries ("Created `hello.py`", "Ran `python3 hello.py`"), and the answer as the visual anchor.
-  While the run is active the group is open with a live last line; when it completes the group folds into one line
-  ("Worked for 38 s · created 2 files, ran 3 commands"); a failure keeps it open at the failing line. Each line opens
+  While the run is active the group is open with a live last line (folded by the person, the live line is its heading
+  instead: the step, its shimmer and time, the button's name unchanged, WEB-U-462); when it completes the group folds
+  into one line ("Worked for 38 s · created 2 files, ran 3 commands"); a failure keeps it open at the failing line. Each line opens
   into the full tool card; long output is capped with "Show all"; copy is available on commands, code and output.
 - Reasoning is available but secondary and visually quieter than the answer: while the model thinks, it streams open
   under the live line (one click folds it); once the model writes or acts, each step's thinking folds in its place to

@@ -11,6 +11,8 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   than the window scrolls on its own, with the current section in view.
 - **Token counts in short form (WEB-U-461).** 2.8M instead of 2 824 643, in each language's own way (282.5万 in
   Chinese); the exact number shows on hover and is what screen readers read.
+- **A folded group shows the step it is on (WEB-U-462).** While a task runs, a folded activity group is headed by its
+  live line (the step, a soft shimmer and the time) instead of a static "Working…".
 
 ## 17.3 (8 November 2026)
 

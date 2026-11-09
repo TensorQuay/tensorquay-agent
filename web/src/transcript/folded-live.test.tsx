@@ -76,7 +76,8 @@ describe("WEB-U-462 a folded group shows the step it is on", () => {
 
   it("says Thinking… with the step's time when no call runs", () => {
     vi.useFakeTimers({ now: BASE + 10_000 });
-    show(start);
+    // The step started and the model hasn't written a word yet (while it writes, no live line speaks over it).
+    show(start.slice(0, 3));
     const button = toggle();
     if (!button) throw new Error("the group has its toggle");
     fireEvent.click(button);

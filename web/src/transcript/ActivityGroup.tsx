@@ -74,6 +74,14 @@ export function ActivityGroup({
     };
   }, [running, named]);
   const stepSaid = step && named ? named(step, t) : null;
+  // The live words while the run works, the model not writing its answer (17.3): the running call's step, else
+  // thinking, or waiting for the model's first word. The open group ends with them; a folded one is headed by them.
+  const liveWords =
+    running && !turn.writing && (!step || stepSaid)
+      ? (stepSaid ??
+        t(waiting ? "activity.waitingFirst" : "activity.thinkingLive"))
+      : null;
+  const liveElapsed = elapsed === null ? null : secondsLabel(elapsed, t);
   // The thinking shows itself while the model thinks (17.3); folding it is the person's choice, kept for the turn.
   const [thinkingOpen, setThinkingOpen] = useState(true);
   // The card's code loads on the intent to open a step (a UI review before 17.0), never just because the turn shows:
@@ -114,18 +122,34 @@ export function ActivityGroup({
         onClick={() => setChoice({ status: turn.status, open: !open })}
       >
         <Icon glyph={ChevronDown} size={16} />
-        <span
-          title={
-            retried
-              ? retriesTitle(
-                  t,
-                  turn.retries.map((retry) => retry.reason),
-                )
-              : undefined
-          }
-        >
-          <RecordedSummary text={turn.activityLabel} />
-        </span>
+        {!open && liveWords !== null ? (
+          // WEB-U-462: folded while the run works, the heading is the live line. Its words and time are for the eye;
+          // the button's name stays the turn's label, so the timer never makes a screen reader speak.
+          <>
+            <span className="visually-hidden">
+              <RecordedSummary text={turn.activityLabel} />
+            </span>
+            <span className="activity-heading-live" aria-hidden="true">
+              <span className="shimmer">{liveWords}</span>
+              {liveElapsed && (
+                <span className="run-elapsed">{` · ${liveElapsed}`}</span>
+              )}
+            </span>
+          </>
+        ) : (
+          <span
+            title={
+              retried
+                ? retriesTitle(
+                    t,
+                    turn.retries.map((retry) => retry.reason),
+                  )
+                : undefined
+            }
+          >
+            <RecordedSummary text={turn.activityLabel} />
+          </span>
+        )}
       </button>
       <div id={id} className="activity-body" hidden={!open}>
         <ol className="activity-lines">
@@ -183,13 +207,10 @@ export function ActivityGroup({
         )}
         <Retries turn={turn} id={retriesId} />
         {/* While the model writes its words, they stream with their caret: no live line speaks over them (17.3). */}
-        {running && !turn.writing && (!step || stepSaid) && (
+        {liveWords !== null && (
           <LiveLine
-            words={
-              stepSaid ??
-              t(waiting ? "activity.waitingFirst" : "activity.thinkingLive")
-            }
-            elapsed={elapsed === null ? null : secondsLabel(elapsed, t)}
+            words={liveWords}
+            elapsed={liveElapsed}
             thinking={turn.liveThinking}
             open={thinkingOpen}
             onToggle={() => setThinkingOpen(!thinkingOpen)}
