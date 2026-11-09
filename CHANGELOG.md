@@ -9,6 +9,8 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 - **Settings menu (WEB-U-460).** From 768 px the section menu stays in view while a long section scrolls; a menu taller
   than the window scrolls on its own, with the current section in view.
+- **Token counts in short form (WEB-U-461).** 2.8M instead of 2 824 643, in each language's own way (282.5万 in
+  Chinese); the exact number shows on hover and is what screen readers read.
 
 ## 17.3 (8 November 2026)
 

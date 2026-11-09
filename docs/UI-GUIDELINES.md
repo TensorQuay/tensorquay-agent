@@ -384,7 +384,9 @@ drawings except the brand mark.
 - Plain, short, present tense. Sentence case everywhere, including buttons ("Allow once", not "ALLOW ONCE").
 - Say what happened and what the user can do: "The sandbox is waking. Your message will send in a moment."
 - No exclamation marks, no jokes, no anthropomorphising the agent beyond "the agent".
-- Times are relative in lists ("4 min ago") and absolute on hover. Numbers use narrow no-break spaces (U+202F) for thousands, so a number never breaks across lines.
+- Times are relative in lists ("4 min ago") and absolute on hover. Numbers use narrow no-break spaces (U+202F) for thousands, so a number never breaks across lines. Token counts read
+  in their language's short form (2.8M, 282.5万, 2,8 M; one decimal at most), every count on a page the same way; a
+  standalone figure keeps its exact number on hover and for screen readers (WEB-U-461).
 - Run status in words the user would use: "Working…" (with elapsed time), "Done · 22 s", "Stopped", "Failed: <reason>".
   The execution environment is mentioned only when it affects the user: "Starting the environment…", "The environment
   is asleep; it wakes when you send." Internal names (route ids, "sandbox", "idle") never appear in the product UI.

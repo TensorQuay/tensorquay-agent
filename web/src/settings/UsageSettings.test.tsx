@@ -471,10 +471,14 @@ describe("WEB-U-127 usage reads the same on day one as later", () => {
     if (!figure) throw new Error("The chart is a figure");
     expect(within(figure).getByText("Sep 1, 2026")).toBeVisible();
     expect(within(figure).getByText("Sep 26, 2026")).toBeVisible();
-    // The busiest day, visible and the chart's name.
-    const caption = within(figure).getByText(/^Tokens per day\. Busiest: /);
-    expect(caption.tagName).toBe("FIGCAPTION");
-    expect(chart).toHaveAccessibleName(caption.textContent ?? "");
+    // The busiest day, visible in short form (WEB-U-461) and the chart's name with the exact figure.
+    const caption = figure.querySelector("figcaption");
+    expect(caption?.querySelector('[aria-hidden="true"]')).toHaveTextContent(
+      "Tokens per day. Busiest: Sep 26, 2026, 33.3K tokens.",
+    );
+    expect(chart).toHaveAccessibleName(
+      `Tokens per day. Busiest: Sep 26, 2026, 33${GROUP}283 tokens.`,
+    );
   });
 
   it("names a route without a display name as the model picker does, and one with its display name", async () => {
@@ -503,10 +507,18 @@ describe("WEB-U-127 usage reads the same on day one as later", () => {
     expect(within(table).queryByText("local")).toBeNull();
   });
 
-  it("writes every number the same way", async () => {
+  it("WEB-U-461 writes every count the same way: short on screen, never a long row of digits", async () => {
     const { api } = fake(answers());
     show(api);
-    await screen.findByText(`66${GROUP}566 tokens`, exactly);
-    expect(document.body.textContent).not.toMatch(/\d(\.\d)?[KMB]\b/);
+    await screen.findByText("66.6K tokens", exactly);
+    // What shows on screen: everything but the screen-reader twins.
+    const page = document.body.cloneNode(true) as HTMLElement;
+    for (const hidden of page.querySelectorAll(".visually-hidden"))
+      hidden.remove();
+    const long = page.textContent?.match(
+      new RegExp(`.{0,30}\\d${GROUP}\\d{3}.{0,30}`, "g"),
+    );
+    expect(long).toBeNull();
+    expect(page.textContent).toMatch(/\d(\.\d)?K\b/);
   });
 });

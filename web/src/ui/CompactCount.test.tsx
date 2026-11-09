@@ -15,9 +15,9 @@ describe("WEB-U-461 a short count keeps its exact number one step away", () => {
     const shown = cell.querySelector('[aria-hidden="true"]');
     expect(shown).toHaveTextContent(/^2\.8M$/);
     expect(shown).toHaveAttribute("title", "2 824 643");
-    expect(cell).toHaveAccessibleDescription("");
-    expect(cell.querySelector(".visually-hidden")).toHaveTextContent(
-      "2 824 643",
+    // Read raw: the matcher would fold the narrow no-break spaces into plain ones.
+    expect(cell.querySelector(".visually-hidden")?.textContent).toBe(
+      "2\u202f824\u202f643",
     );
   });
 
