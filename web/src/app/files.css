@@ -437,15 +437,12 @@ button.file-open:hover {
 .attachment-open:hover {
   background: var(--hover-tint);
 }
-/* A sent message's pictures: each up to 240 px a side, whole (never cropped), a button that opens its preview. */
-.sent-pictures {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin: var(--space-2) 0 0;
-  padding: 0;
-  list-style: none;
+/* A sent message's files are one list, pictures first: a chip beside a picture keeps its own height. */
+.sent-attachments {
+  align-items: flex-start;
 }
+/* A sent picture: up to 240 px a side, whole (never cropped), in a frame; a button that opens its preview where the
+   page has a Files panel, and only then drawn as one. */
 .sent-picture {
   display: block;
   padding: 0;
@@ -453,6 +450,8 @@ button.file-open:hover {
   border: var(--border-width) solid var(--line);
   border-radius: var(--control-radius);
   background: var(--paper);
+}
+button.sent-picture {
   cursor: zoom-in;
 }
 .sent-picture img {

@@ -1,19 +1,30 @@
+import { useQuery } from "@tanstack/react-query";
 import { FileText } from "lucide-react";
-import { useEffect, useEffectEvent, useState } from "react";
+import {
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 import { api } from "../api/client";
+import { fileContent } from "../api/previews";
 import { useT } from "../i18n/I18nProvider";
 import { Icon } from "../ui/Icon";
 
 import { extension, IMAGE_TYPES } from "./file-kind";
+import { MAX_IMAGE_BYTES, useImageBytes } from "./image-bytes";
 import "./changes-catalogue";
 
 /** The image types a sent message shows as pictures (WEB-U-464), as the model's image input accepts them. */
 const PICTURE = /\.(png|jpe?g|gif|webp)$/i;
 
 /**
- * One sent image, drawn from its bytes as the Files panel draws one (an object URL of the type its name gives), so the
- * picture needs nothing the page's policy doesn't already allow; a failed read gives way to the file's chip.
+ * One sent image, drawn from its bytes as the Files panel draws one. Its size and version are read first, into the
+ * cache the panel's preview reads (opening the file reads nothing again); its bytes only up to the panel's limit; and an
+ * object URL of the type its name gives, so the picture needs nothing the page's policy doesn't already allow. A file
+ * that can't be read, or one over the limit, gives way to the file's chip.
  */
 function Picture({
   conversationId,
@@ -26,41 +37,47 @@ function Picture({
   alt: string;
   onBroken: () => void;
 }) {
-  const [src, setSrc] = useState<string>();
-  // The latest callback, read when the bytes fail, so a parent's re-render never reads the file again.
+  const file = useQuery({
+    queryKey: ["file", conversationId, path],
+    queryFn: ({ signal }) => fileContent(api, conversationId, path, signal),
+    retry: false,
+  });
+  const bytes = useImageBytes(conversationId, path, file.data);
+  const unshown =
+    file.isError ||
+    bytes.isError ||
+    (file.data !== undefined && file.data.size > MAX_IMAGE_BYTES);
+  // The latest callback, read when the picture can't be shown, so a parent's re-render never reads the file again.
   const fail = useEffectEvent(() => onBroken());
   useEffect(() => {
-    const stop = new AbortController();
-    let url: string | undefined;
-    api.fileBlob(conversationId, path, stop.signal).then(
-      async (blob) => {
-        const type = IMAGE_TYPES[extension(path)] ?? "application/octet-stream";
-        url = URL.createObjectURL(
-          new Blob([await blob.arrayBuffer()], { type }),
-        );
-        if (!stop.signal.aborted) setSrc(url);
-      },
-      () => {
-        if (!stop.signal.aborted) fail();
-      },
+    if (unshown) fail();
+  }, [unshown]);
+  const image = useRef<HTMLImageElement>(null);
+  const data = bytes.data;
+  // Made from bytes already read, and revoked with the picture: no object URL outlives it.
+  useEffect(() => {
+    if (!data || !image.current) return;
+    const url = URL.createObjectURL(
+      new Blob([data], {
+        type: IMAGE_TYPES[extension(path)] ?? "application/octet-stream",
+      }),
     );
-    return () => {
-      stop.abort();
-      if (url) URL.revokeObjectURL(url);
-    };
-  }, [conversationId, path]);
-  return src ? (
+    image.current.src = url;
+    return () => URL.revokeObjectURL(url);
+  }, [data, path]);
+  return data ? (
     // eslint-disable-next-line @next/next/no-img-element -- the workspace's own bytes (blob:); next/image can't serve them
-    <img src={src} alt={alt} decoding="async" onError={onBroken} />
+    <img ref={image} alt={alt} decoding="async" onError={onBroken} />
   ) : (
     <span className="sent-picture-waiting" role="img" aria-label={alt} />
   );
 }
 
 /**
- * The files a message named, by their name inside uploads/ (WEB-U-464). Loaded only for a message that has files, so
- * a task's page without any never pays for it. With a conversation and a Files panel, an image shows as its picture
- * and every file opens its preview in the panel; a picture that can't load falls back to the file's chip.
+ * The files a message named, by their name inside uploads/ (WEB-U-464), in one list: pictures first, then the other
+ * files' chips. Loaded only for a message that has files, so a task's page without any never pays for it. With a
+ * conversation and a Files panel, an image shows as its picture and every file is a button that opens its preview in
+ * the panel; without a panel nothing is drawn as a control. A picture that can't be shown falls back to the file's chip.
  */
 export function SentAttachments({
   paths,
@@ -77,9 +94,8 @@ export function SentAttachments({
   const name = (path: string) => path.slice(path.lastIndexOf("/") + 1);
   const pictured = (path: string) =>
     conversationId !== undefined && PICTURE.test(path) && !broken.has(path);
-  const pictures = paths.filter(pictured);
-  const chips = paths.filter((path) => !pictured(path));
-  const open = (path: string, children: React.ReactNode, className: string) =>
+  /** A button that opens the file's preview, where the page has a Files panel; nothing otherwise. */
+  const opener = (path: string, className: string, children: ReactNode) =>
     onOpenFile ? (
       <button
         type="button"
@@ -89,49 +105,47 @@ export function SentAttachments({
       >
         {children}
       </button>
-    ) : (
-      <span className={className}>{children}</span>
-    );
+    ) : null;
   return (
-    <>
-      {pictures.length > 0 && conversationId !== undefined && (
-        <ul className="sent-pictures" aria-label={t("attach.list")}>
-          {pictures.map((path) => (
+    <ul
+      className="attachment-chips sent-attachments"
+      aria-label={t("attach.list")}
+    >
+      {conversationId !== undefined &&
+        paths.filter(pictured).map((path) => {
+          const picture = (
+            <Picture
+              conversationId={conversationId}
+              path={path}
+              alt={name(path)}
+              onBroken={() => setBroken((before) => new Set(before).add(path))}
+            />
+          );
+          return (
             <li key={path}>
-              {open(
-                path,
-                <Picture
-                  conversationId={conversationId}
-                  path={path}
-                  alt={name(path)}
-                  onBroken={() =>
-                    setBroken((before) => new Set(before).add(path))
-                  }
-                />,
-                "sent-picture",
+              {opener(path, "sent-picture", picture) ?? (
+                <span className="sent-picture">{picture}</span>
               )}
             </li>
-          ))}
-        </ul>
-      )}
-      {chips.length > 0 && (
-        <ul className="attachment-chips" aria-label={t("attach.list")}>
-          {chips.map((path) => (
+          );
+        })}
+      {paths
+        .filter((path) => !pictured(path))
+        .map((path) => {
+          const label = (
+            <>
+              <Icon glyph={FileText} size={16} />
+              <span className="attachment-name" title={name(path)}>
+                {name(path)}
+              </span>
+            </>
+          );
+          return (
             <li className="attachment-chip" data-status="sent" key={path}>
-              {open(
-                path,
-                <>
-                  <Icon glyph={FileText} size={16} />
-                  <span className="attachment-name" title={name(path)}>
-                    {name(path)}
-                  </span>
-                </>,
-                "attachment-open",
-              )}
+              {opener(path, "attachment-open", label) ?? label}
             </li>
-          ))}
-        </ul>
-      )}
-    </>
+          );
+        })}
+    </ul>
   );
 }

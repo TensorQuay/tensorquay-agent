@@ -1,5 +1,6 @@
 import { Fragment, lazy, memo, type ReactNode, Suspense } from "react";
 
+import type { SentAttachments as SentList } from "../files/SentAttachments";
 import { useT } from "../i18n/I18nProvider";
 import { Button } from "../ui/Button";
 import { Skeleton } from "../ui/Skeleton";
@@ -21,11 +22,13 @@ const BriefCard = lazy(() =>
   })),
 );
 // A message's files and pictures (WEB-U-464): only a message that has files loads them, off the first load of every
-// task page (WEB-U-014).
+// task page (WEB-U-014). A tab older than an upgrade may not find their code any more: the message then shows without
+// them, and the transcript stays.
 const SentAttachments = lazy(() =>
-  import("../files/SentAttachments").then(({ SentAttachments }) => ({
-    default: SentAttachments,
-  })),
+  import("../files/SentAttachments").then(
+    ({ SentAttachments }) => ({ default: SentAttachments }),
+    (): { default: typeof SentList } => ({ default: () => null }),
+  ),
 );
 
 /**
