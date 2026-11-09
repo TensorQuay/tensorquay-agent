@@ -270,26 +270,7 @@
 textarea.composer-input {
   resize: none;
   line-height: var(--body-leading);
-  min-height: calc(
-    var(--body-size) * var(--body-leading) * 2 + var(--space-2) +
-      var(--border-width) * 2
-  );
-  max-height: calc(
-    var(--body-size) * var(--body-leading) * 8 + var(--space-2) +
-      var(--border-width) * 2
-  );
   overflow-y: auto;
-}
-.composer-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  margin-top: var(--space-3);
-}
-.composer-controls .row {
-  flex-shrink: 0;
 }
 /* §8: the thin caret after the last word while text streams (17.3), blinking about once a second; reduced motion
    holds it still. */
@@ -314,10 +295,6 @@ textarea.composer-input {
   }
   .conversation-link {
     flex-basis: 100%;
-  }
-  /* The composer's row stays one row on a phone: its pickers give way before Send does. */
-  .composer-controls {
-    flex-wrap: nowrap;
   }
 }
 
@@ -640,9 +617,6 @@ textarea.composer-input {
   background: transparent;
   padding-inline: var(--space-3) var(--space-1);
 }
-.composer-controls .composer-submit {
-  margin-inline-start: auto;
-}
 /* The send arrow's visual weight is in its head: drawn 1 px high it sits at the disc's optical centre (§5b). Stop's
    square (the secondary variant) is centred as drawn. */
 .composer-submit .button[data-variant="primary"] .button-label > svg {
@@ -669,14 +643,57 @@ textarea.composer-input {
   border: var(--border-width) solid var(--line);
   border-radius: var(--composer-radius);
   box-shadow: var(--elevation);
-  /* §5b's table: 12 px by 16 px, so the empty card is two lines and the bar in 122 px (WEB-U-430). */
-  padding: var(--space-3) var(--space-4);
+  /* §5b's table: 8 px around the row, so at rest the card is one row of 36 px buttons, 54 px with its border
+     (WEB-U-430, WEB-U-458). */
+  padding: var(--space-2);
 }
+/* §7 Composer (decided on 9 Nov 2026): its focus is the card's thin border in the focus colour (3:1 and more against
+   the page in either theme), not a 2 px ring around it. */
 .composer-card:focus-within {
-  outline: var(--focus-width) solid var(--focus);
-  outline-offset: var(--focus-offset);
-  border-color: transparent;
-  box-shadow: none;
+  border-color: var(--focus);
+}
+/* One row (§7 Composer): + at its start, the text, then what sends or stops at its end. The text grows line by line
+   above them, which stay at the row's bottom ends, so nothing they show moves while a line is typed. */
+.composer-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+/* As tall as the round buttons, its one line at their middle; taller as the text grows. */
+.composer-row > .field {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--composer-button-size);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+/* What waits for the agent (WEB-U-079): a row of chips above the text, only while there are any, each its words cut on
+   one line and its own actions. */
+.composer-held {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+.composer-queued {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  max-width: 100%;
+  min-width: 0;
+  padding-inline-start: var(--space-3);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--pill-radius);
+  background: var(--surface);
+}
+.composer-queued > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .composer-card .field > label {
   position: absolute;
@@ -687,19 +704,18 @@ textarea.composer-input {
   white-space: nowrap;
 }
 .composer-card textarea.composer-input {
+  flex: 1;
+  min-width: 0;
   background: var(--paper);
   border: 0;
   outline: none;
   box-shadow: none;
-  padding: 0;
-  /* Two lines when empty, growing to eight (§7 Composer, WEB-U-430). */
-  min-height: calc(var(--body-size) * var(--body-leading) * 2);
-  max-height: calc(var(--body-size) * var(--body-leading) * 8);
-}
-.composer-controls {
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-end;
+  padding: var(--space-1) 0;
+  /* One line at rest (two while New task's keyboard hint shows), growing to eight (§7 Composer, WEB-U-430). */
+  min-height: calc(var(--body-size) * var(--body-leading) + 2 * var(--space-1));
+  max-height: calc(
+    var(--body-size) * var(--body-leading) * 8 + 2 * var(--space-1)
+  );
 }
 .composer-reason {
   margin-top: var(--space-2);

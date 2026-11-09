@@ -459,9 +459,6 @@ button.file-open:hover {
   width: var(--min-control-height);
   height: var(--min-control-height);
 }
-.composer-controls:has(.composer-attach) {
-  justify-content: space-between;
-}
 .composer-drop {
   margin: 0 0 var(--space-3);
 }

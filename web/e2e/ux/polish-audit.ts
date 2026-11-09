@@ -163,7 +163,7 @@ function measure(input: {
     // §5: 16 px in text and controls, 20 px in the header and in the composer bar's round buttons (§7 Composer).
     const context = icon.closest("header.app-header")
       ? "header"
-      : icon.closest(".composer-controls")
+      : icon.closest(".composer-row")
         ? "composer bar"
         : icon.closest("button, a, [role=menuitem], [role=menuitemradio]")
           ? "control"

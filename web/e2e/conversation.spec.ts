@@ -8,7 +8,7 @@ import { chooseModel } from "./model";
 import { createConversation, signIn } from "./session";
 import { expect, test } from "./test";
 
-test("WEB-U-430 composer grows from two to eight lines and keeps Shift+Enter as a newline", async ({
+test("WEB-U-430 composer grows from one to eight lines and keeps Shift+Enter as a newline", async ({
   page,
 }) => {
   await signIn(page);
@@ -29,9 +29,9 @@ test("WEB-U-430 composer grows from two to eight lines and keeps Shift+Enter as 
       };
     });
   const initial = await dimensions();
-  expect(initial.height).toBeCloseTo(initial.line * 2 + initial.padding, 0);
-  // The card: 12 px by 16 px of padding (UI-GUIDELINES §5b's table), so empty it is two 24 px lines, the 12 px gap, the
-  // 36 px bar, the padding and its border: 122 px.
+  expect(initial.height).toBeCloseTo(initial.line + initial.padding, 0);
+  // The card: 8 px of padding around one row (UI-GUIDELINES §5b's table): empty it is the 36 px row, the padding and its
+  // border, 54 px (one row at rest, decided on 9 Nov 2026).
   const card = await input.evaluate((element) => {
     const box = element.closest(".composer-card");
     if (!box) throw new Error("The composer has no card");
@@ -47,8 +47,8 @@ test("WEB-U-430 composer grows from two to eight lines and keeps Shift+Enter as 
     };
   });
   expect(card).toEqual({
-    height: 122,
-    padding: ["12px", "16px", "12px", "16px"],
+    height: 54,
+    padding: ["8px", "8px", "8px", "8px"],
   });
   expect(initial.resize).toBe("none");
   await input.fill("First line");

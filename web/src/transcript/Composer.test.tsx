@@ -28,7 +28,8 @@ describe("WEB-U-001 composer states", () => {
     const onSend = vi.fn(() => Promise.resolve(true));
     render(<Composer {...defaults} onSend={onSend} />);
     const input = screen.getByRole("textbox", { name: "Message" });
-    expect(input).toHaveAttribute("rows", "2");
+    // One row at rest (§7 Composer, decided on 9 Nov 2026).
+    expect(input).toHaveAttribute("rows", "1");
     fireEvent.change(input, { target: { value: "Inspect the workspace" } });
     fireEvent.keyDown(input, { key: "Enter", shiftKey: true });
     fireEvent.keyDown(input, { key: "Enter", isComposing: true });

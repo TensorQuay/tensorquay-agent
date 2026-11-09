@@ -46,6 +46,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   its centred column; with the Files panel open it ends where the panel starts. A long title gives way first, then the
   pickers show their icons, and nothing wraps. New task's header and a channel's header span the page the same way. On
   a phone nothing changes.
+- **A compact composer (WEB-U-457, WEB-U-458, WEB-E2E-118).** At rest the message box is one row, about 52 px instead of
+  122: + at the start, your text, then Send (or Stop while a run goes) at the end. It grows with your text, line by
+  line, above + and Send, which stay where they are; files attached and messages waiting for the agent show as chips
+  above the text, only while there are any. Its focus is a thin border in the focus colour instead of a 2 px ring. New
+  task's box starts the same, at two lines while its placeholder shows the keyboard hint.
 
 ## 17.3 (8 November 2026)
 

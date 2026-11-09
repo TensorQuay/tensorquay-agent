@@ -47,25 +47,18 @@ for (const width of [1024, 1440])
         "start block is vertically centred",
       ).toBeGreaterThan(350);
       expect((greeting.y + examples.y + examples.height) / 2).toBeLessThan(610);
+      // §7 Composer (decided on 9 Nov 2026): its focus is the card's thin border in the focus colour, no 2 px ring.
       await expect(page.locator(".composer-card")).toHaveCSS(
-        "outline-width",
-        "2px",
-      );
-      await expect(page.locator(".composer-card")).toHaveCSS(
-        "outline-offset",
-        "2px",
-      );
-      await expect(page.locator(".composer-card")).toHaveCSS(
-        "outline-color",
-        theme === "light" ? "rgb(37, 99, 235)" : "rgb(96, 165, 250)",
-      );
-      await expect(page.locator(".composer-card")).toHaveCSS(
-        "box-shadow",
+        "outline-style",
         "none",
       );
       await expect(page.locator(".composer-card")).toHaveCSS(
         "border-color",
-        "rgba(0, 0, 0, 0)",
+        theme === "light" ? "rgb(37, 99, 235)" : "rgb(96, 165, 250)",
+      );
+      await expect(page.locator(".composer-card")).not.toHaveCSS(
+        "box-shadow",
+        "none",
       );
       await expect(input).toHaveCSS("outline-style", "none");
       await capture(page, `centred-start-${suffix}`);
