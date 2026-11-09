@@ -140,7 +140,7 @@ test("E2E-AGENTS-027 the team's budget used up: the team stops with its end note
     await expect(
       page.getByText("The team ran out of budget before it finished."),
     ).toBeVisible({ timeout: afterStart(30_000) });
-    // Words only: no catalogue key shown as text anywhere on the lead's page (the owner once saw one).
+    // Words only: no catalogue key shown as text anywhere on the lead's page (one was found there before 17.0).
     await expect(page.locator("body")).not.toContainText(RAW_KEY);
   } finally {
     await reset();

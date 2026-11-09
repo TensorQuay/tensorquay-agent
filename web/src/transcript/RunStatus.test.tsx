@@ -37,7 +37,7 @@ describe("WEB-U-001 starting and failed work", () => {
       }),
     ].reduce(apply, emptyTranscript());
     render(<TranscriptView transcript={transcript} />);
-    // The recorded reason is a diagnostic; the code's plain words and next step show (the owner's Mac test).
+    // The recorded reason is a diagnostic; the code's plain words and next step show (found on a Mac before 17.0).
     expect(screen.queryByText(/Command could not complete/)).toBeNull();
     const reason = screen.getByText(
       "The task's environment couldn't be reached.",

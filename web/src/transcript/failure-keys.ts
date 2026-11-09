@@ -4,7 +4,7 @@ import type { MessageKey } from "../i18n/translate";
  * Which run failures have their own plain words, and the words: data only, with no catalogue loaded, so a browser spec
  * can check the page against it (failure-copy.ts words them in the reader's language).
  */
-/** What happened, and what the person can do about it: every failure reads as both (the owner's Mac test). */
+/** What happened, and what the person can do about it: every failure reads as both (found on a Mac before 17.0). */
 export type Failure = { reason: MessageKey; next: MessageKey };
 
 /**

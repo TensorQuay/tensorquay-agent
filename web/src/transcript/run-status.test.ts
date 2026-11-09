@@ -73,7 +73,7 @@ describe("WEB-U-001 human run and environment status", () => {
         reason: "Command failed",
       }),
     );
-    // The owner's Mac test: the plain words for the code, never the recorded reason.
+    // Found on a Mac before 17.0: the plain words for the code, never the recorded reason.
     expect(runPresentation(failed, 0).label).toBe(
       "Failed: The task's environment couldn't be reached",
     );

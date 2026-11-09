@@ -5,7 +5,7 @@ import { knownFailure } from "../src/transcript/failure-keys";
 import { createConversation, signIn } from "./session";
 import { expect, test, type Page } from "./test";
 
-// WEB-U-016 end to end, after the owner's test on a Mac showed a raw "budget.output_tokens." in red: every failure a
+// WEB-U-016 end to end, after a run on a Mac before 17.0 showed a raw "budget.output_tokens." in red: every failure a
 // run can end with reaches the page as what happened and what to do, in plain words, and its recorded reason never
 // shows. The fake model fails on "Fail with <code> [reason]" (e2e/front/stream.mjs).
 // Read, not imported: Playwright loads specs as ES modules, which refuse a JSON import without an attribute.
@@ -65,9 +65,7 @@ for (const [code, reason] of cases)
       await neverSays(page, reason);
   });
 
-test("WEB-U-016 the owner's failure: a spent output budget, in plain words", async ({
-  page,
-}) => {
+test("WEB-U-016 a spent output budget, in plain words", async ({ page }) => {
   await signIn(page);
   await page.goto(await createConversation(page));
   const input = page.getByLabel("Message", { exact: true });

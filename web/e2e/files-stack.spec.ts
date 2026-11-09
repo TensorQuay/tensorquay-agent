@@ -413,7 +413,7 @@ test("WEB-E2E-021 uploads, workspace files and run changes on the real stack", a
   await uploadEdited(page, baseURL);
 });
 
-// WEB-E2E-027 (the owner's screenshot): the agent writes a file by the sandbox's absolute path; the task's Open shows
+// WEB-E2E-027 (found before 17.0): the agent writes a file by the sandbox's absolute path; the task's Open shows
 // that file in the files panel, not "This file is no longer there" under "Workspace / / workspace / …".
 test("WEB-E2E-027 a file written by its absolute path opens on the real stack", async ({
   page,

@@ -245,7 +245,7 @@ describe("WEB-U-016 a stopped turn", () => {
   });
 });
 
-// WEB-U-083 (the owner's screenshot): the agent named its file by the sandbox's absolute path, and Open went to
+// WEB-U-083 (found before 17.0): the agent named its file by the sandbox's absolute path, and Open went to
 // "Workspace / / workspace / index.html", which wasn't there. A tool's path is read as a workspace path first.
 describe("WEB-U-083 files a finished task names by their absolute path", () => {
   it("opens the workspace's own file for /workspace/…", () => {
