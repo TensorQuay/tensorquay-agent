@@ -23,7 +23,9 @@ esac
 download="$(mktemp -d)"
 trap 'rm -rf -- "$download"' EXIT
 archive="gitleaks_${version}_${platform}.tar.gz"
-curl --fail --silent --show-error --location --connect-timeout 10 --max-time 120 \
+# A timeout or a 408, 429, 500, 502, 503 or 504 answer is tried again, up to 5 times with curl's back-off from 1 s,
+# and no new try starts after 5 minutes. Any other error, a 404 among them, fails at once.
+curl --fail --silent --show-error --location --connect-timeout 10 --max-time 120 --retry 5 --retry-max-time 300 \
     "https://github.com/gitleaks/gitleaks/releases/download/v${version}/${archive}" \
     --output "$download/$archive"
 printf '%s  %s\n' "$checksum" "$download/$archive" | shasum --algorithm 256 --check
