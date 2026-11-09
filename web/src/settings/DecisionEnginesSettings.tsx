@@ -188,8 +188,12 @@ function EngineTable({ items, ...actions }: { items: Engine[] } & RowActions) {
   );
 }
 
-/** A budget's use over its current count, a sentence per limit; none without a budget. */
-function budgetWords(item: Engine, t: Translate): string[] {
+/**
+ * A budget's use over its current count, a sentence per limit; none without a budget. Token figures are short
+ * (WEB-U-461), the use rounded down so it never reads as the limit before it is reached; `exact` gives every figure
+ * whole, for the row's tooltip (UI-GUIDELINES §10).
+ */
+function budgetWords(item: Engine, t: Translate, exact = false): string[] {
   const { budget, budget_used: used } = item;
   if (!budget || !used) return [];
   const period = budget.period ?? "total";
@@ -211,8 +215,10 @@ function budgetWords(item: Engine, t: Translate): string[] {
   if (budget.tokens !== undefined)
     lines.push(
       t("engines.budgetUseTokens", {
-        used: formatCompact(used.tokens, t.locale),
-        limit: formatCompact(budget.tokens, t.locale),
+        used: exact
+          ? used.tokens
+          : formatCompact(used.tokens, t.locale, "down"),
+        limit: exact ? budget.tokens : formatCompact(budget.tokens, t.locale),
         period,
         date,
       }),
@@ -230,6 +236,8 @@ function EngineRow({
   const source = item.seed ? ENGINE_SOURCES[item.seed] : undefined;
   const host = engineHost(item.url);
   const budget = budgetWords(item, t).join(" · ");
+  // The line is short; its tooltip gives the figures exactly (WEB-U-461).
+  const exact = budgetWords(item, t, true).join(" · ");
   return (
     <tr>
       <td>
@@ -260,11 +268,15 @@ function EngineRow({
           {/* One line under them (17.3): where to add a missing key, then the budget's use, whole in its tooltip (no page
               says the use, so the row is its home). */}
           {item.key_missing ? (
-            <CellNote href="/settings/keys/shared" after={budget || null}>
+            <CellNote
+              href="/settings/keys/shared"
+              after={budget || null}
+              title={[t("engines.addKey"), exact].filter(Boolean).join(" · ")}
+            >
               {t("engines.addKey")}
             </CellNote>
           ) : (
-            budget && <CellNote>{budget}</CellNote>
+            budget && <CellNote title={exact}>{budget}</CellNote>
           )}
         </div>
       </td>

@@ -262,15 +262,32 @@ function pluralRule(locale: string): Intl.PluralRules {
   return rule;
 }
 
+/** Short-form formatters, one per language and rounding: the Usage tables shorten every cell. */
+const compactFormats = new Map<string, Intl.NumberFormat>();
+
 /**
  * Formats a count in its language's short form (WEB-U-461): 2.8M, 282.5万, 2,8 M, with one decimal at most. Token
- * counts read this way; the exact number stays one step away (CompactCount).
+ * counts read this way; the exact number stays one step away (CompactCount). A use against its limit rounds `down`, so
+ * it never reads as the limit before it is reached ("29.9M of 30M", not "30M of 30M"); anything else rounds to the
+ * nearest.
  */
-export function formatCompact(value: number, locale: string): string {
-  return new Intl.NumberFormat(locale, {
-    notation: "compact",
-    maximumFractionDigits: 1,
-  }).format(value);
+export function formatCompact(
+  value: number,
+  locale: string,
+  rounding: "nearest" | "down" = "nearest",
+): string {
+  const key = `${locale} ${rounding}`;
+  let format = compactFormats.get(key);
+  if (!format) {
+    format = new Intl.NumberFormat(locale, {
+      notation: "compact",
+      maximumFractionDigits: 1,
+      // Every supported browser rounds this way (UI-GUIDELINES §16; Firefox from 116, Safari from 15.4).
+      roundingMode: rounding === "down" ? "floor" : "halfExpand",
+    });
+    compactFormats.set(key, format);
+  }
+  return format.format(value);
 }
 
 /** Formats a number for the language with narrow no-break space thousands grouping (§10, WEB-U-354). */

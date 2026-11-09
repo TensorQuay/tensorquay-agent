@@ -21,6 +21,12 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **Sent images show as pictures (WEB-U-464).** Under your message, an image you attached shows as its picture and
   any file opens its preview in the Files panel with one click.
 
+### Fixed
+
+- **The Settings menu and engine budgets (WEB-U-460, WEB-U-461).** Only the menu scrolls to show the current section,
+  never the page, an administrator's section included; a budget's use rounds down ("29.9M of 30M tokens", never
+  "30M of 30M" before the limit), and its tooltip gives the exact figures.
+
 ## 17.3 (8 November 2026)
 
 A fix release of the web app: no migration, no protocol change, no gateway or runtime change.

@@ -24,7 +24,9 @@
 }
 /* WEB-U-460: the menu stays in view while a long section scrolls, under the page's top padding; a menu taller than the
    window scrolls inside its own area. Its padding gives the 2 px focus ring room there, and the matching negative
-   margin keeps the items where they were. Below 768 px the menu is the Section select instead. */
+   margin keeps the items where they were. At the page's top the menu starts under the title row, so its foot sits
+   that far below the window: as much room at its end lets it scroll its last section into view by itself (17.4 fix),
+   the page left at its top. Below 768 px the menu is the Section select instead. */
 .settings-nav {
   grid-area: nav;
   display: flex;
@@ -37,6 +39,7 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: var(--space-1);
+  padding-bottom: calc(var(--space-1) + var(--heading-line-height));
   margin: calc(-1 * var(--space-1));
 }
 /* WEB-U-075: the sections in three groups, each under a quiet label. */

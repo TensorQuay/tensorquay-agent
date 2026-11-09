@@ -2,20 +2,23 @@ import Link from "next/link";
 
 /**
  * A table cell's one muted line (UI-GUIDELINES §7 Table, 17.3): cut with "…" where its column ends, its words whole in
- * its tooltip; the item's own page says them in full. With `href`, the line holds a link of its words, never cut: after
- * the reason `before` it (where to allow a host), or ahead of the words `after` it (where to add a missing key). A
- * space comes first, so the row's text and its name read "value note", never "valuenote".
+ * its tooltip; the item's own page says them in full. A line short for its figures gives them exactly in its tooltip
+ * instead, as `title` (§10, WEB-U-461). With `href`, the line holds a link of its words, never cut: after the reason
+ * `before` it (where to allow a host), or ahead of the words `after` it (where to add a missing key). A space comes
+ * first, so the row's text and its name read "value note", never "valuenote".
  */
 export function CellNote({
   children,
   href,
   before,
   after,
+  title,
 }: {
   children: string;
   href?: string;
   before?: string | null;
   after?: string | null;
+  title?: string;
 }) {
   const words = [before, [children, after].filter(Boolean).join(" · ")]
     .filter(Boolean)
@@ -23,7 +26,7 @@ export function CellNote({
   return (
     <>
       {" "}
-      <span className="type-small muted cell-note" title={words}>
+      <span className="type-small muted cell-note" title={title ?? words}>
         {href ? (
           <>
             {before ? <span>{`${before} `}</span> : null}
