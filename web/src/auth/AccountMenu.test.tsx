@@ -34,7 +34,14 @@ describe("WEB-U-007 single account menu", () => {
     const trigger = screen.getByRole("button", {
       name: "Account",
     });
-    expect(trigger).toHaveAttribute("title", "member@example.invalid");
+    // No native title: the email names it; where the email is hidden (the rail) or cut, the app's own tooltip shows it
+    // whole (UI-GUIDELINES §6; in the test's layout nothing has a size, as on the rail).
+    expect(trigger).not.toHaveAttribute("title");
+    fireEvent.pointerEnter(trigger);
+    expect(document.querySelector(".action-tooltip")).toHaveTextContent(
+      "member@example.invalid",
+    );
+    fireEvent.pointerLeave(trigger);
     // UI-GUIDELINES §7: the account row shows an initials avatar and the email; the menu opens upward.
     expect(within(trigger).getByText("ME")).toBeVisible();
     expect(within(trigger).getByText("member@example.invalid")).toBeVisible();

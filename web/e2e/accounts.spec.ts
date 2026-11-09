@@ -232,9 +232,10 @@ for (const width of [1024, 1440])
       await expect(
         guest.getByRole("heading", { name: "What should the agent do?" }),
       ).toBeVisible();
+      // The account row names its person by its email (its own words; no native title, UI-GUIDELINES §6).
       await expect(
         guest.getByRole("button", { name: "Account", exact: true }),
-      ).toHaveAttribute("title", "new@example.invalid");
+      ).toContainText("new@example.invalid");
       await guest.goto(path);
       await expect(
         guest.getByText(/^This invitation link is not valid\./),

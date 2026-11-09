@@ -135,9 +135,13 @@ describe("WEB-U-070 one task row layout", () => {
 describe("WEB-U-070 the drawer at phone width", () => {
   // At 390 px (WEB-U-070): the drawer's rows showed the task icon, which the expanded sidebar hides; it took title room.
   it("shows no task icon in the drawer, as in the expanded sidebar", () => {
+    // Hidden, keeping its column, so the titles start where the top items' labels do (WEB-U-453).
     expect(
-      declared(rule(conversation, ".navigation-drawer .task-icon"), "display"),
-    ).toBe("none");
+      declared(
+        rule(conversation, ".navigation-drawer .task-icon"),
+        "visibility",
+      ),
+    ).toBe("hidden");
   });
 
   it("is up to 320 px wide, and at most 85% of the screen", () => {
@@ -437,10 +441,6 @@ describe("WEB-U-450 a lead's row reads as one row", () => {
 // rows at the scale's height, the top block's 2 px apart, 8 px under the header, one group gap before the first group;
 // the drawer's rows inset as the sidebar's.
 describe("WEB-U-453 the sidebar's one left edge and rhythm", () => {
-  const flat = (value: string | undefined) =>
-    value?.replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")");
-  const tokens = rule(globals, ":root");
-
   it("puts the logo on the items' icon column, 8 px above the top block", () => {
     // The top-level rule; the rail's own (a column, centred) sets it back to 0.
     const brand = /\n\.sidebar-brand \{([^}]*)\}/.exec(globals)?.[1] ?? "";
@@ -456,23 +456,42 @@ describe("WEB-U-453 the sidebar's one left edge and rhythm", () => {
     ).toBe("var(--nav-pad-inline)");
   });
 
-  it("starts the task titles where the top items' labels do", () => {
-    expect(flat(declared(tokens, "--nav-label-start"))).toBe(
-      "calc(var(--nav-pad-inline) + var(--icon-text) + var(--space-3))",
-    );
+  it("starts the task titles where the top items' labels do: a row keeps its hidden icon's column", () => {
+    // A top item: the rows' padding, its 16 px icon, a 12 px gap, its label. A task row: the same padding and gap, its
+    // icon hidden in place (never removed), its title; so both start on one edge, every value on the spacing scale.
     expect(declared(rule(globals, ".nav-item"), "gap")).toBe("var(--space-3)");
+    expect(declared(rule(globals, ".nav-item"), "padding")).toBe(
+      "var(--nav-row-padding)",
+    );
+    expect(declared(rule(conversation, ".conversation-link"), "gap")).toBe(
+      "var(--space-3)",
+    );
+    expect(declared(rule(conversation, ".conversation-link"), "padding")).toBe(
+      "var(--nav-row-padding)",
+    );
+    expect(
+      declared(rule(conversation, ".app-sidebar .task-icon"), "visibility"),
+    ).toBe("hidden");
+    expect(
+      declared(rule(conversation, ".app-sidebar .task-icon"), "display"),
+    ).toBe(undefined);
+    // A lead's chevron takes the icon column's place.
     expect(
       declared(
-        rule(conversation, ".app-sidebar .conversation-link"),
-        "padding-inline-start",
+        ruleFlat(
+          conversation,
+          ".conversation-row:has(> .task-helpers-toggle) > .conversation-link > .task-icon",
+        ),
+        "display",
       ),
-    ).toBe("var(--nav-label-start)");
+    ).toBe("none");
+    // Show more's label starts on the same edge: a hidden icon's width, then the rows' gap.
+    expect(declared(rule(conversation, ".task-more-slot"), "width")).toBe(
+      "var(--icon-text)",
+    );
     expect(
-      declared(
-        rule(conversation, ".navigation-drawer .conversation-link"),
-        "padding-inline-start",
-      ),
-    ).toBe("var(--nav-label-start)");
+      declared(rule(conversation, ".task-more-button .button-label"), "gap"),
+    ).toBe("var(--space-3)");
   });
 
   it("spaces the top block's rows 2 px apart and the task list one group gap below them", () => {

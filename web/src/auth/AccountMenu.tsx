@@ -3,6 +3,7 @@
 import { lazy, Suspense, useRef, useState } from "react";
 
 import { useT } from "../i18n/I18nProvider";
+import { useNavTip } from "../shell/nav-tip";
 import { PanelBoundary } from "../ui/PanelBoundary";
 import { Popover } from "../ui/Popover";
 
@@ -24,6 +25,8 @@ export function AccountMenu({ onNavigate }: { onNavigate?: () => void } = {}) {
   const anchor = useRef<HTMLButtonElement>(null);
   const email = useSession().data?.email ?? "";
   const t = useT();
+  // The email names the row; where it is hidden (the rail) or cut, the app's own tooltip shows it whole (§6).
+  const { handlers, tip } = useNavTip(email || t("account.label"));
   return (
     <>
       <button
@@ -31,10 +34,10 @@ export function AccountMenu({ onNavigate }: { onNavigate?: () => void } = {}) {
         ref={anchor}
         className="account-row"
         aria-label={t("account.label")}
-        title={email || t("account.label")}
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen(!open)}
+        {...handlers}
         onKeyDown={(event) => {
           if (["ArrowDown", "ArrowUp"].includes(event.key)) {
             event.preventDefault();
@@ -45,8 +48,11 @@ export function AccountMenu({ onNavigate }: { onNavigate?: () => void } = {}) {
         <span className="account-avatar type-label" aria-hidden="true">
           {initials(email)}
         </span>
-        <span className="account-email type-small">{email}</span>
+        <span className="account-email type-small" data-nav-label="">
+          {email}
+        </span>
       </button>
+      {tip}
       {open && (
         <Popover
           anchor={anchor}

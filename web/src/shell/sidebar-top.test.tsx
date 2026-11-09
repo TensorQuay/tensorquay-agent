@@ -10,20 +10,31 @@ vi.mock("next/navigation", () => ({ usePathname: () => "/workspaces" }));
 vi.mock("next/link", () => ({
   default: ({
     href,
+    className,
     children,
     ...rest
   }: {
     href: string;
+    className?: string;
     children: ReactNode;
-    [key: string]: unknown;
-  }) => {
-    const { prefetch: _prefetch, onNavigate: _navigate, ...props } = rest;
-    return (
-      <a href={href} {...(props as object)}>
-        {children}
-      </a>
-    );
-  },
+    "aria-label"?: string;
+    "aria-current"?: "page";
+    title?: string;
+    onPointerEnter?: () => void;
+    onPointerLeave?: () => void;
+  }) => (
+    <a
+      href={href}
+      className={className}
+      aria-label={rest["aria-label"]}
+      aria-current={rest["aria-current"]}
+      title={rest.title}
+      onPointerEnter={rest.onPointerEnter}
+      onPointerLeave={rest.onPointerLeave}
+    >
+      {children}
+    </a>
+  ),
 }));
 vi.mock("../conversations/StartProvider", () => ({
   useConversationStart: () => ({ start: () => undefined }),

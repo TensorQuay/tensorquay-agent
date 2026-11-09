@@ -413,9 +413,8 @@ describe("WEB-U-017 composer-first start", () => {
       expect(screen.getByRole("textbox", { name: "Message" })).toHaveFocus();
     }
     expect(document.title).toBe("New task · TensorQuay Agent");
-    expect(screen.getByRole("navigation")).not.toHaveTextContent(
-      /Workspaces|Channels|Admin/,
-    );
+    // The navigation's top block is New task, Workspaces and Channels (UI-GUIDELINES §6, WEB-U-452); no Admin item.
+    expect(screen.getByRole("navigation")).not.toHaveTextContent(/Admin/);
     expect(posts()).toHaveLength(0);
   });
 

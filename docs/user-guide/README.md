@@ -15,6 +15,10 @@ administrator allows. This guide describes the web app as it is today. Labels in
 | [The desktop](desktop.md) | Give a task a screen, watch the agent work on it, take over to sign in, replay its steps, and what is kept |
 | [Helpers](helpers.md) | Ask a task to lead helpers for work that splits, follow them, step in, and stop them (when your administrator has turned helpers on) |
 
+The sidebar starts with **New task**, **Workspaces** and **Channels**, then lists your tasks by when you last used
+them; your account is at its foot, with the Account menu. The button beside the product name (or the [ key) narrows
+it to icons, and pointing at an icon shows its name. On a phone, the menu button at the top left opens the same list.
+
 The app follows your browser's language; **Language** in the Account menu changes it. **Theme** in the same menu
 chooses **System**, **Light** or **Dark**. The agent's own answers are
 not translated. For settings that only an administrator can change, see the

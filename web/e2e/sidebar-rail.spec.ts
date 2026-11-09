@@ -33,11 +33,22 @@ for (const theme of ["light", "dark"] as const)
       sidebar.getByRole("button", { name: "Expand sidebar" }),
     ).toBeVisible();
 
-    // The global actions: each shown, named, with its tooltip.
+    // The global actions: each shown, named, with its tooltip: the app's own beside it on hover, never a native title
+    // (UI-GUIDELINES §6, WEB-E2E-115); the toggle, an icon-only control, keeps its title with its key.
     for (const [role, name] of GLOBAL) {
       const control = sidebar.getByRole(role, { name, exact: true });
       await expect(control, name).toBeVisible();
-      expect(await control.getAttribute("title"), name).toBeTruthy();
+      if (name === "Expand sidebar") {
+        expect(await control.getAttribute("title"), name).toBeTruthy();
+        continue;
+      }
+      expect(await control.getAttribute("title"), name).toBeNull();
+      await control.hover();
+      await expect(
+        page.locator(".action-tooltip").filter({ hasText: /\S/ }),
+        name,
+      ).toBeVisible();
+      await page.mouse.move(900, 600);
     }
     // Of the task list, the open task alone; and nothing else shows.
     await expect(sidebar.locator(".conversation-link:visible")).toHaveCount(1);

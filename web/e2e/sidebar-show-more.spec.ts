@@ -51,7 +51,18 @@ for (const colorScheme of ["light", "dark"] as const)
         height: box.height,
         width: box.width,
         rowWidth: row.getBoundingClientRect().width,
-        label: box.left + parseFloat(style.paddingLeft),
+        // Where its words start: a range over its text (a hidden icon column comes first, §6).
+        label: (() => {
+          const walker = document.createTreeWalker(
+            button,
+            NodeFilter.SHOW_TEXT,
+          );
+          let text = walker.nextNode();
+          while (text && !text.textContent?.trim()) text = walker.nextNode();
+          const range = document.createRange();
+          if (text) range.selectNodeContents(text);
+          return range.getBoundingClientRect().left;
+        })(),
         titles: title.getBoundingClientRect().left,
         color: style.color,
         ink,

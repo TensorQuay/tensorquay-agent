@@ -958,8 +958,9 @@ textarea.composer-input {
   /* Past the chevron's 16 px and the gap, where a tool line's words start. */
   padding-inline-start: calc(var(--space-4) + var(--space-2));
 }
+/* §6: the task list starts one group gap under the top block, the gap between its groups (the owner, 9 Nov 2026). */
 .conversation-list {
-  margin-block: var(--space-4);
+  margin-block: var(--group-gap) var(--space-4);
 }
 /* One highlighted row per task: the delete action sits inside it and appears on hover or keyboard focus. */
 .conversation-row {
@@ -1222,15 +1223,29 @@ textarea.composer-input {
     );
   }
 }
-/* The expanded sidebar shows titles without the task icon; the rail shows only the icon. */
+/* §6: the expanded sidebar and the phone's drawer show titles without the task icon, but keep its column, so a task's
+   title starts where the top items' labels do (the row's padding, the 16 px icon, the 12 px gap); the rail shows only
+   the icon. A lead's chevron takes the column's place. */
 @container sidebar (min-width: 121px) {
   .app-sidebar .task-icon {
-    display: none;
+    visibility: hidden;
   }
 }
-/* The phone drawer is never a rail: its rows are titles too, with no icon taking their room. */
 .navigation-drawer .task-icon {
+  visibility: hidden;
+}
+.conversation-row:has(> .task-helpers-toggle)
+  > .conversation-link
+  > .task-icon {
   display: none;
+}
+/* Show more sits on the same columns: a hidden icon's width and the rows' gap before its label. */
+.task-more-button .button-label {
+  gap: var(--space-3);
+}
+.task-more-slot {
+  flex-shrink: 0;
+  width: var(--icon-text);
 }
 /* On the rail the status sits on the task's icon, a small badge in its corner. */
 @container sidebar (max-width: 120px) {

@@ -205,10 +205,9 @@
   --row-action-reach: calc(
     var(--row-action-size) + var(--row-inset) - var(--nav-pad-inline)
   );
-  /* §13b: a lead task's chevron is a 24 px target at the row's start (the row's height on touch screens), its icon at
-     the target's end; the title starts 6 px after the icon, and the lead's helpers start there too. */
-  --lead-toggle-width: var(--space-6);
-  --lead-title-start: calc(var(--lead-toggle-width) + var(--space-1));
+  /* §13b: a lead task's chevron spans the row's start padding and the icon column, its icon on the top items' icon
+     column (§6), as tall as the row. */
+  --lead-toggle-width: calc(var(--nav-pad-inline) + var(--icon-text));
   --nav-font-size: 15px;
   --nav-line-height: 22px;
   --group-gap: var(--space-4);
@@ -259,7 +258,6 @@
     --row-height-nav: var(--row-height-touch);
     --row-height-table: var(--row-height-touch);
     --table-control-height: var(--row-height-touch);
-    --lead-toggle-width: var(--row-height-touch);
   }
 }
 [lang|="ja"] {
@@ -894,7 +892,8 @@ textarea.form-control {
   container: sidebar / inline-size;
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  /* §6: 8 px under the header (the owner, 9 Nov 2026). */
+  gap: var(--space-2);
   min-height: 0;
   overflow: hidden;
   border-right: var(--border-width) solid var(--line);
@@ -913,11 +912,21 @@ textarea.form-control {
   justify-content: space-between;
   gap: var(--space-2);
   min-height: var(--brand-row-height);
+  /* §6: the logo starts on the items' icon column, so the logo, every item's icon and the group labels share one
+     left edge (the owner, 9 Nov 2026). */
+  padding-inline-start: var(--nav-pad-inline);
 }
 .sidebar-account {
   flex-shrink: 0;
 }
-/* The phone's drawer (WEB-U-379): the account row at its foot, as in the sidebar, and in view over a long task list. */
+/* The phone's drawer (WEB-U-379): the account row at its foot, as in the sidebar, and in view over a long task list.
+   Its rows sit 12 px from its sides, as the sidebar's do, and 8 px under its header (§6). */
+.dialog.navigation-drawer {
+  padding-inline: var(--space-3);
+}
+.navigation-drawer .dialog-header {
+  margin-bottom: var(--space-2);
+}
 .navigation-drawer[open],
 .navigation-drawer[open] > .dialog-content {
   display: flex;
@@ -975,6 +984,11 @@ textarea.form-control {
 @container sidebar (max-width: 120px) {
   .sidebar-brand {
     flex-direction: column;
+    padding-inline-start: 0;
+  }
+  /* The logo on the rail's one axis with the icons, the toggle and the avatar (§6): no margin pushing it to the start. */
+  .sidebar-brand > .product-name {
+    margin-right: 0;
   }
   .app-sidebar svg {
     flex-shrink: 0;
@@ -1038,7 +1052,12 @@ textarea.form-control {
 .navigation {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+}
+/* §6: the sidebar's top block (New task, Workspaces, Channels): navigation rows, 2 px apart (§5c). */
+.nav-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--nav-row-gap);
 }
 .nav-item {
   position: relative;
