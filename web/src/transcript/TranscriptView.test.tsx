@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { frame, transcriptFrames } from "../test/frames";
 import { settleLazy } from "../test/lazy";
@@ -87,7 +87,7 @@ describe("WEB-U-222 lines among the turns", () => {
 });
 
 describe("WEB-U-020 attachments in the transcript", () => {
-  it("shows each attached file by name under the message", () => {
+  it("shows each attached file by name under the message, loaded with the first message that has files", async () => {
     const state = apply(
       emptyTranscript(),
       frame(1, {
@@ -98,12 +98,46 @@ describe("WEB-U-020 attachments in the transcript", () => {
     );
     render(<TranscriptView transcript={state} />);
     const message = screen.getByRole("article", { name: "Your message" });
-    const files = within(message).getByRole("list", { name: "Attached files" });
+    const files = await within(message).findByRole("list", {
+      name: "Attached files",
+    });
     expect(
       within(files)
         .getAllByRole("listitem")
         .map((item) => item.textContent),
     ).toEqual(["a.csv", "Q3_report-2.pdf"]);
+  });
+});
+
+describe("WEB-U-464 a message whose files' list can't load", () => {
+  it("keeps the message, the transcript and its files' names (a tab older than an upgrade)", async () => {
+    vi.resetModules();
+    vi.doMock("../files/SentAttachments", () => {
+      throw new Error("Failed to fetch dynamically imported module");
+    });
+    try {
+      const { TranscriptView: Fresh } = await import("./TranscriptView");
+      const state = apply(
+        emptyTranscript(),
+        frame(1, {
+          type: "message.user",
+          text: "Compare these",
+          attachments: ["uploads/a.csv"],
+        }),
+      );
+      render(<Fresh transcript={state} />);
+      await settleLazy();
+      expect(
+        screen.getByRole("article", { name: "Your message" }),
+      ).toHaveTextContent("Compare these");
+      // Its files are still named, as plain words.
+      expect(
+        screen.getByRole("article", { name: "Your message" }),
+      ).toHaveTextContent("a.csv");
+    } finally {
+      vi.doUnmock("../files/SentAttachments");
+      vi.resetModules();
+    }
   });
 });
 

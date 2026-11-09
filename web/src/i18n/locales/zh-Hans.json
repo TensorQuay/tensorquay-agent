@@ -2861,6 +2861,7 @@
     "account.whatsNew": "新功能",
     "account.source": "源代码",
     "account.licence": "许可证",
-    "account.newTab": "（在新标签页中打开）"
+    "account.newTab": "（在新标签页中打开）",
+    "attach.open": "打开 {name}"
   }
 }

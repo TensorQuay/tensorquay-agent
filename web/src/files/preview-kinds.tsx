@@ -1,9 +1,7 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { api } from "../api/client";
 import { useT } from "../i18n/I18nProvider";
 import { formatSize } from "../i18n/message";
 import { DeferredMarkdown } from "../transcript/DeferredMarkdown";
@@ -12,10 +10,9 @@ import { Skeleton } from "../ui/Skeleton";
 
 import { parseTable } from "./csv";
 import { extension, IMAGE_TYPES } from "./file-kind";
+import { MAX_IMAGE_BYTES, useImageBytes } from "./image-bytes";
 import "./changes-catalogue";
 
-/** An image larger than this isn't fetched for a preview. */
-export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 /** The rows a table shows; the count says how many there are. */
 const MAX_ROWS = 200;
 const SOURCE_KEY = "tensorquay-file-source";
@@ -77,13 +74,7 @@ export function ImagePreview({
   const type = IMAGE_TYPES[extension(name)] ?? "application/octet-stream";
   const svg = type === "image/svg+xml";
   const small = size <= MAX_IMAGE_BYTES;
-  const bytes = useQuery({
-    queryKey: ["file-image", conversationId, path, etag],
-    queryFn: async ({ signal }) =>
-      (await api.fileBlob(conversationId, path, signal)).arrayBuffer(),
-    enabled: small,
-    retry: false,
-  });
+  const bytes = useImageBytes(conversationId, path, { size, etag });
   const image = useRef<HTMLImageElement>(null);
   const data = bytes.data;
   const svgSource = useMemo(

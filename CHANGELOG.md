@@ -18,6 +18,8 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   live line (the step, a soft shimmer and the time) instead of a static "Working…".
 - **The account menu (WEB-U-463).** Your email and role, then Settings, Usage (administrators), Language, Help, Send
   feedback, API tokens and About, each with its icon. Theme moved to Settings › Account.
+- **Sent images show as pictures (WEB-U-464).** Under your message, an image you attached shows as its picture and
+  any file opens its preview in the Files panel with one click.
 - **The task list's ⋯ is part of its row (WEB-U-449, WEB-E2E-114).** It shows inside the row's hover backdrop at the
   row's end, square and evenly inset, its corners concentric with the row's, with no fill of its own; its own hover
   is a quiet tint. A long title fades out under it instead of being cut, and the row's marks give way while it

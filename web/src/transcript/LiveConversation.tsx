@@ -426,6 +426,7 @@ export function LiveConversation({
               <DesktopSwitchContext.Provider value={desktopSwitch}>
                 <TranscriptView
                   transcript={shown}
+                  conversationId={conversation.id}
                   viewer={me}
                   changedFiles={changedFiles}
                   onOpenChanges={openChanges}
