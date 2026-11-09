@@ -487,8 +487,9 @@ textarea.composer-input {
   border: 0;
 }
 /*
- * A task's model and environment (the owner's correction, WEB-U-113): two small quiet pickers in the task header,
- * right of the title and status (New task: its top bar). They keep their size; the title and status give way first.
+ * A task's model and environment (the Product Owner's correction, WEB-U-113): two small quiet pickers in the task
+ * header, right of the title and status (New task: its top bar). They keep their size; the title and status give way
+ * first.
  */
 .header-choices {
   display: flex;
