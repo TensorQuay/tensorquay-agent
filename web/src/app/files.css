@@ -415,21 +415,27 @@ button.file-open:hover {
   padding-right: var(--space-2);
   background: var(--paper);
 }
-/* WEB-U-464: a sent chip opens its file's preview; the button is the chip's whole content, in the chip's own type. */
+/* WEB-U-464: a sent chip that opens its file's preview is one button filling the chip: the chip's height, padding and
+   corners, and the hover tint of every control. */
+.attachment-chip:has(> .attachment-open) {
+  padding: 0;
+}
 .attachment-open {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   min-width: 0;
-  padding: 0;
+  min-height: var(--min-control-height);
+  padding: 0 var(--space-2);
   border: 0;
+  border-radius: inherit;
   background: none;
   color: inherit;
   font: inherit;
   cursor: pointer;
 }
-.attachment-open:hover .attachment-name {
-  text-decoration: underline;
+.attachment-open:hover {
+  background: var(--hover-tint);
 }
 /* A sent message's pictures: each up to 240 px a side, whole (never cropped), a button that opens its preview. */
 .sent-pictures {
