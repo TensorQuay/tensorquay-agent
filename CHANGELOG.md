@@ -3,6 +3,14 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
+## Unreleased
+
+### Changed
+
+- **Releases are tagged.** Each release is a `vMAJOR.MINOR.PATCH` tag with a page on GitHub's Releases; the README
+  and the install guide start from the newest release, and CONTRIBUTING.md says how branches, pull requests and
+  releases work.
+
 ## 17.3 (8 November 2026)
 
 A fix release of the web app: no migration, no protocol change, no gateway or runtime change.
