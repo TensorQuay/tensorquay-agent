@@ -35,8 +35,8 @@ test("WEB-E2E-107 every Settings section opens with its name, one muted line and
       const column = page.locator(".settings-column");
       const heading = column.locator("> h2").first();
       await expect.soft(heading).toHaveText(name);
-      await expect.soft(heading).toHaveCSS("font-size", "20px");
-      await expect.soft(heading).toHaveCSS("line-height", "25px");
+      await expect.soft(heading).toHaveCSS("font-size", "22px");
+      await expect.soft(heading).toHaveCSS("line-height", "27.5px");
       // The one muted line: the first paragraph after the heading, in the muted colour, alone before the action.
       const opening = await column.evaluate((element) => {
         const heading = element.querySelector(":scope > h2");

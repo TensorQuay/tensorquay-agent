@@ -6,7 +6,7 @@ import { auditView } from "./ux/polish-audit";
 
 /** The polish audit's rules about controls: their height, their pointer, a disabled one's cursor. */
 const CONTROL_RULES = [
-  "control lower than 28 px",
+  "control lower than 32 px",
   "control without a pointer cursor",
   "disabled control without not-allowed",
 ];

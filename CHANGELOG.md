@@ -7,6 +7,8 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Changed
 
+- **The MCP client library is rmcp 3.9.0** (it was 3.4.1), past RUSTSEC-2026-0457, -0461 and -0462. None of the
+  affected code was built in.
 - **Releases are tagged.** Each release is a `vMAJOR.MINOR.PATCH` tag with a page on GitHub's Releases; the README
   and the install guide start from the newest release, and CONTRIBUTING.md says how branches, pull requests and
   releases work.
@@ -20,6 +22,39 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   feedback, API tokens and About, each with its icon. Theme moved to Settings › Account.
 - **Sent images show as pictures (WEB-U-464).** Under your message, an image you attached shows as its picture and
   any file opens its preview in the Files panel with one click.
+- **The task list's ⋯ is part of its row (WEB-U-449, WEB-E2E-114).** It shows inside the row's hover backdrop at the
+  row's end, square and evenly inset, its corners concentric with the row's, with no fill of its own; its own hover
+  is a quiet tint. A long title fades out under it instead of being cut, and the row's marks give way while it
+  shows. It shows on hover, on keyboard focus and while its menu is open, never because a click left focus behind,
+  so one row at a time shows it. On a phone it always shows, calm, and titles end before it. A row's title no longer
+  underlines on hover.
+- **A lead task's row reads as one row (WEB-U-450).** Its chevron sits on the sidebar's left edge with its title just
+  after it; its helpers start where its title starts; an open lead's ⋯ stays on its own line.
+- **The whole app is one type step bigger (WEB-U-451).** Body text is 16 px on a 24 px line, small text 14, the
+  sidebar, the Settings menu and the menus 15, labels 13, page headings 22 and a task's title 18. Controls are at
+  least 32 px high and list and menu rows 36 px (44 px on touch screens, as before). Every size comes from one set
+  of tokens. The Settings column is 800 px wide (it was 760) and menus up to 240 px, so they hold what they held; a
+  table's controls stay 32 px and its two-line rows are 68 px.
+- **The sidebar's top block, and one left edge (WEB-U-452, WEB-U-453, WEB-E2E-115).** New task, Workspaces and
+  Channels sit together at the top, then the tasks; the account alone at the foot. The logo, the icons, the group
+  labels and the task titles share one left edge, and the spacing is even. On the rail the logo sits on the icons'
+  axis and each icon shows its name in a tooltip; no item whose name shows repeats it in a browser tooltip. The
+  phone's drawer follows: the same order, its rows inset as the sidebar's.
+- **One tab style everywhere (WEB-U-454, WEB-U-455, WEB-E2E-116).** The Files panel's tabs, a channel's To-dos and
+  Members, and Keys' Mine and Shared look and work the same: the chosen tab is a soft filled pill, the others plain
+  labels that tint under the pointer, with no underline and no bold. The arrow keys move between the tabs and choose,
+  Home and End go to the first and last, and only the chosen tab is in the Tab order. Tabs wider than a phone's screen
+  scroll sideways in their own row.
+- **The task header uses the full width (WEB-U-456, WEB-E2E-117).** A task's header runs across the main area: its
+  title and state at the start, the model and environment pickers, Files and ⋯ at the end, while the conversation keeps
+  its centred column; with the Files panel open it ends where the panel starts. A long title gives way first, then the
+  pickers show their icons, and nothing wraps. New task's header and a channel's header span the page the same way. On
+  a phone nothing changes.
+- **A compact composer (WEB-U-457, WEB-U-458, WEB-E2E-118).** At rest the message box is one row, about 52 px instead of
+  122: + at the start, your text, then Send (or Stop while a run goes) at the end. It grows with your text, line by
+  line, above + and Send, which stay where they are; files attached and messages waiting for the agent show as chips
+  above the text, only while there are any. Its focus is a thin border in the focus colour instead of a 2 px ring. New
+  task's box starts the same, at two lines while its placeholder shows the keyboard hint.
 
 ### Fixed
 

@@ -91,11 +91,11 @@ for (const width of [1280, 390] as const)
       );
       expect(all.y + all.height).toBeLessThanOrEqual(first.y);
       expect(Math.abs(all.x - first.x)).toBeLessThan(2);
-      // Each tool is one line, its description a muted line under it. One line of a check row is its control's 28 px
+      // Each tool is one line, its description a muted line under it. One line of a check row is its control's 32 px
       // target (the controls standard, WEB-E2E-101), so the row is measured, at most that high.
       const shell = tools.getByRole("checkbox", { name: "Run commands" });
       const name = await box(shell.locator("xpath=ancestor::label[1]"));
-      expect(name.height).toBeLessThanOrEqual(28);
+      expect(name.height).toBeLessThanOrEqual(32);
       const hint = await box(
         tools.getByText("Run commands in the task's computer"),
       );
@@ -185,7 +185,7 @@ for (const width of [1280, 390] as const)
           expect(
             option.y - (options[index - 1]?.y ?? 0),
             "one control's height apart",
-          ).toBeLessThanOrEqual(29);
+          ).toBeLessThanOrEqual(33);
       const question = await box(where.getByText("Where does the model run?"));
       expect(
         (options[0]?.y ?? 0) - (question.y + question.height),

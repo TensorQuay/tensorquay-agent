@@ -1,10 +1,8 @@
 "use client";
 
-import { Check, Ellipsis, type LucideIcon } from "lucide-react";
-import Link from "next/link";
+import { Ellipsis, type LucideIcon } from "lucide-react";
 import {
   useEffect,
-  useId,
   useImperativeHandle,
   useRef,
   useState,
@@ -12,10 +10,8 @@ import {
   type RefObject,
 } from "react";
 
-import { Icon } from "./Icon";
 import { IconAction } from "./IconAction";
-import { Menu } from "./Menu";
-import { Popover } from "./Popover";
+import { prefetchMenus, useMenus } from "./lazy-menus";
 
 /** One action on the thing a menu belongs to. */
 export type MenuAction = {
@@ -74,7 +70,8 @@ export function ActionMenu({
   const [open, setOpen] = useState(false);
   const anchor = useRef<HTMLButtonElement>(null);
   useImperativeHandle(ref, () => anchor.current as HTMLButtonElement);
-  const id = useId();
+  // Its open list's code comes when it is about to open (WEB-U-014's budget); a menu that can't get it closes.
+  const menus = useMenus(open, setOpen, anchor);
   const show = () => {
     onOpen?.();
     setOpen(true);
@@ -91,7 +88,12 @@ export function ActionMenu({
       latest.current();
     }
     element.addEventListener("contextmenu", contextMenu);
-    return () => element.removeEventListener("contextmenu", contextMenu);
+    // A right-click comes with the pointer over the thing: its menu's code is fetched then.
+    element.addEventListener("pointerenter", prefetchMenus);
+    return () => {
+      element.removeEventListener("contextmenu", contextMenu);
+      element.removeEventListener("pointerenter", prefetchMenus);
+    };
   }, [context]);
   const choose = (action: MenuAction) => {
     setOpen(false);
@@ -109,75 +111,16 @@ export function ActionMenu({
         round={round}
         expanded={open}
         onClick={() => (open ? setOpen(false) : show())}
+        onIntent={prefetchMenus}
       />
-      {open && (
-        <Popover anchor={anchor} label={label} onClose={() => setOpen(false)}>
-          <Menu label={label}>
-            {actions.map((action) => {
-              const reason = action.unavailable
-                ? `${id}-${action.id}`
-                : undefined;
-              const note = action.note ? `${id}-${action.id}-note` : undefined;
-              const described =
-                [reason, note].filter(Boolean).join(" ") || undefined;
-              const content = (
-                <>
-                  <Icon glyph={action.icon} className="menu-icon" />
-                  <span className="action-menu-word">
-                    <span>{action.label}</span>
-                    {action.unavailable && (
-                      <span id={reason} className="type-small muted">
-                        {action.unavailable}
-                      </span>
-                    )}
-                    {action.note && (
-                      <span id={note} className="type-small muted">
-                        {action.note}
-                      </span>
-                    )}
-                  </span>
-                  {action.checked && (
-                    <Icon glyph={Check} className="menu-check" />
-                  )}
-                </>
-              );
-              const shared = {
-                role:
-                  action.checked === undefined
-                    ? "menuitem"
-                    : "menuitemcheckbox",
-                "aria-checked": action.checked,
-                tabIndex: -1,
-                className: "menu-item action-menu-item",
-                "aria-label": action.name ?? action.label,
-                "aria-disabled": action.unavailable ? true : undefined,
-                "aria-describedby": described,
-                "data-danger": action.danger || undefined,
-              } as const;
-              return action.href && !action.unavailable ? (
-                <Link
-                  key={action.id}
-                  href={action.href}
-                  {...shared}
-                  onClick={() => setOpen(false)}
-                >
-                  {content}
-                </Link>
-              ) : (
-                <button
-                  key={action.id}
-                  type="button"
-                  {...shared}
-                  onClick={() => {
-                    if (!action.unavailable) choose(action);
-                  }}
-                >
-                  {content}
-                </button>
-              );
-            })}
-          </Menu>
-        </Popover>
+      {open && menus && (
+        <menus.ActionMenuSurface
+          anchor={anchor}
+          label={label}
+          actions={actions}
+          onClose={() => setOpen(false)}
+          onChoose={choose}
+        />
       )}
     </>
   );

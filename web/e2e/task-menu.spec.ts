@@ -10,8 +10,9 @@ const en = JSON.parse(readFileSync("src/i18n/locales/en.json", "utf8")) as {
   messages: Record<string, string>;
 };
 
-// WEB-E2E-100: the task's ⋯ menu keeps the standard width (at most 220 px): Keep environment on says what it costs in
-// one muted line of at most 36 characters, from the catalogue (UI-GUIDELINES §7 Action menu).
+// WEB-E2E-100: the task's ⋯ menu keeps the standard width (at most 240 px since the type step of 9 Nov 2026): Keep
+// environment on says what it costs in one muted line of at most 36 characters, from the catalogue (UI-GUIDELINES §7
+// Action menu).
 for (const [width, theme] of [
   [1440, "light"],
   [1440, "dark"],
@@ -41,7 +42,7 @@ for (const [width, theme] of [
     }));
     expect(shape.height).toBeLessThan(shape.leading * 1.5);
     const surface = await menu.locator("xpath=..").boundingBox();
-    expect(surface?.width ?? Infinity).toBeLessThanOrEqual(220);
+    expect(surface?.width ?? Infinity).toBeLessThanOrEqual(240);
     await capture(page, `task-menu-${width}-${theme}`);
     expect(await axeViolations(page)).toEqual([]);
   });

@@ -99,12 +99,14 @@ export function Composer({
   const [localDraft, setLocalDraft] = useState("");
   const draft = value ?? localDraft;
   const setDraft = onChange ?? setLocalDraft;
-  const input = useComposerSize(draft, initial);
+  // A touch keyboard has no Shift+Enter: the hint is for keyboards only (a screen review before 17.0, WEB-U-154).
+  const hint = !useCoarsePointer();
+  // One row at rest; two lines while New task's placeholder carries the keyboard hint, so it shows whole (§7 Composer).
+  const lines = keyHint && hint ? 2 : 1;
+  const input = useComposerSize(draft, initial, lines);
   const submitting = useRef(false);
   const helpId = useId();
   const noticeId = useId();
-  // A touch keyboard has no Shift+Enter: the hint is for keyboards only (a screen review before 17.0, WEB-U-154).
-  const hint = !useCoarsePointer();
   const t = useT();
   const active = !sending && run.status === "running" && run.id !== null;
   // With held messages, a working agent doesn't lock the box: the gateway holds a message until the run ends.
@@ -183,52 +185,6 @@ export function Composer({
             limit={attachments.limit}
           />
         )}
-        <Textarea
-          ref={input}
-          className="composer-input"
-          label={t("composer.message")}
-          rows={2}
-          maxLength={maximumCharacters}
-          placeholder={
-            t(
-              initial ? "composer.placeholderNew" : "composer.placeholderReply",
-            ) + (keyHint && hint ? `\n${t("composer.hint")}` : "")
-          }
-          value={draft}
-          disabled={sending || reason !== null}
-          aria-describedby={
-            [notice ? noticeId : null, reason ? helpId : null]
-              .filter(Boolean)
-              .join(" ") || undefined
-          }
-          onChange={(event) => setDraft(event.target.value)}
-          onKeyDown={(event) => {
-            if (
-              event.key === "Enter" &&
-              !event.shiftKey &&
-              !event.nativeEvent.isComposing
-            ) {
-              event.preventDefault();
-              void send();
-            }
-          }}
-        />
-        {reason && (
-          <p className="type-small muted composer-reason" id={helpId}>
-            {reason}
-          </p>
-        )}
-        {!reason && waiting && (
-          <p className="type-small muted composer-reason">{waiting}</p>
-        )}
-        {attachments?.refused ? (
-          <p className="type-small composer-reason" role="status">
-            {t("attach.tooMany", {
-              count: attachments.refused,
-              limit: MAX_ATTACHMENTS,
-            })}
-          </p>
-        ) : null}
         {held && (held.held.length > 0 || held.dropped.length > 0) && (
           <ul className="composer-held" aria-label={t("composer.heldList")}>
             {held.held.map((message) => (
@@ -296,12 +252,8 @@ export function Composer({
             ))}
           </ul>
         )}
-        {held?.notice && (
-          <p className="type-small composer-reason" role="status">
-            {held.notice}
-          </p>
-        )}
-        <div className="composer-controls">
+        {/* One row (§7 Composer): + at its start, the text, then what sends or stops at its end. */}
+        <div className="composer-row">
           {attachments && (
             <AttachButton
               onFiles={attachments.add}
@@ -310,16 +262,38 @@ export function Composer({
               more={more}
             />
           )}
-          {holds && draft.trim() && (
-            <Button
-              variant="secondary"
-              type="button"
-              className="composer-queue"
-              onClick={() => void send()}
-            >
-              {t("composer.sendAfter")}
-            </Button>
-          )}
+          <Textarea
+            ref={input}
+            className="composer-input"
+            label={t("composer.message")}
+            rows={lines}
+            maxLength={maximumCharacters}
+            placeholder={
+              t(
+                initial
+                  ? "composer.placeholderNew"
+                  : "composer.placeholderReply",
+              ) + (keyHint && hint ? `\n${t("composer.hint")}` : "")
+            }
+            value={draft}
+            disabled={sending || reason !== null}
+            aria-describedby={
+              [notice ? noticeId : null, reason ? helpId : null]
+                .filter(Boolean)
+                .join(" ") || undefined
+            }
+            onChange={(event) => setDraft(event.target.value)}
+            onKeyDown={(event) => {
+              if (
+                event.key === "Enter" &&
+                !event.shiftKey &&
+                !event.nativeEvent.isComposing
+              ) {
+                event.preventDefault();
+                void send();
+              }
+            }}
+          />
           {/* The bar's round icon button, as "+" is: filled with ink only while there is something to send. */}
           <IconAction
             className="composer-submit"
@@ -350,6 +324,38 @@ export function Composer({
             </span>
           )}
         </div>
+        {/* While a run goes, on its own line under the row's end, so the text keeps the row (§7 Composer). */}
+        {holds && draft.trim() && (
+          <Button
+            variant="secondary"
+            type="button"
+            className="composer-queue"
+            onClick={() => void send()}
+          >
+            {t("composer.sendAfter")}
+          </Button>
+        )}
+        {reason && (
+          <p className="type-small muted composer-reason" id={helpId}>
+            {reason}
+          </p>
+        )}
+        {!reason && waiting && (
+          <p className="type-small muted composer-reason">{waiting}</p>
+        )}
+        {attachments?.refused ? (
+          <p className="type-small composer-reason" role="status">
+            {t("attach.tooMany", {
+              count: attachments.refused,
+              limit: MAX_ATTACHMENTS,
+            })}
+          </p>
+        ) : null}
+        {held?.notice && (
+          <p className="type-small composer-reason" role="status">
+            {held.notice}
+          </p>
+        )}
       </div>
       {/* §13b: under the card, every time: a fact about who reads, not a hint about keys. */}
       {notice && (

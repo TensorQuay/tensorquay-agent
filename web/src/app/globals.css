@@ -141,24 +141,29 @@
   /* §7 Composer: Send with nothing to send is an outline disc at this share of the ink (the §8 inactive look). */
   --inactive-share: 35%;
   --pill-radius: 999px;
-  --display-size: 28px;
-  --heading-size: 20px;
-  /* The UI standard: a task's title is 16 px, weight 700 (the app ships 400 and 700, §4). */
-  --task-title-size: 16px;
-  --body-size: 15px;
-  --small-size: 13px;
-  --label-size: 12px;
+  --display-size: 30px;
+  --heading-size: 22px;
+  /* The UI standard: a task's title is 18 px, weight 700 (the app ships 400 and 700, §4). The whole scale is one
+     step bigger, decided on 9 Nov 2026: body 16/24, small 14, nav 15/22, labels 13. */
+  --task-title-size: 18px;
+  --body-size: 16px;
+  --small-size: 14px;
+  --label-size: 13px;
   --display-leading: 1.15;
   --heading-leading: 1.25;
-  --body-leading: 1.6;
+  --body-leading: 1.5;
   --small-leading: 1.5;
   --code-leading: 1.55;
+  /* One small line tight under a title (a task's "From {profile}"). */
+  --compact-leading: 1.2;
   --display-tracking: -0.04em;
   --heading-tracking: -0.03em;
   --label-tracking: 0.025em;
   --control-height: 36px;
   /* §5b: no interactive element is lower than this (small buttons, disclosure summaries). */
-  --min-control-height: 28px;
+  --min-control-height: 32px;
+  /* §7 Tabs: a tab is a control, 32 px; on touch screens a tap target (below). */
+  --tab-height: var(--min-control-height);
   --pill-height: 22px;
   /* UI-GUIDELINES §6: the one-line conversation bar and the sidebar brand row. */
   --bar-height: 56px;
@@ -174,27 +179,42 @@
   --search-results-height: 480px;
   --rail-width: 56px;
   --dialog-width: 480px;
-  --form-width: 760px;
+  /* The Settings column: 800 px since the type step of 9 Nov 2026 (760 before), so a table holds what it held. */
+  --form-width: 800px;
   /* A Settings page's field at most this wide, in one column (WEB-U-131). */
   --field-width: 640px;
   /* UI-GUIDELINES §3: text links in rows (the overview's actions) take the informational blue, in both themes. */
-  /* UI-GUIDELINES §5c, density: navigation rows (the Settings menu, the sidebar's tasks, Keys' tabs) and menu items,
-     table rows, and the height both grow to on touch screens. */
-  --row-height-nav: 32px;
+  /* UI-GUIDELINES §5c, density: navigation rows (the Settings menu, the sidebar's tasks) and menu items, table rows,
+     and the height both grow to on touch screens. */
+  --row-height-nav: 36px;
   --row-height-table: 40px;
+  /* §7 Table: a control in a cell (Edit, a ⋯) is 32 px with 4 px around it, so a one-line row stays 40 px. */
+  --table-control-height: var(--min-control-height);
   /* A table row whose cells have a muted second line: every row of that table (17.3, §7 Table). */
-  --row-height-table-two: 64px;
+  --row-height-table-two: 68px;
   --row-height-touch: 44px;
   --space-half: 2px;
   --nav-pad-block: var(--space-1);
   --nav-pad-inline: var(--space-3);
   --nav-row-padding: var(--nav-pad-block) var(--nav-pad-inline);
   --nav-row-gap: var(--space-half);
-  --nav-font-size: 14px;
-  --nav-line-height: 20px;
+  /* §7 Conversation list item: a task row's ⋯ is part of the row. It sits inside the row's end at one even inset,
+     square at the row's height less two insets, its corners concentric with the row's (the row's radius less the
+     inset). A title that reaches it fades out over the last `--row-action-reach` of its box while it shows. */
+  --row-inset: var(--space-half);
+  --row-action-size: calc(var(--row-height-nav) - 2 * var(--row-inset));
+  --row-action-radius: calc(var(--control-radius) - var(--row-inset));
+  --row-action-reach: calc(
+    var(--row-action-size) + var(--row-inset) - var(--nav-pad-inline)
+  );
+  /* §13b: a lead task's chevron spans the row's start padding and the icon column, its icon on the top items' icon
+     column (§6), as tall as the row. */
+  --lead-toggle-width: calc(var(--nav-pad-inline) + var(--icon-text));
+  --nav-font-size: 15px;
+  --nav-line-height: 22px;
   --group-gap: var(--space-4);
   --group-label-gap: var(--space-1);
-  --heading-line-height: 28px;
+  --heading-line-height: 30px;
   --table-name-width: 180px;
   /* A table column whose cells carry a muted line keeps this much, before the name column takes the rest (17.3). */
   --table-note-width: 16rem;
@@ -218,6 +238,8 @@
   --border-width: 1px;
   --focus-width: 2px;
   --focus-offset: 2px;
+  /* How far the ring reaches outside a control: the room a strip that scrolls keeps around its controls (§7 Tabs). */
+  --focus-reach: calc(var(--focus-width) + var(--focus-offset));
   --status-tint: 12%;
   --motion-fast: 120ms;
   --motion-panel: 160ms;
@@ -239,6 +261,8 @@
   :root {
     --row-height-nav: var(--row-height-touch);
     --row-height-table: var(--row-height-touch);
+    --table-control-height: var(--row-height-touch);
+    --tab-height: var(--row-height-touch);
   }
 }
 [lang|="ja"] {
@@ -882,7 +906,8 @@ textarea.form-control {
   container: sidebar / inline-size;
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  /* §6: 8 px under the header (decided on 9 Nov 2026). */
+  gap: var(--space-2);
   min-height: 0;
   overflow: hidden;
   border-right: var(--border-width) solid var(--line);
@@ -901,11 +926,21 @@ textarea.form-control {
   justify-content: space-between;
   gap: var(--space-2);
   min-height: var(--brand-row-height);
+  /* §6: the logo starts on the items' icon column, so the logo, every item's icon and the group labels share one
+     left edge (decided on 9 Nov 2026). */
+  padding-inline-start: var(--nav-pad-inline);
 }
 .sidebar-account {
   flex-shrink: 0;
 }
-/* The phone's drawer (WEB-U-379): the account row at its foot, as in the sidebar, and in view over a long task list. */
+/* The phone's drawer (WEB-U-379): the account row at its foot, as in the sidebar, and in view over a long task list.
+   Its rows sit 12 px from its sides, as the sidebar's do, and 8 px under its header (§6). */
+.dialog.navigation-drawer {
+  padding-inline: var(--space-3);
+}
+.navigation-drawer .dialog-header {
+  margin-bottom: var(--space-2);
+}
 .navigation-drawer[open],
 .navigation-drawer[open] > .dialog-content {
   display: flex;
@@ -963,6 +998,11 @@ textarea.form-control {
 @container sidebar (max-width: 120px) {
   .sidebar-brand {
     flex-direction: column;
+    padding-inline-start: 0;
+  }
+  /* The logo on the rail's one axis with the icons, the toggle and the avatar (§6): no margin pushing it to the start. */
+  .sidebar-brand > .product-name {
+    margin-right: 0;
   }
   .app-sidebar svg {
     flex-shrink: 0;
@@ -984,6 +1024,20 @@ textarea.form-control {
   }
   .app-sidebar .conversation-row {
     padding-right: 0;
+  }
+  /* The rail has no ⋯ (above), so nothing gives way under it: the open task's run mark stays under the pointer. */
+  .app-sidebar
+    .conversation-row:has(> .task-more):hover
+    > .conversation-link
+    > .task-mark,
+  .app-sidebar
+    .conversation-row:has(> .task-more):has(
+      > :focus-visible,
+      > .task-more :focus-visible
+    )
+    > .conversation-link
+    > .task-mark {
+    opacity: 1;
   }
   .app-sidebar .nav-label {
     position: absolute;
@@ -1012,7 +1066,12 @@ textarea.form-control {
 .navigation {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+}
+/* §6: the sidebar's top block (New task, Workspaces, Channels): navigation rows, 2 px apart (§5c). */
+.nav-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--nav-row-gap);
 }
 .nav-item {
   position: relative;
@@ -1061,6 +1120,47 @@ textarea.form-control {
 }
 /* Under the pointer the active item keeps its fill: the hover tint is the lighter step, never darker (17.3). */
 .nav-item[aria-current="page"]:hover {
+  background: var(--selected-fill);
+}
+/* §7 Tabs: one style for every tab list (a task's Files panel, a channel's side, Keys' Mine | Shared). The chosen tab
+   is the selected fill with its label in ink, as the active navigation row; the others are muted labels that take the
+   hover tint; one weight, no underline. A strip wider than its place scrolls sideways inside itself, never the page. */
+.tab-list {
+  display: flex;
+  gap: var(--space-1);
+  min-width: 0;
+  overflow-x: auto;
+  /* The strip scrolls, so it cuts off what reaches past its edges: room for the focus ring, which the margin takes back
+     so the tabs stay where they were. */
+  padding: var(--focus-reach);
+  margin: calc(-1 * var(--focus-reach));
+}
+.tab {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tab-height);
+  padding: 0 var(--nav-pad-inline);
+  border: 0;
+  border-radius: var(--control-radius);
+  background: transparent;
+  color: var(--muted);
+  font-size: var(--nav-font-size);
+  line-height: var(--nav-line-height);
+  font-weight: 400;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+}
+.tab:hover {
+  color: var(--ink);
+  background: var(--hover-tint);
+}
+/* After the hover rule, at its weight: under the pointer the chosen tab keeps its fill, never darker (§5c). */
+.tab[aria-selected="true"],
+.tab[aria-current="page"] {
+  color: var(--ink);
   background: var(--selected-fill);
 }
 .nav-item svg {
@@ -1122,7 +1222,7 @@ textarea.form-control {
   gap: var(--space-2);
   min-height: var(--min-control-height);
 }
-/* The shared check row's control (§7 Checkbox, WEB-U-434): Lucide's 16 px box (a circle for a radio) in a 28 px target
+/* The shared check row's control (§7 Checkbox, WEB-U-434): Lucide's 16 px box (a circle for a radio) in a 32 px target
    that the native input fills, transparent, so the input keeps the pointer, the keyboard and the label; its focus ring
    is drawn around the target. */
 .check-control {

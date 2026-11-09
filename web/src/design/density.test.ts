@@ -1,6 +1,6 @@
 // @vitest-environment node
-// WEB-U-080: one density for navigation lists, menus and tables, set once as tokens (UI-GUIDELINES §5c): 32 px nav
-// rows, 12 px sans labels, a fill-only active item, 40 px table rows, 32 px menu items, and 44 px on touch screens.
+// WEB-U-080: one density for navigation lists, menus and tables, set once as tokens (UI-GUIDELINES §5c): 36 px nav
+// rows, 13 px sans labels, a fill-only active item, 40 px table rows, 36 px menu items, and 44 px on touch screens.
 import { readdirSync, readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
@@ -41,13 +41,13 @@ function over(ink = "", paper = "", share = 0) {
 
 describe("WEB-U-080 density tokens", () => {
   it.each([
-    ["row-height-nav", "32px"],
+    ["row-height-nav", "36px"],
     ["row-height-table", "40px"],
     ["row-height-touch", "44px"],
-    ["label-size", "12px"],
-    ["nav-font-size", "14px"],
-    ["nav-line-height", "20px"],
-    // On the §5 scale (the workspaces audit of §5b): the row's 32 px comes from its min-height.
+    ["label-size", "13px"],
+    ["nav-font-size", "15px"],
+    ["nav-line-height", "22px"],
+    // On the §5 scale (the workspaces audit of §5b): the row's 36 px comes from its min-height.
     ["nav-pad-block", "var(--space-1)"],
     ["nav-pad-inline", "var(--space-3)"],
     ["nav-row-padding", "var(--nav-pad-block) var(--nav-pad-inline)"],
@@ -57,7 +57,7 @@ describe("WEB-U-080 density tokens", () => {
     ["group-gap", "var(--space-4)"],
     ["space-1", "4px"],
     ["group-label-gap", "var(--space-1)"],
-    ["heading-line-height", "28px"],
+    ["heading-line-height", "30px"],
     // The sign-in pages' wordmark, smaller (the design direction: the same form, a quieter mark).
     ["wordmark-height", "24px"],
   ])("sets --%s to %s", (name, value) => {
@@ -77,7 +77,7 @@ describe("WEB-U-080 density tokens", () => {
 });
 
 describe("WEB-U-080 labels, rows and the active item", () => {
-  it("sets labels in the sans face at 12 px, weight 400, never monospace", () => {
+  it("sets labels in the sans face at 13 px, weight 400, never monospace", () => {
     const label = rule(globals, ".type-label");
     expect(declared(label, "font-family")).toBe("var(--font-ui)");
     expect(declared(label, "font-size")).toBe("var(--label-size)");
@@ -85,7 +85,7 @@ describe("WEB-U-080 labels, rows and the active item", () => {
     expect(declared(label, "font-weight")).toBe("400");
   });
 
-  it("makes navigation rows 32 px with 14/20 text from the tokens", () => {
+  it("makes navigation rows 36 px with 15/22 text from the tokens", () => {
     const item = rule(globals, ".nav-item");
     expect(declared(item, "min-height")).toBe("var(--row-height-nav)");
     expect(declared(item, "padding")).toBe("var(--nav-row-padding)");
@@ -154,7 +154,7 @@ describe("WEB-U-080 labels, rows and the active item", () => {
     expect(declared(rule(settings, ".overview-lines"), "gap")).toBe("0");
   });
 
-  it("makes menu items 32 px with 14 px text", () => {
+  it("makes menu items 36 px with 15 px text", () => {
     const item = rule(menu, ".menu-item");
     expect(declared(item, "min-height")).toBe("var(--row-height-nav)");
     expect(declared(item, "font-size")).toBe("var(--nav-font-size)");
@@ -186,7 +186,7 @@ describe("WEB-U-080 labels, rows and the active item", () => {
     ).toBe("var(--space-2) 0");
   });
 
-  it("sets the Settings heading at 20/28", () => {
+  it("sets the Settings heading at 22/30", () => {
     const title = rule(settings, ".settings-title h1");
     expect(declared(title, "font-size")).toBe("var(--heading-size)");
     expect(declared(title, "line-height")).toBe("var(--heading-line-height)");
@@ -208,5 +208,79 @@ describe("WEB-U-448 the weights the app ships", () => {
     expect(
       asked.filter((weight) => !/: (400|700|inherit)$/.test(weight)),
     ).toEqual([]);
+  });
+});
+
+// WEB-U-451 (UI-GUIDELINES §4 and §5c; decided on 9 Nov 2026): the
+// whole app one step bigger, set once in the tokens: body 16/24, small 14, the navigation 15/22, labels 13, page
+// headings 22/30, a task's title 18, display 30; controls at least 32 px; list and menu rows 36 px; two-line table rows 68 px. Every
+// stylesheet takes its sizes and lines from the tokens, so the whole app follows them.
+describe("WEB-U-451 one type scale, one step up", () => {
+  it.each([
+    ["display-size", "30px"],
+    ["heading-size", "22px"],
+    ["heading-line-height", "30px"],
+    ["task-title-size", "18px"],
+    ["body-size", "16px"],
+    ["body-leading", "1.5"],
+    ["small-size", "14px"],
+    ["small-leading", "1.5"],
+    ["label-size", "13px"],
+    ["nav-font-size", "15px"],
+    ["nav-line-height", "22px"],
+    ["compact-leading", "1.2"],
+    ["min-control-height", "32px"],
+    ["row-height-nav", "36px"],
+    ["pill-height", "22px"],
+    ["row-height-table-two", "68px"],
+  ])("sets --%s to %s", (name, value) => {
+    expect(declared(root, `--${name}`)).toBe(value);
+  });
+
+  it("states the scale on the design reference as the tokens set it", () => {
+    const reference = readFileSync("src/design/TypeAndSpace.tsx", "utf8");
+    const stated = (role: string) =>
+      new RegExp(`"${role} · (\\d+) / ([\\d.]+)"`).exec(reference)?.slice(1);
+    const token = (name: string) =>
+      declared(root, `--${name}`)?.replace(/px$/, "");
+    expect(stated("Display")).toEqual([
+      token("display-size"),
+      token("display-leading"),
+    ]);
+    expect(stated("Heading")).toEqual([
+      token("heading-size"),
+      token("heading-leading"),
+    ]);
+    expect(stated("Body")).toEqual([token("body-size"), token("body-leading")]);
+    expect(stated("Small")).toEqual([
+      token("small-size"),
+      token("small-leading"),
+    ]);
+    // Labels take the body's leading (the theme's --text-label--line-height); code is set at the small size.
+    expect(stated("Label")).toEqual([
+      token("label-size"),
+      token("body-leading"),
+    ]);
+    expect(stated("Code")).toEqual([
+      token("small-size"),
+      token("code-leading"),
+    ]);
+  });
+
+  it("takes every font size and line height from a token", () => {
+    const loose = readdirSync("src/app")
+      .filter((file) => file.endsWith(".css"))
+      .flatMap((file) =>
+        [
+          ...read(file).matchAll(
+            /(?<![\w-])(font-size|line-height)\s*:\s*([^;}]+)/g,
+          ),
+        ]
+          .map((match) => `${file}: ${match[1]}: ${match[2]?.trim()}`)
+          // pdf.js lays its text layer out at line height 1, to sit on the page's own words (files.css).
+          .filter((found) => !found.startsWith("files.css: line-height: 1")),
+      )
+      .filter((found) => !/: (var\(--|calc\(|inherit|normal)/.test(found));
+    expect(loose).toEqual([]);
   });
 });

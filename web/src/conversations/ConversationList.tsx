@@ -7,6 +7,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { useSession } from "../auth/use-session";
 import { useT } from "../i18n/I18nProvider";
 import type { Conversation } from "../protocol/generated/api";
+import { useNavTip } from "../shell/nav-tip";
 import { Button } from "../ui/Button";
 import { ErrorMessage } from "../ui/ErrorMessage";
 import { useFocusAfterRemoval } from "../ui/focus-after-removal";
@@ -101,6 +102,7 @@ export function ConversationList({
   const searchable = loaded.length >= SEARCH_FROM || list.hasNextPage;
   // The shell holds the one shortcut and the one search; the list says it is long enough.
   // Not yet known while the list loads, so a shortcut pressed meanwhile waits for the answer (WEB-U-218).
+  const searchTip = useNavTip(t("list.search"));
   const searchState = error ? "failed" : loading ? "unknown" : searchable;
   useEffect(() => {
     if (searchState === "failed") taskSearch.available(false, "failed");
@@ -181,19 +183,22 @@ export function ConversationList({
           type="button"
           className="nav-item task-search-row"
           aria-label={t("list.search")}
-          // On the rail it is an icon: its words in a tooltip, as the rail's other actions (WEB-U-435).
-          title={t("list.search")}
+          // On the rail it is an icon: the app's own tooltip names it, as the rail's other actions (WEB-U-435).
+          {...searchTip.handlers}
           aria-keyshortcuts={mac ? "Meta+K" : "Control+K"}
           aria-haspopup="dialog"
           onClick={taskSearch.open}
         >
           <Icon glyph={Search} />
-          <span className="nav-label">{t("list.searchRow")}</span>
+          <span className="nav-label" data-nav-label="">
+            {t("list.searchRow")}
+          </span>
           <kbd className="task-search-keys type-label muted" aria-hidden="true">
             {t("list.searchKeys", { mac: mac ? "yes" : "no" })}
           </kbd>
         </button>
       )}
+      {searchable && searchTip.tip}
       {loading && <Skeleton label={t("list.loading")} />}
       <ErrorMessage error={error} />
       {error && (

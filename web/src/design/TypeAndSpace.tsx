@@ -1,11 +1,11 @@
 const roles = [
-  ["display", "Display · 28 / 1.15", "A place for your work"],
-  ["heading", "Heading · 20 / 1.25", "Clear signals, considered details"],
-  ["body", "Body · 15 / 1.6", "Keep the work in view, with room to think."],
-  ["body-strong", "Body strong · 15 / 1.6", "Workspace name"],
-  ["small", "Small · 13 / 1.5", "Updated a moment ago"],
-  ["label", "Label · 12 / 1.6", "Run status"],
-  ["code", "Code · 13 / 1.55", 'run.status = "idle";'],
+  ["display", "Display · 30 / 1.15", "A place for your work"],
+  ["heading", "Heading · 22 / 1.25", "Clear signals, considered details"],
+  ["body", "Body · 16 / 1.5", "Keep the work in view, with room to think."],
+  ["body-strong", "Body strong · 16 / 1.5", "Workspace name"],
+  ["small", "Small · 14 / 1.5", "Updated a moment ago"],
+  ["label", "Label · 13 / 1.5", "Run status"],
+  ["code", "Code · 14 / 1.55", 'run.status = "idle";'],
 ] as const;
 const spaces = [1, 2, 3, 4, 6, 8, 12, 16];
 

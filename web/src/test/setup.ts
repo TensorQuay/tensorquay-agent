@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup, configure } from "@testing-library/react";
-import { afterEach } from "vitest";
+import { afterEach, beforeAll } from "vitest";
 
 import { parseScale, unitCaps } from "../../deadline-scale";
 import context from "../i18n/generated/en.context.json";
@@ -22,6 +22,13 @@ addReference("failures", failures.messages);
 configure({
   asyncUtilTimeout: unitCaps(parseScale(process.env.TQA_TEST_DEADLINE_SCALE))
     .asyncUtilMs,
+});
+
+// A menu's open state loads when it is wanted (WEB-U-014's budget), and component tests read a menu the moment it opens:
+// its code is fetched before each file's tests, after the file's own mocks, as the person's pointer would have
+// (lazy-menus.test.tsx checks the fetch itself).
+beforeAll(async () => {
+  await (await import("../ui/lazy-menus")).loadMenus();
 });
 
 // After each test's unmount, its queued query notifications run while its environment is still there (§19a, WEB-U-195).

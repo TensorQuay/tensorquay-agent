@@ -105,7 +105,7 @@ span.files-step {
   align-items: center;
   gap: var(--space-2);
   width: 100%;
-  /* §5c: a file or change is a 32 px row with 14 px text. */
+  /* §5c: a file or change is a 36 px row with 15 px text. */
   min-height: var(--row-height-nav);
   padding: 0 var(--nav-pad-inline);
   font-size: var(--nav-font-size);
@@ -510,9 +510,6 @@ button.sent-picture {
   width: var(--min-control-height);
   height: var(--min-control-height);
 }
-.composer-controls:has(.composer-attach) {
-  justify-content: space-between;
-}
 .composer-drop {
   margin: 0 0 var(--space-3);
 }
@@ -528,32 +525,10 @@ button.sent-picture {
 .files-body:focus:not(:focus-visible) {
   outline: none;
 }
-/* The Files and Changes tabs, the changed-file list and a run's diff (§7 tool-card diff tints). */
+/* The panel's tabs (§7 Tabs) take the width beside its buttons; the changed-file list and a run's diff (§7 tool-card
+   diff tints). */
 .files-tabs {
-  display: flex;
   flex: 1;
-  gap: var(--space-1);
-}
-.files-tab {
-  min-height: var(--min-control-height);
-  padding: 0 var(--space-2);
-  border: 0;
-  border-bottom: var(--focus-width) solid transparent;
-  border-radius: var(--control-radius);
-  background: transparent;
-  color: var(--muted);
-  font-size: var(--body-size);
-  font-weight: 700;
-  cursor: pointer;
-}
-.files-tab:hover {
-  color: var(--ink);
-  background: var(--hover-tint);
-}
-/* The selected tab is underlined, so hovering it still shows a change. */
-.files-tab[aria-selected="true"] {
-  color: var(--ink);
-  border-bottom-color: var(--ink);
 }
 .change-status {
   flex-shrink: 0;

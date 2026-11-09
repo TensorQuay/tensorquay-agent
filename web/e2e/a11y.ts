@@ -60,12 +60,21 @@ export async function tabWalk(
       if (!element || element === document.body) return null;
       const box = element.getBoundingClientRect();
       const style = getComputedStyle(element);
-      // The ring may be the element's own or its field's (a composer card draws it with :focus-within).
+      // The ring may be the element's own or its field's: the composer's card shows its text's focus with :focus-within,
+      // as its border in the focus colour (UI-GUIDELINES §7 Composer, decided on 9 Nov 2026).
+      const probe = document.createElement("span");
+      probe.style.color = "var(--focus)";
+      document.body.append(probe);
+      const focusColour = getComputedStyle(probe).color;
+      probe.remove();
       const ringed = (node: Element | null, depth: number): boolean => {
         if (!node || depth > 3) return false;
         const own = getComputedStyle(node);
         return (
           (own.outlineStyle !== "none" && parseFloat(own.outlineWidth) > 0) ||
+          (node.classList.contains("composer-card") &&
+            own.borderTopStyle !== "none" &&
+            own.borderTopColor === focusColour) ||
           ringed(node.parentElement, depth + 1)
         );
       };

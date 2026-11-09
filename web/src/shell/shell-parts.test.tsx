@@ -39,13 +39,18 @@ vi.mock("next/link", () => ({
     </a>
   ),
 }));
-vi.mock("./Navigation", () => ({
-  Navigation: ({ onNavigate }: { onNavigate: () => void }) => (
-    <button type="button" onClick={onNavigate}>
-      New task
-    </button>
-  ),
+// The sidebar's top block (New task, Workspaces, Channels) comes with the navigation; the task list is left out.
+vi.mock("../conversations/StartProvider", () => ({
+  useConversationStart: () => ({ start: () => undefined }),
 }));
+vi.mock("./Navigation", async () => {
+  const { NavigationTop } = await import("./NavigationTop");
+  return {
+    Navigation: ({ onNavigate }: { onNavigate: () => void }) => (
+      <NavigationTop onNavigate={onNavigate} />
+    ),
+  };
+});
 afterEach(() => {
   pathname.value = "/";
   document.documentElement.removeAttribute("data-theme");
@@ -110,7 +115,7 @@ describe("WEB-U-007 shell parts", () => {
     // WEB-U-230: the drawer is the one sheet primitive, at the start edge.
     expect(drawer).toHaveClass("dialog-sheet");
     expect(drawer).toHaveAttribute("data-placement", "start");
-    fireEvent.click(screen.getByRole("button", { name: "New task" }));
+    fireEvent.click(screen.getByRole("link", { name: "New task" }));
     fireEvent.click(screen.getByRole("link", { name: "Workspaces" }));
     fireEvent.click(screen.getByRole("link", { name: "Channels" }));
     expect(onClose).toHaveBeenCalledTimes(3);

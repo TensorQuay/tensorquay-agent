@@ -13,7 +13,7 @@ const SPACING = [0, 2, 4, 8, 12, 16, 20, 24, 32, 48, 64];
 // §5 radii: controls 6, dialogs 10, composer 16, pills and round icon buttons (999, or 50 % of a square).
 // The UI standard: 8 px corners, the composer 16 px (pills are exempt).
 const RADII = [0, 8, 16];
-const MIN_CONTROL_HEIGHT = 28;
+const MIN_CONTROL_HEIGHT = 32;
 const MAX_FINDINGS = 200;
 
 type Raw = Omit<Finding, "view">;
@@ -67,6 +67,28 @@ function measure(input: {
       ? value.value
       : null;
   };
+  // §5: a control set inside a rounded box at an even inset takes the box's radius less the inset, so their corners are
+  // concentric (a task row's ⋯, §7 Conversation list item): its nearest rounded ancestor's radius is on the scale, and
+  // the control sits that radius difference from the ancestor's top and its end.
+  const concentric = (element: Element, radius: number, box: DOMRect) => {
+    for (
+      let node = element.parentElement;
+      node && node !== document.body;
+      node = node.parentElement
+    ) {
+      const outer = px(node, "border-top-right-radius");
+      if (!outer) continue;
+      const frame = node.getBoundingClientRect();
+      const top = box.top - frame.top;
+      const end = frame.right - box.right;
+      return (
+        input.radii.includes(outer) &&
+        Math.abs(top - end) < 0.6 &&
+        Math.abs(outer - radius - top) < 0.6
+      );
+    }
+    return false;
+  };
   const root = document.querySelector(input.root) ?? document.body;
   for (const element of root.querySelectorAll("*")) {
     if (!visible(element) || hidden(element)) continue;
@@ -92,7 +114,8 @@ function measure(input: {
       radius !== null &&
       !input.radii.includes(radius) &&
       radius < 999 &&
-      !(Math.abs(box.width - box.height) < 1 && radius * 2 >= box.height - 1)
+      !(Math.abs(box.width - box.height) < 1 && radius * 2 >= box.height - 1) &&
+      !concentric(element, radius, box)
     )
       add("radius off the scale", element, `${radius}px`);
     if (
@@ -123,7 +146,7 @@ function measure(input: {
       continue;
     const box = element.getBoundingClientRect();
     if (box.height < input.minHeight - 0.5)
-      add("control lower than 28 px", element, `${Math.round(box.height)}px`);
+      add("control lower than 32 px", element, `${Math.round(box.height)}px`);
     const disabled = element.matches(":disabled, [aria-disabled='true']");
     const cursor = getComputedStyle(element).cursor;
     const textual = element.matches(
@@ -140,7 +163,7 @@ function measure(input: {
     // §5: 16 px in text and controls, 20 px in the header and in the composer bar's round buttons (§7 Composer).
     const context = icon.closest("header.app-header")
       ? "header"
-      : icon.closest(".composer-controls")
+      : icon.closest(".composer-row")
         ? "composer bar"
         : icon.closest("button, a, [role=menuitem], [role=menuitemradio]")
           ? "control"
@@ -246,9 +269,9 @@ export async function auditFocus(page: Page, view: string): Promise<Finding[]> {
 }
 
 /**
- * Hovers each enabled control; its background, colour, border or underline must change (run with reduced motion). The
- * active item of a navigation list (`aria-current="page"`) is the exception: it keeps its selected fill under the
- * pointer, never darker and with no underline (UI-GUIDELINES §5c, 17.3).
+ * Hovers each enabled control; its background, colour, border or underline must change, or its row's backdrop (run
+ * with reduced motion). The active item of a navigation list (`aria-current="page"`) is the exception: it keeps its
+ * selected fill under the pointer, never darker and with no underline (UI-GUIDELINES §5c, 17.3).
  */
 export async function auditHover(page: Page, view: string): Promise<Finding[]> {
   const found: Finding[] = [];
@@ -256,27 +279,34 @@ export async function auditHover(page: Page, view: string): Promise<Finding[]> {
     'button:visible:not(:disabled), a[href]:visible, [role="menuitem"]:visible, [role="menuitemradio"]:visible',
   );
   const count = Math.min(await controls.count(), MAX_HOVERED);
+  // A navigation row's link (a sidebar task) shows its hover in the backdrop of the row it fills, the list item, with
+  // no underline of its own (§5c, §7 Conversation list item): that row's change counts as the link's.
   const look = (element: Element) => {
     const style = getComputedStyle(element);
+    const row = element.closest("li");
     return [
       style.backgroundColor,
       style.color,
       style.borderColor,
       style.textDecorationLine,
       style.opacity,
+      row ? getComputedStyle(row).backgroundColor : "",
     ].join("|");
   };
   for (let index = 0; index < count; index += 1) {
     const control = controls.nth(index);
     // Markdown links keep the prose style; the skip link is off-screen until focused; an open modal makes
-    // everything outside it inert; the active item keeps its look (above).
+    // everything outside it inert; the active item keeps its look (above, §5c): the current page's link, or a chosen
+    // tab, which says so the tabs' way (§7 Tabs). The other tabs still change.
     if (
       await control.evaluate((element) => {
         const modal = document.querySelector("dialog:modal");
         return (
           element.closest(".markdown, .skip-link") !== null ||
           (modal !== null && !modal.contains(element)) ||
-          element.getAttribute("aria-current") === "page"
+          element.getAttribute("aria-current") === "page" ||
+          (element.getAttribute("role") === "tab" &&
+            element.getAttribute("aria-selected") === "true")
         );
       })
     )

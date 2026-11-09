@@ -76,8 +76,9 @@ for (const width of [1024, 1440])
       });
 
       await test.step("keyboard focus: the tip, and the view passes with it", async () => {
+        // + comes before the text, as on the screen (one row, §7 Composer, decided on 9 Nov 2026).
         await input.focus();
-        await page.keyboard.press("Tab");
+        await page.keyboard.press("Shift+Tab");
         await expect(plus).toBeFocused();
         await expect(tips).toHaveText(["Attach files"]);
         expect(await auditView(page, `composer-buttons-${suffix}`)).toEqual([]);

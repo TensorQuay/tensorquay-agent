@@ -41,7 +41,8 @@ appear under a namespace, and they must obey the same permission policy (ARCHITE
 5. **Permissions:** every MCP tool has a permission class, by default **execute**, since a stdio server is code running in the sandbox;
    an admin may lower it per server. The server's annotations are untrusted and may only tighten the class. There is one policy
    engine, and prepared-action binding and session grants apply unchanged.
-6. **Client library: `rmcp` 3.4.1** (the official Rust SDK; Apache-2.0; MSRV 1.88), with only the `client` and
+6. **Client library: `rmcp`, pinned exactly** (3.4.1 at first, 3.9.0 since 9 Nov 2026; the official Rust SDK;
+   Apache-2.0; MSRV 1.88), with only the `client` and
    `transport-async-rw` features. The runtime spawns the process itself, keeping its process group, environment, stderr capture and
    kill, and hands rmcp a bounded transport: a framed reader with `JsonRpcMessageCodec::new_with_max_length(1 MiB)` that ends the
    stream at the first framing error. The protocol version is pinned (`2025-11-25`) in one constant, and the client declares no
@@ -57,6 +58,15 @@ appear under a namespace, and they must obey the same permission policy (ARCHITE
    One finding to handle in our code: rmcp's default stdio transport is **unbounded** (`usize::MAX`), so the bounded construction is
    mandatory, and a test pins it.
 
+   **Amended 9 Nov 2026: 3.9.0.** Three advisories against 3.4.1 (RUSTSEC-2026-0457, -0461 and -0462) concern code this
+   build doesn't compile (the OAuth client and both Streamable HTTP transports), but `cargo deny` refuses the version, so
+   the pin moved instead of three ignores. rmcp 3.9.0 adds `sha2` 0.11 and `libc` to its own dependencies, both already
+   in the lockfile. What reaches this client: a `tools/call` reply with no `content` (only `_meta`) is no longer read as a
+   result, so it is a `protocol_error`; a server's `ping` during the handshake is answered; a message with both `result`
+   and `error` no longer decodes, so our reader ends the stream there (`protocol_error` at start, `Crashed` for a pending
+   call); and a `tools/list` that our handshake timeout drops is cancelled with a notice. A crash mid-call is `Crashed`
+   at once in both versions (TOOL-I-012). The bounded construction is unchanged, and its tests pass.
+
 ## Consequences
 
 - Any MCP server works without project code, and the conformance suite (TOOL-I-012, RT-I-008, SEC-011) is the acceptance evidence
@@ -69,7 +79,8 @@ appear under a namespace, and they must obey the same permission policy (ARCHITE
 - The rmcp dependency is pinned exactly and reviewed like any other; a future transport change that removes the bounded
   construction would fail its test.
 
-- rmcp 3.4.1's own `AsyncRwTransport` reads each stdio line into an unbounded buffer and silently skips lines that aren't
+- rmcp's own `AsyncRwTransport` buffers each stdio line (with no bound before 3.6.0; since then 16 MiB by default, and
+  an over-long line is dropped while the connection stays open) and silently skips lines that aren't
   JSON, so the runtime never uses it; rmcp is given only our transport, a `FramedRead` with
   `JsonRpcMessageCodec::new_with_max_length` (1 MiB) that ends the stream at the first over-long or non-JSON line
   (TOOL-I-012 pins both as `protocol_error`). Any rmcp upgrade must keep that construction and re-run those tests.
