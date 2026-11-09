@@ -57,7 +57,7 @@ class Sums(unittest.TestCase):
 
 
 class Release(unittest.TestCase):
-    def test_the_manifest_records_what_the_notes_and_the_owner_need(self):
+    def test_the_manifest_records_what_the_notes_and_the_product_owner_need(self):
         record = manifest.release(
             version="1.0.0", commit="a" * 40, commit_time="2026-09-28T05:00:00+08:00", tree="t" * 40,
             releasable=True, tag={"tag": "v1.0.0", "state": "to create"}, runner_commit="c" * 40,

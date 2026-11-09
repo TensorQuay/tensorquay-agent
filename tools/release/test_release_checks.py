@@ -31,7 +31,7 @@ class Checkout(unittest.TestCase):
 
 
 class Tag(unittest.TestCase):
-    def test_an_absent_tag_is_to_be_created_by_the_owner(self):
+    def test_an_absent_tag_is_to_be_created_by_the_product_owner(self):
         self.assertEqual(checks.tag("1.0.0", SHA, ""), {"tag": "v1.0.0", "state": "to create"})
 
     def test_a_tag_on_this_commit_passes(self):

@@ -122,11 +122,17 @@ class Render(unittest.TestCase):
         self.assertIn("- Gate 7: **One:** the first limit, which continues here.", text)
         self.assertIn("- Gate 5: A draft's limit.", text)
 
-    def test_a_candidate_says_it_is_not_releasable_and_publishing_needs_the_owner(self):
+    def test_a_candidate_says_it_is_not_releasable(self):
+        self.assertIn("**Candidate dry run: not releasable.**", self.render())
+
+    def test_the_notes_say_what_waits_for_the_product_owner(self):
         text = self.render()
-        self.assertIn("**Candidate dry run: not releasable.**", text)
-        self.assertIn("Publishing this release needs the owner's approval.", text)
-        self.assertIn("v0.9.0-rc.1 (to create, by the owner)", text)
+        for expected in ("v0.9.0-rc.1 (to create, by the Product Owner)",
+                         "registry digests exist once the Product Owner pushes them",
+                         "not built for this release (shipping it is the Product Owner's decision)",
+                         "Publishing this release needs the Product Owner's approval."):
+            with self.subTest(expected=expected):
+                self.assertIn(expected, text)
 
     def test_the_parts_a_person_writes_are_marked(self):
         text = self.render()
