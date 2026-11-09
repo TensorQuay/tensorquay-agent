@@ -173,7 +173,7 @@ describe("WEB-U-074 decision engines", () => {
     expect(within(row(/plain/)).queryByText(/ of /)).toBeNull();
   });
 
-  // WEB-U-461 (17.4 fix, round 2): the short figures never misstate where a budget stands. Under its limit the use
+  // WEB-U-461 (17.4 fix): the short figures never misstate where a budget stands. Under its limit the use
   // rounds down and the limit up; at or over it, the use rounds up and the limit down (both are multiples of the step
   // shown, so under never reads as equal and at or over never reads as under). The line shows them short; its tooltip
   // and screen readers get them exactly, and a missing key's link is read as itself.

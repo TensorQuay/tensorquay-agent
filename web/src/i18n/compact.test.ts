@@ -34,7 +34,7 @@ describe("WEB-U-461 short counts", () => {
     expect(formatCompact(29_960_000, "en")).toBe("30M");
   });
 
-  // Round 2: a use at or over its limit rounds up, and a limit above its use rounds up too.
+  // A use at or over its limit rounds up, and a limit above its use rounds up too (17.4 fix).
   it("rounds up when asked", () => {
     expect(
       [29_940_000, 30_040_000, 30_000_000, 999_901].map((value) =>
