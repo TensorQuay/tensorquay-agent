@@ -375,36 +375,30 @@ describe("WEB-U-449 the task row's ⋯ is part of the row", () => {
   });
 });
 
-// WEB-U-450 (UI-GUIDELINES §13b): a lead task's row reads as one row. Its chevron is a 24 px target at the row's start
-// (the row's height on touch screens), its icon at the target's end; the title follows 6 px after the icon; the
-// helpers' rows start where the lead's title starts; a normal row's title doesn't move.
+// WEB-U-450 (UI-GUIDELINES §13b and §6): a lead task's row reads as one row. Its chevron spans the row's start padding
+// and its icon column, its icon on the top items' icon column, as tall as the row (44 px on touch screens); its title
+// starts where every task title does; its helpers' rows start where its title starts.
 describe("WEB-U-450 a lead's row reads as one row", () => {
-  const tokens = rule(globals, ":root");
   const flat = (value: string | undefined) =>
     value?.replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")");
 
-  it("makes the chevron a 24 px target at the row's start, the row's height on touch screens, its icon at the end", () => {
-    // The first :root block holds the pointer's value; the touch screens' block, read below, holds theirs.
+  it("makes the chevron the row's start padding and its icon column, as tall as the row", () => {
     const base = /:root \{([^}]*)\}/.exec(globals)?.[1] ?? "";
-    expect(declared(base, "--lead-toggle-width")).toBe("var(--space-6)");
-    const touch =
-      /@media \(pointer: coarse\) \{\s*:root \{([^}]*)\}/.exec(globals)?.[1] ??
-      "";
-    expect(declared(touch, "--lead-toggle-width")).toBe(
-      "var(--row-height-touch)",
+    expect(flat(declared(base, "--lead-toggle-width"))).toBe(
+      "calc(var(--nav-pad-inline) + var(--icon-text))",
+    );
+    // One width everywhere, so the lead's title keeps the titles' edge on touch screens too.
+    expect(globals).not.toMatch(
+      /--lead-toggle-width: var\(--row-height-touch\)/,
     );
     const toggle = rule(teams, ".task-helpers-toggle");
     expect(declared(toggle, "width")).toBe("var(--lead-toggle-width)");
     expect(declared(toggle, "min-height")).toBe("var(--row-height-nav)");
     expect(declared(toggle, "justify-content")).toBe("flex-end");
-    expect(declared(toggle, "padding-inline-end")).toBe("var(--space-half)");
-    expect(declared(toggle, "min-width")).toBe(undefined);
+    expect(declared(toggle, "padding-inline-end")).toBe(undefined);
   });
 
-  it("starts the title 6 px after the chevron's icon: no gap, then 4 px of the link's own start", () => {
-    expect(flat(declared(tokens, "--lead-title-start"))).toBe(
-      "calc(var(--lead-toggle-width) + var(--space-1))",
-    );
+  it("starts the lead's title where every task title does: no gap, then the icon's 12 px", () => {
     expect(
       declared(
         rule(teams, ".conversation-row:has(> .task-helpers-toggle)"),
@@ -419,19 +413,88 @@ describe("WEB-U-450 a lead's row reads as one row", () => {
         ),
         "padding-inline-start",
       ),
-    ).toBe("var(--space-1)");
-    // A normal row's title doesn't move: the rows' own padding is unchanged.
-    expect(declared(rule(conversation, ".conversation-link"), "padding")).toBe(
-      "var(--nav-row-padding)",
-    );
+    ).toBe("var(--space-3)");
   });
 
-  it("starts the helpers' rows where the lead's title starts", () => {
+  it("starts the helpers' rows where the lead's title starts, on the spacing scale", () => {
+    expect(declared(rule(teams, ".task-helpers"), "padding-inline-start")).toBe(
+      "var(--space-6)",
+    );
     expect(
-      flat(declared(rule(teams, ".task-helpers"), "padding-inline-start")),
-    ).toBe("calc(var(--lead-title-start) - var(--nav-pad-inline))");
+      declared(
+        rule(teams, ".conversation-row > .task-helpers .conversation-link"),
+        "padding-inline-start",
+      ),
+    ).toBe("var(--space-4)");
+    const note = rule(teams, ".task-helpers-note");
+    expect(declared(note, "padding-inline-start")).toBe("var(--space-6)");
+    expect(declared(note, "margin-inline-start")).toBe("var(--space-4)");
+  });
+});
+
+// WEB-U-453 (UI-GUIDELINES §6; the owner, 9 Nov 2026, against a reference): the sidebar reads as one tidy list. One left
+// edge for the logo, every item's icon and the group labels; the task titles start where the top items' labels do; the
+// rows at the scale's height, the top block's 2 px apart, 8 px under the header, one group gap before the first group;
+// the drawer's rows inset as the sidebar's.
+describe("WEB-U-453 the sidebar's one left edge and rhythm", () => {
+  const flat = (value: string | undefined) =>
+    value?.replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")");
+  const tokens = rule(globals, ":root");
+
+  it("puts the logo on the items' icon column, 8 px above the top block", () => {
+    // The top-level rule; the rail's own (a column, centred) sets it back to 0.
+    const brand = /\n\.sidebar-brand \{([^}]*)\}/.exec(globals)?.[1] ?? "";
+    expect(declared(brand, "padding-inline-start")).toBe(
+      "var(--nav-pad-inline)",
+    );
+    expect(declared(rule(globals, ".app-sidebar"), "gap")).toBe(
+      "var(--space-2)",
+    );
+    // The group labels start on the same column (unchanged).
     expect(
-      declared(rule(teams, ".task-helpers-note"), "padding-inline-start"),
-    ).toBe("var(--lead-title-start)");
+      declared(rule(conversation, ".sidebar-label"), "padding-inline-start"),
+    ).toBe("var(--nav-pad-inline)");
+  });
+
+  it("starts the task titles where the top items' labels do", () => {
+    expect(flat(declared(tokens, "--nav-label-start"))).toBe(
+      "calc(var(--nav-pad-inline) + var(--icon-text) + var(--space-3))",
+    );
+    expect(declared(rule(globals, ".nav-item"), "gap")).toBe("var(--space-3)");
+    expect(
+      declared(
+        rule(conversation, ".app-sidebar .conversation-link"),
+        "padding-inline-start",
+      ),
+    ).toBe("var(--nav-label-start)");
+    expect(
+      declared(
+        rule(conversation, ".navigation-drawer .conversation-link"),
+        "padding-inline-start",
+      ),
+    ).toBe("var(--nav-label-start)");
+  });
+
+  it("spaces the top block's rows 2 px apart and the task list one group gap below them", () => {
+    expect(declared(rule(globals, ".navigation"), "gap")).toBe(undefined);
+    expect(declared(rule(globals, ".nav-items"), "gap")).toBe(
+      "var(--nav-row-gap)",
+    );
+    expect(
+      declared(rule(conversation, ".conversation-list"), "margin-block"),
+    ).toBe("var(--group-gap) var(--space-4)");
+    expect(globals).not.toMatch(/\.sidebar-footer/);
+  });
+
+  it("insets the drawer's rows as the sidebar's, 8 px under its header", () => {
+    expect(
+      declared(rule(globals, ".dialog.navigation-drawer"), "padding-inline"),
+    ).toBe("var(--space-3)");
+    expect(
+      declared(
+        rule(globals, ".navigation-drawer .dialog-header"),
+        "margin-bottom",
+      ),
+    ).toBe("var(--space-2)");
   });
 });

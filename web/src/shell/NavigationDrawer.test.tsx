@@ -43,9 +43,18 @@ vi.mock("next/link", () => ({
     </a>
   ),
 }));
-vi.mock("./Navigation", () => ({
-  Navigation: () => <nav aria-label="Tasks" />,
+// The sidebar's top block (New task, Workspaces, Channels) comes with the navigation; the task list is left out.
+vi.mock("../conversations/StartProvider", () => ({
+  useConversationStart: () => ({ start: () => undefined }),
 }));
+vi.mock("./Navigation", async () => {
+  const { NavigationTop } = await import("./NavigationTop");
+  return {
+    Navigation: ({ onNavigate }: { onNavigate: () => void }) => (
+      <NavigationTop onNavigate={onNavigate} />
+    ),
+  };
+});
 afterEach(() => {
   vi.restoreAllMocks();
   replace.mockClear();
