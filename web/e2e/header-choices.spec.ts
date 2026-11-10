@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { createConversation, signIn } from "./session";
 import { expect, test, type Locator, type Page } from "./test";
 
-// WEB-U-113 on the page (the owner's correction of the UI standard's step 2 B): a task's model and environment are two
+// WEB-U-113 on the page (the UI standard's step 2 B, corrected on 30 Sep 2026): a task's model and environment are two
 // small pickers in its header, right of the title and status, before the Files icon and the ⋯; each opens below and
 // applies at once. The composer is "+", the text and Send. The header never overflows (WEB-U-112).
 async function capture(page: Page, name: string) {

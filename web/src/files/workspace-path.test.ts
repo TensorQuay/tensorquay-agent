@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { workspacePath } from "./workspace-path";
 
-// WEB-U-083 (the owner's screenshot): an agent may name a file by its absolute path in the sandbox, as
+// WEB-U-083 (found before 17.0): an agent may name a file by its absolute path in the sandbox, as
 // /workspace/index.html; the page opens the workspace's own index.html, never "Workspace / / workspace / index.html".
 describe("WEB-U-083 a path from a tool call is a workspace path", () => {
   it.each([

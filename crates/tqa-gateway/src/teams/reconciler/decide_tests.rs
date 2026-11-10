@@ -164,7 +164,7 @@ fn stopped_and_done_members_are_left_alone() {
 // TEST: GW-U-130
 #[test]
 fn the_deadline_warning_is_ten_minutes_or_a_fifth_of_a_short_deadline() {
-    // The lead's decision of 2 Oct 2026: 60 minutes warns at 10 left, 20 at 4, 5 at 1.
+    // ADR-0034, decided on 2 Oct 2026: 60 minutes warns at 10 left, 20 at 4, 5 at 1.
     assert_eq!(deadline_warning_secs(120), 10 * MIN);
     assert_eq!(deadline_warning_secs(60), 10 * MIN);
     assert_eq!(deadline_warning_secs(20), 4 * MIN);

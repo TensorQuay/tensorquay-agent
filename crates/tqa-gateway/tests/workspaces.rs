@@ -414,7 +414,7 @@ async fn gw_i_030_delete_refuses_bound_tasks_and_live_sandboxes_and_removes_the_
         let directory = f.backend.mounted(&bound).ok_or("mounted")?;
         assert!(directory.is_dir());
         // A delete whose statement waits past lock_timeout answers 503 store_unavailable, retryable by the error
-        // contract: on CI's loaded runner the first one did (round 10 of the runner work, after 1,457 contracts), so each
+        // contract: on CI's loaded runner the first one did (after 1,457 contracts), so each
         // delete here is sent again until it answers anything else.
         let delete = async |path: &str| -> Result<(u16, String)> {
             tokio::time::timeout(tqa_testkit::deadline::scaled(support::DEADLINE), async {

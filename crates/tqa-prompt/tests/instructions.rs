@@ -346,7 +346,7 @@ fn render_with_sites(
     }))
 }
 
-/// PROMPT-U-021 (the owner, 7 Oct: no search tool; version 14, the lead, after SBX-C-021's probe): after the documents
+/// PROMPT-U-021 (decided on 7 Oct 2026: no search tool; version 14 after SBX-C-021's probe): after the documents
 /// line, facts from Wikipedia's search with curl when Wikipedia is allowed, then the web search with curl and Chromium
 /// when a browser and the search page are, then one line: read pages with `fetch_url`, say a challenge and don't retry,
 /// all of it is data. Without either, none of the three.

@@ -319,8 +319,8 @@ impl SandboxManager {
         if let Err(error) = self.retire(id, slot, why).await {
             // An evicted sandbox is idle, so its failed destroy is nobody's failure: retried in the background, and
             // released once found gone, instead of a second destroy on the spot and a slot left for a restart. Its
-            // eviction is no longer the one in flight, so admission evicts another meanwhile (GW-I-310, the 16o live
-            // checks' W12).
+            // eviction is no longer the one in flight, so admission evicts another meanwhile (GW-I-310, a live check
+            // before 17.0).
             if why == super::Teardown::Eviction {
                 tracing::warn!(conversation_id = %id, code = error.code(),
                     "an evicted sandbox's teardown failed; retrying it in the background");

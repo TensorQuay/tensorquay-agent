@@ -2,7 +2,7 @@
 without a sandbox to that run's first `run.started` (the runtime is linked, configured and its tools registered).
 Target p50 <= 3 s. Each sample uses a new conversation, so each creates a fresh sandbox; the backend split (gateway to
 container created, Docker create to start, start to run.started) locates a regression. Then the returning task as a
-person sees it on Docker (PERF-010-returning-task, the owner's 3 s): a task that already ran, its sandbox removed
+person sees it on Docker (PERF-010-returning-task, PRD M3's 3 s): a task that already ran, its sandbox removed
 after the idle window, so its next message starts a new container on the same workspace with the image warm; from the
 message accepted to run.started, with the same split. Run with no other stack running on the host:
     TQA_DOCKER_TESTS=1 python3 deploy/tests/perf_start.py
@@ -11,7 +11,7 @@ PERF-011 from the person's side, `--backend firecracker` (a prepared KVM host an
 deploy/firecracker/README.md): the same span on the microVM backend for a new task's first message (the first boot,
 its workspace and state images created) and for a returning task's next message (the VM retired at idle, the images
 kept), split into accepted to VM host created, VM host create to start, start to the sandbox ready (guest boot and
-the runtime linked and configured), and ready to run.started. Targets: p50 <= 2 s cold (PERF-011), and the owner's
+the runtime linked and configured), and ready to run.started. Targets: p50 <= 2 s cold (PERF-011), and PRD M3's
 3 s. Each new task is deleted after its two samples.
     TQA_DOCKER_TESTS=1 python3 deploy/tests/perf_start.py --backend firecracker
 """
@@ -37,7 +37,7 @@ from soak_stack import Stack, cleanup_actions
 from soak_stream import MAX_RECORD_BYTES, SseDecoder
 
 WARMUPS, SAMPLES, TARGET_MS, STARTED_WITHIN = 5, 50, 3000, 60
-# PERF-011's plan target for a cold start, and the owner's ceiling for what a person waits.
+# PERF-011's plan target for a cold start, and PRD M3's ceiling for what a person waits.
 VM_TARGET_MS, OWNER_MS = 2000, 3000
 # The microVM backend retires an idle VM after this many seconds, so a returning task boots again with its images;
 # long enough that the VM host is still there to be read once run.started has arrived.
@@ -198,7 +198,7 @@ def vm_split(sent, created, running, ready, started, end="run_started"):
 
 
 def vm_summary(totals, splits):
-    """p50 and p99 of the totals, each stage's p50, and both targets: PERF-011's verdict and the owner's 3 s."""
+    """p50 and p99 of the totals, each stage's p50, and both targets: PERF-011's verdict and PRD M3's 3 s."""
     summary = {"p50_ms": perf_common.percentile(totals, 50), "p99_ms": perf_common.percentile(totals, 99)}
     for name in splits[0]:
         summary[name.replace("_ms", "_p50_ms")] = perf_common.percentile([split[name] for split in splits], 50)

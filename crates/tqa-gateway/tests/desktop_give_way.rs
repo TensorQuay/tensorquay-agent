@@ -311,7 +311,7 @@ fn names_holder(message: &Message, holder: &str) -> Result<bool, Box<dyn std::er
 async fn gw_i_308_a_desktop_that_may_hold_a_sign_in_isnt_evicted_for_a_slot(
     pool: PgPool,
 ) -> TestResult {
-    // The lead, 17 Oct 2026: a slot's eviction took any idle sandbox, a Desktop with a hand sign-in too. One slot, an
+    // Found on 17 Oct 2026: a slot's eviction took any idle sandbox, a Desktop with a hand sign-in too. One slot, an
     // idle Desktop in it, and a task on another environment waiting for the slot.
     support::run_configured(
         pool,

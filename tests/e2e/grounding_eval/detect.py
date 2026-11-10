@@ -7,7 +7,7 @@ weights mounted read-only; the measurement's pure parts below need neither.
 
 MODEL is one of MODELS. Each keeps its boxes from a low score (`kept`) so recall can read at the card's own threshold
 (`threshold`) or any higher one without a rerun. The licences are recorded in the output, and neither model ships:
-UI-DETR-1 is measured while the owner's decision G-F (its training data) waits, and OmniParser v3 is a reference
+UI-DETR-1 is measured while the decision on its training data waits, and OmniParser v3 is a reference
 only, since its weights come from GPL-3.0 YOLOv9-E ones.
 """
 

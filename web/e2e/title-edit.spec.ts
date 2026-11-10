@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { createConversation, signIn } from "./session";
 import { expect, test, type Locator, type Page } from "./test";
 
-// WEB-U-114 on the page: the task title edits as on Claude.ai. At rest plain text; on hover a subtle tint, no box and
+// WEB-U-114 on the page: the task title edits in place. At rest plain text; on hover a subtle tint, no box and
 // no pencil; editing, the same font in place with a thin underline, no box, and a focus ring only when the keyboard
 // opened it. Enter or a click elsewhere saves, Esc cancels; the ⋯'s Rename opens the same field.
 async function capture(page: Page, name: string) {

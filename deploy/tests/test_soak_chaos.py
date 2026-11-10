@@ -100,7 +100,7 @@ class ChaosTests(unittest.TestCase):
     # TEST: SOAK-001
     def test_the_idle_age_counts_a_connection_left_in_a_failed_transaction(self):
         """Postgres has three idle states: 'idle', 'idle in transaction' and 'idle in transaction (aborted)'. A guard
-        leaked on an error path holds the last one, the likeliest leak of all (the review of 10 Oct, P1)."""
+        leaked on an error path holds the last one, the likeliest leak of all."""
         query = DATABASE_QUERY.lower()
         self.assertIn("state like 'idle%'", query)
         self.assertNotIn("state in (", query, "a list of states misses one")

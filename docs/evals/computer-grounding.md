@@ -2,8 +2,8 @@
 
 **State:** measured twice (section 6), on 12 Oct 2026 and again on 15 Oct on 16i's capture. Qwen3.8 27B finds what
 it's asked to act on by ref (200/200 both times) and by mark (199/200, then 196/200), and by coordinates only 46/200,
-then 34/200, so it doesn't get `pixel_grounding`. The bar is decided (the technical lead, 5 Oct 2026, on the owner's
-delegation): a route gets `pixel_grounding` only when the lower bound of its coordinate hit rate is at least 90 %. Not
+then 34/200, so it doesn't get `pixel_grounding`. The bar was decided on 5 Oct 2026: a route gets `pixel_grounding`
+only when the lower bound of its coordinate hit rate is at least 90 %. Not
 yet measured on 16y's capture: the tool's words changed after 16i (section 6).
 
 ## 1. What it measures
@@ -73,7 +73,7 @@ words and the element it means, named by the role and name the snapshot gives it
   | **200** | **189** | **94.5 %** | 89.8 % |
   | 300 | 281 | 93.7 % | 89.9 % |
 
-  With 200 targets (the technical lead, 5 Oct 2026), a route may miss 11. With 60 it could miss only one, a bar that
+  With 200 targets (decided on 5 Oct 2026), a route may miss 11. With 60 it could miss only one, a bar that
   measured the set's size more than the model.
 - The admin guide lists each route measured, its three rates with their intervals, the date and the model's version.
 

@@ -7,8 +7,8 @@ pressure, three TEST-PLAN §19a entries are closed, and the microVM host-key gap
 images; SBX-F-009 failed there** (a vCPU ENOMEM under host memory pressure; the analysis below) **and passed in the
 G-13 rerun**, with all 18 gates. **9 Oct: c15 was respun as 15b** (only the gateway's telemetry and
 event hub changed), so the evaluation is drafted for 15b below. **11 Oct: refreshed on 15b, every row passed** (G-13
-18 of 18 on the first pass, SBX-F-009 included; PERF-011 within the owner's 3 s; REL-I-002), **except PERF-012's
-microVM half, which failed and was waived by the product owner for 15c**. The gate stays at that until its evaluation
+18 of 18 on the first pass, SBX-F-009 included; PERF-011 within PRD M3's 3 s; REL-I-002), **except PERF-012's
+microVM half, which failed and was waived by the Product Owner for 15c**. The gate stays at that until its evaluation
 is signed (the technical lead, 11 Oct); it was signed the same day.
 Earlier: refreshed on candidate 14b (`c14b-rc`, the integration of 4 to 5 Oct 2026) for the
 technical lead's acceptance. **Not reached** until that evaluation is recorded here. On 14b every row in the gate's
@@ -27,7 +27,7 @@ SEC-001…006 (SEC-003 removed) and SEC-014 on Firecracker; PERF-011; plus gate 
 
 ## Candidate 15 (7 to 8 Oct 2026): known issue so far
 c15 was respun as 15b on 9 Oct, and its evaluation is drafted for 15b (below, after this section's rows). This section
-holds the one Gate 8 row that failed in c15's integration, and the lead's decision on it (8 Oct 05:29).
+holds the one Gate 8 row that failed in c15's integration, and the decision on it (8 Oct 05:29).
 
 **A VM host dies at start when the host kernel can't allocate a vCPU (SBX-F-009, ENOMEM): host memory pressure, not
 c15.**
@@ -78,7 +78,7 @@ c15.**
   in a new VM on the same image and completed; the completed call's file survived; recovery took 1 s.
 - **E2E-VM-013:** workspace files on the microVM backend, passed (`vmfiles`).
 - **PERF-011** (`perf_start --kvm`): passed. New task p50 506 ms, p99 640 ms; returning task p50 383 ms, p99 418 ms;
-  new task with an upload p50 469 ms, p99 632 ms; the owner's bound is 3 s.
+  new task with an upload p50 469 ms, p99 632 ms; PRD M3's bound is 3 s.
 - **Beside the gate:** the rootfs build tests (SBX-F-005/010) passed, and the file previews passed on the microVM
   (`demo previews firecracker`).
 
@@ -111,8 +111,8 @@ So c15's Gate 8 rows above stand for 15b's code. The rows below confirm them on 
 | Row | Result on 15b's images | When / evidence |
 |---|---|---|
 | G-13 (all 18 gates), with SBX-F-009 in G-13-suites | **pass, 18 of 18 on the first pass** ("All gates passed"); SBX-F-009 (sixteen microVMs at once within the memory budget) passed both in the integration's Firecracker step (108 of 108) and in G-13-suites | 15b's integration, 10 Oct: `int-23112f6b-kvm.log`, `int-23112f6b-fc.log` |
-| PERF-011 (M3, microVM): new task, returning task, upload | **pass** (the owner's bound 3 s). Gate 9's rerun, the candidate's two rounds: new task p50 501 / 510 ms, p99 578 / 581 ms; returning task p50 377 / 375 ms, p99 436 / 413 ms; upload p50 422 / 426 ms, p99 485 / 477 ms. The integration's run: new task p50 526, p99 618 ms | Gate 9's step d (11 Oct, 01:24 to 02:15), `gate-9.md`, 15b; `int-23112f6b-perf_start-fc.log` |
-| PERF-012's microVM half | **fail** (sequential write 0.588 and 0.546, random write 0.385 and 0.329, against ≥ 0.7), **waived by the product owner for 15c on 11 Oct**; the analysis and the numbers are in `gate-9.md`, 15b | 11 Oct 04:35 and 05:13 |
+| PERF-011 (M3, microVM): new task, returning task, upload | **pass** (PRD M3's bound, 3 s). Gate 9's rerun, the candidate's two rounds: new task p50 501 / 510 ms, p99 578 / 581 ms; returning task p50 377 / 375 ms, p99 436 / 413 ms; upload p50 422 / 426 ms, p99 485 / 477 ms. The integration's run: new task p50 526, p99 618 ms | Gate 9's step d (11 Oct, 01:24 to 02:15), `gate-9.md`, 15b; `int-23112f6b-perf_start-fc.log` |
+| PERF-012's microVM half | **fail** (sequential write 0.588 and 0.546, random write 0.385 and 0.329, against ≥ 0.7), **waived by the Product Owner for 15c on 11 Oct**; the analysis and the numbers are in `gate-9.md`, 15b | 11 Oct 04:35 and 05:13 |
 | REL-I-002 (each template's rootfs is its source image plus the guest init) | **pass**: 7 tests, OK, on the Workstation rootfs built from `1648c896` | 11 Oct 04:34 |
 | 15b's soak: no orphan VM hosts, taps or chroots left (SOAK-001, SOAK-004 on the soak's backend) | **Doesn't apply to 15b: the soak ran on the Docker backend** (its run script: "R2: the 24 h soak (SOAK-001…003, PRD M5) on Docker"), so it started no VM hosts, taps or chroots. Its orphans on Docker: 0, checked by hand (`gate-9.md`, 15b) | `gate-9.md`, 15b |
 
@@ -131,7 +131,7 @@ scope passed in the first pass, with no rerun:
 - G-13, 18 of 18 gates, "All gates passed" (`kvm`), G-13-full and G-13-lifetime included;
 - the phase demo E2E-VM-012 (`gate8`), E2E-VM-013 (`vmfiles`), the rootfs build tests (SBX-F-005, SBX-F-010) and
   the file previews on the microVM;
-- PERF-011 within the owner's 3 s, here and in Gate 9's rerun (the table above);
+- PERF-011 within PRD M3's 3 s, here and in Gate 9's rerun (the table above);
 - REL-I-002 on 15b's own rootfs (11 Oct).
 
 This is a stronger result than c15's: there, SBX-F-009 failed its first pass and passed only in the rerun.
@@ -222,7 +222,7 @@ The "19" in "Since candidate 13h" below doesn't match the script; 18 is the coun
   lands.
 - **PRD M3 as the user feels it** (`perf_start` on Firecracker, `int-16589e55-perf_start-fc.log`): first start 470 ms;
   a new task p50 522 ms, p99 1130 ms; a returning task p50 392 ms, p99 952 ms; an upload to a new task p50 437 ms, p99
-  850 ms. The owner's 3 s is met in each. The log also holds `docker inspect` errors for containers that were already
+  850 ms. PRD M3's 3 s is met in each. The log also holds `docker inspect` errors for containers that were already
   gone; they are the harness reading sandboxes the gateway had removed, and no measurement depended on them.
 - **The previews stack suite on the microVM backend (WEB-E2E-032)**: the suite itself passed (1 of 1), then the
   harness's clean-up check failed: it lists the images under test without the VM host's, so it refused `tqa-vmm`'s
@@ -265,7 +265,7 @@ its log:
 | SBX-F-006 (E2E-VM-012) | `gate8` | the killed VM's run resumed in a new VM on the same image and completed, the completed call's file survived, recovery 1 s; start-up 0 engine timeouts, 0 retries |
 | E2E-VM-013 | `e2e-vmfiles` | files, uploads, attachments, run changes and fork from the guest; upload with VM start 470 ms, message and run 532 and 525 ms |
 | SBX-F-016, SEC-004, SEC-005, SEC-014's gateway side | `unit`, `ignored` | 2,323 of 2,323 and 2,540 of 2,540, no failure |
-| PERF-011 and PRD M3 | `perf_start-fc` | first start 470 ms; new task p50 522, p99 1130 ms; returning p50 392, p99 952 ms; upload p50 437, p99 850 ms; the owner's 3 s met in each |
+| PERF-011 and PRD M3 | `perf_start-fc` | first start 470 ms; new task p50 522, p99 1130 ms; returning p50 392, p99 952 ms; upload p50 437, p99 850 ms; PRD M3's 3 s met in each |
 | Outside the rows | `demo-previews-fc`, `cov-all`, `sandbox` | WEB-E2E-032 1 passed, then the image guard refused the VM host's `c8a54cf8` containers (a harness fix); coverage 34 failures in its own environment; the Docker suite 198 of 199, RT-I-016 the retired git relay |
 
 **Two microVM findings outside the rows, for the lead to weigh** (both from 14b's other runs, both in c14b-rc):
@@ -342,7 +342,7 @@ the `5ba25238` images): 18 of 19 gates passed, G-13-images and G-13-suites (93 o
 failed in its rootfs build: `docker run` exited 141 with nothing on stderr, the SIGPIPE that SBX-F-036 reproduces and
 fixes (TEST-PLAN §19a).
 
-**Open before the gate can be reached** (the technical lead's decisions of 4 Oct 2026 in brackets):
+**Open before the gate can be reached** (the decisions of 4 Oct 2026 in brackets):
 1. The §19a entries for this gate: G-13-full (fix on dev; closes when G-13-full passes under load), the posture and
    full-workspace cut at the 30 s Docker API bound (the warning now names its request; closes if the next candidate's
    loaded runs don't show it), G-13-lifetime / SBX-F-036 (closes when it passes with `tqa-vmm` rebuilt), and PERF-011's
@@ -392,8 +392,8 @@ failed.
 
 Outside this row: the previews stack suite (WEB-E2E-032) passed on the microVM backend in the integration, and the
 user-view PERF-011 harness (`perf_start` on Firecracker) passed on the rerun: first start 628 ms; a new task p50
-674 ms, p99 724 ms; a returning task p50 401 ms, p99 455 ms; an upload to a new task p50 626 ms, p99 722 ms (the
-owner's 3 s met in each). The Docker sandbox suite passed 192 of 192 on the same rerun.
+674 ms, p99 724 ms; a returning task p50 401 ms, p99 455 ms; an upload to a new task p50 626 ms, p99 722 ms (PRD
+M3's 3 s met in each). The Docker sandbox suite passed 192 of 192 on the same rerun.
 
 **The integration's first-pass failures, all passed on the quiet reruns.** The integration ran on a loaded host (its
 perf steps began at load 24.35). Each failure's cause, from its logs:
@@ -416,7 +416,7 @@ the SBX-F-032 row are on the Docker start-up budget branch, not yet in dev, so 1
 **What was left at 13h** (superseded by "Since candidate 13h" above):
 1. SBX-F-032 merged (the four explained failures and half of the fifth), the G-13-full harness fix merged, and the
    §19a entries above closed.
-2. PRD M3 as the user feels it: the user-view numbers above pass the owner's 3 s. Whether M3 belongs to this gate's
+2. PRD M3 as the user feels it: the user-view numbers above pass PRD M3's 3 s. Whether M3 belongs to this gate's
    evaluation is the technical lead's call (DEV-PLAN §4a).
 3. The technical lead's evaluation on 13h, recorded on this page.
 

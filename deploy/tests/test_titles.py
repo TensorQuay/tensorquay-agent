@@ -1,4 +1,4 @@
-"""L7 short task titles on the real stack: the titles scenario, the suite's configuration and its evidence."""
+"""Short task titles on the real stack: the titles scenario, the suite's configuration and its evidence."""
 
 import json
 from pathlib import Path

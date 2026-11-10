@@ -33,8 +33,8 @@ async function firstRow(items: Locator) {
 const form = (page: Page) => page.locator("form.settings-form-page");
 
 /**
- * One column, as ChatGPT's and Claude's settings: a field's label above it at the section's left edge, never an empty
- * label column beside it; a field is at most about 640 px wide, a phone's whole width.
+ * One column, so a page reads top to bottom at any width: a field's label above it at the section's left edge, never
+ * an empty label column beside it; a field is at most about 640 px wide, a phone's whole width.
  */
 async function oneColumn(page: Page, width: number) {
   const label = await box(

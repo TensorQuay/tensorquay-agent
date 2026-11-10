@@ -69,7 +69,7 @@ async function add(name: string, value: string) {
 }
 
 // FR-22, FR-28: shared secrets for administrators, write-only (WEB-U-035).
-// One word on the page, "key" (the owner's ask): names without the secrets/ reference, which Who may use states.
+// One word on the page, "key", never "secret": names without the secrets/ reference, which Who may use states.
 describe("WEB-U-035 shared keys", () => {
   // As on the Models page, a file-managed list still says where its keys come from, and when every key
   // has left the file, its marker is what says to delete them.

@@ -1,7 +1,7 @@
-//! GW-I-256 (the owner's edge cases, 7 Oct 2026): two agent teams of one person at once, at that person's admission cap.
-//! The first team holds all the person's slots; the second team's lead has a turn queued. An idle helper of the first
-//! yields (its waiting read says `yield_slot`), its turn ends, and admission gives its slot to the other team's lead:
-//! the person's own cap never starves the person's second team.
+//! GW-I-256 (the Product Owner's edge cases, 7 Oct 2026): two agent teams of one person at once, at that person's
+//! admission cap. The first team holds all the person's slots; the second team's lead has a turn queued. An idle helper
+//! of the first yields (its waiting read says `yield_slot`), its turn ends, and admission gives its slot to the other
+//! team's lead: the person's own cap never starves the person's second team.
 #[path = "support/agent_team.rs"]
 mod agent_team;
 #[path = "support/fixture.rs"]

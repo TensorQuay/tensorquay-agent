@@ -1,4 +1,4 @@
-"""H6: the end-of-run orphan audit (SOAK-001, PRD M5 "no orphan sandboxes or volumes"). After the drain, what exists
+"""The end-of-run orphan audit (SOAK-001, PRD M5 "no orphan sandboxes or volumes"). After the drain, what exists
 must be exactly what the soak's live conversations account for:
 - every sandbox container of this installation is running and belongs to one of the soak's conversations, one each;
 - every running sandbox has its admission row, and every row is live with its sandbox running;

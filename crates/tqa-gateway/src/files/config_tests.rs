@@ -10,7 +10,7 @@ fn gw_i_045_defaults_are_the_documented_limits() -> Result<(), GatewayError> {
     assert_eq!(config.preview_bytes, 512 * KIB);
     assert_eq!(config.download_bytes, 100 * MIB);
     assert_eq!(config.upload_seconds, 120);
-    // The file previews design: an HTML page, a PDF and a spreadsheet each have their own preview limit.
+    // The Files panel's previews: an HTML page, a PDF and a spreadsheet each have their own preview limit.
     assert_eq!(config.preview_html_bytes, 2 * MIB);
     assert_eq!(config.preview_pdf_bytes, 20 * MIB);
     assert_eq!(config.preview_sheet_bytes, 10 * MIB);

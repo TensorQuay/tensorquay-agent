@@ -1,4 +1,4 @@
-"""TOOL-U-064's image half (c16k real-world A10 and A12b, 17 Oct 2026): the model drove its desktop with xdotool from
+"""TOOL-U-064's image half (real-world use before 17.0, 17 Oct 2026): the model drove its desktop with xdotool from
 the shell. The Desktop image keeps xdotool for the runtime's computer tool, off the sandbox user's PATH, and the tool
 calls it there. REL-I-003 checks the built image."""
 import re

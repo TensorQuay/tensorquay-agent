@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted (technical lead, 2026-09-28), after its review against the loop; see "Decisions 2026-09-28".
+Accepted (2026-09-28), after a comparison with the loop as built; see "Decisions 2026-09-28".
 
 ## Date
 
@@ -124,7 +124,7 @@ decision or a fallback, and `Act`, `Compact` and `Stop` are reserved.
 
 ## Decisions 2026-09-28
 
-The technical lead's decisions on the review of this ADR against the loop as built, applied in the points above:
+Decisions from comparing this ADR with the loop as built, applied in the points above:
 1. The engine is consulted once per step, never per attempt; the step's retries and failover reuse its decision.
 2. `after_response` selects and doesn't reorder in v1.
 3. One protocol revision covers the session-configuration field, `decision_stop` and the two events (the floor was
@@ -135,7 +135,7 @@ The technical lead's decisions on the review of this ADR against the loop as bui
 
 ## Amendment 2026-09-28: the engine record and its relay
 
-The technical lead's decisions for the gateway half (point 6), replacing "an engine is a route kind":
+Decisions for the gateway half (point 6), replacing "an engine is a route kind":
 1. **Its own record.** An engine has a name, a `url`, `auth` and `key_ref` like a connector's, a `timeout_ms` (2000 by
    default, at most 10000), an `exposure` (`none` by default) and `enabled`; `insecure_http` and `ca_file` are
    file-only. The file seeds at most 16. Engines are never in `models.toml` and never a route, so no model request
@@ -172,7 +172,7 @@ The technical lead's decisions for the gateway half (point 6), replacing "an eng
 
 ## Amendment draft 2026-09-29: the external typed-question adapter and the engine budget (Phase 9 item 1)
 
-**Status: accepted by the technical lead, 29 Sep; built.**
+**Status: accepted on 29 Sep 2026; built.**
 This covers two things: an adapter that lets an installation use an outside service which answers typed questions
 (multiple choice with a confidence) as its decision engine, and an optional budget per engine.
 
@@ -222,8 +222,8 @@ This covers two things: an adapter that lets an installation use an outside serv
      exposure: each change is its own audit action, `budget`, with the old and new budget (migration 0058). `total`
      counts from when the budget was set or last changed, so saving a new budget starts a new count and saving the
      engine with the same budget keeps it; `month` counts the whole calendar month whatever changed in it, since the
-     month is the bill's period and raising the cap only raises the ceiling (the lead, 29 Sep). It applies to every
-     engine kind: a `decision_v1` engine counts calls only.
+     month is the bill's period and raising the cap only raises the ceiling (decided on 29 Sep 2026). It applies to
+     every engine kind: a `decision_v1` engine counts calls only.
    - **Where it is counted:** from the engine's usage rows since the period began (calls = rows; tokens = their sum),
      in the gateway relay, which holds the key, so nothing can call around it. The counters survive restarts because
      they are the usage rows.
@@ -242,7 +242,7 @@ This covers two things: an adapter that lets an installation use an outside serv
    - **The notice's code** is gateway-to-client only, like `decision_engine_unavailable`, so no raised floor (the
      runtime reads the same code from the relay's 409, which is not a frame). Revision 9 isn't released yet, so
      `decision_engine_budget_spent` and the `budget_spent` fallback reason join revision 9: no new row and no new
-     revision (the technical lead, 29 Sep).
+     revision (decided on 29 Sep 2026).
 6. **Failure and timeout.** The engine's `timeout_ms` (2 s by default, at most 10 s) bounds the whole service call.
    There are no retries inside a step: a retry would spend the step's latency and double the cost, and the circuit
    breaker handles persistent failure.

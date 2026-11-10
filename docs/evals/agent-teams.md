@@ -71,8 +71,8 @@ the restart.
 **On c15 (8 Oct 2026):** the agents stack suite (`deploy/tests/demo.py --suite agents`, on C15's
 images, step 2b, 05:29 to 05:31) passed 5 of 6.
 - **E2E-AGENTS-020** passed, both its plain run and its run with a gateway restart.
-- **The owner's edge cases:** E2E-AGENTS-022 (Stop team), 023 (a restart while helpers work), 024 (deleting a lead
-  with live helpers) and 025 (the helper limit) passed.
+- **The Product Owner's edge cases:** E2E-AGENTS-022 (Stop team), 023 (a restart while helpers work), 024 (deleting a
+  lead with live helpers) and 025 (the helper limit) passed.
 - **E2E-AGENTS-021** (a helper whose run fails) is skipped: it is marked to wait for the gateway's fix (GW-I-260),
   which comes in c16.
 
@@ -178,8 +178,8 @@ An attempt's judged score is the sum (0 to 10). The automatic check is reported 
 - whether the lead started helpers at all. A lead that worked alone is still a team attempt, and the share of them is
   reported.
 
-**Long tasks and real collaboration (proposal of 7 Oct 2026, for the owner's acceptance bar):** the 20 tasks above
-are short and split by partition.
+**Long tasks and real collaboration (proposal of 7 Oct 2026, for the Product Owner's acceptance bar):** the 20 tasks
+above are short and split by partition.
 - **Short:** 15–30 min of wall clock, at most 40 steps and 300,000 tokens.
 - **Split by partition:** by folder, vendor, region or module. Each helper's part is independent of the others, and
   the lead's merge is a concatenation.
@@ -209,13 +209,13 @@ are short and split by partition.
 - **The rubric is unchanged.** For D tasks, Coherent means one design throughout: one format, one schema, one error
   convention.
 
-**Run plan for Fri 9 and Sat 10 Oct (the lead's decisions, 7 Oct):**
+**Run plan for Fri 9 and Sat 10 Oct (decided on 7 Oct 2026):**
 - **Two nights** on the shared GPU's night slot.
 - **Not enough room for the whole design:** that's 27 tasks × 2 sides × 3 attempts, about 60 h of serial model time.
-  So the two nights favour the new kinds, which answer the owner's question, and the short set's three attempts move
-  to later nights.
+  So the two nights favour the new kinds, which answer the Product Owner's question, and the short set's three attempts
+  move to later nights.
 - **Always one attempt at a time,** as the design says. Single and team sharing one server at once would confound the
-  time and the load that are being measured (the lead, 7 Oct).
+  time and the load that are being measured (decided on 7 Oct 2026).
 - **Fri night (about 10 h):**
   - D1–D5 × 2 sides × 1 attempt, in the design's order: 10 attempts at about 35 min, 6 h;
   - then eight short tasks × 2 sides × 1 attempt: R1, R2, P1, P4, C2, C3, M2 and M3 (one or two per kind, the most
@@ -223,9 +223,9 @@ are short and split by partition.
 - **Sat night (a 12 h window):** L1 and L3 × 2 sides × 1 attempt, sequentially, about 9 h. Then D1–D5's second
   attempts while time remains.
 - **Batches:** each night runs in batches, each with its own `--out` so each resumes on its own: `fri-d` and `fri-s`
-  on Friday, `sat-l` and `sat-d` on Saturday (the lead, 8 Oct). The packets are made once, after the last batch, and
-  the report reads all four, combining them by task.
-- **L2 is dropped** (the lead, 7 Oct).
+  on Friday, `sat-l` and `sat-d` on Saturday (decided on 8 Oct 2026). The packets are made once, after the last batch,
+  and the report reads all four, combining them by task.
+- **L2 is dropped** (decided on 7 Oct 2026).
 - **What it can show:** with one or two attempts per task, the write-up labels the result **indicative**, a direction
   with its intervals stated as wide. The three-attempt runs come on later nights, and a claim about the short set waits
   for them.
@@ -240,7 +240,7 @@ are short and split by partition.
 - the long tasks' budgets set in their `task.toml`;
 - the judges named (two plus a third), with the packets' redaction checked on a team answer that names its helpers.
 
-**The bars** (proposed here and accepted by the technical lead as proposed, before any run):
+**The bars** (proposed here and accepted as proposed, before any run):
 - Agent teams ship in v1.1 behind the install switch, off by default, whatever the result. The result decides only the
   guides' advice and the next step.
 - **Recommend for split work:** the team's mean judged score is higher, and the interval excludes no gain on research
@@ -317,7 +317,7 @@ measured result.
   run the answer's code. Three packets differed by exactly 2 and settled at the mean. None is waiting.
 - **Deviations from section 2:**
   - **The brief line.** On night 1 the team side never started a helper, so the night was a single agent against a
-    single agent. From night 2 the team side's task carried one line, approved by the technical lead, in a person's
+    single agent. From night 2 the team side's task carried one line, in a person's
     words and naming no tool: "You can lead a team on this: start helpers, each taking one part of the work from your
     brief and reporting back to you. Use them where splitting the work helps." So the team's lead is no longer "told
     nothing extra".

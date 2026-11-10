@@ -27,7 +27,7 @@ What isn't done yet:
 - the Evaluation below.
 
 ## Scope
-The TEST-PLAN §17 Gate 11 row (the technical lead, 12 Oct 2026; the rows added since, 21 Oct) holds every P0 and P1
+The TEST-PLAN §17 Gate 11 row (set on 12 Oct 2026; the rows added since, 21 Oct) holds every P0 and P1
 row that names Phase 11 or ADR-0039, plus WEB-E2E-067; the phase demo; and the grounding evaluation as the gate's
 measurement. Retired rows (TOOL-U-046, WEB-E2E-076, WEB-U-240) are left out.
 - **P0 (22):** GW-I-159, GW-I-218, GW-I-223, GW-I-313; GW-U-147, GW-U-150, GW-U-151, GW-U-203, GW-U-204; RT-I-054…057;
@@ -42,7 +42,7 @@ measurement. Retired rows (TOOL-U-046, WEB-E2E-076, WEB-U-240) are left out.
 - **The measurement:** the grounding evaluation (`computer-grounding.md`). It doesn't pass or fail the gate. It
   decides which routes get `pixel_grounding` (ADR-0039 §2), and its result is under Known limits below.
 
-**The rows added on 21 Oct** (the technical lead) are GW-I-274, already in the §17 row, and the computer-use P0 and P1
+**The rows added on 21 Oct** are GW-I-274, already in the §17 row, and the computer-use P0 and P1
 rows written since 12 Oct: those naming ADR-0039, and those this page cites as a fix. Each passed in the 16y
 integration, by the test named:
 - a viewer waits for a live sandbox whose runtime link is down: GW-I-274
@@ -177,9 +177,9 @@ rests on the tool's own evidence, the runtime's log or the screen, never on the 
 
 ## Since 16u: the zbus-6 reader and the sign-out readiness fix
 - **The accessibility reader on zbus 6** (16v, merge `96d1f6d26`; TOOL-U-067, TOOL-U-068). The reader now uses our own
-  zbus 6 proxies, without the `atspi` crate or zbus 5's three unmaintained crates (the owner's decision: replaced, not
-  ignored). The bar was that nothing a model or a person sees changes: AT-SPI's replies are decoded as the `atspi`
-  crate decoded them, and the state bits and interface names are pinned to its own. Only native applications go
+  zbus 6 proxies, without the `atspi` crate or zbus 5's three unmaintained crates (the Product Owner's decision:
+  replaced, not ignored). The bar was that nothing a model or a person sees changes: AT-SPI's replies are decoded as the
+  `atspi` crate decoded them, and the state bits and interface names are pinned to its own. Only native applications go
   through it; browser pages use CDP. Live: G1 on 16x (above).
 - **Sign out everywhere waits for its browser** (16w, merge `4dc85cb3d`; RT-I-056, RT-I-057, GW-U-204). In 16v's
   integration (its coverage pass, not a verdict), SEC-059's test lost a sign-in by hand. The trace found that Sign out

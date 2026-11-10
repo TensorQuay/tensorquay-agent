@@ -22,7 +22,7 @@ const tool: ToolView = {
 };
 
 describe("WEB-U-001 tool card behavior", () => {
-  // The owner's direction (c8): the line names the project; the card, for those who open it, says what the changes
+  // The Product Owner's direction: the line names the project; the card, for those who open it, says what the changes
   // were saved as.
   it("says what a saved push's changes were saved as", () => {
     render(
@@ -103,7 +103,7 @@ describe("WEB-U-001 tool card behavior", () => {
     );
     // A non-zero exit reads as not succeeding, its code kept.
     expect(screen.getByText("Didn't succeed (code 1)")).toBeVisible();
-    // The shell's 127 is a missing command: said so, with the code kept (the owner's Mac test).
+    // The shell's 127 is a missing command: said so, with the code kept (found on a Mac before 17.0).
     rerender(
       <ToolCard
         tool={{ ...tool, status: "error", exitCode: 127, durationMs: 1250 }}

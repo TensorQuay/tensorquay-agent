@@ -257,13 +257,13 @@ const taskClaim: Summary = (tool, t) => {
     ? t("tool.taskClaim", { number: String(number) })
     : t("tool.taskClaimAny");
 };
-/** A project by its site and path ("example.com/team/report"), without ".git"; the owner's direction (c8). */
+/** A project by its site and path ("example.com/team/report"), without ".git"; the Product Owner's direction. */
 export function project(remote: unknown): string | null {
   return typeof remote === "string"
     ? page(remote.replace(/\.git\/?$/, ""))
     : null;
 }
-/** A push by the project it saves changes to, never its branch or the word push (the owner's direction, c8). */
+/** A push by the project it saves changes to, never its branch or the word push (the Product Owner's direction). */
 const gitPush: Summary = (tool, t) => {
   const values = {
     project: project(argument(tool, "remote")) ?? t("tool.fallbackProject"),

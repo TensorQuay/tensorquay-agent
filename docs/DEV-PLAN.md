@@ -239,7 +239,7 @@ behind it; the internal releases then in testing keep first call on testing time
 ### Phase 11 (after v1.0 outline): computer use
 A `desktop` capability on the Workstation template (display server, screenshot and input tools for the agent), a live
 Screen panel in the conversation page; the switch to a desktop environment stays the person's, in the environment
-picker (ARCHITECTURE §4.7; the agent's one-click suggestion was dropped by the owner, 10 Oct 2026, ADR-0039 §8). Needs its own security review (what a desktop session may reach).
+picker (ARCHITECTURE §4.7; the agent's one-click suggestion was dropped on 10 Oct 2026, ADR-0039 §8). Needs its own security review (what a desktop session may reach).
 Status (8 Oct 2026): complete for the release after v1.0 (shipped in 17.0), not in the v1.0 candidate. The runtime half of the screen bridge and
 Sign out everywhere are built; the panel's review fixes are in; the security review's threats each map to a test, and
 the gaps found on 8 Oct are filled (another person, a share holder and an administrator refused the screen and its
@@ -250,7 +250,7 @@ pass on the review stack (which gets the Desktop with one Desktop at once) and t
 
 ### Phase 12 (later outline): swarms
 One goal across a person's own agent teams, designed in ADR-0038 (PRD §12 item 21): agent teams coordinated one level
-up by a coordinator task, through the same addressed delivery (ARCHITECTURE §16.4). Scope, set by the owner on 2 Oct 2026, with a Pause goal button and the word "Coordinator": one person's own teams only; each part
+up by a coordinator task, through the same addressed delivery (ARCHITECTURE §16.4). Scope, set on 2 Oct 2026, with a Pause goal button and the word "Coordinator": one person's own teams only; each part
 of a goal becomes a new lead task from an agent profile the person picks (their own or one an administrator shared);
 no publishing and no sharing between people. Where its messages are seen (ARCHITECTURE §16.4, UI-GUIDELINES §13c):
 - a goal page with the parts, the budget and time, a row per team, and the coordinator's conversation with every lead,

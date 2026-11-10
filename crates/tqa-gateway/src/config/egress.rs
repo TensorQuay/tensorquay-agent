@@ -182,7 +182,7 @@ pub(super) fn egress(
     }))
 }
 
-/// `ca_file`: authority certificates in PEM (ADR-0037's G9a).
+/// `ca_file`: authority certificates in PEM (ADR-0037 §4).
 ///
 /// # Errors
 /// An unreadable, oversized or non-authority file.

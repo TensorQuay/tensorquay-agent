@@ -891,7 +891,7 @@ class Soak:
                 "database_connections_high_water": max(sample["database_connections"] for sample in self.samples)}
 
     def orphans(self, conversations):
-        """H6: nothing left behind (PRD M5). Returns what the settled inventory held."""
+        """Nothing left behind (PRD M5). Returns what the settled inventory held."""
         deadline = time.monotonic() + ORPHAN_SETTLE_SECONDS
         while True:
             containers, rows, networks, volumes = self.stack.inventory()
@@ -931,7 +931,7 @@ def main():
                         help="firecracker needs a KVM host, TQA_VMM_IMAGE and TQA_FC_KERNEL_DIR (deploy/firecracker)")
     parser.add_argument("--conversations", type=int, choices=(4, 8), default=8)
     parser.add_argument("--storage-mib", type=int, default=64,
-                        help="the storage root's bounded tmpfs, in MiB, for disk_full (H5)")
+                        help="the storage root's bounded tmpfs, in MiB, for disk_full")
     parser.add_argument("--exclude", action="append", default=[], metavar="KIND",
                         help="leave one disruption kind out on purpose (repeatable); recorded in the result")
     parser.add_argument("--reconnect-only", action="store_true",

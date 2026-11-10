@@ -1,11 +1,11 @@
 # Gate 9: PRD metrics M1–M8
 
-**State:** **reached on release candidate 15b**, by the technical lead's verdict (11 Oct 2026), **with the product
-owner's waiver of PERF-012's microVM half** (11 Oct). Every metric M1–M8 is met on 15b (the summary below; the runs
-under "Release candidate 15b"): the 24 h soak passed by the owner's rule of 9 Oct (PRD §12 item 25), with a gap the
-owner accepted; Gate 9's rerun passed; PERF-021, REL-I-001…003 and PERF-012's Docker half passed; PERF-012's microVM
-half failed and was waived. The v1.0 candidate became **15c** (15b's server with a new web image) and is on main as
-`1586fd9f` (11 Oct). **9 Oct 2026:
+**State:** **reached on release candidate 15b**, by the technical lead's verdict (11 Oct 2026), **with the Product
+Owner's waiver of PERF-012's microVM half** (11 Oct). Every metric M1–M8 is met on 15b (the summary below; the runs
+under "Release candidate 15b"): the 24 h soak passed by the Product Owner's rule of 9 Oct (PRD §12 item 25), with a gap
+the Product Owner accepted; Gate 9's rerun passed; PERF-021, REL-I-001…003 and PERF-012's Docker half passed; PERF-012's
+microVM half failed and was waived. The v1.0 candidate became **15c** (15b's server with a new web image) and is on main
+as `1586fd9f` (11 Oct). **9 Oct 2026:
 c15 was respun as 15b**:
 c15's soak showed the gateway's memory growing (two leaks, both fixed in 15b), so the product owner chose a new
 candidate. 15b's 24 h soak runs from 9 Oct 12:48, and its Gate 9 runs follow it; see "Release candidate 15b". Before
@@ -17,10 +17,10 @@ model's, 7 Oct); M5's soak 4 on c14b-rc (6 Oct 20:13) failed on the harness's ow
 bounds, not on the product (fixed in `df6bb17b` and `a2d7202b`); M6's
 E2E-CMP-003 is pending a GPU slot. Refreshed 4 Oct 2026 with candidate 13h's values. Gate 9 needs
 every PRD metric (PRD §7, M1–M8) **met or explicitly waived by the product owner**. v1.0 ships on the **next**
-candidate, so every verdict is taken on that candidate's runs (the technical lead's ruling of 4 Oct 2026); candidate
+candidate, so every verdict is taken on that candidate's runs (decided on 4 Oct 2026); candidate
 13h's values below are **indicative**, kept with their raw data and commands, and decide nothing. On 13h, M1–M4 measured
 inside their bounds, M5 (the soak) and M6 (the comparison) have no passing run, M7 was met on candidate 7, and M8's
-coverage is met. No waiver is asked; the owner's open questions and the next candidate's runs are at the end.
+coverage is met. No waiver is asked; the Product Owner's open questions and the next candidate's runs are at the end.
 
 **The rule this page applies:** a metric is *met* only with a measured result on a **named release candidate**, dated,
 with its configuration. A result measured only on an ordinary dev commit, or asserted by a passing test that keeps no
@@ -34,13 +34,13 @@ Candidates named here: candidate 5 `545c3d0` (2026-09-28 08:05), candidate 6 `a1
 ## Summary
 | Metric | Verdict (taken on the next candidate) | Candidate 13h, indicative | Earlier evidence | Open |
 |---|---|---|---|---|
-| M1 Task completion | **met on 15b** (E2E-WAVE-001 60/60, E2E-WAVE-002 60/60 with 8 helpers, 0 harness failures, 10 Oct; `gate-5.md`); earlier met on c14b-rc (60/60 and 59/60); the model's class is the owner's question | E2E-WAVE-001 58/60 = 96.7 %, E2E-WAVE-002 59/60 = 98.3 %, 0 harness failures (2 Oct) | 59/60 both waves, `a14afc0` (28 Sep) | Owner question: does the wave model count as "GLM-5.3-Flash class"? |
+| M1 Task completion | **met on 15b** (E2E-WAVE-001 60/60, E2E-WAVE-002 60/60 with 8 helpers, 0 harness failures, 10 Oct; `gate-5.md`); earlier met on c14b-rc (60/60 and 59/60); the model's class is the Product Owner's question | E2E-WAVE-001 58/60 = 96.7 %, E2E-WAVE-002 59/60 = 98.3 %, 0 harness failures (2 Oct) | 59/60 both waves, `a14afc0` (28 Sep) | Owner question: does the wave model count as "GLM-5.3-Flash class"? |
 | M2 Harness overhead | **met on 15b** (PERF-001 journal p50 0.80 / 0.83 ms, p99 4.70 / 1.04 ms, the rerun's two candidate rounds; bound p50 ≤ 50 ms, p99 ≤ 200 ms); earlier met on c14b-rc | PERF-001 release: journal p50 1.90 ms, p99 28.7 ms; memory p50 0.076 ms, p99 0.078 ms; at load 25 (not idle) | none | none (done on 15b's quiet-host rerun) |
-| M3 Sandbox start | **met on 15b** (PERF-010 p50 452 / 448 ms; PERF-011 new task p50 501 / 510 ms, within the owner's 3 s); earlier met on c14b-rc; the warm-snapshot stretch is the owner's question | Docker PERF-010 p50 515 ms, p99 681 ms; Firecracker cold boot 170–240 ms; the person's view on the microVM: new task p50 674 ms, p99 724 ms | Docker p50 413 ms (dev, 26 Sep) | Owner question: the warm-snapshot stretch |
+| M3 Sandbox start | **met on 15b** (PERF-010 p50 452 / 448 ms; PERF-011 new task p50 501 / 510 ms, within PRD M3's 3 s); earlier met on c14b-rc; the warm-snapshot stretch is the Product Owner's question | Docker PERF-010 p50 515 ms, p99 681 ms; Firecracker cold boot 170–240 ms; the person's view on the microVM: new task p50 674 ms, p99 724 ms | Docker p50 413 ms (dev, 26 Sep) | Owner question: the warm-snapshot stretch |
 | M4 Concurrency | **met on 15b** (PERF-020 passed: CPU p95 18.9 / 18.4 %, RSS 12 MB); earlier met on c14b-rc (0 dropped, CPU p95 20.1 %) | PERF-020: 16 conversations, 3 runs, 0 dropped events, CPU p95 19.2 % of 2 vCPU, RSS peak 12.2 MB | 0 dropped, CPU p95 24.2 % (dev, 26 Sep) | none (done on 15b) |
-| M5 Reliability | **met on 15b**, by the owner's rule of 9 Oct 2026 (PRD §12 item 25): RSS +1.2 % (projected +0.7 %), descriptors flat, the database connections within the pool, on a 12.06 h lifetime; **with the gap the owner accepted** (10 Oct): the last 8 of 72 conversations' end-of-run checks didn't run (an expired sign-in at hour 24), to be completed by c16's soak. Earlier: c15's soak showed two leaks (fixed in 15b); soak 4 on c14b-rc failed on the harness's wait | No passing soak: the 24 h run was waived for 13h's release only; both 8 h soaks failed (2h25 on the outage audit's rule; 3h19 on the full-disk defect, fixed since) | rehearsals only (candidates 4–6) | c16's soak completes every end-of-run check (the gap) |
+| M5 Reliability | **met on 15b**, by the Product Owner's rule of 9 Oct 2026 (PRD §12 item 25): RSS +1.2 % (projected +0.7 %), descriptors flat, the database connections within the pool, on a 12.06 h lifetime; **with the gap the Product Owner accepted** (10 Oct): the last 8 of 72 conversations' end-of-run checks didn't run (an expired sign-in at hour 24), to be completed by c16's soak. Earlier: c15's soak showed two leaks (fixed in 15b); soak 4 on c14b-rc failed on the harness's wait | No passing soak: the 24 h run was waived for 13h's release only; both 8 h soaks failed (2h25 on the outage audit's rule; 3h19 on the full-disk defect, fixed since) | rehearsals only (candidates 4–6) | c16's soak completes every end-of-run check (the gap) |
 | M6 Capability parity | **met on 15b**: E2E-CMP-003 ours 50/50, reference 50/50, a difference of 0 points (bound ±5), 10 Oct (`gate-5.md`) | not run | 48/50 vs 50/50, −4.0 points, 95 % interval −10.0 to 0.0 (`a14afc0`) | none (done on 15b) |
-| M7 Isolation | **met on 15b**: G-13's `egress`, `escape` and `history` passed on the microVM, and the Docker sandbox and security suites passed, in 15b's integration (10 Oct); earlier met on candidate 7; subject to the owner's items | G-13's `egress`, `escape` and `history` passed on the microVM; the Docker stack suites passed | twelve steps on both backends (candidate 7) | Owner items: the SEC-023 microVM limit; the audit's G1 row |
+| M7 Isolation | **met on 15b**: G-13's `egress`, `escape` and `history` passed on the microVM, and the Docker sandbox and security suites passed, in 15b's integration (10 Oct); earlier met on candidate 7; subject to the Product Owner's items | G-13's `egress`, `escape` and `history` passed on the microVM; the Docker stack suites passed | twelve steps on both backends (candidate 7) | The Product Owner's items: the SEC-023 microVM limit; the audit's G1 row |
 | M8 Openness | **met on 15b**: G-04's coverage passed in 15b's integration, and each 15b number on this page names its raw data (the soak's samples and judge, the rerun's kept JSONs, the GPU runs' records in `gate-5.md`) | pure-crate coverage 95.90 % lines | 93.67 % (`a14afc0`) | none for 15b |
 
 ## Per metric
@@ -59,7 +59,7 @@ Candidates named here: candidate 5 `545c3d0` (2026-09-28 08:05), candidate 6 `a1
   59/60 = 98.3 % (91.1–99.7 %), 0 harness failures (`waves.md`). E2E-WAVE-002's one miss,
   `ts-add-tests-slug` (harness label `model.budget` then, `model.stuck` since 7 Oct), is classified by hand as the model's: its own tests asserted
   behaviour the code doesn't have, three times, and the repeated-failure guard ended the run (`waves.md`, Results).
-  **Met on c14b-rc.** The model's class stays the owner's question 1.
+  **Met on c14b-rc.** The model's class stays the Product Owner's question 1.
 
 ### M2: Harness overhead
 - **PRD:** "≤ 50 ms p50, ≤ 200 ms p99 (PERF-001)" per model turn, excluding model time.
@@ -161,8 +161,8 @@ Candidates named here: candidate 5 `545c3d0` (2026-09-28 08:05), candidate 6 `a1
   - SEC-008: the dependency gates (G-05) there, and the release vulnerability gate in the release dry run
     (`~/.cache/release-dist/0.9.0-rc.1/sbom/vulns.md`, candidate 6; on candidate 7 when it is released);
   - SEC-037–039 test agent teams (v1.1, ADR-0034), outside v1.0's M7.
-- **Verdict:** met on candidate 7, subject to the owner accepting the SEC-023 microVM limit (below; the planned skills
-  work would remove it).
+- **Verdict:** met on candidate 7, subject to the Product Owner accepting the SEC-023 microVM limit (below; the planned
+  skills work would remove it).
   - Done: the sandbox-side rows on both backends on one candidate (the twelve steps above), the gateway-side rows from
     the candidate's run with the test database, SEC-036 among them (the decision engine ships in v1.0, ADR-0013), and
     SEC-019's credential half; SEC-003 left with the approval step.
@@ -195,7 +195,7 @@ Candidates named here: candidate 5 `545c3d0` (2026-09-28 08:05), candidate 6 `a1
   Their new digests come from the rebuild, not from a change. 15b's rootfs is therefore built again from its own
   runtime image.
 
-**How M5 is judged on 15b: the owner's rule of 9 Oct 2026 (PRD §12 item 25; TEST-PLAN SOAK-001).**
+**How M5 is judged on 15b: the Product Owner's rule of 9 Oct 2026 (PRD §12 item 25; TEST-PLAN SOAK-001).**
 - **Gateway RSS** keeps M5's 5 % rule: the second hour's median against the last hour's, and the slope projected to
   24 h.
 - **Open descriptors other than the gateway's database connections** take the same 5 % rule.
@@ -221,7 +221,7 @@ Candidates named here: candidate 5 `545c3d0` (2026-09-28 08:05), candidate 6 `a1
     its 12 recorded restart windows, by each sample's start time; the judged lifetime holds 834 samples.
   - **The judge:** `deploy/tests/soak_growth.py`, 15b's for the old rule, the PRD §12 item 25 version for the new.
 
-  | Metric (c15, 8 Oct) | The 5 % rule on every metric (before 9 Oct) | The owner's rule of 9 Oct 2026 (PRD §12 item 25) |
+  | Metric (c15, 8 Oct) | The 5 % rule on every metric (before 9 Oct) | The Product Owner's rule of 9 Oct 2026 (PRD §12 item 25) |
   |---|---|---|
   | Gateway RSS | 36.1 MB → 37.7 MB, +4.3 %; projected **+34.2 % over 24 h: fails** | the same rule: **fails** |
   | Open descriptors | 57 → 59, +3.5 %; projected **+20.9 %: fails** | without the database connections: 51 → 51, 0.0 %; projected −1.3 %: passes |
@@ -272,8 +272,8 @@ Candidates named here: candidate 5 `545c3d0` (2026-09-28 08:05), candidate 6 `a1
 | REL-I-002, on 15b's own rootfs | **Passed** (11 Oct 04:34): 7 tests, OK, on the Workstation rootfs built from `1648c896` the same morning. An earlier attempt (03:33) ran before that rootfs was built and errored; it isn't a result | the U0a step's log |
 | M1 and M6 (the waves and E2E-CMP-003, on the GPU) | **Passed** (10 Oct 20:04 to 22:44): E2E-CMP-003 50/50 against the reference's 50/50 (0 points; M6's bound ±5); E2E-WAVE-001 60/60; E2E-WAVE-002 60/60 with 8 helpers | `gate-5.md` |
 
-REL-I-002 and PERF-012 are P1 rows: a fail of either blocks the push until it's explained and fixed, or the product
-owner waives it in writing (the technical lead, 9 Oct). **PERF-012's microVM half was waived so** on 11 Oct, and 15c
+REL-I-002 and PERF-012 are P1 rows: a fail of either blocks the push until it's explained and fixed, or the Product
+Owner waives it in writing (decided on 9 Oct 2026). **PERF-012's microVM half was waived so** on 11 Oct, and 15c
 was pushed to main the same day (`1586fd9f`, its tree `release/c15` at `bf85085f`).
 
 ## Release candidate c15 (8 to 9 Oct 2026; respun as 15b)
@@ -304,7 +304,7 @@ REL-I-001…003, about 2 h 20 min; PERF-021 carried over). Until then:
 | PERF-002 | lag p50 1.49 ms, p99 7.5 ms; 550,000 events sent and stored. On a disk database (fsync on): p50 1.53 ms, p99 8.94 ms | p99 ≤ 100 ms | p50 1.42 ms, p99 8.2 ms |
 | PERF-003 | added per request p50 0.97 ms, p99 3.08 ms; to the first token p50 0.96 ms | p50 ≤ 10 ms and ≤ 20 ms | p50 0.89 ms, p99 3.5 ms |
 | PERF-010 (M3, Docker) | fresh p50 432 ms, p99 630 ms; returning task p50 443 ms, p99 688 ms | p50 ≤ 3,000 ms | fresh p50 442 ms, p99 639 ms |
-| PERF-011 (M3, microVM) | new task p50 506 ms, p99 640 ms; returning task p50 383 ms, p99 418 ms; upload to a new task p50 469 ms, p99 632 ms; the owner's 3 s met | p50 ≤ 2,000 ms | new task p50 501 ms, p99 574 ms |
+| PERF-011 (M3, microVM) | new task p50 506 ms, p99 640 ms; returning task p50 383 ms, p99 418 ms; upload to a new task p50 469 ms, p99 632 ms; PRD M3's 3 s met | p50 ≤ 2,000 ms | new task p50 501 ms, p99 574 ms |
 | PERF-020 (M4) | 0 dropped (at least 4,800 events); CPU p95 18.2 %; RSS 12 MB | CPU p95 < 70 %, RSS < 1.5 GB | CPU p95 20.1 %, RSS 12.9 MB |
 | PERF-030 | p50 1.82 ms, p99 2.22 ms | pass | – |
 
@@ -322,7 +322,7 @@ G-13-suites, on SBX-F-009's host memory.
   - the release directory complete, with no partial left, and `SHA256SUMS` verifying;
   - `release.json` saying candidate, not releasable, not published;
   - every image ID matching the local engine;
-  - the notes saying it needs the owner;
+  - the notes saying it needs the Product Owner;
   - the vulnerability gate's report written;
   - no tag `v1.0.0-rc.1` created, and nothing pushed.
 
@@ -354,7 +354,7 @@ candidate runs unless stated; the raw results stay on the run host, beside the i
 | PERF-002 | lag p50 1.42 ms, p99 8.2 ms at 10,000 events/s; 550,000 sent, stored and replayed | p99 ≤ 100 ms | not measurable (below) |
 | PERF-003 | added per request p50 0.89 ms, p99 3.5 ms; added to the first token p50 0.89 ms | p50 ≤ 10 ms and ≤ 20 ms | first token p50 4.31 ms; total not comparable (below) |
 | PERF-010 (M3, Docker) | fresh p50 442 ms, p99 639 ms; returning task p50 419 ms, p99 692 ms | p50 ≤ 3,000 ms | p50 358 ms, p99 632 ms (one run, indicative; below) |
-| PERF-011 (M3, microVM) | first start 419 ms; new task p50 501 ms, p99 574 ms; returning task p50 381 ms, p99 433 ms; upload to a new task p50 424 ms, p99 525 ms; the owner's 3 s met | p50 ≤ 2,000 ms | new task p50 613 ms; upload p50 571 ms |
+| PERF-011 (M3, microVM) | first start 419 ms; new task p50 501 ms, p99 574 ms; returning task p50 381 ms, p99 433 ms; upload to a new task p50 424 ms, p99 525 ms; PRD M3's 3 s met | p50 ≤ 2,000 ms | new task p50 613 ms; upload p50 571 ms |
 | PERF-012 (Docker) | bind mount ratios: sequential write 0.93, read 1.01; random write 0.98, read 0.97 | ≥ 0.8 | not run |
 | PERF-012 (microVM) | invalid measurement, re-measure pending (finding 6; gaps list 7) | ≥ 0.7 | not run |
 | PERF-020 (M4) | 16 conversations, 0 dropped; CPU p95 20.1 % of 2 vCPU; RSS peak 12.9 MB | CPU p95 < 70 %, RSS < 1.5 GB | CPU p95 22.0 %, RSS 12.6 MB |
@@ -397,7 +397,7 @@ candidate (`deploy/tests/gate9_run.py --candidate-only`, a reproduction and neve
 Not run on 13h, in this gate's scope (the TEST-PLAN audit of 13h): SOAK-001…004 (the 24 h run), PERF-002/003 (they
 refuse a non-release build), PERF-012, PERF-021, REL-I-001/003 (Docker-gated), TK-I-006 and E2E-CMP-003.
 
-## The owner's questions (asked with the gate review)
+## The Product Owner's questions (asked with the gate review)
 1. **M1:** the wave model is a 27B open-weight model in FP4 (`waves.md`, Setup). Does it count as "GLM-5.3-Flash
    class"?
 2. **M3:** the warm-snapshot target (≤ 500 ms) is a Phase 4 stretch that is not built: drop it from v1.0, or build and
@@ -441,7 +441,7 @@ each row's absolute bar, which the candidate's jobs meet undisturbed.
 1. **M2–M4:** the next candidate's step a, b and d runs (13h's values are indicative).
 2. **M5:** the 24 h soak on the next candidate, with its evidence kept.
 3. **M6:** E2E-CMP-003 at 50 a side on the next candidate.
-4. **M1, M3, M7:** the owner's questions above.
+4. **M1, M3, M7:** the Product Owner's questions above.
 5. **M8:** each published number's raw data and command, on this page and in `waves.md` (done for 13h), and for the
    next candidate's results as they come.
 6. **Scope rows not run on 13h:** PERF-002/003/012/021, REL-I-001/003, TK-I-006, and the soak rows.

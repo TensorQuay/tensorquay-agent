@@ -86,7 +86,7 @@ test("WEB-E2E-030 every page sends the app's policy with a fresh nonce its scrip
     expect(parts.get("frame-ancestors")).toEqual(["'none'"]);
     expect(parts.get("font-src")).toEqual(["'self'"]);
     expect(policy).not.toContain("unsafe-eval");
-    // A page holds its load's nonce, so no shared cache may replay it (the WEB-E2E-010 owner's condition).
+    // A page holds its load's nonce, so no shared cache may replay it (a condition of WEB-E2E-010).
     const cache = response.headers()["cache-control"] ?? "";
     expect(cache, path).toContain("private");
     expect(cache, path).toContain("no-store");

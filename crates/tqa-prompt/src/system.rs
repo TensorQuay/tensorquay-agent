@@ -61,10 +61,10 @@ alternatives. Save charts to files.\n"
         ""
     };
     // Version 13: with a browser and the search page among the allowed sites, how to search the web with the tools
-    // already there; no search tool (the owner, 7 Oct). The pages are read with fetch_url, so they arrive marked.
+    // already there; no search tool (decided on 7 Oct 2026). The pages are read with fetch_url, so they arrive marked.
     // Version 14: Chromium is given the proxy without its trailing slash: the sandbox's HTTPS_PROXY is a URL
     // ("http://host:port/"), and Chromium refuses a proxy with a path (net::ERR_NO_SUPPORTED_PROXIES, SBX-C-021).
-    // Version 14 also (the lead, 7 Oct, after SBX-C-021's probe): from a server's address the search pages answer
+    // Version 14 also (decided on 7 Oct 2026, after SBX-C-021's probe): from a server's address the search pages answer
     // with a bot challenge, while Wikipedia's search answers. So facts come from Wikipedia first when it is allowed, as
     // its API's JSON (five titles and snippets, about 2 KB; its HTML page was 61 KB, too much for a 32k model's
     // context), the chosen article then read with fetch_url; then the web search, and a challenge is said, never

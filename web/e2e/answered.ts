@@ -11,8 +11,8 @@ export type Answered = {
 
 /**
  * The answer to the first request for `path` that `act` makes, its body read in the response handler, as the answer
- * arrives (WEB-E2E-089, the 16n integration: the models-people suite read a body after the step had moved on, got
- * nothing, and recorded an empty answer the gateway never sent). A body that can't be read, never comes within
+ * arrives (WEB-E2E-089, an integration before 17.0: the models-people suite read a body after the step had moved on,
+ * got nothing, and recorded an empty answer the gateway never sent). A body that can't be read, never comes within
  * `timeout`, or isn't JSON fails the step: never an empty answer.
  */
 export async function answered(

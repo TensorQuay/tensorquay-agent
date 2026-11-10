@@ -29,8 +29,8 @@ const EnvironmentChange = lazy(() =>
 );
 
 /**
- * A task's model and environment, as two small pickers in the task header right of its title and status (the owner's
- * correction, WEB-U-113): each opens below and applies at once; a new environment first asks to switch, under the
+ * A task's model and environment, as two small pickers in the task header right of its title and status (corrected
+ * on 30 Sep 2026, WEB-U-113): each opens below and applies at once; a new environment first asks to switch, under the
  * header. During a run, and where the task's profile fixes one (ADR-0012), a picker is disabled with the reason.
  */
 // Memoised: the task's page re-renders on every keystroke in the message box; the pickers needn't (WEB-U-151).

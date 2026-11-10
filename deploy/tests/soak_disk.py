@@ -1,4 +1,4 @@
-"""H5: the soak's storage root on a bounded tmpfs, and the disk_full fault.
+"""The soak's storage root on a bounded tmpfs, and the disk_full fault.
 
 The storage root is a host path that the gateway and every sandbox see through bind mounts, which the rootless engine
 resolves in its own mount namespace. A tmpfs mounted at that path in that namespace (as this user; the engine's user

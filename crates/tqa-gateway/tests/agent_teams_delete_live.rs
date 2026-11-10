@@ -1,6 +1,6 @@
-//! GW-I-253 (the owner's edge cases, 7 Oct 2026): deleting a lead while its helpers are live. GW-I-108 deletes a lead
-//! whose helpers have no sandbox; here one helper's run is going and the other, idle, has a wake from the lead queued.
-//! The delete leaves nothing behind: every sandbox retired, every runtime token revoked, the queued wake never
+//! GW-I-253 (the Product Owner's edge cases, 7 Oct 2026): deleting a lead while its helpers are live. GW-I-108 deletes
+//! a lead whose helpers have no sandbox; here one helper's run is going and the other, idle, has a wake from the lead
+//! queued. The delete leaves nothing behind: every sandbox retired, every runtime token revoked, the queued wake never
 //! delivered nor a sandbox started for it, the team ended for `lead_deleted`, and all three tasks deleted.
 #[path = "support/agent_team.rs"]
 mod agent_team;

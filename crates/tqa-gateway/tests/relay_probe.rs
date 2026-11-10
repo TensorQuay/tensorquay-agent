@@ -237,7 +237,7 @@ async fn gw_i_037_a_failed_probe_is_an_observation_and_a_route_is_rate_limited(
 async fn gw_i_037_a_changed_route_is_probed_at_once_and_its_repeat_waits(
     pool: PgPool,
 ) -> TestResult {
-    // The lead, 12 Oct 2026: a route saved again (a new version, as after a check's suggestion) is a new thing to
+    // Decided on 12 Oct 2026: a route saved again (a new version, as after a check's suggestion) is a new thing to
     // check; a second check of the same version still waits its 30 s.
     let text = || Script::new(vec![Scripted::Text("no tools here".into()), usage()]);
     let server = FakeModelServer::start(

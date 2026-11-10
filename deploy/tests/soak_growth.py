@@ -7,7 +7,7 @@ of restarts, so M5 is judged on that one 12 h lifetime:
   leak can't hide between two close hours.
 
 That 5 % rule judges the gateway's RSS. Open descriptors and database connections are judged by what they are
-(the c15 soaks of 6 and 8 Oct 2026 failed both on noise; TEST-PLAN SOAK-001; the owner's decision of 9 Oct 2026,
+(the c15 soaks of 6 and 8 Oct 2026 failed both on noise; TEST-PLAN SOAK-001; decided on 9 Oct 2026,
 PRD §12 item 25):
 - open_fds without the database connections (each is a socket): the fds other than DB sockets stayed at 50 every hour
   while the pool's 4-16 swings moved open_fds, so those fds take the 5 % rule (judge_fds);

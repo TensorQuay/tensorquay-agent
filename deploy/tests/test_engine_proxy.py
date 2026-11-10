@@ -1,4 +1,4 @@
-"""H4: the engine-stall proxy's request framing, its fault decisions, and a real round trip through a fake engine on a
+"""The engine-stall proxy's request framing, its fault decisions, and a real round trip through a fake engine on a
 Unix socket (no Docker)."""
 from pathlib import Path
 import socket

@@ -5,9 +5,10 @@ import { expect, test } from "@playwright/test";
 
 import { answered } from "./answered";
 
-// WEB-E2E-089 (the 16n integration, 17 Oct 2026): the models-people suite read an answer's body after the page had
-// moved on, couldn't, and recorded `{}`: an empty answer the gateway never sent ("unreachable" became no failure). A
-// step's answer is read as it arrives, and one that can't be read, or isn't JSON, fails the step, never reads as empty.
+// WEB-E2E-089 (an integration before 17.0, 17 Oct 2026): the models-people suite read an answer's body after the
+// page had moved on, couldn't, and recorded `{}`: an empty answer the gateway never sent ("unreachable" became no
+// failure). A step's answer is read as it arrives, and one that can't be read, or isn't JSON, fails the step, never
+// reads as empty.
 let server: Server;
 let origin = "";
 

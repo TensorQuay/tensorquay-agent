@@ -11,7 +11,7 @@ import {
 /**
  * The person's own choices in a conversation's transcript: which step lines and step groups they opened or closed. Kept
  * above the transcript, so a re-render when the turn finishes, or a replay after a reconnect that rebuilds the steps,
- * never undoes them (the lead, from a real connector run). Without a provider each line keeps its own, as before.
+ * never undoes them (found in a real connector run). Without a provider each line keeps its own, as before.
  */
 type Kept = { lines: Map<string, boolean>; groups: Map<string, unknown> };
 const StepState = createContext<Kept | null>(null);

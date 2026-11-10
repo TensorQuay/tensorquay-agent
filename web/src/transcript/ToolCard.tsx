@@ -174,7 +174,7 @@ export function ToolCard({
             </ScrollBlock>
           </>
         )}
-        {/* The owner's direction (c8): the line names the project; the card says what the changes were saved as. */}
+        {/* The Product Owner's direction: the line names the project; the card says what the changes were saved as. */}
         {tool.name === "git_push" &&
           tool.status === "ok" &&
           typeof argument(tool, "branch") === "string" && (

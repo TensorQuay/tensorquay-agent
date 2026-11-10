@@ -9,11 +9,11 @@ use tqa_types::{
 fn proto_u_008_the_floor_stays_10_under_revision_14() {
     // ADR-0035 raised the floor to 9 (a revision-8 runtime can't read a session.config without the policy). Revision
     // 10 adds the reply_cut error code, which a revision-9 runtime can't read in a history it resumes, so the gateway
-    // refuses it as too old (the technical lead, 29 Sep 2026); an upgrade rebuilds every environment anyway. Revision
-    // 11 adds host keys only for runtimes announcing it, so the floor stays 10 (guardrails §8, the lead, 1 Oct 2026).
+    // refuses it as too old (decided on 29 Sep 2026); an upgrade rebuilds every environment anyway. Revision
+    // 11 adds host keys only for runtimes announcing it, so the floor stays 10 (guardrails §8, decided on 1 Oct 2026).
     // Revision 12 adds the lead's brief on an agent team member's first turn; only a member needs it, refused at the
-    // link below 12, so the floor stays 10 (ADR-0034, the lead, 2 Oct 2026). Revision 13 marks the gateway's wake of a
-    // team reader; a team's lead or member is refused at the link below 13, and the floor stays 10 (the lead, 5 Oct
+    // link below 12, so the floor stays 10 (ADR-0034, decided on 2 Oct 2026). Revision 13 marks the gateway's wake of a
+    // team reader; a team's lead or member is refused at the link below 13, and the floor stays 10 (decided on 5 Oct
     // 2026). Revision 14 brings the Desktop; a conversation whose environment declares it is refused at the link
     // below 14, and the floor stays 10 (ADR-0039).
     assert_eq!(MIN_RUNTIME_REVISION, 10);

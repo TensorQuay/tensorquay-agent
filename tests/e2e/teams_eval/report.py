@@ -12,7 +12,7 @@ replaces an attempt of its own batch only, and the numbers combine every batch's
 
 `packets --leave-out BATCH:SIDE` (repeatable) leaves one batch's side out of the judging and the numbers: night 1's
 team side started no helper, so it is left out, and night 3's team side (`fri-d-team`, `fri-s-team`) is compared
-with night 1's single attempts, task by task (the technical lead, 12 Oct 2026). The packets step keeps the choice in
+with night 1's single attempts, task by task (decided on 12 Oct 2026). The packets step keeps the choice in
 `left-out.json`, and the report reads it from there and says it, so the two steps never disagree.
 
 Pure: it reads a run's directory and the task fixtures, never a stack.
@@ -332,7 +332,7 @@ def markdown(found, lines, waiting, switches=(), incomplete=(), guesses=None, le
     harness = [line for line in final_of(lines) if line.get("passed") is None and line.get("problem")]
     out.append(f"- not counted (the harness's): {len(harness)}")
     if switches:
-        out += ["", f"Gateway restarts to switch sides ({len(switches)}, the lead's request of 5 Oct 2026):", ""]
+        out += ["", f"Gateway restarts to switch sides ({len(switches)}, requested on 5 Oct 2026):", ""]
         if any("batch" in entry for entry in switches):
             out += ["| Batch | At (UTC) | Before | To | Seconds |", "|---|---|---|---|---|"]
             out += [f"| {entry.get('batch', '')} | {entry['at']} | {entry['before']} | {entry['side']} | "

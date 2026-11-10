@@ -31,11 +31,11 @@ QUIET_POLICY = {
     "DnsOverHttpsMode": "off",
     # The browser runs with --no-sandbox (the task's sandbox is the boundary, computer/cdp.rs launch_args): without this
     # it shows "You are using an unsupported command-line flag … Stability and security will suffer." to the person
-    # taking over and in every picture the model is sent (the 16d page pass, Z14).
+    # taking over and in every picture the model is sent (a pass over the pages before 17.0).
     "CommandLineFlagSecurityWarningsEnabled": False,
-    # The c16k real-world run (REL-I-004): on the Desktop the browser offered "Save password?" after a person's sign-in
-    # and "Save address?" after a checkout form, in every picture the model was sent; the agent's sessions are emptied
-    # at each run's end, so nothing it saves would last anyway.
+    # Real-world use before 17.0 (REL-I-004): on the Desktop the browser offered "Save password?" after a person's
+    # sign-in and "Save address?" after a checkout form, in every picture the model was sent; the agent's sessions are
+    # emptied at each run's end, so nothing it saves would last anyway.
     "PasswordManagerEnabled": False,
     "AutofillAddressEnabled": False,
     "AutofillCreditCardEnabled": False,
@@ -86,7 +86,7 @@ class QuietSwitches(unittest.TestCase):
         features = next(flag for flag in flags if flag.startswith("--disable-features="))
         self.assertIn("OptimizationHintsFetching", features)
         # Autofill asks content-autofill.googleapis.com about each form's fields, whatever the policy says about saving:
-        # a blocked notice in the c16k real-world forms (A2, A3, REL-I-004).
+        # a blocked notice in real-world use before 17.0 (REL-I-004).
         self.assertIn("AutofillServerCommunication", features.split("=", 1)[1].split(","))
 
     def test_without_debians_flags_it_adds_each_switch_once_and_still_drops_remote_extensions(self):

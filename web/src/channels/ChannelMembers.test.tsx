@@ -121,7 +121,7 @@ describe("WEB-U-066 channel membership", () => {
     expect(screen.queryByRole("button", { name: /^Remove/ })).toBeNull();
   });
 
-  // The owner's request: an agent's name opens its task page, where its run shows live; a person's name links nowhere,
+  // Decided before 17.0: an agent's name opens its task page, where its run shows live; a person's name links nowhere,
   // and neither does a task the viewer may not open (the gateway's `can_open`: its owner, or an administrator).
   it("links each agent's name to its task, and a person's to nothing", () => {
     show({ item: { ...RELEASE, state: "ended" } });

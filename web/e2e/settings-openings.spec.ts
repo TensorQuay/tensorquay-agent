@@ -72,7 +72,7 @@ test("WEB-E2E-107 every Settings section opens with its name, one muted line and
         .soft(opening.firstText.length, `${name}: the line says something`)
         .toBeGreaterThan(0);
       expect.soft(opening.firstMuted, `${name}: the line is muted`).toBe(true);
-      // People invites after its list (WEB-U-156); its place is a question open with the lead (17.3).
+      // People invites after its list (WEB-U-156); its place is still an open question (17.3).
       if (href !== "/settings/people")
         expect
           .soft(

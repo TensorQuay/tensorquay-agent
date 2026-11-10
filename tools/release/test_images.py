@@ -202,7 +202,7 @@ class ImageHardening(unittest.TestCase):
 
 @unittest.skipUnless(DOCKER, "needs Docker (TQA_DOCKER_TESTS=1, TQA_IMAGE_TAG)")
 class DesktopInputTool(unittest.TestCase):
-    """REL-I-003 for TOOL-U-064 (the c16k real-world run, 17 Oct 2026: the model drove its desktop with xdotool from
+    """REL-I-003 for TOOL-U-064 (real-world use before 17.0, 17 Oct 2026: the model drove its desktop with xdotool from
     the shell). The Desktop image keeps xdotool for the computer tool, off the sandbox user's PATH."""
 
     def test_xdotool_is_the_computer_tools_and_off_the_path(self):
@@ -214,7 +214,7 @@ class DesktopInputTool(unittest.TestCase):
 
 @unittest.skipUnless(DOCKER, "needs Docker (TQA_DOCKER_TESTS=1, TQA_IMAGE_TAG)")
 class DesktopBrowserPolicy(unittest.TestCase):
-    """REL-I-004 (the c16k real-world run, 17 Oct 2026): the Desktop's browser offered "Save password?" and "Save
+    """REL-I-004 (real-world use before 17.0, 17 Oct 2026): the Desktop's browser offered "Save password?" and "Save
     address?" in the person's and the model's pictures, and asked content-autofill.googleapis.com about every form, a
     blocked notice in the task. The built image holds the repository's policy and switches where Chromium reads
     them."""

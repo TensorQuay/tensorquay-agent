@@ -297,7 +297,7 @@ Rules:
 - Every crate's README states which specification or contract it implements.
 
 ## 12. Decisions for the PO
-**Decided by the technical lead (22 Sep 2026), recorded for information:** server-sent events plus POST for browsers
+**Decided on 22 Sep 2026, recorded for information:** server-sent events plus POST for browsers
 and programs with an outbound WebSocket runtime link (ADR-0015); activeness by lifecycle events and sandbox admission
 with slots, queue, eviction, parking and pin (ADR-0016).
 
@@ -314,7 +314,7 @@ with slots, queue, eviction, parking and pin (ADR-0016).
    external vault backend is built, bundled or connected.
 8. **Busy workspace policy default:** `wait` (recommended: the second conversation queues until the lease is
    released) or `refuse`.
-9. **Channels in v1.0:** **Decided (technical lead, on the PO's delegation, 27 Sep 2026): yes, in v1.0** (ADR-0014),
+9. **Channels in v1.0:** **Decided on 27 Sep 2026: yes, in v1.0** (ADR-0014),
    built now as Phase 7 and time-boxed: if Gate 7 is not reached by 11 Oct 2026, v1.0 ships without channels and they
    move to v1.1. A task may allow more than one claimant, for comparing results. Agent teams are v1.1 and no longer
    use the channel's votes (item 20).
@@ -357,7 +357,7 @@ with slots, queue, eviction, parking and pin (ADR-0016).
     settings, with depth 1. Members are normal tasks grouped under the lead. Per member the lead chooses its own copy
     (results handed back as files) or turns on the lead's files; no git requirement. The `quorum` and `lead` rules
     and agent votes leave the v1.1 plan. A **swarm** (agent teams talking to agent teams) is a later phase.
-    **Decided since (2 Oct 2026; the owner left the open points to the technical lead):** a person can type to any
+    **Decided since (2 Oct 2026):** a person can type to any
     member directly, like typing into any developer's terminal window, and the lead is told (proposal G). It is built
     now, test-first, slice by slice, behind an install switch (`[agent_teams] enabled`, off by default), and merges
     into the development branch behind it; the internal releases then in testing keep first call on testing time.
@@ -397,8 +397,8 @@ with slots, queue, eviction, parking and pin (ADR-0016).
     and 8 Oct 2026, while the other descriptors stayed flat; and the probe counted itself (the 17 seen was the pool's
     16 plus the probe). The stated blind spot: a leak of 3 or fewer held connections per 12 h can pass, and a run with
     no gateway lifetime of 11 h or more (an 8 h run) doesn't judge the floor and says so; the 24 h run fails if it
-    has none. **Proposed amendment (9 Oct 2026, held for the owner's wording):** a fourth check closes that blind
-    spot for a connection taken and never used again. After the first hour, no more of the gateway's database
+    has none. **Proposed amendment (9 Oct 2026, held for the Product Owner's wording):** a fourth check closes that
+    blind spot for a connection taken and never used again. After the first hour, no more of the gateway's database
     connections may stay idle for over 25 minutes than its listeners (none in the soak). A healthy pool puts its
     connections back into use; a connection taken and never used again idles for good, so it fails about 25 minutes
     after being taken, in any lifetime, the 8 h run's included. A leaked connection still used now and then is left

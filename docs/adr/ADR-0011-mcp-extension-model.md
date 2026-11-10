@@ -89,4 +89,4 @@ appear under a namespace, and they must obey the same permission policy (ARCHITE
 
 - PRD FR-9; ARCHITECTURE §5.4, §8, §12 and §15; ADR-0026
 - TEST-PLAN TOOL-I-012, TOOL-I-013, TOOL-I-018, RT-I-008, SEC-011, SEC-013, E2E-MCP-006
-- The stdio-tier design was approved by the technical lead on 2026-09-26
+- The stdio-tier design was approved on 2026-09-26

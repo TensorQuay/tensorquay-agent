@@ -17,11 +17,11 @@ import { recordTexts } from "./header-texts";
 import { afterStart, budget } from "./stack-start";
 import { bootstrap } from "./ux/flow";
 
-// The owner's edge cases that agents-stack.spec.ts doesn't cover (E2E-AGENTS-026..030; the acceptance bar of 7 Oct,
-// point 2) and 16n's and 16p's team fixes (E2E-AGENTS-031..035), on the real stack with the scripted model: each lead's
-// EDGE- phrase picks its script in deploy/tests/fixtures/agents.json. They run before agents-stack.spec.ts (files run
-// in name order on one worker), so E2E-AGENTS-020 stays last. Every case stops its team at the end; the afterEach stops
-// any a failure left running.
+// The Product Owner's edge cases that agents-stack.spec.ts doesn't cover (E2E-AGENTS-026..030; the acceptance bar of
+// 7 Oct, point 2) and the team fixes before 17.0 (E2E-AGENTS-031..035), on the real stack with the scripted model: each
+// lead's EDGE- phrase picks its script in deploy/tests/fixtures/agents.json. They run before agents-stack.spec.ts
+// (files run in name order on one worker), so E2E-AGENTS-020 stays last. Every case stops its team at the end; the
+// afterEach stops any a failure left running.
 test.skip(
   process.env.TQA_STACK_SUITE !== "agents",
   "Requires the agents stack suite",
@@ -140,7 +140,7 @@ test("E2E-AGENTS-027 the team's budget used up: the team stops with its end note
     await expect(
       page.getByText("The team ran out of budget before it finished."),
     ).toBeVisible({ timeout: afterStart(30_000) });
-    // Words only: no catalogue key shown as text anywhere on the lead's page (the owner once saw one).
+    // Words only: no catalogue key shown as text anywhere on the lead's page (one was found there before 17.0).
     await expect(page.locator("body")).not.toContainText(RAW_KEY);
   } finally {
     await reset();
@@ -361,9 +361,9 @@ test("E2E-AGENTS-031 a message to a leading lead: held, read at its next check o
 // E2E-AGENTS-032 (a review before 17.0, GW-I-306, WEB-U-398; real-world use before 17.0: the lead ended its turn
 // without done and its header said Done while the team ran on): EDGE-L's lead starts a helper that reports and
 // finishes, reads its report, and ends every turn without done. The gateway reminds it only once nothing else can wake
-// it (its helper quiet, nothing unread; the 16n integration), twice, never more; its header is never Done while the
-// team runs, and after the second reminder says the lead stopped without finishing, with what to do. The team keeps
-// running.
+// it (its helper quiet, nothing unread; found in an integration before 17.0), twice, never more; its header is never
+// Done while the team runs, and after the second reminder says the lead stopped without finishing, with what to do. The
+// team keeps running.
 test("E2E-AGENTS-032 a lead that ends its turns without done: two reminders, never Done, then the lead stopped", async ({
   page,
   baseURL,

@@ -17,7 +17,7 @@ describe("WEB-U-221 a helper's state and the team's budget, in words", () => {
       words: "Waiting for the lead",
       tone: "muted",
     });
-    // `position` counts from 1 (ADR-0034 S6, the review of 2 Oct 2026): third in line has two ahead; first is next.
+    // `position` counts from 1 (ADR-0034 S6, decided on 2 Oct 2026): third in line has two ahead; first is next.
     expect(words("queued", 3)).toEqual({
       words: "Waiting for a slot (2 ahead)",
       tone: "muted",

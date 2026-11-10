@@ -9,7 +9,7 @@
 #   on accounts.google.com that a person opens still loads as any page does; only the browser's own checks move.
 # - The optimization guide's fetches (optimizationguide-pa.googleapis.com) are off by feature, and so are autofill's
 #   questions to content-autofill.googleapis.com about each form's fields, which it asks whatever the policy says
-#   about saving (the c16k real-world forms, REL-I-004).
+#   about saving (real-world use before 17.0, REL-I-004).
 CHROMIUM_FLAGS=$(printf '%s' "$CHROMIUM_FLAGS" | sed 's/ *--enable-remote-extensions//g')
 export CHROMIUM_FLAGS="$CHROMIUM_FLAGS --disable-component-update --disable-domain-reliability \
 --disable-features=OptimizationHints,OptimizationHintsFetching,OptimizationGuideModelDownloading,\

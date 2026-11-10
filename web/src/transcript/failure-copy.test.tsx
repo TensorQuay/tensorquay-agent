@@ -48,7 +48,7 @@ function budgetReasons(): string[] {
 }
 const words = (key: string) => (en.messages as Record<string, string>)[key];
 
-// The owner's test on a Mac: a failed run showed the raw "budget.output_tokens." in red. Every reason a run can fail
+// Found on a Mac before 17.0: a failed run showed the raw "budget.output_tokens." in red. Every reason a run can fail
 // with reads as what happened and what to do, in plain words; an unknown one never shows raw.
 describe("WEB-U-016 every failure in plain words", () => {
   it.each(codes)("has plain words and a next step for %s", (code) => {
@@ -75,7 +75,7 @@ describe("WEB-U-016 every failure in plain words", () => {
     expect(failureReason({ code: "budget", reason })).not.toContain(reason);
   });
 
-  it("reads the owner's failure in plain words, with what to do", () => {
+  it("reads a spent output budget in plain words, with what to do", () => {
     const run = { code: "budget", reason: "budget.output_tokens" };
     expect(failureReason(run)).toBe(
       "The reply was cut off at the task's length limit",

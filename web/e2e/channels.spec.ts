@@ -159,7 +159,7 @@ for (const width of [1024, 1280] as const)
       await expect(idle.getByRole("link")).toHaveCount(0);
       await expect(idle).not.toContainText("Coder");
       await axe(page);
-      // The owner's request: an agent's name opens its task, when the viewer may open it (the gateway's can_open).
+      // Decided before 17.0: an agent's name opens its task, when the viewer may open it (the gateway's can_open).
       const members = page.getByRole("list", { name: "Members" });
       await expect(
         members

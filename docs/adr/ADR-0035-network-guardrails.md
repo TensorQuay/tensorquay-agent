@@ -1,9 +1,9 @@
 # ADR-0035: Guardrails at the network boundary, with no per-call permission policy and no approvals
 
 ## Status
-Accepted (8 Oct 2026). The owner decided the removal of the per-call policy and approvals (§1, §3 to §7), the git
-push variant (§5) and, on 8 Oct, the network extras in §2: point 1 confirmed, point 3 built after 17.0, point 2 when
-someone asks for it, point 4 dropped ("The owner's decision on the network extras", at the end).
+Accepted (8 Oct 2026). The Product Owner decided the removal of the per-call policy and approvals (§1, §3 to §7), the
+git push variant (§5) and, on 8 Oct, the network extras in §2: point 1 confirmed, point 3 built after 17.0, point 2 when
+someone asks for it, point 4 dropped ("The Product Owner's decision on the network extras", at the end).
 
 ## Date
 2026-09-29
@@ -16,7 +16,7 @@ agent's actions. The decision is recorded in:
   FR-23, FR-26, FR-27, G1, G3, M7 and the risks follow;
 - DEV-PLAN **Phase 9 item 4**: the removal after candidate 7, with this ADR.
 
-The owner's principles, which this ADR implements:
+The Product Owner's principles, which this ADR implements:
 - **Inside the sandbox** the agent may read, write and run any command freely.
 - **The only guardrail we add is the network:** which sites and ports it may reach. There are no approvals and no
   special rules for git or anything else.
@@ -45,7 +45,7 @@ Every tool the task has runs when the model calls it: no broker, no rule, no `as
   paths mean, not a permission. The shell reaches the whole sandbox, as today.
 - **The decision engine's role is unchanged** (ADR-0013). It can narrow the step's tools or stop, and it can't widen
   the task's tools or the network. Its `act` runs like a model call: schema, then dispatch.
-- **Git in the sandbox runs without repository hooks** (the security review; the technical lead, 29 Sep). The runtime
+- **Git in the sandbox runs without repository hooks** (the security review; decided on 29 Sep 2026). The runtime
   sets environment configuration for every process in the sandbox (`GIT_CONFIG_COUNT`, `GIT_CONFIG_KEY_n`,
   `GIT_CONFIG_VALUE_n`, which outranks a repository's own config) with `core.hooksPath=/dev/null` and
   `core.fsmonitor=false`. So every `git`, the shell's included, ignores hooks and a file-system monitor planted in
@@ -71,7 +71,7 @@ them too:
 - with per-profile lists (point 2 below), a task can use only the git hosts and connector hosts its own list allows.
 
 **In v1.0, after candidate 7** (the finer control proposed by the technical lead; points 1 to 4 were **decided by the
-owner on 8 Oct 2026**, at the end):
+Product Owner on 8 Oct 2026**, at the end):
 1. **A host:port allow-list with wildcards, default deny.** This is what exists today, kept and documented:
    - exact hosts or `*.domain` for any subdomain (never the domain itself);
    - explicit ports, up to 16 per rule;
@@ -98,7 +98,7 @@ owner on 8 Oct 2026**, at the end):
    - When the time runs out, the list goes back to enforcing.
    - Observe mode is an administrator's setting only, and every change of it is audited.
    - On the install's list, observe mode would lift egress for every task on the install. The technical lead
-     recommends allowing it **on a profile's list only** (a new kind of task). The owner dropped point 4 (8 Oct
+     recommends allowing it **on a profile's list only** (a new kind of task). The Product Owner dropped point 4 (8 Oct
      2026).
 
 **Later, v1.1, opt-in (named here, not decided):**
@@ -128,7 +128,7 @@ owner on 8 Oct 2026**, at the end):
    the default). The list is bounded, with the rest named as "and N more". It's administrator configuration, not a
    secret, but it goes to the model provider with every prompt, so **the prompt lists host names only**: entries
    that are literal addresses (often an internal network's, allowed on purpose) are left out and counted in "and N
-   more" (the technical lead, 29 Sep). Host names are shown as they are; there is no per-entry "not shown" flag for
+   more" (decided on 29 Sep 2026). Host names are shown as they are; there is no per-entry "not shown" flag for
    now.
    - The gateway sends the list to the runtime in `session.config`, a field added in the same revision as the
      removal (below), and the runtime renders it into the prompt. The field carries at most 32 host names; the
@@ -153,7 +153,7 @@ such connections is not part of this decision.
 - **The admin guide tells administrators** to protect important branches on the git host, to use narrowly scoped
   tokens, and to give connectors least-privilege credentials.
 
-### 5. Git push: the host decides (the owner's choice)
+### 5. Git push: the host decides (the Product Owner's choice)
 A push is plain git with a host key (ADR-0037 §7, which removed the Git relay), and the git host's rules decide.
 - **The key stays in the gateway:** the sandbox holds an inert, per-run placeholder, and the egress proxy puts the
   value in for a keyed git host (ADR-0037).
@@ -204,7 +204,7 @@ A push is plain git with a host key (ADR-0037 §7, which removed the Git relay),
 
 ## Amendment (1 Oct 2026): internal servers by name
 
-**The owner's decision (1 Oct 2026), asked by the lead in plain words:** yes, an administrator may allow a *named*
+**The Product Owner's decision (1 Oct 2026):** yes, an administrator may allow a *named*
 internal server per rule: administrators only, off by default, with protection against DNS rebinding. Found while
 planning the host-keys stack suite: a rule naming a host never reaches a private address (§6, the private-address
 guard), so an internal git server known by name had no way in, by keys or the Git relay.
@@ -216,10 +216,10 @@ guard), so an internal git server known by name had no way in, by keys or the Gi
   Never loopback, link-local (cloud metadata), unspecified, multicast or broadcast; and never the gateway's own ground:
   the container engine's networks and their gateways (read from the engine and renewed every minute), the sandbox pool,
   the gateway's own addresses, and this machine's own addresses.
-- **This machine's addresses (the lead, 1 Oct, ENGINEERING-GUARDRAILS §1.4):** a gateway in a container can't see them,
-  so `[egress] internal_never` must name them while internal rules exist; until it does, internal rules refuse, and the
-  admin list, the task's notice and `tqa-gateway check` say so in words. A gateway in the host's network namespace (it
-  holds an engine bridge's gateway address) finds them itself, and the setting is optional.
+- **This machine's addresses (decided on 1 Oct 2026, ENGINEERING-GUARDRAILS §1.4):** a gateway in a container can't see
+  them, so `[egress] internal_never` must name them while internal rules exist; until it does, internal rules refuse,
+  and the admin list, the task's notice and `tqa-gateway check` say so in words. A gateway in the host's network
+  namespace (it holds an engine bridge's gateway address) finds them itself, and the setting is optional.
 - **Rebinding:** each connection resolves once, every address it got is checked, and only that checked set is
   connected to; one forbidden address refuses the whole answer. An engine inventory unknown or older than three minutes
   refuses (fail closed).
@@ -229,7 +229,7 @@ guard), so an internal git server known by name had no way in, by keys or the Gi
 Tests: SEC-050 to SEC-054.
 
 ## Security analysis
-| Removed check | What it protected | What covers it now, or the risk the owner accepts |
+| Removed check | What it protected | What covers it now, or the risk the Product Owner accepts |
 |---|---|---|
 | `ask` on network and communication tools | A person saw each outbound request first | The allow-list, per profile, decides every connection outside the sandbox, and the sandbox holds no credentials. **Accepted:** data can go to an allowed host without a person seeing it, so keep lists narrow; observe mode helps build them |
 | Admin deny/ask rules on commands and paths | Stopped chosen commands or paths | The sandbox is disposable and its only lasting state is its workspace; nothing outside the sandbox is reachable. **Accepted:** the agent can change or delete its own workspace's files; forks and anything already sent out elsewhere recover them |
@@ -251,7 +251,7 @@ The residual risk is exfiltration or unwanted action through what the administra
 reach of the keys and connector credentials. The admin guide says so plainly.
 
 ## Protocol and upgrade path
-"Released" means a tagged release (v1.0), not a candidate or a push to main (the technical lead, 29 Sep). v1.0 isn't
+"Released" means a tagged release (v1.0), not a candidate or a push to main (decided on 29 Sep 2026). v1.0 isn't
 tagged, so nothing is deprecated for a release first: what goes is removed outright.
 - **The revision.** Revision 9 is unreleased by that definition, even after candidate 7 reaches main, so the removal
   and the prompt's allow-list change revision 9 itself, with no new revision:
@@ -263,12 +263,12 @@ tagged, so nothing is deprecated for a release first: what goes is removed outri
   - it gains the allow-list in `session.config`: `network`, at most 32 entries of host and ports in the proxy's
     order, with `more` counting the rest;
   - `gateway_revision` stays, since the gateway announcing its revision is useful on its own;
-  - **the floor rises to 9** (the technical lead, 29 Sep): a revision-8 runtime can't read a `session.config` without
+  - **the floor rises to 9** (decided on 29 Sep 2026): a revision-8 runtime can't read a `session.config` without
     the policy, so the gateway refuses it as too old rather than keep sending it a policy nothing uses.
 
   Runtimes built from candidates before this change are pre-release: environments from those images are rebuilt from
   the new runtime image, as the upgrade notes say.
-- **Stored histories keep loading** (the technical lead, 29 Sep). The gateway and the runtime read every stored frame
+- **Stored histories keep loading** (decided on 29 Sep 2026). The gateway and the runtime read every stored frame
   back through the protocol's parser, and a stored frame can sit in a blob no migration rewrites. So the types that
   histories written before this change can hold stay as **retired, read-only markers**: they parse the old stored
   payload with its fields, keep none but the sequence, are never sent, are refused from a runtime, and the web
@@ -373,10 +373,10 @@ tagged, so nothing is deprecated for a release first: what goes is removed outri
 - **Order:** after candidate 7:
   1. the proxy's refusal text and the prompt list, which don't depend on the removal;
   2. the removal, with the revision bump, the migrations and the docs;
-  3. per-profile lists, recent refusals with "Allow this site", and observe mode, once the owner agrees.
+  3. per-profile lists, recent refusals with "Allow this site", and observe mode, once the Product Owner agrees.
 
-## The owner's decision on the network extras (8 Oct 2026)
-Asked by the lead with a one-page brief. Every option kept the owner's principles: the network is the only guardrail,
+## The Product Owner's decision on the network extras (8 Oct 2026)
+Every option kept the Product Owner's principles: the network is the only guardrail,
 nothing asks a person to approve, and it stays simple. §2's points 1 to 4:
 1. **The host:port allow-list with wildcards, default deny: confirmed** as v1.0's design, as built.
 2. **Per-profile network lists: when someone asks for them**, not planned now. They would add a second place where the

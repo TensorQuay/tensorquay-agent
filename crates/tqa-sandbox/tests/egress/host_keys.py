@@ -1,6 +1,6 @@
-"""G9b, the host-keys stack suite (ADR-0037) on an owned Docker stack with the release images: no test hook. The keyed
+"""The host-keys stack suite (ADR-0037) on an owned Docker stack with the release images: no test hook. The keyed
 host is the fixture's origin at its exact address (Amendment 2), its certificate from the fixture's own authority, which
-the gateway trusts only through `[egress] ca_file` (G9a).
+the gateway trusts only through `[egress] ca_file` (ADR-0037 §4).
 
 SEC-047 (R2): a run uses its key through the proxy. The host receives the value; the task sees only the placeholder,
 including in the host's echo of it (the proxy scrubs answers); and the value is in no event, no log, no file or
@@ -648,7 +648,7 @@ def helper_of(stack, lead_path, role, lead_stored):
 
 
 def sec_046_team(stack, shared):
-    """SEC-046's team case (ADR-0034; ADR-0037 §2, L9). In v1.1 a team's helpers are its person's own agents, and each
+    """SEC-046's team case (ADR-0034; ADR-0037 §2). In v1.1 a team's helpers are its person's own agents, and each
     helper's turn is sent as that person, so a helper's run gets the same keys as its lead's run, and no other person's.
     The owner leads a team on their own workspace: the lead leaves its placeholder in a file, and a helper on a copy of
     those files holds the owner's keys; its call with the lead's placeholder is refused `foreign_sandbox` (another
@@ -705,7 +705,7 @@ def wait_for_file(stack, conversation, name, seconds=120):
 
 
 def sec_055(stack):
-    """A gateway restart during a keyed call (ADR-0037's supporting tests; the second review's T-d). A run holds a keyed
+    """A gateway restart during a keyed call (ADR-0037's supporting tests). A run holds a keyed
     connection and has made one call; the gateway stops (the task's stream ends with `restarting`) and starts again
     (healthy, the task's stream reopened). The held connection ends with the gateway's process, never a hang or an
     answer from nowhere; a fresh connection's call with the same placeholder, made at once, is swapped and answered:
@@ -737,7 +737,7 @@ def sec_055(stack):
 
 
 def sbx_c_019(stack):
-    """SBX-C-019 (G9c), the trust matrix on Docker: curl, Python's urllib, requests (pip's own copy: the image has no
+    """SBX-C-019, the trust matrix on Docker: curl, Python's urllib, requests (pip's own copy: the image has no
     other), pip and Node each trust the install CA from the bundle the run's shell is given and reach the keyed host
     with the value swapped in; git does so in SEC-049. A port of the same host that no key is for is a plain tunnel:
     the client sees the host's own certificate (the fixture's authority, not the install CA), which the sandbox doesn't
@@ -787,12 +787,12 @@ def probes(stack, title, phrase):
 
 
 def sec_056(stack):
-    """SEC-056 (G9d on the stack, ADR-0035 amendment): named internal servers on the release images and the real engine.
+    """SEC-056 (on the stack, ADR-0035 amendment): named internal servers on the release images and the real engine.
     The fixture by its service name resolves to its address on a Docker network: a plain rule is refused as private;
     an internal rule is refused while `internal_never` is missing; once it is set (the gateway restarted to read it),
     the same rule is still refused because the address is on one of the engine's networks, read from the engine
     itself, and an internal rule for `localhost` is refused as a reserved address, as any rule's is. Nothing reaches
-    the fixture. Being reached needs a server on another machine (G9e); in-process SEC-050..054 hold it."""
+    the fixture. Being reached needs a server on another machine; in-process SEC-050..054 hold it."""
     before = len(stack.received())
     internal_rule(stack, "upstream", False)
     plain = probes(stack, "Reaches a private name", SEC_056_PLAIN)

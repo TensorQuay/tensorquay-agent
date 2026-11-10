@@ -81,7 +81,7 @@ export function turnSummary(
   const pages = tools.filter(
     (tool) => tool.name === "fetch_url" && tool.status === "ok",
   ).length;
-  // The owner's direction (c8): the projects it saved changes to, by site and path, never "pushed".
+  // The Product Owner's direction: the projects it saved changes to, by site and path, never "pushed".
   const projects = new Set(
     tools
       .filter((tool) => tool.name === "git_push" && tool.status === "ok")
@@ -136,7 +136,7 @@ export function turnSummary(
   const outcome =
     run?.status === "failed"
       ? {
-          // Every failure reads as what happened and what to do (the owner's Mac test); the runtime's recorded
+          // Every failure reads as what happened and what to do (found on a Mac before 17.0); the runtime's recorded
           // reason is a diagnostic, never shown, and an unknown code shows after "The run stopped".
           reason: t("summary.reason", {
             reason: failureReason(run, t) ?? t("summary.runFailed"),

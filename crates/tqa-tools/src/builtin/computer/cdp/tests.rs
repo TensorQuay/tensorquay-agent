@@ -660,7 +660,7 @@ async fn tool_u_062_a_pages_file_chooser_is_taken_once_and_its_input_given_files
 #[tokio::test]
 async fn tool_u_062_a_click_by_ref_is_a_persons_gesture_so_a_chooser_may_open() -> TestResult {
     // Chromium opens a file input's chooser only after a person's activation: a styled button's `input.click()` from
-    // a click without one opens nothing (16n's live upload, 17 Oct 2026).
+    // a click without one opens nothing (a live check before 17.0, 17 Oct 2026).
     let (endpoint, browser) = fake_browser(page_answers()).await?;
     let driver = Browser::over(Client::connect(&endpoint).await?);
     driver.act("9", ElementAct::Click).await?;

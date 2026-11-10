@@ -385,7 +385,7 @@ describe("WEB-U-013 attempts and interleaved calls", () => {
     expect(state.run.status).toBe("failed");
   });
 
-  // The owner's direction (c8), then PRD §12 item 22: getting a workspace's files says so in plain words, never
+  // The Product Owner's direction, then PRD §12 item 22: getting a workspace's files says so in plain words, never
   // "clone", "repository" or "project".
   it("replays getting a workspace's files as quiet notices and hides a skipped one", () => {
     const clone = (

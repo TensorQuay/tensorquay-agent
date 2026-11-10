@@ -642,7 +642,7 @@ test("E2E-AGENTS-025 helpers per lead at 1: a second start is refused, and the s
   }
 });
 
-// Last, so the edge cases run first when the stack lane is short (the lead, 7 Oct 17:16).
+// Last, so the edge cases run first when the stack lane is short (decided on 7 Oct 2026).
 test("E2E-AGENTS-020 an agent team end to end, then again with a gateway restart", async ({
   page,
   baseURL,

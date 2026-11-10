@@ -1,5 +1,5 @@
 """The agent-teams evaluation on the scripted model, before GPU time: every task once per side through runner.py on an
-owned stack, so the runner, both arms and the switch between them are shaken out (the lead's request of 5 Oct 2026).
+owned stack, so the runner, both arms and the switch between them are shaken out (requested on 5 Oct 2026).
 
 The stack is tests/e2e/dry_run.py's (the gateway and the scripted model, compose files and helpers reused). Before each
 attempt the scripted model serves the task's dry-run/<side>.json; the arms switch by rewriting the gateway's

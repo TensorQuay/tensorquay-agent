@@ -88,7 +88,7 @@ changes nothing in the images.
 
 ### Publication
 The SBOMs, package lists, the kernel's configuration and `THIRD-PARTY-NOTICES.md` go with the release notes.
-Publishing a release, including these files, needs the owner's approval.
+Publishing a release, including these files, needs the Product Owner's approval.
 
 ### Tests
 - REL-U-001 to REL-U-007 run in every `tools/check.sh` (gate REL-U), on fixtures without Docker or network.
@@ -117,7 +117,7 @@ TQA_DOCKER_TESTS=1 python3 tools/release/release.py --version X.Y.Z --commit <sh
 1. It builds the five images, tagged locally only. A runtime image whose protocol-revision label differs from the
    commit's `PROTOCOL_REVISION` fails.
 2. It builds both template rootfs, and with `--kernel` the guest kernel. Whether a release ships the kernel binary is
-   the owner's decision.
+   the Product Owner's decision.
 3. It writes every SBOM, with the completeness check, and runs the vulnerability gate.
 4. It writes:
    - `release.json`: IDs, hashes, pins, the evaluation pages, and the tag to create;
@@ -141,7 +141,7 @@ python3 tools/release/squash-import.py --source <verified commit> --message-file
 
 Before anything is written, the tree and the message get the repository guard's checks (identity, message form,
 personal data, addresses, internal references, file types and sizes) and the tree gets the secrets scanner. The
-report shows the change against `main` and the push that would publish it; pushing needs the owner's approval.
+report shows the change against `main` and the push that would publish it; pushing needs the Product Owner's approval.
 `--first-import` parents the commit on `main`'s first commit instead of its tip, which replaces `main`'s history
 and so needs a force-push.
 

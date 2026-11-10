@@ -1,10 +1,10 @@
 # Workstation data libraries: licence audit (F24)
 
 pandas, matplotlib and openpyxl come from Debian into the Workstation image, installed with `--no-install-recommends`
-from the pinned snapshot in `Dockerfile`. The owner decided this route on 30 Sep 2026 (licence option A): the image is
-an aggregate of separately licensed Debian packages (ADR-0017 point 7), and each release publishes its exact package
-list with every package's licence, copyright file and source location in `PACKAGES.md` beside this file (generated from
-the built image by `packages.py`).
+from the pinned snapshot in `Dockerfile`. The Product Owner decided this route on 30 Sep 2026 (licence option A): the
+image is an aggregate of separately licensed Debian packages (ADR-0017 point 7), and each release publishes its exact
+package list with every package's licence, copyright file and source location in `PACKAGES.md` beside this file
+(generated from the built image by `packages.py`).
 
 Below is the audit made before that decision, of the packages these libraries brought in with their dependencies
 (recommends included, so it names a few the image doesn't install), as `package|licences from its Debian copyright

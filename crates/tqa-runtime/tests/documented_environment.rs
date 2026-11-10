@@ -274,7 +274,7 @@ async fn rt_i_035_python_is_python3_in_every_runtime_image_and_workstation_has_t
             "{selected}"
         );
     }
-    // F24: Workstation has pandas, matplotlib and openpyxl (Debian's, the owner's licence decision), working headless
+    // F24: Workstation has pandas, matplotlib and openpyxl (Debian's, as decided on 30 Sep 2026), working headless
     // in the sandbox: a CSV read and summed, a chart saved, a spreadsheet written and read back. Minimal stays small.
     let workstation = image("tqa-runtime:workstation");
     let script = "cd /tmp && printf 'region,total\\nnorth,3\\nsouth,4\\n' > t.csv && MPLBACKEND=Agg python -c \"\

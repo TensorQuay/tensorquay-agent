@@ -1,8 +1,8 @@
-"""WEB-E2E-035, the web half of the host-keys stack suite (ADR-0037) on the same owned stack as G9b (`host_keys.py`):
+"""WEB-E2E-035, the web half of the host-keys stack suite (ADR-0037) on the same owned stack as `host_keys.py`:
 the keyed host at its exact address, its authority in `[egress] ca_file`, the release images and no test hook. The
 person's part happens in the browser (`web/e2e/host-keys-stack.spec.ts`), in two phases; this driver owns the stack,
-the teammate's account and the checks of what reached the keyed host. Kept apart from G9b, so the security suite runs
-without the web image and Playwright, and a failure says which side broke.
+the teammate's account and the checks of what reached the keyed host. Kept apart from `host_keys.py`, so the security
+suite runs without the web image and Playwright, and a failure says which side broke.
 
 - Own key: the administrator adds `FIXTURE_KEY` for the keyed host's address in the browser, and a task of theirs calls
   it. The host received the value once; the stored events never hold it; the key's last use names that task.
@@ -41,7 +41,7 @@ PLACEHOLDER = re.compile(r"^" + NAME + r"=(tqa_ph_[A-Za-z0-9_-]{43})$", re.MULTI
 
 
 class WebHostKeyStack(HostKeyStack):
-    """G9b's stack with its page server, signed in; the key itself is added in the browser."""
+    """The host-keys stack with its page server, signed in; the key itself is added in the browser."""
 
     def start(self):
         # The egress stack starts the gateway alone; the browser needs the page server too.

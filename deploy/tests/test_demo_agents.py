@@ -143,8 +143,8 @@ class RestarterTests(unittest.TestCase):
 
     def test_every_tool_call_names_how_it_streams(self):
         """The fake model refuses a whole scenario with a tool call that leaves out `split_into` (1 to 64 pieces), so one
-        such reply stops every agents case from starting (TK-U-050; the 16o integration: three replies of the T5/T7 cases
-        left it out). Checked here too, so the fixture's own test catches it."""
+        such reply stops every agents case from starting (TK-U-050; the 16o integration: three replies of the
+        E2E-AGENTS-033 and -034 cases left it out). Checked here too, so the fixture's own test catches it."""
         replies = json.loads((Path(__file__).resolve().parent / "fixtures/agents.json").read_text())["responses"]
         missing = [(index, reply["when"], event.get("name")) for index, reply in enumerate(replies)
                    for event in reply["events"] if event.get("type") == "tool_call"

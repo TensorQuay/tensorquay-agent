@@ -227,7 +227,7 @@ describe("WEB-U-039 model routes", () => {
     );
   });
 
-  // Lead (2026-09-26): a badge only for a real probe result; a route never checked shows nothing.
+  // Decided on 26 Sep 2026: a badge only for a real probe result; a route never checked shows nothing.
   it("shows a route probe's result, and nothing for a route never checked", async () => {
     const probed = (state: "verified" | "failed" | "stale") => ({
       probe: { state, probed_at: "2026-09-26T08:00:00Z", observed: null },

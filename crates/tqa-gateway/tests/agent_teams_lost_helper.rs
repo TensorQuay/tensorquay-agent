@@ -1,7 +1,7 @@
-//! GW-I-254 (the owner's edge cases, 7 Oct 2026): a helper whose sandbox keeps stopping mid-run. Each loss is replaced
-//! and the run resumes, as for any task (GW-I-114); the fifth in ten minutes retires the sandbox as failed with the run
-//! unfinished. For a helper that run still reads as going, so the lead heard nothing until it looked stuck 15 minutes
-//! later. Now the lead is told at once that the helper failed, in words, and once.
+//! GW-I-254 (the Product Owner's edge cases, 7 Oct 2026): a helper whose sandbox keeps stopping mid-run. Each loss is
+//! replaced and the run resumes, as for any task (GW-I-114); the fifth in ten minutes retires the sandbox as failed
+//! with the run unfinished. For a helper that run still reads as going, so the lead heard nothing until it looked stuck
+//! 15 minutes later. Now the lead is told at once that the helper failed, in words, and once.
 #[path = "support/agent_team.rs"]
 mod agent_team;
 #[path = "support/fixture.rs"]

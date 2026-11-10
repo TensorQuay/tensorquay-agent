@@ -37,10 +37,10 @@ completion? That cost at equal quality is what the seam exists for (ADR-0013 poi
 | **Fixed** | One model, one route set, one candidate's images, one harness build, one tree; concurrency 1 (below) |
 | **Caps** | `--max-engine-calls 1500` (the flag is required; the reference engine costs nothing) and `--max-wall-minutes` set to the window. The night's stop rules (cutoff, a pause when the shared GPU is needed) apply as on eval nights |
 
-**Two changes from ADR-0013 point 8, for the lead's decision:**
+**Two changes from ADR-0013 point 8, proposed for a decision:**
 1. **The engine arm is the reference engine, not the outside typed-question service.** It costs no money, needs no
    credential, and needs no product-owner OK for a live smoke, so it can run in the next free window. The
-   typed-question service is the same measurement with a second engine profile. It follows after the owner's OK,
+   typed-question service is the same measurement with a second engine profile. It follows after the Product Owner's OK,
    with the caps point 8 sets.
 2. **`local-fast` keeps native tools** (point 8 had `local-text`, the text protocol). Only thinking changes between
    the routes, so a difference is thinking's cost on routine steps, not the tool protocol's parsing. A `local-text`

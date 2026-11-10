@@ -490,7 +490,7 @@ describe("WEB-U-071 sidebar task list", () => {
     expect(screen.queryByText("Fix the date range")).toBeNull();
   });
 
-  // The owner's "this edit on top sucks", in the sidebar too: Rename turns the row's title into the field.
+  // The in-place edit, in the sidebar too: Rename turns the row's title into the field.
   it("renames a row in place: Enter saves, Esc puts it back", async () => {
     const items = [ago(1, 1, { title: "Fix the date range" })];
     const id = items[0]?.id ?? "";

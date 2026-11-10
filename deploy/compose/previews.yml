@@ -1,4 +1,4 @@
-# WEB-E2E-032 (the file previews design): the scripted model writes the previews' files. The scenario is generated per
+# WEB-E2E-032 (the Files panel's previews): the scripted model writes the previews' files. The scenario is generated per
 # run (deploy/tests/demo_previews.py), because the report page names this run's witness server.
 services:
   fake-model:

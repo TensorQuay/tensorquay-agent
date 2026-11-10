@@ -221,7 +221,7 @@ async fn tool_u_010_shell_receives_only_explicit_proxy_values_and_no_bearer() ->
     let fixture = workspace_fixture()?;
     let shell = Shell::new().with_proxy(ProxyEndpoint::new("http://gateway:3128")?);
     let result = shell.call(json!({"command":"printf '%s\\n' \"$HTTP_PROXY\" \"$HTTPS_PROXY\" \"$http_proxy\" \"$https_proxy\" \"$NO_PROXY\" \"${TQA_RUNTIME_TOKEN_FILE-unset}\" \"${NODE_USE_ENV_PROXY-unset}\""}), &context::context(&fixture)).await?;
-    // Node's fetch and https read the proxy from the environment only when told to (G9c, SBX-C-019).
+    // Node's fetch and https read the proxy from the environment only when told to (SBX-C-019).
     assert_eq!(
         result.text,
         "http://gateway:3128/\nhttp://gateway:3128/\nhttp://gateway:3128/\nhttp://gateway:3128/\ngateway,localhost,127.0.0.1,::1\nunset\n1\n"

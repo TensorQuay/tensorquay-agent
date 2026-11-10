@@ -1,4 +1,4 @@
-//! GW-I-126 (migration 0058, the lead's rules of 29 Sep): when an engine's budget counts from. `total` counts from when
+//! GW-I-126 (migration 0058; decided on 29 Sep 2026): when an engine's budget counts from. `total` counts from when
 //! the budget was set or last changed, so saving a new budget starts a new count and saving the engine with the same
 //! budget keeps it; `month` counts the calendar month in UTC whatever changed in it (raising the cap only raises the
 //! ceiling). Every change of a budget is its own audit row, action `budget`, with the old and new budget, from the API

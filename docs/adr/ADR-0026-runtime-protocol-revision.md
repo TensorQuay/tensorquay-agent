@@ -72,7 +72,7 @@ The authoritative list is `PROTOCOL_REVISIONS` in `tqa-types`; this table mirror
 `workspace.reply` (runtime to gateway) needs no revision: the gateway is never older than its runtimes.
 
 ## Note 2026-09-28: revision 9 leaves the floor at 8
-The technical lead's decision for ADR-0013's revision. Raising the floor would rebuild every runtime image, template
+Decided for ADR-0013's revision. Raising the floor would rebuild every runtime image, template
 and microVM root filesystem for a field that only conversations with a decision engine use. So `MIN_RUNTIME_REVISION`
 stays 8 and the gateway sends `decision_engine` only to a runtime announcing 9 or later
 (`DECISION_ENGINE_REVISION`). A runtime below 9 serving a conversation whose profile names an engine is refused at
@@ -81,7 +81,7 @@ one reduced configuration so far: a single optional field, absent unless an engi
 (`link/endpoint.rs`).
 
 ## Note 2026-10-01: revision 11 leaves the floor at 10
-The technical lead's decision, from ENGINEERING-GUARDRAILS §8 (an addition keeps the older version working for a
+Decided from ENGINEERING-GUARDRAILS §8 (an addition keeps the older version working for a
 release). A revision-10 runtime refuses a `user.message` or `session.config` with fields it doesn't know, so the
 gateway keeps the revision each runtime announced with its link and sends `host_keys` and `host_ca` only to one at
 `HOST_KEYS_REVISION` (11). A revision-10 runtime runs without keys; when the turn's sender has keys the task could
@@ -89,7 +89,7 @@ use, the task's streams get the unsequenced `host_keys_unsupported` notice, so t
 rather than seeing calls go out without a key.
 
 ## Note 2026-10-02: revision 12 leaves the floor at 10
-The technical lead's decision, as for revision 9. Only an agent team member's first turn carries `lead_brief`, and a
+Decided as for revision 9. Only an agent team member's first turn carries `lead_brief`, and a
 brief must never reach a model as the person's own words: so instead of a reduced configuration, a member whose
 runtime announces less than `LEAD_BRIEF_REVISION` (12) is refused at the link exactly as a decision engine's task is
 (426, `runtime_too_old`, `needs` 12), its sandbox retired with a notice. Every other task keeps linking runtimes from
@@ -98,7 +98,7 @@ the floor, 10, up. The runtime writes the brief into the journal entry's text, i
 and never a person's message (RT-I-039, CORE-U-078).
 
 ## Note 2026-10-05: revision 13 leaves the floor at 10
-The technical lead's decision, as for revision 12. The page pass found a helper's page showing the gateway's wake
+Decided as for revision 12. A pass over the pages before 17.0 found a helper's page showing the gateway's wake
 sentence as the person's own message: the wake was a plain `user.message`. Revision 13 marks it (`team_wake`: the
 reader's place in the log, after which new team messages wait), the runtime journals the marker on `message.user`, and
 a client words the notice itself ("New team messages"). It names no writer: what waits may be the helpers', the

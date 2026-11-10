@@ -69,7 +69,7 @@ describe("WEB-U-041 limits", () => {
     const idle = row("Sleep after idle");
     expect(within(idle).getByText("15 min")).toBeVisible();
     expect(within(idle).getByText("Set here")).toBeVisible();
-    // Sizes are each environment's now (the owner's direction): no CPU, memory or process rows here.
+    // Sizes are each environment's now (the Product Owner's direction): no CPU, memory or process rows here.
     expect(
       screen.queryByText(
         /CPU per environment|Memory per environment|Processes per environment/,

@@ -176,8 +176,8 @@ describe("WEB-U-037 a replayed Messages run", () => {
   });
 });
 
-// A push that failed for lack of a credential (or a refused one) points to the person's keys. The owner's
-// direction (c8): it asks for the key for the site, in plain words, never a "Git credential".
+// A push that failed for lack of a credential (or a refused one) points to the person's keys. The Product
+// Owner's direction: it asks for the key for the site, in plain words, never a "Git credential".
 describe("WEB-U-038 push credential hint", () => {
   const push = (content: string, remote?: string) =>
     [

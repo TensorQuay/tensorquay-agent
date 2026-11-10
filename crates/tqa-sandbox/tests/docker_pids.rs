@@ -1,6 +1,6 @@
 //! SEC-010: a sandbox that spawns processes without bound stops at its pids limit, and nothing outside it notices.
 //! The storm is bounded and gentle: background sleeps past the limit, each refused spawn counted and never retried,
-//! so nothing spins (the owner's rule: no artificial CPU or memory load on this machine). It runs in Python in the
+//! so nothing spins (no artificial CPU or memory load on the machine that runs it). It runs in Python in the
 //! runtime image, as on the microVM (`deploy/firecracker/pids_checks.py`): a shell loop aborts at its first refused
 //! fork, so it would stop at the limit instead of pushing past it. While the storm holds the limit, the checks run.
 

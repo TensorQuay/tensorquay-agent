@@ -131,7 +131,7 @@ export function ConversationBar({
         )}
         <div className="conversation-title" data-editing={editing || undefined}>
           <div className="conversation-name">
-            {/* A click on the title renames it, as in ChatGPT and Claude; the ⋯'s Rename is the keyboard's way. */}
+            {/* A click on the title renames it where the name is; the ⋯'s Rename is the keyboard's way. */}
             {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
             <h1
               ref={heading}

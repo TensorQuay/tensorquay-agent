@@ -1,4 +1,4 @@
-"""H5: the soak's bounded storage and its disk_full fault, with a recording runner (no Docker, no mounts)."""
+"""The soak's bounded storage and its disk_full fault, with a recording runner (no Docker, no mounts)."""
 from pathlib import Path
 import tempfile
 import unittest
