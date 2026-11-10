@@ -188,8 +188,13 @@ function EngineTable({ items, ...actions }: { items: Engine[] } & RowActions) {
   );
 }
 
-/** A budget's use over its current count, a sentence per limit; none without a budget. */
-function budgetWords(item: Engine, t: Translate): string[] {
+/**
+ * A budget's use over its current count, a sentence per limit; none without a budget. Token figures are short
+ * (WEB-U-461) and never misstate where the budget stands: under its limit the use rounds down and the limit up; at or
+ * over it, the use up and the limit down. Both are multiples of the step shown, so under never reads as equal, and at
+ * or over never as under. `exact` gives every figure whole, for the tooltip and screen readers (UI-GUIDELINES §10).
+ */
+function budgetWords(item: Engine, t: Translate, exact = false): string[] {
   const { budget, budget_used: used } = item;
   if (!budget || !used) return [];
   const period = budget.period ?? "total";
@@ -208,15 +213,21 @@ function budgetWords(item: Engine, t: Translate): string[] {
         date,
       }),
     );
-  if (budget.tokens !== undefined)
+  if (budget.tokens !== undefined) {
+    const spent = used.tokens >= budget.tokens;
     lines.push(
       t("engines.budgetUseTokens", {
-        used: formatCompact(used.tokens, t.locale),
-        limit: formatCompact(budget.tokens, t.locale),
+        used: exact
+          ? used.tokens
+          : formatCompact(used.tokens, t.locale, spent ? "up" : "down"),
+        limit: exact
+          ? budget.tokens
+          : formatCompact(budget.tokens, t.locale, spent ? "down" : "up"),
         period,
         date,
       }),
     );
+  }
   return lines;
 }
 
@@ -230,6 +241,9 @@ function EngineRow({
   const source = item.seed ? ENGINE_SOURCES[item.seed] : undefined;
   const host = engineHost(item.url);
   const budget = budgetWords(item, t).join(" · ");
+  // The line shows its figures short; its tooltip and screen readers get them exactly (WEB-U-461).
+  const whole = budgetWords(item, t, true).join(" · ");
+  const exact = whole === budget ? null : whole;
   return (
     <tr>
       <td>
@@ -260,11 +274,15 @@ function EngineRow({
           {/* One line under them (17.3): where to add a missing key, then the budget's use, whole in its tooltip (no page
               says the use, so the row is its home). */}
           {item.key_missing ? (
-            <CellNote href="/settings/keys/shared" after={budget || null}>
+            <CellNote
+              href="/settings/keys/shared"
+              after={budget || null}
+              exact={exact}
+            >
               {t("engines.addKey")}
             </CellNote>
           ) : (
-            budget && <CellNote>{budget}</CellNote>
+            budget && <CellNote exact={exact}>{budget}</CellNote>
           )}
         </div>
       </td>

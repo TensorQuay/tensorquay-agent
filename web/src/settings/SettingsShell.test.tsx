@@ -1,7 +1,15 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { api } from "../api/client";
 import type { User } from "../protocol/generated/api";
 import { ShellContext } from "../shell/shell-context";
 import { LIMITS } from "../test/user";
@@ -276,41 +284,116 @@ describe("WEB-U-362 Open navigation in Settings", () => {
   });
 });
 
-// WEB-U-460: a menu taller than the window scrolls on its own; the current section is never left out of view.
+// WEB-U-460: a menu taller than the window scrolls on its own; the current section is never left out of its view, and
+// only the menu scrolls to show it (17.4 fix): the page stays where it is.
 describe("WEB-U-460 the Settings menu stays in view", () => {
-  it("keeps the current section in view when the menu scrolls on its own", () => {
-    // jsdom has no layout: give it the method, then watch which item asks to be shown, and how.
+  const member: User = {
+    id: "0195d8c0-0000-7000-8000-000000000002",
+    email: "member@example.invalid",
+    role: "member",
+    internet: "none",
+    limits: LIMITS,
+    features: { agent_teams: false },
+  };
+  const admin: User = {
+    ...member,
+    email: "admin@example.invalid",
+    role: "admin",
+  };
+
+  /**
+   * jsdom has no layout: puts the menu and its current item where a short window has them (top and bottom, in px,
+   * against jsdom's 768 px window), and records any `scrollIntoView`, which would scroll the page as well.
+   */
+  function layout(menu: [number, number], item: [number, number]) {
     const had = "scrollIntoView" in Element.prototype;
     if (!had) Element.prototype.scrollIntoView = () => undefined;
-    const seen: [Element, unknown][] = [];
+    const asked: Element[] = [];
     const scroll = vi
       .spyOn(Element.prototype, "scrollIntoView")
-      .mockImplementation(function (
-        this: Element,
-        options?: boolean | ScrollIntoViewOptions,
-      ) {
-        seen.push([this, options]);
+      .mockImplementation(function (this: Element) {
+        asked.push(this);
       });
+    const boxes = vi
+      .spyOn(Element.prototype, "getBoundingClientRect")
+      .mockImplementation(function (this: Element) {
+        const [top, bottom] = this.matches("nav.settings-nav")
+          ? menu
+          : this.getAttribute("aria-current") === "page"
+            ? item
+            : [0, 0];
+        return DOMRect.fromRect({
+          x: 0,
+          y: top,
+          width: 160,
+          height: bottom - top,
+        });
+      });
+    return {
+      asked,
+      restore() {
+        boxes.mockRestore();
+        scroll.mockRestore();
+        if (!had)
+          delete (Element.prototype as { scrollIntoView?: unknown })
+            .scrollIntoView;
+      },
+    };
+  }
+
+  const nav = () =>
+    screen.getByRole("navigation", { name: "Settings sections" });
+
+  it("brings an administrator's section into the menu's view when the session arrives after the first render", async () => {
+    // A cold load of /settings/status: no session at first, so the menu has no Status yet.
+    const me = vi
+      .spyOn(api, "me")
+      .mockReturnValue(new Promise(() => undefined));
+    const cache = new QueryClient();
+    render(
+      <QueryClientProvider client={cache}>
+        <SettingsShell section="status">{() => null}</SettingsShell>
+      </QueryClientProvider>,
+    );
+    expect(within(nav()).queryByRole("link", { name: "Status" })).toBeNull();
+    // The menu shows from 100 px to the window's foot (768 px); Status sits below it, at 800-832 px.
+    const shown = layout([100, 900], [800, 832]);
     try {
-      show(
-        {
-          id: "0195d8c0-0000-7000-8000-000000000002",
-          email: "member@example.invalid",
-          role: "member",
-          internet: "none",
-          limits: LIMITS,
-          features: { agent_teams: false },
-        },
-        "keys",
-      );
-      const nav = screen.getByRole("navigation", { name: "Settings sections" });
-      const current = within(nav).getByRole("link", { current: "page" });
-      expect(seen).toEqual([[current, { block: "nearest" }]]);
+      act(() => {
+        cache.setQueryData(["session"], admin);
+      });
+      // The query tells its observers on the next tick, as a real response would.
+      expect(
+        await within(nav()).findByRole("link", { name: "Status" }),
+      ).toHaveAttribute("aria-current", "page");
+      await waitFor(() => expect(nav().scrollTop).toBe(64));
+      expect(shown.asked).toEqual([]);
     } finally {
-      scroll.mockRestore();
-      if (!had)
-        delete (Element.prototype as { scrollIntoView?: unknown })
-          .scrollIntoView;
+      shown.restore();
+      me.mockRestore();
+    }
+  });
+
+  it("scrolls only the menu, up as well as down, and leaves a hidden menu alone", () => {
+    const cache = new QueryClient();
+    cache.setQueryData(["session"], member);
+    const shell = (section: "tokens" | "keys") => (
+      <QueryClientProvider client={cache}>
+        <SettingsShell section={section}>{() => null}</SettingsShell>
+      </QueryClientProvider>
+    );
+    const { rerender } = render(shell("tokens"));
+    // Below 768 px the menu isn't drawn (no box): nothing moves.
+    expect(nav().scrollTop).toBe(0);
+    // The menu scrolled down earlier; the new section's item sits above its view (60-92 px; the view starts at 100).
+    nav().scrollTop = 200;
+    const shown = layout([100, 700], [60, 92]);
+    try {
+      rerender(shell("keys"));
+      expect(nav().scrollTop).toBe(160);
+      expect(shown.asked).toEqual([]);
+    } finally {
+      shown.restore();
     }
   });
 });

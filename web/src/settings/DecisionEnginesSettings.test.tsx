@@ -36,6 +36,13 @@ function show(api: EnginesApi, me: User = admin) {
   );
 }
 const row = (name: RegExp) => screen.getByRole("row", { name });
+/** A short line's two forms: what shows (hidden from screen readers), and the exact words screen readers get instead. */
+const forms = (line: HTMLElement) => ({
+  shown: line.querySelector('[aria-hidden="true"]')?.textContent,
+  read: line.querySelector(".visually-hidden")?.textContent,
+});
+/** A count written with the narrow no-break space between its thousands, as the app writes it (§10). */
+const grouped = (words: string) => words.replace(/(\d) (?=\d)/g, "$1\u202f");
 const field = (name: string) => screen.getByRole("textbox", { name });
 
 /** Opens the add dialog, takes its first step (the kind), and waits for the form. */
@@ -145,11 +152,16 @@ describe("WEB-U-074 decision engines", () => {
     expect(
       within(row(/monthly/)).getByText(/^1\s204 of 3\s000 calls this month$/),
     ).toBeVisible();
-    // One muted line for both limits (17.3); no page says the use, so the line's tooltip holds it whole.
+    // One muted line for both limits (17.3); no page says the use, so the line's tooltip holds it whole, its figures
+    // exact (WEB-U-461).
     const typed = row(/typed/);
-    expect(cellNote(typed, "12 of 500 calls")).toHaveTextContent(
-      /^12 of 500 calls since Sep 29, 2026 · 4\.2K of 30M tokens since Sep 29, 2026$/,
-    );
+    const typedExact =
+      "12 of 500 calls since Sep 29, 2026 · 4\u202f200 of 30\u202f000\u202f000 tokens since Sep 29, 2026";
+    expect(forms(cellNote(typed, "12 of 500 calls", typedExact))).toEqual({
+      shown:
+        "12 of 500 calls since Sep 29, 2026 · 4.2K of 30M tokens since Sep 29, 2026",
+      read: typedExact,
+    });
     // A missing key's link leads the line, and the use still follows it.
     const keyless = row(/keyless/);
     expect(
@@ -159,6 +171,61 @@ describe("WEB-U-074 decision engines", () => {
       "Add it under Keys › Shared · 7 of 100 calls this month",
     );
     expect(within(row(/plain/)).queryByText(/ of /)).toBeNull();
+  });
+
+  // WEB-U-461 (17.4 fix): the short figures never misstate where a budget stands. Under its limit the use
+  // rounds down and the limit up; at or over it, the use rounds up and the limit down (both are multiples of the step
+  // shown, so under never reads as equal and at or over never reads as under). The line shows them short; its tooltip
+  // and screen readers get them exactly, and a missing key's link is read as itself.
+  it("never shows a budget as more or less spent than it is, and gives screen readers the exact figures", async () => {
+    const use = (used: number, limit: number) => ({
+      budget: { tokens: limit, period: "month" as const },
+      budget_used: { calls: 0, tokens: used },
+      budget_since: "2026-09-01T00:00:00Z",
+    });
+    show(
+      fakeEngines({
+        engines: [
+          engine("spent", use(29980000, 29960000)),
+          engine("headroom", use(29930000, 29940000)),
+          engine("round-under", use(29960000, 30000000)),
+          engine("round-over", use(30040000, 30000000)),
+          engine("keyless", {
+            ...use(29960000, 30000000),
+            key_ref: "secrets/gone",
+            key_missing: true,
+          }),
+        ],
+      }).api,
+    );
+    await screen.findByRole("table", { name: "Decision engines" });
+    for (const [name, shown, exact] of [
+      ["spent", "30M of 29.9M", "29 980 000 of 29 960 000"],
+      ["headroom", "29.9M of 30M", "29 930 000 of 29 940 000"],
+      ["round-under", "29.9M of 30M", "29 960 000 of 30 000 000"],
+      ["round-over", "30.1M of 30M", "30 040 000 of 30 000 000"],
+    ] as const) {
+      const words = `${grouped(exact)} tokens this month`;
+      const line = cellNote(row(new RegExp(name)), "tokens", words);
+      expect(forms(line)).toEqual({
+        shown: `${shown} tokens this month`,
+        read: words,
+      });
+      expect(row(new RegExp(name))).toHaveAccessibleName(new RegExp(words));
+    }
+    const words = `${grouped("29 960 000 of 30 000 000")} tokens this month`;
+    const keyless = cellNote(
+      row(/keyless/),
+      "Add it under Keys › Shared",
+      `Add it under Keys › Shared · ${words}`,
+    );
+    expect(forms(keyless)).toEqual({
+      shown: " · 29.9M of 30M tokens this month",
+      read: ` · ${words}`,
+    });
+    expect(
+      within(keyless).getByRole("link", { name: "Add it under Keys › Shared" }),
+    ).toHaveAttribute("href", "/settings/keys/shared");
   });
 
   it("shows members nothing, and says what an empty list means", async () => {

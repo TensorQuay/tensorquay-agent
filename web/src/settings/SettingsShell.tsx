@@ -75,6 +75,25 @@ export function SettingsShell(props: {
   );
 }
 
+/**
+ * Scrolls `menu`, and only `menu`, so its current item is inside the part of it the window shows: its box clipped to
+ * the window (WEB-U-460). `scrollIntoView` would scroll the page too, since the sticky menu's foot sits below the window
+ * while the page is at its top. The menu's padding stays around the item, room for its focus ring. A menu that isn't
+ * drawn (below 768 px, where the Section select stands in) has no box and is left alone.
+ */
+function showCurrent(menu: HTMLElement) {
+  const item = menu.querySelector('[aria-current="page"]');
+  const box = menu.getBoundingClientRect();
+  if (!item || box.height === 0) return;
+  const top = Math.max(box.top, 0);
+  const bottom = Math.min(box.bottom, window.innerHeight);
+  const room = Number.parseFloat(getComputedStyle(menu).paddingTop) || 0;
+  const place = item.getBoundingClientRect();
+  if (place.top - room < top) menu.scrollTop -= top - place.top + room;
+  else if (place.bottom + room > bottom)
+    menu.scrollTop += place.bottom + room - bottom;
+}
+
 /** The shell itself, rendered once the settings copy has loaded. */
 function Shell({
   section,
@@ -95,13 +114,13 @@ function Shell({
   })).filter((group) => group.entries.length > 0);
   const current = SECTIONS.find((entry) => entry.id === section);
   const title = current ? t(current.label) : t("settings.title");
-  // WEB-U-460: a menu taller than the window scrolls on its own, so the current section is brought into its view.
+  // WEB-U-460: a menu taller than the window scrolls on its own. Whenever the current section's item appears (an
+  // administrator's arrives with the session, after the first render), the menu scrolls to show it, and only the menu.
   const menu = useRef<HTMLElement>(null);
+  const listed = shown.some((entry) => entry.id === section);
   useEffect(() => {
-    menu.current
-      ?.querySelector('[aria-current="page"]')
-      ?.scrollIntoView?.({ block: "nearest" });
-  }, [section]);
+    if (listed && menu.current) showCurrent(menu.current);
+  }, [section, listed]);
   return (
     <div className="settings-page">
       <TabTitle>

@@ -3,7 +3,10 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
-## Unreleased
+## 17.4.0 (10 November 2026)
+
+An improvement release of the web app, and the runtime's MCP client library past three advisories. No migration, no
+protocol change.
 
 ### Changed
 
@@ -15,7 +18,8 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **Settings menu (WEB-U-460).** From 768 px the section menu stays in view while a long section scrolls; a menu taller
   than the window scrolls on its own, with the current section in view.
 - **Token counts in short form (WEB-U-461).** 2.8M instead of 2 824 643, in each language's own way (282.5万 in
-  Chinese); the exact number shows on hover and is what screen readers read.
+  Chinese). On the Usage page and in an engine's budget, the exact number shows on hover and is what screen readers
+  read.
 - **A folded group shows the step it is on (WEB-U-462).** While a task runs, a folded activity group is headed by its
   live line (the step, a soft shimmer and the time) instead of a static "Working…".
 - **The account menu (WEB-U-463).** Your email and role, then Settings, Usage (administrators), Language, Help, Send
@@ -55,6 +59,20 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   line, above + and Send, which stay where they are; files attached and messages waiting for the agent show as chips
   above the text, only while there are any. Its focus is a thin border in the focus colour instead of a 2 px ring. New
   task's box starts the same, at two lines while its placeholder shows the keyboard hint.
+
+### Fixed
+
+- **A sent picture's frame hugs the picture (WEB-U-464).** A wide picture no longer has an empty band beside it, and
+  on the narrowest screens a picture shrinks to fit its message.
+- **The Settings menu and engine budgets (WEB-U-460, WEB-U-461).** Only the menu scrolls to show the current section,
+  never the page, an administrator's section included; a budget's short figures never misstate where it stands
+  ("29.9M of 30M tokens" with headroom left, "30M of 29.9M" when spent), and its tooltip and screen readers get the
+  exact figures.
+
+### Upgrade notes
+
+- No migration, no protocol change. The web and runtime images are new (the runtime for its MCP client library); a
+  browser that holds an old task page reloads it on the next navigation.
 
 ## 17.3 (8 November 2026)
 
