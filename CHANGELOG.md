@@ -3,7 +3,10 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
-## Unreleased
+## 17.4.1 (12 November 2026)
+
+A fix release of the web app, the image builds and the install guide, and the system-call library past one
+advisory. No migration, no protocol change.
 
 ### Fixed
 
@@ -51,6 +54,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **The system-call library is rustix 1.1.6** (it was 1.1.5), past RUSTSEC-2026-0486. Its one affected call here,
   the sandbox's read-back of a file ACL, always passes a non-empty buffer, so the unsound zero-length case was not
   reached.
+
+### Upgrade notes
+
+- No migration, no protocol change. The web, gateway and runtime images are new; build them from the v17.4.1 tag
+  and start the gateway and web with `--force-recreate`, as the install guide now says. A browser that holds an old page reloads it on the next navigation.
 
 ## 17.4.0 (10 November 2026)
 
