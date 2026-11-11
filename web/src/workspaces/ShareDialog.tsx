@@ -146,6 +146,7 @@ export function ShareDialog({
       >
         <Input
           label={t("workspaces.email")}
+          labelHidden
           type="email"
           name="email"
           autoComplete="off"

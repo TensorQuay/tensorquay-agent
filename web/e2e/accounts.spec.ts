@@ -5,7 +5,50 @@ import AxeBuilder from "@axe-core/playwright";
 
 import { settled } from "./motion";
 import { signIn } from "./session";
-import { expect, test, type Page } from "./test";
+import { timesShown } from "./settings-page";
+import { expect, test, type Locator, type Page } from "./test";
+
+/**
+ * The character before each line break in `element`'s text, found by where each character's box starts a new line:
+ * an address may break only after its @ or a dot (its <wbr>s) or a hyphen, never inside a word (WEB-U-117).
+ */
+async function breaksAfter(element: Locator) {
+  return element.evaluate((node) => {
+    const after: string[] = [];
+    let top: number | null = null;
+    let previous = "";
+    const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+    for (let text = walker.nextNode(); text; text = walker.nextNode()) {
+      const value = text.textContent ?? "";
+      for (let at = 0; at < value.length; at++) {
+        const range = document.createRange();
+        range.setStart(text, at);
+        range.setEnd(text, at + 1);
+        const box = range.getClientRects()[0];
+        if (!box) continue;
+        if (top !== null && box.top > top + 1) after.push(previous);
+        top = box.top;
+        previous = value.charAt(at);
+      }
+    }
+    return after;
+  });
+}
+const BREAKS_AT = new Set(["@", ".", "-"]);
+
+/** People's list with `email` added as a member's, as the page reads it. */
+async function withPerson(page: Page, email: string, id: string) {
+  await page.route("**/api/v1/users", async (route) => {
+    const answer = await route.fetch();
+    const listed = (await answer.json()) as {
+      items: Record<string, unknown>[];
+    };
+    const member =
+      listed.items.find((item) => item.role === "member") ?? listed.items[0];
+    listed.items.push({ ...member, id, email, role: "member" });
+    await route.fulfill({ response: answer, json: listed });
+  });
+}
 
 async function capture(page: Page, name: string) {
   const directory = process.env.TQA_WEB_EVIDENCE_DIR;
@@ -17,6 +60,7 @@ async function capture(page: Page, name: string) {
 }
 async function clean(page: Page) {
   await settled(page);
+  await timesShown(page);
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   // Every column, the row actions included, fits the settings column without scrolling sideways.
   expect(
@@ -73,8 +117,14 @@ for (const width of [1024, 1440])
       await expect(page.getByText(value)).toHaveCount(0);
       await capture(page, `tokens-list-${suffix}`);
 
+      // Revoke is under the row's ⋯ (WEB-U-191).
       await page
-        .getByRole("button", { name: "Revoke token “Nightly build”" })
+        .getByRole("button", {
+          name: "More actions for the token “Nightly build”",
+        })
+        .click();
+      await page
+        .getByRole("menuitem", { name: "Revoke token “Nightly build”" })
         .click();
       const confirm = page.getByRole("dialog", { name: "Revoke this token?" });
       await expect(confirm).toContainText(
@@ -467,6 +517,11 @@ for (const size of [
         line.top < menu.y + menu.height - 1,
     );
     expect(overlapping, "lines of the address under the Role menu").toEqual([]);
+    const breaks = await breaksAfter(email);
+    expect(
+      breaks.filter((character) => !BREAKS_AT.has(character)),
+      `breaks only after its @, a dot or a hyphen (after: ${breaks.join(" ")})`,
+    ).toEqual([]);
     // The full address is there to read, and to hover.
     expect(await email.textContent()).toBe(long);
     await expect(row.locator(`[title="${long}"]`)).toHaveCount(1);
@@ -487,3 +542,32 @@ for (const size of [
     ).toBe(0);
   });
 }
+
+// WEB-U-117: an address longer than its column breaks at its <wbr>s (after its @ and dots), or after a hyphen, never
+// inside a word, in a People table as tight as its row form gets (1124 px beside the expanded sidebar) and as cards.
+// A rule that lets any value of a table wrap anywhere (.cell-whole) must not reach it.
+for (const width of [1124, 390])
+  test(`WEB-U-117 a long address on a tight People breaks only between its parts at ${String(width)}`, async ({
+    page,
+  }) => {
+    const long =
+      "the-quarterly-planning-and-review-coordinator-a12be408cd9f0e1a2b3c@finance-team.example.invalid";
+    await withPerson(page, long, "0195d8c0-0000-7000-8000-0000000003f4");
+    await page.setViewportSize({ width, height: 900 });
+    await signIn(page);
+    await page.goto("/settings/people");
+    const email = page
+      .getByRole("row", { name: new RegExp(long.replace(/[.]/g, "\\.")) })
+      .getByText(long, { exact: true });
+    await expect(email).toBeVisible();
+    await page.evaluate(() => document.fonts.ready);
+    const breaks = await breaksAfter(email);
+    expect(
+      breaks.length,
+      "the address is longer than its column",
+    ).toBeGreaterThan(0);
+    expect(
+      breaks.filter((character) => !BREAKS_AT.has(character)),
+      `breaks only after its @, a dot or a hyphen (after: ${breaks.join(" ")})`,
+    ).toEqual([]);
+  });

@@ -134,6 +134,17 @@ function measure(input: {
         `${element.scrollWidth}px in ${element.clientWidth}px`,
       );
   }
+  // Words for screen readers only take no room on screen (WEB-U-461). Tailwind's `sr-only` sits in its utilities
+  // layer, so an unlayered rule of ours on the same element wins over it and could put the words back.
+  for (const element of root.querySelectorAll(".sr-only")) {
+    const box = element.getBoundingClientRect();
+    if (box.width > 1.5 || box.height > 1.5 || !hidden(element))
+      add(
+        "screen-reader words on screen",
+        element,
+        `${Math.round(box.width)}x${Math.round(box.height)}`,
+      );
+  }
   const interactive = document.querySelectorAll(
     'button, a[href], summary, select, input:not([type="hidden"]), [role="button"], [role="menuitem"], [role="menuitemradio"], [role="tab"]',
   );

@@ -1,3 +1,8 @@
+import { readFileSync } from "node:fs";
+
+import { LANGUAGES } from "../src/i18n/generated/languages";
+import { SECTIONS } from "../src/settings/sections";
+
 import { signIn } from "./session";
 import { expect, test } from "./test";
 
@@ -63,3 +68,60 @@ test("WEB-U-460 a short window shows the current section in the menu and leaves 
     expect(await pageTop()).toBe(0);
   });
 });
+
+/** A shipped language's messages, from its catalogue. */
+const messages = (code: string) =>
+  (
+    JSON.parse(readFileSync(`src/i18n/locales/${code}.json`, "utf8")) as {
+      messages: Record<string, string>;
+    }
+  ).messages;
+const english = messages("en");
+
+/** The menu's items taller than one navigation row (`--row-height-nav`), each with its height. */
+function tallItems(menu: Element): string[] {
+  const token = getComputedStyle(menu).getPropertyValue("--row-height-nav");
+  const row = parseFloat(token);
+  // A renamed or emptied token would read as NaN, and then nothing would be "tall": fail instead.
+  if (!Number.isFinite(row))
+    throw new Error(`--row-height-nav is not a length: "${token}"`);
+  return [...menu.querySelectorAll<HTMLElement>("a.nav-item")]
+    .map((item) => ({
+      label: (item.textContent ?? "").trim(),
+      height: Math.round(item.getBoundingClientRect().height),
+    }))
+    .filter((item) => item.height > row)
+    .map((item) => `${item.label} (${item.height} px)`);
+}
+
+// WEB-U-465 (17.4.1 fix): every item of the Settings menu takes one line, in every language we ship and at every width
+// that shows the menu, from 768 px; the menu is as wide as its widest label needs. A longer label, or a translation of
+// one, fails here by name: shorten it or widen the menu, never cut it off.
+for (const { code } of LANGUAGES)
+  test(`WEB-U-465 every Settings menu item takes one line in ${code}`, async ({
+    page,
+  }) => {
+    const translated = messages(code);
+    const labels = SECTIONS.map(
+      // As the app does: the language's label, else the English one, else its key.
+      ({ label }) => translated[label] ?? english[label] ?? label,
+    );
+    await page.addInitScript((language) => {
+      localStorage.setItem("tensorquay-language", language);
+    }, code);
+    await signIn(page);
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto("/settings/account");
+    const menu = page.locator("nav.settings-nav");
+    // The language's own labels (English where it has none yet), the administrator's sections among them.
+    await expect(menu.locator("a.nav-item")).toHaveText(labels);
+    // Measured in the menu's own font, never in the one shown while it loads.
+    await page.evaluate(() => document.fonts.load('15px "Space Grotesk"'));
+    const tall: string[] = [];
+    for (const width of [768, 1024, 1280, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const item of await menu.evaluate(tallItems))
+        tall.push(`${item} at ${width} px`);
+    }
+    expect(tall).toEqual([]);
+  });

@@ -1,5 +1,5 @@
 import { signIn } from "./session";
-import { axe, capture } from "./settings-page";
+import { axe, capture, timesShown } from "./settings-page";
 import { expect, test, type Page } from "./test";
 
 // WEB-U-190 in the browser: where a settings table's own column is narrow (here a phone), its rows are cards rather
@@ -89,6 +89,9 @@ test("WEB-U-190 the same tables are tables on a laptop", async ({ page }) => {
   for (const path of PAGES) {
     await page.goto(path);
     await filled(page);
+    // The form is chosen by the table's widths: read it once every relative time is drawn.
+    await page.evaluate(() => document.fonts.ready);
+    await timesShown(page);
     expect(
       await page
         .locator(".data-table tbody tr")

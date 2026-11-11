@@ -1,6 +1,5 @@
 import { previewKind, shownInPanel } from "../files/file-kind";
 import { workspacePath } from "../files/workspace-path";
-import { formatCompact } from "../i18n/message";
 import { english, type Translate } from "../i18n/translate";
 
 import {
@@ -127,11 +126,10 @@ export function turnSummary(
   ];
   if (run)
     counts.push(
-      // WEB-U-461: token counts in their short form (2.4K), as on the Usage page.
-      t("summary.input", { count: formatCompact(run.promptTokens, t.locale) }),
-      t("summary.output", {
-        count: formatCompact(run.completionTokens, t.locale),
-      }),
+      // WEB-U-461: exact and grouped. The details are the figures one step away from the footer, as a short count's
+      // tooltip is, and screen readers get them too (TranscriptView).
+      t("summary.input", { count: run.promptTokens }),
+      t("summary.output", { count: run.completionTokens }),
     );
   const outcome =
     run?.status === "failed"

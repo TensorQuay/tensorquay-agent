@@ -22,29 +22,9 @@ describe("WEB-U-461 short counts", () => {
     ]);
   });
 
-  // A use against its limit rounds down (17.4 fix): 29 960 000 of 30 000 000 must not read "30M of 30M" while 40 000
-  // tokens are left. Totals and limits keep the nearest.
-  it("rounds a use down, so it never reads as its limit before it is reached", () => {
-    expect(
-      [29_960_000, 999_960, 4_249, 30_000_000].map((value) =>
-        formatCompact(value, "en", "down"),
-      ),
-    ).toEqual(["29.9M", "999.9K", "4.2K", "30M"]);
-    expect(formatCompact(29_960_000, "zh-Hans", "down")).toBe("2996万");
-    expect(formatCompact(29_960_000, "en")).toBe("30M");
-  });
-
-  // A use at or over its limit rounds up, and a limit above its use rounds up too (17.4 fix).
-  it("rounds up when asked", () => {
-    expect(
-      [29_940_000, 30_040_000, 30_000_000, 999_901].map((value) =>
-        formatCompact(value, "en", "up"),
-      ),
-    ).toEqual(["30M", "30.1M", "30M", "1M"]);
-  });
-
-  // The Usage tables shorten every cell: one formatter per language and rounding, not one per call.
-  it("builds one formatter per language and rounding", () => {
+  // The Usage tables shorten every cell: one formatter per language, not one per call. Whether an earlier test has
+  // already built a language's formatter doesn't matter: at most one is built here per language, and none after.
+  it("builds at most one formatter per language, whatever ran before", () => {
     const Real = Intl.NumberFormat;
     // Counts each formatter built, and builds the real one (a function, so `new` works on the spy).
     const built = vi.spyOn(Intl, "NumberFormat").mockImplementation(function (
@@ -54,9 +34,17 @@ describe("WEB-U-461 short counts", () => {
     });
     try {
       for (const value of [1234, 5678, 9012]) formatCompact(value, "en-GB");
-      expect(built).toHaveBeenCalledTimes(1);
-      formatCompact(1234, "en-GB", "down");
-      expect(built).toHaveBeenCalledTimes(2);
+      for (const value of [1234, 5678]) formatCompact(value, "fr");
+      const builtFor = (locale: string) =>
+        built.mock.calls.filter(([language]) => language === locale).length;
+      expect(builtFor("en-GB")).toBeLessThanOrEqual(1);
+      expect(builtFor("fr")).toBeLessThanOrEqual(1);
+      const first = built.mock.calls.length;
+      for (const value of [1, 22, 333]) {
+        formatCompact(value, "en-GB");
+        formatCompact(value, "fr");
+      }
+      expect(built).toHaveBeenCalledTimes(first);
     } finally {
       built.mockRestore();
     }

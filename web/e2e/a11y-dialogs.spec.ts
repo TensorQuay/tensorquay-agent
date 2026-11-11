@@ -236,10 +236,16 @@ test("A11Y dialogs after a change", async ({ page }) => {
       button(page, "Create token"),
       '/settings/tokens "Token created"',
     )),
+  );
+  // Revoke is under the token's ⋯ (WEB-U-191), and its dialog gives focus back there.
+  const tokenMore = button(page, `More actions for the token “${token}”`);
+  await tokenMore.click();
+  findings.push(
     ...(await auditDialog(
       page,
-      button(page, `Revoke token “${token}”`),
+      page.getByRole("menuitem", { name: `Revoke token “${token}”` }),
       '/settings/tokens "Revoke"',
+      { returnsTo: tokenMore },
     )),
   );
   await page.goto("/settings/people");

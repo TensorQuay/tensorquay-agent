@@ -56,6 +56,83 @@ for (const theme of ["light", "dark"] as const) {
     await expect(inside.getByText("Scripts ran.")).toBeVisible();
   });
 
+  // WEB-U-467: the preview is offline, so a page that loads from the internet names its hosts, as text, on a row of
+  // its own under the bar, which stays as before (the sandbox note and Reload, as high as a self-contained page's);
+  // at 1280 and 390.
+  test(`WEB-U-467 a page that needs the internet 1280 and 390 ${theme}`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.emulateMedia({ colorScheme: theme, reducedMotion: "reduce" });
+    await signIn(page);
+    await page.goto(await createConversation(page));
+    const panel = await openFile(page, "reports", /^weather\.html/);
+    const preview = panel.getByRole("region", { name: "weather.html" });
+    const line = preview.getByText(
+      "Previews run offline: what this page loads from cdn.example.org and api.example.org won't show here. Download it to see it all.",
+      { exact: true },
+    );
+    await expect(line).toBeVisible();
+    await expect(line.locator("a")).toHaveCount(0);
+    const note = preview.getByText("Scripts are running in a sandbox", {
+      exact: true,
+    });
+    await expect(note).toBeVisible();
+    await expect(preview.frameLocator("iframe").locator("#now")).toHaveText(
+      "Loading…",
+    );
+    // The line is under the bar, across the preview's width; the bar is as high as a self-contained page's.
+    const rows = async () =>
+      note.evaluate((element) => {
+        const bar = element.parentElement?.getBoundingClientRect();
+        const row = element.parentElement?.nextElementSibling;
+        const below = row?.getBoundingClientRect();
+        return {
+          bar: bar?.height ?? 0,
+          barBottom: bar?.bottom ?? 0,
+          barWidth: bar?.width ?? 0,
+          rowTop: below?.top ?? 0,
+          rowWidth: below?.width ?? 0,
+          row: row?.tagName ?? "",
+        };
+      });
+    const offline = await rows();
+    expect(offline.row).toBe("P");
+    expect(offline.rowTop).toBeGreaterThanOrEqual(offline.barBottom);
+    expect(offline.rowWidth).toBe(offline.barWidth);
+    await settled(page);
+    await capture(page, `preview-offline-1280-${theme}`);
+    expect(
+      (await new AxeBuilder({ page }).exclude("iframe").analyze()).violations,
+    ).toEqual([]);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(line).toBeVisible();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    ).toBe(true);
+    await settled(page);
+    await capture(page, `preview-offline-390-${theme}`);
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await panel
+      .getByRole("navigation", { name: "Folder path" })
+      .getByRole("button", { name: "reports" })
+      .click();
+    await panel.getByRole("button", { name: /^report\.html/ }).click();
+    const report = panel.getByRole("region", { name: "report.html" });
+    const reportNote = report.getByText("Scripts are running in a sandbox", {
+      exact: true,
+    });
+    await expect(reportNote).toBeVisible();
+    await expect(report.getByText(/^Previews run offline/)).toHaveCount(0);
+    expect(
+      await reportNote.evaluate(
+        (element) => element.parentElement?.getBoundingClientRect().height,
+      ),
+    ).toBe(offline.bar);
+  });
+
   test(`WEB-U-088 a spreadsheet in the Files panel 1280 ${theme}`, async ({
     page,
   }) => {

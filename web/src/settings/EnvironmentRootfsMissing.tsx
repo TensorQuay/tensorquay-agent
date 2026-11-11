@@ -14,7 +14,7 @@ export function EnvironmentRootfsMissing({ item }: { item: EnvironmentItem }) {
       <p className="type-small">
         {t("environments.rootfsMissingLine", { name: item.display_name })}
       </p>
-      <code className="type-code">
+      <code className="type-code code-wrap">
         {t("environments.rootfsBuildCommand", { image: rootfsImage(item) })}
       </code>
       <p className="type-small">{t("environments.rootfsMissingThen")}</p>

@@ -62,7 +62,8 @@ describe("WEB-U-016 quiet recorded summaries", () => {
     expect(long).not.toMatch(/feature|push|branch|commit/i);
   });
 
-  it("uses whole seconds and token counts in short form (WEB-U-461)", () => {
+  // WEB-U-461: the details are the exact figures one step away from the footer, as a short count's tooltip is.
+  it("uses whole seconds and exact token counts, grouped", () => {
     const summary = turnSummary(
       {
         status: "completed",
@@ -79,7 +80,7 @@ describe("WEB-U-016 quiet recorded summaries", () => {
     );
     expect(summary.summary).toBe("No files changed");
     expect(summary.details).toBe(
-      "46 s · 0 steps · 0 files changed · 0 commands · 218.5K input · 6.3K output tokens",
+      "46 s · 0 steps · 0 files changed · 0 commands · 218\u202f469 input · 6\u202f269 output tokens",
     );
     expect(summary.activityLabel).toBe("Worked for 46 s");
   });

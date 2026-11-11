@@ -235,6 +235,10 @@ function TranscriptTurns({
                     <RecordedSummary text={turn.summary} />
                   )}
                 </p>
+                {turn.summaryDetails && (
+                  // The tooltip's details, for screen readers: a title alone reaches few of them (WEB-U-461).
+                  <p className="sr-only">{turn.summaryDetails}</p>
+                )}
                 {turn.wrote && onOpenFile ? (
                   <Button
                     variant="ghost"

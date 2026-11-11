@@ -220,7 +220,30 @@
   --table-note-width: 16rem;
   /* An environment's tools in its list row: one line at most this wide, the rest after "…" (17.3). */
   --table-tools-width: 200px;
-  --settings-nav-width: 160px;
+  /* A table area narrower than the full 800 px column (beside the Settings menu at 1024 or 1280) is tight: a column of
+     muted lines and an environment's tools line give way first, since their words are cut with "…" and whole in a
+     tooltip, before a row's actions leave the area (17.4.1, WEB-E2E-119). They keep a share of the area, which in a
+     full column is the widths above (30% and 25% of 800 px are 240 and 200 px); a table area is a container. */
+  --table-note-share: 30cqi;
+  --table-tools-share: 25cqi;
+  /* A value that would widen its table wraps whole past this share of the area, outside the name column (17.4.1). */
+  --table-value-share: 25cqi;
+  /* A note that holds a link (where to allow a host) counts no more than the room that leaves, beside a 16rem column
+     (Last used), the name column 16 characters of the code face (128 px at 14 px) and the three columns their padding,
+     so 368, 324 and 272 px in the 800, 756 and 704 px areas (17.4.1). Its words give way first, then its link wraps. */
+  --table-name-least: 128px;
+  --table-note-line-share: calc(
+    100cqi - var(--table-note-width) - var(--table-name-least) - 6 *
+      var(--space-2)
+  );
+  /* The Settings menu, as wide as its widest label needs (17.4.1, WEB-U-465): an item gives its label its width less
+     12 px of padding at each side, the 16 px icon and the 12 px gap, so 132 px here. That is the widest label we ship,
+     "Decision engines" at 124 px in 15 px Space Grotesk, and 8 px for a rendering that runs a little wider. */
+  --settings-nav-width: 184px;
+  /* A field's starting width in a one-row settings form, before the row wraps. */
+  --form-field-basis: 160px;
+  /* The label column of a details list (an administrator's view of another person's task). */
+  --detail-label-width: 160px;
   --transcript-width: 720px;
   --channel-side-width: 18rem;
   /* §6: the right panel for files and changes. */
@@ -465,6 +488,11 @@ h3 {
   font-family: var(--font-machine);
   font-size: var(--small-size);
   line-height: var(--code-leading);
+}
+/* A machine value that can outgrow its line (an image digest, a command, an environment's name) wraps anywhere, whole
+   and unchanged, rather than push its column sideways (WEB-U-466, 17.4.1), as a secret's name does (`.secret-ref`). */
+.code-wrap {
+  overflow-wrap: anywhere;
 }
 .prose-measure {
   max-width: var(--measure);
@@ -866,23 +894,6 @@ textarea.form-control {
     .sidebar-toggle-state[data-sidebar-for="rail"]:not([hidden]) {
     display: contents;
   }
-}
-/* Words for screen readers only, such as the exact number behind a short count (WEB-U-461). */
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-.sidebar-toggle-name {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
 }
 .product-name {
   display: flex;

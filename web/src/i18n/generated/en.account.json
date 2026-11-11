@@ -6,6 +6,7 @@
     "account.signIn": "Sign in",
     "account.languageCurrent": "Language · {language}",
     "account.settings": "Settings",
+    "account.heading": "{email} · {role}",
     "account.roleAdmin": "Administrator",
     "account.roleMember": "Member",
     "account.usage": "Usage",

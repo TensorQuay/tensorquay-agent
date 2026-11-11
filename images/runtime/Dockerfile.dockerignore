@@ -5,6 +5,7 @@
 !crates
 !crates/**
 !images
+!images/fetch.py
 !images/runtime
 !images/runtime/packages.py
 !images/runtime/go-shim.sh

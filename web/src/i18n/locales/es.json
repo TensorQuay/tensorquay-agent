@@ -321,6 +321,7 @@
     "quota.workspaceOver": "Este espacio de trabajo supera su cuota de almacenamiento. La ejecución continúa; elimina archivos para volver a estar por debajo.",
     "quota.workspaceStopped": "La ejecución se detuvo: este espacio de trabajo superó con creces su cuota de almacenamiento. Elimina archivos y vuelve a enviar tu mensaje.",
     "workspaces.helperCopyName": "{name} (copia del ayudante)",
+    "account.heading": "{email} · {role}",
     "account.roleAdmin": "Administrador",
     "account.roleMember": "Miembro",
     "account.usage": "Uso",

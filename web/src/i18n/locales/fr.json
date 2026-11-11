@@ -321,6 +321,7 @@
     "quota.workspaceOver": "Cet espace de travail dépasse son quota de stockage. L’exécution continue ; supprimez des fichiers pour repasser en dessous.",
     "quota.workspaceStopped": "L’exécution s’est arrêtée : cet espace de travail a trop dépassé son quota de stockage. Supprimez des fichiers, puis renvoyez votre message.",
     "workspaces.helperCopyName": "{name} (copie de l’assistant)",
+    "account.heading": "{email} · {role}",
     "account.roleAdmin": "Administrateur",
     "account.roleMember": "Membre",
     "account.usage": "Utilisation",

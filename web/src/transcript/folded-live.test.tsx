@@ -76,6 +76,21 @@ describe("WEB-U-462 a folded group shows the step it is on", () => {
     expect(button).toHaveAccessibleName("Working…");
   });
 
+  // The label leaves the screen through the one class for words only screen readers get, set while the live words
+  // show; it stays the button's name.
+  it("hides the label on screen only, while the live words show", () => {
+    vi.useFakeTimers({ now: BASE + 34_000 });
+    show(reading);
+    const button = toggle();
+    if (!button) throw new Error("the group has its toggle");
+    const label = () => button.querySelector(":scope > span");
+    expect(label()).not.toHaveClass("sr-only");
+    fireEvent.click(button);
+    expect(label()).toHaveClass("sr-only");
+    expect(label()).toHaveTextContent(/^Working…$/);
+    expect(button).toHaveAccessibleName("Working…");
+  });
+
   it("says Thinking… with the step's time when no call runs", () => {
     vi.useFakeTimers({ now: BASE + 10_000 });
     // The step started and the model hasn't written a word yet (while it writes, no live line speaks over it).

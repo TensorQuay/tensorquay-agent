@@ -204,7 +204,9 @@ function Administration({ me, clock }: { me: User; clock: () => Date }) {
                           className="data-name data-name-wrap"
                           title={account.email}
                         >
-                          <span>{breakable(account.email)}</span>
+                          <span className="cell-whole">
+                            {breakable(account.email)}
+                          </span>
                           {own && (
                             <span className="status-pill type-label">
                               {t("users.you")}
@@ -324,7 +326,9 @@ function Administration({ me, clock }: { me: User; clock: () => Date }) {
                         className="data-name data-name-wrap"
                         title={invitation.email}
                       >
-                        <span>{breakable(invitation.email)}</span>
+                        <span className="cell-whole">
+                          {breakable(invitation.email)}
+                        </span>
                       </div>
                     </td>
                     <td>{t("users.roleName", { role: invitation.role })}</td>

@@ -239,7 +239,7 @@ export function ImageChoice({
             <p className="type-small muted">
               {t("environments.imageResolved")}
               {sentenceGap(t.locale)}
-              <code className="type-code">{resolved}</code>
+              <code className="type-code code-wrap">{resolved}</code>
             </p>
           )}
           {creating && <BuildHelp />}

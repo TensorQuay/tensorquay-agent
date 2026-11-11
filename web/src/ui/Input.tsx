@@ -10,6 +10,7 @@ import { Field } from "./Field";
  */
 export function Input({
   label,
+  labelHidden = false,
   error,
   adornment,
   id: suppliedId,
@@ -18,6 +19,7 @@ export function Input({
   ...props
 }: InputHTMLAttributes<HTMLInputElement> & {
   label: string;
+  labelHidden?: boolean;
   error?: string;
   adornment?: ReactNode;
 }) {
@@ -37,7 +39,7 @@ export function Input({
     />
   );
   return (
-    <Field id={id} label={label} error={error}>
+    <Field id={id} label={label} labelHidden={labelHidden} error={error}>
       {adornment ? (
         <div className="input-adorned">
           {input}

@@ -253,7 +253,7 @@ function DefaultEnvironment({
         {display ? (
           <span>{display}</span>
         ) : (
-          <code className="type-code">{name}</code>
+          <code className="type-code code-wrap">{name}</code>
         )}
         <span
           className="status-pill type-label"

@@ -71,7 +71,11 @@
 .conversation-empty {
   padding-block: var(--space-12);
 }
+/* The transcript's items are the container its sent pictures measure (WEB-U-464): as wide as the scroller's content,
+   less any classic scrollbar, which container units on the scroller itself would count. Their containment moves
+   nothing in them, and nothing in them is fixed: menus and tooltips mount outside the transcript. */
 .transcript-items {
+  container: transcript / inline-size;
   display: flex;
   flex-direction: column;
   gap: var(--space-8);
@@ -322,15 +326,6 @@ textarea.composer-input {
 }
 /* WEB-U-462: a folded group's live heading stays on one line; long step words end in an ellipsis, the time after
    them never wraps. */
-/* While the live words show, the label before them leaves the screen but stays the button's name. */
-.activity-toggle > span:has(+ .activity-heading-live) {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
 .activity-heading-live {
   min-width: 0;
   overflow: hidden;
@@ -704,14 +699,6 @@ textarea.composer-input {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.composer-card .field > label {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
 .composer-card textarea.composer-input {
   flex: 1;
   min-width: 0;
@@ -797,18 +784,6 @@ textarea.composer-input {
   min-width: 0;
   overflow: hidden;
 }
-.conversation-pickers .field {
-  min-width: 0;
-  max-width: 100%;
-}
-.conversation-pickers .field > label {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
 /*
  * The bar gives way in order: the environment clause takes only the room the title leaves (basis 0) and shows whole or
  * not at all; the title truncates next, down to a few words; the pickers' names truncate; a long run status (a
@@ -851,14 +826,6 @@ textarea.composer-input {
 }
 .conversation-status [data-short]::before {
   content: attr(data-short) / "";
-}
-.conversation-status .run-long {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
 }
 @container task-header (max-width: 600px) {
   .conversation-title {

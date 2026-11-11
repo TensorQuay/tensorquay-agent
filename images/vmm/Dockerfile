@@ -24,16 +24,30 @@ FROM debian:trixie-slim@sha256:62bd423aeee912639ca8ee681c2b762cb3e25137e0a92b20b
 # The release below is arch-check's machine; the pins are the x86_64 release's.
 COPY --from=arch-check /arch/machine /tmp/machine
 RUN test "$(cat /tmp/machine)" = x86_64
+# Python and CA certificates for the download, from the vmm stage's signed snapshot (apt verifies every package hash).
+RUN printf '%s\n' \
+    'deb [check-valid-until=no] http://snapshot.debian.org/archive/debian/20261020T000000Z/ trixie main' \
+    > /etc/apt/sources.list \
+    && rm /etc/apt/sources.list.d/debian.sources \
+    && apt-get -o APT::Update::Error-Mode=any -o Acquire::Retries=3 -o Acquire::http::Timeout=30 update \
+    && apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 install -y --no-install-recommends \
+       python3 ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 ARG FIRECRACKER_VERSION=v1.17.0
 # Both pins are the release's published values: the archive's SHA-256 and that of its published checksum file. The
-# build fails on any other content, and the archive is verified again against the published file.
-ADD --checksum=sha256:06094a1108ae9e82aa4c23a775aa92758f53f1175d422270d9d6162cb9ade558 \
-    https://github.com/firecracker-microvm/firecracker/releases/download/${FIRECRACKER_VERSION}/firecracker-${FIRECRACKER_VERSION}-x86_64.tgz \
-    /tmp/release/firecracker-${FIRECRACKER_VERSION}-x86_64.tgz
-ADD --checksum=sha256:b89dea3edf551929f151b95d31168677ad2b8bb257d1d87a08470f7299749b7c \
-    https://github.com/firecracker-microvm/firecracker/releases/download/${FIRECRACKER_VERSION}/firecracker-${FIRECRACKER_VERSION}-x86_64.tgz.sha256.txt \
-    /tmp/release/SHA256
-RUN cd /tmp/release && sha256sum -c --strict SHA256 \
+# build fails on any other content, and the archive is verified again against the published file. The helper tries a
+# file again after a network error (REL-U-012); a wrong file fails at once.
+ARG FIRECRACKER_SHA256=06094a1108ae9e82aa4c23a775aa92758f53f1175d422270d9d6162cb9ade558
+ARG FIRECRACKER_SUMS_SHA256=b89dea3edf551929f151b95d31168677ad2b8bb257d1d87a08470f7299749b7c
+WORKDIR /tmp/release
+RUN --mount=type=bind,source=images/fetch.py,target=/tmp/fetch.py python3 /tmp/fetch.py \
+      https://github.com/firecracker-microvm/firecracker/releases/download/${FIRECRACKER_VERSION}/firecracker-${FIRECRACKER_VERSION}-x86_64.tgz \
+      /tmp/release/firecracker-${FIRECRACKER_VERSION}-x86_64.tgz \
+      https://github.com/firecracker-microvm/firecracker/releases/download/${FIRECRACKER_VERSION}/firecracker-${FIRECRACKER_VERSION}-x86_64.tgz.sha256.txt \
+      /tmp/release/SHA256 \
+    && printf '%s  %s\n' "$FIRECRACKER_SHA256" "firecracker-${FIRECRACKER_VERSION}-x86_64.tgz" \
+       "$FIRECRACKER_SUMS_SHA256" SHA256 | sha256sum -c \
+    && sha256sum -c --strict SHA256 \
     && tar --no-same-owner -xzf "firecracker-${FIRECRACKER_VERSION}-x86_64.tgz" -C /tmp \
     && release="/tmp/release-${FIRECRACKER_VERSION}-x86_64" \
     && install -D -m 0755 "$release/firecracker-${FIRECRACKER_VERSION}-x86_64" /out/usr/local/bin/firecracker \

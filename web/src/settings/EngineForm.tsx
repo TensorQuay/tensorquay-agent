@@ -7,7 +7,6 @@ import { useId, useState, type FormEvent } from "react";
 import { newActionKey } from "../api/action-key";
 import { ApiError } from "../api/error";
 import { useT } from "../i18n/I18nProvider";
-import { formatCompact } from "../i18n/message";
 import { sentenceGap } from "../i18n/sentences";
 import type { MessageKey } from "../i18n/translate";
 import { Button } from "../ui/Button";
@@ -730,17 +729,10 @@ function BudgetSummary({
   const period = draft.budgetPeriod;
   const text =
     calls !== null && tokens !== null
-      ? t("engines.budgetSummaryBoth", {
-          calls,
-          tokens: formatCompact(tokens, t.locale),
-          period,
-        })
+      ? t("engines.budgetSummaryBoth", { calls, tokens, period })
       : calls !== null
         ? t("engines.budgetSummaryCalls", { calls, period })
-        : t("engines.budgetSummaryTokens", {
-            tokens: formatCompact(tokens ?? 0, t.locale),
-            period,
-          });
+        : t("engines.budgetSummaryTokens", { tokens: tokens ?? 0, period });
   return <p className="type-small">{text}</p>;
 }
 

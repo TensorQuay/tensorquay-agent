@@ -138,7 +138,7 @@
   gap: var(--space-3);
 }
 .settings-form .field {
-  flex: 1 1 var(--settings-nav-width);
+  flex: 1 1 var(--form-field-basis);
   min-width: 0;
 }
 
@@ -211,20 +211,26 @@
   max-width: none;
 }
 /* An environment's tools in a table row: one line, cut with "…", every tool named in its tooltip (17.3). Each tool is
-   inline there, so the "…" sits on their words' line; a card (under 600 px) lists them all. */
+   inline there, so the "…" sits on their words' line; a card lists them all. */
 @container data-table (min-width: 600px) {
-  .data-table .environment-tools {
+  :where(.data-table-scroll:not([data-cards])) .data-table .environment-tools {
     display: block;
-    max-width: var(--table-tools-width);
+    max-width: min(var(--table-tools-width), var(--table-tools-share));
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
   }
-  .data-table .environment-tools li {
+  :where(.data-table-scroll:not([data-cards]))
+    .data-table
+    .environment-tools
+    li {
     display: inline;
     margin-inline-end: var(--space-3);
   }
-  .data-table .environment-tools svg {
+  :where(.data-table-scroll:not([data-cards]))
+    .data-table
+    .environment-tools
+    svg {
     display: inline-block;
     margin-inline-end: var(--space-1);
     vertical-align: middle;
@@ -248,9 +254,36 @@
   text-overflow: ellipsis;
 }
 /* Outside the name column, a column whose cells carry a muted line keeps 16rem, so its notes read as words, not as a
-   few letters and "…" (17.3). */
+   few letters and "…" (17.3); in a tight table area, its share of the area (17.4.1). */
 .data-table td:not(:first-child) .cell-note {
-  min-width: calc(var(--table-note-width) - 2 * var(--space-2));
+  min-width: min(
+    calc(var(--table-note-width) - 2 * var(--space-2)),
+    var(--table-note-share)
+  );
+}
+/* In a tight table area's row form (600 to 800 px; as cards its notes wrap in full), a note's words take the room its
+   link leaves and are cut there with "…", the link whole right after them (17.4.1). They count for nothing in the
+   column's least width (width 0) and keep their own width up to that room (the flex basis). */
+@container data-table (600px <= width < 800px) {
+  :where(.data-table-scroll:not([data-cards]))
+    .data-table
+    .cell-note:has(> .cell-note-link)
+    > :not(.cell-note-link) {
+    width: 0;
+    flex: 0 1 max-content;
+  }
+}
+/* In a full area the note's line counts whole up to its share (`--table-note-line-share`), so the name column keeps
+   its room beside it (17.4.1): there its words take the room its link leaves and are cut first, then the link wraps
+   past the share. With the usual words and link the line is whole, as before. */
+@container data-table (width >= 800px) {
+  :where(.data-table-scroll:not([data-cards]))
+    .data-table
+    td:not(:first-child)
+    .cell-note:has(> .cell-note-link) {
+    width: max-content;
+    max-width: var(--table-note-line-share);
+  }
 }
 .data-table:has(.cell-note) td {
   height: var(--row-height-table-two);
@@ -340,6 +373,90 @@
     min-width: 0;
   }
 }
+/* A value that would widen its table past its area (a name or host in the name column, an email, who read a key, a
+   task's environment or model) wraps whole in its column instead, anywhere if it has no space, so its row grows a line
+   and none of it is cut (17.4.1). In the name column it takes the room the other columns leave; in another it keeps its
+   own width up to a quarter of the area (16rem at most). A pill beside it goes under it, and a note's link wraps the
+   same way past its share. The names and values held to one line keep their cut, whole in the tooltip (§7 Table). */
+.data-table td .cell-whole,
+.data-table .cell-note-link {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+/* People's email is a .cell-whole too, but breaks at its <wbr>s (after its @ and dots) or a hyphen, never inside a
+   word (WEB-U-117, WEB-U-382): these two rules outweigh the one above. In a table's row form it never breaks inside
+   a part, so its column is at least its longest part, and a table that can't give it that is cards (TableScroll).
+   As cards a part longer than a whole line (an address at the gateway's limit, WEB-E2E-120) breaks inside as a last
+   resort; every other address still breaks only between its parts. */
+.data-table td .data-name-wrap > .cell-whole {
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+@container data-table (min-width: 600px) {
+  :where(.data-table-scroll:not([data-cards]))
+    .data-table
+    td
+    .data-name-wrap
+    > .cell-whole {
+    overflow-wrap: normal;
+  }
+}
+.data-table .cell-note-link {
+  max-width: 100%;
+}
+.data-table td:first-child .cell-pills {
+  flex-wrap: wrap;
+}
+/* A reference held to 20ch in the name column (§7) takes no more than the room its row leaves, cut there and whole in
+   its tooltip, so it never holds the table past its area either. */
+.data-table td:first-child .cell-pills > .secret-ref-line {
+  width: 0;
+  flex: 0 1 max-content;
+}
+@container data-table (min-width: 600px) {
+  :where(.data-table-scroll:not([data-cards]))
+    .data-table
+    td:not(:first-child)
+    .cell-whole {
+    display: inline-block;
+  }
+  :where(.data-table-scroll:not([data-cards]))
+    .data-table
+    td:not(:first-child)
+    .cell-whole,
+  :where(.data-table-scroll:not([data-cards])) .data-table .cell-note-link {
+    width: max-content;
+    max-width: min(var(--table-note-width), var(--table-value-share));
+  }
+}
+/* A note's link is whole on one line wherever the row has room for it: up to the note's line share, which leaves the
+   name column its room (in a tight area, where the note's words count for nothing, the link alone counts; in a full
+   one the line holds it). Past that it wraps (17.4.1). */
+@container data-table (600px <= width < 800px) {
+  :where(.data-table-scroll:not([data-cards])) .data-table .cell-note-link {
+    max-width: var(--table-note-line-share);
+  }
+}
+@container data-table (width >= 800px) {
+  :where(.data-table-scroll:not([data-cards])) .data-table .cell-note-link {
+    max-width: 100%;
+  }
+}
+/* In a table row a wrapped link reads as one piece: its lines at the text's own leading, the first on its words' line
+   (their shared baseline), the next under it; one line stays in the middle of the control's height, as before. A
+   card's note wraps as one text (WEB-E2E-111). */
+@container data-table (min-width: 600px) {
+  :where(.data-table-scroll:not([data-cards]))
+    .data-table
+    .cell-note:has(> .cell-note-link) {
+    align-items: baseline;
+  }
+  :where(.data-table-scroll:not([data-cards])) .data-table .cell-note-link {
+    display: flex;
+    align-items: center;
+    line-height: var(--small-leading);
+  }
+}
 /* Links in tables and the back link: underlined, with at least the minimum control height to hit (§5b). A button drawn
    as a link (a row's Edit that opens its page) is a button, never an underlined link (17.3); a link in a cell's note
    stays inline in that line (above). */
@@ -371,89 +488,95 @@
   gap: var(--space-2);
 }
 
-/* Where a table's own column is narrow (a phone, or beside a menu), its rows are cards rather than a table to scroll
-   sideways (WEB-U-190): the row's name first with its actions beside it, then each other cell under its column's name,
-   which TableScroll copies from the header (data-label). The header row stays for screen readers only. */
+/* Where a table's area is narrow (a phone, or beside a menu), or the table does not fit it, its rows are cards rather
+   than a table to scroll sideways (WEB-U-190): the row's name first with its actions beside it, then each other cell
+   under its column's name, which TableScroll copies from the header (data-label). The header row stays for screen
+   readers only. TableScroll decides the form (`data-cards` on the area, 17.4.1): every rule of a table's row form
+   above that depends on the area's width holds only without it. The selector before each rule weighs nothing, so the
+   cascade is as it was under the old 600 px query. */
 .data-table-scroll {
   container: data-table / inline-size;
 }
-@container data-table (max-width: 599px) {
-  .data-table,
-  .data-table tbody,
-  .data-table tfoot {
-    display: block;
-  }
-  .data-table thead {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-  .data-table tbody tr,
-  .data-table tfoot tr {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    column-gap: var(--space-2);
-    padding: var(--space-3);
-    margin-bottom: var(--space-2);
-    border: var(--border-width) solid var(--line);
-    border-radius: var(--control-radius);
-  }
-  .data-table td {
-    display: block;
-    grid-column: 1 / -1;
-    height: auto;
-    min-width: 0;
-    padding: var(--space-1) 0;
-    border-bottom: none;
-    white-space: normal;
-    overflow-wrap: anywhere;
-  }
-  /* The row's name, and its actions beside it on the first line. */
-  .data-table td:first-child {
-    grid-column: 1;
-  }
-  .data-table td.data-cell-action {
-    grid-column: 2;
-    grid-row: 1;
-    align-self: start;
-    text-align: right;
-  }
-  .data-table td[data-label]::before {
-    content: attr(data-label);
-    display: block;
-    color: var(--muted);
-    font-size: var(--label-size);
-    line-height: var(--small-leading);
-  }
-  .data-table .data-name {
-    max-width: none;
-  }
-  /* A card is no table row (17.3): no two-line height or a row's padding around a control, and a cell's note wraps in
-     full, since a phone shows no tooltip. */
-  .data-table:has(.cell-note) td,
-  .data-table td:has(.button, a) {
-    height: auto;
-    padding-block: var(--space-1);
-  }
-  .data-table .cell-note,
-  .data-table .cell-cut,
-  .data-table td:not(:first-child) .cell-note {
-    contain: none;
-    min-width: 0;
-    max-width: none;
-    overflow: visible;
-    white-space: normal;
-  }
-  .data-table .cell-note:has(> .cell-note-link) {
-    flex-wrap: wrap;
-  }
-  .data-table .cell-note > * {
-    overflow: visible;
-    white-space: pre-wrap;
-  }
+:where(.data-table-scroll[data-cards]) .data-table,
+:where(.data-table-scroll[data-cards]) .data-table tbody,
+:where(.data-table-scroll[data-cards]) .data-table tfoot {
+  display: block;
+}
+:where(.data-table-scroll[data-cards]) .data-table thead {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+:where(.data-table-scroll[data-cards]) .data-table tbody tr,
+:where(.data-table-scroll[data-cards]) .data-table tfoot tr {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: var(--space-2);
+  padding: var(--space-3);
+  margin-bottom: var(--space-2);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+}
+:where(.data-table-scroll[data-cards]) .data-table td {
+  display: block;
+  grid-column: 1 / -1;
+  height: auto;
+  min-width: 0;
+  padding: var(--space-1) 0;
+  border-bottom: none;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+/* The row's name, and its actions beside it on the first line. */
+:where(.data-table-scroll[data-cards]) .data-table td:first-child {
+  grid-column: 1;
+}
+:where(.data-table-scroll[data-cards]) .data-table td.data-cell-action {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: start;
+  text-align: right;
+}
+:where(.data-table-scroll[data-cards]) .data-table td[data-label]::before {
+  content: attr(data-label);
+  display: block;
+  color: var(--muted);
+  font-size: var(--label-size);
+  line-height: var(--small-leading);
+}
+:where(.data-table-scroll[data-cards]) .data-table .data-name {
+  max-width: none;
+}
+/* A card is no table row (17.3): no two-line height or a row's padding around a control, and a cell's note wraps in
+   full, since a phone shows no tooltip. */
+:where(.data-table-scroll[data-cards]) .data-table:has(.cell-note) td,
+:where(.data-table-scroll[data-cards]) .data-table td:has(.button, a) {
+  height: auto;
+  padding-block: var(--space-1);
+}
+:where(.data-table-scroll[data-cards]) .data-table .cell-note,
+:where(.data-table-scroll[data-cards]) .data-table .cell-cut,
+:where(.data-table-scroll[data-cards])
+  .data-table
+  td:not(:first-child)
+  .cell-note {
+  contain: none;
+  min-width: 0;
+  max-width: none;
+  overflow: visible;
+  white-space: normal;
+}
+:where(.data-table-scroll[data-cards])
+  .data-table
+  .cell-note:has(> .cell-note-link) {
+  flex-wrap: wrap;
+}
+:where(.data-table-scroll[data-cards]) .data-table .cell-note > * {
+  overflow: visible;
+  white-space: pre-wrap;
 }
 .data-select {
   width: auto;
@@ -498,7 +621,7 @@
 }
 .detail-row {
   display: grid;
-  grid-template-columns: var(--settings-nav-width) minmax(0, 1fr);
+  grid-template-columns: var(--detail-label-width) minmax(0, 1fr);
   gap: var(--space-3);
 }
 /* The Usage page's period and grouping sit side by side; figures align on the right in tabular digits. */

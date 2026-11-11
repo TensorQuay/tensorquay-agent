@@ -37,6 +37,8 @@
     "files.contents": "Contents of {name}",
     "files.pageSandboxed": "Scripts are running in a sandbox",
     "files.pageLeft": "Links in a preview don't open here. Reload to see the page again.",
+    "files.pageOffline": "Previews run offline: what this page loads from {hosts} won't show here. Download it to see it all.",
+    "files.pageHostsMore": "{count, plural, one {# more} other {# more}}",
     "files.reload": "Reload",
     "files.expand": "Expand",
     "files.pageFrame": "Preview of {name}",

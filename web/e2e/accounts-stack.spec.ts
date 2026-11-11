@@ -119,8 +119,12 @@ test("WEB-E2E-020 team accounts on the real stack", async ({
     [],
   );
 
+  // Revoke is under the row's ⋯ (WEB-U-191).
   await guest
-    .getByRole("button", { name: "Revoke token “Stack check”" })
+    .getByRole("button", { name: "More actions for the token “Stack check”" })
+    .click();
+  await guest
+    .getByRole("menuitem", { name: "Revoke token “Stack check”" })
     .click();
   await guest
     .getByRole("dialog", { name: "Revoke this token?" })
