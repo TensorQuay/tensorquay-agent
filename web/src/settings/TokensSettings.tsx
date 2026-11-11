@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Trash2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
 import { useRequest } from "../api/use-request";
@@ -8,6 +9,7 @@ import { RelativeTime } from "../conversations/RelativeTime";
 import { useT } from "../i18n/I18nProvider";
 import { sentenceGap } from "../i18n/sentences";
 import type { ApiToken, CreatedToken } from "../protocol/generated/api";
+import { ActionMenu } from "../ui/ActionMenu";
 import { Button } from "../ui/Button";
 import { ConfirmDialog } from "../ui/ConfirmDialog";
 import { ErrorMessage } from "../ui/ErrorMessage";
@@ -194,15 +196,20 @@ export function TokensSettings({
                       )}
                     </td>
                     <td className="data-cell-action">
-                      <Button
-                        variant="ghost"
-                        aria-label={t("tokens.revokeName", {
-                          name: token.name,
-                        })}
-                        onClick={() => setRevoking(token)}
-                      >
-                        {t("tokens.revokeConfirm")}
-                      </Button>
+                      {/* Revoke is a danger item under the row's ⋯, as in every settings table (WEB-U-191). */}
+                      <ActionMenu
+                        label={t("tokens.more", { name: token.name })}
+                        actions={[
+                          {
+                            id: "revoke",
+                            label: t("tokens.revokeMenu"),
+                            name: t("tokens.revokeName", { name: token.name }),
+                            icon: Trash2,
+                            danger: true,
+                            onSelect: () => setRevoking(token),
+                          },
+                        ]}
+                      />
                     </td>
                   </tr>
                 );

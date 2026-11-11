@@ -1,12 +1,15 @@
 import Link from "next/link";
 
+import { ShortAndExact } from "./CompactCount";
+
 /**
  * A table cell's one muted line (UI-GUIDELINES §7 Table, 17.3): cut with "…" where its column ends, its words whole in
  * its tooltip; the item's own page says them in full. A line that shows its figures short takes them `exact` too (§10,
  * WEB-U-461): its words without a link, or the words `after` its link. The short words show; the tooltip and screen
- * readers get the exact ones, as `ShortAndExact` does. With `href`, the line holds a link of its words, never cut: after
- * the reason `before` it (where to allow a host), or ahead of the words `after` it (where to add a missing key). A
- * space comes first, so the row's text and its name read "value note", never "valuenote".
+ * readers get the exact ones (`ShortAndExact`, untitled: the line's tooltip is its one). With `href`, the line holds a
+ * link of its words, never cut: after the reason `before` it (where to allow a host), or ahead of the words `after` it
+ * (where to add a missing key). A space comes first, so the row's text and its name read "value note", never
+ * "valuenote".
  */
 export function CellNote({
   children,
@@ -41,31 +44,22 @@ export function CellNote({
             <Link href={href} className="cell-note-link">
               {children}
             </Link>
-            {after ? (
-              <Shown
+            {after && exact ? (
+              <ShortAndExact
                 short={` · ${after}`}
-                exact={exact ? ` · ${exact}` : null}
+                exact={` · ${exact}`}
+                titled={false}
               />
+            ) : after ? (
+              <span>{` · ${after}`}</span>
             ) : null}
           </>
         ) : exact ? (
-          <Shown short={words} exact={whole} />
+          <ShortAndExact short={words} exact={whole} titled={false} />
         ) : (
           words
         )}
       </span>
     </>
-  );
-}
-
-/** Words shown short and hidden from screen readers, beside the exact words only screen readers get; plain without. */
-function Shown({ short, exact }: { short: string; exact?: string | null }) {
-  return exact ? (
-    <>
-      <span aria-hidden="true">{short}</span>
-      <span className="visually-hidden">{exact}</span>
-    </>
-  ) : (
-    <span>{short}</span>
   );
 }

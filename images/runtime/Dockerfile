@@ -73,16 +73,39 @@ RUN case "${TARGETARCH:-amd64}" in \
     && printf '%s  /tmp/go.tar.gz\n' "$sum" > go-sha256
 
 # The official Go release as arch-check chose it, verified by its SHA-256 and extracted in its own stage, so the archive
-# never reaches an image layer. Fetched with Python rather than ADD, whose checksum can't come from another stage; a
-# mismatch stops the build before anything is extracted.
+# never reaches an image layer. Fetched with images/fetch.py rather than ADD, whose checksum can't come from another
+# stage and which never tries again: the helper does after a network error (REL-U-012), and a mismatch stops the build
+# before anything is extracted.
 FROM runtime-base AS go-toolchain
 USER 0:0
 COPY --from=arch-check /arch/go-url /arch/go-sha256 /tmp/
-RUN python3 -c 'import sys, urllib.request; urllib.request.urlretrieve(open(sys.argv[1]).read().strip(), "/tmp/go.tar.gz")' \
-       /tmp/go-url \
+RUN --mount=type=bind,source=images/fetch.py,target=/tmp/fetch.py python3 /tmp/fetch.py "$(cat /tmp/go-url)" /tmp/go.tar.gz \
     && sha256sum -c /tmp/go-sha256 \
     && tar --no-same-owner -C /usr/local -xzf /tmp/go.tar.gz \
     && rm /tmp/go.tar.gz /tmp/go-url /tmp/go-sha256
+
+# npm and two of its bundled packages, as published, verified by their SHA-256 in their own stage (REL-U-012: the helper
+# tries a file again after a network error), so no archive reaches an image layer; the Workstation unpacks them below.
+# The npm release Node bundles carries vulnerable dependencies (dependency audit A4); this one bundles fixed ones.
+# Its tarball holds its dependencies, so unpacking it is the whole install, with no registry access and no scripts.
+# No npm release yet bundles the fixed undici and brace-expansion (11.21.0 and 12.2.0 still carry 6.28.0 and 5.0.9), so
+# those two bundled packages are replaced by their fixed patch releases, same dependencies (c15 release gate, 8 Oct
+# 2026: GHSA-rfgv-xxqx-mfg5, GHSA-3wwx-pv8p-q78v; GHSA-6j4f-fj2g-mc7p, GHSA-qhr7-859c-m2p7, GHSA-q2hr-2g5m-vwhr).
+# undici is 6.29.1 since the c17 release gate (6.28.1 HIGH; 6.29.1 has no dependencies, as 6.28.1).
+# Drop them when an npm release bundles these versions or newer.
+FROM runtime-base AS npm-release
+USER 0:0
+ARG NPM_VERSION=11.20.0
+WORKDIR /out
+RUN --mount=type=bind,source=images/fetch.py,target=/tmp/fetch.py python3 /tmp/fetch.py \
+      https://registry.npmjs.org/npm/-/npm-${NPM_VERSION}.tgz /out/npm.tgz \
+      https://registry.npmjs.org/undici/-/undici-6.29.1.tgz /out/undici.tgz \
+      https://registry.npmjs.org/brace-expansion/-/brace-expansion-5.0.12.tgz /out/brace-expansion.tgz \
+    && printf '%s  %s\n' \
+      d1a92f40e6c407b84c3a00c3cf978a10b24fd42f153c527e2016cef7bb34a483 npm.tgz \
+      29c4b8e0b2d86cb8795571c1959012ce057a14ecfd34858335f47c31e770a04f undici.tgz \
+      ef8448ec78f20b692f04fa6d01f39b5ab34c66404bea3429f5a39c6c9e0be8b4 brace-expansion.tgz \
+    | sha256sum -c
 
 # The Workstation's files, without the runtime binary: the workstation target (below) copies it last.
 FROM runtime-base AS workstation-os
@@ -118,26 +141,13 @@ COPY images/runtime/chromium-policy.json /etc/chromium/policies/managed/tqa-quie
 COPY --chmod=0644 images/runtime/chromium-quiet-flags.sh /etc/chromium.d/tqa-quiet
 COPY --from=node-toolchain /usr/local/bin/node /usr/local/bin/node
 COPY --from=node-toolchain /usr/local/lib/node_modules/ /usr/local/lib/node_modules/
-# The npm release Node bundles carries vulnerable dependencies (dependency audit A4); this one bundles fixed ones.
-# Its tarball holds its dependencies, so unpacking it is the whole install, with no registry access and no scripts.
-ARG NPM_VERSION=11.20.0
-ADD --checksum=sha256:d1a92f40e6c407b84c3a00c3cf978a10b24fd42f153c527e2016cef7bb34a483 \
-    https://registry.npmjs.org/npm/-/npm-${NPM_VERSION}.tgz /tmp/npm.tgz
-# No npm release yet bundles the fixed undici and brace-expansion (11.21.0 and 12.2.0 still carry 6.28.0 and 5.0.9), so
-# those two bundled packages are replaced by their fixed patch releases, same dependencies (c15 release gate, 8 Oct
-# 2026: GHSA-rfgv-xxqx-mfg5, GHSA-3wwx-pv8p-q78v; GHSA-6j4f-fj2g-mc7p, GHSA-qhr7-859c-m2p7, GHSA-q2hr-2g5m-vwhr).
-# undici is 6.29.1 since the c17 release gate (6.28.1 HIGH; 6.29.1 has no dependencies, as 6.28.1).
-# Drop them when an npm release bundles these versions or newer.
-ADD --checksum=sha256:29c4b8e0b2d86cb8795571c1959012ce057a14ecfd34858335f47c31e770a04f \
-    https://registry.npmjs.org/undici/-/undici-6.29.1.tgz /tmp/undici.tgz
-ADD --checksum=sha256:ef8448ec78f20b692f04fa6d01f39b5ab34c66404bea3429f5a39c6c9e0be8b4 \
-    https://registry.npmjs.org/brace-expansion/-/brace-expansion-5.0.12.tgz /tmp/brace-expansion.tgz
-RUN rm -rf /usr/local/lib/node_modules/npm && install -d /usr/local/lib/node_modules/npm \
-    && tar --no-same-owner --strip-components=1 -C /usr/local/lib/node_modules/npm -xzf /tmp/npm.tgz \
+# npm-release's archives (above), mounted for this step only: unpacking npm is its whole install.
+RUN --mount=type=bind,from=npm-release,source=/out,target=/tmp/npm-release \
+    rm -rf /usr/local/lib/node_modules/npm && install -d /usr/local/lib/node_modules/npm \
+    && tar --no-same-owner --strip-components=1 -C /usr/local/lib/node_modules/npm -xzf /tmp/npm-release/npm.tgz \
     && for p in undici brace-expansion; do \
          d=/usr/local/lib/node_modules/npm/node_modules/$p; rm -rf "$d" && install -d "$d" \
-         && tar --no-same-owner --strip-components=1 -C "$d" -xzf "/tmp/$p.tgz"; done \
-    && rm /tmp/npm.tgz /tmp/undici.tgz /tmp/brace-expansion.tgz
+         && tar --no-same-owner --strip-components=1 -C "$d" -xzf "/tmp/npm-release/$p.tgz"; done
 COPY --from=node-toolchain /usr/local/LICENSE /usr/share/doc/node/LICENSE
 COPY --from=go-toolchain /usr/local/go /usr/local/go
 COPY --from=go-toolchain /usr/local/go/LICENSE /usr/share/doc/go/LICENSE

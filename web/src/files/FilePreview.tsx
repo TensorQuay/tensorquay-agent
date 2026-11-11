@@ -103,6 +103,7 @@ export function FilePreview({
         size={file.size}
         etag={file.etag}
         limit={limits.preview_html_bytes}
+        text={file.truncated || file.binary ? null : file.text}
       />
     ) : kind === "pdf" ? (
       // A new version of the file is drawn afresh.

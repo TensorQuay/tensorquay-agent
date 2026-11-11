@@ -23,6 +23,7 @@ import { type ReactNode, useState } from "react";
 import { api } from "../api/client";
 import { useRequest } from "../api/use-request";
 import { useLanguage, useT } from "../i18n/I18nProvider";
+import type { Translate } from "../i18n/translate";
 import { ErrorMessage } from "../ui/ErrorMessage";
 import { Icon } from "../ui/Icon";
 import { Menu } from "../ui/Menu";
@@ -36,6 +37,18 @@ const HELP_URL = `${REPOSITORY_URL}/tree/main/docs/user-guide`;
 const FEEDBACK_URL = `${REPOSITORY_URL}/issues/new/choose`;
 const RELEASES_URL = `${REPOSITORY_URL}/releases`;
 const LICENCE_URL = `${REPOSITORY_URL}/blob/main/LICENSE`;
+
+/** Who is signed in: the email and the role, joined as the reader's language joins them (WEB-U-463). */
+export function accountHeading(
+  t: Translate,
+  email: string,
+  admin: boolean,
+): string {
+  return t("account.heading", {
+    email,
+    role: t(admin ? "account.roleAdmin" : "account.roleMember"),
+  });
+}
 
 /**
  * Account preferences load on demand; failed sign-out stays visible and can be retried. `onNavigate` (default
@@ -73,7 +86,7 @@ export function AccountActions({
         <>
           {/* WEB-U-463: who is signed in, then what people reach for; theme lives in Settings › Account. */}
           <p className="menu-heading type-small muted">
-            {`${session.data.email} · ${t(admin ? "account.roleAdmin" : "account.roleMember")}`}
+            {accountHeading(t, session.data.email, admin)}
           </p>
           <MenuLink href="/settings" icon={Settings} onNavigate={onNavigate}>
             {t("account.settings")}
@@ -274,7 +287,7 @@ function ExternalItem({
     >
       {icon && <Icon glyph={icon} className="menu-icon" />}
       <span>
-        {children} <span className="visually-hidden">{newTab}</span>
+        {children} <span className="sr-only">{newTab}</span>
       </span>
       <Icon glyph={ExternalLink} size={16} />
     </a>

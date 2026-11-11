@@ -66,7 +66,7 @@ for (const width of [1280, 390])
         (await status.textContent()) ?? "",
       );
       // At every width only its word shows (WEB-U-155); the reason is the turn's outcome below.
-      const long = status.locator(".run-long");
+      const long = status.getByRole("status");
       const shown = await status.evaluate(
         (element) => getComputedStyle(element, "::before").content,
       );

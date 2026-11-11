@@ -158,7 +158,9 @@ function ReadsTable({
                   </span>
                 </td>
                 <td>
-                  {t(CONSUMERS[item.consumer_kind], { name: item.consumer })}
+                  <span className="cell-whole">
+                    {t(CONSUMERS[item.consumer_kind], { name: item.consumer })}
+                  </span>
                 </td>
                 {column && (
                   <td>

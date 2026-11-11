@@ -47,6 +47,14 @@ Environments page. A later build moves the tag, and the gateway's next start mov
 shown on the Environments page); tasks follow at their next session. An image built FROM Workstation carries its labels
 but not its tag, so it never replaces Workstation: pick it on the Environments page to make an environment of its own.
 
+**Which image an environment runs.** The tags are the host's, not the installation's: a `tqa-runtime:workstation`
+already on this host from another build (an earlier release, another checkout) becomes this installation's
+Workstation at its first start, even when this build had no `--workstation`. Before the first task, open
+**Settings › Environments** and each environment's page, which shows its image (or, as an administrator,
+`GET /api/v1/admin/templates`, each entry's `image`), and compare it with
+`docker image inspect --format '{{.Id}}' tqa-runtime:workstation`. To run only this build's images, build with
+`--workstation`, or pin each one ([Two or more installations on one host](#two-or-more-installations-on-one-host)).
+
 - **Time.** The first build takes a while: about 20 to 45 minutes on a recent machine, more with `--workstation`.
   Later builds reuse Docker's cache and take a few minutes.
 - **Docker Desktop on a Mac with Apple silicon** builds arm64 images natively, which is what the stack runs there,
@@ -85,6 +93,15 @@ export TQA_RUNTIME_IMAGE="$(docker image inspect --format '{{.Id}}' tqa-runtime:
 export TQA_GATEWAY_IMAGE='tqa-gateway:local'
 export TQA_WEB_IMAGE='tqa-web:local'
 export TQA_HTTP_PORT=8080
+# A rootless Docker daemon (docker info lists name=rootless) needs its socket and the socket's group as containers
+# see it; see Rootless Docker below.
+if docker info --format '{{.SecurityOptions}}' | grep -q 'name=rootless'; then
+  export TQA_DOCKER_SOCKET="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/docker.sock"
+  export TQA_DOCKER_GID="$(docker run --rm --network none \
+    --mount "type=bind,source=$TQA_DOCKER_SOCKET,target=/var/run/docker.sock,readonly" \
+    tianon/toybox:0.8.14@sha256:8fe8776eca4b6dabdee10f3522ae0ab9c51dbac70aaff9dfd377eac548f8e7f7 \
+    stat -c %g /var/run/docker.sock)"
+fi
 ```
 
 - **Images.** The three image lines take step 0's images: the gateway and web app by their `:local` tags, the runtime by
@@ -94,7 +111,12 @@ export TQA_HTTP_PORT=8080
   container itself. Use an address the container can reach:
   - a model server on the same Mac (with Docker Desktop): `http://host.docker.internal:<port>/v1`, for example
     `http://host.docker.internal:8000/v1` for a server listening on the Mac's port 8000;
-  - on Linux, the host's LAN address, or a container on a network the gateway joins;
+  - on Linux, there is no `host.docker.internal` (unless you add one), and a server listening on `127.0.0.1` can't be
+    reached from a container: under rootless Docker a container never reaches the host's loopback. Either make the
+    server listen on the host's LAN address (Ollama listens on `127.0.0.1:11434` by default: set
+    `OLLAMA_HOST=0.0.0.0:11434`) and use that address, or run it as a container and join it to the stack's control
+    network after step 3 (`docker network connect tqa_control <its container>`, or `<COMPOSE_PROJECT_NAME>_control`),
+    then use its container name, for example `http://ollama:11434/v1`;
   - a hosted provider: its API base URL.
 - **A local model needs room.** Tasks need at least 16,384 tokens of context, and 32,768 works better. Unless told
   otherwise, Ollama gives a model 4,096 when the GPU memory it detects is under 23 GiB (Ollama's log says which it chose
@@ -113,8 +135,9 @@ export TQA_HTTP_PORT=8080
   example `local`). The route sends it as a bearer token, which such a server ignores.
 - **Port.** The gateway publishes `TQA_HTTP_PORT` on the host's loopback only. The browser address, the first
   administrator's page and API clients' `Origin` all use it: `http://localhost:$TQA_HTTP_PORT`.
-- **Rootless Docker.** On a rootless daemon, also set `TQA_DOCKER_SOCKET` and `TQA_DOCKER_GID` now, as in
-  [Rootless Docker](#rootless-docker); the next step writes them into the installation.
+- **Rootless Docker.** On a rootless daemon the block's last lines set `TQA_DOCKER_SOCKET` and `TQA_DOCKER_GID`, as
+  [Rootless Docker](#rootless-docker) explains; the next step writes them into the installation. Without them the
+  gateway gets `/var/run/docker.sock`, the host's root daemon, and stops at start ("sandbox configure failed").
 - **A second installation on this host** needs its own names too; see
   [Two or more installations on one host](#two-or-more-installations-on-one-host).
 
@@ -210,9 +233,11 @@ curl -fsS "http://localhost:${TQA_HTTP_PORT:-8080}/readyz" && echo ready
 
 `storage.root` uses the same absolute path inside and outside the gateway so Docker can bind-mount the workspace,
 runtime state and private token files into sibling sandboxes. Keep the installation on a local filesystem shared
-with Docker Desktop. The storage directory is private and writable only by the container account. Put the storage
-root on its own local filesystem (not NFS, and not the root or Docker's data filesystem): on Docker, workspace quotas
-are measured between runs, so a run that fills its workspace fills that filesystem, and nothing else should share it.
+with Docker Desktop (never NFS). The storage directory is private and writable only by the container account. Its
+own filesystem is recommended, not required: the stack runs with the storage root anywhere local, as step 2 creates
+it. But on Docker, workspace quotas are measured between runs, so a run that fills its workspace fills the storage
+root's filesystem; when that is the root or Docker's data filesystem, the host and every container on it run out of
+space too. On a host that matters, give the storage root a filesystem of its own.
 
 On a Mac with Docker Desktop, the installation lives on the Mac's disk and reaches the containers through Docker
 Desktop's file sharing (VirtioFS), where ownership doesn't behave as on Linux: the `chown` above may not take effect as
@@ -272,6 +297,45 @@ append one that nothing else uses, then check it against the host's routes as in
 printf '[sandbox.network_pool]\ncidr = "10.214.0.0/16"\nprefix = 29\n' >> "$TQA_INSTALL_DIR/gateway.toml"
 ```
 
+Images are the host's, not an installation's. `deploy/build-images.sh`, from whichever checkout, moves
+`tqa-gateway:local`, `tqa-web:local`, `tqa-runtime:base` and the environment tags (`tqa-runtime:minimal`,
+`tqa-runtime:workstation`) to its own build. An installation whose `compose.env` names a `:local` tag runs the newest
+build at its next `up`, and every gateway on the host moves its built-in environments to what the environment tags
+name at its next start. To keep an installation on its own images, pin each by ID. In step 1, take the gateway and
+web app by ID as the runtime line does:
+
+```sh
+export TQA_GATEWAY_IMAGE="$(docker image inspect --format '{{.Id}}' tqa-gateway:local)"
+export TQA_WEB_IMAGE="$(docker image inspect --format '{{.Id}}' tqa-web:local)"
+```
+
+and after step 2, name the built-in environments' images in `gateway.toml` (a built-in named there is that image, its
+label still checked, never what its tag names later; only `minimal`, `workstation` and `data`, by ID only, or the
+gateway stops at start):
+
+```sh
+printf '[runtime.builtin_images]\nminimal = "%s"\nworkstation = "%s"\n' \
+  "$(docker image inspect --format '{{.Id}}' tqa-runtime:minimal)" \
+  "$(docker image inspect --format '{{.Id}}' tqa-runtime:workstation)" >> "$TQA_INSTALL_DIR/gateway.toml"
+```
+
+An ID pins an image only while the image is kept. With Docker's containerd image store (`docker info` shows
+`io.containerd.snapshotter.v1`), an image whose last tag moves to a newer build is deleted, its ID with it: the next
+build would take away the runtime this installation runs (`/readyz?detail=1` then reports `image_present` false,
+while the plain `/readyz` still answers 200). So give each pinned image a tag of the installation's own before
+another build, for example:
+
+```sh
+for image in gateway:local web:local runtime:minimal runtime:workstation; do
+  docker tag "tqa-$image" "tqa-staging-${image%%:*}:${image#*:}"
+done
+```
+
+After a build, start the new images: `docker compose --env-file "$TQA_INSTALL_DIR/compose.env" -f
+deploy/compose/docker.yml up -d --no-build --wait --force-recreate gateway web` (step 3's `up` alone may leave the
+gateway on its old image), then check `/readyz?detail=1` as an administrator, as in
+[First administrator, route and task](#first-administrator-route-and-task).
+
 ### Sandbox networks
 
 Every sandbox gets its own internal network, with no route out, created when the sandbox starts and removed with
@@ -282,12 +346,13 @@ of 8). The pool must hold at least twice `sandbox.max_live` subnets; the gateway
 
 Pick a pool that nothing else on the host uses. The gateway refuses to start if the pool overlaps another Docker
 network or one of its own routes, and logs the conflict. It cannot see the host's routes from its container, so check
-those once when you install, and again if the host's networks change:
+those once when you install, and again if the host's networks change. Give the pool after `python3 -`: the default
+`10.213.0.0/16`, or your `[sandbox.network_pool]` cidr:
 
 ```sh
-python3 - <<'PY'
-import ipaddress, subprocess
-pool = ipaddress.ip_network('10.213.0.0/16')  # the [sandbox.network_pool] cidr
+python3 - 10.213.0.0/16 <<'PY'
+import ipaddress, subprocess, sys
+pool = ipaddress.ip_network(sys.argv[1])  # the pool, given after `python3 -`
 routes = subprocess.run(['ip', '-4', 'route'], capture_output=True, text=True, check=True).stdout
 for line in routes.splitlines():
     destination = line.split()[0]
@@ -299,7 +364,8 @@ PY
 
 On a Mac, `ip` doesn't exist, so the check above fails. Docker Desktop's containers and networks live in its own
 Linux VM, so the Mac's routes meet the pool only through a VPN that routes private addresses: check with
-`netstat -rn -f inet | grep '^10\.213'` instead (nothing printed means no overlap).
+`netstat -rn -f inet | grep '^10\.213'` instead, with your pool's first part in place of `10\.213` (nothing printed
+means no overlap).
 
 To use another pool, set it in `gateway.toml`:
 

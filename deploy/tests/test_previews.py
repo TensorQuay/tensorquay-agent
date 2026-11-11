@@ -21,8 +21,8 @@ WITNESS = "http://192.0.2.10:40123"
 class PreviewFilesTests(unittest.TestCase):
     def test_every_file_is_what_its_name_says(self):
         files = demo_previews.fixtures(WITNESS)
-        self.assertEqual(set(files), {"report.html", "brief.pdf", "long.pdf", "broken.pdf", "sales.xlsx",
-                                      "plan.ods", "bomb.xlsx", "damaged.xlsx"})
+        self.assertEqual(set(files), {"report.html", "weather.html", "notes.html", "brief.pdf", "long.pdf",
+                                      "broken.pdf", "sales.xlsx", "plan.ods", "bomb.xlsx", "damaged.xlsx"})
         with zipfile.ZipFile(io.BytesIO(files["sales.xlsx"])) as book:
             self.assertIn("xl/workbook.xml", book.namelist())
             totals = book.read("xl/worksheets/1.xml").decode()
@@ -37,6 +37,16 @@ class PreviewFilesTests(unittest.TestCase):
         with zipfile.ZipFile(io.BytesIO(files["bomb.xlsx"])) as bomb:
             self.assertEqual(bomb.infolist()[0].file_size, 200 * 1024 * 1024)
         self.assertFalse(zipfile.is_zipfile(io.BytesIO(files["damaged.xlsx"])))
+
+    def test_one_page_loads_from_the_internet_and_one_is_self_contained(self):
+        files = demo_previews.fixtures(WITNESS)
+        weather, notes = files["weather.html"].decode(), files["notes.html"].decode()
+        for reference in ("https://cdn.example.org/three.min.js", "https://cdn.example.org/weather.css",
+                          "https://api.example.org/forecast"):
+            self.assertIn(reference, weather)
+        # The self-contained page names the internet only in a link the person clicks.
+        self.assertEqual(re.findall(r"https?://[\w.-]+", notes), ["https://example.org"])
+        self.assertNotIn('"//', notes)
 
     def test_the_pdfs_have_true_offsets_and_their_pages(self):
         for name, pages, script in (("brief.pdf", 1, True), ("long.pdf", 25, False)):

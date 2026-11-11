@@ -147,7 +147,7 @@ function KeyRow({
         <span className="stack route-name">
           {/* The name as the task reads it: the person's own word, in the code font; it opens the key's page. */}
           <Link href={`${KEYS_PAGE}/${item.id}`}>
-            <code className="type-code">{item.name}</code>
+            <code className="type-code cell-whole">{item.name}</code>
           </Link>
           {item.check_name && (
             <span className="status-pill type-label" data-tone="warn">
@@ -160,7 +160,7 @@ function KeyRow({
         {/* The address, then, while tasks can't reach it, why in one muted line: an administrator's ends with where to
             allow it, never cut (17.3, UI-GUIDELINES §7 Table). */}
         <span className="stack route-name">
-          <span className="cell-cut" title={formatAddress(item)}>
+          <span className="cell-cut cell-address" title={formatAddress(item)}>
             {formatAddress(item)}
           </span>
           {!item.allowed &&

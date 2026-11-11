@@ -106,7 +106,9 @@ describe("WEB-U-023 API tokens", () => {
     );
   });
 
-  it("revokes after a named confirmation", async () => {
+  // WEB-U-191: Revoke is a danger item under the row's ⋯, named for the token, as in every settings table: never a bare
+  // destructive button in a row. It asks first, and only then sends.
+  it("revokes from the row's ⋯ after a named confirmation", async () => {
     fetch
       .mockImplementationOnce(() => json({ items: [ci] }))
       .mockImplementationOnce(() =>
@@ -114,22 +116,46 @@ describe("WEB-U-023 API tokens", () => {
       )
       .mockImplementationOnce(() => json({ items: [] }));
     show();
-    // The button names its object; the confirmation carries the danger, not a red button on every row.
-    const revoke = await screen.findByRole("button", {
-      name: "Revoke token “CI”",
+    const more = await screen.findByRole("button", {
+      name: "More actions for the token “CI”",
     });
-    expect(revoke).toHaveTextContent("Revoke token");
-    expect(revoke).not.toHaveClass("danger-ghost");
+    expect(screen.queryByRole("button", { name: /^Revoke/ })).toBeNull();
+    fireEvent.click(more);
+    const revoke = screen.getByRole("menuitem", { name: "Revoke token “CI”" });
+    expect(revoke).toHaveTextContent("Revoke…");
+    expect(revoke).toHaveAttribute("data-danger");
     fireEvent.click(revoke);
     const dialog = screen.getByRole("dialog", { name: "Revoke this token?" });
     expect(dialog).toHaveTextContent(
       "Programs using “CI” stop working at once.",
     );
+    expect(fetch).toHaveBeenCalledTimes(1);
     fireEvent.click(
       within(dialog).getByRole("button", { name: "Revoke token" }),
     );
     expect(await screen.findByText("No tokens yet.")).toBeInTheDocument();
     expect(fetch.mock.calls[1]?.[0]).toBe(`/api/v1/tokens/${ci.id}`);
+    // As after an invitation's revoke: the row and its ⋯ are gone, and focus is the page's.
+    expect(document.activeElement).toBe(document.body);
+  });
+
+  it("gives focus back to the row's ⋯ when the revoke is cancelled, and sends nothing", async () => {
+    fetch.mockImplementationOnce(() => json({ items: [ci] }));
+    show();
+    const more = await screen.findByRole("button", {
+      name: "More actions for the token “CI”",
+    });
+    fireEvent.click(more);
+    fireEvent.click(
+      screen.getByRole("menuitem", { name: "Revoke token “CI”" }),
+    );
+    fireEvent.click(
+      within(
+        screen.getByRole("dialog", { name: "Revoke this token?" }),
+      ).getByRole("button", { name: "Cancel" }),
+    );
+    expect(more).toHaveFocus();
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 
   it("marks an expired token and greys its row", async () => {

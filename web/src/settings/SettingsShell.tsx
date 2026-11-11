@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { type ReactNode, useEffect, useRef } from "react";
+import { type ReactNode, useLayoutEffect, useRef } from "react";
 
 import { useSession } from "../auth/use-session";
 import { useT } from "../i18n/I18nProvider";
@@ -75,6 +75,9 @@ export function SettingsShell(props: {
   );
 }
 
+/** Below 768 px the Section select stands in for the menu, which isn't drawn (settings.css). */
+const NARROW = "(max-width: 767px)";
+
 /**
  * Scrolls `menu`, and only `menu`, so its current item is inside the part of it the window shows: its box clipped to
  * the window (WEB-U-460). `scrollIntoView` would scroll the page too, since the sticky menu's foot sits below the window
@@ -116,10 +119,26 @@ function Shell({
   const title = current ? t(current.label) : t("settings.title");
   // WEB-U-460: a menu taller than the window scrolls on its own. Whenever the current section's item appears (an
   // administrator's arrives with the session, after the first render), the menu scrolls to show it, and only the menu.
+  // It does so before the page is painted, so the menu never moves once it shows; then again whenever a wider window
+  // draws the menu, and once the fonts have loaded, which can move the item.
   const menu = useRef<HTMLElement>(null);
   const listed = shown.some((entry) => entry.id === section);
-  useEffect(() => {
-    if (listed && menu.current) showCurrent(menu.current);
+  useLayoutEffect(() => {
+    const node = menu.current;
+    if (!listed || !node) return;
+    const show = () => showCurrent(node);
+    show();
+    const narrow = typeof matchMedia === "function" ? matchMedia(NARROW) : null;
+    narrow?.addEventListener("change", show);
+    let live = true;
+    if ("fonts" in document)
+      void document.fonts.ready.then(() => {
+        if (live) show();
+      });
+    return () => {
+      live = false;
+      narrow?.removeEventListener("change", show);
+    };
   }, [section, listed]);
   return (
     <div className="settings-page">

@@ -57,7 +57,8 @@ describe("WEB-U-024 files changed in the turn summary", () => {
         files: [change("report.md"), change("rows.txt")],
       }),
     );
-    expect(await screen.findByText(/2 files changed/)).toBeVisible();
+    // The footer's own words: its details' copy for screen readers names the files too (WEB-U-461).
+    expect(await screen.findByText(/^2 files changed$/)).toBeVisible();
     expect(fetch.mock.calls[0]?.[0]).toBe(
       `/api/v1/conversations/${conversationId}/runs/${runId}/changes`,
     );

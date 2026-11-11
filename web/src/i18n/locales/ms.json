@@ -321,6 +321,7 @@
     "quota.workspaceOver": "Ruang kerja ini melebihi kuota storannya. Larian diteruskan; padam fail untuk kembali di bawah kuota.",
     "quota.workspaceStopped": "Larian berhenti: ruang kerja ini terlalu jauh melebihi kuota storannya. Padam fail, kemudian hantar mesej anda sekali lagi.",
     "workspaces.helperCopyName": "{name} (salinan pembantu)",
+    "account.heading": "{email} · {role}",
     "account.roleAdmin": "Pentadbir",
     "account.roleMember": "Ahli",
     "account.usage": "Penggunaan",

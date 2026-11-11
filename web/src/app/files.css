@@ -459,11 +459,11 @@ button.sent-picture {
   /* No percentage here: the list sizes each item to its content and leaves a percentage max-width out of that size, so
      with min(240px, 100%) the frame kept the width of the picture at its height cap, an empty band beside it (17.4
      fix). Container units do count there. On a column narrower than the picture, the second cap keeps it inside its
-     message: the conversation's width less the transcript's and the bubble's side padding, the frame's borders and
-     room for a classic scrollbar (18 px). */
-  max-width: min(
-    240px,
-    100cqi - 2 * (var(--space-1) + var(--space-4) + var(--border-width)) - 18px
+     message: the width of the transcript's items (conversation.css), less the bubble's side padding and the frame's
+     borders. It never goes under 48 px, so a column narrower than that still shows the picture. */
+  max-width: max(
+    var(--space-12),
+    min(240px, 100cqi - 2 * (var(--space-4) + var(--border-width)))
   );
   max-height: 240px;
   object-fit: contain;

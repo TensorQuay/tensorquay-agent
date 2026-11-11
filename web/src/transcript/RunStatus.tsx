@@ -174,10 +174,11 @@ export function RunStatus({
             : (status.took ?? (elapsed ? `${label} · ${elapsed}` : label))
         }
       >
+        {/* The whole, off the screen where the short word shows and still read (WEB-U-155). */}
         <span
           role="status"
           aria-live="polite"
-          className={short ? "run-long" : undefined}
+          className={short ? "sr-only" : undefined}
         >
           {sending ? t("run.sending") : label}
           {/* The recovery as its notice gave it: announced once, not on each tick of the visible countdown. */}

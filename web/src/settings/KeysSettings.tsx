@@ -231,7 +231,7 @@ function ConnectorRow({
       <td>
         {/* The name people know; the internal id is for administrators (the Connectors page). */}
         <div className="stack route-name">
-          <div className="data-name">
+          <div className="data-name" title={name}>
             <span>{name}</span>
           </div>
           <CellNote>{t("keys.forConnector")}</CellNote>

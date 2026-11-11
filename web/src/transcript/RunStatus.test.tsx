@@ -171,7 +171,8 @@ describe("WEB-U-112 a status that gives way", () => {
     // The short word is the stylesheet's, so the status's text stays the whole.
     expect(group).toHaveAttribute("data-short", "Failed");
     expect(group).toHaveTextContent(/^Failed: .{12,}$/);
-    expect(status).toHaveClass("run-long");
+    // The whole leaves the screen through the one class for words only screen readers get.
+    expect(status).toHaveClass("sr-only");
   });
 
   it("has a message not sent's short word", () => {

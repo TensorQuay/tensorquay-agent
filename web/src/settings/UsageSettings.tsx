@@ -221,7 +221,7 @@ function Report({
     <div className="stack">
       {/* The one number first: the period's tokens and their change. */}
       <section className="usage-headline" aria-label={t("usage.total")}>
-        {/* Written as every other number on the page: all short (WEB-U-461), never "59.2K" above "59 200". */}
+        {/* Written as every other token count on the page: all short (WEB-U-461), never "59.2K" above "59 200". */}
         <p className="type-display">
           <ShortAndExact
             short={t("usage.headline", { tokens: short(now) })}
@@ -501,8 +501,9 @@ function EachDay({ report }: { report: UsageReport }) {
           {rows.map((row) => (
             <tr key={row.key}>
               <td>{dates.format(new Date(`${row.key}T00:00:00Z`))}</td>
+              {/* Requests read exactly, as the summary's do; only token counts read short (§10). */}
               <td className="numeric">
-                <CompactCount value={row.requests} locale={t.locale} />
+                {formatNumber(row.requests, t.locale)}
               </td>
               <td className="numeric">
                 <CompactCount value={row.prompt_tokens} locale={t.locale} />

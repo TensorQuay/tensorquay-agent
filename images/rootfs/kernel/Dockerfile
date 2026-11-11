@@ -1,6 +1,14 @@
 # Pinned microVM guest kernel (ADR-0006): Linux 6.18.54 longterm with Firecracker v1.17.0's 6.18 guest configuration.
 # Build: docker build -f images/rootfs/kernel/Dockerfile --target kernel --output type=local,dest=<dir> images/rootfs/kernel
+# The context is this folder, so fetch.py here is a byte-identical copy of the shared download helper, images/fetch.py
+# (REL-U-012 checks the bytes).
 # The output is vmlinux plus manifest.json. The kernel is GPL-2.0-only; it is built locally and not distributed.
+
+# The pins, read by the sources and build stages below.
+ARG KERNEL_VERSION=6.18.54
+ARG KERNEL_SHA256=9df30b02dd8102bbd0be52556288ef6889ddbe7f1ddb96fbf847d0becf3eacac
+ARG FIRECRACKER_VERSION=v1.17.0
+ARG CONFIG_SHA256=ba22401a0c7292a4c024ebcd10a562d4a1f1bfd2faed671406d3b159c0cf5215
 
 # The one architecture decision (the only stage that reads the target architecture): the guest kernel is
 # Firecracker's x86_64 configuration, and the microVM backend is amd64-only, so arm64 is refused plainly, before any
@@ -11,6 +19,32 @@ ARG TARGETARCH
 WORKDIR /arch
 RUN test "${TARGETARCH:-amd64}" = amd64 || { echo "The microVM guest kernel is built for amd64 only; on ${TARGETARCH} use the Docker backend (the default), which needs no kernel." >&2; exit 1; } \
     && echo x86_64 > machine
+
+# The pinned sources, downloaded and verified in their own stage: the helper tries a file again after a network error
+# (REL-U-012), a wrong file fails at once, and a failed compile below never downloads them again.
+FROM debian:trixie-slim@sha256:a99cfc517144bc59b1978475ec53b46ecabec7e43635402ee5b77cc54cd1b20a AS sources
+# The pins are x86_64's.
+COPY --from=arch-check /arch/machine /tmp/machine
+RUN test "$(cat /tmp/machine)" = x86_64
+# Python and CA certificates for the download, from the build stage's signed snapshot (apt verifies every package hash).
+RUN printf '%s\n' \
+    'deb [check-valid-until=no] http://snapshot.debian.org/archive/debian/20260923T000000Z/ trixie main' \
+    > /etc/apt/sources.list \
+    && rm /etc/apt/sources.list.d/debian.sources \
+    && apt-get -o APT::Update::Error-Mode=any -o Acquire::Retries=3 -o Acquire::http::Timeout=30 update \
+    && apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 install -y --no-install-recommends \
+       python3 ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+ARG KERNEL_VERSION
+ARG KERNEL_SHA256
+ARG FIRECRACKER_VERSION
+ARG CONFIG_SHA256
+WORKDIR /src
+RUN --mount=type=bind,source=fetch.py,target=/tmp/fetch.py python3 /tmp/fetch.py \
+      https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-${KERNEL_VERSION}.tar.xz /src/linux.tar.xz \
+      https://raw.githubusercontent.com/firecracker-microvm/firecracker/${FIRECRACKER_VERSION}/resources/guest_configs/microvm-kernel-ci-x86_64-6.18.config \
+      /src/base.config \
+    && printf '%s  %s\n' "$KERNEL_SHA256" linux.tar.xz "$CONFIG_SHA256" base.config | sha256sum -c
 
 FROM debian:trixie-slim@sha256:a99cfc517144bc59b1978475ec53b46ecabec7e43635402ee5b77cc54cd1b20a AS build
 # The configuration below is arch-check's machine; the pins are x86_64's.
@@ -26,16 +60,12 @@ RUN printf '%s\n' \
     && apt-get -o Acquire::Retries=3 -o Acquire::https::Timeout=30 install -y --no-install-recommends \
        bc bison build-essential flex libelf-dev libssl-dev xz-utils \
     && rm -rf /var/lib/apt/lists/*
-ARG KERNEL_VERSION=6.18.54
-ARG KERNEL_SHA256=9df30b02dd8102bbd0be52556288ef6889ddbe7f1ddb96fbf847d0becf3eacac
-ARG FIRECRACKER_VERSION=v1.17.0
-ARG CONFIG_SHA256=ba22401a0c7292a4c024ebcd10a562d4a1f1bfd2faed671406d3b159c0cf5215
+ARG KERNEL_VERSION
+ARG KERNEL_SHA256
+ARG FIRECRACKER_VERSION
+ARG CONFIG_SHA256
 ARG JOBS=8
-ADD --checksum=sha256:9df30b02dd8102bbd0be52556288ef6889ddbe7f1ddb96fbf847d0becf3eacac \
-    https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-${KERNEL_VERSION}.tar.xz /src/linux.tar.xz
-ADD --checksum=sha256:ba22401a0c7292a4c024ebcd10a562d4a1f1bfd2faed671406d3b159c0cf5215 \
-    https://raw.githubusercontent.com/firecracker-microvm/firecracker/${FIRECRACKER_VERSION}/resources/guest_configs/microvm-kernel-ci-x86_64-6.18.config \
-    /src/base.config
+COPY --from=sources /src/linux.tar.xz /src/base.config /src/
 COPY tqa.config /src/tqa.config
 COPY build.sh /src/build.sh
 # A fixed timestamp, user and host make the build independent of when and where it runs.
