@@ -2,25 +2,8 @@ import { randomUUID } from "node:crypto";
 
 import { capture } from "./evidence";
 import { signIn } from "./session";
-import { rowMenu } from "./settings-page";
+import { rowMenu, TABLE_PAGES as PAGES, timesShown } from "./settings-page";
 import { expect, resetFront, test, type Locator, type Page } from "./test";
-
-/** The app's tables, each with what its rows hold (a person's tasks are added once their id is known). */
-const PAGES = [
-  "/settings/keys",
-  "/settings/keys/shared",
-  "/settings/agent-profiles",
-  "/settings/people",
-  "/settings/models",
-  "/settings/environments",
-  "/settings/connectors",
-  "/settings/decision-engines",
-  "/settings/internet-access",
-  "/settings/limits",
-  "/settings/usage",
-  "/settings/tokens",
-  "/workspaces",
-] as const;
 
 const slug = (href: string) =>
   href
@@ -67,6 +50,7 @@ async function open(page: Page, href: string) {
   await page.goto(href);
   await expect(page.locator("table").first()).toBeVisible();
   await page.waitForLoadState("networkidle");
+  await timesShown(page);
 }
 
 /** Opens the reads of a shared key, a table in a dialog, and returns the dialog. */
@@ -85,7 +69,8 @@ async function reads(page: Page) {
 
 /**
  * Judges every table in `scope`: even rows, two lines at most (`oneLine` px for a one-line table, 68 for a two-line one),
- * a cut line's words whole in its tooltip; a column whose cells carry a muted line at least 16rem wide, the name column
+ * a cut line's words whole in its tooltip; a column whose cells carry a muted line at least 16rem wide where the table
+ * has its full 800 px, and 30% of a narrower area (with its cell's padding), the name column
  * at least 12ch and the rest of the room, except on Limits, where the value column takes the room and the names keep
  * their own width; a note's link never cut; every table and its ⋯ inside the column; and Models' route names whole.
  */
@@ -158,7 +143,7 @@ async function judge(
         cutWithoutTitle,
         columns,
         noted,
-        note: length("16rem", table),
+        note: length("min(16rem, calc(30cqi + 2 * var(--space-2)))", table),
         name12: length("12ch", first),
         limits: table.classList.contains("limits-table"),
         longestName: Math.max(0, ...names),
@@ -209,7 +194,7 @@ async function judge(
       expect
         .soft(
           column.width >= Math.floor(table.note) || column.whole,
-          `${at}: a column with muted lines keeps 16rem, or shows its notes whole (${column.width} px)`,
+          `${at}: a column with muted lines keeps 16rem (30% of a narrower table area), or shows its notes whole (${column.width} of ${Math.floor(table.note)} px)`,
         )
         .toBe(true);
     expect
@@ -256,8 +241,9 @@ async function walk(
 
 // WEB-E2E-111 (17.3, UI-GUIDELINES §7 Table): a cell is at most two lines, its value and one muted line (a longer one
 // cut with "…", whole in its tooltip); a table with a two-line cell gives every row the same two-line height, a
-// one-line table stays at 40 px (44 on touch); a column with muted lines keeps 16rem, and the name column takes the
-// rest (at least 12ch), except on Limits, where the value column takes it; a note's link is never cut.
+// one-line table stays at 40 px (44 on touch); a column with muted lines keeps 16rem (30% of a narrower table area),
+// and the name column takes the rest (at least 12ch), except on Limits, where the value column takes it; a note's
+// link is never cut.
 test("WEB-E2E-111 every table's cells are two lines at most, on even rows, names taking the room", async ({
   page,
 }) => {
@@ -284,36 +270,77 @@ test.describe("on a touch screen", () => {
 test("WEB-E2E-111 at phone width a table's rows are cards whose notes wrap in full", async ({
   page,
 }) => {
-  test.setTimeout(120_000);
-  await page.setViewportSize({ width: 390, height: 844 });
+  test.setTimeout(180_000);
   const person = await start(page);
   // Workspaces are cards of their own at phone width, with no table.
   const pages = [...PAGES.filter((href) => href !== "/workspaces"), person];
-  for (const href of pages)
-    await test.step(href, async () => {
-      await open(page, href);
-      const cards = await page.locator("main table").evaluateAll((all) =>
-        all.map((table) => ({
-          name: table.getAttribute("aria-label") ?? "",
-          cut: [...table.querySelectorAll(".cell-note")].filter(
-            (note) => note.scrollWidth > note.clientWidth + 1,
-          ).length,
-          actions: [...table.querySelectorAll("tbody td.data-cell-action")].map(
-            (cell) => Math.round(cell.getBoundingClientRect().height),
-          ),
-        })),
-      );
-      for (const card of cards) {
-        expect
-          .soft(card.cut, `${href} ${card.name}: a note wraps in full`)
-          .toBe(0);
-        expect
-          .soft(
-            card.actions.every((height) => height < 68),
-            `${href} ${card.name}: no cell keeps a row's height (${card.actions.join(", ")})`,
-          )
-          .toBe(true);
-      }
-      await capture(page, `table-lines-390-${slug(href)}`);
-    });
+  // At 768 px a table's area beside the Settings menu is under 600 px too: cards there as well.
+  for (const width of [390, 768])
+    for (const href of pages)
+      await test.step(`${href} at ${width} px`, async () => {
+        await page.setViewportSize({ width, height: 844 });
+        await open(page, href);
+        const cards = await page.locator("main table").evaluateAll((all) =>
+          all.map((table) => ({
+            name: table.getAttribute("aria-label") ?? "",
+            cut: [...table.querySelectorAll(".cell-note")].filter(
+              (note) => note.scrollWidth > note.clientWidth + 1,
+            ).length,
+            actions: [
+              ...table.querySelectorAll("tbody td.data-cell-action"),
+            ].map((cell) => Math.round(cell.getBoundingClientRect().height)),
+            // Each note's parts drawn, and a note with a link no taller than its words wrapped in its width, each line
+            // as high as the link's.
+            notes: [...table.querySelectorAll(".cell-note")].map((note) => {
+              const box = note.getBoundingClientRect();
+              const link = note.querySelector(".cell-note-link");
+              const probe = document.createElement("div");
+              probe.style.cssText = `position:absolute;visibility:hidden;white-space:normal;width:${box.width}px`;
+              probe.style.font = getComputedStyle(note).font;
+              if (link)
+                probe.style.lineHeight = getComputedStyle(link).lineHeight;
+              probe.textContent = note.textContent;
+              document.body.append(probe);
+              const wrapped = Math.ceil(probe.getBoundingClientRect().height);
+              probe.remove();
+              return {
+                text: (note.textContent ?? "").trim().slice(0, 40),
+                empty: [...note.children].filter(
+                  (part) => part.getBoundingClientRect().width === 0,
+                ).length,
+                link: link !== null,
+                height: Math.round(box.height),
+                wrapped,
+              };
+            }),
+          })),
+        );
+        for (const card of cards) {
+          expect
+            .soft(card.cut, `${href} ${card.name}: a note wraps in full`)
+            .toBe(0);
+          for (const note of card.notes) {
+            expect
+              .soft(
+                note.empty,
+                `${href} at ${width} px, "${note.text}": no part of a note is 0 px wide`,
+              )
+              .toBe(0);
+            if (note.link)
+              expect
+                .soft(
+                  note.height,
+                  `${href} at ${width} px, "${note.text}": a note with a link is no taller than its wrapped lines (${note.wrapped} px)`,
+                )
+                .toBeLessThanOrEqual(note.wrapped + 1);
+          }
+          expect
+            .soft(
+              card.actions.every((height) => height < 68),
+              `${href} ${card.name}: no cell keeps a row's height (${card.actions.join(", ")})`,
+            )
+            .toBe(true);
+        }
+        await capture(page, `table-lines-${width}-${slug(href)}`);
+      });
 });

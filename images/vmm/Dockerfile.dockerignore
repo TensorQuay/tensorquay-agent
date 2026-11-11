@@ -5,6 +5,7 @@
 !crates
 !crates/**
 !images
+!images/fetch.py
 !images/rootfs
 !images/rootfs/mkrootfs.sh
 !images/vmm

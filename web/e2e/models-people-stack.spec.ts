@@ -2,7 +2,7 @@ import { writeFile } from "node:fs/promises";
 
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
-import { answered } from "./answered";
+import { answered, everyAnswer } from "./answered";
 import { pick } from "./choices";
 import { chooseModel } from "./model";
 import { axe, rowMenu } from "./settings-page";
@@ -115,17 +115,11 @@ test("WEB-E2E-026 Models: Paste key, List models and an edit of every group on t
   const name = `edit-${RUN}`;
   const display = `Edit ${RUN}`;
   const pasted = `synthetic-stack-key-${RUN}`;
-  // Every API answer the page receives, to show the pasted key never comes back from the gateway.
-  const bodies: Promise<string>[] = [];
-  page.on("response", (response) => {
-    // An event stream never ends, so its body is never awaited (a task page would open one).
-    const type = response.headers()["content-type"] ?? "";
-    if (
-      new URL(response.url()).pathname.startsWith("/api/") &&
-      !type.startsWith("text/event-stream")
-    )
-      bodies.push(response.text().catch(() => ""));
-  });
+  // The answers to the API requests the page makes from here on are searched, to show the pasted key never comes back
+  // from the gateway: the page's own copy of each fetch's answer, as far as it came (WEB-E2E-089). An answer under
+  // /api/ the page asked for any other way (an upload's XMLHttpRequest), or whose body left with its page, fails the
+  // search by name. An event stream never ends and carries nothing to search (a task page opens one).
+  const answers = await everyAnswer(page, "/api/");
 
   // Added with a key pasted in the form: stored as a shared secret, never shown back (WEB-U-056).
   await page.goto("/settings/models");
@@ -226,7 +220,7 @@ test("WEB-E2E-026 Models: Paste key, List models and an edit of every group on t
   const left = await read<{ items: Route[] }>(page, "/api/v1/admin/routes");
   result.deleted = !left.items.some((item) => item.name === name);
   // The pasted key stays under Keys › Shared, as the form says; Keys belong to WEB-E2E-025, and the stack is thrown away.
-  result.keyInResponses = (await Promise.all(bodies)).some((body) =>
+  result.keyInResponses = (await answers.bodies()).some((body) =>
     body.includes(pasted),
   );
   await saveResult();

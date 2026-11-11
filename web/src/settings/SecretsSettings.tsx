@@ -237,7 +237,7 @@ function UsedBy({ routes }: { routes: readonly string[] }) {
   if (routes.length === 0)
     return <span className="muted">{t("secrets.notUsed")}</span>;
   const list = routes.join(", ");
-  if (routes.length <= 2) return <span>{list}</span>;
+  if (routes.length <= 2) return <span className="cell-whole">{list}</span>;
   return (
     <span>
       <span className="nowrap" title={list} aria-hidden="true">

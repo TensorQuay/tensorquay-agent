@@ -248,6 +248,8 @@
     "tokens.expired": "Expired",
     "tokens.empty": "No tokens yet.",
     "tokens.revokeName": "Revoke token “{name}”",
+    "tokens.more": "More actions for the token “{name}”",
+    "tokens.revokeMenu": "Revoke…",
     "tokens.revokeTitle": "Revoke this token?",
     "tokens.revokeBody": "Programs using “{name}” stop working at once.",
     "tokens.revokeConfirm": "Revoke token",

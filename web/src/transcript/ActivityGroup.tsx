@@ -123,8 +123,9 @@ export function ActivityGroup({
       >
         <Icon glyph={ChevronDown} size={16} />
         {/* WEB-U-462: folded while the run works, the live words head the group; the label stays the button's
-            name (hidden on screen by the CSS), so the timer never makes a screen reader speak. */}
+            name (off the screen through its class), so the timer never makes a screen reader speak. */}
         <span
+          className={!open && liveWords !== null ? "sr-only" : undefined}
           title={
             retried
               ? retriesTitle(

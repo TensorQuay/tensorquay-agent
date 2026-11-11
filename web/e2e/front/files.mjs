@@ -28,6 +28,7 @@ function seed() {
   );
   put(".tqa/state.json", "{}");
   put("reports/report.html", REPORT);
+  put("reports/weather.html", WEATHER);
   put("reports/brief.pdf", BRIEF_PDF);
   put("reports/chinese.pdf", CHINESE_PDF);
   put("reports/symbol.pdf", SYMBOL_PDF);
@@ -68,6 +69,18 @@ document.getElementById("ran").textContent="Scripts ran.";
 let reach;try{reach=window.parent.document?"The app's page was reachable.":"";}catch{reach="The app's page is out of reach.";}
 document.getElementById("reach").textContent=reach;
 </script></body></html>
+`;
+
+// A page that needs the internet: a 3D library from a CDN and live data from an API. The preview is offline, so it
+// stays at "Loading…", and the panel names its hosts (WEB-U-467).
+const WEATHER = `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Weather</title>
+<style>body{font:14px/1.4 system-ui,sans-serif;margin:16px;color:#1f2328}</style>
+<script src="https://cdn.example.org/three.min.js"></script></head>
+<body><h1>Weather</h1><p id="now">Loading…</p><p><a href="https://example.com/about">About the data</a></p>
+<script>fetch("https://api.example.org/forecast").then((answer) => answer.json())
+.then((data) => { document.getElementById("now").textContent = data.summary; }, () => undefined);</script>
+</body></html>
 `;
 
 /** A PDF of `objects` (1 is the catalogue) with correct cross-reference offsets. */

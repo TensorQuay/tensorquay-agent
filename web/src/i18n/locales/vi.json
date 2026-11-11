@@ -321,6 +321,7 @@
     "quota.workspaceOver": "Không gian làm việc này vượt quá hạn mức lưu trữ. Lượt chạy vẫn tiếp tục; hãy xóa bớt tệp để trở lại dưới hạn mức.",
     "quota.workspaceStopped": "Lượt chạy đã dừng: không gian làm việc này vượt quá xa hạn mức lưu trữ. Hãy xóa bớt tệp rồi gửi lại tin nhắn của bạn.",
     "workspaces.helperCopyName": "{name} (bản sao của trợ lý)",
+    "account.heading": "{email} · {role}",
     "account.roleAdmin": "Quản trị viên",
     "account.roleMember": "Thành viên",
     "account.usage": "Mức sử dụng",

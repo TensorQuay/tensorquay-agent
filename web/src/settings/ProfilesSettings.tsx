@@ -165,7 +165,7 @@ function ProfileRow({
       <td>
         <div className="stack route-name">
           {/* The display name only: the internal name is not the reader's (as for connectors). */}
-          <span>{item.display_name}</span>
+          <span className="cell-whole">{item.display_name}</span>
           {item.description && <CellNote>{item.description}</CellNote>}
         </div>
       </td>

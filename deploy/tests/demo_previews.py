@@ -77,6 +77,32 @@ note("done", "Probes done.");
 """.format(witness=witness, socket_origin=socket_origin)
 
 
+# A page that needs the internet (a 3D view from a CDN, live data from an API), as an agent writes one: the preview
+# runs offline, so the panel names its hosts (WEB-U-467). Reserved example hosts; the page's policy blocks both.
+WEATHER = """<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Weather</title>
+<link rel="stylesheet" href="https://cdn.example.org/weather.css">
+<script src="https://cdn.example.org/three.min.js"></script></head>
+<body><h1>Weather</h1><p id="now">Loading…</p><div id="globe"></div>
+<p><a href="https://example.com/about">About the data</a></p>
+<script>
+fetch("https://api.example.org/forecast?city=Lisbon").then((answer) => answer.json())
+  .then((data) => { document.getElementById("now").textContent = data.summary; }, () => undefined);
+</script></body></html>
+"""
+
+# A self-contained page: inline style and script, a data: image and a link the person may click; nothing to load, so
+# the panel keeps its sandbox note.
+NOTES = """<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Notes</title>
+<style>body{font:14px/1.4 system-ui,sans-serif;margin:16px;color:#1f2328;background:#fff}</style></head>
+<body><h1>Meeting notes</h1>
+<img alt="" width="8" height="8" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
+<p id="count"></p><p><a href="https://example.org/agenda">The agenda</a></p>
+<script>document.getElementById("count").textContent = "3 decisions";</script></body></html>
+"""
+
+
 def pdf(pages, script=False):
     """A PDF of `pages` pages, each titled with its number, with correct cross-reference offsets; with `script`, an
     OpenAction that would raise an alert (a preview must never run it)."""
@@ -180,6 +206,8 @@ def fixtures(witness):
     """Every embedded file, by its name in the previews folder."""
     return {
         "report.html": report(witness).encode(),
+        "weather.html": WEATHER.encode(),
+        "notes.html": NOTES.encode(),
         "brief.pdf": pdf(1, script=True),
         "long.pdf": pdf(25),
         "broken.pdf": b"%PDF-1.7\nthis is not a PDF body\n%%EOF\n",

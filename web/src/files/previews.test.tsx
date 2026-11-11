@@ -1,5 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -36,12 +42,22 @@ type Answer = { status: number; body: unknown };
 let files: Record<string, FileContent>;
 /** The sheet answers by the requested sheet name ("" for none). */
 let sheets: Record<string, Answer>;
+/** A file's whole bytes, as the download answers them. */
+let downloads: Record<string, string>;
 const fetch = vi.fn();
 beforeEach(() => {
   files = {};
   sheets = {};
+  downloads = {};
   fetch.mockReset().mockImplementation((input) => {
     const url = new URL(input as string, "http://localhost");
+    if (url.pathname.endsWith("/files/download"))
+      return Promise.resolve(
+        new Response(downloads[url.searchParams.get("path") ?? ""] ?? "", {
+          status: 200,
+          headers: { "Content-Type": "application/octet-stream" },
+        }),
+      );
     if (url.pathname.endsWith("/files/sheet")) {
       const answer = sheets[url.searchParams.get("sheet") ?? ""] ?? {
         status: 404,
@@ -183,6 +199,128 @@ describe("WEB-U-087 a web page in the Files panel", () => {
     ).toBeTruthy();
     expect(screen.queryByTitle("Preview of big.html")).toBeNull();
     expect(screen.getByRole("link", { name: "Download" })).toBeTruthy();
+  });
+});
+
+// WEB-U-467: a preview runs offline, so a page that loads from the internet says so on its own row under the bar,
+// naming the hosts as text; the bar keeps the sandbox note and Reload, and a self-contained page has no row.
+describe("WEB-U-467 a page that loads from the internet", () => {
+  const sandboxed = "Scripts are running in a sandbox";
+  const offline = (hosts: string) =>
+    `Previews run offline: what this page loads from ${hosts} won't show here. Download it to see it all.`;
+  const weather = [
+    '<script src="https://cdn.example.org/three.min.js"></script>',
+    '<p id="now">Loading…</p><a href="https://example.com/about">About</a>',
+    "<script>fetch('https://api.example.org/forecast')</script>",
+  ].join("");
+
+  it("names the hosts on a row of its own under the bar, as text, never as links", async () => {
+    files["weather.html"] = content("weather.html", weather.length, weather);
+    show("weather.html");
+    const line = await screen.findByText(
+      offline("cdn.example.org and api.example.org"),
+    );
+    expect(line.tagName).toBe("P");
+    expect(line.closest("a")).toBeNull();
+    expect(line.querySelector("a")).toBeNull();
+    // The bar is as before: the sandbox note and Reload; the line follows it.
+    const note = screen.getByText(sandboxed);
+    const bar = note.parentElement;
+    expect(bar?.className).toBe("file-kind-bar");
+    expect(line.closest(".file-kind-bar")).toBeNull();
+    expect(bar?.nextElementSibling).toBe(line);
+    expect(screen.getAllByRole("link").map((link) => link.textContent)).toEqual(
+      ["Download"],
+    );
+    expect(screen.getByTitle("Preview of weather.html")).toBeTruthy();
+  });
+
+  it("names three hosts at most, then counts the rest", async () => {
+    const html = ["a", "b", "c", "d", "e"]
+      .map((name) => `<script src="https://${name}.example.org/x.js"></script>`)
+      .join("");
+    files["many.html"] = content("many.html", html.length, html);
+    show("many.html");
+    expect(
+      await screen.findByText(
+        offline("a.example.org, b.example.org, c.example.org, and 2 more"),
+      ),
+    ).toBeTruthy();
+  });
+
+  it("shows the bar alone for a self-contained page", async () => {
+    const html = '<p>hi</p><a href="https://example.org/">More</a>';
+    files["report.html"] = content("report.html", html.length, html);
+    show("report.html");
+    await screen.findByTitle("Preview of report.html");
+    // Let the page's text be read before looking for a line that must not come.
+    await new Promise((settle) => setTimeout(settle, 20));
+    expect(screen.getByText(sandboxed)).toBeTruthy();
+    expect(screen.queryByText(/Previews run offline/)).toBeNull();
+  });
+
+  it("reads a page past the preview's text from its download", async () => {
+    const html = `${"<p>row</p>".repeat(60_000)}<script src="https://cdn.example.org/late.js"></script>`;
+    files["long.html"] = {
+      ...content("long.html", html.length, html.slice(0, 512 * 1024)),
+      truncated: true,
+    };
+    downloads["long.html"] = html;
+    show("long.html");
+    expect(await screen.findByText(offline("cdn.example.org"))).toBeTruthy();
+  });
+
+  /** The page's download fails `failures` times (a dropped connection), then answers. */
+  function failingDownload(failures: number) {
+    const answer = fetch.getMockImplementation() as
+      ((input: unknown, init: unknown) => Promise<Response>) | undefined;
+    let failed = 0;
+    fetch.mockImplementation((input: unknown, init: unknown) => {
+      const url = new URL(input as string, "http://localhost");
+      if (url.pathname.endsWith("/files/download") && failed < failures) {
+        failed += 1;
+        return Promise.reject(new TypeError("Failed to fetch"));
+      }
+      return answer?.(input, init);
+    });
+    return () =>
+      fetch.mock.calls.filter(([input]) =>
+        new URL(input as string, "http://localhost").pathname.endsWith(
+          "/files/download",
+        ),
+      ).length;
+  }
+  const longPage = () => {
+    const html = `${"<p>row</p>".repeat(60_000)}<script src="https://cdn.example.org/late.js"></script>`;
+    files["long.html"] = {
+      ...content("long.html", html.length, html.slice(0, 512 * 1024)),
+      truncated: true,
+    };
+    downloads["long.html"] = html;
+  };
+
+  it("reads the page again once when its first read fails", async () => {
+    longPage();
+    const reads = failingDownload(1);
+    show("long.html");
+    expect(
+      await screen.findByText(offline("cdn.example.org"), undefined, {
+        timeout: 4000,
+      }),
+    ).toBeTruthy();
+    expect(reads()).toBe(2);
+  });
+
+  it("reads it twice at most, and shows the bar alone when both reads fail", async () => {
+    longPage();
+    const reads = failingDownload(5);
+    show("long.html");
+    await screen.findByTitle("Preview of long.html");
+    await waitFor(() => expect(reads()).toBe(2), { timeout: 4000 });
+    // A third read would come 2 s after the second (the query's backoff): watch past it.
+    await new Promise((settle) => setTimeout(settle, 3000));
+    expect(reads()).toBe(2);
+    expect(screen.queryByText(/Previews run offline/)).toBeNull();
   });
 });
 

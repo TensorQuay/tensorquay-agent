@@ -190,9 +190,8 @@ function EngineTable({ items, ...actions }: { items: Engine[] } & RowActions) {
 
 /**
  * A budget's use over its current count, a sentence per limit; none without a budget. Token figures are short
- * (WEB-U-461) and never misstate where the budget stands: under its limit the use rounds down and the limit up; at or
- * over it, the use up and the limit down. Both are multiples of the step shown, so under never reads as equal, and at
- * or over never as under. `exact` gives every figure whole, for the tooltip and screen readers (UI-GUIDELINES §10).
+ * (WEB-U-461) and never misstate where the budget stands (`shortBudget`). `exact` gives every figure whole, for the
+ * tooltip and screen readers (UI-GUIDELINES §10).
  */
 function budgetWords(item: Engine, t: Translate, exact = false): string[] {
   const { budget, budget_used: used } = item;
@@ -214,21 +213,52 @@ function budgetWords(item: Engine, t: Translate, exact = false): string[] {
       }),
     );
   if (budget.tokens !== undefined) {
-    const spent = used.tokens >= budget.tokens;
+    const [shownUse, shownLimit] = exact
+      ? [used.tokens, budget.tokens]
+      : shortBudget(used.tokens, budget.tokens, t.locale);
     lines.push(
       t("engines.budgetUseTokens", {
-        used: exact
-          ? used.tokens
-          : formatCompact(used.tokens, t.locale, spent ? "up" : "down"),
-        limit: exact
-          ? budget.tokens
-          : formatCompact(budget.tokens, t.locale, spent ? "down" : "up"),
+        used: shownUse,
+        limit: shownLimit,
         period,
         date,
       }),
     );
   }
   return lines;
+}
+
+/**
+ * A use and its limit in short form (WEB-U-461). Both read to the nearest, so a limit always reads the same. Only
+ * when a use and its limit differ but read the same does the use move to the next figure: below the limit's when
+ * under it, above when over. So "30M of 30M" means a use at its limit, and nothing else.
+ */
+function shortBudget(
+  used: number,
+  limit: number,
+  locale: string,
+): [string, string] {
+  const shownUse = formatCompact(used, locale);
+  const shownLimit = formatCompact(limit, locale);
+  if (shownUse !== shownLimit || used === limit) return [shownUse, shownLimit];
+  return [nextFigure(used, locale, used < limit ? -1 : 1), shownLimit];
+}
+
+/**
+ * The short figure next to a count's own, below it or above it. The numbers that read alike form a run, whose edge
+ * is found by halving; so it holds in every language's units (K, M, 万) and across them (999.9K below 1M).
+ */
+function nextFigure(value: number, locale: string, side: -1 | 1): string {
+  const shown = formatCompact(value, locale);
+  let inside = value;
+  // A count of one or more never reads as zero, or as twice itself.
+  let outside = side < 0 ? 0 : Math.max(value * 2, 1);
+  while (Math.abs(outside - inside) > 1) {
+    const middle = Math.floor((inside + outside) / 2);
+    if (formatCompact(middle, locale) === shown) inside = middle;
+    else outside = middle;
+  }
+  return formatCompact(outside, locale);
 }
 
 function EngineRow({
@@ -248,7 +278,7 @@ function EngineRow({
     <tr>
       <td>
         <div className="stack route-name">
-          <span>{label}</span>
+          <span className="cell-whole">{label}</span>
           <CellNote>
             {[host, source ? t(source) : null].filter(Boolean).join(" · ")}
           </CellNote>

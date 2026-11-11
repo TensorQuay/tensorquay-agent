@@ -127,4 +127,28 @@ describe("WEB-U-016 one item per call, in words", () => {
     expect(footer).toHaveTextContent(/^No files changed$/);
     expect(footer?.getAttribute("title")).toMatch(/steps?.*command.*tokens/);
   });
+
+  // WEB-U-461: the tooltip gives the token counts exactly, as a short count's does, and screen readers get the same
+  // details, which a title alone reaches few of; the footer still shows only what changed.
+  it("gives the footer's details exactly, on hover and to screen readers", () => {
+    const { container } = show([
+      ...ls.slice(0, 10),
+      frame(11, {
+        type: "usage",
+        prompt_tokens: 218469,
+        completion_tokens: 6269,
+      }),
+      frame(12, { type: "run.completed", run_id: runId }),
+    ]);
+    const footer = container.querySelector(".turn-summary");
+    expect(footer).toHaveTextContent(/^No files changed$/);
+    const details = footer?.getAttribute("title") ?? "";
+    expect(details).toMatch(
+      / · 218\u202f469 input · 6\u202f269 output tokens$/,
+    );
+    // Matched as is: the default matcher would turn the narrow spaces that group the figures into plain ones.
+    const spoken = screen.getByText(details, { normalizer: (text) => text });
+    expect(spoken).toHaveClass("sr-only");
+    expect(footer).not.toContainElement(spoken);
+  });
 });

@@ -2,6 +2,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
+import { formatMessage, type MessageValues } from "../i18n/message";
+import type { Translate } from "../i18n/translate";
 import { conversationId } from "../test/frames";
 
 import { AccountMenu } from "./AccountMenu";
@@ -119,6 +121,25 @@ describe("WEB-U-007 single account menu", () => {
     expect(
       within(menu).getByRole("menuitem", { name: "Usage" }),
     ).toHaveAttribute("href", "/settings/usage");
+  });
+
+  // The heading joins the email and the role as the reader's language joins them: through its catalogue's message,
+  // never a join of the code's own.
+  it("WEB-U-463 joins the email and the role through the catalogue", async () => {
+    const { accountHeading } = await import("./AccountActions");
+    const messages: Record<string, string> = {
+      "account.heading": "{role}: {email}",
+      "account.roleAdmin": "Admin",
+      "account.roleMember": "Member",
+    };
+    const t = ((key: string, values?: MessageValues) =>
+      formatMessage(messages[key] ?? key, values ?? {}, "en")) as Translate;
+    expect(accountHeading(t, "admin@example.invalid", true)).toBe(
+      "Admin: admin@example.invalid",
+    );
+    expect(accountHeading(t, "member@example.invalid", false)).toBe(
+      "Member: member@example.invalid",
+    );
   });
 
   // Languages that are not fully translated say so in the menu (WEB-U-032).

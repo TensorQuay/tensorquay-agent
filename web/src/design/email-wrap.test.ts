@@ -12,7 +12,9 @@ const settings = readFileSync("src/app/settings.css", "utf8").replace(
 function rule(selector: string): string {
   const found: string[] = [];
   for (const match of settings.matchAll(/([^{};]+)\{([^{}]*)\}/g)) {
-    const selectors = (match[1] ?? "").split(",").map((part) => part.trim());
+    const selectors = (match[1] ?? "")
+      .split(",")
+      .map((part) => part.replace(/\s+/g, " ").trim());
     if (selectors.includes(selector)) found.push(match[2] ?? "");
   }
   return found.join(";");
@@ -26,6 +28,23 @@ describe("WEB-U-117 an email reads whole", () => {
     const text = rule(".data-name-wrap > span:first-child");
     expect(declared(text, "overflow-wrap")).toBe("normal");
     expect(declared(text, "word-break")).toBe("normal");
+  });
+
+  // The email is also a .cell-whole, whose rule (.data-table td .cell-whole, 0,2,1) lets a table's values wrap
+  // anywhere and comes later than the one above, of the same weight: a rule of more weight keeps the email's.
+  it("keeps its breaks against the rule that lets a table's values wrap anywhere", () => {
+    expect(declared(rule(".data-table td .cell-whole"), "overflow-wrap")).toBe(
+      "anywhere",
+    );
+    // As cards, break-word, not anywhere: a part breaks inside only when it can't fit a whole line.
+    const email = rule(".data-table td .data-name-wrap > .cell-whole");
+    expect(declared(email, "overflow-wrap")).toBe("break-word");
+    expect(declared(email, "word-break")).toBe("normal");
+    // In a table's row form, never inside a part: the column is at least the longest one, or the table is cards.
+    const rows = rule(
+      ":where(.data-table-scroll:not([data-cards])) .data-table td .data-name-wrap > .cell-whole",
+    );
+    expect(declared(rows, "overflow-wrap")).toBe("normal");
   });
 });
 

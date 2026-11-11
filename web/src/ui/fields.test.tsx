@@ -18,6 +18,13 @@ describe.each([
     });
     expect(onChange).toHaveBeenCalledOnce();
   });
+  // Where the place says what the field is for (a share form's address, the composer's message), its label leaves the
+  // screen through the one class for words only screen readers get, and still names the field.
+  it("can keep its label for screen readers only", () => {
+    render(<Field label="Name" labelHidden />);
+    expect(screen.getByText("Name")).toHaveClass("sr-only");
+    expect(screen.getByLabelText("Name")).toBeInTheDocument();
+  });
   it("exposes disabled state", () => {
     render(<Field label="Name" disabled />);
     expect(screen.getByLabelText("Name")).toBeDisabled();

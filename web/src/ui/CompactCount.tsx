@@ -2,21 +2,24 @@ import { formatCompact, formatNumber } from "../i18n/message";
 
 /**
  * A sentence shown short with its exact twin for screen readers (WEB-U-461): the short words show, titled with the
- * exact ones for hover; the exact words are what a screen reader reads.
+ * exact ones for hover; the exact words are what a screen reader reads. Inside an element with a tooltip of its own
+ * (CellNote), `titled={false}` leaves the short words untitled, so there is one tooltip.
  */
 export function ShortAndExact({
   short,
   exact,
+  titled = true,
 }: {
   short: string;
   exact: string;
+  titled?: boolean;
 }) {
   return (
     <>
-      <span aria-hidden="true" title={exact}>
+      <span aria-hidden="true" title={titled ? exact : undefined}>
         {short}
       </span>
-      <span className="visually-hidden">{exact}</span>
+      <span className="sr-only">{exact}</span>
     </>
   );
 }

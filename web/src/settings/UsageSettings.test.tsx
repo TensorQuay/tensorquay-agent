@@ -180,7 +180,7 @@ describe("WEB-U-034 usage", () => {
     expect(await screen.findByText("66.6K tokens", exactly)).toBeVisible();
     // WEB-U-461: the exact figure stays for screen readers; the short one is what shows.
     expect(screen.getByText(`66${GROUP}566 tokens`, exactly)).toHaveClass(
-      "visually-hidden",
+      "sr-only",
     );
     // 66 566 against 56 410: 18 % more.
     expect(screen.getByText("+18% vs the same days of August")).toBeVisible();
@@ -293,6 +293,38 @@ describe("WEB-U-034 usage", () => {
         .slice(1)
         .map((line) => within(line).getAllByRole("cell")[0]?.textContent),
     ).toEqual(["Sep 26, 2026", "Sep 25, 2026"]);
+  });
+
+  // UI-GUIDELINES §10, one way per kind of count on a page: requests read exactly, in the summary (whose plural needs
+  // the number itself) and on each day alike; only the token counts read short.
+  it("reads each day's requests exactly, as the summary reads the period's", async () => {
+    const busy = report({
+      rows: [row("2026-09-26", { requests: 1234, reported: 1234 })],
+      totals: { ...figures, requests: 1234, reported: 1234 },
+    });
+    const { api } = fake((query) =>
+      Promise.resolve(
+        query.group === "user"
+          ? people
+          : query.group === "route"
+            ? models
+            : busy,
+      ),
+    );
+    show(api);
+    expect(
+      await screen.findByText(
+        `1${GROUP}234 requests · 30.4K tokens in · 2.9K tokens out`,
+        exactly,
+      ),
+    ).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Show each day" }));
+    const table = screen.getByRole("table", { name: "Usage by day" });
+    const [, day] = within(table).getAllByRole("row");
+    if (!day) throw new Error("the table has the day's row");
+    expect(within(day).getAllByRole("cell")[1]?.textContent).toBe(
+      `1${GROUP}234`,
+    );
   });
 
   it.each([
@@ -507,14 +539,13 @@ describe("WEB-U-127 usage reads the same on day one as later", () => {
     expect(within(table).queryByText("local")).toBeNull();
   });
 
-  it("WEB-U-461 writes every count the same way: short on screen, never a long row of digits", async () => {
+  it("WEB-U-461 writes every token count the same way: short on screen, never a long row of digits", async () => {
     const { api } = fake(answers());
     show(api);
     await screen.findByText("66.6K tokens", exactly);
     // What shows on screen: everything but the screen-reader twins.
     const page = document.body.cloneNode(true) as HTMLElement;
-    for (const hidden of page.querySelectorAll(".visually-hidden"))
-      hidden.remove();
+    for (const hidden of page.querySelectorAll(".sr-only")) hidden.remove();
     const long = page.textContent?.match(
       new RegExp(`.{0,30}\\d${GROUP}\\d{3}.{0,30}`, "g"),
     );

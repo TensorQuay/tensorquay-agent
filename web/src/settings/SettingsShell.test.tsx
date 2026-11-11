@@ -7,6 +7,7 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
+import { type ReactNode, useEffect } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { api } from "../api/client";
@@ -394,6 +395,98 @@ describe("WEB-U-460 the Settings menu stays in view", () => {
       expect(shown.asked).toEqual([]);
     } finally {
       shown.restore();
+    }
+  });
+
+  /** A member's Keys section, the session already known. */
+  function showKeys(children: () => ReactNode = () => null) {
+    const cache = new QueryClient();
+    cache.setQueryData(["session"], member);
+    return render(
+      <QueryClientProvider client={cache}>
+        <SettingsShell section="keys">{children}</SettingsShell>
+      </QueryClientProvider>,
+    );
+  }
+
+  // A passive effect runs once the browser has painted. By then the menu already shows its current item, so it never
+  // moves after the page first shows.
+  it("scrolls the menu before the page is painted", () => {
+    const painted: number[] = [];
+    function Painted() {
+      useEffect(() => {
+        painted.push(nav().scrollTop);
+      }, []);
+      return null;
+    }
+    // The menu shows from 100 to 700 px; Keys sits below its view, at 720-752 px.
+    const shown = layout([100, 700], [720, 752]);
+    try {
+      showKeys(() => <Painted />);
+      expect(painted).toEqual([52]);
+    } finally {
+      shown.restore();
+    }
+  });
+
+  // Below 768 px the Section select stands in for the menu. Widening the window past it draws the menu again, and the
+  // menu then shows its current item.
+  it("shows the current item again when a wider window draws the menu", () => {
+    const heard: (() => void)[] = [];
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn((query: string) => ({
+        matches: true,
+        media: query,
+        addEventListener: (_: string, listener: () => void) =>
+          heard.push(listener),
+        removeEventListener: vi.fn(),
+      })),
+    );
+    try {
+      // Narrow: the menu isn't drawn (no box), so nothing moves.
+      showKeys();
+      expect(nav().scrollTop).toBe(0);
+      const shown = layout([100, 700], [720, 752]);
+      try {
+        act(() => {
+          for (const listener of heard) listener();
+        });
+        expect(nav().scrollTop).toBe(52);
+      } finally {
+        shown.restore();
+      }
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  // The page's fonts can arrive after the first paint and move the item; once they have, the menu shows it again.
+  it("shows the current item again once the fonts have loaded", async () => {
+    let loaded: () => void = () => undefined;
+    const ready = new Promise<void>((resolve) => {
+      loaded = resolve;
+    });
+    Object.defineProperty(document, "fonts", {
+      configurable: true,
+      value: { ready },
+    });
+    try {
+      // Before the fonts, the item is in view (jsdom has no layout: no box).
+      showKeys();
+      expect(nav().scrollTop).toBe(0);
+      const shown = layout([100, 700], [720, 752]);
+      try {
+        await act(async () => {
+          loaded();
+          await ready;
+        });
+        expect(nav().scrollTop).toBe(52);
+      } finally {
+        shown.restore();
+      }
+    } finally {
+      delete (document as { fonts?: unknown }).fonts;
     }
   });
 });

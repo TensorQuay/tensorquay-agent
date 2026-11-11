@@ -102,16 +102,18 @@ export function WorkspaceTable({
                 </td>
                 {others && (
                   <td className="type-small workspace-owner">
-                    {workspace.access === "owner"
-                      ? t("workspaces.ownerYou")
-                      : t("workspaces.ownerAccess", {
-                          owner: workspace.owner.email,
-                          access: t(
-                            workspace.access === "write"
-                              ? "workspaces.canEdit"
-                              : "workspaces.canView",
-                          ),
-                        })}
+                    <span className="cell-whole">
+                      {workspace.access === "owner"
+                        ? t("workspaces.ownerYou")
+                        : t("workspaces.ownerAccess", {
+                            owner: workspace.owner.email,
+                            access: t(
+                              workspace.access === "write"
+                                ? "workspaces.canEdit"
+                                : "workspaces.canView",
+                            ),
+                          })}
+                    </span>
                   </td>
                 )}
                 <td>

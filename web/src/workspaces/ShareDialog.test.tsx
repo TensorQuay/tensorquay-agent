@@ -56,6 +56,18 @@ describe("WEB-U-025 share dialog", () => {
     expect(onClose).toHaveBeenCalledOnce();
   });
 
+  // The field's placeholder says what it is for on screen; its label stays its name, for screen readers only.
+  it("keeps the email field's label for screen readers only", async () => {
+    show({ [`GET ${base}`]: () => Response.json({ items: [anaShare] }) });
+    const dialog = await screen.findByRole("dialog", {
+      name: "Share “Sales analysis”",
+    });
+    const email = within(dialog).getByRole("textbox", { name: "Email" });
+    expect(dialog.querySelector(`label[for="${email.id}"]`)).toHaveClass(
+      "sr-only",
+    );
+  });
+
   it("lists the current members and adds one by exact email", async () => {
     let shares: WorkspaceShare[] = [anaShare];
     const { calls } = show({

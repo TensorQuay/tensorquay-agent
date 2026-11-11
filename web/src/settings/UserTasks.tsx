@@ -78,7 +78,7 @@ function PersonTasks({ id }: { id: string }) {
         <Skeleton label={t("skeleton.loading")} />
       ) : (
         <>
-          <h2 className="type-heading" id="person-tasks">
+          <h2 className="type-heading code-wrap" id="person-tasks">
             {t("users.tasksOf", { email: person.email })}
           </h2>
           <p className="muted">{t("users.tasksNote")}</p>
@@ -150,5 +150,9 @@ function Named({
   name: string | undefined;
   children: string;
 }) {
-  return name ? <>{name}</> : <code className="type-code">{children}</code>;
+  return name ? (
+    <span className="cell-whole">{name}</span>
+  ) : (
+    <code className="type-code cell-whole">{children}</code>
+  );
 }

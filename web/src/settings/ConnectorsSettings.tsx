@@ -176,7 +176,7 @@ function ConnectorRow({
       <td>
         <div className="stack route-name">
           {/* The display name only (UI-GUIDELINES §10); the internal name stands in when there is none. */}
-          <span>{name}</span>
+          <span className="cell-whole">{name}</span>
           <CellNote>{`${hostOf(item.url)} · ${source}`}</CellNote>
         </div>
       </td>

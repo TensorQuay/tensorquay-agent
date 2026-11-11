@@ -82,7 +82,7 @@ export function SidebarToggle() {
       hidden={known && (layout === "expanded") !== expanded}
     >
       <Icon glyph={glyph} />
-      <span className="sidebar-toggle-name">{words}</span>
+      <span className="sr-only">{words}</span>
     </span>
   );
   return (

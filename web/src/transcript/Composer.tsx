@@ -266,6 +266,7 @@ export function Composer({
             ref={input}
             className="composer-input"
             label={t("composer.message")}
+            labelHidden
             rows={lines}
             maxLength={maximumCharacters}
             placeholder={

@@ -85,6 +85,15 @@ describe("WEB-U-457 the composer's one row", () => {
     expect(follows(text, send)).toBe(true);
   });
 
+  // The text's placeholder says what it is for on screen; its label stays its name, for screen readers only.
+  it("keeps the text's label for screen readers only", () => {
+    render(<Harness />);
+    const text = screen.getByRole("textbox", { name: "Message" });
+    expect(document.querySelector(`label[for="${text.id}"]`)).toHaveClass(
+      "sr-only",
+    );
+  });
+
   it("keeps Stop at the row's end while a run goes", () => {
     render(<Harness run={running} />);
     const text = screen.getByRole("textbox", { name: "Message" });

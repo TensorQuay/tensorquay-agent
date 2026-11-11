@@ -215,11 +215,16 @@ export function AdminSharedKeys({
                     <tr key={item.id}>
                       <td>
                         <Link href={`${SHARED_PAGE}/${item.id}`}>
-                          <code className="type-code">{item.name}</code>
+                          <code className="type-code cell-whole">
+                            {item.name}
+                          </code>
                         </Link>
                       </td>
                       <td>
-                        <span className="cell-cut" title={formatAddress(item)}>
+                        <span
+                          className="cell-cut cell-address"
+                          title={formatAddress(item)}
+                        >
                           {formatAddress(item)}
                         </span>
                       </td>
@@ -265,9 +270,14 @@ export function AdminSharedKeys({
                   const used = lastUseTime(item.last_use, t, at, timeZone);
                   return (
                     <tr key={item.id}>
-                      <td>{item.owner.email}</td>
                       <td>
-                        <span className="cell-cut" title={formatAddress(item)}>
+                        <span className="cell-whole">{item.owner.email}</span>
+                      </td>
+                      <td>
+                        <span
+                          className="cell-cut cell-address"
+                          title={formatAddress(item)}
+                        >
                           {formatAddress(item)}
                         </span>
                       </td>
@@ -438,10 +448,13 @@ export function MemberSharedKeys({
               return (
                 <tr key={item.id}>
                   <td>
-                    <code className="type-code">{item.name}</code>
+                    <code className="type-code cell-whole">{item.name}</code>
                   </td>
                   <td>
-                    <span className="cell-cut" title={formatAddress(item)}>
+                    <span
+                      className="cell-cut cell-address"
+                      title={formatAddress(item)}
+                    >
                       {formatAddress(item)}
                     </span>
                   </td>

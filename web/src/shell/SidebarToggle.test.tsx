@@ -67,6 +67,10 @@ describe("WEB-U-007 sidebar toggle", () => {
       ["expanded", "Collapse sidebar", false],
       ["rail", "Expand sidebar", false],
     ]);
+    // Each name is words for screen readers only, through the one class for them.
+    expect(
+      names.map((name) => name.querySelector(".sr-only")?.textContent),
+    ).toEqual(["Collapse sidebar", "Expand sidebar"]);
   });
 
   it("names itself and offers its key in its tooltip once it knows the layout", () => {

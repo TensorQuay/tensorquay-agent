@@ -289,7 +289,7 @@ function RuleRows({
                   {/* An internal server's rule (WEB-U-188) says so beside its host, and why the gateway can't use it
                       yet in the row's one muted line (17.3). */}
                   <span className="cell-pills">
-                    <code className="type-code">{item.host}</code>{" "}
+                    <code className="type-code cell-whole">{item.host}</code>{" "}
                     {item.internal && (
                       <span className="status-pill type-label">
                         {t("egress.internal")}

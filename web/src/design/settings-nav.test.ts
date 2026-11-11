@@ -72,3 +72,26 @@ describe("WEB-U-460 the Settings menu stays in view", () => {
     expect(declared(nav, "margin")).toBe("calc(-1 * var(--space-1))");
   });
 });
+
+// WEB-U-465 (17.4.1 fix): the menu is as wide as its widest label needs, which `e2e/settings-menu.spec.ts` measures in
+// every shipped language. Its width once also set a settings form's fields and the details list's labels; they only
+// borrowed it, and keep their 160 px under names of their own.
+describe("WEB-U-465 the Settings menu is as wide as its labels need", () => {
+  it("takes its width from its own token, on the 4 px grid", () => {
+    expect(
+      declared(rule(settings, ".settings-page"), "grid-template-columns"),
+    ).toBe("var(--settings-nav-width) minmax(0, var(--form-width))");
+    expect(px("var(--settings-nav-width)") % 4).toBe(0);
+  });
+
+  it("leaves the settings form's fields and the details list's labels at their own 160 px", () => {
+    expect(declared(rule(settings, ".settings-form .field"), "flex")).toBe(
+      "1 1 var(--form-field-basis)",
+    );
+    expect(px("var(--form-field-basis)")).toBe(160);
+    expect(
+      declared(rule(settings, ".detail-row"), "grid-template-columns"),
+    ).toBe("var(--detail-label-width) minmax(0, 1fr)");
+    expect(px("var(--detail-label-width)")).toBe(160);
+  });
+});

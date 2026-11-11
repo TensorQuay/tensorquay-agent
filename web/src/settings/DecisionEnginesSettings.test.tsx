@@ -39,7 +39,7 @@ const row = (name: RegExp) => screen.getByRole("row", { name });
 /** A short line's two forms: what shows (hidden from screen readers), and the exact words screen readers get instead. */
 const forms = (line: HTMLElement) => ({
   shown: line.querySelector('[aria-hidden="true"]')?.textContent,
-  read: line.querySelector(".visually-hidden")?.textContent,
+  read: line.querySelector(".sr-only")?.textContent,
 });
 /** A count written with the narrow no-break space between its thousands, as the app writes it (§10). */
 const grouped = (words: string) => words.replace(/(\d) (?=\d)/g, "$1\u202f");
@@ -173,10 +173,10 @@ describe("WEB-U-074 decision engines", () => {
     expect(within(row(/plain/)).queryByText(/ of /)).toBeNull();
   });
 
-  // WEB-U-461 (17.4 fix): the short figures never misstate where a budget stands. Under its limit the use
-  // rounds down and the limit up; at or over it, the use rounds up and the limit down (both are multiples of the step
-  // shown, so under never reads as equal and at or over never reads as under). The line shows them short; its tooltip
-  // and screen readers get them exactly, and a missing key's link is read as itself.
+  // WEB-U-461: the short figures never misstate where a budget stands. Both read to the nearest, so a limit always
+  // reads the same; only when two different values read the same does the use move one figure away, below the limit
+  // when under it and above it when over, so a use at its limit reads as at it. The line shows them short; its
+  // tooltip and screen readers get them exactly, and a missing key's link is read as itself.
   it("never shows a budget as more or less spent than it is, and gives screen readers the exact figures", async () => {
     const use = (used: number, limit: number) => ({
       budget: { tokens: limit, period: "month" as const },
@@ -186,10 +186,15 @@ describe("WEB-U-074 decision engines", () => {
     show(
       fakeEngines({
         engines: [
-          engine("spent", use(29980000, 29960000)),
-          engine("headroom", use(29930000, 29940000)),
+          engine("under-a-hair", use(29999999, 30000001)),
+          engine("over-a-hair", use(30000001, 29999999)),
+          engine("at-limit", use(29940000, 29940000)),
           engine("round-under", use(29960000, 30000000)),
           engine("round-over", use(30040000, 30000000)),
+          engine("clear-under", use(29000000, 30000000)),
+          engine("clear-over", use(31000000, 30000000)),
+          engine("same-step", use(29910000, 29940000)),
+          engine("unit-edge", use(999960, 1000000)),
           engine("keyless", {
             ...use(29960000, 30000000),
             key_ref: "secrets/gone",
@@ -200,10 +205,16 @@ describe("WEB-U-074 decision engines", () => {
     );
     await screen.findByRole("table", { name: "Decision engines" });
     for (const [name, shown, exact] of [
-      ["spent", "30M of 29.9M", "29 980 000 of 29 960 000"],
-      ["headroom", "29.9M of 30M", "29 930 000 of 29 940 000"],
+      ["under-a-hair", "29.9M of 30M", "29 999 999 of 30 000 001"],
+      ["over-a-hair", "30.1M of 30M", "30 000 001 of 29 999 999"],
+      ["at-limit", "29.9M of 29.9M", "29 940 000 of 29 940 000"],
       ["round-under", "29.9M of 30M", "29 960 000 of 30 000 000"],
       ["round-over", "30.1M of 30M", "30 040 000 of 30 000 000"],
+      ["clear-under", "29M of 30M", "29 000 000 of 30 000 000"],
+      ["clear-over", "31M of 30M", "31 000 000 of 30 000 000"],
+      // Rounding the use down alone would leave it on its limit's figure; it moves a whole figure, even across units.
+      ["same-step", "29.8M of 29.9M", "29 910 000 of 29 940 000"],
+      ["unit-edge", "999.9K of 1M", "999 960 of 1 000 000"],
     ] as const) {
       const words = `${grouped(exact)} tokens this month`;
       const line = cellNote(row(new RegExp(name)), "tokens", words);
@@ -457,7 +468,7 @@ describe("WEB-U-074 decision engines", () => {
     expect(field("Tokens")).not.toHaveAttribute("aria-invalid", "true");
     expect(fake.writes).toHaveLength(0);
     // A field keeps exactly what was typed, focused or not, so selecting and typing replaces it; the summary under
-    // the row reads the numbers grouped.
+    // the row restates the numbers exactly, grouped, never shortened.
     expect(field("Tokens")).toHaveValue("30000000");
     fireEvent.focus(field("Tokens"));
     fireEvent.blur(field("Tokens"));
@@ -465,7 +476,7 @@ describe("WEB-U-074 decision engines", () => {
     fireEvent.change(field("Calls"), { target: { value: "3000" } });
     expect(
       within(dialog).getByText(
-        /^Up to 3\s000 calls and 30M tokens in total\.$/,
+        /^Up to 3\s000 calls and 30\s000\s000 tokens in total\.$/,
       ),
     ).toBeVisible();
     fireEvent.click(picker("Per", dialog));
@@ -477,7 +488,7 @@ describe("WEB-U-074 decision engines", () => {
     );
     expect(
       within(dialog).getByText(
-        /^Up to 3\s000 calls and 30M tokens each month \(UTC\)\.$/,
+        /^Up to 3\s000 calls and 30\s000\s000 tokens each month \(UTC\)\.$/,
       ),
     ).toBeVisible();
     expect(

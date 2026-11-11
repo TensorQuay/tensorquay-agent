@@ -3,6 +3,55 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
+## Unreleased
+
+### Fixed
+
+- **A long name or host no longer pushes a Settings table's actions off the screen (WEB-E2E-120).** A key's name, a
+  site's host, an email or a display name longer than its column wraps inside it, and its row grows a line. Beside a
+  key's note, its words are cut first and its link wraps second, so an everyday key's name stays on one line and its
+  address whole at 1024 px and wider. Before, in 17.4.0 too, the table scrolled sideways and the row's Edit and ⋯ left
+  the screen.
+- **A Settings table that doesn't fit its area shows its rows as cards (WEB-E2E-119).** Beside the expanded sidebar
+  from 1025 px, and in windows of about 920 to 1019 px with the rail, some tables needed more room than their area
+  had: Decision engines, Environments and API tokens scrolled sideways and hid a row's actions, or squeezed an
+  everyday name onto two lines. Each table now measures itself, as it loads and whenever its area or its content
+  changes, and shows its rows as cards where it doesn't fit and as a table where it does. Before, in 17.4.0 too, only
+  an area under 600 px showed cards.
+- **A page preview says when the page needs the internet (WEB-U-467).** Previews run offline, so a page that loads a
+  library from a CDN or live data from an API showed "Loading…" or an empty view with no word why. The panel now says
+  so in a line under the preview's bar, naming up to three of the hosts the page loads from (then "and N more") and
+  suggesting the download; a self-contained page looks as before. The preview stays offline.
+- **Image downloads survive a dropped connection (REL-U-012).** When the images are built, every download a
+  checksum guards (Go, npm, the guest kernel and Firecracker) is tried again after a network error, a TLS drop
+  included. A slow but steady link finishes however long it takes; a try ends only when it stalls or crawls, and a
+  lasting failure names the URL.
+- **Engine budgets read to the nearest (WEB-U-461).** Both of a budget's figures round to the nearest, so a limit
+  always reads the same; only when a use would read as its limit does it move to the next figure: "29.9M of 30M"
+  with headroom left, "30.1M of 30M" just over, and "29.9M of 29.9M" exactly at it. The budget form's summary
+  restates the numbers as typed ("30 000 000 tokens").
+- **The task summary's exact token counts (WEB-U-461).** Its tooltip gives the token counts exactly ("218 469
+  input"), as a short count's tooltip does, and screen readers now get its details too.
+- **The Settings menu holds still (WEB-U-460).** It shows the current section before the page is first drawn, and
+  again when a wider window brings the menu back or the fonts finish loading.
+- **Usage counts requests one way (WEB-U-461).** Each day's requests read exactly, as the period's summary does
+  ("1 234 requests"); token counts stay short.
+- **A sent picture uses the transcript's whole width (WEB-U-464).** On a narrow screen it no longer leaves room for a
+  scrollbar a phone doesn't draw, and in a very narrow column it keeps 48 px instead of vanishing.
+- **The install guide gets a new user through on Linux and rootless Docker (deploy/README.md).** It says how a model
+  server on the host is reached from a container on Linux (no `host.docker.internal`, and not on `127.0.0.1`); step 1
+  sets the rootless daemon's socket and group itself; it warns that a build moves the image tags every installation on
+  the host follows, and how to pin an installation's images by ID (`[runtime.builtin_images]` included) and keep them
+  with tags of its own, since with Docker's containerd image store a build deletes the images it replaces; how to
+  start a new build's images and check them; how to see which image an environment runs; the sandbox pool check takes
+  the pool as an argument; and the storage root's own filesystem is a recommendation, with the reason.
+
+### Security
+
+- **The system-call library is rustix 1.1.6** (it was 1.1.5), past RUSTSEC-2026-0486. Its one affected call here,
+  the sandbox's read-back of a file ACL, always passes a non-empty buffer, so the unsound zero-length case was not
+  reached.
+
 ## 17.4.0 (10 November 2026)
 
 An improvement release of the web app, and the runtime's MCP client library past three advisories. No migration, no
