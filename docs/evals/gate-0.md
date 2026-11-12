@@ -1,13 +1,13 @@
 # Gate 0: Foundation
 
-**State:** **technical criteria met; open on the Product Owner's MS0**, by the technical lead's evaluation below (12 Oct 2026). Until then the page was a draft. Phase 0 was built before this folder had pages: the
+**State:** **reached** (12 Nov 2026): the technical criteria were met by the technical lead's evaluation below (12 Oct 2026), and the Product Owner approved the four documents (MS0) on 12 Nov 2026 ("The documents, 12 Nov 2026"). Until then the page was a draft. Phase 0 was built before this folder had pages: the
 repository's first import (`a50bac90`, 23 Sep 2026) already held the workspace, the guardrails and the protocol
 types, and no Gate 0 report was written then. This page assesses the gate on the v1.0 release's evidence, 15b's full
 integration (10 Oct 2026, 14:56 to 17:51; 15c, its server with a new web image, is on main as
-`1586fd9f`). On that evidence the four test IDs and the CI gates pass. **One criterion has no record yet:** the product
+`1586fd9f`). On that evidence the four test IDs and the CI gates pass. **One criterion had no record until 12 Nov 2026:** the product
 owner's approval of the four documents (MS0). It was given on 12 Nov 2026 on a condition, that the technical lead had
 reviewed the documents and found them aligned; the review and the revisions it led to are below ("The documents,
-12 Nov 2026"), and the record follows them.
+12 Nov 2026"), and so is the record.
 
 ## Scope
 The TEST-PLAN §17 Gate 0 row: PROTO-C-001/002, PROTO-U-003, PROTO-U-007 (3 P0, 1 P1), and the CI gates G-01…G-10.
@@ -84,6 +84,8 @@ document had fallen behind a decision already made or a release already out. Non
   nothing on the releases since 17.0, or on agent teams and computer use being in them; the DEV-PLAN's stack
   table (the jailer, an image name) and its standing of 7 Nov; no traceability rows for FR-34 to FR-36.
 - **The revisions:** PRD v0.3, DEV-PLAN v0.8, ARCHITECTURE v0.2 and TEST-PLAN v0.2, all of 12 Nov 2026.
+- **The record (12 Nov 2026):** the revisions were merged that day, and the product owner, told of the review's
+  limits above and of the two points below, approved: "agree, go ahead". MS0 is reached, and with it Gate 0.
 - **Left open, and said so:** the PRD's §12 item 5 (the reference hardware for published numbers) has no decision;
-  item 25's fourth check (SOAK-001's D4) takes its confirmation from this approval; NFR-2, NFR-3 and NFR-8 have
+  item 25's fourth check (SOAK-001's D4) is confirmed by this approval; NFR-2, NFR-3 and NFR-8 have
   no row in TEST-PLAN §18.

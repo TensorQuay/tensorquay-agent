@@ -1,6 +1,6 @@
 # TensorQuay Agent: Product Requirements
 
-Status: **v0.3** (12 Nov 2026): v0.2 (1 Oct 2026) brought to the Product Owner's decisions up to 12 Nov 2026 (§12) and to what the releases carry (§6, "Releases and the plan's version names"). Roles: Product is the TensorQuay Product Owner (PO);
+Status: **v0.3** (12 Nov 2026): v0.2 (1 Oct 2026) brought to the Product Owner's decisions up to 12 Nov 2026 (§12) and to what the releases carry (§6, "Releases and the plan's version names"). **Approved by the Product Owner on 12 Nov 2026 (MS0).** Roles: Product is the TensorQuay Product Owner (PO);
 Engineering is TensorQuay engineering (AI-assisted). Companion documents: [ARCHITECTURE](ARCHITECTURE.md),
 [DEV-PLAN](DEV-PLAN.md), [TEST-PLAN](TEST-PLAN.md), [DEV-GUIDELINES](DEV-GUIDELINES.md).
 
@@ -272,7 +272,7 @@ decision engine that passes its suite is accepted on that evidence (ARCHITECTURE
 ## 9. Milestones and exit criteria
 | Milestone | Exit criteria |
 |---|---|
-| **MS0 Documents approved** | PO approves PRD, ARCHITECTURE, DEV-PLAN, TEST-PLAN |
+| **MS0 Documents approved** | PO approves PRD, ARCHITECTURE, DEV-PLAN, TEST-PLAN. **Reached on 12 Nov 2026** ([gate 0](evals/gate-0.md)) |
 | **MS1 Walking skeleton** (Phase 1) | An agent run visible end to end in the browser on Docker mode: loop, four tools, runtime in a container, gateway with persistence and relay, streaming transcript; the skeleton subset of P0 tests (TEST-PLAN §17 gate 1) |
 | **MS2 Team MVP** (Phases 2–5) | Robustness, safety, team and local-model quality on Docker mode; FR-1…FR-8, FR-11…FR-19 (FR-10 is superseded), FR-21, FR-22, FR-26, FR-29, FR-30; all P0 tests through gate 5; SEC P0 in Docker mode; metrics M2, M3 (Docker), M4 measured; E2E-WAVE-001 on the TensorQuay box |
 | **MS3 Extensions and channels** (Phases 6–7) | FR-9, FR-23…FR-25, FR-28, FR-31; gates 6 and 7 |
@@ -408,8 +408,8 @@ with slots, queue, eviction, parking and pin (ADR-0016).
     and 8 Oct 2026, while the other descriptors stayed flat; and the probe counted itself (the 17 seen was the pool's
     16 plus the probe). The stated blind spot: a leak of 3 or fewer held connections per 12 h can pass, and a run with
     no gateway lifetime of 11 h or more (an 8 h run) doesn't judge the floor and says so; the 24 h run fails if it
-    has none. **Amendment (proposed 9 Oct 2026; in the soak's verdict as TEST-PLAN SOAK-001's check D4; its wording is confirmed
-    with the PO's approval of this document, MS0):** a fourth check closes that
+    has none. **Amendment (proposed 9 Oct 2026; in the soak's verdict as TEST-PLAN SOAK-001's check D4; confirmed as worded by
+    the PO on 12 Nov 2026, with MS0):** a fourth check closes that
     blind spot for a connection taken and never used again. After the first hour, no more of the gateway's database
     connections may stay idle for over 25 minutes than its listeners (none in the soak). A healthy pool puts its
     connections back into use; a connection taken and never used again idles for good, so it fails about 25 minutes
