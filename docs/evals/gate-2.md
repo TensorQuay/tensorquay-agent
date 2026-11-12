@@ -1,6 +1,6 @@
 # Gate 2: Robustness
 
-**State:** **reached, on one condition**: SOAK-002 closes when c16's soak completes every end-of-run check (the technical lead's evaluation below, 12 Oct 2026). Until then the page was a draft. Phase 2 was built and imported on 23 and 24 Sep 2026,
+**State:** **reached** (12 Nov 2026). It was reached on one condition on 12 Oct 2026, that a soak completes every end-of-run check (the technical lead's evaluation below); cycle 17's 24-hour soak met it ("The condition, closed", at the end). Until then the page was a draft. Phase 2 was built and imported on 23 and 24 Sep 2026,
 before this folder had pages; its short soak (SOAK-002) ran on 24 Sep (`3781de25`), and no Gate 2 report was
 written then. This page assesses the gate on the v1.0 release's evidence: 15b's full integration (10 Oct 2026,
 14:56 to 17:51), 15c's web run (15b's server with the web image `28c0f621…`; 15c is on main as
@@ -71,3 +71,15 @@ SOAK-002's exactly-once check with a full gate-evidence run.
   link and a 9 s stall causes exactly one outage, after which every frame arrives once. All three passed in 15b's
   ignored step (`int-23112f6b-ignored.log`). The client's `Last-Event-ID` half is the SSE tests and WEB-U-002.
 - **The demo in parts** is accepted: each of its three disruptions has a real-stack test on 15c's images.
+
+## The condition, closed (technical lead, 12 Nov 2026)
+**Verdict: Gate 2 is reached.** The condition asked for a soak that completes every end-of-run check, so that
+SOAK-002's exactly-once check has a full gate-evidence run. The condition named c16's soak; the run that meets
+it is cycle 17's 24-hour soak, of 1 to 2 Nov 2026, before release 17.0:
+
+- **The run:** 24 h, 8 conversation slots, seed 731, 72 conversation generations, 2863 samples and none missed;
+  the result says `status: passed` and `gate_evidence: true`.
+- **Exactly once:** in each of the 72 conversations both clients received the same number of events, and the
+  run's last line reads "Soak 24 h passed: every client's receipts equal the stored history; every run terminal".
+- **Read for this verdict:** the run's `result.json` and its log's end; the per-client receipt files were not
+  reread. The evidence is the team's (`evidence-r2-soak-24h-20261101-1015`), not part of this repository.

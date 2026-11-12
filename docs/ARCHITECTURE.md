@@ -1,6 +1,8 @@
 # TensorQuay Agent: Architecture
 
-Status: **draft v0.1 for Product Owner review** (22 Sep 2026). This is the architectural design half of the
+Status: **v0.2** (12 Nov 2026): v0.1 (22 Sep 2026) as amended in place since, checked against the PRD on 12 Nov 2026
+for the Product Owner's approval (MS0). "v1.0" and "v1.1" name the plan's scope; the releases are numbered 17.x, and
+release 17.0 carries agent teams (experimental, off by default) and computer use too (PRD §6). This is the architectural design half of the
 development plan; the phase-by-phase half is [DEV-PLAN](DEV-PLAN.md). Requirements: [PRD](PRD.md). Tests:
 [TEST-PLAN](TEST-PLAN.md). Final types are decided in code review; sketches here fix names and responsibilities.
 
@@ -261,7 +263,7 @@ Rules:
   still applies to writers. Sharing is off by default.
 - **Creation.** From the workspace picker in the conversation bar of a new conversation (no dialog, §11): pick an existing workspace, create an empty one, or fork one. Nothing
   is specific to git (PRD §12 item 22): the agent fetches files itself (git included, with the person's key from key
-  management); the API's git address on a new workspace is deprecated and goes over two releases. Workspaces also have their own page for listing, renaming,
+  management); the API's git address on a new workspace is removed, and a request that still sends one is refused by name (ADR-0037 amendment 4). Workspaces also have their own page for listing, renaming,
   sharing, size and deletion.
 - **Deletion is final** (PRD §12 item 18). Deleting a task or a workspace marks its row `deleted` and writes one
   content-free `admin_audit` row (area `tasks` or `workspaces`, the id, the actor) in the same transaction. A deleted
@@ -281,7 +283,7 @@ An **environment** is the machine the agent works in. It is described by a **tem
 current instance of it.
 - **Templates** (gateway table `templates`): name and display name, the OCI image digest (a registry digest or a local
   image ID, §4.1), the Firecracker rootfs digest exported from the same image, **declared capabilities**
-  (`shell`, `python`, `node`, `build`, `browser`, later `desktop`), resource defaults (a browser needs more memory),
+  (`shell`, `python`, `node`, `build`, `browser`, `desktop`), resource defaults (a browser needs more memory),
   and whether it is the default. Two first-party templates ship: **Workstation** (the default: the everyday coding
   toolchain plus a headless Chromium with Playwright and common CLI tools, image `tqa-runtime:workstation`) and
   **Minimal** (the runtime and core utilities only, image `tqa-runtime:base`, for tests and locked-down installs).
@@ -298,8 +300,8 @@ current instance of it.
   differs, emits `environment.changed { template, capabilities }` as a normal sequenced event before anything else, so
   the transcript and the model both learn of the change (the gateway never creates sequenced events, ADR-0005). A switch
   during a run is refused with `run_active`.
-- **Computer use** (a virtual desktop the agent sees and operates, streamed to the web UI) is a later phase (DEV-PLAN
-  Phase 11) and nothing in v1.0 depends on it. Design: a `desktop` capability on the Workstation image adds a virtual
+- **Computer use** (a virtual desktop the agent sees and operates, streamed to the web UI) is DEV-PLAN
+  Phase 11, in release 17.0 (ADR-0039); nothing in v1.0's scope depends on it. Design: a `desktop` capability on the Workstation image adds a virtual
   display (Xvfb at a fixed size such as 1280×800) with a light window manager and ordinary applications (a headed
   browser, a terminal, a file manager). The agent **observes** through screenshots scaled to the model's expected size,
   the Linux accessibility tree (AT-SPI) for element names, roles and positions, and, inside the browser, Playwright's
@@ -1016,6 +1018,8 @@ lead's page** shows the goal messages that lead sent or received, as quiet lines
 **The task list:** the goal is one item, its teams are under it, and each team's helpers are under that.
 
 ## 17. What we deliberately do not build yet
+This is v1.0's list. Since it was written, agent teams (experimental, off by default) and computer use were built and
+are in release 17.0 (PRD §6).
 - Agent teams (v1.1, §16.2) and swarms (later, §16.4); the channel primitive itself is in v1.0; cross-conversation memory; hooks; computer use (a later phase, §4.7; headless browser automation through the Workstation template's tools is in v1.0); built-in
   connector code; an in-process plugin API; billing; Kubernetes; OIDC; multi-organisation; GPU pass-through. Each is
   listed in PRD §6 and needs a PO decision.
@@ -1057,7 +1061,7 @@ lead's page** shows the goal messages that lead sent or received, as quiet lines
 | ADR-0032 | Custom sandbox templates (accepted): runtime-mutable settings (ADR-0028) registered by image digest, never pulled; checked in the background without running image code (derivation, protocol label, image policy, runtime binary hash, microVM rootfs by image ID); offered only when enabled and verified (or unchecked from the file); exactly one default that stays offered (`template_is_default`); a new image reaches idle bound conversations at their next sandbox |
 | ADR-0033 | The built-in secret store is the only secret store (accepted): AEAD in PostgreSQL under an install key outside the database; the gateway is the only reader; anything the store needs later (read audit, KMS or HSM wrapping of the install key) is built into it, never borrowed; no external vault backend is built, bundled or connected |
 | ADR-0034 | Agent teams (accepted 2 Oct 2026; built behind `[agent_teams] enabled`, off by default): a lead and its members, enforced by the gateway; roles stored at start and tools by role; members started by the lead with `start_member`, normal tasks grouped under it, with the lead's settings or narrower and depth 1; addressed messages on the channel's storage with per-reader seqs, delivered or refused, waking instead of waiting; no agent votes (the lead decides, people veto); per-member `own_copy` (files handed back through reports) or `my_files` (turns under the lease); budget and deadline at the relay; idle and stuck notices; room for swarms later |
-| ADR-0035 | Guardrails at the network boundary (proposed): no per-call permission policy and no approvals; the network allow-list is the only guardrail added; a refused connection names its host and port, and the prompt lists the allowed hosts; the git host's rules decide what a push may do; per-profile lists, recent refusals and observe mode are pending the Product Owner |
+| ADR-0035 | Guardrails at the network boundary (accepted 8 Oct 2026): no per-call permission policy and no approvals; the network allow-list is the only guardrail added; a refused connection names its host and port, and the prompt lists the allowed hosts; the git host's rules decide what a push may do; of the extras, recent refusals are built after 17.0, per-profile lists come when someone asks, and observe mode is dropped (PRD §12 item 23) |
 | ADR-0036 | Managing skills in the product (proposed, amends ADR-0029): a draft for the Product Owner, slice 1 only, no code before the Product Owner's OK |
 | ADR-0037 | Per-service keys (accepted 30 Sep 2026; part of 17.0): a member's or a shared key for one web address, given to a run as a per-run placeholder bound to its sandbox and run; the egress proxy opens TLS only for keyed hosts, swaps the placeholder for the value in the key's own header only, scrubs responses and audits every use before it (fail closed); an install CA rotated on demand; administrators make shared keys and choose who may use them; a member's key serves only that member's runs; `git_push` and the Git relay retire for plain git over HTTPS (amends ADR-0023, ADR-0033, ADR-0035) |
 | ADR-0038 | Swarms (accepted 2 Oct 2026, built after agent teams): one goal across a person's own agent teams; the person sets up the goal and its parts (each a new lead task from a profile they pick) or confirms the coordinator's proposal; one coordinator talks to the leads, leads only to the coordinator, helpers never leave their team; only messages and attached files cross teams; one goal budget and deadline; two levels, no cycles; each page's message box talks to that page's agent; no publishing, sharing or outside agents |
