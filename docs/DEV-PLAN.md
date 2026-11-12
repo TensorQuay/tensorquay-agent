@@ -1,6 +1,6 @@
 # TensorQuay Agent: Development Plan
 
-Status: **v0.8** (12 Nov 2026): v0.7 (7 Nov 2026) with where each phase stands and what comes next brought to release 17.4.1 (§4a, §4b), and a note where a phase's text was overtaken later (Phases 3 and 4). This is the phase-by-phase half of the development
+Status: **v0.8** (12 Nov 2026): v0.7 (7 Nov 2026) with where each phase stands and what comes next brought to release 17.4.1 (§4a, §4b), and a note where a phase's text was overtaken later (Phases 3 and 4). **Approved by the Product Owner on 12 Nov 2026 (MS0).** This is the phase-by-phase half of the development
 plan; the design half is [ARCHITECTURE](ARCHITECTURE.md). Requirements: [PRD](PRD.md). Tests: [TEST-PLAN](TEST-PLAN.md).
 Rules: [DEV-GUIDELINES](DEV-GUIDELINES.md). v0.2 replaces the layer-by-layer phases of v0.1 with a **walking
 skeleton first, then vertical iterations**: something runs end to end in the browser within the first weeks, and
@@ -277,7 +277,7 @@ explained in [TEST-PLAN](TEST-PLAN.md#build-names-and-ids).
 
 | Phase | Built | Gate |
 |---|---|---|
-| 0 Foundation | yes | technical criteria met (12 Oct 2026); open on the product owner's MS0 record. The approval was given on 12 Nov 2026 on condition that the four documents are aligned; their revisions of that day align them, and the record follows |
+| 0 Foundation | yes | reached (12 Nov 2026): technical criteria met on 12 Oct 2026, and the product owner approved the four documents (MS0) on 12 Nov 2026 |
 | 1 Walking skeleton | yes | reached (12 Oct 2026) |
 | 2 Robustness | yes | reached (12 Nov 2026): the one condition of 12 Oct, a soak that completes every end-of-run check, was met by cycle 17's 24-hour soak of 1 to 2 Nov 2026 |
 | 3 Safety | yes | reached (12 Oct 2026), Docker mode |
@@ -296,12 +296,11 @@ explained in [TEST-PLAN](TEST-PLAN.md#build-names-and-ids).
    mix; the gates' open points are closed; `gate-10.md`, `gate-11.md` and `agent-teams.md` are brought to the
    current release's evidence, with one 24-hour soak that has both in its mix; then the technical lead's verdicts.
    Agent teams stay experimental and off by default (PRD §12 item 32).
-2. **Gate 0:** the record of the product owner's MS0 approval.
-3. **Release 18.0:** the PDF reader and page previews that load from a fixed list of CDNs and the page's own files
+2. **Release 18.0:** the PDF reader and page previews that load from a fixed list of CDNs and the page's own files
    (PRD §12 items 30 and 31); "Recently refused" with "Allow this site" (ADR-0035 point 3); keeping a desktop
    sign-in for a whole task (ADR-0039 §6). Verified end to end before the release.
-4. **Fix releases** as findings come in (§7).
-5. **Later:** Phase 12, swarms, when the product owner calls for it.
+3. **Fix releases** as findings come in (§7).
+4. **Later:** Phase 12, swarms, when the product owner calls for it.
 
 ## 5. Parallel tracks
 Engineering runs in three streams that own disjoint parts of the tree, so they progress in parallel and meet at each

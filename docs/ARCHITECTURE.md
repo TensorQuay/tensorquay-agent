@@ -1,7 +1,7 @@
 # TensorQuay Agent: Architecture
 
-Status: **v0.2** (12 Nov 2026): v0.1 (22 Sep 2026) as amended in place since, checked against the PRD on 12 Nov 2026
-for the Product Owner's approval (MS0). "v1.0" and "v1.1" name the plan's scope; the releases are numbered 17.x, and
+Status: **v0.2** (12 Nov 2026): v0.1 (22 Sep 2026) as amended in place since, checked against the PRD on 12 Nov 2026.
+**Approved by the Product Owner on 12 Nov 2026 (MS0).** "v1.0" and "v1.1" name the plan's scope; the releases are numbered 17.x, and
 release 17.0 carries agent teams (experimental, off by default) and computer use too (PRD §6). This is the architectural design half of the
 development plan; the phase-by-phase half is [DEV-PLAN](DEV-PLAN.md). Requirements: [PRD](PRD.md). Tests:
 [TEST-PLAN](TEST-PLAN.md). Final types are decided in code review; sketches here fix names and responsibilities.
