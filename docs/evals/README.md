@@ -9,9 +9,9 @@ they use, and the commit and image IDs they quote, are explained in [TEST-PLAN](
 
 | Gate | Phase | Page | State |
 |---|---|---|---|
-| 0 | Foundation | [gate-0.md](gate-0.md) | **technical criteria met** (2026-10-12), on 15b's evidence: the four IDs and the CI gates pass; open on the product owner's MS0 record |
+| 0 | Foundation | [gate-0.md](gate-0.md) | **technical criteria met** (2026-10-12), on 15b's evidence: the four IDs and the CI gates pass; open on the record of the product owner's MS0 approval, given on 12 Nov 2026 on condition that the documents are aligned |
 | 1 | Walking skeleton | [gate-1.md](gate-1.md) | **reached** (2026-10-12), on 15b's evidence: 36 of 36 IDs pass, PERF-001 inside its target; the demo's change step isn't scripted |
-| 2 | Robustness | [gate-2.md](gate-2.md) | **reached on one condition** (2026-10-12), on 15b's evidence: 49 of 50 live IDs pass on their tests; SOAK-002 closes with c16's complete soak |
+| 2 | Robustness | [gate-2.md](gate-2.md) | **reached** (2026-11-12): on 15b's evidence 49 of 50 live IDs pass on their tests (2026-10-12), and the one condition, a soak that completes every end-of-run check, was met by cycle 17's 24-hour soak (1 to 2 Nov 2026) |
 | 3 | Safety | [gate-3.md](gate-3.md) | **reached** (2026-10-12), on 15b's evidence, Docker mode: 20 of 20 live IDs pass (6 void with approvals); the demo's network half passed |
 | 4 | Team | [gate-4.md](gate-4.md) | reached (2026-09-28) |
 | 5 | Local-model quality | [gate-5.md](gate-5.md) | reached on 15b (2026-10-11): every local-model run passed, M6 met, the phase demo accepted |

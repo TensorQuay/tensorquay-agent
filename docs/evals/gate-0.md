@@ -4,8 +4,10 @@
 repository's first import (`a50bac90`, 23 Sep 2026) already held the workspace, the guardrails and the protocol
 types, and no Gate 0 report was written then. This page assesses the gate on the v1.0 release's evidence, 15b's full
 integration (10 Oct 2026, 14:56 to 17:51; 15c, its server with a new web image, is on main as
-`1586fd9f`). On that evidence the four test IDs and the CI gates pass. **One criterion has no record:** the product
-owner's approval of the four documents (MS0); two of them still carry a "draft for Product Owner review" status line.
+`1586fd9f`). On that evidence the four test IDs and the CI gates pass. **One criterion has no record yet:** the product
+owner's approval of the four documents (MS0). It was given on 12 Nov 2026 on a condition, that the technical lead had
+reviewed the documents and found them aligned; the review and the revisions it led to are below ("The documents,
+12 Nov 2026"), and the record follows them.
 
 ## Scope
 The TEST-PLAN §17 Gate 0 row: PROTO-C-001/002, PROTO-U-003, PROTO-U-007 (3 P0, 1 P1), and the CI gates G-01…G-10.
@@ -30,7 +32,7 @@ DEV-PLAN Phase 0 adds two criteria: the skeleton protocol subset published, and 
 | PROTO-U-007 (P0) | **pass**: 15 of 15 | as PROTO-C-001 |
 | CI gates G-01…G-10 | **pass** on 15b's tree: G-01, 02, 03, 04, 05 (with G-05-images), 06, 07, 08 (with G-08-decision), 09 (with G-09-catalog), G-10-audit, unit and secrets, "All gates passed" | `int-23112f6b-check.log` |
 | Skeleton protocol subset published | **met**: `crates/tqa-types/schema/tqa-protocol-v1.json`, exported from the types and held to them by G-08 (pass, above); described in ARCHITECTURE §9 | the schema file; G-08 |
-| PO approval of the documents (MS0) | **no record found** | PRD's status line: "v0.2 (1 Oct 2026): v0.1 (22 Sep 2026) revised with the Product Owner's decisions to date, listed in §12". DEV-PLAN: v0.5 (8 Oct 2026). **ARCHITECTURE and TEST-PLAN** still say "draft v0.1 for Product Owner review (22 Sep 2026)". No approval of the set is recorded in the documents or the team's log |
+| PO approval of the documents (MS0) | **no record found** (12 Oct 2026; since then, see "The documents, 12 Nov 2026") | PRD's status line: "v0.2 (1 Oct 2026): v0.1 (22 Sep 2026) revised with the Product Owner's decisions to date, listed in §12". DEV-PLAN: v0.5 (8 Oct 2026). **ARCHITECTURE and TEST-PLAN** still say "draft v0.1 for Product Owner review (22 Sep 2026)". No approval of the set is recorded in the documents or the team's log |
 
 ## Phase 0's other deliverables (not gate criteria; checked for completeness)
 - **Present:** the Cargo workspace and `web/`; `rust-toolchain.toml`, `deny.toml`; `AGENTS.md`, the hooks and
@@ -67,3 +69,21 @@ DEV-PLAN Phase 0 adds two criteria: the skeleton protocol subset published, and 
   *Updated 12 Oct 2026:* the docs-completeness gate, G-09-complete, found them; the fakes ship as
   `FakeSandboxBackend` and `FakeGateway` and the plans now say so, and `docs/protocol-reference.md` is written and
   held to the schema by the gate.
+
+## The documents, 12 Nov 2026
+The product owner approved the four documents on 12 Nov 2026 on one condition: that the technical lead had reviewed
+them and found them aligned. The review of that day found them not aligned on 16 points, each a place where a
+document had fallen behind a decision already made or a release already out. None needed a new decision.
+
+- **How they were reviewed:** the PRD and the DEV-PLAN's §1 to §4b read in full; ARCHITECTURE read to §4.7 and
+  searched from there for wording about what is later, proposed, pending, deprecated or approved; TEST-PLAN's §17
+  and §18 read against the PRD's requirements and the DEV-PLAN's gates, its test rows not reread.
+- **What was found:** status lines that still said "draft for Product Owner review"; the PRD against itself
+  (English only beside ten languages; object storage beside none); requirements that still spoke of approvals,
+  a `parked` state and a Git relay that were removed; decisions listed as open that the build had settled;
+  nothing on the releases since 17.0, or on agent teams and computer use being in them; the DEV-PLAN's stack
+  table (the jailer, an image name) and its standing of 7 Nov; no traceability rows for FR-34 to FR-36.
+- **The revisions:** PRD v0.3, DEV-PLAN v0.8, ARCHITECTURE v0.2 and TEST-PLAN v0.2, all of 12 Nov 2026.
+- **Left open, and said so:** the PRD's §12 item 5 (the reference hardware for published numbers) has no decision;
+  item 25's fourth check (SOAK-001's D4) takes its confirmation from this approval; NFR-2, NFR-3 and NFR-8 have
+  no row in TEST-PLAN §18.

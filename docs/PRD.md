@@ -1,6 +1,6 @@
 # TensorQuay Agent: Product Requirements
 
-Status: **v0.2** (1 Oct 2026): v0.1 (22 Sep 2026) revised with the Product Owner's decisions to date, listed in §12. Roles: Product is the TensorQuay Product Owner (PO);
+Status: **v0.3** (12 Nov 2026): v0.2 (1 Oct 2026) brought to the Product Owner's decisions up to 12 Nov 2026 (§12) and to what the releases carry (§6, "Releases and the plan's version names"). Roles: Product is the TensorQuay Product Owner (PO);
 Engineering is TensorQuay engineering (AI-assisted). Companion documents: [ARCHITECTURE](ARCHITECTURE.md),
 [DEV-PLAN](DEV-PLAN.md), [TEST-PLAN](TEST-PLAN.md), [DEV-GUIDELINES](DEV-GUIDELINES.md).
 
@@ -104,7 +104,7 @@ All are measured by the TEST-PLAN procedures; PERF numbers are on the named refe
 |---|---|---|
 | M1 | **Task completion** on a fixed local-model task set (TEST-PLAN §16, `E2E-WAVE`) | ≥ 90 % of tasks complete with a passing check when the model is GLM-5.3-Flash class; the remaining failures are model errors, not harness errors (classified per run) |
 | M2 | **Harness overhead** per model turn, excluding model time | ≤ 50 ms p50, ≤ 200 ms p99 (PERF-001) |
-| M3 | **Sandbox start** (create to first tool ready) | Docker on Linux: ≤ 3 s p50 warm image. Firecracker: ≤ 2 s cold boot p50; ≤ 500 ms from a warm snapshot (Phase 4 stretch) (PERF-010/011). **As the user feels it** (PO, 1 Oct 2026): from sending the first message on a new task to the agent starting work, ≤ 3 s p50 on both backends, measured for a new task (first boot) and a returning one |
+| M3 | **Sandbox start** (create to first tool ready) | Docker on Linux: ≤ 3 s p50 warm image. Firecracker: ≤ 2 s cold boot p50; ≤ 500 ms from a warm snapshot (a Phase 8 stretch goal) (PERF-010/011). **As the user feels it** (PO, 1 Oct 2026): from sending the first message on a new task to the agent starting work, ≤ 3 s p50 on both backends, measured for a new task (first boot) and a returning one |
 | M4 | **Concurrency** | 16 live conversations on one gateway host with 2 vCPU / 4 GB and no dropped events (PERF-020). The model server, not the harness, is the limit |
 | M5 | **Reliability** | 24 h soak at 8 conversations: no crash, gateway RSS growth < 5 %, zero lost or duplicated events across forced reconnects, every run resumable after a gateway restart (SOAK-001…004) |
 | M6 | **Capability parity** with the open reference on the same tasks and the same model | Task completion within 5 points of OpenHands on the shared subset (E2E-CMP) |
@@ -112,6 +112,12 @@ All are measured by the TEST-PLAN procedures; PERF numbers are on the named refe
 | M8 | **Openness** | Every published number has its configuration, raw data and a reproduction script. Coverage ≥ 90 % lines on the pure crates (G-04) |
 
 ## 6. Scope
+**Releases and the plan's version names (12 Nov 2026).** "v1.0" and "v1.1" in these documents name the plan's
+scope, not a release. The product's releases are numbered 17.x ([CHANGELOG](../CHANGELOG.md), DEV-PLAN §4a and §7).
+Release 17.0 (3 Nov 2026), the initial release, carries v1.0's scope below and two things this section lists as
+later: agent teams (the plan's v1.1; experimental, behind the install switch `[agent_teams] enabled`, off by
+default) and computer use (a desktop environment, ADR-0039). Swarms are not built and are on hold (§12 item 21).
+
 **v1.0 (in):**
 - **Harness:** a single-agent loop with streaming, native tool calling and a text-protocol fallback, tool result caps,
   context compaction, iteration and token budgets, error recovery with back-off, a durable run journal and resume.
@@ -165,10 +171,10 @@ object storage for workspaces or events.
 - **v1.1: agent teams** (ARCHITECTURE §16.2, ADR-0034; §12 item 20): a person asks one task to lead; the lead starts
   its helpers, writes their briefs, collects their reports and decides. Roles, tools by role, delivery, budgets and
   limits are enforced by the gateway. Helpers work on their own copy or take turns on the lead's files and hand
-  results back as files. No votes between agents.
+  results back as files. No votes between agents. In release 17.0, experimental and off by default.
 - **Later: swarms** (ARCHITECTURE §16.4, ADR-0038; §12 item 21): one goal across a person's own agent teams. The
   person sets up the goal and its parts, each a lead task from a profile they pick, or confirms the coordinator's
-  proposal; one coordinator talks to the leads. No publishing, sharing or outside agents.
+  proposal; one coordinator talks to the leads. No publishing, sharing or outside agents. On hold (PO, 13 Oct 2026).
 - OIDC single sign-on; multiple organisations per install.
 - Warm-snapshot pools for Firecracker; custom images per team; GPU pass-through for in-sandbox inference.
 - Cross-conversation memory; hooks (pre- and post-tool scripts or HTTP).
@@ -225,15 +231,15 @@ decision engine that passes its suite is accepted on that evidence (ARCHITECTURE
 | FR-9 | **MCP.** Two tiers: `stdio` servers inside the sandbox (no secrets), and remote servers reached through the gateway's MCP proxy (§6.1 connectors). Configured per install, per profile and per conversation; discovered tools appear with a namespace prefix; connector calls are subject to the remote system's own permissions |
 | FR-10 | *Superseded (29 Sep 2026, PO).* There is no per-call permission policy and no approval step: the sandbox is the wall and the network allow-list (egress and ingress) is the guardrail (§6 Guardrails). A blocked connection returns a plain reason naming the host and port |
 | FR-11 | **Instructions and skills.** Load `AGENTS.md` from the workspace root and parents; load skills from a configured directory; both are shown in a "context" panel |
-| FR-12 | **Sandbox lifecycle.** States `creating → ready → busy ↔ idle → destroyed`, plus `parked` for runs waiting on a human or a channel. Activeness is defined by the runtime's lifecycle events (`run.started`, terminal events, heartbeats), never by processes or traffic; the reaper destroys sandboxes by idle window, max lifetime or missed heartbeats and parks long waits; the workspace survives the sandbox and the next message wakes it |
+| FR-12 | **Sandbox lifecycle.** States `creating → ready → busy ↔ idle → destroyed`. No run waits for a person (FR-10), so the `parked` state is retired; a run waiting on a channel keeps its sandbox busy. Activeness is defined by the runtime's lifecycle events (`run.started`, terminal events, heartbeats), never by processes or traffic; the reaper destroys sandboxes by idle window, max lifetime or missed heartbeats; the workspace survives the sandbox and the next message wakes it |
 | FR-13 | **Runtime backends.** `docker` and `firecracker` implement one `SandboxBackend` interface: create, start, exec-health, network attach, destroy, list, stats. Backend choice is per install; a conversation never changes backend |
 | FR-14 | **LLM relay.** The sandbox calls the gateway relay with a per-run token; the gateway resolves the route, injects credentials, enforces the user's allowed models, meters usage and streams back. The sandbox never holds provider keys |
 | FR-15 | **Egress policy.** Default deny from the sandbox except the gateway relay; an admin allow-list of hosts (for example package registries and git hosts); the policy is enforced by the backend, not by the agent |
 | FR-16 | **Gateway API and persistence.** Users, roles, invitations, conversations, messages, events, usage in PostgreSQL. Events are append-only with `(conversation_id, seq)` unique |
 | FR-17 | **Event streaming and reconnect.** Clients receive events as server-sent events and act with POSTs; on reconnect `Last-Event-ID` (the sequence number) yields the missing events exactly once; the runtime keeps an outbound link to the gateway and nothing listens inside the sandbox; a run continues while no client is connected |
 | FR-18 | **Web UI.** The pages in §6, including the workspaces page and the workspace picker in the new-conversation dialog; streaming text and reasoning deltas; tool cards with command, output and diff; cancel; resumed-run indicator; file tree and diff of the workspace; settings; admin pages |
-| FR-19 | **Outside services, git included.** Nothing in the web UI or the setup is specific to git (PO, 2 Oct 2026). Git is a tool inside the sandbox like curl or pip: the agent clones, commits and pushes with plain `git`. A git host is an outside service like any other: the person's key or token for it lives in key management (FR-28, ADR-0037) and is swapped in at the network edge, never entering the sandbox, the model context, events or logs; the host's own rules (branch protection, token scopes) decide what is accepted. The `git_push` tool and the Git relay retire over two releases (§12 item 12) |
-| FR-20 | *Superseded (22 Sep 2026).* The headless CLI was removed: there is no CLI product. Programmatic use is FR-26; the benchmark driver is test tooling that answers approvals by a stated policy and records a deterministic event log |
+| FR-19 | **Outside services, git included.** Nothing in the web UI or the setup is specific to git (PO, 2 Oct 2026). Git is a tool inside the sandbox like curl or pip: the agent clones, commits and pushes with plain `git`. A git host is an outside service like any other: the person's key or token for it lives in key management (FR-28, ADR-0037) and is swapped in at the network edge, never entering the sandbox, the model context, events or logs; the host's own rules (branch protection, token scopes) decide what is accepted. The `git_push` tool and the Git relay are removed (ADR-0037 §7; §12 item 12) |
+| FR-20 | *Superseded (22 Sep 2026).* The headless CLI was removed: there is no CLI product. Programmatic use is FR-26; the benchmark driver is test tooling that records a deterministic event log |
 | FR-21 | **Usage and metrics.** Per-run and per-user token usage; Prometheus metrics for runs, sandboxes, relay latency, provider errors, event lag |
 | FR-22 | **Admin settings.** Model registry editing, the secret vault (provider keys and connector credentials; write-only, encrypted at rest), egress allow-list, runtime backend status, sandbox limits per user (max live, idle window, max lifetime), connectors, templates and shared profiles |
 | FR-23 | **Agent profiles.** A profile defines instructions, model route, allowed tools and connectors, skills, sandbox template and budgets. Profiles are validated files or admin-UI records, shared or personal; a conversation is created from a profile and keeps it |
@@ -245,9 +251,9 @@ decision engine that passes its suite is accepted on that evidence (ARCHITECTURE
 | FR-29 | **Workspace storage on the host's local disk.** Every workspace is a directory (Docker: bind mount or named volume) or a block image (Firecracker) under a configured local directory on the host, mapped into the sandbox as `/workspace`; per-workspace quota; retention policy; diagnostics warn on network or slow filesystems |
 | FR-30 | **Workspace model.** A workspace is owned by one user, isolated from every other user's, and is the unit a conversation binds to at creation. Many conversations may bind to one workspace; one conversation at a time may run on it (write lease, released on run end, sandbox death or expiry; the next waits or is refused per setting). Workspaces can be created empty or by forking, and files arrive by upload or by the agent fetching them; they can be shared with named users or a team as read or write; admins see metadata, not contents |
 | FR-31 | **Channels.** A channel is an append-only, ordered, persistent message log at the gateway with members (conversations and users; roles lead, member, observer) and structured message types (text, proposal, vote, decision, task, claim, report, done). Agents use four tools (`channel_post`, `channel_read`, `channel_wait`, `task_claim`) through the gateway with the per-run token; the author is set by the gateway. Claims are atomic. Decision rules `human` and `majority` are evaluated by the gateway. Humans use the same channel from a web page and can veto. v1.1's agent teams (FR-32) build on the channel's storage and stream, not on its votes |
-| FR-32 | *(v1.1, designed now, ADR-0034)* **Agent teams.** A person asks a normal task to lead; the lead starts members (helpers) itself with a brief it writes (`start_member`), each a normal task grouped under the lead, from an agent profile the lead names (the person's own or a shared one; its tools and connectors never wider than the lead's) or with the lead's own settings, and with no members of its own. Members talk only to the lead; the lead asks, collects reports and decides, with no votes between agents; people read everything, watch each helper's transcript live, type to the lead or any helper (the lead is told), overrule a decision by telling the lead, and stop; when the agent team needs a person, the lead asks and its task shows "Waiting for you", and helpers ask the lead, never the person directly. Roles and tools by role, addressed delivery (stored, delivered once or refused with a reason, waking instead of waiting), a token budget, a deadline, idle and stuck notices and the member limit are enforced by the gateway (limits are admin settings). Per helper, the lead chooses its own copy of the workspace (results handed back as files) or turns on the lead's files under the lease |
+| FR-32 | *(v1.1; in release 17.0, experimental and off by default; ADR-0034)* **Agent teams.** A person asks a normal task to lead; the lead starts members (helpers) itself with a brief it writes (`start_member`), each a normal task grouped under the lead, from an agent profile the lead names (the person's own or a shared one; its tools and connectors never wider than the lead's) or with the lead's own settings, and with no members of its own. Members talk only to the lead; the lead asks, collects reports and decides, with no votes between agents; people read everything, watch each helper's transcript live, type to the lead or any helper (the lead is told), overrule a decision by telling the lead, and stop; when the agent team needs a person, the lead asks and its task shows "Waiting for you", and helpers ask the lead, never the person directly. Roles and tools by role, addressed delivery (stored, delivered once or refused with a reason, waking instead of waiting), a token budget, a deadline, idle and stuck notices and the member limit are enforced by the gateway (limits are admin settings). Per helper, the lead chooses its own copy of the workspace (results handed back as files) or turns on the lead's files under the lease |
 | FR-33 | **Admission on limited hosts.** A resource budget (a configured share of host memory and cores) yields sandbox slots, with a per-user cap; when slots are full the gateway evicts the longest-idle warm sandbox or queues the run with per-user fairness and shows the position; busy and pinned sandboxes are never evicted before their max lifetime; a keep-alive pin keeps one conversation's sandbox live between messages |
-| FR-34 | **Environments.** Each conversation runs in an environment described by a template with declared capabilities. The default Workstation template is a complete working computer for an agent (coding toolchains, a headless browser, common CLI tools); a Minimal template exists for tests and locked-down installs; custom templates derive from them by digest. A user picks the environment with the environment picker in the conversation bar and may switch it while no run is active; files and history carry over and the change is recorded in the transcript. Computer use (a desktop the agent operates, streamed to the UI) is a later phase |
+| FR-34 | **Environments.** Each conversation runs in an environment described by a template with declared capabilities. The default Workstation template is a complete working computer for an agent (coding toolchains, a headless browser, common CLI tools); a Minimal template exists for tests and locked-down installs; custom templates derive from them by digest. A user picks the environment with the environment picker in the conversation bar and may switch it while no run is active; files and history carry over and the change is recorded in the transcript. Computer use (a desktop the agent operates, streamed to the UI) is a desktop environment, in release 17.0 (ADR-0039) |
 | FR-35 | **Languages.** The web UI ships in English, Simplified Chinese, Japanese, Korean, Vietnamese, Thai, Malay, Tamil, French and Spanish; the language follows the browser and can be changed per user; catalogues are plain files so the community can add languages with one pull request (UI-GUIDELINES §11b). | WEB-U-019 |
 | FR-36 | **Attachments and images.** Files attached or dropped in the composer are stored in the conversation's workspace (`/workspace/uploads/`, size-limited and checked by the gateway) and passed to the agent as attachments; images and pasted screenshots go natively to a model whose route has the `vision` capability, and otherwise stay files with a plain notice suggesting a vision model. | WEB-U-020, GW-I-045 |
 
@@ -260,7 +266,7 @@ decision engine that passes its suite is accepted on that evidence (ARCHITECTURE
 | NFR-4 | **Lean code.** The ENGINEERING-GUARDRAILS standard: files ≤ 1000 lines; downward-only crate dependencies; pure crates build and test on macOS; no unsafe outside audited modules; lints clean |
 | NFR-5 | **Licensing.** Apache-2.0. Dependencies are permissive (MIT, Apache-2.0, BSD, ISC); a `cargo deny` and an npm licence check gate the CI. Third-party notices are kept |
 | NFR-6 | **Operations.** One `docker compose up` for Docker mode; a documented host script for Firecracker mode; health endpoints; graceful shutdown that does not kill running sandboxes; schema migrations that are forward-only and tested |
-| NFR-7 | **Accessibility and i18n.** The web UI is keyboard-operable and passes basic contrast checks; strings are externalised for later translation (English only in v1.0) |
+| NFR-7 | **Accessibility and i18n.** The web UI is keyboard-operable and passes basic contrast checks; strings are externalised in catalogues, and the UI ships in ten languages (FR-35) |
 | NFR-8 | **Documentation.** Install guide, admin guide, protocol reference, contributor guide, and this document set |
 
 ## 9. Milestones and exit criteria
@@ -268,7 +274,7 @@ decision engine that passes its suite is accepted on that evidence (ARCHITECTURE
 |---|---|
 | **MS0 Documents approved** | PO approves PRD, ARCHITECTURE, DEV-PLAN, TEST-PLAN |
 | **MS1 Walking skeleton** (Phase 1) | An agent run visible end to end in the browser on Docker mode: loop, four tools, runtime in a container, gateway with persistence and relay, streaming transcript; the skeleton subset of P0 tests (TEST-PLAN §17 gate 1) |
-| **MS2 Team MVP** (Phases 2–5) | Robustness, safety, team and local-model quality on Docker mode; FR-1…FR-8, FR-10…FR-19, FR-21, FR-22, FR-26, FR-29, FR-30; all P0 tests through gate 5; SEC P0 in Docker mode; metrics M2, M3 (Docker), M4 measured; E2E-WAVE-001 on the TensorQuay box |
+| **MS2 Team MVP** (Phases 2–5) | Robustness, safety, team and local-model quality on Docker mode; FR-1…FR-8, FR-11…FR-19 (FR-10 is superseded), FR-21, FR-22, FR-26, FR-29, FR-30; all P0 tests through gate 5; SEC P0 in Docker mode; metrics M2, M3 (Docker), M4 measured; E2E-WAVE-001 on the TensorQuay box |
 | **MS3 Extensions and channels** (Phases 6–7) | FR-9, FR-23…FR-25, FR-28, FR-31; gates 6 and 7 |
 | **MS4 MicroVM mode** (Phase 8) | Firecracker backend passes the same SBX and SEC suites; metric M3 (Firecracker) measured on the reference host |
 | **MS5 v1.0 public** (Phase 9) | FR-27; metrics M1–M8; SOAK passes; docs complete; PO sign-off |
@@ -284,7 +290,7 @@ decision engine that passes its suite is accepted on that evidence (ARCHITECTURE
 | An external decision engine saves nothing, or hurts quality | It is optional and measured (E2E-DECISION-008); the default stays the model; the engine cannot widen the task's tools or the network allow-list |
 | Prompt injection through repository content and tool output | Instruction files are shown, not trusted; the sandbox holds no credentials; egress allow-list; a red-team test set (SEC-3xx) |
 | Protocol churn between web, gateway and runtime | One versioned protocol with a JSON Schema and contract tests on both sides (PROTO-C-*) |
-| Event persistence becomes the bottleneck | Batched appends, sequence per conversation, measured in PERF-020; events are compact and payloads over a size cap spill to object storage |
+| Event persistence becomes the bottleneck | Batched appends, sequence per conversation, measured in PERF-020; events are compact and payloads over a size cap spill to files on the host's disk (`storage.root/blobs/`) |
 
 ## 11. Provenance and prior art
 Public prior art studied for ideas, never for code: OpenAI Codex (Rust, Apache-2.0; its app-server protocol and
@@ -303,17 +309,19 @@ with slots, queue, eviction, parking and pin (ADR-0016).
 
 1. **Backend language for the gateway:** **Decided (PO, 22 Sep 2026): Rust.** One toolchain shared with the harness
    and the engine team; protocol types shared without code generation. Go was the alternative.
-2. **Database:** PostgreSQL only (recommended: one engine, one migration path) or SQLite for single-user installs.
-3. **Firecracker in v1.0 or v1.1:** the plan builds it in Phase 8 before the public release; deferring it shortens
-   v1.0 by 3–5 weeks.
-4. **Public repository name** (`TensorQuay/tensorquay-agent` proposed) and when to open the repository (at M2 or at v1.0).
+2. **Database:** **As built: PostgreSQL only** (one engine, one migration path; DEV-PLAN §2). SQLite for single-user
+   installs was the alternative.
+3. **Firecracker in v1.0 or v1.1:** **As built: in the initial release.** Phase 8 was built before it (Gate 8 reached
+   on 11 Oct 2026), and release 17.0 carries the microVM backend.
+4. **Public repository name** and when to open the repository: **Done (PO): `TensorQuay/tensorquay-agent`, public
+   since 8 Nov 2026.**
 5. **Reference hardware for the published numbers:** the TensorQuay box (2 × RTX PRO 6000) for E2E and a
    4-vCPU Linux KVM VM for Firecracker PERF.
-6. **Crate and image prefix:** `tqa` (proposed).
+6. **Crate and image prefix:** **As built: `tqa`.**
 7. **Secret store:** **Decided (PO, 27 Sep 2026): the built-in store is the only secret store** (ADR-0033). No
    external vault backend is built, bundled or connected.
-8. **Busy workspace policy default:** `wait` (recommended: the second conversation queues until the lease is
-   released) or `refuse`.
+8. **Busy workspace policy default:** **As built: `wait`** (the second conversation queues until the lease is
+   released); `refuse` is the other setting.
 9. **Channels in v1.0:** **Decided on 27 Sep 2026: yes, in v1.0** (ADR-0014),
    built now as Phase 7 and time-boxed: if Gate 7 is not reached by 11 Oct 2026, v1.0 ships without channels and they
    move to v1.1. A task may allow more than one claimant, for comparing results. Agent teams are v1.1 and no longer
@@ -329,6 +337,7 @@ with slots, queue, eviction, parking and pin (ADR-0016).
 12. **Per-person keys for external services (30 Sep 2026, ADR-0037, decisions 1 to 6):** a member's own keys are used
     only for that member's runs and are swapped in at the network edge; the sandbox and the model see placeholders.
     The `git_push` tool retires in favour of plain `git` with a key, over two releases (ENGINEERING-GUARDRAILS §6).
+    Both releases are done: the tool and the Git relay are removed (ADR-0037 §7 and its amendment 4).
 13. **Licences (30 Sep 2026):** only Apache-2.0-compatible components, never GPL or LGPL in any form, even with an
     exception; where none exists, the project writes its own. Operating-system packages inside images are an
     aggregate (ADR-0017 point 7), and each release publishes the package list and source locations.
@@ -374,12 +383,14 @@ with slots, queue, eviction, parking and pin (ADR-0016).
     at most two levels, no cycles; everything logged. Each page's message box talks to that page's agent.
     **Decided since (2 Oct 2026):** a Pause goal button (each team finishes its current step and waits until
     Resume); the word "Coordinator" is kept; deleting a goal deletes its teams as deleting a lead's task does.
+    **On hold (PO, 13 Oct 2026):** swarms are not built, and stay so until the PO calls for them.
 
 22. **Nothing specific to git in the UI or setup (2 Oct 2026, restated by the PO):** git hosts are outside services
     like any other: a person's key or token for one is kept in key management and used through the network edge
     (FR-19, ADR-0037). The remaining git-specific parts go: the agent profile's "project link" switch, project keys in
     Settings › Keys, the "Git credentials" label, and the API's git address on new workspaces and tasks (over two
-    releases: first deprecated and unused by the web, then removed).
+    releases: first deprecated and unused by the web, then removed). Done: a request that still sends one is refused
+    by name (ADR-0037 amendment 4).
 23. **The network extras (8 Oct 2026, ADR-0035 §2):** the host:port allow-list with wildcards, default deny, is
     confirmed as v1.0's design, as built. "Recently refused" with "Allow this site" in Settings › Internet access is
     built after 17.0. Per-profile network lists come when someone asks for them. Observe mode is dropped: it would
@@ -397,10 +408,30 @@ with slots, queue, eviction, parking and pin (ADR-0016).
     and 8 Oct 2026, while the other descriptors stayed flat; and the probe counted itself (the 17 seen was the pool's
     16 plus the probe). The stated blind spot: a leak of 3 or fewer held connections per 12 h can pass, and a run with
     no gateway lifetime of 11 h or more (an 8 h run) doesn't judge the floor and says so; the 24 h run fails if it
-    has none. **Proposed amendment (9 Oct 2026, held for the Product Owner's wording):** a fourth check closes that
+    has none. **Amendment (proposed 9 Oct 2026; in the soak's verdict as TEST-PLAN SOAK-001's check D4; its wording is confirmed
+    with the PO's approval of this document, MS0):** a fourth check closes that
     blind spot for a connection taken and never used again. After the first hour, no more of the gateway's database
     connections may stay idle for over 25 minutes than its listeners (none in the soak). A healthy pool puts its
     connections back into use; a connection taken and never used again idles for good, so it fails about 25 minutes
     after being taken, in any lifetime, the 8 h run's included. A leaked connection still used now and then is left
     to the floor check. The 25 minutes are the pool's own bound with no traffic at all, and a later soak than the v1.0
     candidate's calibrates it.
+
+**Decided by the PO since v0.2 (recorded 12 Nov 2026):**
+
+26. **The technical lead releases, through a pull request (6 Nov 2026):** DEV-PLAN §7.
+27. **Maturity first (7 Nov 2026):** the feature set stays as it is; testing, stability, robustness and performance
+    come before new features.
+28. **Computer use without a detector model (7 Nov 2026):** the agent works from screenshots, the accessibility tree
+    and the browser's page structure (ARCHITECTURE §4.7); no separate model that finds interface elements is part of
+    the product.
+29. **Releases are tags (9 Nov 2026):** `main` is where development happens; a release is a `vMAJOR.MINOR.PATCH` tag
+    with its page on GitHub, and people install releases (DEV-PLAN §7).
+30. **Reading PDFs (9 Nov 2026):** the agent reads a PDF through a reader built into the product, in Rust, on an
+    Apache-compatible library; no Python PDF library, and no OCR where it can be avoided. Every model gets the text;
+    a route with `vision` gets page pictures too. Planned for release 18.0.
+31. **Page previews (11 Nov 2026):** a preview runs offline and says when its page needs the internet (17.4.1). In
+    18.0 a preview may load scripts, styles and fonts from a fixed list of public CDNs and the page's own files in
+    the workspace; live data stays blocked.
+32. **Agent teams stay experimental (12 Nov 2026):** off by default behind the install switch (item 20). The
+    evaluation of one agent against a team on the same budget showed no difference either way (DEV-PLAN §4a).
