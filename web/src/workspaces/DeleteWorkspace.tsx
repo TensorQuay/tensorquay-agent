@@ -96,7 +96,10 @@ export function DeleteWorkspace({
       error={request.error}
       errorCopy={(error) =>
         error instanceof ApiError && error.status === 409
-          ? t("workspaces.deleteRefused")
+          ? // A task in it leads helpers: the way through is that task's delete with them, never the raw code.
+            error.code === "has_helpers"
+            ? t("workspaces.deleteHasHelpers")
+            : t("workspaces.deleteRefused")
           : null
       }
       onConfirm={() => {

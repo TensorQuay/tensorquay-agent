@@ -170,15 +170,20 @@ def used_subnets(inspected):
     return subnets
 
 
-def sandbox_pool(used, randbelow=secrets.randbelow):
+def sandbox_pool(used, randbelow=secrets.randbelow, prefix=24):
     """A 10.213.X.0/24 that no existing network overlaps, drawn at random among the free ones. Another installation
     on the daemon, such as a long-lived review stack, already holds one; a clash makes the engine refuse this
-    installation's sandbox networks."""
+    installation's sandbox networks. `prefix` 23 draws an aligned 10.213.X.0/23 instead (64 subnets of /29, for the
+    soak's teams and Desktop mix); every pool stays within 10.213.0.0/16."""
+    if prefix not in (23, 24):
+        raise ValueError("the sandbox pool is a /24 or a /23")
     taken = [ipaddress.ip_network(subnet, strict=False) for subnet in used]
-    free = [candidate for candidate in (ipaddress.ip_network("10.213.{}.0/24".format(third)) for third in range(256))
+    step = 2 ** (24 - prefix)
+    free = [candidate for candidate in (ipaddress.ip_network("10.213.{}.0/{}".format(third, prefix))
+                                        for third in range(0, 256, step))
             if not any(candidate.version == network.version and candidate.overlaps(network) for network in taken)]
     if not free:
-        raise RuntimeError("no free 10.213.X.0/24 sandbox pool on this engine")
+        raise RuntimeError("no free 10.213.X.0/{} sandbox pool on this engine".format(prefix))
     return str(free[randbelow(len(free))])
 
 
@@ -282,7 +287,7 @@ def required_image(env, name):
     return image
 
 
-def prepare(directory, env, *, runtime=None, port=0, host="127.0.0.1", max_live=4):
+def prepare(directory, env, *, runtime=None, port=0, host="127.0.0.1", max_live=4, pool_prefix=24):
     """Write the installation; without a runtime, the labelled stand-in (the compose contract's own runtime)."""
     for name in ("TQA_GATEWAY_IMAGE", "TQA_WEB_IMAGE"):
         required_image(env, name)
@@ -301,7 +306,7 @@ def prepare(directory, env, *, runtime=None, port=0, host="127.0.0.1", max_live=
     # Parallel stacks on one daemon need their own gateway container name and their own slice of the sandbox
     # network pool (a /24 of /29s: 32 subnets, enough for max_live 16).
     env["TQA_GATEWAY_CONTAINER"] = env["COMPOSE_PROJECT_NAME"] + "-gateway"
-    pool = sandbox_pool(engine_subnets(env))
+    pool = sandbox_pool(engine_subnets(env), prefix=pool_prefix)
     write(directory / "install.key", secrets.token_bytes(32))
     write(directory / "secrets.toml", '[secrets]\n"secrets/local" = "synthetic-compose-fixture"\n')
     write(directory / "models.toml", route)

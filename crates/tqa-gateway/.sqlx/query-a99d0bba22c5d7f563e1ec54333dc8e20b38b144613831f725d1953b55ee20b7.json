@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (SELECT 1 FROM agent_teams t JOIN agent_team_members m ON m.team_id = t.id JOIN conversations c ON c.id = m.conversation_id WHERE t.lead_conversation = ANY($1) AND c.state <> 'deleted') AS \"leads_helpers!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "leads_helpers!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "a99d0bba22c5d7f563e1ec54333dc8e20b38b144613831f725d1953b55ee20b7"
+}

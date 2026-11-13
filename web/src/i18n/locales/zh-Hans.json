@@ -1540,6 +1540,7 @@
     "workspaces.deleteOthers": "其他人在“{name}”上有任务，因此无法删除。",
     "workspaces.deleteNotReady": "“{name}”仍在复制中。复制完成后才能删除。",
     "workspaces.deleteRefused": "此工作区正在使用或有其他人的任务，现在无法删除。",
+    "workspaces.deleteHasHelpers": "此工作区中有一个任务正带领助手。请先删除该任务及其助手，再删除此工作区。",
     "workspaces.shareTitle": "共享“{name}”",
     "workspaces.shareIntro": "你添加的人可以打开其文件；拥有“可编辑”权限的人还可以在其上开始自己的任务。他们永远看不到你的任务。",
     "workspaces.email": "电子邮件",

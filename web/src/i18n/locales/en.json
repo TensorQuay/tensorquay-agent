@@ -1540,6 +1540,7 @@
     "workspaces.deleteOthers": "Other people have tasks on “{name}”, so it can’t be deleted.",
     "workspaces.deleteNotReady": "“{name}” is still being copied. It can be deleted once the copy is finished.",
     "workspaces.deleteRefused": "This workspace is in use or has other people’s tasks, so it can’t be deleted now.",
+    "workspaces.deleteHasHelpers": "This workspace has a task that leads helpers. Delete that task with its helpers first, then delete the workspace.",
     "workspaces.shareTitle": "Share “{name}”",
     "workspaces.shareIntro": "People you add can open its files; with Can edit they can also start their own tasks on it. They never see your tasks.",
     "workspaces.email": "Email",

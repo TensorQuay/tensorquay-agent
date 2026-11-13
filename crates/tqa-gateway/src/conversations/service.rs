@@ -336,6 +336,19 @@ pub(super) async fn remove(
         )
         .execute(&mut *transaction)
         .await?;
+        // A helper's own copy goes with its task (GW-I-108), whichever delete removes the task: its own, its lead's,
+        // or a retry of either. The purge removes the copy's files and row once the task is gone. A copy another task
+        // still works in is that task's person's now, and stays.
+        sqlx::query!(
+            "UPDATE workspaces w SET state='deleted',updated_at=CURRENT_TIMESTAMP \
+             FROM conversations c JOIN agent_team_members m ON m.conversation_id=c.id \
+             WHERE c.id=$1 AND m.workspace='own_copy' AND w.id=c.workspace_id AND w.kind='helper_copy' \
+             AND w.state<>'deleted' \
+             AND NOT EXISTS(SELECT 1 FROM conversations o WHERE o.workspace_id=w.id AND o.id<>c.id AND o.state<>'deleted')",
+            value
+        )
+        .execute(&mut *transaction)
+        .await?;
         sqlx::query!("DELETE FROM runtime_tokens WHERE conversation_id=$1", value)
             .execute(&mut *transaction)
             .await?;

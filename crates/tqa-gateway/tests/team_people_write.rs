@@ -291,6 +291,389 @@ async fn deleting_a_lead_with_helpers(f: &Fixture) -> TestResult {
     Ok(())
 }
 
+/// A helper of `t` on its own copy of the lead's workspace: the member's task (`t.member` when `name` is None, else a
+/// new task joined as `name`), its `helper_copy` workspace bound to it, and the copy's folder with a file. Answers the
+/// member's task, the copy and its folder.
+async fn helper_on_copy(
+    f: &Fixture,
+    t: &Team,
+    name: Option<&str>,
+) -> Result<(String, Uuid, std::path::PathBuf)> {
+    let member = match name {
+        None => t.member.clone(),
+        Some(name) => {
+            let member = f.conversation(t.person).await?.id.to_string();
+            sqlx::query(
+                "INSERT INTO agent_team_members (conversation_id, team_id, name, role, workspace, state) \
+                 VALUES ($1::uuid, $2, $3, $3, 'own_copy', 'working')",
+            )
+            .bind(&member)
+            .bind(t.id)
+            .bind(name)
+            .execute(&f.pool)
+            .await?;
+            member
+        }
+    };
+    let own: Uuid =
+        sqlx::query_scalar("SELECT workspace_id FROM conversations WHERE id = $1::uuid")
+            .bind(&t.lead)
+            .fetch_one(&f.pool)
+            .await?;
+    let copy = Uuid::now_v7();
+    sqlx::query(
+        "INSERT INTO workspaces (id, owner_id, name, forked_from, fork_consistent, kind) \
+         VALUES ($1, $2, 'Fixture', $3, true, 'helper_copy')",
+    )
+    .bind(copy)
+    .bind(t.person)
+    .bind(own)
+    .execute(&f.pool)
+    .await?;
+    sqlx::query("UPDATE conversations SET workspace_id = $1 WHERE id = $2::uuid")
+        .bind(copy)
+        .bind(&member)
+        .execute(&f.pool)
+        .await?;
+    let folder = f
+        .config_storage_root()
+        .join("workspaces")
+        .join(copy.to_string());
+    std::fs::create_dir_all(&folder)?;
+    std::fs::write(folder.join("result.md"), b"helper\n")?;
+    Ok((member, copy, folder))
+}
+
+/// `DELETE /api/v1/conversations/{id}{query}` as the team's person; answers the status.
+async fn delete_task(f: &Fixture, t: &Team, id: &str, query: &str) -> Result<u16> {
+    Ok(f.client
+        .delete(f.url(&format!("/api/v1/conversations/{id}{query}")))
+        .header("origin", f.origin())
+        .header("cookie", &t.cookie)
+        .send()
+        .await?
+        .status()
+        .as_u16())
+}
+
+/// Purge cycles enough for tasks and then their workspaces.
+async fn purge(f: &Fixture) -> TestResult {
+    for _ in 0..4 {
+        f.gateway.purge_now().await?;
+    }
+    Ok(())
+}
+
+/// The copy's row, in any state; 0 once purged.
+async fn copy_rows(f: &Fixture, copy: Uuid) -> Result<i64> {
+    Ok(
+        sqlx::query_scalar("SELECT count(*) FROM workspaces WHERE id = $1")
+            .bind(copy)
+            .fetch_one(&f.pool)
+            .await?,
+    )
+}
+
+// TEST: GW-I-108
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_108_a_helpers_task_deleted_on_its_own_takes_its_copy(pool: PgPool) -> TestResult {
+    support::run_configured(pool, None, ON, async |f: &Fixture| {
+        let t = team(f).await?;
+        let (member, copy, folder) = helper_on_copy(f, &t, None).await?;
+        assert_eq!(delete_task(f, &t, &member, "").await?, 204);
+        purge(f).await?;
+        assert_eq!(
+            copy_rows(f, copy).await?,
+            0,
+            "the helper's copy goes with its task"
+        );
+        assert!(!folder.exists(), "and its folder");
+        Ok(())
+    })
+    .await
+}
+
+// TEST: GW-I-108
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_108_a_helper_deleted_before_its_lead_still_loses_its_copy(
+    pool: PgPool,
+) -> TestResult {
+    // As a lead's delete that failed half way leaves it: one helper's task already deleted, so the retry's list of
+    // helpers no longer names it.
+    support::run_configured(pool, None, ON, async |f: &Fixture| {
+        let t = team(f).await?;
+        let (first, first_copy, first_folder) = helper_on_copy(f, &t, None).await?;
+        let (_, second_copy, second_folder) = helper_on_copy(f, &t, Some("writer")).await?;
+        assert_eq!(delete_task(f, &t, &first, "").await?, 204);
+        assert_eq!(
+            delete_task(f, &t, &t.lead, "?with_helpers=true").await?,
+            204
+        );
+        purge(f).await?;
+        assert_eq!(
+            (
+                copy_rows(f, first_copy).await?,
+                copy_rows(f, second_copy).await?
+            ),
+            (0, 0),
+            "both helpers' copies"
+        );
+        assert!(
+            !first_folder.exists() && !second_folder.exists(),
+            "both copies' folders"
+        );
+        Ok(())
+    })
+    .await
+}
+
+// TEST: GW-I-108
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_108_a_copy_another_live_task_works_in_stays(pool: PgPool) -> TestResult {
+    // Nothing stops the person starting a task in a helper's copy (binding checks access and readiness, not kind):
+    // the copy is then theirs, and deleting the team leaves it whole.
+    support::run_configured(pool, None, ON, async |f: &Fixture| {
+        let t = team(f).await?;
+        let (_, copy, folder) = helper_on_copy(f, &t, None).await?;
+        let own = f.conversation(t.person).await?.id.to_string();
+        sqlx::query("UPDATE conversations SET workspace_id = $1 WHERE id = $2::uuid")
+            .bind(copy)
+            .bind(&own)
+            .execute(&f.pool)
+            .await?;
+        assert_eq!(
+            delete_task(f, &t, &t.lead, "?with_helpers=true").await?,
+            204
+        );
+        purge(f).await?;
+        let state: String = sqlx::query_scalar("SELECT state FROM workspaces WHERE id = $1")
+            .bind(copy)
+            .fetch_one(&f.pool)
+            .await?;
+        assert_eq!(state, "ready", "the copy a live task works in stays");
+        assert!(folder.join("result.md").exists(), "with its files");
+        let live: String =
+            sqlx::query_scalar("SELECT state FROM conversations WHERE id = $1::uuid")
+                .bind(&own)
+                .fetch_one(&f.pool)
+                .await?;
+        assert_eq!(live, "active");
+        Ok(())
+    })
+    .await
+}
+
+/// `DELETE /api/v1/workspaces/{id}{query}` as the team's person; answers the status and the body.
+async fn delete_workspace(f: &Fixture, t: &Team, id: Uuid, query: &str) -> Result<(u16, Value)> {
+    let answer = f
+        .client
+        .delete(f.url(&format!("/api/v1/workspaces/{id}{query}")))
+        .header("origin", f.origin())
+        .header("cookie", &t.cookie)
+        .send()
+        .await?;
+    let status = answer.status().as_u16();
+    let body = answer.json().await.unwrap_or(Value::Null);
+    Ok((status, body))
+}
+
+// TEST: GW-I-108
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_108_a_leads_workspace_deleted_with_its_tasks_is_refused_while_it_has_helpers(
+    pool: PgPool,
+) -> TestResult {
+    // Deleting a workspace with its tasks marks them deleted in bulk: a lead in it would go without its team stopping,
+    // leaving helpers working for a deleted lead. It is refused as deleting that lead without its helpers is.
+    support::run_configured(pool, None, ON, async |f: &Fixture| {
+        let t = team(f).await?;
+        let (_, copy, _) = helper_on_copy(f, &t, None).await?;
+        let own: Uuid =
+            sqlx::query_scalar("SELECT workspace_id FROM conversations WHERE id = $1::uuid")
+                .bind(&t.lead)
+                .fetch_one(&f.pool)
+                .await?;
+        let (status, body) = delete_workspace(f, &t, own, "?with_conversations=true").await?;
+        assert_eq!((status, code(&body)), (409, json!("has_helpers")));
+        assert_eq!(
+            team_state(f, t.id).await?.0,
+            "running",
+            "a refused delete stops nothing"
+        );
+        let tasks: Vec<String> = sqlx::query_scalar(
+            "SELECT state FROM conversations WHERE id = ANY($1::uuid[]) ORDER BY id",
+        )
+        .bind(vec![t.lead.clone(), t.member.clone()])
+        .fetch_all(&f.pool)
+        .await?;
+        assert_eq!(tasks, ["active", "active"], "the lead and its helper");
+        // The way through: the lead with its helpers, then the workspace.
+        assert_eq!(
+            delete_task(f, &t, &t.lead, "?with_helpers=true").await?,
+            204
+        );
+        assert_eq!(
+            delete_workspace(f, &t, own, "?with_conversations=true")
+                .await?
+                .0,
+            204
+        );
+        purge(f).await?;
+        assert_eq!(
+            copy_rows(f, copy).await?,
+            0,
+            "the helper's copy went with its task"
+        );
+        Ok(())
+    })
+    .await
+}
+
+// TEST: GW-I-108
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_108_a_helpers_copy_deleted_with_its_task_leaves_nothing(pool: PgPool) -> TestResult {
+    // The copy is the workspace deleted, so it goes; the team sees its helper's task deleted as any delete leaves it.
+    support::run_configured(pool, None, ON, async |f: &Fixture| {
+        let t = team(f).await?;
+        let (member, copy, folder) = helper_on_copy(f, &t, None).await?;
+        assert_eq!(
+            delete_workspace(f, &t, copy, "?with_conversations=true")
+                .await?
+                .0,
+            204
+        );
+        let state: String =
+            sqlx::query_scalar("SELECT state FROM conversations WHERE id = $1::uuid")
+                .bind(&member)
+                .fetch_one(&f.pool)
+                .await?;
+        assert_eq!(state, "deleted");
+        assert_eq!(
+            team_state(f, t.id).await?.0,
+            "running",
+            "the team goes on without that helper"
+        );
+        purge(f).await?;
+        assert_eq!(copy_rows(f, copy).await?, 0);
+        assert!(!folder.exists());
+        Ok(())
+    })
+    .await
+}
+
+// TEST: GW-I-108
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_108_a_leads_workspace_goes_with_its_tasks_once_its_helpers_are_deleted(
+    pool: PgPool,
+) -> TestResult {
+    // A helper deleted on its own leaves its member row: the lead has no helper working for it, so its workspace goes
+    // with its tasks, as deleting the lead alone would.
+    support::run_configured(pool, None, ON, async |f: &Fixture| {
+        let t = team(f).await?;
+        let (member, _, _) = helper_on_copy(f, &t, None).await?;
+        assert_eq!(delete_task(f, &t, &member, "").await?, 204);
+        let own: Uuid =
+            sqlx::query_scalar("SELECT workspace_id FROM conversations WHERE id = $1::uuid")
+                .bind(&t.lead)
+                .fetch_one(&f.pool)
+                .await?;
+        assert_eq!(
+            delete_workspace(f, &t, own, "?with_conversations=true")
+                .await?
+                .0,
+            204
+        );
+        Ok(())
+    })
+    .await
+}
+
+// TEST: GW-I-108
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_108_a_deleted_lead_leaves_no_copy_folder_or_team_log_after_the_purge(
+    pool: PgPool,
+) -> TestResult {
+    // The soak with teams in its mix (12 Nov 2026) found both left behind: the helpers' own copies stayed `ready`
+    // with their folders, and the team's channel and its messages stayed once the lead's task was purged.
+    support::run_configured(pool, None, ON, async |f: &Fixture| {
+        let t = team(f).await?;
+        let leading = Uuid::parse_str(&t.lead)?;
+        let own: Uuid = sqlx::query_scalar("SELECT workspace_id FROM conversations WHERE id = $1")
+            .bind(leading)
+            .fetch_one(&f.pool)
+            .await?;
+        let copy = Uuid::now_v7();
+        sqlx::query(
+            "INSERT INTO workspaces (id, owner_id, name, forked_from, fork_consistent, kind) \
+             VALUES ($1, $2, 'Fixture', $3, true, 'helper_copy')",
+        )
+        .bind(copy)
+        .bind(t.person)
+        .bind(own)
+        .execute(&f.pool)
+        .await?;
+        sqlx::query("UPDATE conversations SET workspace_id = $1 WHERE id = $2::uuid")
+            .bind(copy)
+            .bind(&t.member)
+            .execute(&f.pool)
+            .await?;
+        let folder = f
+            .config_storage_root()
+            .join("workspaces")
+            .join(copy.to_string());
+        std::fs::create_dir_all(&folder)?;
+        std::fs::write(folder.join("result.md"), b"soak-analyst\n")?;
+        question(f, &t).await?;
+        question(f, &t).await?;
+
+        let deleted = f
+            .client
+            .delete(f.url(&format!(
+                "/api/v1/conversations/{}?with_helpers=true",
+                t.lead
+            )))
+            .header("origin", f.origin())
+            .header("cookie", &t.cookie)
+            .send()
+            .await?;
+        assert_eq!(deleted.status().as_u16(), 204);
+        // Tasks go before their workspaces, so a copy may take a second cycle; a few are plenty.
+        for _ in 0..4 {
+            f.gateway.purge_now().await?;
+        }
+        let left: (i64, i64, i64, i64) = sqlx::query_as(
+            "SELECT (SELECT count(*) FROM workspaces WHERE id = $1), \
+                    (SELECT count(*) FROM workspaces WHERE kind = 'helper_copy'), \
+                    (SELECT count(*) FROM channels WHERE id = $2), \
+                    (SELECT count(*) FROM channel_messages WHERE channel_id = $2)",
+        )
+        .bind(copy)
+        .bind(t.channel)
+        .fetch_one(&f.pool)
+        .await?;
+        assert_eq!(
+            left,
+            (0, 0, 0, 0),
+            "copy row, helper copies, the team's channel, its messages"
+        );
+        assert!(!folder.exists(), "the copy's folder is gone");
+        let kept: i64 =
+            sqlx::query_scalar("SELECT count(*) FROM workspaces WHERE id = $1 AND state = 'ready'")
+                .bind(own)
+                .fetch_one(&f.pool)
+                .await?;
+        assert_eq!(kept, 1, "the lead's own workspace stays");
+        Ok(())
+    })
+    .await
+}
+
 // TEST: GW-I-108
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]

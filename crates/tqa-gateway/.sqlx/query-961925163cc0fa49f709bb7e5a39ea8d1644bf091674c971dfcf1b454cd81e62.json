@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM channels c USING agent_teams t WHERE t.channel_id = c.id AND c.kind = 'agent_team' AND t.lead_conversation=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "961925163cc0fa49f709bb7e5a39ea8d1644bf091674c971dfcf1b454cd81e62"
+}
