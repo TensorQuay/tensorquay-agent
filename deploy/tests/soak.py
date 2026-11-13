@@ -21,12 +21,17 @@ from soak_audit import ReceiptLog, RunAudit, require, timestamp_seconds
 from soak_chaos import restart_times, schedule
 from soak_disruptions import GLOBAL, backend_kinds, disruptions
 from soak_growth import verdict
+import soak_mix
 import soak_real
 from soak_orphans import findings as orphan_findings
 from soak_scenario import RESPONSES, ScenarioProgress
 from soak_stack import READY_MARGIN_SECONDS, Stack, cleanup_actions, ready_wait  # noqa: F401 (soak.ready_wait is the soak's own)
 from soak_audit import DISK_RESUME_MARGIN_SECONDS
-from soak_stream import DISK_RECOVERY_SECONDS, SseClient
+from soak_recovery import (  # noqa: F401 (the tests and the drivers read them here)
+    DISK_RECOVERY_SECONDS, SAMPLE_STALL_SECONDS, STORE_EVENTS_PER_HOUR, STORE_RECOVERY_SECONDS, disk_recovery,
+    io_recovery, missed_sample_problem, probe_outcome, probe_slot, probe_verdict, replacements_on_full_disk,
+    store_events, too_many_store_events, wait_for_idle)
+from soak_stream import SseClient
 
 DRAIN_SECONDS = 600
 MESSAGE_CAP = 50
@@ -106,36 +111,6 @@ def control_frames(clients):
     return counts
 
 
-def disk_recovery(window, steps, completions, now, final=False, margin=DISK_RECOVERY_SECONDS):
-    """A conversation that got `io` in a disk_full window recovers in two parts: a step completes after the free and
-    within the margin (progress resumed promptly), and a run completes after the free before the soak ends (the work
-    still finishes). A scripted run lasts several steps, longer than the margin (the c14b soak, 5 Oct 2026: a step's
-    median 69 s, a run's p90 356 s), so the margin bounds the first step, not a whole run. `failed_step` once the
-    margin passes without a step, `failed_run` when the soak ends with no run completed, `recovered` with both, else
-    `pending`. A step or run completed before the free proves nothing."""
-    end = window[1]
-    if end == float("inf"):
-        return "pending"
-    stepped = any(end <= step <= end + margin for step in steps)
-    if not stepped:
-        return "failed_step" if now > end + margin else "pending"
-    if any(completion >= end for completion in completions):
-        return "recovered"
-    return "failed_run" if final else "pending"
-
-
-def io_recovery(window, completions, now, margin=DISK_RECOVERY_SECONDS):
-    """A run must complete within the margin after `window` closes: `recovered` once one does, `failed` when the margin
-    passes without one, else `pending`. A store_unavailable outside a database fault uses it (store_recoveries); a full
-    disk uses disk_recovery. A completion before the window's end proves nothing."""
-    end = window[1]
-    if end == float("inf"):
-        return "pending"
-    if any(end <= completion <= end + margin for completion in completions):
-        return "recovered"
-    return "failed" if now > end + margin else "pending"
-
-
 def planned_kinds(backend, excluded):
     """The disruption kinds this run plans: the backend's, less those left out on purpose (`--exclude`, recorded in the
     result). Only disruptions can be left out; the reconnect plan and the restarts always run."""
@@ -167,78 +142,6 @@ def replacement_times(log_text, conversation, resumed_at):
             started = stamp
     return {"destroyed": destroyed, "started": started, "resumed": resumed_at,
             "destroy_to_resume_seconds": None if destroyed is None else resumed_at - destroyed}
-
-
-# The gateway's store may time out on a busy host outside every database fault (its clients get store_unavailable).
-# Accepted as load, not a fault: the conversation must complete a run within this margin after the notice, the
-# notices are counted in the result, and more than STORE_EVENTS_PER_HOUR stalls in any hour fail the run.
-STORE_RECOVERY_SECONDS = 180
-STORE_EVENTS_PER_HOUR = 5
-
-
-def store_events(times, gap=10.0):
-    """One stall reaches several clients within seconds: notices closer than `gap` to the event's first are one."""
-    events = []
-    for when in sorted(times):
-        if not events or when - events[-1] > gap:
-            events.append(when)
-    return events
-
-
-def too_many_store_events(events, per_hour=STORE_EVENTS_PER_HOUR):
-    """Whether any rolling hour holds more than `per_hour` events."""
-    events = sorted(events)
-    return any(sum(1 for later in events[i:] if later - first < 3600) > per_hour for i, first in enumerate(events))
-
-
-# Resource samples on a busy host: a sample may miss while the engine is loaded (builds, other work); the run fails
-# only when the sampler has stopped working (no success for this long) or too few points remain to judge growth.
-SAMPLE_STALL_SECONDS = 15 * 60
-
-
-def missed_sample_problem(missed, attempts):
-    """Why the missed resource samples leave growth unjudgeable (more than a tenth, and more than two), else None."""
-    if missed > max(2, attempts // 10):
-        return "missed {} of {} resource samples: growth can't be judged".format(missed, attempts)
-    return None
-
-
-def replacements_on_full_disk(times, windows, margin):
-    """The replacement times inside a full-disk window or its margin: the gateway replaced those runtimes by design."""
-    return sorted(when for when in times if any(start <= when <= end + margin for start, end in windows))
-
-
-def probe_verdict(refusal):
-    """The full-disk probe's message: a clean typed refusal (an HTTP error whose body names a code), or accepted. An
-    accepted message must then complete within the margin after the free, which the recovery check enforces like any
-    other conversation's; only an untyped refusal fails here."""
-    if refusal is not None:
-        return "refused: {} {}".format(refusal["status"], refusal["code"]) if refusal.get("code") else "failed"
-    return "accepted"
-
-
-def probe_slot(settled):
-    """A conversation with no run in flight, so the probe's message starts a run on the full disk; None when every
-    one is busy. A message into a busy conversation is answered `busy`, which the full-disk rule doesn't excuse."""
-    return next((index for index, ready in enumerate(settled) if ready), None)
-
-
-def wait_for_idle(settled, *, poll, seconds, clock=time.monotonic, sleep=time.sleep):
-    """The first idle conversation within `seconds`, draining events between checks so a run's end is seen; None if
-    none became idle in time."""
-    deadline = clock() + seconds
-    while True:
-        index = probe_slot(settled())
-        if index is not None or clock() >= deadline:
-            return index
-        poll()
-        sleep(0.25)
-
-
-def probe_outcome(probe):
-    """A skipped probe (no conversation was idle while the disk was full) is recorded, not judged; a sent one is
-    judged by its refusal."""
-    return "skipped" if probe.get("skipped") else probe_verdict(probe["refusal"])
 
 
 def link_witnessed(backend, gateway_closed, runtime_logged, snapshots_grew):
@@ -306,6 +209,9 @@ class Soak:
         self.log_start = self.log_last = None
         self.journal = None
         self.started, self.ended = None, None
+        # Agent teams and Desktop tasks beside the slots (soak_mix), off unless asked.
+        self.mix = soak_mix.MixRun(getattr(options, "mix", soak_mix.MixOptions()), stack, self.log)
+        self.draining = False
 
     def record_slow(self, measurement):
         """A harness engine command that was slow on a saturated engine: a measurement in the journal, not a failure.
@@ -332,6 +238,8 @@ class Soak:
                  excluded_kinds=sorted(self.options.exclude),
                  conversations=self.slots, chaos_seconds=self.seconds, drain_seconds=DRAIN_SECONDS,
                  images=self.stack.images, plan=self.plan,
+                 **({"mix": vars(self.mix.options), "desktop_image": self.stack.desktop,
+                     "network_pool": self.stack.network_pool} if self.mix.options.on else {}),
                  # The load sampler counts this project's containers only (soak_load.py).
                  project=self.stack.env.get("COMPOSE_PROJECT_NAME"))
         self.conversations, self.audits = [None] * self.slots, [None] * self.slots
@@ -824,10 +732,13 @@ class Soak:
         self.started = time.monotonic()
         self.log_start = self.log_last = time.time()
         self.log("chaos_started")
+        self.mix.start(0.0, self.stack.request("/api/v1/admin/limits") if self.mix.options.on else {})
+        self.mix.begin(lambda: time.monotonic() - self.started, self.sending_paused, lambda: self.draining)
         next_fault, next_sample = 0, 0
         deadline = self.started + self.seconds + DRAIN_SECONDS
         while True:
             self.poll()
+            self.mix.check()
             now = time.monotonic()
             elapsed = now - self.started
             if next_fault < len(self.plan) and elapsed >= self.plan[next_fault]["at"]:
@@ -837,13 +748,13 @@ class Soak:
             self.witnesses()
             self.io_recoveries()
             self.store_recoveries()
-            draining = elapsed >= self.seconds and next_fault == len(self.plan)
+            draining = self.draining = elapsed >= self.seconds and next_fault == len(self.plan)
             self.replenish(draining)
             if elapsed >= next_sample and not self.database_down():
                 self.measure()
                 self.collect_logs()
                 next_sample = elapsed + 30
-            if draining and not self.pending and all(audit.active is None and audit.started == sent
+            if draining and not self.pending and self.mix.idle() and all(audit.active is None and audit.started == sent
                     and not audit.needs_completion() for audit, sent in zip(self.audits, self.sent)):
                 break
             require(now < deadline, "soak drain deadline exceeded; a run or replay did not finish")
@@ -852,6 +763,7 @@ class Soak:
         self.measure()
 
     def verify(self):
+        self.mix.end()
         self.poll()
         conversations = self.finished + [self.close_conversation(index) for index in range(self.slots)]
         planned = {(fault["kind"], fault["target"]) for fault in self.plan}
@@ -864,11 +776,16 @@ class Soak:
         problem = missed_sample_problem(self.missed_samples, len(self.samples) + self.missed_samples)
         require(problem is None, problem or "")
         growth = verdict(self.samples, self.windows, GROWTH_METRICS,
+                         listeners=soak_mix.listeners(self.mix.options.teams),
                          require_judged=self.options.hours in (8, 24) and not self.options.rehearsal,
                          require_floor=self.options.hours == 24 and not self.options.rehearsal)
         self.log("growth", verdict=growth)
         require(growth["passed"], "resource growth: " + growth["reason"])
+        mix = self.mix.finish()
+        if mix is not None:
+            mix.update(desktop_image=self.stack.desktop, network_pool=self.stack.network_pool)
         return {"status": "passed", "gate_evidence": self.stack.evidence(self.options.rehearsal),
+                **({"mix": mix} if mix is not None else {}),
                 "seed": self.options.seed,
                 "growth": growth, "orphans": orphans, "disk_replacements": self.disk_replacements,
                 "missed_samples": self.missed_samples,
@@ -908,7 +825,7 @@ class Soak:
         clients = [client for client in self.clients if client is not None]
         for client in clients:
             client.stop()
-        actions = [client.join for client in clients]
+        actions = [lambda: self.mix.end(raise_failure=False)] + [client.join for client in clients]
         actions += [client.receipts.output.close for client in clients]
         if self.log_start is not None and getattr(self.stack, "gateway", None):
             actions.append(lambda: self.collect_logs(final=True))
@@ -939,12 +856,18 @@ def main():
     parser.add_argument("--seed", type=int, default=731)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--rehearsal", action="store_true", help="five-minute plumbing check; never gate evidence")
+    parser.add_argument("--teams-every", type=int, metavar="MIN",
+                        help="an agent team every MIN minutes beside the slots (soak_mix); off unless given")
+    parser.add_argument("--desktops-every", type=int, metavar="MIN",
+                        help="a Desktop task every MIN minutes beside the slots (soak_mix); off unless given")
     # Test-only: rotate each conversation after this many responses, to prove the generation path in a rehearsal.
     parser.add_argument("--rotate-after", type=int, help=argparse.SUPPRESS)
     options = parser.parse_args()
     run_seconds(options.hours, options.rehearsal)
     soak_real.check_mode(options.model, options.hours, options.rehearsal, options.conversations)
     check_rotate_after(options.rotate_after, options.rehearsal)
+    options.mix = soak_mix.MixOptions(options.teams_every, options.desktops_every)
+    soak_mix.check_mix(options.mix, options.backend, options.model)
     # The real-model run keeps to reconnect faults and hourly restarts: the GPU slot is not where the engine and the
     # database are also stressed.
     options.reconnect_only = options.reconnect_only or options.model == "real"
@@ -955,7 +878,7 @@ def main():
     env["TQA_STACK_READINGS"] = "off"
     temporary = tempfile.TemporaryDirectory(prefix="tqa-soak-")
     directory = compose.installation(temporary)
-    stack = Stack(directory, env, options.output, backend=options.backend, model=options.model)
+    stack = Stack(directory, env, options.output, backend=options.backend, model=options.model, mix=options.mix)
     soak, failure = Soak(stack, options), None
     previous = signal.signal(signal.SIGTERM, interrupted)
     result = {"status": "failed", "seed": options.seed, "gate_evidence": False}

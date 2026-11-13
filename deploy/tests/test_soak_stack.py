@@ -393,5 +393,64 @@ class StorageTests(unittest.TestCase):
             self.assertEqual(visited, ["reader", "containers"])
 
 
+class NoSwapTests(unittest.TestCase):
+    """TQA_SOAK_NO_SWAP=1, the launcher's hard memory cap: no service of the stack may swap (sandboxes never do: the
+    gateway sets their swap to their memory)."""
+
+    def test_every_service_swaps_nothing_beyond_its_memory(self):
+        rendered = {"services": {"gateway": {"mem_limit": "536870912"}, "postgres": {"mem_limit": "536870912"},
+                                 "fake-model": {"mem_limit": "268435456"}}}
+        overlay = {"services": {"fake-model": {"image": "x"}}}
+        capped = soak_stack.no_swap(overlay, rendered)
+        self.assertEqual(capped["services"]["gateway"], {"memswap_limit": "536870912"})
+        self.assertEqual(capped["services"]["fake-model"], {"image": "x", "memswap_limit": "268435456"})
+        self.assertEqual(set(capped["services"]), {"gateway", "postgres", "fake-model"})
+
+    def test_a_service_without_a_memory_limit_refuses_the_run(self):
+        with self.assertRaisesRegex(AuditError, "web has no mem_limit"):
+            soak_stack.no_swap({}, {"services": {"web": {}}})
+
+    def test_off_unless_asked(self):
+        self.assertFalse(soak_stack.wants_no_swap({}))
+        self.assertTrue(soak_stack.wants_no_swap({"TQA_SOAK_NO_SWAP": "1"}))
+        with self.assertRaises(AuditError):
+            soak_stack.wants_no_swap({"TQA_SOAK_NO_SWAP": "yes"})
+
+
+class StartupLogTests(unittest.TestCase):
+    """A stack that doesn't come up keeps every service's log in the evidence: a service that exits at start (a
+    refused configuration) is removed with the installation, and its reason with it."""
+
+    def test_a_failed_start_keeps_the_services_logs_and_fails_as_before(self):
+        import subprocess
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as out:
+            stack = soak_stack.Stack.__new__(soak_stack.Stack)
+            stack.env, stack.output, stack.configuration = {}, Path(out), ["docker", "compose"]
+            calls = []
+
+            def command(arguments, timeout=90):
+                calls.append(arguments)
+                if "up" in arguments:
+                    raise subprocess.CalledProcessError(1, arguments)
+                return "gateway-1  | error: models.toml: duplicate route"
+            stack.command = command
+            with self.assertRaises(subprocess.CalledProcessError):
+                stack.start_services("60")
+            self.assertEqual(calls[-1], ["docker", "compose", "logs", "--no-color", "--timestamps"])
+            self.assertIn("duplicate route", (Path(out) / "startup.log").read_text())
+
+    def test_a_start_that_succeeds_keeps_nothing(self):
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as out:
+            stack = soak_stack.Stack.__new__(soak_stack.Stack)
+            stack.env, stack.output, stack.configuration = {}, Path(out), ["docker", "compose"]
+            stack.command = lambda arguments, timeout=90: ""
+            stack.start_services("60")
+            self.assertFalse((Path(out) / "startup.log").exists())
+
+
 if __name__ == "__main__":
     unittest.main()

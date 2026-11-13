@@ -5427,7 +5427,7 @@
       "delete": {
         "operationId": "deleteWorkspace",
         "summary": "Delete a workspace and its files",
-        "description": "Owner only. Refused with 409 workspace_in_use while a task's environment on it has a run going or is pinned (lease.running, lease.pinned), and while bound active tasks exist unless with_conversations=true and they all belong to the owner (then they are deleted with it). A kept, idle environment is retired for the delete, as for a new task's handover, and the host directory goes once it has let go; with no environment, the directory goes at once; its tasks, recorded changes, snapshots and shares are purged within minutes, and forks stay with forked_from cleared. One content-free audit record is written per workspace and per task deleted with it.",
+        "description": "Owner only. Refused with 409 workspace_in_use while a task's environment on it has a run going or is pinned (lease.running, lease.pinned), and while bound active tasks exist unless with_conversations=true and they all belong to the owner (then they are deleted with it); with 409 has_helpers while one of those tasks leads an agent team with helpers (delete that lead with its helpers first). A kept, idle environment is retired for the delete, as for a new task's handover, and the host directory goes once it has let go; with no environment, the directory goes at once; its tasks, recorded changes, snapshots and shares are purged within minutes, and forks stay with forked_from cleared. One content-free audit record is written per workspace and per task deleted with it.",
         "security": [
           {
             "sessionCookie": []
@@ -5478,7 +5478,7 @@
             }
           },
           "409": {
-            "description": "workspace_in_use; workspace_not_ready while it is being forked",
+            "description": "workspace_in_use; workspace_not_ready while it is being forked; has_helpers while a task deleted with it leads an agent team with helpers",
             "content": {
               "application/json": {
                 "schema": {

@@ -3,6 +3,19 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
+## Unreleased
+
+### Fixed
+
+- **Deleting a team's lead task with its helpers now removes the helpers' own copies and the team's messages
+  (GW-I-108).** Each helper's copy of the lead's files is deleted with the helper's task, whether the helper is
+  deleted on its own or with its lead, and the purge removes it within minutes; a copy you started another task in
+  stays yours. The team's message log goes when the lead's task is purged. Before, in 17.4.1 and earlier, both
+  stayed for good: the copies, still listed among the person's workspaces, with their files on disk, and every
+  message the team had sent. Deleting the lead's workspace with its tasks is refused while the lead has helpers
+  (`409 has_helpers`), as deleting the lead alone is, and the web app says what to delete first; before, the
+  workspace's tasks went in bulk and the team kept running for a deleted lead.
+
 ## 17.4.1 (12 November 2026)
 
 A fix release of the web app, the image builds and the install guide, and the system-call library past one

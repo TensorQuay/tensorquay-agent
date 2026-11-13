@@ -21,8 +21,8 @@ WARM_UP = HOUR
 MIN_LIFETIME = 4 * HOUR
 LIMIT = 0.05
 # The gateway's database pool (gateway.toml limits.database_connections, 16 by default; the soak's stacks set none)
-# and its connections outside the pool: a PgListener (teams/changed.rs) only with agent teams on, which the soak's
-# stacks never turn on, so none.
+# and its connections outside the pool: a PgListener (teams/changed.rs) only with agent teams on, which only a soak
+# with teams in its mix does (soak_mix.listeners passes 1 then); otherwise none.
 POOL = 16
 LISTENERS = 0
 # The measurement's own share of `database_connections`: soak_chaos's probe counts every backend of the database, its

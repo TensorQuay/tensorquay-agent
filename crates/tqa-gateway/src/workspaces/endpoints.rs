@@ -553,11 +553,12 @@ pub(crate) async fn update(
 /// `DELETE /api/v1/workspaces/{id}[?with_conversations=true]`: the owner deletes the workspace and its directory.
 /// Never while a task's environment on it has a run going or is pinned; a kept, idle one is retired for it, as for a
 /// new task's handover (GW-I-199). Bound active tasks refuse it unless `with_conversations`, and then only when they
-/// all belong to the owner, who deletes them with it.
+/// all belong to the owner, who deletes them with it, and none of them leads an agent team with helpers: those go
+/// in bulk, past the lead's own delete that stops its team, so the lead is deleted with its helpers first (GW-I-108).
 ///
 /// # Errors
-/// `404`, `403`, `409 workspace_in_use`, `409 workspace_not_ready` while it is being forked, or a store or
-/// storage failure.
+/// `404`, `403`, `409 workspace_in_use`, `409 workspace_not_ready` while it is being forked, `409 has_helpers`, or
+/// a store or storage failure.
 pub(crate) async fn delete(
     AppState(state): AppState<Arc<State>>,
     Authz(user): Authz,
@@ -583,6 +584,19 @@ pub(crate) async fn delete(
             return Err(GatewayError::Conflict("workspace_in_use"));
         }
         let tasks: Vec<Uuid> = bound.iter().map(|task| task.id).collect();
+        // A lead among them would go without its team stopping, its helpers working for a deleted lead: refused as
+        // deleting that lead without its helpers is, whatever the agent-teams switch says now (GW-I-108).
+        let leads_helpers = sqlx::query_scalar!(
+            "SELECT EXISTS (SELECT 1 FROM agent_teams t JOIN agent_team_members m ON m.team_id = t.id \
+             JOIN conversations c ON c.id = m.conversation_id \
+             WHERE t.lead_conversation = ANY($1) AND c.state <> 'deleted') AS \"leads_helpers!\"",
+            &tasks
+        )
+        .fetch_one(&mut *transaction)
+        .await?;
+        if leads_helpers {
+            return Err(GatewayError::Conflict("has_helpers"));
+        }
         sqlx::query!("UPDATE conversations SET state='deleted',updated_at=CURRENT_TIMESTAMP WHERE id=ANY($1)", &tasks)
             .execute(&mut *transaction).await?;
         sqlx::query!("DELETE FROM runtime_tokens WHERE conversation_id=ANY($1)", &tasks).execute(&mut *transaction).await?;

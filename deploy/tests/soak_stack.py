@@ -16,6 +16,8 @@ import urllib.request
 import compose
 from engine_proxy import EngineProxy
 from soak_disk import BoundedStorage, engine_child_pid
+import soak_mix
+from soak_mix_audit import MixProbe
 from soak_orphans import parse_rows
 import soak_real
 import demo
@@ -38,6 +40,8 @@ ALREADY_DONE = re.compile(r"is not running|is already paused|is not paused|is no
 # long to start a container, and a slow sample is better than a missed one.
 RESOURCE_COMMAND_SECONDS = 90
 POOL_SANDBOXES = 16  # compose.prepare's /24 pool of /29 networks
+# The demo's services, where the mix's lane model takes its definition from (soak_mix.lane_service).
+DEMO_COMPOSE = Path(__file__).resolve().parents[1] / "compose" / "demo.yml"
 
 
 def firecracker_stack():
@@ -65,6 +69,24 @@ def image_references(env):
             "runtime": compose.required_image(env, "TQA_RUNTIME_IMAGE"),
             "web": compose.required_image(env, "TQA_WEB_IMAGE"),
             "fake-model": compose.required_image(env, "TQA_FAKE_MODEL_IMAGE")}
+
+
+def wants_no_swap(env):
+    """TQA_SOAK_NO_SWAP=1: the launcher's hard memory cap, off unless set."""
+    value = env.get("TQA_SOAK_NO_SWAP")
+    require(value in (None, "1"), "TQA_SOAK_NO_SWAP takes 1, or is left unset")
+    return value == "1"
+
+
+def no_swap(overlay, rendered):
+    """The soak's overlay with every service's swap held to its memory (`memswap_limit` = `mem_limit`), so no service
+    swaps; a service without a memory limit has no hard cap and refuses the run. Sandboxes never swap: the gateway sets
+    their swap to their memory."""
+    for name, service in sorted(rendered["services"].items()):
+        limit = service.get("mem_limit")
+        require(bool(limit), "service {} has no mem_limit: no hard memory cap".format(name))
+        overlay.setdefault("services", {}).setdefault(name, {})["memswap_limit"] = limit
+    return overlay
 
 
 def pages(fetch, max_pages=100):
@@ -117,8 +139,10 @@ def io_full():
 
 class Stack:
     """All identities, mounts and actions derive from this invocation's Compose project."""
-    def __init__(self, directory, env, output, backend="docker", model="fake"):
+    def __init__(self, directory, env, output, backend="docker", model="fake", mix=None):
         self.directory, self.env, self.output, self.backend, self.model_kind = directory, env, output, backend, model
+        # Agent teams and Desktop tasks in the mix (soak_mix), off unless asked; the Desktop image under test, pinned.
+        self.mix, self.desktop, self.network_pool = mix or soak_mix.MixOptions(), None, None
         self.model_route = None
         self.configuration = demo.COMPOSE + ["-f", str(directory.parent / "soak.json")]
         if backend == "firecracker":
@@ -209,13 +233,17 @@ class Stack:
         self.images = {name: demo.runtime_image(self.env, reference)
                        for name, reference in image_references(self.env).items()}
         self.env.update(TQA_GATEWAY_IMAGE=self.images["gateway"], TQA_WEB_IMAGE=self.images["web"])
+        self.desktop = soak_mix.desktop_image(self.env, self.mix.desktops, self.image_record)
+        if self.desktop is not None:
+            self.images["desktop"] = self.desktop["id"]
         if engine_proxy:
             self.start_engine_proxy()
         with socket.socket() as reservation:
             reservation.bind(("127.0.0.1", 0))
             port = reservation.getsockname()[1]
             compose.prepare(self.directory, self.env, runtime=self.images["runtime"], port=port,
-                            max_live=max_live(slots))
+                            max_live=soak_mix.max_live(slots, self.mix.teams, self.mix.desktops),
+                            **({"pool_prefix": soak_mix.pool_prefix(self.mix)} if self.mix.on else {}))
         self.origin = "http://127.0.0.1:" + str(port)
         self.env["TQA_DEMO_HOST"] = "127.0.0.1"
         compose.ownership(self.directory, self.env)
@@ -226,14 +254,22 @@ class Stack:
         gateway_toml = (self.directory / "gateway.toml").read_text()
         self.ready_wait_seconds = ready_wait(gateway_toml)
         self.session_ttl = session_ttl(gateway_toml)
+        if self.desktop is not None:
+            soak_mix.check_pinned(gateway_toml, self.desktop["id"])
+        self.network_pool = soak_mix.network_pool(gateway_toml) if self.mix.on else None
         compose.ownership(self.directory, self.env, "1000:1000")
         if storage_mib:
             self.bound_storage(storage_mib)
+        if wants_no_swap(self.env):
+            overlay = self.directory.parent / "soak.json"
+            rendered = json.loads(self.command(self.configuration + ["config", "--format", "json"]))
+            compose.write(overlay, json.dumps(no_swap(json.loads(overlay.read_text()), rendered)))
         wait = "120" if self.backend == "firecracker" else "60"
-        self.command(self.configuration + ["up", "-d", "--no-build", "--wait", "--wait-timeout", wait], timeout=180)
+        self.start_services(wait)
         self.gateway = self.service("gateway")
         self.database = self.service("postgres")
         self.model = self.service("fake-model")
+        self.mix_model = self.service(soak_mix.MIX_SERVICE) if self.mix.on else None
         self.wait_ready()
         password = "synthetic-soak-" + secrets.token_hex(16)
         self.env["TQA_STACK_PASSWORD"] = password
@@ -241,6 +277,19 @@ class Stack:
         self.request("/api/v1/auth/bootstrap", dict(account, token=self.env["TQA_BOOTSTRAP_TOKEN"]))
         self.account = account
         self.sign_in()
+
+    def start_services(self, wait):
+        """`compose up`; when it fails, every service's log is kept in the evidence first (startup.log), since a
+        service that exits at start goes with the installation, and its reason with it."""
+        try:
+            self.command(self.configuration + ["up", "-d", "--no-build", "--wait", "--wait-timeout", wait], timeout=180)
+        except (OSError, RuntimeError, subprocess.SubprocessError):
+            try:
+                logs = self.command(self.configuration + ["logs", "--no-color", "--timestamps"], timeout=60)
+                compose.write(self.output / "startup.log", compose.redact(logs, self.env)[-LOG_CAP:])
+            except (OSError, RuntimeError, subprocess.SubprocessError):
+                print("Could not keep the services' logs after the failed start", flush=True)
+            raise
 
     def sign_in(self):
         """Signs in as the run's account; the jar keeps the new session, and `cookie` is its header for the streams. Its
@@ -288,6 +337,9 @@ class Stack:
             compose.write(gateway, "session_ttl={}\n".format(int(ttl)) + gateway.read_text())
             self.session_override = True
         compose.write(self.directory / "scenario.json", json.dumps(scenario(rehearsal)))
+        if self.mix.teams:
+            gateway = self.directory / "gateway.toml"
+            compose.write(gateway, soak_mix.gateway_text(gateway.read_text(), teams=True))
         compose.write(self.directory.parent / "soak.json", json.dumps({"services": {"fake-model": {
             "image": self.images["fake-model"], "command": ["--scenario", "/scenarios/soak.json"],
             "volumes": [{"type": "bind", "source": str(self.directory / "scenario.json"),
@@ -303,6 +355,19 @@ class Stack:
                                                   self.model_route["context_window"]))
         else:
             compose.write(models, models.read_text() + "context_window=1000000\nstream_usage=true\n")
+        if self.mix.on:
+            self.configure_mix(models)
+
+    def configure_mix(self, models):
+        """The lanes' own scripted model (soak_mix.lane_service) beside the slots', and its route."""
+        source = self.directory / "mix.json"
+        compose.write(source, json.dumps(soak_mix.lane_scenario(self.mix.teams, self.mix.desktops)))
+        overlay = self.directory.parent / "soak.json"
+        services = json.loads(overlay.read_text())
+        services["services"][soak_mix.MIX_SERVICE] = soak_mix.lane_service(str(source), self.images["fake-model"],
+                                                                           str(DEMO_COMPOSE))
+        compose.write(overlay, json.dumps(services))
+        compose.write(models, soak_mix.models_text(models.read_text()))
 
     def request(self, path, body=None):
         """One API call. A 401 means the session ended (it lasts session_ttl from sign-in, not from use): it signs in
@@ -315,6 +380,30 @@ class Stack:
                 raise
         self.renew(stale)
         return self.call(path, body)
+
+    def delete(self, path):
+        """A DELETE, answered 204; a 401 signs in again as `request` does."""
+        stale = self.cookie
+        try:
+            return self.call_delete(path)
+        except urllib.error.HTTPError as error:
+            if error.code != 401 or self.account is None:
+                raise
+        self.renew(stale)
+        return self.call_delete(path)
+
+    def call_delete(self, path):
+        request = urllib.request.Request(self.origin + path, method="DELETE", headers={
+            "Origin": self.origin, "Idempotency-Key": secrets.token_hex(16)})
+        with self.client.open(request, timeout=15) as response:
+            require(response.status == 204, "DELETE {} answered {}".format(path.split("?")[0], response.status))
+
+    def image_record(self, reference):
+        return json.loads(self.command(["docker", "image", "inspect", reference]))[0]
+
+    def mix_probe(self, helpers):
+        """The mix audit's listings now (soak_mix_audit), with the helper tasks the team lane saw."""
+        return MixProbe(self, self.desktop["id"] if self.desktop else None, compose.TOYBOX)(helpers)
 
     def call(self, path, body=None):
         headers = {"Origin": self.origin, "Content-Type": "application/json"}
@@ -552,7 +641,8 @@ class Stack:
     def save_logs(self):
         """The logs of every container still there; a runtime already removed (rotated, evicted or killed) is skipped,
         since its logs went with it and that is not a cleanup failure."""
-        identities = {"gateway": getattr(self, "gateway", None), "fake-model": getattr(self, "model", None)}
+        identities = {"gateway": getattr(self, "gateway", None), "fake-model": getattr(self, "model", None),
+                      soak_mix.MIX_SERVICE: getattr(self, "mix_model", None)}
         identities.update({"runtime-" + key: value for key, value in self.runtimes.items()})
         actions = [lambda name=name, identity=identity: compose.write(self.output / (name + ".log"), self.logs(identity))
                    for name, identity in identities.items() if identity is not None and self.exists(identity)]

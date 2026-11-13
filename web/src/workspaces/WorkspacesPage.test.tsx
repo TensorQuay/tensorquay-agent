@@ -371,20 +371,19 @@ describe("WEB-U-025 workspaces page", () => {
 
 // The confirmation follows the gateway's delete rules.
 describe("WEB-U-025 deleting a workspace", () => {
-  const answer = (status: number) =>
-    status === 204
-      ? new Response(null, { status })
-      : problem(status, "workspace_in_use");
+  const answer = (status: number, code = "workspace_in_use") =>
+    status === 204 ? new Response(null, { status }) : problem(status, code);
   async function remove(
     value: Workspace,
     tasks: ReturnType<typeof task>[] = [],
     status = 204,
+    code?: string,
   ) {
     const gateway = show([value], {
       [TASKS]: () => Response.json({ items: tasks, next_cursor: null }),
-      [`DELETE /api/v1/workspaces/${value.id}`]: () => answer(status),
+      [`DELETE /api/v1/workspaces/${value.id}`]: () => answer(status, code),
       [`DELETE /api/v1/workspaces/${value.id}?with_conversations=true`]: () =>
-        answer(status),
+        answer(status, code),
     });
     await screen.findByRole("table");
     // The count of my tasks comes from the task list; let it load first.
@@ -574,6 +573,23 @@ describe("WEB-U-025 deleting a workspace", () => {
         "This workspace is in use or has other people’s tasks, so it can’t be deleted now.",
       ),
     ).toBeInTheDocument();
+  });
+
+  // A task in it leads helpers (409 has_helpers): the sentence says what to delete first, never the code.
+  it("says to delete the lead with its helpers first when the gateway finds one in it", async () => {
+    const { dialog } = await remove(
+      workspace({ name: "Lead" }),
+      [],
+      409,
+      "has_helpers",
+    );
+    fireEvent.click(within(dialog).getByRole("button", { name: "Delete" }));
+    expect(
+      await within(dialog).findByText(
+        "This workspace has a task that leads helpers. Delete that task with its helpers first, then delete the workspace.",
+      ),
+    ).toBeInTheDocument();
+    expect(dialog).not.toHaveTextContent("has_helpers");
   });
 });
 

@@ -313,6 +313,7 @@ async fn purge_task(
         events: task_events(state, connection, task).await?,
     };
     counts.rows += task_rows(state, connection, task).await?;
+    counts.rows += team_log(state, connection, task).await?;
     detach_kept(state, connection, task, owner).await?;
     // The row last, under the same guard: channel memberships and the stored answers about it cascade, usage detaches.
     let gone = bounded(
@@ -484,6 +485,31 @@ async fn task_rows(
         task
     );
 
+    Ok(removed)
+}
+
+/// The log of a team the task led, and its channel (GW-I-108: deleting the lead's task deletes the team's messages).
+/// The team's row references its channel, not the other way round, so the lead's row going takes the team but would
+/// leave its channel and messages: they go here, the messages in batches, then the channel, which takes the team, its
+/// members' rows and their places in the log with it. How many messages went.
+async fn team_log(state: &State, connection: &mut PgConnection, task: Uuid) -> Result<u64, Failed> {
+    let removed = batches!(
+        state,
+        connection,
+        "team log",
+        "DELETE FROM channel_messages WHERE ctid = ANY(ARRAY(SELECT m.ctid FROM channel_messages m JOIN agent_teams t ON t.channel_id = m.channel_id WHERE t.lead_conversation=$1 LIMIT $2))",
+        task
+    );
+    bounded(
+        state,
+        sqlx::query!(
+            "DELETE FROM channels c USING agent_teams t WHERE t.channel_id = c.id AND c.kind = 'agent_team' AND t.lead_conversation=$1",
+            task
+        )
+        .execute(&mut *connection),
+    )
+    .await
+    .map_err(|error| ("team log", error))?;
     Ok(removed)
 }
 
