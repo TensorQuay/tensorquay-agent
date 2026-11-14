@@ -274,6 +274,15 @@ also white since 16n (SBX-C-024). A rerun on a 16y capture would measure both; i
 | 4 | **A changed Desktop cap reaches a running desktop** only at its next link-up (the caps go with the link's set-up). The page's words say so since 16f. | recorded as a known limit (below, 14 Nov 2026) |
 | 5 | **A screenshot refusal** reaches the model with the refusal and the elision placeholder run together (the 16e session, P3). | closed 14 Nov 2026: fixed before 17.0, the placeholder starts with a newline (`tqa-core/src/runner/model/screenshots.rs`); CORE-U-081 now asserts the newline |
 
+## Found while rerunning the suites for the gate (14 Nov 2026)
+- **RT-I-047's menu cases and the grounding capture failed on the current Desktop image** ("menu File has no box")
+  while the 30 October probe image passed with identical Debian packages. Cause: 17.1's rule that drops a box
+  outside the focused window's frame (TOOL-U-139) took the frame from xdotool's `getwindowgeometry`, which under the
+  Desktop's window manager reports the client area 20 px too low (its offset inside the frame added to the frame's
+  position: Mousepad at (320, 167) read as (321, 187)); every element in the top 20 px, the menu bar first, lost its
+  box. Fixed test-first (TOOL-U-142: the frame from xwininfo's absolute client origin); the menu cases and the
+  capture run again on the fixed image.
+
 ## Known limits (v1.1)
 - **Docker only.** The microVM's rootfs has no Desktop yet, so the microVM refuses a desktop sandbox at its spec check,
   naming `desktop` (SBX-C-020's microVM half tests the refusal; ADR-0039 §11). The Desktop in the microVM is later work.

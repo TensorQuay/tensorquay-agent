@@ -8,6 +8,8 @@ use super::driver::{Direction, DriverError};
 
 /// The program, as the Desktop image keeps it: off the sandbox user's PATH, the computer tool's (TOOL-U-064).
 pub const XDOTOOL: &str = "/usr/libexec/tqa/xdotool";
+/// `xwininfo` (x11-utils, in the Desktop image for the grounding capture): a window's real place on the screen.
+pub const XWININFO: &str = "xwininfo";
 /// Milliseconds between typed characters: slow enough for toolkits that drop fast input.
 const TYPE_DELAY_MS: &str = "12";
 /// xdotool's non-zero exit: the display refused the request, or (for `getactivewindow`) no window has the focus.
@@ -100,22 +102,27 @@ impl XDo {
             .map_err(failed)
     }
 
-    /// A window's frame on the screen (x, y, width, height), when xdotool can read it.
+    /// A window's client area on the screen (x, y, width, height), as `xwininfo -id` reports it, or `None` when it
+    /// can't be read (then no box is judged against it). Not xdotool's `getwindowgeometry`: under a window manager
+    /// it adds the window's offset inside its frame to the frame's position, so Mousepad's client area at (320, 167)
+    /// read as (321, 187) and every element in the window's top 20 px, the menu bar first, lost its box (TOOL-U-142,
+    /// 14 November 2026).
     pub async fn geometry(&self, id: &str) -> Option<(i32, i32, u32, u32)> {
         let text = self
-            .xdotool(&["getwindowgeometry", "--shell", id])
+            .runner
+            .run(XWININFO, &["-id".to_owned(), id.to_owned()])
             .await
             .ok()?;
         let value = |key: &str| {
             text.lines()
-                .find_map(|line| line.strip_prefix(key)?.strip_prefix('='))
+                .find_map(|line| line.trim_start().strip_prefix(key)?.strip_prefix(':'))
                 .map(str::trim)
         };
         Some((
-            value("X")?.parse().ok()?,
-            value("Y")?.parse().ok()?,
-            value("WIDTH")?.parse().ok()?,
-            value("HEIGHT")?.parse().ok()?,
+            value("Absolute upper-left X")?.parse().ok()?,
+            value("Absolute upper-left Y")?.parse().ok()?,
+            value("Width")?.parse().ok()?,
+            value("Height")?.parse().ok()?,
         ))
     }
 

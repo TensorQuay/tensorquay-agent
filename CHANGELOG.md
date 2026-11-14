@@ -7,6 +7,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **Desktop menus and tool bars at the top of a window are marked again.** Since 17.1, an element whose box lay
+  outside the focused window's frame got no mark; the frame's position came from a tool that, under the desktop's
+  window manager, placed it about 20 pixels too low, so the menu bar and the tool bar of an application such as
+  Mousepad or LibreOffice had no marks and the agent could not click them by mark. The frame is now the window's
+  real client area.
 - **Deleting a team's lead task with its helpers now removes the helpers' own copies and the team's messages
   (GW-I-108).** Each helper's copy of the lead's files is deleted with the helper's task, whether the helper is
   deleted on its own or with its lead, and the purge removes it within minutes; a copy you started another task in
