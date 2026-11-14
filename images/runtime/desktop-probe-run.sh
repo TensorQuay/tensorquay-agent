@@ -7,10 +7,15 @@
 # answers at once, so applications never wait on x11vnc's selection (RT-I-058). Fails if any of the three failed.
 args="--ignored --test-threads=1 --nocapture"
 paste=rt_i_046_nothing_is_copied_out_and_a_paste_reaches_the_x_clipboard
+after_paste=rt_i_058_a_double_click_after_a_paste_in_opens_rename_sheet_every_time
 computer-browser-probe $args
 browser=$?
-computer-desktop-probe $args --skip "$paste"
+computer-desktop-probe $args --skip "$paste" --skip "$after_paste"
 desktop=$?
 computer-desktop-probe $args --exact "$paste"
 clipboard=$?
-[ "$browser" -eq 0 ] && [ "$desktop" -eq 0 ] && [ "$clipboard" -eq 0 ]
+# RT-I-058 pastes in too, so it runs after the clipboard case: a guard that every double-click after a paste opens
+# Rename Sheet (not reproduced on 14 November 2026, 30 of 30).
+computer-desktop-probe $args --exact "$after_paste"
+after=$?
+[ "$browser" -eq 0 ] && [ "$desktop" -eq 0 ] && [ "$clipboard" -eq 0 ] && [ "$after" -eq 0 ]

@@ -170,20 +170,31 @@ def used_subnets(inspected):
     return subnets
 
 
-def sandbox_pool(used, randbelow=secrets.randbelow, prefix=24):
-    """A 10.213.X.0/24 that no existing network overlaps, drawn at random among the free ones. Another installation
-    on the daemon, such as a long-lived review stack, already holds one; a clash makes the engine refuse this
-    installation's sandbox networks. `prefix` 23 draws an aligned 10.213.X.0/23 instead (64 subnets of /29, for the
-    soak's teams and Desktop mix); every pool stays within 10.213.0.0/16."""
+DEFAULT_POOL_BASE = "10.213"
+
+
+def pool_base(env):
+    """The first two octets the installation's sandbox pool is drawn from: 10.213 unless TQA_SANDBOX_POOL_BASE says
+    another (a host with a soak running draws the soak's sandboxes anywhere in 10.213.0.0/16)."""
+    return env.get("TQA_SANDBOX_POOL_BASE") or DEFAULT_POOL_BASE
+
+
+def sandbox_pool(used, randbelow=secrets.randbelow, prefix=24, base=DEFAULT_POOL_BASE):
+    """A `base`.X.0/24 (10.213 by default) that no existing network overlaps, drawn at random among the free ones.
+    Another installation on the daemon, such as a long-lived review stack, already holds one; a clash makes the
+    engine refuse this installation's sandbox networks. `prefix` 23 draws an aligned `base`.X.0/23 instead (64
+    subnets of /29, for the soak's teams and Desktop mix); every pool stays within `base`.0.0/16."""
     if prefix not in (23, 24):
         raise ValueError("the sandbox pool is a /24 or a /23")
+    if not re.fullmatch(r"(?:[1-9]?\d|1\d\d|2[0-4]\d|25[0-5])\.(?:[1-9]?\d|1\d\d|2[0-4]\d|25[0-5])", base):
+        raise ValueError("the sandbox pool's base is two octets, such as 10.213")
     taken = [ipaddress.ip_network(subnet, strict=False) for subnet in used]
     step = 2 ** (24 - prefix)
-    free = [candidate for candidate in (ipaddress.ip_network("10.213.{}.0/{}".format(third, prefix))
+    free = [candidate for candidate in (ipaddress.ip_network("{}.{}.0/{}".format(base, third, prefix))
                                         for third in range(0, 256, step))
             if not any(candidate.version == network.version and candidate.overlaps(network) for network in taken)]
     if not free:
-        raise RuntimeError("no free 10.213.X.0/{} sandbox pool on this engine".format(prefix))
+        raise RuntimeError("no free {}.X.0/{} sandbox pool on this engine".format(base, prefix))
     return str(free[randbelow(len(free))])
 
 
@@ -306,7 +317,7 @@ def prepare(directory, env, *, runtime=None, port=0, host="127.0.0.1", max_live=
     # Parallel stacks on one daemon need their own gateway container name and their own slice of the sandbox
     # network pool (a /24 of /29s: 32 subnets, enough for max_live 16).
     env["TQA_GATEWAY_CONTAINER"] = env["COMPOSE_PROJECT_NAME"] + "-gateway"
-    pool = sandbox_pool(engine_subnets(env), prefix=pool_prefix)
+    pool = sandbox_pool(engine_subnets(env), prefix=pool_prefix, base=pool_base(env))
     write(directory / "install.key", secrets.token_bytes(32))
     write(directory / "secrets.toml", '[secrets]\n"secrets/local" = "synthetic-compose-fixture"\n')
     write(directory / "models.toml", route)

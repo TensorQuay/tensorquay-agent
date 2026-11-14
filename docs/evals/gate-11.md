@@ -270,9 +270,9 @@ also white since 16n (SBX-C-024). A rerun on a 16y capture would measure both; i
 |---|---|---|
 | 1 | **A soak with Desktop tasks.** The soak's mix (`deploy/tests/soak*.py`) has no Desktop task, and its launcher pins no Desktop image, so no c16 soak (16e's and 16j's, passed; 16u's, stopped at 9 h 33 min; 16x's, passed; 16y's, running) says anything about ADR-0039 §10's resources: a desktop's processes, its profile, its screenshots, `desktop.max_sessions`. Needed: Desktop tasks in the mix, a Desktop image pinned, and the audit counting those resources. A known gap for v1.1, reported to the owner. | c17 |
 | 2 | **The grounding evaluation on a 16y capture** (above): the tool's words and the Desktop's root window changed after 16i. | with c17's grounding work |
-| 3 | **A ctrl+L sent within a few ms of a click** can be lost while the browser moves its focus (16x's L4, unpaced). The 16i session's Ctrl keys under Take over (ctrl+A arriving as ctrl+shift+A) want a check with a real keyboard. | c17 |
-| 4 | **A changed Desktop cap reaches a running desktop** only at its next link-up (the caps go with the link's set-up). The page's words say so since 16f. | c17 |
-| 5 | **A screenshot refusal** reaches the model with the refusal and the elision placeholder run together (the 16e session, P3). | c17 |
+| 3 | **A ctrl+L sent within a few ms of a click** can be lost while the browser moves its focus (16x's L4, unpaced). The 16i session's Ctrl keys under Take over (ctrl+A arriving as ctrl+shift+A) want a check with a real keyboard. | recorded as a known limit (below, 14 Nov 2026); ctrl+A under Take over measured after the 24 h soak |
+| 4 | **A changed Desktop cap reaches a running desktop** only at its next link-up (the caps go with the link's set-up). The page's words say so since 16f. | recorded as a known limit (below, 14 Nov 2026) |
+| 5 | **A screenshot refusal** reaches the model with the refusal and the elision placeholder run together (the 16e session, P3). | closed 14 Nov 2026: fixed before 17.0, the placeholder starts with a newline (`tqa-core/src/runner/model/screenshots.rs`); CORE-U-081 now asserts the newline |
 
 ## Known limits (v1.1)
 - **Docker only.** The microVM's rootfs has no Desktop yet, so the microVM refuses a desktop sandbox at its spec check,
@@ -300,6 +300,24 @@ also white since 16n (SBX-C-024). A rerun on a 16y capture would measure both; i
   try again; if you have control, double-click again. We have seen this only in LibreOffice. A fix is coming in the
   next release. The cause: after a paste, x11vnc owns PRIMARY and CLIPBOARD and answers each request in about 0.2 s;
   a double-click after a paste opened Rename Sheet 10 times in 15, against 14 in 14 with the selections cleared.
+  **Not reproduced on 14 Nov 2026** on the current Desktop image: 30 of 30 double-clicks after a paste in opened Rename
+  Sheet (and 30 of 30 cleared) while x11vnc still answered a selection request in 129 ms; RT-I-058 is closed as not
+  reproduced and its probe case stays as the guard. Nothing was changed in the image.
+- **Under Take over, a key sent within a few ms of a click can be lost** while the desktop's browser takes the focus
+  (16x's unpaced L4: 18 of 20 ctrl+L landed, and every key reached the canvas, so the loss is in the browser's focus
+  move, not on the way). Type at a person's pace, or click once more and send the key again. The agent's own path is
+  not affected: each action waits for the screen to settle (`SETTLE_STILL`, `SETTLE_MAX`). Whether ctrl+A under Take
+  over arrives as ctrl+shift+A (seen once, 16i), measured on the x11vnc side on 14 Nov 2026 (RFB key events to the
+  Desktop's x11vnc, read by xev): ctrl with the keysym `a` arrives as ctrl+a; ctrl with the keysym `A`, which a viewer
+  sends with Caps Lock on or from a shifted layout, arrives as ctrl+shift+A, because x11vnc presses Shift itself to
+  produce the upper-case keysym (its modifier tweak); with `-nomodtweak` the same arrives as ctrl+a and an explicit
+  Shift still passes. So 16i's ctrl+shift+A is the viewer sending `A`. The browser half (what the Screen panel's
+  viewer sends for a keyboard's ctrl+A, with and without Caps Lock) is measured on a test stack after the 24 h soak;
+  the fix is then either the viewer sending the unshifted letter under Ctrl or x11vnc's `-nomodtweak`.
+- **A changed Desktop cap reaches a running desktop only at its next link-up.** The screenshot and action caps go
+  with the link's session set-up (`link/session.rs`), and nothing pushes a change to a desktop that is running; the
+  Limits page says so per limit ("a desktop already running keeps the cap it started with", GW-U-146). The way
+  around: stop the task and start it again; the new cap applies from that start (recorded 14 Nov 2026).
 
 ## Evaluation (the technical lead)
 *Left to the technical lead.*
