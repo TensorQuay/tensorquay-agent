@@ -66,6 +66,7 @@
     "picker.modelApart": "{name} · {apart}",
     "picker.modelNumbered": "{name} ({count})",
     "picker.lastCheckFailed": "Its last check didn't pass",
+    "picker.notAnswering": "Not answering right now",
     "picker.modelsUnavailable": "Models unavailable",
     "picker.modelUnavailable": "Model unavailable",
     "picker.loadingModels": "Loading models…",

@@ -11,6 +11,7 @@ const base: RoutedModel = {
   display_name: "Local model",
   description: null,
   verified: null,
+  answering: null,
   model: "qwen3",
   protocol: "openai_chat",
   context_window: 32768,
@@ -105,5 +106,36 @@ describe("WEB-U-103 a model's second line", () => {
     });
     expect(hosted).toHaveTextContent("Fast answers for everyday work");
     expect(hosted).not.toHaveTextContent("DeepSeek ·");
+  });
+});
+
+describe("WEB-U-469 the picker says when a model isn't answering", () => {
+  it("names it on that model's row only, in plain words", () => {
+    render(
+      <ModelPicker
+        route="cloud"
+        onChange={() => undefined}
+        models={[
+          {
+            ...base,
+            name: "stopped",
+            display_name: "Qwen3.8 27B",
+            description: "On the RTX 5090 in this computer",
+            verified: true,
+            answering: false,
+          },
+          { ...base, name: "cloud", display_name: "Opus", answering: true },
+        ]}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /^Model:/ }));
+    const stopped = screen.getByRole("menuitemradio", {
+      name: /^Qwen3\.8 27B/,
+    });
+    expect(stopped).toHaveTextContent("Not answering right now");
+    expect(stopped).toHaveTextContent("On the RTX 5090 in this computer");
+    expect(
+      screen.getByRole("menuitemradio", { name: /^Opus/ }),
+    ).not.toHaveTextContent("Not answering");
   });
 });

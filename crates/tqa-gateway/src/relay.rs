@@ -38,6 +38,7 @@ mod probe_thinking_tests;
 mod rate;
 #[cfg(test)]
 mod rate_tests;
+mod reach;
 mod request;
 #[cfg(test)]
 mod request_tests;
@@ -62,6 +63,7 @@ pub(crate) use endpoint::{chat, messages, models, responses};
 pub(crate) use models_api::{LIST_TIMEOUT as MODELS_LIST_TIMEOUT, models as route_models};
 pub(crate) use probe::local_route;
 pub(crate) use probe_api::{probe as route_probe, request_ceiling as probe_request_ceiling};
+pub use reach::UNREACHABLE_HOLD;
 
 pub(crate) struct Relay {
     client: reqwest::Client,
@@ -74,6 +76,8 @@ pub(crate) struct Relay {
     budget_notices: budget::Notices,
     /// Title calls a person's next message cancels.
     titles: title::Calls,
+    /// Whether each route's model server answered its latest call (GW-I-320).
+    pub(crate) reach: reach::Reach,
 }
 impl Relay {
     pub fn new(config: &RelayConfig) -> Result<Self, GatewayError> {
@@ -98,6 +102,7 @@ impl Relay {
             probes: probe_api::Guard::default(),
             listings: probe_api::Guard::default(),
             budget_notices: budget::Notices::default(),
+            reach: reach::Reach::default(),
             titles: title::Calls::default(),
         })
     }

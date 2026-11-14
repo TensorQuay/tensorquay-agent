@@ -45,18 +45,26 @@ export function ModelPicker({
           const line = model.description ?? modelLine(model, t);
           // A person picking a failing route by hand knows first (WEB-U-322); the closed button never says it.
           const failing = model.verified === false;
+          // A server that couldn't be reached on its latest call says so first (WEB-U-469): picking it fails at once.
+          const silent = model.answering === false;
           return {
             id: model.name,
             label: labels.get(model.name) ?? model.name,
-            ...(line || failing
+            ...(line || failing || silent
               ? {
                   detail: (
                     <>
                       {line && <span className="type-small muted">{line}</span>}
-                      {failing && (
+                      {silent ? (
                         <span className="type-small muted">
-                          {t("picker.lastCheckFailed")}
+                          {t("picker.notAnswering")}
                         </span>
+                      ) : (
+                        failing && (
+                          <span className="type-small muted">
+                            {t("picker.lastCheckFailed")}
+                          </span>
+                        )
                       )}
                     </>
                   ),

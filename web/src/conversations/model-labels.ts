@@ -53,13 +53,17 @@ export function modelLabels(
 
 /**
  * The route New task starts with when the person hasn't picked one: the first whose current check didn't fail
- * (verified false), so an unchecked route still counts; the first route when every check failed, as before.
+ * (verified false) and whose server answered its latest call (answering not false, WEB-U-469), so an unchecked route
+ * still counts; the first route when none is usable, as before.
  */
 export function defaultRoute(
   models: readonly RoutedModel[] | undefined,
 ): string {
   return (
-    (models?.find((model) => model.verified !== false) ?? models?.[0])?.name ??
-    ""
+    (
+      models?.find(
+        (model) => model.verified !== false && model.answering !== false,
+      ) ?? models?.[0]
+    )?.name ?? ""
   );
 }

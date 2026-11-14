@@ -113,6 +113,7 @@
     "picker.modelApart": "{name} · {apart}",
     "picker.modelNumbered": "{name}（{count}）",
     "picker.lastCheckFailed": "上次检查未通过",
+    "picker.notAnswering": "目前没有响应",
     "picker.modelsUnavailable": "模型不可用",
     "picker.modelUnavailable": "模型不可用",
     "picker.loadingModels": "正在加载模型…",
