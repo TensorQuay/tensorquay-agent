@@ -114,10 +114,6 @@ jobs:
           set -euo pipefail
           cargo fmt -p tqa-gateway --check
           cargo clippy -p tqa-gateway --all-targets -- -D warnings
-      - name: Run database-independent contracts and show ignored tests
-        env:
-          SQLX_OFFLINE: "true"
-        run: cargo nextest run -p tqa-gateway
       - name: Build the static gateway image for the Docker contract
         run: docker build -f images/gateway/Dockerfile -t tqa-gateway:local .
       - name: Build the standalone web image for the Docker contract
@@ -163,7 +159,8 @@ jobs:
           SQLX_OFFLINE: "true"
           TQA_DOCKER_TESTS: "1"
           TQA_GATEWAY_IMAGE: tqa-gateway:local
-        # Every failure in one run: the job takes over an hour on the runner. PERF-002 and PERF-003 measure a release
+        # Every failure in one run, the database-independent contracts included (`--run-ignored all` runs both, so they
+        # have no step of their own since 14 Nov 2026). PERF-002 and PERF-003 measure a release
         # build and refuse this debug one; a shared 2-core runner's timings would measure the runner anyway.
         run: cargo nextest run -p tqa-gateway --run-ignored all --no-fail-fast -E 'not test(/^perf_/)'
       - name: Test the deployment harness failures without Docker
@@ -211,7 +208,10 @@ jobs:
           SQLX_OFFLINE: "true"
           RUSTDOCFLAGS: -D warnings
         run: cargo doc -p tqa-gateway --no-deps
+      # Coverage runs on main only (14 Nov 2026, the owner: a pull request waited 90 minutes): the instrumented rerun of
+      # every contract took 27 of them, and the plain run above already decides a pull request.
       - name: Free the disk for the coverage build
+        if: github.event_name == 'push'
         # The runner had 14 GB left here on 7 Nov and the instrumented build's linker died of it (ld: Bus error). The
         # debug test build goes (its tests are done; the cache saves whatever is rebuilt), and so do the image build
         # layers; the images under test stay (the instrumented contracts run them with --no-build).
@@ -220,6 +220,7 @@ jobs:
           docker builder prune -af > /dev/null
           df -h /
       - name: Report crate coverage
+        if: github.event_name == 'push'
         env:
           SQLX_OFFLINE: "true"
           TQA_DOCKER_TESTS: "1"
