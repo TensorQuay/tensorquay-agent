@@ -12,6 +12,13 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   window manager, placed it about 20 pixels too low, so the menu bar and the tool bar of an application such as
   Mousepad or LibreOffice had no marks and the agent could not click them by mark. The frame is now the window's
   real client area.
+- **A model that can't be reached says so, and a task on it stops waiting (GW-I-320, WEB-U-469).** When a call to a
+  model's server can't connect (the server stopped, or its address is gone), the model menu reads "Not answering
+  right now" on that model and New task starts on another model. A server that stays down for more than 30 seconds
+  is answered for at once, with one real try every 10 seconds, so a task on it fails quickly instead of each try
+  waiting for the connection; a server down only briefly (a restart) is still tried on every call, so a task's own
+  retries reach it when it's back. Before, a stopped model looked available and a message on it showed "Sending…"
+  for 20 seconds before failing.
 - **Deleting a team's lead task with its helpers now removes the helpers' own copies and the team's messages
   (GW-I-108).** Each helper's copy of the lead's files is deleted with the helper's task, whether the helper is
   deleted on its own or with its lead, and the purge removes it within minutes; a copy you started another task in

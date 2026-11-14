@@ -53,13 +53,23 @@ pub(super) async fn send(
     // The route's first-response bound (GW-I-150): a CPU model server on the same machine reads a long prompt for a
     // minute or more before its first byte.
     let first_byte = Duration::from_secs(u64::from(crate::link::first_response_secs(route)));
+    // A server that just couldn't be reached is answered for at once (GW-I-320): a task's retries don't each wait for
+    // the connection again, and the hold is short, so a server that comes back is tried within it.
+    if state.relay.reach.held(&route.name) {
+        return Err(GatewayError::UpstreamUnavailable);
+    }
+    let reach = &state.relay.reach;
     let upstream = crate::io::bounded(first_byte, &state.cancel, async {
-        request
-            .send()
-            .await
-            .map_err(|_| GatewayError::UpstreamUnavailable)
+        request.send().await.map_err(|error| {
+            // Only a failed connection (refused, no such host, connect timeout) marks the route; a slow answer doesn't.
+            if error.is_connect() {
+                reach.unreachable(&route.name);
+            }
+            GatewayError::UpstreamUnavailable
+        })
     })
     .await?;
+    reach.reached(&route.name);
     let status = upstream.status();
     let headers = forwarded(upstream.headers());
     let content_type = headers

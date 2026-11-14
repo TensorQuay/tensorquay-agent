@@ -100,6 +100,11 @@ async fn complete(
     if bytes.len() > state.config.relay.body_bytes {
         return Err(GatewayError::BodyTooLarge);
     }
+    // A server that just couldn't be reached is answered for at once, before the run's records and the limiter
+    // (GW-I-320): the task's retries don't wait again, and nothing is metered for a call that goes nowhere.
+    if state.relay.reach.held(&caller.route.name) {
+        return Err(GatewayError::UpstreamUnavailable);
+    }
     // The run the runtime names, kept only when it is this task's (the run-id contract); a malformed one is refused.
     let run = super::attribution::attributed(
         &state,

@@ -13,6 +13,7 @@ const route = (
   display_name: null,
   description: null,
   verified: null,
+  answering: null,
   context_window: null,
   vision: false,
   native_tools: true,
@@ -90,5 +91,32 @@ describe("WEB-U-322 New task's default skips a route whose check failed", () => 
     ).toBe("a");
     expect(defaultRoute([])).toBe("");
     expect(defaultRoute(undefined)).toBe("");
+  });
+});
+
+describe("WEB-U-469 New task's default skips a model that isn't answering", () => {
+  it("takes the first route that is neither failing its check nor unreachable", () => {
+    expect(
+      defaultRoute([
+        route("stopped", { verified: true, answering: false }),
+        route("b", { answering: null }),
+      ]),
+    ).toBe("b");
+    expect(
+      defaultRoute([
+        route("stopped", { answering: false }),
+        route("failed", { verified: false, answering: true }),
+        route("ok", { answering: true }),
+      ]),
+    ).toBe("ok");
+  });
+
+  it("still takes the first route when none is usable", () => {
+    expect(
+      defaultRoute([
+        route("a", { answering: false }),
+        route("b", { verified: false }),
+      ]),
+    ).toBe("a");
   });
 });
