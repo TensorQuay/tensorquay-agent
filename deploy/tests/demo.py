@@ -60,7 +60,7 @@ def verify_workspace(env):
 
 def verify_catch_up(env, configuration):
     """WEB-E2E-121: the proxy must have held at least one event stream, or the catch-up was never exercised and the
-    spec's pass says nothing. The proxy says so in its log (fixtures/buffering_proxy.py, held_line)."""
+    spec's pass says nothing. The proxy says so in its log (buffering_proxy.py, held_line)."""
     log = compose.command(configuration + ["logs", "--no-color", "proxy"], env, capture=True).stdout
     held = [line for line in log.splitlines() if "buffering proxy: held " in line]
     if not held:

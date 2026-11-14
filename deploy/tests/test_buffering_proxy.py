@@ -3,7 +3,7 @@ import sys
 import unittest
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent / "fixtures"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import buffering_proxy as proxy  # noqa: E402
 
 
