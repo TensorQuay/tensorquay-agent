@@ -16,6 +16,15 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   (`409 has_helpers`), as deleting the lead alone is, and the web app says what to delete first; before, the
   workspace's tasks went in bulk and the team kept running for a deleted lead.
 
+### Known limits
+
+- **A changed Desktop limit applies to desktops that start after the change.** The screenshot and action caps go to
+  a desktop when its task's environment starts, and a desktop already running keeps the caps it started with, as the
+  Limits page says beside each limit. To apply a new cap to a running task, stop the task and start it again.
+- **Under Take over, a key sent within a few milliseconds of a click can be lost** while the desktop's browser moves
+  its focus. Type at a person's pace, or click once more and send the key again. The agent's own actions are not
+  affected: each one waits for the screen to settle first.
+
 ## 17.4.1 (12 November 2026)
 
 A fix release of the web app, the image builds and the install guide, and the system-call library past one

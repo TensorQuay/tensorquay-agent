@@ -24,6 +24,13 @@ use tqa_tools::{
 const NOT_SHOWN: &str =
     "[This screenshot is no longer shown. Take another to see the screen as it is now.]";
 
+/// The text ends with the fixed line, and a newline parts it from the result's own text (a refusal and the line ran
+/// together in a session before 17.0).
+fn parted(text: &str) -> bool {
+    text.strip_suffix(NOT_SHOWN)
+        .is_some_and(|before| before.ends_with('\n'))
+}
+
 /// A `computer` tool whose every screenshot is a distinct marked PNG, `PNG1`, `PNG2`, ..., with its clean copy,
 /// `CLEAN1`, `CLEAN2`, ...
 struct Camera {
@@ -173,7 +180,7 @@ async fn core_u_081_the_latest_three_screenshots_go_on_their_results() -> TestRe
     let ids: Vec<&str> = sent.iter().map(|(id, _, _)| id.as_str()).collect();
     assert_eq!(ids, ["s1", "s2", "s3", "s4"]);
     assert!(sent[0].1.is_empty(), "the oldest isn't sent");
-    assert!(sent[0].2.ends_with(NOT_SHOWN), "{}", sent[0].2);
+    assert!(parted(&sent[0].2), "{}", sent[0].2);
     for (index, (_, images, text)) in sent.iter().enumerate().skip(1) {
         let number = u8::try_from(index + 1)?;
         // Only the latest carries marks; an older picture's mark 7 could name another element than the current e7.
@@ -263,7 +270,7 @@ async fn core_u_081_a_route_without_images_or_a_lost_file_gets_the_fixed_line() 
             images.is_empty(),
             "{id}: no image on a route without images"
         );
-        assert!(text.ends_with(NOT_SHOWN), "{id}: {text}");
+        assert!(parted(&text), "{id}: {text}");
     }
     // Without a store (a lost sandbox's files), every screenshot is the fixed line too.
     let (mut h, _state) = harness(true)?;
@@ -274,7 +281,7 @@ async fn core_u_081_a_route_without_images_or_a_lost_file_gets_the_fixed_line() 
     assert!(
         shots(&last)
             .iter()
-            .all(|(_, images, text)| images.is_empty() && text.ends_with(NOT_SHOWN))
+            .all(|(_, images, text)| images.is_empty() && parted(text))
     );
     Ok(())
 }

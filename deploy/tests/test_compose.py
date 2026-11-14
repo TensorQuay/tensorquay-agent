@@ -544,6 +544,25 @@ class SandboxPoolTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "no free 10.213.X.0/24"):
             compose.sandbox_pool([net(10, 213, 0, 0, prefix=16)], randbelow=lambda n: 0)
 
+    def test_a_base_off_the_default_range_draws_there_and_only_there(self):
+        """A host with a soak running draws its sandboxes anywhere in 10.213.0.0/16, so another stack beside it takes
+        a base of its own (TQA_SANDBOX_POOL_BASE, for example 10.214) and never a 10.213 pool."""
+        used = [net(10, 213, 0, 0, prefix=16), net(10, 214, 7, 0, prefix=24)]
+        for draw in range(256):
+            with self.subTest(draw=draw):
+                chosen = compose.sandbox_pool(used, randbelow=lambda n, d=draw: d % n, base="10.214")
+                self.assertTrue(chosen.startswith("10.214.") and chosen.endswith(".0/24"), chosen)
+                self.assertNotEqual(chosen, net(10, 214, 7, 0, prefix=24))
+        with self.assertRaisesRegex(RuntimeError, "no free 10.214.X.0/24"):
+            compose.sandbox_pool([net(10, 214, 0, 0, prefix=16)], randbelow=lambda n: 0, base="10.214")
+        with self.assertRaisesRegex(ValueError, "base"):
+            compose.sandbox_pool([], randbelow=lambda n: 0, base="10.213.5")
+
+    def test_the_pool_base_comes_from_the_environment(self):
+        self.assertEqual(compose.pool_base({"TQA_SANDBOX_POOL_BASE": "10.214"}), "10.214")
+        self.assertEqual(compose.pool_base({}), "10.213")
+        self.assertEqual(compose.pool_base({"TQA_SANDBOX_POOL_BASE": ""}), "10.213")
+
     def test_the_engines_networks_are_read_from_their_ipam_config(self):
         subnets = [net(10, 213, 41, 0, prefix=29), "fd00::/64", net(172, 18, 0, 0, prefix=16)]
         inspected = json.dumps([{"IPAM": {"Config": [{"Subnet": subnets[0]}]}},
