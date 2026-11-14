@@ -24,8 +24,8 @@ async fn gw_i_042_models_are_authenticated_sorted_and_exactly_projected(
             let response = f.get("/api/v1/models", &cookie).await?;
             assert_eq!(response.status(), 200);
             assert_eq!(response.json::<Value>().await?, json!({"items":[
-                {"name":"alpha","display_name":null,"description":null,"verified":null,"model":"first","protocol":"openai_chat","context_window":32000,"vision":true,"native_tools":true,"reasoning":{"allowed":["low","high"],"default":"low"},"runs_on":{"where":"hosted","provider":null}},
-                {"name":"zeta","display_name":null,"description":null,"verified":null,"model":"second","protocol":"openai_chat","context_window":null,"vision":false,"native_tools":false,"reasoning":null,"runs_on":{"where":"hosted","provider":null}}
+                {"name":"alpha","display_name":null,"description":null,"verified":null,"answering":null,"model":"first","protocol":"openai_chat","context_window":32000,"vision":true,"native_tools":true,"reasoning":{"allowed":["low","high"],"default":"low"},"runs_on":{"where":"hosted","provider":null}},
+                {"name":"zeta","display_name":null,"description":null,"verified":null,"answering":null,"model":"second","protocol":"openai_chat","context_window":null,"vision":false,"native_tools":false,"reasoning":null,"runs_on":{"where":"hosted","provider":null}}
             ]}));
             for route in ["alpha", "zeta", "absent"] {
                 let response = f.action("/api/v1/conversations", &cookie, Some(route), &json!({"title":"Model permission", "model_route":route})).await?;

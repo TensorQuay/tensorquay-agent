@@ -545,6 +545,12 @@
             "null"
           ]
         },
+        "answering": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
         "model": {
           "type": "string"
         },

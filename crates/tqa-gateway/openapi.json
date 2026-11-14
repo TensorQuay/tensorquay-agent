@@ -19629,6 +19629,13 @@
             ],
             "description": "Whether a current route probe passed; null until one is recorded."
           },
+          "answering": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Whether the model server answered the gateway's latest call: false while it can't be reached (New task doesn't start on it), true once a call connected, null before any call since the gateway started. Optional: a gateway before 18.0 leaves it out."
+          },
           "model": {
             "type": "string"
           },

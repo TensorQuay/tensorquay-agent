@@ -14,6 +14,9 @@ pub(crate) struct RouteSummary {
     description: Option<String>,
     /// Whether a current route probe passed; `None` until the route probe (099) records one, or once the route changed.
     verified: Option<bool>,
+    /// Whether the model server answered this gateway's latest call (GW-I-320): `false` while it couldn't be reached,
+    /// `true` once a call connected, `None` before any call since the gateway started.
+    answering: Option<bool>,
     model: String,
     protocol: tqa_llm::Protocol,
     context_window: Option<u32>,
@@ -82,6 +85,7 @@ pub(crate) async fn list(
             display_name: settings.display_names.get(&route.name).cloned(),
             description: settings.descriptions.get(&route.name).cloned(),
             verified: checks.get(&route.name).copied(),
+            answering: state.relay.reach.answering(&route.name),
             model: route.model.clone(),
             protocol: route.protocol,
             context_window: route.limits.context_window,
