@@ -242,9 +242,22 @@ export class ApiClient {
    */
   events(id: string, after: number, signal?: AbortSignal) {
     const query = new URLSearchParams({ after: String(after), limit: "1000" });
+    // Only the page's shape is checked here: each item is a stored frame, checked as the stream's own are when the
+    // store applies it (parseFrame), so a full EventPage validator would add about 4.5 KB to every page's scripts.
     return this.transport.request(
       "events",
-      (value) => parseApi(value, "EventPage"),
+      (value) => {
+        const page = value as { items?: unknown; next_after?: unknown };
+        if (
+          typeof value !== "object" ||
+          value === null ||
+          !Array.isArray(page.items) ||
+          !(page.next_after === null || typeof page.next_after === "number")
+        )
+          // copy-lint: not user copy (internal diagnostic)
+          throw new Error("Expected a page of events");
+        return page as { items: unknown[]; next_after: number | null };
+      },
       { parameters: { id }, query, signal },
     );
   }
