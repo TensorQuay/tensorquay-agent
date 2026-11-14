@@ -217,6 +217,24 @@ def transient(error):
     return isinstance(error, (urllib.error.URLError, OSError, TimeoutError, subprocess.SubprocessError))
 
 
+# A capture dropped while the disk was full may be refused for this long after the free (as the slots' clients allow).
+DISK_RECOVERY_SECONDS = 180
+
+
+def disk_full_window(opened, ended, windows, margin=DISK_RECOVERY_SECONDS):
+    """The soak's disk-full window `[start, end]` (end inf while the disk is still full) that a Desktop task running from
+    `opened` to `ended` (wall-clock seconds) met, within the store's recovery after the free; None when none did."""
+    return next((window for window in windows if window[0] <= ended and opened <= window[1] + margin), None)
+
+
+def dropped_capture(events):
+    """Whether the product recorded a capture it could not keep: a `tool.result` whose evidence reads a phase false
+    (CORE-U-083; the screen store drops what it cannot keep and the action goes on)."""
+    return any(event_kind(item) == "tool.result"
+               and any(kept is False for kept in ((item.get("event") or {}).get("evidence") or {}).values())
+               for item in events)
+
+
 def event_kind(item):
     event = item.get("event") or {}
     return event.get("type", item.get("type"))
@@ -227,11 +245,13 @@ class Lane:
     delete. Times are the soak's seconds since the chaos started."""
     kind = None
 
-    def __init__(self, api, every_seconds, start, log):
+    def __init__(self, api, every_seconds, start, log, disk_windows=lambda: (), wall=time.time):
         self.api, self.every, self.log = api, every_seconds, log
         self.state, self.next_start, self.next_poll = "waiting", start + FIRST_START_SECONDS, start
         self.count, self.records, self.retries = 0, [], 0
         self.conversation, self.started, self.deadline, self.sent = None, None, None, False
+        # The soak's disk-full windows (wall-clock) and the clock that places a conversation among them.
+        self.disk_windows, self.wall, self.opened_at = disk_windows, wall, None
 
     def idle(self):
         return self.state == "waiting"
@@ -274,6 +294,7 @@ class Lane:
         if self.state == "waiting":
             self.conversation = self.api.request("/api/v1/conversations", self.create())["id"]
             self.started, self.deadline, self.state, self.sent = now, now + CONVERSATION_SECONDS, "running", False
+            self.opened_at = self.wall()
             self.log("mix_opened", lane=self.kind, conversation=self.conversation, number=self.count)
         if self.state == "running" and not self.sent:
             # Sent on the next poll again if a stack-wide fault met it.
@@ -360,14 +381,25 @@ class DesktopLane(Lane):
         return "{} {}: look at a page.".format(DESK_PHRASE, self.count)
 
     def ended(self):
-        kinds = [event_kind(item) for page in self.api.stored(self.conversation) for item in page]
+        events = [item for page in self.api.stored(self.conversation) for item in page]
+        kinds = [event_kind(item) for item in events]
         require("run.failed" not in kinds, "Desktop task {} failed".format(self.conversation))
         if "run.completed" not in kinds:
             return None
         pictures = self.api.mix_probe(set())["screens"].get(self.conversation, 0)
-        require(pictures >= 1, "Desktop task {} kept no picture".format(self.conversation))
-        return {"captures": kinds.count("screen.capture"), "pictures": pictures,
-                "tool_calls": kinds.count("tool.start")}
+        record = {"captures": kinds.count("screen.capture"), "pictures": pictures,
+                  "tool_calls": kinds.count("tool.start")}
+        if pictures < 1:
+            # Inside a disk-full fault the screen store drops what it cannot keep and the run goes on, by design
+            # (CORE-U-083): judged, never avoided, and only on the product's own record of a dropped capture (the 24 h
+            # run of 13 Nov 2026 ended on a task opened 3 ms into such a window).
+            window = disk_full_window(self.opened_at, self.wall(), self.disk_windows())
+            require(window is not None, "Desktop task {} kept no picture".format(self.conversation))
+            require(dropped_capture(events), "Desktop task {} kept no picture in a full-disk window, and its events "
+                    "said nothing of a dropped capture".format(self.conversation))
+            record.update(pictures_not_kept="disk full",
+                          disk_full_window=[window[0], None if window[1] == float("inf") else window[1]])
+        return record
 
     def leftovers(self, probe):
         return desktop_leftovers(probe["counts"], probe["sandboxes"], probe["screens"], self.conversation)
@@ -376,8 +408,9 @@ class DesktopLane(Lane):
 class MixRun:
     """The lanes a run asked for, the audit's samples and its end check."""
 
-    def __init__(self, options, api, log, clock=time.monotonic, sleep=time.sleep):
+    def __init__(self, options, api, log, clock=time.monotonic, sleep=time.sleep, disk_windows=lambda: ()):
         self.options, self.api, self.log, self.clock, self.sleep = options, api, log, clock, sleep
+        self.disk_windows = disk_windows
         self.lanes, self.samples, self.next_sample, self.missed_samples = [], 0, 0.0, 0
         self.start_counts = self.high_water = self.sessions = None
         self.thread, self.failure, self.stopping = None, None, threading.Event()
@@ -393,7 +426,8 @@ class MixRun:
         if self.options.teams:
             self.lanes.append(TeamLane(self.api, self.options.teams_every * 60, now, self.log))
         if self.options.desktops:
-            self.lanes.append(DesktopLane(self.api, self.options.desktops_every * 60, now, self.log))
+            self.lanes.append(DesktopLane(self.api, self.options.desktops_every * 60, now, self.log,
+                                          disk_windows=self.disk_windows))
         self.log("mix_started", counts=self.start_counts, max_sessions=self.sessions)
 
     def probe(self):

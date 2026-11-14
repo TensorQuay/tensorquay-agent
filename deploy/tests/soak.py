@@ -210,7 +210,8 @@ class Soak:
         self.journal = None
         self.started, self.ended = None, None
         # Agent teams and Desktop tasks beside the slots (soak_mix), off unless asked.
-        self.mix = soak_mix.MixRun(getattr(options, "mix", soak_mix.MixOptions()), stack, self.log)
+        self.mix = soak_mix.MixRun(getattr(options, "mix", soak_mix.MixOptions()), stack, self.log,
+                                   disk_windows=lambda: self.disk_windows)
         self.draining = False
 
     def record_slow(self, measurement):

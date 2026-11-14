@@ -7,6 +7,10 @@ mod args;
 pub mod cdp;
 pub mod desktop;
 #[cfg(test)]
+mod desktop_frame_tests;
+#[cfg(test)]
+mod desktop_support;
+#[cfg(test)]
 mod desktop_tests;
 pub mod driver;
 pub mod framebuffer;
