@@ -47,7 +47,11 @@ export function useTeam(
     queryFn: async ({ signal }) => {
       const held = cache.getQueryData<TeamMessage[]>(teamMessagesKey(id)) ?? [];
       const after = held.at(-1)?.seq ?? 0;
-      const fresh = await readAfter(id, after, signal);
+      // Only messages past the last one held: a read that overlaps another (a retry and a change at once) or a page
+      // that repeats one never shows a message twice (WEB-U-229).
+      const fresh = (await readAfter(id, after, signal)).filter(
+        (message) => message.seq > after,
+      );
       return fresh.length ? [...held, ...fresh] : held;
     },
     enabled,
