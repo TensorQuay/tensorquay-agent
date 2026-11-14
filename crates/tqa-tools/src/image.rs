@@ -29,6 +29,9 @@ pub enum ImageError {
     /// The file is readable but is not a supported image format.
     #[error("not an image")]
     NotImage,
+    /// An iPhone-style HEIC or HEIF photo: a picture no model reads, which the agent can convert itself.
+    #[error("heic photo")]
+    Heic,
     /// The image is larger than [`MAX_IMAGE_BYTES`].
     #[error("too large")]
     TooLarge,
@@ -169,7 +172,25 @@ fn media_type(file: &mut File) -> Result<ImageMediaType, ImageError> {
         .take(IMAGE_HEADER_BYTES as u64)
         .read_to_end(&mut header)
         .map_err(|_| ImageError::Unreadable)?;
-    ImageMediaType::from_header(&header).ok_or(ImageError::NotImage)
+    ImageMediaType::from_header(&header).ok_or_else(|| {
+        if heif(&header) {
+            ImageError::Heic
+        } else {
+            ImageError::NotImage
+        }
+    })
+}
+
+/// Whether `header` starts an ISO media file of a HEIC or HEIF still picture (its `ftyp` box's major brand).
+fn heif(header: &[u8]) -> bool {
+    header.get(4..8) == Some(b"ftyp".as_slice())
+        && header.get(8..12).is_some_and(|brand| {
+            [
+                b"heic", b"heix", b"hevc", b"heim", b"heis", b"mif1", b"msf1",
+            ]
+            .iter()
+            .any(|known| brand == known.as_slice())
+        })
 }
 
 #[cfg(test)]
