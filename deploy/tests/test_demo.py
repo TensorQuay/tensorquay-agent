@@ -187,6 +187,26 @@ class DemoTests(unittest.TestCase):
         self.assertIn("Only the tests matching TQA_STACK_GREP ran, so the files suite's own check is skipped",
                       output.getvalue())
 
+    def test_the_catch_up_check_needs_the_proxy_to_have_held_a_stream(self):
+        """WEB-E2E-121's own pass proves nothing if the proxy passed everything through: the proxy's log must say it
+        held an event stream, read through Compose with the suite's overlay."""
+        held = "proxy-1  | buffering proxy: held /api/v1/conversations/x/events?stream=1 for 40 s after 2048 bytes\n"
+        calls = []
+
+        def logs(args, env, **kwargs):
+            calls.append(args)
+            return type("Run", (), {"stdout": held})()
+
+        output = io.StringIO()
+        with patch.object(compose, "command", logs), contextlib.redirect_stdout(output):
+            demo.verify_catch_up({"TQA_STACK_SUITE": "catch-up"}, ["docker", "compose", "-f", "catch-up.yml"])
+        self.assertEqual(calls, [["docker", "compose", "-f", "catch-up.yml", "logs", "--no-color", "proxy"]])
+        self.assertIn("held 1 event stream", output.getvalue())
+        with patch.object(compose, "command", lambda *a, **k: type("Run", (), {"stdout": "proxy-1 | started\n"})()):
+            with self.assertRaises(AssertionError) as refused:
+                demo.verify_catch_up({}, ["docker", "compose"])
+        self.assertIn("held no event stream", str(refused.exception))
+
     def test_the_driver_checks_each_suite_through_verify(self):
         source = Path(demo.__file__).read_text()
         self.assertIn("failure = verify(args.suite, checks[args.suite], env)", source)

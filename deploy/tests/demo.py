@@ -58,6 +58,17 @@ def verify_workspace(env):
     print("Host workspace: hello/README.md exists, created and then changed, with the expected contents", flush=True)
 
 
+def verify_catch_up(env, configuration):
+    """WEB-E2E-121: the proxy must have held at least one event stream, or the catch-up was never exercised and the
+    spec's pass says nothing. The proxy says so in its log (fixtures/buffering_proxy.py, held_line)."""
+    log = compose.command(configuration + ["logs", "--no-color", "proxy"], env, capture=True).stdout
+    held = [line for line in log.splitlines() if "buffering proxy: held " in line]
+    if not held:
+        raise AssertionError("The proxy held no event stream: the catch-up suite did not exercise the buffering")
+    print("Buffering proxy: held {} event stream{}; the page caught up meanwhile".format(
+        len(held), "" if len(held) == 1 else "s"), flush=True)
+
+
 def verify_accounts(env):
     """Task 067: the member's token worked with curl before revocation and was refused after it."""
     text = Path(env["TQA_STACK_RESULT"]).read_text()
@@ -218,7 +229,7 @@ def main():
     parser.add_argument("--keep", action="store_true", help="Keep the stack available until Ctrl-C instead of running the browser contract")
     parser.add_argument("--suite", choices=("basic", "agents", "ux", "environment", "queue", "egress", "accounts", "files",
                                                  "workspaces", "channel-members", "models-people", "settings", "task-page",
-                                                 "reply-cut", "key-use", "previews", "titles", "desktop"),
+                                                 "reply-cut", "key-use", "previews", "titles", "desktop", "catch-up"),
                         default="basic",
                         help="Select the full-stack contract")
     parser.add_argument("--backend", choices=("docker", "firecracker"), default="docker",
@@ -234,7 +245,7 @@ def main():
     env.pop("COMPOSE_PROJECT_NAME", None)
     host = "127.0.0.1" if args.suite == "basic" else demo_ux.lan_host(env)
     configuration = COMPOSE + (["-f", "deploy/compose/{}.yml".format(args.suite)] if args.suite in ("agents", "environment", "queue", "egress", "files", "workspaces", "task-page", "previews",
-                                                                                                                "titles", "desktop")
+                                                                                                                "titles", "desktop", "catch-up")
                              else [])
     if args.backend == "firecracker":
         # First, so that tearing down after any failure can still interpolate the overlay.
@@ -358,6 +369,7 @@ def main():
                           "task-page": lambda env: verify_task_page(env, restarter),
                           "previews": lambda env: demo_previews.verify_result(env, witness),
                           "titles": demo_titles.verify_result,
+                          "catch-up": lambda env: verify_catch_up(env, configuration),
                           "agents": lambda env: demo_agents.verify_result(env, restarter),
                           "desktop": lambda env: demo_desktop.verify_result(env, restarter, pictures),
                           "basic": lambda env: (verify_workspace(env), demo_run_ids.verify(env))}

@@ -236,6 +236,18 @@ export class ApiClient {
       { parameters: { id }, query, signal },
     );
   }
+  /**
+   * The task's stored events after `after`, a page at a time without the stream (WEB-U-468): what a page reads when
+   * its live stream is held back, the same route the stream serves.
+   */
+  events(id: string, after: number, signal?: AbortSignal) {
+    const query = new URLSearchParams({ after: String(after), limit: "1000" });
+    return this.transport.request(
+      "events",
+      (value) => parseApi(value, "EventPage"),
+      { parameters: { id }, query, signal },
+    );
+  }
   /** One folder of the task's workspace; `path` "" is the root. */
   files(id: string, path: string, after?: string, signal?: AbortSignal) {
     const query = new URLSearchParams({ path });

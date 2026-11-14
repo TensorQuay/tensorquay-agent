@@ -64,9 +64,15 @@ function Choices({
     request: Action<Conversation>;
   } | null>(null);
   const t = useT();
+  // The record beside the transcript: a run the record says ended isn't working, however a held-back stream reads
+  // (WEB-U-414, WEB-U-468).
   const busy =
     sending ||
-    isWorking(transcript) ||
+    isWorking(
+      transcript,
+      current.data.run_status,
+      current.data.last_activity_at,
+    ) ||
     transcript.run.status === "queued" ||
     transcript.sandbox === "queued" ||
     transcript.sandbox === "creating";

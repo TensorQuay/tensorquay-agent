@@ -118,7 +118,11 @@ export default defineConfig({
                                                               .TQA_STACK_SUITE ===
                                                             "screen"
                                                           ? "screen-stack.spec.ts"
-                                                          : "full-stack.spec.ts",
+                                                          : process.env
+                                                                .TQA_STACK_SUITE ===
+                                                              "catch-up"
+                                                            ? "catch-up-stack.spec.ts"
+                                                            : "full-stack.spec.ts",
   forbidOnly: Boolean(process.env.CI),
   retries: 0,
   // Baselines are never rewritten by a check run; TQA_STACK_UPDATE_SNAPSHOTS=1 rewrites the ones a suite reads, for a

@@ -22,6 +22,11 @@ import type { Transcript } from "./types";
 import { useComposerSize } from "./use-composer-size";
 
 type Props = {
+  /**
+   * The task's record says the run ended while the stream still shows it going (WEB-U-414, WEB-U-468): the box is
+   * a Send, never a Stop, and the stream catches up behind it.
+   */
+  ended?: boolean;
   run: Transcript["run"];
   sandbox: SandboxState;
   /** What a queued task waits for: a desktop wait says when one frees. */
@@ -95,6 +100,7 @@ export function Composer({
   held,
   notice = null,
   keyHint = false,
+  ended = false,
 }: Props) {
   const [localDraft, setLocalDraft] = useState("");
   const draft = value ?? localDraft;
@@ -108,12 +114,15 @@ export function Composer({
   const helpId = useId();
   const noticeId = useId();
   const t = useT();
-  const active = !sending && run.status === "running" && run.id !== null;
+  const active =
+    !sending && run.status === "running" && run.id !== null && !ended;
   // With held messages, a working agent doesn't lock the box: the gateway holds a message until the run ends.
   const holds = Boolean(held) && active;
   const reason =
     disabledReason ??
-    (holds ? null : composerReason(run, sandbox, sending, t, queue, teamWait));
+    (holds || ended
+      ? null
+      : composerReason(run, sandbox, sending, t, queue, teamWait));
   const attachable = attachments && !sending && reason === null;
   const drop = useDrop(attachable ? attachments.add : null);
   // A screenshot or a file pasted anywhere in the card attaches as a dropped one does; text pastes as text.
