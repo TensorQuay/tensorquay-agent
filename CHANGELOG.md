@@ -7,6 +7,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **The agent can look at a picture in its workspace (CORE-U-090, TOOL-U-143).** When the agent reads a picture
+  file with `read_file` (PNG, JPEG, GIF or WebP, recognised by its content), a model that reads pictures is shown
+  the picture itself: the latest three read in a run, within the request's room. A model that doesn't read pictures
+  is told so in plain words. Before, the agent got only "[binary file]", so it could convert a photo to JPEG and
+  still tell the person it couldn't see it. iPhone HEIC photos still need converting first.
 - **Desktop menus and tool bars at the top of a window are marked again.** Since 17.1, an element whose box lay
   outside the focused window's frame got no mark; the frame's position came from a tool that, under the desktop's
   window manager, placed it about 20 pixels too low, so the menu bar and the tool bar of an application such as

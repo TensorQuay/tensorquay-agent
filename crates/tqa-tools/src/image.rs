@@ -111,6 +111,58 @@ fn open(
     Ok((file, opened.len()))
 }
 
+/// Reads a picture anywhere in the workspace that the agent read with `read_file` (TOOL-U-143): `path` is relative to
+/// the workspace root, each directory is opened with `O_NOFOLLOW` from the root down and the file with
+/// `O_NOFOLLOW | O_NONBLOCK`, so no link leads out; then the same format and size rules as an attached image.
+///
+/// # Errors
+/// `Unreadable` for a path that climbs, is absolute, names a link, a missing or non-regular file; `NotImage` or
+/// `TooLarge` as for an attachment.
+pub fn read_workspace_image(
+    workspace: &WorkspaceRoot,
+    path: &str,
+) -> Result<ImageData, ImageError> {
+    let parts: Vec<&str> = path
+        .split('/')
+        .filter(|part| !part.is_empty() && *part != ".")
+        .collect();
+    if path.starts_with('/') || parts.is_empty() || parts.contains(&"..") {
+        return Err(ImageError::Unreadable);
+    }
+    let directory = OFlag::O_RDONLY | OFlag::O_DIRECTORY | OFlag::O_CLOEXEC;
+    let mut dir = fcntl::open(workspace.path(), directory, Mode::empty())
+        .map_err(|_| ImageError::Unreadable)?;
+    let (name, folders) = parts.split_last().ok_or(ImageError::Unreadable)?;
+    for folder in folders {
+        dir = fcntl::openat(&dir, *folder, directory | OFlag::O_NOFOLLOW, Mode::empty())
+            .map_err(|_| ImageError::Unreadable)?;
+    }
+    let flags = OFlag::O_RDONLY | OFlag::O_NOFOLLOW | OFlag::O_NONBLOCK | OFlag::O_CLOEXEC;
+    let mut file = File::from(
+        fcntl::openat(&dir, *name, flags, Mode::empty()).map_err(|_| ImageError::Unreadable)?,
+    );
+    let size = file.metadata().map_err(|_| ImageError::Unreadable)?;
+    if !size.is_file() {
+        return Err(ImageError::Unreadable);
+    }
+    let media_type = media_type(&mut file)?;
+    if size.len() > MAX_IMAGE_BYTES as u64 {
+        return Err(ImageError::TooLarge);
+    }
+    let mut bytes = Vec::new();
+    file.rewind()
+        .and_then(|()| {
+            file.by_ref()
+                .take(MAX_IMAGE_BYTES as u64 + 1)
+                .read_to_end(&mut bytes)
+        })
+        .map_err(|_| ImageError::Unreadable)?;
+    if bytes.len() > MAX_IMAGE_BYTES {
+        return Err(ImageError::TooLarge);
+    }
+    Ok(ImageData { media_type, bytes })
+}
+
 fn media_type(file: &mut File) -> Result<ImageMediaType, ImageError> {
     let mut header = Vec::with_capacity(IMAGE_HEADER_BYTES);
     file.by_ref()
@@ -124,6 +176,54 @@ fn media_type(file: &mut File) -> Result<ImageMediaType, ImageError> {
 mod tests {
     use super::*;
     use std::os::unix::fs::symlink;
+
+    // TEST: TOOL-U-143
+    #[test]
+    fn tool_u_143_a_picture_anywhere_in_the_workspace_is_read_and_nothing_leads_out()
+    -> Result<(), Box<dyn std::error::Error>> {
+        let workspace = tempfile::tempdir()?;
+        let outside = tempfile::tempdir()?;
+        std::fs::create_dir_all(workspace.path().join("site/img"))?;
+        std::fs::write(
+            workspace.path().join("site/img/a.png"),
+            b"\x89PNG\r\n\x1a\nINSIDE",
+        )?;
+        std::fs::write(workspace.path().join("notes.txt"), b"plain words")?;
+        std::fs::write(outside.path().join("b.png"), b"\x89PNG\r\n\x1a\nOUTSIDE")?;
+        symlink(outside.path(), workspace.path().join("out"))?;
+        symlink(
+            outside.path().join("b.png"),
+            workspace.path().join("site/link.png"),
+        )?;
+        let root = WorkspaceRoot::open(workspace.path()).map_err(|error| error.to_string())?;
+        let image = read_workspace_image(&root, "site/img/a.png")?;
+        assert_eq!(image.media_type, ImageMediaType::Png);
+        assert!(image.bytes.ends_with(b"INSIDE"));
+        assert_eq!(
+            read_workspace_image(&root, "./site/img/a.png")?.bytes,
+            image.bytes
+        );
+        for path in [
+            "out/b.png",
+            "site/link.png",
+            "../b.png",
+            "/etc/hostname",
+            "site/img",
+            "",
+            "missing.png",
+        ] {
+            assert_eq!(
+                read_workspace_image(&root, path),
+                Err(ImageError::Unreadable),
+                "{path}"
+            );
+        }
+        assert_eq!(
+            read_workspace_image(&root, "notes.txt"),
+            Err(ImageError::NotImage)
+        );
+        Ok(())
+    }
 
     #[test]
     fn tool_u_021_uploads_swapped_for_a_symlink_after_the_check_is_never_followed()
