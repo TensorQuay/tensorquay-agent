@@ -232,7 +232,7 @@ impl SandboxManager {
                 tracing::warn!(conversation_id = %id, code = error.code(),
                     "the old sandbox still could not be removed; nothing new starts beside it");
                 let routes = self.fail_actions(id, &error).await?;
-                self.report_failure(id, &routes, &error)
+                self.report_failure(id, &routes, &error).await
             }
         }
     }
@@ -437,7 +437,7 @@ impl SandboxManager {
         self.mark_closing(id, None).await?;
         let routes = self.fail_actions(id, cause).await?;
         // Report before cleanup, so a failing cleanup can never hide the failure from the user.
-        self.report_failure(id, &routes, cause)?;
+        self.report_failure(id, &routes, cause).await?;
         self.retire(id, slot, super::Teardown::StartFailed).await
     }
 
@@ -454,8 +454,9 @@ impl SandboxManager {
         }).await
     }
 
-    /// Logs one WARN per failed action and tells every open stream, with a bounded, secret-free cause.
-    pub(super) fn report_failure(
+    /// Logs one WARN per failed action and tells every open stream, with a bounded, secret-free cause; then the queue,
+    /// so the message the failure dropped is seen as such (GW-I-322), live and after a reload alike.
+    pub(super) async fn report_failure(
         &self,
         id: &ConversationId,
         routes: &[String],
@@ -477,7 +478,16 @@ impl SandboxManager {
             *retryable = true;
         }
         self.services.events.control(id, notice)?;
-        self.state_notice(id, tqa_types::SandboxState::Failed)
+        self.state_notice(id, tqa_types::SandboxState::Failed)?;
+        if !routes.is_empty() {
+            let told =
+                crate::actions::held::publish(&self.services.pool, &self.services.events, id, None)
+                    .await;
+            if let Err(error) = told {
+                tracing::warn!(conversation_id = %id, code = error.code(), "the dropped message could not be told to the task's streams");
+            }
+        }
+        Ok(())
     }
 }
 

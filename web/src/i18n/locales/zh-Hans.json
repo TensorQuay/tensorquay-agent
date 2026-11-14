@@ -540,6 +540,7 @@
     "composer.queuedSendHandBack": "你交还桌面后发送：{text}",
     "composer.queuedSendByHandBack": "来自 {author}，桌面交还后发送：{text}",
     "composer.droppedFailed": "未发送，因为运行失败：{text}",
+    "composer.droppedNotStarted": "未发送，因为环境无法启动：{text}",
     "composer.droppedStopped": "未发送，因为运行已停止：{text}",
     "composer.sendAgain": "再次发送",
     "composer.dismiss": "忽略",
