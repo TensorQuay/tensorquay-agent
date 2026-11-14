@@ -19,6 +19,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   waiting for the connection; a server down only briefly (a restart) is still tried on every call, so a task's own
   retries reach it when it's back. Before, a stopped model looked available and a message on it showed "Sending…"
   for 20 seconds before failing.
+- **A task's page catches up when its live updates are held back.** Through a proxy that buffers the event stream,
+  the task's header could read Done while the transcript stayed on "Working…" with a Stop button, and nothing let
+  you send. The page now notices a run the task's record says has ended, or a stream that never opens, reads the
+  missing events itself and reopens the stream from where it got to; the Send button follows the record, so you can
+  write while the page catches up. Silence alone changes nothing: a long quiet step stays a working run.
 - **Deleting a team's lead task with its helpers now removes the helpers' own copies and the team's messages
   (GW-I-108).** Each helper's copy of the lead's files is deleted with the helper's task, whether the helper is
   deleted on its own or with its lead, and the purge removes it within minutes; a copy you started another task in
