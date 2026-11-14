@@ -17,7 +17,7 @@ use super::{
         Source,
     },
     framebuffer::Framebuffer,
-    x11::{Runner, XDOTOOL, XDo},
+    x11::{Runner, XDOTOOL, XDo, XWININFO},
 };
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;
@@ -31,8 +31,10 @@ struct Display {
     commands: StdMutex<Vec<String>>,
     pointer: StdMutex<(i32, i32)>,
     blind: bool,
-    /// The focused window's frame, for `getwindowgeometry`; refused when `None`.
+    /// The focused window's frame as xdotool's `getwindowgeometry` reports it; refused when `None`.
     frame: Option<(i32, i32, u32, u32)>,
+    /// The window's client area as xwininfo reports it (absolute origin, size); `frame` again when `None`.
+    client: Option<(i32, i32, u32, u32)>,
 }
 
 impl Display {
@@ -45,6 +47,7 @@ impl Display {
             pointer: StdMutex::new((640, 400)),
             blind: false,
             frame: None,
+            client: None,
         })
     }
 
@@ -58,6 +61,28 @@ impl Display {
             pointer: StdMutex::new((640, 400)),
             blind: false,
             frame: Some(frame),
+            client: None,
+        })
+    }
+
+    /// A focused window under a window manager: xdotool reports `frame`, xwininfo the client area `client` (the
+    /// window's real place on the screen).
+    fn managed(
+        window: &str,
+        pid: u32,
+        title: &str,
+        frame: (i32, i32, u32, u32),
+        client: (i32, i32, u32, u32),
+    ) -> Arc<Self> {
+        Arc::new(Self {
+            window: window.into(),
+            pid: Some(pid),
+            title: title.into(),
+            commands: StdMutex::new(Vec::new()),
+            pointer: StdMutex::new((640, 400)),
+            blind: false,
+            frame: Some(frame),
+            client: Some(client),
         })
     }
 
@@ -71,6 +96,7 @@ impl Display {
             pointer: StdMutex::new((640, 400)),
             blind: true,
             frame: None,
+            client: None,
         })
     }
 
@@ -85,6 +111,20 @@ impl Display {
 #[async_trait]
 impl Runner for Display {
     async fn run(&self, program: &str, args: &[String]) -> Result<String, DriverError> {
+        if program == XWININFO {
+            // `xwininfo -id W`, as x11-utils prints it: the absolute client origin, the offset inside the frame.
+            assert_eq!(args.first().map(String::as_str), Some("-id"));
+            return self
+                .client
+                .or(self.frame)
+                .map(|(x, y, width, height)| {
+                    format!(
+                        "\nxwininfo: Window id: {} \"Mousepad\"\n\n  Absolute upper-left X:  {x}\n  Absolute upper-left Y:  {y}\n  Relative upper-left X:  1\n  Relative upper-left Y:  20\n  Width: {width}\n  Height: {height}\n  Depth: 24\n",
+                        self.window
+                    )
+                })
+                .ok_or_else(|| DriverError::Unavailable("no geometry".into()));
+        }
         assert_eq!(program, XDOTOOL);
         match args.first().map(String::as_str) {
             Some("getactivewindow") => Ok(format!("{}\n", self.window)),
@@ -951,6 +991,55 @@ async fn tool_u_139_a_tree_box_outside_its_window_draws_no_mark() -> TestResult 
             (":1.5/view", false)
         ],
         "every element stays listed (its own action still works); only a box inside the window is drawn"
+    );
+    Ok(())
+}
+
+// TEST: TOOL-U-142
+#[tokio::test]
+async fn tool_u_142_a_menu_at_the_top_of_a_managed_window_keeps_its_box() -> TestResult {
+    // Under the Desktop's window manager xdotool reports a window at its frame's origin plus its inner offset: Mousepad's
+    // client area at (320, 167) read as (321, 187) (14 Nov 2026, the desktop probe: "menu File has no box"). The
+    // frame rule (TOOL-U-139) then cut every element in the top 20 px, the menu bar and the tool bar. The frame is the
+    // window's real client area, so a top-edge menu keeps its box and a box far outside the window still loses it.
+    let display = Display::managed(
+        "16777219",
+        311,
+        "Mousepad",
+        (321, 187, 640, 480),
+        (320, 167, 640, 480),
+    );
+    let placed = |role: &str, handle: &str, extents| Node {
+        extents: Some(extents),
+        ..node(role, handle, &["sensitive"], None, handle)
+    };
+    let tree = Tree {
+        window: Some(Window {
+            handle: ":1.5/frame".into(),
+            title: "Mousepad".into(),
+            nodes: vec![
+                placed("menu", ":1.5/file", (328, 169, 44, 22)),
+                placed("push button", ":1.5/save", (340, 200, 32, 32)),
+                placed("push button", ":1.5/stray", (0, 12, 32, 32)),
+            ],
+        }),
+        ..Tree::default()
+    };
+    let (desktop, _) = desktop(&display, tree, None);
+    let snapshot = desktop.snapshot().await?;
+    let boxes: Vec<(&str, bool)> = snapshot
+        .elements
+        .iter()
+        .map(|element| (element.name.as_str(), element.rect.is_some()))
+        .collect();
+    assert_eq!(
+        boxes,
+        [
+            (":1.5/file", true),
+            (":1.5/save", true),
+            (":1.5/stray", false)
+        ],
+        "the menu at the window's top edge keeps its box; a box in the screen's corner still loses it"
     );
     Ok(())
 }

@@ -432,6 +432,67 @@ class LaneTests(unittest.TestCase):
         self.assertEqual(lane.records[0]["captures"], 2)
         self.assertEqual(lane.records[0]["pictures"], 2)
 
+    def full_disk_lane(self, windows, wall=1005.0):
+        """A Desktop lane opened at wall-clock `wall` while the soak's disk-full windows read `windows`."""
+        lane, api = self.lane("desktop")
+        lane.disk_windows, lane.wall = (lambda: windows), (lambda: wall)
+        self.drive(lane, [60])
+        return lane, api
+
+    def test_a_desktop_task_in_a_full_disk_window_may_keep_no_picture_when_the_product_said_so(self):
+        # The screen store drops a capture it cannot keep and the run goes on (CORE-U-083); the result says so.
+        lane, api = self.full_disk_lane([[1000.0, float("inf")]])
+        api.events = [{"seq": 1, "event": {"type": "tool.start"}},
+                      {"seq": 2, "event": {"type": "tool.result", "evidence": {"before": True, "after": False}}},
+                      {"seq": 3, "event": {"type": "run.completed"}}]
+        self.drive(lane, [70])
+        self.assertEqual(api.deleted, ["/api/v1/conversations/desk-1"])
+        self.drive(lane, [80])
+        self.assertTrue(lane.idle(), "it settles as any Desktop task does")
+        record = lane.records[0]
+        self.assertEqual((record["pictures"], record["captures"], record["tool_calls"]), (0, 0, 1))
+        self.assertEqual(record["pictures_not_kept"], "disk full")
+        self.assertEqual(record["disk_full_window"], [1000.0, None])
+        self.assertEqual(record["conversation"], DESK)
+
+    def test_a_full_disk_window_that_closed_is_still_the_window_within_its_recovery(self):
+        lane, api = self.full_disk_lane([[800.0, 900.0]], wall=900.0 + soak_mix.DISK_RECOVERY_SECONDS)
+        api.events = [{"seq": 1, "event": {"type": "tool.result", "evidence": {"after": False}}},
+                      {"seq": 2, "event": {"type": "run.completed"}}]
+        self.drive(lane, [70])
+        self.assertEqual(lane.record["disk_full_window"], [800.0, 900.0])
+
+    def test_no_picture_outside_a_full_disk_window_still_fails_the_run(self):
+        for windows in ([], [[100.0, 200.0]]):
+            lane, api = self.full_disk_lane(windows)
+            api.events = [{"seq": 1, "event": {"type": "tool.result", "evidence": {"after": False}}},
+                          {"seq": 2, "event": {"type": "run.completed"}}]
+            with self.assertRaisesRegex(AuditError, "kept no picture"):
+                self.drive(lane, [70])
+
+    def test_no_picture_in_a_full_disk_window_without_the_products_record_fails_the_run(self):
+        # The product must have said so: a result whose evidence reads all kept, or none, is no dropped capture.
+        for events in ([{"seq": 1, "event": {"type": "run.completed"}}],
+                       [{"seq": 1, "event": {"type": "tool.result", "evidence": {"before": True, "after": True}}},
+                        {"seq": 2, "event": {"type": "run.completed"}}]):
+            lane, api = self.full_disk_lane([[1000.0, float("inf")]])
+            api.events = events
+            with self.assertRaisesRegex(AuditError, "kept no picture.*said nothing of a dropped capture"):
+                self.drive(lane, [70])
+
+    def test_pictures_kept_in_a_full_disk_window_are_an_ordinary_record(self):
+        lane, api = self.full_disk_lane([[1000.0, float("inf")]])
+        api.events = [{"seq": 1, "event": {"type": "screen.capture"}}, {"seq": 2, "event": {"type": "run.completed"}}]
+        api.probe["screens"] = {DESK: 1}
+        self.drive(lane, [70])
+        self.assertNotIn("pictures_not_kept", lane.record)
+
+    def test_the_window_of_the_13_november_run(self):
+        # Desktop task 71 opened 3 ms after a 105 s disk_full fault started and ended 20 s later, inside it.
+        windows = [[1794592702.9, 1794592737.1], [1794606860.8778, float("inf")]]
+        self.assertEqual(soak_mix.disk_full_window(1794606860.8805, 1794606881.0, windows), windows[1])
+        self.assertIsNone(soak_mix.disk_full_window(1794600000.0, 1794600020.0, windows))
+
     def test_a_desktop_task_that_fails_or_keeps_no_picture_fails_the_run(self):
         lane, api = self.lane("desktop")
         self.drive(lane, [60])
