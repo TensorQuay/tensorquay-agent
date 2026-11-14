@@ -526,6 +526,12 @@ describe("WEB-U-229 a team log that can't be read", () => {
     expect(
       await screen.findByText("To researcher: Collect the Q3 figures."),
     ).toBeVisible();
+    // Read twice (Try again's read and the change's) and shown once: the second read's repeat is dropped. A loaded CI
+    // runner showed it twice (14 Nov 2026).
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(
+      screen.getAllByText("To researcher: Collect the Q3 figures."),
+    ).toHaveLength(1);
   });
 });
 
