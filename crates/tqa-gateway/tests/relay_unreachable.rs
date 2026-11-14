@@ -1,4 +1,5 @@
 //! GW-I-320: a model that can't be reached says so in the model list, and the next calls fail at once.
+//! A server down only briefly (a restart) is still tried on every call, so a task's retries can reach it again.
 //! The owner's case (13 Nov 2026): a local model server was stopped; New task still offered it as if it worked, and
 //! each of the task's three tries waited for the connection before failing, so the message sat on "Sending…".
 
@@ -9,7 +10,6 @@ use secrecy::ExposeSecret;
 use serde_json::{Value, json};
 use sqlx::PgPool;
 use std::net::Ipv4Addr;
-use std::time::{Duration, Instant};
 use support::TestResult;
 
 /// The fixture's task route `local`, to a port nothing listens on, beside one that is never called.
@@ -48,7 +48,7 @@ fn answering(listed: &Value) -> Vec<(String, Value)> {
 // TEST: GW-I-320
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
-async fn gw_i_320_a_model_that_cant_be_reached_says_so_and_the_next_calls_fail_at_once(
+async fn gw_i_320_a_model_that_cant_be_reached_says_so_and_stays_marked_while_down(
     pool: PgPool,
 ) -> TestResult {
     let port = closed_port()?;
@@ -89,15 +89,15 @@ async fn gw_i_320_a_model_that_cant_be_reached_says_so_and_the_next_calls_fail_a
             "only the route that failed is marked"
         );
 
-        // The task's next tries fail at once instead of waiting for the connection again.
-        let started = Instant::now();
+        // Within the grace a server may be restarting: the task's retries still try it (and still fail here), and the
+        // route stays marked. Answering at once after the grace is the reach module's unit test (an injected clock).
         for _ in 0..2 {
             assert_eq!(call().await?.status(), 502);
         }
-        assert!(
-            started.elapsed() < Duration::from_millis(500),
-            "the retries waited {:?}",
-            started.elapsed()
+        let listed = f.get("/api/v1/models", &cookie).await?.json::<Value>().await?;
+        assert_eq!(
+            answering(&listed),
+            [("local".to_owned(), json!(false)), ("other".to_owned(), Value::Null)]
         );
         Ok(())
     })
@@ -108,8 +108,8 @@ async fn gw_i_320_a_model_that_cant_be_reached_says_so_and_the_next_calls_fail_a
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
 async fn gw_i_320_a_model_that_answers_again_is_no_longer_marked(pool: PgPool) -> TestResult {
-    // The port is closed for the first call, then a server listens on it: after the short hold the relay tries again,
-    // reaches it, and the mark goes.
+    // The port is closed for the first call, then a server listens on it: the next call reaches it at once, and the
+    // mark goes.
     let port = closed_port()?;
     support::run_configured(pool, Some(registry(port)?), "", async |f| {
         let (owner, cookie) = f.admin().await?;
@@ -151,8 +151,7 @@ async fn gw_i_320_a_model_that_answers_again_is_no_longer_marked(pool: PgPool) -
             }
         });
 
-        // Within the hold the relay doesn't try; after it, the next call reaches the server.
-        tokio::time::sleep(tqa_gateway::UNREACHABLE_HOLD + Duration::from_millis(200)).await;
+        // A server back within the grace (a restart) is reached by the very next call.
         assert_eq!(call().await?.status(), 200);
         let listed = f.get("/api/v1/models", &cookie).await?.json::<Value>().await?;
         assert_eq!(

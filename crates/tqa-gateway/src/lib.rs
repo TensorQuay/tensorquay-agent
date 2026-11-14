@@ -74,7 +74,7 @@ pub use host_ca::rotate as rotate_host_ca;
 pub use link::RuntimeHeartbeat;
 pub use manager::{IdleClock, SandboxManager};
 pub use purge::Cycle;
-pub use relay::UNREACHABLE_HOLD;
+pub use relay::{UNREACHABLE_GRACE, UNREACHABLE_HOLD};
 pub use routes::registered_routes;
 pub use runtime_tokens::{ReservationId, RuntimeTokens, SandboxId};
 pub use secrets::{

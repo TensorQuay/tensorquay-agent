@@ -63,7 +63,7 @@ pub(crate) use endpoint::{chat, messages, models, responses};
 pub(crate) use models_api::{LIST_TIMEOUT as MODELS_LIST_TIMEOUT, models as route_models};
 pub(crate) use probe::local_route;
 pub(crate) use probe_api::{probe as route_probe, request_ceiling as probe_request_ceiling};
-pub use reach::UNREACHABLE_HOLD;
+pub use reach::{UNREACHABLE_GRACE, UNREACHABLE_HOLD};
 
 pub(crate) struct Relay {
     client: reqwest::Client,
