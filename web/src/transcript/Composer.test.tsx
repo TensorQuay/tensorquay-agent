@@ -357,6 +357,60 @@ describe("WEB-U-079 send after this", () => {
     ).toBeNull();
   });
 
+  // WEB-U-471: a first start that failed drops the message with the start's reason (GW-I-322); the composer says so
+  // in its own words and offers Send again, as for a run that failed.
+  it("says when the environment couldn't start for a dropped message", () => {
+    const onSendAgain = vi.fn();
+    const notStarted = message(
+      "5",
+      "Start the work.",
+      "dropped",
+      me,
+      "sandbox_failed",
+    );
+    render(
+      <Composer
+        {...defaults}
+        held={held({
+          dropped: [
+            notStarted,
+            message(
+              "6",
+              "Open the file.",
+              "dropped",
+              other,
+              "runtime_start_failed",
+            ),
+            message(
+              "7",
+              "Ask the model.",
+              "dropped",
+              other,
+              "decision_engine_unavailable",
+            ),
+          ],
+          onSendAgain,
+        })}
+      />,
+    );
+    const items = screen.getAllByRole("listitem");
+    expect(items[0]).toHaveTextContent(
+      "Not sent, because the environment couldn't start: Start the work.",
+    );
+    expect(items[1]).toHaveTextContent(
+      "Not sent, because the environment couldn't start: Open the file.",
+    );
+    expect(items[2]).toHaveTextContent(
+      "Not sent, because the environment couldn't start: Ask the model.",
+    );
+    fireEvent.click(
+      within(items[0] as HTMLElement).getByRole("button", {
+        name: "Send again",
+      }),
+    );
+    expect(onSendAgain).toHaveBeenCalledExactlyOnceWith(notStarted);
+  });
+
   it("says when a Cancel lost the race to the turn going out", () => {
     render(
       <Composer

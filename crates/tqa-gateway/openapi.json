@@ -2275,7 +2275,7 @@
             "personalToken": []
           }
         ],
-        "description": "Oldest first: held (still waiting), dropped (the run failed or was stopped; reason) and sent (sent_at), the last two for the idempotency retention. Readers of the task. Clients learn of each change through the unsequenced message.queue stream frame."
+        "description": "Oldest first: held (still waiting), dropped (the run failed or was stopped, or the task's environment never started for the message; reason) and sent (sent_at), the last two for the idempotency retention. Readers of the task. Clients learn of each change through the unsequenced message.queue stream frame, a failed start's drop included."
       }
     },
     "/api/v1/conversations/{id}/messages/queued/{message_id}": {
@@ -2423,7 +2423,7 @@
             "personalToken": []
           }
         ],
-        "description": "Only the message's author or the task's owner; 409 message_sent once it went out; 409 team_turn for an agent team's wake (team_wake) or a member's first turn (lead_brief), which no one may cancel."
+        "description": "Cancels a held message or one waiting for a slot, or dismisses a dropped one (a run's drop or a failed start's). Only the message's author or the task's owner; 409 message_sent once it went out; 409 team_turn for an agent team's wake (team_wake) or a member's first turn (lead_brief), which no one may cancel."
       }
     },
     "/api/v1/conversations/{id}/runs/{run_id}/cancel": {
@@ -25396,14 +25396,17 @@
               "dropped",
               "sent"
             ],
-            "description": "waiting_for_slot: a message not behind a run that has not gone out yet (the task waits for a slot or its sandbox is starting); it can be cancelled like a held one."
+            "description": "waiting_for_slot: a message not behind a run that has not gone out yet (the task waits for a slot or its sandbox is starting); it can be cancelled like a held one. dropped: a message held behind a run that failed or was stopped, or one whose environment never started (reason says which), listed held or not, so a client that reloads still shows it with Send again."
           },
           "reason": {
             "enum": [
               "run_failed",
-              "run_cancelled"
+              "run_cancelled",
+              "sandbox_failed",
+              "runtime_start_failed",
+              "decision_engine_unavailable"
             ],
-            "description": "Why a dropped message was dropped."
+            "description": "Why a dropped message was dropped: the run it waited behind failed or was stopped, or the task's environment never started for it (the sandbox could not be created, the runtime exited before it registered, or the task's decision engine is gone); a start that failed is retryable by sending the message again."
           },
           "sent_at": {
             "type": "string",

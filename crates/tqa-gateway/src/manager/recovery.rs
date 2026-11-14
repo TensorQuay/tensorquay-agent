@@ -425,7 +425,7 @@ impl SandboxManager {
         };
         let routes = self.fail_actions(id, &cause).await?;
         if !routes.is_empty() {
-            self.report_failure(id, &routes, &cause)?;
+            self.report_failure(id, &routes, &cause).await?;
         }
         self.forget(id).await
     }

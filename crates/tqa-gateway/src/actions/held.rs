@@ -105,7 +105,18 @@ pub(crate) fn join(parts: &[Part]) -> (usize, ClientFrame) {
     )
 }
 
-/// Tells the task's open streams which messages wait and which were dropped; `sent` names a turn that just went out.
+/// Whether a failed action's error says its environment never started for it (GW-I-322): the message is then listed
+/// as dropped with that reason, held or not, so a page that reloads still shows "Not sent, because the environment
+/// couldn't start" with Send again, and a client that polls the list can send it again.
+pub(crate) fn start_failed(error: Option<&str>) -> bool {
+    matches!(
+        error,
+        Some("sandbox_failed" | "runtime_start_failed" | "decision_engine_unavailable")
+    )
+}
+
+/// Tells the task's open streams which messages wait and which were dropped (held behind a run that failed or was
+/// stopped, or whose environment never started); `sent` names a turn that just went out.
 ///
 /// # Errors
 /// A store failure, or a stream that can't take the notice.
@@ -118,7 +129,8 @@ pub(crate) async fn publish(
     let conversation = conversations::uuid(id)?;
     let rows = sqlx::query!(
         "SELECT ordinal AS \"ordinal!\", execution_status FROM idempotency WHERE conversation_id=$1 AND route=$2 \
-         AND held AND (execution_status='queued' OR (execution_status='failed' AND execution_error IN ('run_failed','run_cancelled'))) \
+         AND ((held AND (execution_status='queued' OR (execution_status='failed' AND execution_error IN ('run_failed','run_cancelled')))) \
+              OR (execution_status='failed' AND execution_error IN ('sandbox_failed','runtime_start_failed','decision_engine_unavailable'))) \
          ORDER BY ordinal LIMIT $3",
         conversation,
         route(id),
@@ -180,8 +192,9 @@ pub(crate) struct Items {
 }
 
 /// `GET /api/v1/conversations/{id}/messages/queued`: the messages that waited behind a run, oldest first: `held`
-/// (still waiting), `dropped` (the run failed or was stopped) and `sent`, the last two kept for the idempotency
-/// retention; and `waiting_for_slot`, a message not behind a run that has not gone out yet (the task waits for a
+/// (still waiting), `dropped` (the run failed or was stopped, or the task's environment never started for the
+/// message: GW-I-322) and `sent`, the last two kept for the idempotency retention; and `waiting_for_slot`, a message
+/// not behind a run that has not gone out yet (the task waits for a
 /// slot or its sandbox is starting), so every viewer can cancel it (GW-I-173). The gateway's wake of a team reader says
 /// so (`team_wake`, GW-I-298), and a member's first turn too (`lead_brief`, GW-I-300), so a client shows its notice
 /// rather than the person's message.
@@ -199,7 +212,8 @@ pub(crate) async fn list(
         Ok(sqlx::query!(
             "SELECT i.ordinal AS \"ordinal!\", i.user_id, u.email::text AS \"email!\", i.created_at, i.updated_at, \
              i.execution_status, i.execution_error, i.queued_frame, i.held FROM idempotency i JOIN users u ON u.id=i.user_id \
-             WHERE i.conversation_id=$1 AND i.route=$2 AND (i.held OR i.execution_status='queued') \
+             WHERE i.conversation_id=$1 AND i.route=$2 AND (i.held OR i.execution_status='queued' \
+                 OR (i.execution_status='failed' AND i.execution_error IN ('sandbox_failed','runtime_start_failed','decision_engine_unavailable'))) \
              AND i.execution_status<>'cancelled' \
              ORDER BY i.ordinal LIMIT $3",
             conversation,
@@ -293,7 +307,7 @@ async fn cancel_row(
         // committed before this cancel, and its reservation is seen below, or comes after and finds the work gone.
         crate::db::queue(&mut transaction, crate::db::Queue::Key(74_271_012)).await?;
         let row = sqlx::query!(
-            "SELECT i.key, i.user_id, i.execution_status, i.held, i.queued_frame, c.owner_id FROM idempotency i JOIN conversations c ON c.id=i.conversation_id \
+            "SELECT i.key, i.user_id, i.execution_status, i.execution_error, i.held, i.queued_frame, c.owner_id FROM idempotency i JOIN conversations c ON c.id=i.conversation_id \
              WHERE i.conversation_id=$1 AND i.route=$2 AND i.ordinal=$3 FOR UPDATE OF i",
             conversation,
             route(id),
@@ -318,6 +332,8 @@ async fn cancel_row(
             }
             "queued" => {}
             "failed" if row.held => {}
+            // Dropped because its environment never started (GW-I-322): dismissed like one a failed run dropped.
+            "failed" if start_failed(row.execution_error.as_deref()) => {}
             // Claimed for a turn, or already sent: the agent gets it.
             "sending" | "delivered" => return Err(GatewayError::Conflict("message_sent")),
             _ => return Err(GatewayError::NotFound),

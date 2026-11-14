@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT i.ordinal AS \"ordinal!\", i.user_id, u.email::text AS \"email!\", i.created_at, i.updated_at, i.execution_status, i.execution_error, i.queued_frame, i.held FROM idempotency i JOIN users u ON u.id=i.user_id WHERE i.conversation_id=$1 AND i.route=$2 AND (i.held OR i.execution_status='queued') AND i.execution_status<>'cancelled' ORDER BY i.ordinal LIMIT $3",
+  "query": "SELECT i.ordinal AS \"ordinal!\", i.user_id, u.email::text AS \"email!\", i.created_at, i.updated_at, i.execution_status, i.execution_error, i.queued_frame, i.held FROM idempotency i JOIN users u ON u.id=i.user_id WHERE i.conversation_id=$1 AND i.route=$2 AND (i.held OR i.execution_status='queued' OR (i.execution_status='failed' AND i.execution_error IN ('sandbox_failed','runtime_start_failed','decision_engine_unavailable'))) AND i.execution_status<>'cancelled' ORDER BY i.ordinal LIMIT $3",
   "describe": {
     "columns": [
       {
@@ -117,5 +117,5 @@
       false
     ]
   },
-  "hash": "6334d7305320022e5bf995f208404da987a119a042abb25f416dde85dc0f11fc"
+  "hash": "ea56be7b14db7eb2910747ad21d2d746bc57c9966e7e1c626992ea2422fb4085"
 }

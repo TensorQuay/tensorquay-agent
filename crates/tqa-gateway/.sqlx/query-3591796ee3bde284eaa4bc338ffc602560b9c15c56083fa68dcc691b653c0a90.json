@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT ordinal AS \"ordinal!\", execution_status FROM idempotency WHERE conversation_id=$1 AND route=$2 AND held AND (execution_status='queued' OR (execution_status='failed' AND execution_error IN ('run_failed','run_cancelled'))) ORDER BY ordinal LIMIT $3",
+  "query": "SELECT ordinal AS \"ordinal!\", execution_status FROM idempotency WHERE conversation_id=$1 AND route=$2 AND ((held AND (execution_status='queued' OR (execution_status='failed' AND execution_error IN ('run_failed','run_cancelled')))) OR (execution_status='failed' AND execution_error IN ('sandbox_failed','runtime_start_failed','decision_engine_unavailable'))) ORDER BY ordinal LIMIT $3",
   "describe": {
     "columns": [
       {
@@ -38,5 +38,5 @@
       false
     ]
   },
-  "hash": "07fa059a1bda03b919f02924784aa2903c67ed8475631aa879a3bf5d9b99ef53"
+  "hash": "3591796ee3bde284eaa4bc338ffc602560b9c15c56083fa68dcc691b653c0a90"
 }
