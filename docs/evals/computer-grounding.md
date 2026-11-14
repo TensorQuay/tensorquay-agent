@@ -1,6 +1,6 @@
 # Computer use: the grounding evaluation
 
-**State:** measured twice (section 6), on 12 Oct 2026 and again on 15 Oct on 16i's capture. Qwen3.8 27B finds what
+**State:** measured three times (section 6): on 12 Oct 2026, on 15 Oct on 16i's capture, and on 14 Nov 2026 on a current capture (the same answer). Qwen3.8 27B finds what
 it's asked to act on by ref (200/200 both times) and by mark (199/200, then 196/200), and by coordinates only 46/200,
 then 34/200, so it doesn't get `pixel_grounding`. The bar was decided on 5 Oct 2026: a route gets `pixel_grounding`
 only when the lower bound of its coordinate hit rate is at least 90 %. Not
@@ -129,6 +129,23 @@ and by mark every kind is whole but icons by mark (29/30).
   reach about a quarter of the targets. Misses are far: a median of 94 pixels from the box.
 - So for this model, the product's refs and marks are the way to act, as the computer tool already asks; coordinates
   stay off. A route that declares a coordinate space would still be worth measuring for another model family.
+
+### Qwen3.8 27B, 14 Nov 2026, on a current capture
+Served as on 12 Oct (vLLM, NVFP4, images on, thinking on, an output bound of 16,384, four calls at a time). The
+capture: all 200 targets on the Desktop image built from the current sources, with the reader's frame fix (TOOL-U-142:
+without it the capture stops at its first Mousepad screen, the menu bar having no boxes since 17.1), sent unscaled.
+
+| Way | Hits | Rate (Wilson 95 %) |
+|---|---|---|
+| By ref | 200/200 | 100.0 % (98.1 % to 100.0 %) |
+| By mark | 199/200 | 99.5 % (97.2 % to 99.9 %) |
+| By coordinates | 41/200 | 20.5 % (15.5 % to 26.6 %) |
+
+By kind, coordinates: form 13/40, menu 13/30, dark 9/25, chinese 5/25, icon 1/30, desktop 0/20, table 0/30. By ref and
+by mark every kind is whole but icons by mark (29/30), as on 12 and 15 Oct.
+
+**`pixel_grounding`: no.** The bar needs 189 coordinate hits; the targets stand on the current capture, and the
+answer of 12 Oct holds: refs and marks are the way to act on this route, coordinates stay off.
 
 ### Qwen3.8 27B, 15 Oct 2026, on 16i's capture
 The same model and the local route's settings (`run_eval.sh`), served with images on in Gate 5's hold, 20:22 to 20:30
