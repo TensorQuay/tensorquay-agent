@@ -27,6 +27,11 @@ impl<'a> Input<'a> {
         file_io::cancelled(self.cancel)?;
         Ok(self.reader.fill_buf()?.contains(&0))
     }
+    /// The picture format the file starts with (TOOL-U-143), read from the start without moving past the buffer.
+    pub(super) fn picture(&mut self) -> Option<tqa_types::ImageMediaType> {
+        self.seek(0).ok()?;
+        tqa_types::ImageMediaType::from_header(self.reader.fill_buf().ok()?)
+    }
     pub(super) fn seek(&mut self, offset: u64) -> Result<(), ToolError> {
         let difference = i64::try_from(i128::from(offset) - i128::from(self.position))
             .map_err(|_| ToolError::PathInvalid("read offset exceeds bounds".into()))?;
