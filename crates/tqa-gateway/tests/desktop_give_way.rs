@@ -224,16 +224,17 @@ async fn gw_i_305_a_running_or_pinned_desktop_or_a_failed_reset_keeps_its_place(
             },
         )
         .await?;
+        // Pinned by its person, before its reset ends: otherwise the gateway's own admission pass can retire it in the
+        // moment between the reset and the pin, which a loaded CI runner hit (14 Nov 2026).
+        sqlx::query("UPDATE conversations SET pinned=true WHERE id=$1")
+            .bind(Uuid::parse_str(first.as_str())?)
+            .execute(&f.pool)
+            .await?;
         runtime
             .send(&ServerFrame::ScreenReset {
                 ok: true,
                 ready: true,
             })
-            .await?;
-        // Pinned by its person.
-        sqlx::query("UPDATE conversations SET pinned=true WHERE id=$1")
-            .bind(Uuid::parse_str(first.as_str())?)
-            .execute(&f.pool)
             .await?;
         keeps_its_place(f, &second, "pinned").await?;
         sqlx::query("UPDATE conversations SET pinned=false WHERE id=$1")
