@@ -16,6 +16,8 @@ pub(crate) const INTERNAL_FORBIDDEN: &str =
 pub(crate) const INTERNAL_UNCONFIGURED: &str = "internal servers need internal_never";
 /// The engine's networks are unknown or stale, so an internal rule can't be checked.
 pub(crate) const INTERNAL_UNVERIFIED: &str = "internal servers can't be checked now";
+/// A request over plain HTTP carries a key placeholder, which is never sent unencrypted.
+pub(crate) const PLAIN_HTTP_KEY: &str = "a key never goes over plain http";
 
 /// The whole HTTP/1.1 response for a denied destination. The host is echoed only in the allow-list's canonical form
 /// (a name or an address), so nothing a client sent can shape a header.

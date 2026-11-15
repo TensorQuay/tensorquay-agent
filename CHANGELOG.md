@@ -12,6 +12,12 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   images and fonts, read-only, for 15 minutes from the last use. The page stays sandboxed with an opaque origin; it
   may load from the internet only what the install's network setting allows, which the browser enforces before a
   request leaves. A built site's own routes answer its page. The pass is forgotten at a restart.
+- **Settings › Internet access lists the sites refused lately, with Allow this site (GW-I-323, WEB-U-474).** The
+  network proxy keeps the last 200 destinations it refused (host, port, why, how often, when last). An administrator
+  sees them under Recently refused; where a rule would open the site, Allow this site opens Add a site with its host and
+  port (or the host's rule with the port added), the same form and audit as any rule. Nothing waits for it: the task
+  has moved on, and its next connection is decided by the list as it is then. A restarted gateway starts the record
+  empty; the log keeps the rest.
 - **The agent reads PDFs (PRD item 30; ADR-0040; TOOL-U-145, PDF-U-001, PDF-U-002, CORE-U-092).** `read_file` on a PDF answers
   its text page by page, with page numbers, for every model; on a model that reads pictures, the pages it just read are
   shown as pictures too. The reader is built into the product (oxidize-pdf for the text, hayro for the pictures, both

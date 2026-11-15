@@ -119,6 +119,71 @@ pub(crate) async fn list(
     }))
 }
 
+/// One refused destination (ADR-0035 point 3, GW-I-323).
+#[derive(serde::Serialize)]
+pub(crate) struct Refused {
+    host: String,
+    port: u16,
+    /// The refusal's code: `not_listed`, `private`, `disabled`, `internal_forbidden`, `internal_unconfigured`,
+    /// `internal_unverified` or `key_over_plain_http`.
+    reason: &'static str,
+    count: u64,
+    last_at: String,
+    /// The list that refused it: the install's, the only one until per-profile lists exist.
+    list: &'static str,
+    /// Whether a rule for this host and port would open it: only the allow-list's own refusals.
+    allowable: bool,
+    /// Whether the allow-list as it is now lets this host and port through (after Allow this site, say).
+    allowed: bool,
+}
+
+/// The recent refusals, the most recent first.
+#[derive(serde::Serialize)]
+pub(crate) struct Refusals {
+    items: Vec<Refused>,
+    /// How many destinations are kept at most.
+    limit: usize,
+}
+
+/// `GET /api/v1/admin/egress/refusals` (administrator, session or token): the destinations the proxy refused lately,
+/// the most recent first, from a bounded record kept in memory (a restarted gateway starts empty). "Allow this site" is
+/// the rule write below, `PUT /api/v1/admin/egress/{host}`, audited as every rule change.
+///
+/// # Errors
+/// Not an administrator.
+pub(crate) async fn refusals(
+    AppState(state): AppState<Arc<State>>,
+    Authz(user): Authz,
+) -> Result<Json<Refusals>, GatewayError> {
+    require_admin(&user)?;
+    let settings = state.settings.current();
+    let items = state
+        .recent_refusals
+        .list()
+        .into_iter()
+        .map(|(key, seen)| Refused {
+            allowed: matches!(
+                settings.egress.decide(&key.host, key.port),
+                crate::egress::Decision::Allowed { .. }
+            ),
+            allowable: key.reason == "not_listed",
+            last_at: seen
+                .last_at
+                .format(&time::format_description::well_known::Rfc3339)
+                .unwrap_or_default(),
+            host: key.host,
+            port: key.port,
+            reason: key.reason,
+            count: seen.count,
+            list: "install",
+        })
+        .collect();
+    Ok(Json(Refusals {
+        items,
+        limit: crate::egress::recent::RECENT_REFUSALS,
+    }))
+}
+
 /// `PUT /api/v1/admin/egress/{host}` `{ports, version?}` (administrator, session or token): creates the rule for a
 /// host pattern without a version (201) or replaces the version read (200). The host is stored in canonical form.
 ///

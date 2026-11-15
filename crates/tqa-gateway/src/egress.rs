@@ -6,6 +6,7 @@ mod keyed;
 pub(crate) use keyed::Closes as KeyedCloses;
 mod notice;
 mod proxy;
+pub(crate) mod recent;
 mod refusal;
 mod rules;
 mod scrub;

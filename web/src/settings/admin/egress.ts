@@ -6,6 +6,7 @@ import type {
   AdminEgressPresetApplied,
   AdminEgressPresetRemoved,
   AdminEgressPresets,
+  AdminEgressRefusals,
   AdminEgressRule,
   AdminEgressRules,
 } from "../../protocol/generated/api";
@@ -17,6 +18,8 @@ export type EgressPreset = AdminEgressPresets["items"][number];
 export type EgressPresetId = EgressPreset["id"];
 export type EgressPresetApplied = AdminEgressPresetApplied;
 export type EgressPresetRemoved = AdminEgressPresetRemoved;
+export type EgressRefusals = AdminEgressRefusals;
+export type EgressRefusal = AdminEgressRefusals["items"][number];
 
 /** The presets in the order the page offers them: installing first, then code, then the open web. */
 export const PRESET_ORDER: readonly EgressPresetId[] = [
@@ -40,6 +43,8 @@ export type EgressApi = {
     key: string,
   ): Promise<EgressRule>;
   deleteRule(host: string, version: number, key: string): Promise<void>;
+  /** The destinations the proxy refused lately, the most recent first (ADR-0035 point 3). */
+  refusals(signal?: AbortSignal): Promise<EgressRefusals>;
   /** The gateway's ready-made lists: each preset's rules and whether they are in the allow-list. */
   presets(signal?: AbortSignal): Promise<EgressPresets>;
   /** Adds a preset's missing rules; a host that already has a rule keeps it and is named in `kept`. */

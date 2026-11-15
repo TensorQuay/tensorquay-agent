@@ -89,6 +89,7 @@ export function gatewayEgressFor(client: ApiClient): EgressApi {
     putRule: on.putEgress,
     deleteRule: on.deleteEgress,
     presets: on.egressPresets,
+    refusals: on.egressRefusals,
     applyPreset: on.applyEgressPreset,
     removePreset: on.removeEgressPreset,
   };

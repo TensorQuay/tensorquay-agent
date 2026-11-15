@@ -270,6 +270,7 @@ fn admin_method_router(handler: Handler) -> MethodRouter<Arc<AppState>> {
         Handler::AdminSecretConsumers => put(crate::admin::secret_bind),
         Handler::AdminSecretDelete => delete(crate::admin::secret_remove),
         Handler::AdminEgress => get(crate::admin::egress),
+        Handler::AdminEgressRefusals => get(crate::admin::egress_refusals),
         Handler::AdminConnectors => get(crate::admin::connectors),
         Handler::AdminConnectorPut => put(crate::admin::connector_put),
         Handler::AdminConnectorDelete => delete(crate::admin::connector_remove),

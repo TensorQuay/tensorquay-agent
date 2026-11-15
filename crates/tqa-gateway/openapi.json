@@ -8161,6 +8161,63 @@
         }
       }
     },
+    "/api/v1/admin/egress/refusals": {
+      "get": {
+        "operationId": "adminEgressRefusals",
+        "summary": "List recent egress refusals",
+        "description": "The destinations the policy proxy refused lately (ADR-0035 point 3), the most recent first: host, port, the refusal's code, how often and when last, and the list that refused it. A bounded record kept in memory (at most limit destinations; the least recently refused goes first); a restarted gateway starts empty and the log keeps the rest. allowable is true when a rule for that host and port would open it (the allow-list's own refusals); allowed is true when the allow-list as it is now lets it through. Allow this site is PUT /api/v1/admin/egress/{host}. Administrators only; a session or a personal token.",
+        "security": [
+          {
+            "sessionCookie": []
+          },
+          {
+            "personalToken": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The recent refusals",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminEgressRefusals"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not an administrator",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable or gateway restarting",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/admin/egress/{host}": {
       "put": {
         "operationId": "adminEgressPut",
@@ -27601,6 +27658,88 @@
             "items": {
               "$ref": "#/components/schemas/ScreenNotice"
             }
+          }
+        }
+      },
+      "AdminEgressRefusal": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "host",
+          "port",
+          "reason",
+          "count",
+          "last_at",
+          "list",
+          "allowable",
+          "allowed"
+        ],
+        "properties": {
+          "host": {
+            "type": "string",
+            "description": "The refused destination's name or address, in the allow-list's canonical form."
+          },
+          "port": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "not_listed",
+              "private",
+              "disabled",
+              "internal_forbidden",
+              "internal_unconfigured",
+              "internal_unverified",
+              "key_over_plain_http"
+            ],
+            "description": "Why the proxy refused it."
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "How often it was refused since the gateway started."
+          },
+          "last_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "list": {
+            "type": "string",
+            "enum": [
+              "install"
+            ],
+            "description": "The list that refused it: the install's (per-profile lists are not built)."
+          },
+          "allowable": {
+            "type": "boolean",
+            "description": "A rule for this host and port would open it."
+          },
+          "allowed": {
+            "type": "boolean",
+            "description": "The allow-list as it is now lets this host and port through."
+          }
+        }
+      },
+      "AdminEgressRefusals": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "limit"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminEgressRefusal"
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1
           }
         }
       },

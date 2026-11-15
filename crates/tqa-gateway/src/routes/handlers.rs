@@ -156,6 +156,7 @@ pub(crate) enum Handler {
     AdminDecisionEnginePut,
     AdminDecisionEngineDelete,
     AdminEgress,
+    AdminEgressRefusals,
     AdminEgressPut,
     AdminEgressDelete,
     AdminEgressPresets,

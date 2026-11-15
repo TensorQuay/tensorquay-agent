@@ -43,6 +43,8 @@ pub(crate) struct State {
     pub upstream_roots: std::sync::RwLock<Arc<rustls::RootCertStore>>,
     /// What internal egress rules may not reach (ADR-0035 amendment), renewed by the manager.
     pub internal: Arc<crate::egress::internal::Guard>,
+    /// The proxy's recent refusals, for Settings › Internet access (ADR-0035 point 3, GW-I-323).
+    pub recent_refusals: Arc<crate::egress::recent::Recent>,
     /// When each secret due for rotation was last named in the log.
     pub reminders: crate::secrets::rotation::Reminders,
     /// The live passes that serve a workspace folder as a site (18.0 previews for real sites): in memory, so a

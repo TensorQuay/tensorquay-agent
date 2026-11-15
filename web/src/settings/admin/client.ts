@@ -198,6 +198,13 @@ function egressRequests(client: ApiClient) {
         query: new URLSearchParams({ version: String(version) }),
         key,
       }),
+    /** The destinations the proxy refused lately, the most recent first (ADR-0035 point 3). */
+    egressRefusals: (signal?: AbortSignal) =>
+      client.request(
+        settingsEndpoint("adminEgressRefusals"),
+        (value) => parseAdminApi(value, "AdminEgressRefusals"),
+        { signal },
+      ),
     /** The ready-made lists and whether each is in the allow-list. */
     egressPresets: (signal?: AbortSignal) =>
       client.request(

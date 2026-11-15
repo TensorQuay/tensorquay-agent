@@ -427,6 +427,11 @@ pub(crate) const ROUTES: &[Route] = &[
     },
     Route {
         method: "GET",
+        path: "/api/v1/admin/egress/refusals",
+        handler: Handler::AdminEgressRefusals,
+    },
+    Route {
+        method: "GET",
         path: "/api/v1/admin/egress/presets",
         handler: Handler::AdminEgressPresets,
     },

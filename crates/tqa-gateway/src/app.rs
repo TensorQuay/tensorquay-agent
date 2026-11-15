@@ -384,6 +384,7 @@ impl Gateway {
             contract: contract_check::Check::default(),
             upstream_roots,
             internal,
+            recent_refusals: Arc::default(),
             reminders: crate::secrets::rotation::Reminders::default(),
             site_passes: crate::files::SitePasses::default(),
             relay,
