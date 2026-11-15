@@ -20,11 +20,16 @@ export class ApiError extends Error {
   }
 }
 
-export function failure(
+// The error body's validator loads with the first failed request, off a task page's first scripts (WEB-U-472); a load
+// that fails leaves the body unreadable, as an invalid one is, and the bounded local message stands.
+const validators = () => import("../protocol/generated/validators.error");
+
+export async function failure(
   status: number,
   headers: Headers,
   body: unknown,
-): ApiError {
+): Promise<ApiError> {
+  await validators().catch(() => undefined);
   let details: FieldProblem[] = [];
   let inUse: InUse | undefined;
   let code = "invalid_response";

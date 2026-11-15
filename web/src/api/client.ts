@@ -12,6 +12,7 @@ import type {
 } from "../protocol/generated/api";
 import { parseApi } from "../protocol/validate";
 
+import { users } from "./accounts";
 import {
   accepted,
   Action,
@@ -19,13 +20,25 @@ import {
   messageAccepted,
   type MessageResult,
 } from "./action";
+import { files } from "./file-pages";
+import { keyUses } from "./key-uses";
+import { models } from "./models";
 import { pathFor, type Endpoint, type Operation } from "./operations";
+import { queuedMessages } from "./queued-messages";
+import { runChanges } from "./run-changes";
+import { screenNotices } from "./screen-notices";
 import {
   delay,
   Transport,
   type Environment,
   type RequestOptions,
 } from "./transport";
+import {
+  createWorkspace,
+  forkWorkspace,
+  updateWorkspace,
+  workspace,
+} from "./workspace";
 
 export { ApiError } from "./error";
 
@@ -84,12 +97,9 @@ export class ApiClient {
   ) {
     return this.transport.request(operation, decode, options);
   }
+  /** The models; their validators load with the first read (WEB-U-472). */
   models(signal?: AbortSignal) {
-    return this.transport.request(
-      "models",
-      (value) => parseApi(value, "Models"),
-      { signal },
-    );
+    return models(this, signal);
   }
   /**
    * `all` asks for every user's tasks as metadata (administrators only; other users' titles are withheld); `q`
@@ -120,13 +130,9 @@ export class ApiClient {
       { signal },
     );
   }
-  /** A desktop task's stored screen notices, oldest first (ADR-0039 §6). */
+  /** A desktop task's stored screen notices, oldest first (ADR-0039 §6); its validators load with the first read. */
   screenNotices(id: string, signal?: AbortSignal) {
-    return this.transport.request(
-      "screenNotices",
-      (value) => parseApi(value, "ScreenNotices"),
-      { parameters: { id }, signal },
-    );
+    return screenNotices(this, id, signal);
   }
   /**
    * Sign the desktop's browser out everywhere (ADR-0039 §6): accepted with no body (202); the outcome arrives as a screen
@@ -196,11 +202,7 @@ export class ApiClient {
   }
   /** The task's held and dropped messages, and those sent in the last day (GW-I-129), oldest first. */
   queuedMessages(id: string, signal?: AbortSignal) {
-    return this.transport.request(
-      "queuedMessages",
-      (value) => parseApi(value, "QueuedMessages"),
-      { parameters: { id }, signal },
-    );
+    return queuedMessages(this, id, signal);
   }
   /** Cancels a held message, or dismisses a dropped one. */
   cancelQueuedMessage(id: string, message_id: string, signal?: AbortSignal) {
@@ -212,12 +214,9 @@ export class ApiClient {
   cancel(id: string, run_id: string): Action {
     return new Action(this.transport, "cancel", { id, run_id }, "{}", accepted);
   }
+  /** Every account; its validators load with the first read (WEB-U-472). */
   users(signal?: AbortSignal) {
-    return this.transport.request(
-      "users",
-      (value) => parseApi(value, "Accounts"),
-      { signal },
-    );
+    return users(this, signal);
   }
   acceptInvitation(body: AcceptInvitation, signal?: AbortSignal) {
     return this.transport.request(
@@ -226,15 +225,9 @@ export class ApiClient {
       { body: JSON.stringify(body), signal },
     );
   }
-  /** One page of the task's stored key uses, newest first (ADR-0037); `before` is the previous page's `next`. */
+  /** One page of the task's stored key uses, newest first (ADR-0037); its validators load with the first read. */
   keyUses(id: string, before: string | null, signal?: AbortSignal) {
-    const query = new URLSearchParams({ limit: "100" });
-    if (before) query.set("before", before);
-    return this.transport.request(
-      "keyUses",
-      (value) => parseApi(value, "TaskKeyUses"),
-      { parameters: { id }, query, signal },
-    );
+    return keyUses(this, id, before, signal);
   }
   /**
    * The task's stored events after `after`, a page at a time without the stream (WEB-U-468): what a page reads when
@@ -261,15 +254,9 @@ export class ApiClient {
       { parameters: { id }, query, signal },
     );
   }
-  /** One folder of the task's workspace; `path` "" is the root. */
+  /** One folder of the task's workspace; `path` "" is the root. Its validators load with the first read. */
   files(id: string, path: string, after?: string, signal?: AbortSignal) {
-    const query = new URLSearchParams({ path });
-    if (after) query.set("after", after);
-    return this.transport.request(
-      "files",
-      (value) => parseApi(value, "FilePage"),
-      { parameters: { id }, query, signal },
-    );
+    return files(this, id, path, after, signal);
   }
   /** Your workspaces and those shared with you. */
   workspaces(signal?: AbortSignal) {
@@ -309,26 +296,15 @@ export class ApiClient {
       { query, signal },
     );
   }
+  /** One workspace; its validators load with the first read (WEB-U-472). */
   workspace(id: string, signal?: AbortSignal) {
-    return this.transport.request(
-      "workspace",
-      (value) => parseApi(value, "Workspace"),
-      { parameters: { id }, signal },
-    );
+    return workspace(this, id, signal);
   }
   createWorkspace(body: NewWorkspace, signal?: AbortSignal) {
-    return this.transport.request(
-      "createWorkspace",
-      (value) => parseApi(value, "Workspace"),
-      { body: JSON.stringify(body), signal },
-    );
+    return createWorkspace(this, body, signal);
   }
   updateWorkspace(id: string, body: UpdateWorkspace, signal?: AbortSignal) {
-    return this.transport.request(
-      "updateWorkspace",
-      (value) => parseApi(value, "Workspace"),
-      { parameters: { id }, body: JSON.stringify(body), signal },
-    );
+    return updateWorkspace(this, id, body, signal);
   }
   /** `withTasks` also deletes the owner's tasks on it (refused while anyone else has tasks there). */
   deleteWorkspace(id: string, withTasks: boolean, signal?: AbortSignal) {
@@ -342,19 +318,11 @@ export class ApiClient {
   }
   /** Starts a copy in the background; the new workspace is `forking` until it is ready. */
   forkWorkspace(id: string, body: ForkWorkspace, signal?: AbortSignal) {
-    return this.transport.request(
-      "forkWorkspace",
-      (value) => parseApi(value, "Workspace"),
-      { parameters: { id }, body: JSON.stringify(body), signal },
-    );
+    return forkWorkspace(this, id, body, signal);
   }
-  /** The files one run added, modified or deleted. */
+  /** The files one run added, modified or deleted; its validators load with the first read (WEB-U-472). */
   runChanges(id: string, run_id: string, signal?: AbortSignal) {
-    return this.transport.request(
-      "runChanges",
-      (value) => parseApi(value, "RunChanges"),
-      { parameters: { id, run_id }, signal },
-    );
+    return runChanges(this, id, run_id, signal);
   }
   /** A file's bytes, for a preview the browser draws itself (an image); downloads use downloadUrl. */
   fileBlob(id: string, path: string, signal?: AbortSignal) {

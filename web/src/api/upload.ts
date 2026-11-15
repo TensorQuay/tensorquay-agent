@@ -4,6 +4,9 @@ import { parseApi } from "../protocol/validate";
 import { ApiError, failure } from "./error";
 import { pathFor } from "./operations";
 
+// The answer's validators load with the first upload, off a task page's first scripts (WEB-U-472).
+const validators = () => import("../protocol/generated/validators.upload");
+
 /** The part of XMLHttpRequest an upload uses; fetch cannot report upload progress. */
 export type UploadRequest = {
   open(method: string, url: string): void;
@@ -32,6 +35,8 @@ export function uploadFile(
   options: UploadOptions = {},
 ): Promise<Upload> {
   return new Promise((resolve, reject) => {
+    // Asked for as the upload starts; a load that fails leaves the answer unreadable, as an invalid one is.
+    const ready = validators().catch(() => undefined);
     const request = (options.request ?? (() => new XMLHttpRequest()))();
     const cancelled = () => request.abort();
     const settle = (outcome: () => void) => {
@@ -54,30 +59,31 @@ export function uploadFile(
         event.lengthComputable ? event.total : file.size,
       );
     request.onload = () =>
-      settle(() => {
+      void ready.then(async () => {
         const value = readJson(request);
         if (request.status !== 201) {
           const retry = request.getResponseHeader("retry-after");
-          reject(
-            failure(
-              request.status,
-              new Headers(retry ? { "retry-after": retry } : {}),
-              value,
-            ),
+          const error = await failure(
+            request.status,
+            new Headers(retry ? { "retry-after": retry } : {}),
+            value,
           );
+          settle(() => reject(error));
           return;
         }
-        try {
-          resolve(parseApi(value, "Upload"));
-        } catch {
-          reject(
-            new ApiError(
-              request.status,
-              "invalid_response",
-              "The server response could not be read. Please try again.", // copy-lint: not user copy
-            ),
-          );
-        }
+        settle(() => {
+          try {
+            resolve(parseApi(value, "Upload"));
+          } catch {
+            reject(
+              new ApiError(
+                request.status,
+                "invalid_response",
+                "The server response could not be read. Please try again.", // copy-lint: not user copy
+              ),
+            );
+          }
+        });
       });
     request.onerror = () =>
       settle(() =>

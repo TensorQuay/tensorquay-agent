@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT i.key, i.user_id, i.execution_status, i.held, i.queued_frame, c.owner_id FROM idempotency i JOIN conversations c ON c.id=i.conversation_id WHERE i.conversation_id=$1 AND i.route=$2 AND i.ordinal=$3 FOR UPDATE OF i",
+  "query": "SELECT i.key, i.user_id, i.execution_status, i.execution_error, i.held, i.queued_frame, c.owner_id FROM idempotency i JOIN conversations c ON c.id=i.conversation_id WHERE i.conversation_id=$1 AND i.route=$2 AND i.ordinal=$3 FOR UPDATE OF i",
   "describe": {
     "columns": [
       {
@@ -38,6 +38,17 @@
       },
       {
         "ordinal": 3,
+        "name": "execution_error",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "idempotency",
+            "name": "execution_error"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
         "name": "held",
         "type_info": "Bool",
         "origin": {
@@ -48,7 +59,7 @@
         }
       },
       {
-        "ordinal": 4,
+        "ordinal": 5,
         "name": "queued_frame",
         "type_info": "Bytea",
         "origin": {
@@ -59,7 +70,7 @@
         }
       },
       {
-        "ordinal": 5,
+        "ordinal": 6,
         "name": "owner_id",
         "type_info": "Uuid",
         "origin": {
@@ -81,10 +92,11 @@
       false,
       false,
       false,
+      true,
       false,
       true,
       false
     ]
   },
-  "hash": "fed8ddb2e8ec77fc1b7f9758670899910d394f45d9d9944d21f59d79301c50f5"
+  "hash": "680944fc12c895906083e200b6dc857955d5031acb92cf2d366a6442cb7922cc"
 }

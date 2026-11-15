@@ -37,6 +37,19 @@ export const AREAS = [
   { name: "profiles", folders: ["src/api/profiles.ts"] },
   { name: "previews", folders: ["src/api/previews.ts"] },
   { name: "shares", folders: ["src/api/shares.ts"] },
+  // Answers a task page's first load never decodes (WEB-U-472): each area's module is loaded by its own API file with
+  // a dynamic import on the first read, so none of these validators is in the page's first scripts.
+  { name: "key-uses", folders: ["src/api/key-uses.ts"] },
+  { name: "screen-notices", folders: ["src/api/screen-notices.ts"] },
+  { name: "run-changes", folders: ["src/api/run-changes.ts"] },
+  { name: "file-pages", folders: ["src/api/file-pages.ts"] },
+  { name: "accounts", folders: ["src/api/accounts.ts"] },
+  { name: "workspace", folders: ["src/api/workspace.ts"] },
+  { name: "upload", folders: ["src/api/upload.ts"] },
+  { name: "error", folders: ["src/api/error.ts"] },
+  // Answers a task page reads once it is shown, never with its first scripts: the queued messages and the models.
+  { name: "queued-messages", folders: ["src/api/queued-messages.ts"] },
+  { name: "models", folders: ["src/api/models.ts"] },
 ];
 
 /**

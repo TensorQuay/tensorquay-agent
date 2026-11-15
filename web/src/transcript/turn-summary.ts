@@ -14,6 +14,7 @@ import { duration } from "./steps";
 import { argument, fileChange } from "./tool-results";
 import { project } from "./tool-summary";
 import type { RunRecord, StepView, ToolView } from "./types";
+import "./turns-catalogue";
 
 /** A test file by its usual names: a tests/ or spec/ folder, or a test_*, *_test, *.test.* or *.spec.* file. */
 const TEST_FILE =

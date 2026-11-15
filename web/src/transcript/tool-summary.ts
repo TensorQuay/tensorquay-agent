@@ -2,6 +2,12 @@ import { workspacePath } from "../files/workspace-path";
 import { english, type Translate } from "../i18n/translate";
 
 import { connectorName } from "./connector-call";
+import {
+  desktopWordsState,
+  loadDesktopWords,
+  loadedDesktopWords,
+  onDesktopWords,
+} from "./desktop-words-state";
 import { blockedAccess } from "./egress";
 import { noticeText } from "./notice-copy";
 import {
@@ -309,51 +315,15 @@ const sendToLead: Summary = (tool, t) => {
   });
 };
 
-/**
- * The Desktop tool's step words (src/screen/desktop-words.ts, WEB-U-422): loaded as a Desktop task's page opens, or at
- * the first `computer` step anywhere; until then a step reads "Used the desktop", and a page that knows it is a
- * Desktop task waits for them before its steps render (LiveConversation).
- */
-let desktopWords: typeof import("../screen/desktop-words") | null = null;
-let desktopLoading: Promise<void> | null = null;
-let desktopFailed = false;
-const desktopArrivals = new Set<() => void>();
-
-export function loadDesktopWords(): Promise<void> {
-  // The server renders without them, as hydration's first render does (as the failure copy, WEB-U-392).
-  if (typeof window === "undefined") return Promise.resolve();
-  desktopLoading ??= import("../screen/desktop-words").then(
-    (loaded) => {
-      desktopWords = loaded;
-      desktopFailed = false;
-      for (const listener of desktopArrivals) listener();
-    },
-    () => {
-      // A chunk that failed (a tab open across a deploy): the page shows its steps with the general label, and the
-      // next computer step's label asks again.
-      desktopLoading = null;
-      desktopFailed = true;
-      for (const listener of desktopArrivals) listener();
-    },
-  );
-  return desktopLoading;
-}
-
-/** Whether the Desktop tool's words are here, failed to load, or are on their way; `onDesktopWords` calls back on
- * each change. */
-export const desktopWordsState = () =>
-  desktopWords ? "ready" : desktopFailed ? "failed" : "waiting";
-export function onDesktopWords(listener: () => void): () => void {
-  desktopArrivals.add(listener);
-  return () => desktopArrivals.delete(listener);
-}
+export { desktopWordsState, loadDesktopWords, onDesktopWords };
 
 /** A desktop step's own output with its element named (WEB-U-368), once the words are here; the text as it is before. */
 export const namedRef = (text: string, tool: ToolView, t: Translate) =>
-  desktopWords ? desktopWords.namedRef(text, tool, t) : text;
+  loadedDesktopWords()?.namedRef(text, tool, t) ?? text;
 
 const computer: Summary = (tool, t) => {
-  if (desktopWords) return desktopWords.computer(tool, t);
+  const words = loadedDesktopWords();
+  if (words) return words.computer(tool, t);
   void loadDesktopWords();
   return t("tool.computerOther");
 };

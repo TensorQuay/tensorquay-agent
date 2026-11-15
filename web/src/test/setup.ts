@@ -7,6 +7,18 @@ import context from "../i18n/generated/en.context.json";
 import failures from "../i18n/generated/en.failures.json";
 import settings from "../i18n/generated/en.settings.json";
 import { addReference } from "../i18n/translate";
+// The validators a task page loads only on a first read (WEB-U-472): warmed here so a test's first read never waits
+// on the worker's cold import of a generated module (the product loads them lazily all the same).
+import "../protocol/generated/validators.accounts";
+import "../protocol/generated/validators.error";
+import "../protocol/generated/validators.file-pages";
+import "../protocol/generated/validators.key-uses";
+import "../protocol/generated/validators.models";
+import "../protocol/generated/validators.queued-messages";
+import "../protocol/generated/validators.run-changes";
+import "../protocol/generated/validators.screen-notices";
+import "../protocol/generated/validators.upload";
+import "../protocol/generated/validators.workspace";
 
 import { countNotifications, notificationsSettled } from "./notify";
 
@@ -29,6 +41,9 @@ configure({
 // (lazy-menus.test.tsx checks the fetch itself).
 beforeAll(async () => {
   await (await import("../ui/lazy-menus")).loadMenus();
+  // The turns' renderers likewise (WEB-U-473): a test's transcript renders its turns in the first pass, as a page
+  // does once they are here.
+  await (await import("../transcript/turns-loader")).preloadTurns();
 });
 
 // After each test's unmount, its queued query notifications run while its environment is still there (§19a, WEB-U-195).

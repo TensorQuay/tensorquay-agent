@@ -18,6 +18,7 @@ import { Textarea } from "../ui/Textarea";
 import { useCoarsePointer } from "../ui/use-coarse-pointer";
 
 import { composerReason } from "./presentation";
+import { warmTurns } from "./turns-loader";
 import type { Transcript } from "./types";
 import { useComposerSize } from "./use-composer-size";
 
@@ -79,6 +80,25 @@ export type HeldMessages = {
 const maximumCharacters = 60000; // Leaves room for the JSON envelope in the gateway's 256 KiB action limit.
 
 /** One paper card carries the draft and Send/Sending/Stop state; a rejected send restores its captured draft. */
+/** Why a dropped message wasn't sent, in the composer's words: the run was stopped or failed, or the task's environment
+ * never started for it (GW-I-322: sandbox_failed, runtime_start_failed, decision_engine_unavailable). */
+const NOT_STARTED = new Set([
+  "sandbox_failed",
+  "runtime_start_failed",
+  "decision_engine_unavailable",
+]);
+function droppedKey(
+  reason: string | undefined,
+):
+  | "composer.droppedStopped"
+  | "composer.droppedNotStarted"
+  | "composer.droppedFailed" {
+  if (reason === "run_cancelled") return "composer.droppedStopped";
+  if (reason !== undefined && NOT_STARTED.has(reason))
+    return "composer.droppedNotStarted";
+  return "composer.droppedFailed";
+}
+
 export function Composer({
   run,
   sandbox,
@@ -176,6 +196,10 @@ export function Composer({
       data-dragging={drop.dragging || undefined}
       {...drop.handlers}
       {...paste}
+      // The person means to send: the turns' renderers start loading, so a new task's first turn renders at once
+      // (WEB-U-473); a task with turns has them already.
+      onFocusCapture={warmTurns}
+      onPointerDownCapture={warmTurns}
       onSubmit={(event) => {
         event.preventDefault();
         void send();
@@ -234,12 +258,7 @@ export function Composer({
             {held.dropped.map((message) => (
               <li key={message.id} className="type-small composer-queued">
                 <span>
-                  {t(
-                    message.reason === "run_cancelled"
-                      ? "composer.droppedStopped"
-                      : "composer.droppedFailed",
-                    { text: message.text },
-                  )}
+                  {t(droppedKey(message.reason), { text: message.text })}
                 </span>
                 <Button
                   variant="ghost"

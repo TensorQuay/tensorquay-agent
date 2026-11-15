@@ -18,6 +18,7 @@ import type {
   ToolView,
   Transcript,
 } from "./types";
+import "./turns-catalogue";
 
 export type Treatment =
   | "Answer"

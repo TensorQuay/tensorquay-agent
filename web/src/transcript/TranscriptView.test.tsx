@@ -117,6 +117,7 @@ describe("WEB-U-464 a message whose files' list can't load", () => {
     });
     try {
       const { TranscriptView: Fresh } = await import("./TranscriptView");
+      await (await import("./turns-loader")).preloadTurns();
       const state = apply(
         emptyTranscript(),
         frame(1, {

@@ -24,6 +24,7 @@ import {
 import { keySite, needsGitCredential } from "./tool-results";
 import { toolTitle } from "./tool-summary";
 import type { KeyUseView } from "./types";
+import "./turns-catalogue";
 
 const LazyToolCard = lazy(() =>
   preloadToolCard().then((card) => ({ default: card })),

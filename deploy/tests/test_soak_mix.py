@@ -278,11 +278,14 @@ class FakeApi:
         self.events = []
         self.probe = {"counts": zero(), "sandboxes": {}, "screens": {}}
         self.failure = None
+        self.queued = []
 
     def request(self, path, body=None):
         if self.failure is not None:
             failure, self.failure = self.failure, None
             raise failure
+        if path.endswith("/messages/queued"):
+            return {"items": list(self.queued)}
         if path == "/api/v1/conversations":
             identity = DESK if body.get("template") == "desktop" else LEAD
             self.created.append(body)
@@ -778,6 +781,60 @@ class PoolTests(unittest.TestCase):
         cidr = net(10, 213, 6, 0, 23)
         text = '[sandbox.network_pool]\ncidr = "{}"\nprefix = 29\n'.format(cidr)
         self.assertEqual(soak_mix.network_pool(text), {"cidr": cidr, "prefix": 29})
+
+
+class StartFailedTests(unittest.TestCase):
+    """The 24 h run of 14 Nov 2026 ended on a Desktop task whose first sandbox start failed under an engine stall: the
+    gateway dropped the message (GW-I-322 lists it with the start's reason) and nothing sent it again. The lane does
+    what a person does with "Not sent, because the environment couldn't start": it sends the message again, once per
+    dropped record, and counts a retry; a message dropped by a failed run is the run's verdict, not a retry."""
+
+    def running(self):
+        api = FakeApi()
+        lane = soak_mix.DesktopLane(api, 360, start=0.0, log=mock.Mock())
+        lane.step(60, paused=False, draining=False)
+        self.assertEqual(len(api.messages), 1)
+        return lane, api
+
+    def dropped(self, identity, reason, text="Act and observe."):
+        return {"id": identity, "text": text, "attachments": [], "state": "dropped", "reason": reason,
+                "author": {"id": "u1", "email": "soak@example.invalid"}, "created_at": "2026-11-14T06:58:59Z"}
+
+    def test_a_message_dropped_because_its_environment_could_not_start_is_sent_again_once(self):
+        lane, api = self.running()
+        api.queued = [self.dropped("7", "sandbox_failed")]
+        lane.step(65, paused=False, draining=False)
+        self.assertEqual(len(api.messages), 2)
+        self.assertEqual(lane.retries, 1)
+        lane.log.assert_any_call("mix_retry", lane="desktop", conversation=DESK, error="sandbox_failed")
+        # The record stays listed until the retention clears it: no second resend for the same one.
+        lane.step(70, paused=False, draining=False)
+        lane.step(75, paused=False, draining=False)
+        self.assertEqual(len(api.messages), 2)
+        # A new drop (the retry's own start failed too) is sent again in turn; every start reason counts.
+        api.queued.append(self.dropped("8", "runtime_start_failed"))
+        lane.step(80, paused=False, draining=False)
+        self.assertEqual(len(api.messages), 3)
+        self.assertEqual(lane.retries, 2)
+        self.assertEqual(lane.state, "running")
+
+    def test_a_message_dropped_by_a_failed_run_is_not_sent_again(self):
+        lane, api = self.running()
+        api.queued = [self.dropped("7", "run_failed")]
+        api.events = [{"seq": 1, "event": {"type": "run.failed"}}]
+        with self.assertRaises(AssertionError):
+            lane.step(65, paused=False, draining=False)
+        self.assertEqual(len(api.messages), 1)
+        self.assertEqual(lane.retries, 0)
+
+    def test_the_sandbox_state_alone_never_resends(self):
+        """The resend follows the gateway's stored record of the drop, not a timer or the sandbox's state: a slow start
+        is waited for within the conversation's bound."""
+        lane, api = self.running()
+        for now in range(65, 400, 5):
+            lane.step(now, paused=False, draining=False)
+        self.assertEqual(len(api.messages), 1)
+        self.assertEqual(lane.retries, 0)
 
 
 class ProbeCadenceTests(unittest.TestCase):

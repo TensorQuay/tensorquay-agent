@@ -5,13 +5,26 @@ import "./changes-catalogue";
 
 import { useQueryClient } from "@tanstack/react-query";
 import { RefreshCw, X } from "lucide-react";
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 import { useSession } from "../auth/use-session";
 import type { ContextState } from "../context/context-state";
 import { useT } from "../i18n/I18nProvider";
-import type { ReplayStep } from "../screen/replay-steps";
-import type { ScreenNoticeView } from "../transcript/types";
+import { desktopSteps } from "../screen/replay-steps";
+import {
+  desktopWordsState,
+  onDesktopWords,
+} from "../transcript/desktop-words-state";
+import { toolSummary } from "../transcript/tool-summary";
+import type { ScreenNoticeView, Transcript } from "../transcript/types";
 import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
 import { Skeleton } from "../ui/Skeleton";
@@ -59,7 +72,7 @@ export function FilesPanel({
   onClose,
   target = null,
   desktop = false,
-  screenSteps = [],
+  transcript = null,
   runStarts = {},
   screenNotices = [],
   signInMayRemain = true,
@@ -79,8 +92,8 @@ export function FilesPanel({
   target?: FileTarget | null;
   /** Whether the task's environment declares a desktop: the Screen tab is offered then (ADR-0039 §5). */
   desktop?: boolean;
-  /** The task's desktop actions, for the Screen tab's replay. */
-  screenSteps?: readonly ReplayStep[];
+  /** The task's transcript: its desktop actions, in words, are the Screen tab's replay (ADR-0039 §5). */
+  transcript?: Transcript | null;
   /** When each run started, for the replay's run picker. */
   runStarts?: Readonly<Record<string, string>>;
   /** The task's live screen notices, for a sign-out's outcome (WEB-U-259). */
@@ -129,6 +142,21 @@ export function FilesPanel({
     moved.current = true;
   }, [folder, file]);
   const t = useT();
+  // Labelled again once the Desktop tool's words arrive (WEB-U-422); the words' summaries load with this panel, off
+  // the task page's first scripts (WEB-U-473).
+  const words = useSyncExternalStore(
+    onDesktopWords,
+    desktopWordsState,
+    () => "waiting",
+  );
+  const screenSteps = useMemo(
+    () =>
+      transcript
+        ? desktopSteps(transcript, (tool) => toolSummary(tool, t))
+        : [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [transcript, t, words],
+  );
   // Escape anywhere inside the panel closes it (the bar's toggle then takes focus), except inside a dialog the panel
   // opened (a preview opened wide), which closes only itself.
   useEffect(() => {

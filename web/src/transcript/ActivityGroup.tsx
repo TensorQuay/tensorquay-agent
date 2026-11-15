@@ -17,6 +17,7 @@ import { onReaderClock } from "./run-status";
 import { useKept, useOpenedAny } from "./step-state";
 import { loadedStepWords, loadStepWords } from "./step-words-loader";
 import { warmToolCard } from "./tool-card-loader";
+import "./turns-catalogue";
 
 /** After this long with nothing from the model, the live line says the model hasn't started answering (WEB-U-099). */
 const WAITING_AFTER_MS = 10_000;
