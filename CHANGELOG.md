@@ -49,6 +49,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **A task deleted while the container engine fails keeps nothing behind (GW-I-325).** If the engine refused the
+  sandbox's removal at the delete and again on the failure path, nothing tried again until the gateway restarted, so
+  the deleted task's sandbox, screenshots and browser profile stayed. The removal is now retried in the background,
+  and the task's files go once it succeeds. Found by the 24-hour soak.
 - **A long name is never cut without a sign (WEB-E2E-124).** A name longer than its space wraps whole, a long word
   broken anywhere: a dialog's title, a channel's name, members, posts and task board. Where a row is one line by
   design (a channel's heading, a file's row in the Files panel, a picker's choice), the name ends in an ellipsis and

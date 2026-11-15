@@ -48,10 +48,13 @@ impl SandboxManager {
             && !self.services.cancel.is_cancelled()
             && self.failed(&id, &slot, &error).await.is_err()
         {
-            tracing::error!(
+            // The teardown failed too (an engine refusing destroys, as in the third 24 h soak, where a deleted task's
+            // sandbox outlived it): retried in the background, so a task's sandbox never waits on a restart to go.
+            tracing::warn!(
                 conversation_id = %id,
-                "sandbox failure cleanup is incomplete; reconciliation is required"
+                "sandbox failure cleanup is incomplete; its teardown is retried in the background"
             );
+            self.retire_later(id.clone(), slot.clone(), super::teardown::Then::Idle);
         }
         slot.running.store(false, Ordering::Release);
     }
