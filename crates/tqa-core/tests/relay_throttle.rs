@@ -66,13 +66,14 @@ fn with_backup(
 }
 async fn run(h: Harness) -> Result<RunOutcome, Box<dyn Error>> {
     let clock = h.clock.clone();
+    // Boxed: the run's future is past clippy's large-future bound since the runner keeps the drawn PDF pages.
     Ok(drive(
-        Runner::new(h.deps)?.run(
+        Box::pin(Runner::new(h.deps)?.run(
             &[],
             Some(turn()),
             CancellationToken::new(),
             CancellationToken::new(),
-        ),
+        )),
         &clock,
     )
     .await??)
