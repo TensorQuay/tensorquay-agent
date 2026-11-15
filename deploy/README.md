@@ -21,11 +21,29 @@ loopback; remote access needs an authenticated TLS reverse proxy and the matchin
 
 ## Install
 
-### 0. Build the images
+### 0. Pull or build the images
 
-There are no prebuilt images, so build them on the machine that runs the stack, from a release: clone the newest tag
-from the [Releases page](https://github.com/TensorQuay/tensorquay-agent/releases/latest) (for example
-`git clone --branch v17.4.1 https://github.com/TensorQuay/tensorquay-agent.git`), not `main`. From the repository root:
+Start from a release: clone the newest tag from the
+[Releases page](https://github.com/TensorQuay/tensorquay-agent/releases/latest) (for example
+`git clone --branch v17.4.1 https://github.com/TensorQuay/tensorquay-agent.git`), not `main`. Then either pull the
+release's prebuilt images or build them yourself; both end with the same three `export` lines for step 1.
+
+**Pull them (from 18.0).** Each release from 18.0 has prebuilt images on the GitHub Container Registry, for amd64 and
+arm64 (Apple silicon included), built and checked by the release workflow (`.github/workflows/images.yml`). From the
+repository root:
+
+```sh
+deploy/pull-images.sh
+```
+
+It pulls the release the checkout's tag names (or the one you name: `deploy/pull-images.sh 18.0.0`), pins each image by
+the digest the registry gives, tags the runtimes as the build does, so the environments register themselves the same
+way, and prints the three `export` lines step 1 needs. `--workstation` and `--desktop` work as for the build below.
+It needs no build tools and takes a few minutes. The test model (`--fake-model`) is only built, never pulled. Releases
+before 18.0 have no prebuilt images.
+
+**Or build them** on the machine that runs the stack, every image from this checkout's source. From the repository
+root:
 
 ```sh
 deploy/build-images.sh

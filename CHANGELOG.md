@@ -5,6 +5,16 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ## Unreleased
 
+### Added
+
+- **Prebuilt images for each release, for amd64 and arm64 (REL-U-013, REL-I-006).** From 18.0, a release tag builds
+  the gateway, web app and Minimal, Workstation and Desktop runtimes natively for both architectures (Apple silicon
+  included), checks them, and publishes them on the GitHub Container Registry as
+  `ghcr.io/tensorquay/tensorquay-agent-<name>:<version>`. `deploy/pull-images.sh` pulls the release the checkout is
+  on, pins each image by its digest, tags the runtimes so the environments register themselves as built ones do, and
+  prints the same three lines for the install's step 1 as `deploy/build-images.sh`: a few minutes in place of a build
+  of 20 to 45. Building from source stays as it was.
+
 ### Fixed
 
 - **The agent can look at a picture in its workspace (CORE-U-090, TOOL-U-143).** When the agent reads a picture
