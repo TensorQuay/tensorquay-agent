@@ -267,6 +267,30 @@ class FailureLogTests(unittest.TestCase):
             self.assertEqual(robustness.keep_logs({}, KeyboardInterrupt(), ["compose"]), [])
         save.assert_not_called()
 
+    def test_a_failure_prints_the_gateway_log_tail_from_the_kept_compose_log(self):
+        with tempfile.TemporaryDirectory() as evidence, patch("sys.stdout", new_callable=io.StringIO) as out:
+            folder = Path(evidence) / "stack-logs"
+            folder.mkdir()
+            lines = ["web-1      | 2026-11-15T18:08:50Z ready"] + \
+                ["gateway  | 2026-11-15T18:08:5{}Z line {}".format(i % 10, i) for i in range(50)] + \
+                ["postgres-1 | 2026-11-15T18:08:59Z checkpoint"]
+            (folder / "compose.log").write_text("\n".join(lines) + "\n")
+            with patch.object(compose, "save_logs", return_value=[folder / "compose.log"]):
+                robustness.keep_logs({"TQA_ROBUSTNESS_EVIDENCE_DIR": evidence}, AssertionError("failed"), ["compose"])
+        printed = out.getvalue()
+        self.assertIn("The gateway's last {} log lines:".format(robustness.GATEWAY_TAIL_LINES), printed)
+        self.assertNotIn("line 9\n", printed)
+        self.assertIn("line 10\n", printed)
+        self.assertIn("line 49\n", printed)
+        self.assertNotIn("checkpoint", printed)
+        self.assertNotIn("ready", printed)
+
+    def test_without_a_compose_log_nothing_is_printed_for_the_gateway(self):
+        with patch.object(compose, "save_logs", return_value=[]), \
+                patch("sys.stdout", new_callable=io.StringIO) as out:
+            robustness.keep_logs({}, AssertionError("failed"), ["compose"])
+        self.assertNotIn("gateway's last", out.getvalue())
+
     def test_logs_are_kept_before_the_sandboxes_are_removed(self):
         source = Path(robustness.__file__).read_text()
         self.assertLess(source.index("keep_logs(env, failure"), source.index("compose.retire(env, failure"))

@@ -150,8 +150,17 @@ impl<'a> Harness<'a> {
                 host_keys: Vec::new(),
             })
             .await?;
-        wait(|| self.sleeper.pending_durations().contains(&START)).await?;
-        assert!(!self.gateway.stored().is_empty());
+        // The runtime's first frames reach the fake gateway's socket on one connection and its model request another:
+        // the journal answers the core once the WAL record is written and the frame is queued for the link, so the
+        // model request (and the START delay it registers) can arrive before the frame is recorded. Wait for both, so
+        // the cut below always leaves an acknowledged prefix behind it.
+        wait(|| {
+            self.sleeper.pending_durations().contains(&START) && !self.gateway.stored().is_empty()
+        })
+        .await
+        .map_err(|error| {
+            format!("the first frame was not stored before the model delay: {error}")
+        })?;
         self.gateway.set_persist(false);
         self.clock.advance(START)?;
         match cut {

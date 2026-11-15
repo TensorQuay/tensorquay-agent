@@ -591,9 +591,33 @@ def keep_logs(env, failure, configuration):
     written = compose.save_logs(env, folder, configuration=configuration)
     if written:
         print("Stack logs kept in {}".format(folder), flush=True)
+        print_gateway_tail(written)
     elif not evidence:
         folder.rmdir()
     return written
+
+
+# How many of the gateway's last log lines a failure prints into the run's own output: the kept folder stays on the
+# runner, so a one-off failure in CI (GW-I-018 on 15 Nov 2026: the restarted gateway exited 1 and only Compose's lines
+# were seen) otherwise leaves no trace of why the gateway stopped. The compose log is already redacted and bounded.
+GATEWAY_TAIL_LINES = 40
+
+
+def print_gateway_tail(written):
+    """Print the last `GATEWAY_TAIL_LINES` lines of the gateway service from the kept compose log, if it was kept."""
+    for path in written:
+        if Path(path).name != "compose.log":
+            continue
+        try:
+            lines = [line for line in Path(path).read_text().splitlines()
+                     if line.split("|", 1)[0].strip() == "gateway"]
+        except OSError as error:
+            print("Could not read the kept compose log: {}".format(error), flush=True)
+            return
+        if lines:
+            print("The gateway's last {} log lines:".format(GATEWAY_TAIL_LINES), flush=True)
+            print("\n".join(line[:300] for line in lines[-GATEWAY_TAIL_LINES:]), flush=True)
+        return
 
 
 # The cases that run their own scenario and add their settings to [sandbox].
