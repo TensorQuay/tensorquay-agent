@@ -133,7 +133,7 @@ Some events appear as a short notice in the transcript:
 | Switched to … (… unavailable) | The model was unavailable, so the agent continued on a fallback model your administrator set up |
 | Earlier steps summarised | A long task was summarised so the model can keep working on it |
 | Resumed after the environment restarted | The environment was replaced; the agent continued from where it was |
-| Blocked network access to … | The agent tried to reach a host that is not on the installation's allow-list |
+| Blocked network access to … | The agent tried to reach a host that is not on the installation's allow-list. An administrator sees it under Settings › Internet access, **Recently refused**, and can allow it there |
 | The workspace is full. … | Delete files you no longer need, then continue |
 
 When the model server has a brief problem, the agent tries again by itself. While it works, its steps say what

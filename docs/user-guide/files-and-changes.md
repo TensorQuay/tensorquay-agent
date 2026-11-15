@@ -39,10 +39,10 @@ preview it as what it is:
   shown the pages it just read; you don't need to convert a PDF first.
 - A Markdown document shows formatted; **Show the source** shows its text, and the panel remembers your choice.
 - A CSV or TSV file shows as a table of its first 200 rows, with how many there are; **Show as text** shows it as text.
-- A web page (HTML) shows as the page, up to 2 MB. Its scripts run in a sandbox, as the note above it says: they can't
-  reach your session, the app or the network, so a page that loads files or data from elsewhere shows without them.
-  **Reload** starts the page again. **Expand** opens a web page, a PDF or a spreadsheet wide, over the task; Escape
-  closes it.
+- A web page (HTML, up to 2 MB) shows as the page, with the style sheets, scripts, pictures and fonts beside it in
+  its folder (see [A web page with its folder](#a-web-page-with-its-folder)). Its scripts run in a sandbox, as the
+  line above it says. **Reload** starts the page again. **Expand** opens a web page, a PDF or a spreadsheet wide, over
+  the task; Escape closes it.
 - A PDF (up to 20 MB) shows its first 20 pages, with how many there are. Its text can be selected and copied, and a
   screen reader reads it, page by page. Nothing in it can be clicked, and any script it contains never runs. A
   damaged or password-protected PDF says so. To get a PDF, ask for one: on the Workstation the agent writes the
@@ -57,6 +57,37 @@ beginning, with a note saying how much is shown. A symbolic link is listed as **
 `.git`), are left out until you choose "Show hidden files (…)".
 
 While the agent works, the panel notes that files may change. Choose **Refresh files** to load the current list.
+
+### A web page with its folder
+<!-- Tests: WEB-U-470, WEB-E2E-122, GW-I-321. -->
+Most pages the agent writes are not one file: an `index.html` has its style sheets, scripts, pictures, fonts and
+other pages beside it, and a built app has its bundles and its own routes. The preview shows a page from its folder,
+served as a small site, so all of that loads as the page expects:
+
+- Everything the page names by a relative address (a style sheet, a script, a picture, a font, another page in the
+  same folder or in one under it) is read from the workspace as it is now. A link to another page of the site opens in
+  the preview; **Reload** starts the page you chose again.
+- The page you choose is the one shown, whatever its name: a `report.html` beside other files opens as itself. The
+  folder's `index.html` also answers for the folder and for any address that names no file, such as a built app's own
+  routes (`/about`), so such an app works in the preview.
+- Scripts run, in a sandbox: they can't reach your session, the app, this task or another. The line above the page
+  says "Scripts are running in a sandbox". **Stop scripts** reloads the page without any script, for a page that is
+  busy or won't stay still; the line then reads "Scripts are stopped", and **Run scripts** brings them back.
+- What the page loads from the internet follows the installation's network setting: the sites tasks may reach, which
+  your administrator sets under Settings › Internet access. The browser refuses any other request before it leaves. When
+  the page names such sites, a line says so, "Blocked by the network setting: …", naming up to three of them and how
+  many more. What a script asks for only while it runs is refused the same way, though the line can't name it. When
+  the open web is allowed, nothing is blocked and there is no line.
+- The folder is served under a pass minted when the preview opens: for one folder of one task, read-only, and only for
+  someone who can open the task. The pass is in the preview's address and is sent without your session, so a copied
+  address works on its own until the pass expires: don't share it. It lasts 15 minutes from its last use, the preview
+  takes a new one when it needs it, and a restart of the gateway forgets them all; a task has at most 8 live passes at a
+  time.
+
+If the folder can't be served, for example at that limit, the page is shown on its own and offline, as earlier
+versions showed every page: a page that loads from elsewhere then says "Previews run offline: what this page loads from
+… won't show here. Download it to see it all.", and a link in it doesn't open ("Links in a preview don't open here.
+Reload to see the page again.").
 
 ## Review what a run changed
 The **Changes** tab shows the files each run changed. Pick a run in the **Run** list; the newest is marked

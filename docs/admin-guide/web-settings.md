@@ -551,6 +551,44 @@ The same through the API: `GET /api/v1/admin/egress/presets` lists them with how
 that already has a rule as it is. `DELETE /api/v1/admin/egress/presets/{id}` removes the rules still marked; a rule you
 edited since is yours and stays. Both take an Idempotency-Key and are audited per rule.
 
+### Recently refused
+<!-- Tests: WEB-U-474, GW-I-323. -->
+Under **Allowed sites**, **Recently refused** lists the sites the network proxy refused lately, so that a site a task
+needed can be allowed without reading the task's notices or the log. Each row is one site, port and reason, the most
+recent first: **Site** (`host:port`), **Why** in plain words, **How often** ("Once" or "12 times") and **Action**.
+
+What is kept: the last 200 refused destinations (a host, a port and a reason count as one), with how often each was
+refused and when last. The record lives in the gateway's memory. A restarted gateway starts with an empty list, which
+reads "No site was refused since the gateway started."; the gateway's log keeps every refusal. A host is listed as the
+allow-list writes it (lower case, without a trailing dot). Only administrators see the list; if it can't be read, the
+page says "The recent refusals couldn't be read." and offers to try again.
+
+The reasons, and what each means:
+
+| Why | What it means |
+|---|---|
+| Not in the allow-list | No rule covers the host and port. A rule would open it, so the row offers **Allow this site** |
+| A private or reserved address | The name resolves to a private or reserved address, which a rule for a name never reaches (see [Internal servers](#internal-servers)) |
+| Internet access is turned off | Egress is turned off in `gateway.toml`, so no rule applies |
+| An internal server on an address that is never reached | An internal rule's name resolves to this machine's own ground: the gateway, its environments, the container engine or the machine itself |
+| Internal servers aren't set up | An internal rule, while `internal_never` isn't named in `gateway.toml` yet |
+| Internal servers can't be checked now | An internal rule, while the gateway can't read the container engine's networks; it tries again every minute |
+| A key sent over plain HTTP | A task put a key's stand-in in a request over `http://`; a key goes only over HTTPS (see [Shared keys for web services](#shared-keys-for-web-services)) |
+
+**Allow this site** on a row opens **Add a site** with the host and port filled in; when the host already has a rule,
+it opens that rule with the port added to its ports. Save it as any rule: the same checks and the same audit entry as a
+rule you add by hand. The row then reads **Allowed now** in place of the button. Nothing waits for it: the task's
+connection was refused when it happened and the task moved on; its next connection to that site is decided by the list
+as it is then, so the task may need a message to try again. A row with any other reason has no **Allow this site**,
+because a rule wouldn't open it: an address the guard refuses stays refused whatever the list says. With egress turned
+off in the configuration no button is offered either, as the page can't change the list.
+
+The same through the API: `GET /api/v1/admin/egress/refusals` (administrators) answers `items`, the most recent first,
+each with `host`, `port`, `reason` (`not_listed`, `private`, `disabled`, `internal_forbidden`, `internal_unconfigured`,
+`internal_unverified` or `key_over_plain_http`), `count`, `last_at` (RFC 3339), `list` (`install`), `allowable`
+(whether a rule would open it) and `allowed` (whether the list as it is now lets it through); and `limit`, 200.
+Allowing is the ordinary rule write, audited as every rule change.
+
 ### Web search
 There is no search tool. On the Workstation, the agent looks things up with what its environment already has:
 - Facts come from Wikipedia's search first, with `curl` on `en.wikipedia.org`.
