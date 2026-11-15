@@ -926,10 +926,27 @@ textarea.form-control {
   padding: var(--sidebar-padding, var(--space-3));
   background: var(--paper);
 }
+/* Only the task list scrolls (WEB-E2E-123; the owner, 15 Nov 2026: the whole sidebar scrolled, New task and Search
+   with it): the brand row, the top block and the account row stay put, and Search stays at the top of the list. */
 .app-sidebar > .navigation {
   flex: 1;
   min-height: 0;
+  overflow: hidden;
+}
+.app-sidebar > .navigation > .nav-items {
+  flex-shrink: 0;
+}
+.app-sidebar > .navigation > .conversation-list {
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.app-sidebar .conversation-list > .task-search-row {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--paper);
 }
 .sidebar-brand {
   display: flex;
