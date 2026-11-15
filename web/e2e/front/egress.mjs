@@ -194,6 +194,9 @@ export async function egressRoute(url, method, read, key, answer) {
   else if (preset?.[1] && method === "POST") apply(preset[1], key, answer);
   else if (preset?.[1] && method === "DELETE")
     removePreset(preset[1], key, answer);
+  // The proxy's recent refusals (GW-I-323): the fake front's sandboxes reach nothing, so nothing was refused.
+  else if (url.pathname === "/api/v1/admin/egress/refusals" && method === "GET")
+    answer.ok(200, { items: [], limit: 200 });
   else if (url.pathname === "/api/v1/admin/egress" && method === "GET")
     answer.ok(200, {
       disabled: false,
