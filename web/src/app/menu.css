@@ -114,6 +114,15 @@
   display: flex;
   flex: 1;
   flex-direction: column;
+  min-width: 0;
+}
+/* A choice's name reads on one line: a long one ends in an ellipsis, the whole in the row's tooltip and its accessible
+   name (decided on 15 Nov 2026, WEB-E2E-124); its detail line wraps as before. */
+.menu-choice > :first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 /* A picker whose choices read on one line (the Changes panel's runs, WEB-U-432): the name, cut by an ellipsis, then
    its muted line. */

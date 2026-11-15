@@ -184,6 +184,9 @@ export function PickerSurface({
       aria-checked={option.id === value}
       aria-disabled={option.disabled ? true : undefined}
       className="menu-item"
+      // A choice reads on one line, so a long name ends in an ellipsis: the whole stays in the tooltip, and the
+      // accessible name is the whole text (decided on 15 Nov 2026, WEB-E2E-124).
+      title={option.label}
       onClick={() => onChoose(option)}
     >
       <span className="menu-choice">
