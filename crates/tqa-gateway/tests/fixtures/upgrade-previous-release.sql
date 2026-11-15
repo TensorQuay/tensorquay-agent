@@ -1,4 +1,4 @@
--- level: 103
+-- level: 105
 -- GW-I-016: the previous release's database, as synthetic rows in every table that exists at the level above (the
 -- highest migration the previous release shipped). The test migrates an empty database to that level, loads this file,
 -- upgrades it with every newer migration and checks that each row is kept and that the schema equals a fresh install's.
@@ -380,3 +380,10 @@ INSERT INTO channel_claims (channel_id, task_seq, claimant_kind, claimant_id, cl
 INSERT INTO agent_team_reads (reader, call_key, team_id, run_id, seqs, more) VALUES
     ('00000000-0000-7000-8000-000000000301', 'call-read-1', '00000000-0000-7000-8000-000000000801', 'run-1', '{1,2}',
      false);
+-- 0104 and 0105 (18.0, a desktop sign-in kept for a task): one task keeps its sign-in, and its two notices.
+UPDATE conversations SET keep_sign_in = true WHERE id = '00000000-0000-7000-8000-000000000301';
+INSERT INTO screen_notices (id, conversation_id, kind, by_user, by_name, at, after_seq, seconds, ended, reason) VALUES
+    ('00000000-0000-7000-8000-000000000338', '00000000-0000-7000-8000-000000000301', 'screen.sign_in_kept',
+     '00000000-0000-7000-8000-000000000101', 'admin@example.invalid', '2026-10-09 16:20:00+00', 4, NULL, NULL, NULL),
+    ('00000000-0000-7000-8000-000000000339', '00000000-0000-7000-8000-000000000301', 'screen.sign_in_released',
+     '00000000-0000-7000-8000-000000000101', 'admin@example.invalid', '2026-10-09 16:25:00+00', 4, NULL, NULL, NULL);
