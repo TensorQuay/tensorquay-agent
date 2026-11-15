@@ -371,17 +371,6 @@ export class ApiClient {
   downloadUrl(id: string, path: string): string {
     return pathFor("fileDownload", { id }, new URLSearchParams({ path }));
   }
-  /**
-   * A short-lived pass that serves a task's folder as a site (WEB-U-470): its `url` frames the folder's pages with their
-   * own files, outside hosts as the network setting allows.
-   */
-  mintSitePass(id: string, folder: string, signal?: AbortSignal) {
-    return this.transport.request(
-      "mintSitePass",
-      (value) => parseApi(value, "SitePass"),
-      { parameters: { id }, body: JSON.stringify({ folder }), signal },
-    );
-  }
   /** An HTML page for the panel's frame; the gateway sandboxes it by its headers. */
   viewUrl(id: string, path: string): string {
     return pathFor("fileView", { id }, new URLSearchParams({ path }));

@@ -5,6 +5,7 @@ import { RotateCw } from "lucide-react";
 import { useState } from "react";
 
 import { api } from "../api/client";
+import { mintSitePass } from "../api/previews";
 import { useT } from "../i18n/I18nProvider";
 import { formatSize } from "../i18n/message";
 import { Button } from "../ui/Button";
@@ -73,7 +74,7 @@ export function PagePreview({
   const folder = slash < 0 ? "" : path.slice(0, slash);
   const site = useQuery({
     queryKey: ["sitePass", conversationId, folder],
-    queryFn: ({ signal }) => api.mintSitePass(conversationId, folder, signal),
+    queryFn: ({ signal }) => mintSitePass(api, conversationId, folder, signal),
     enabled: framed,
     staleTime: 10 * 60 * 1000,
     retry: false,
