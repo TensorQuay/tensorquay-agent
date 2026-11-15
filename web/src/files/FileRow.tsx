@@ -22,7 +22,14 @@ export function FileRow({
   return (
     <li className="file-entry" data-kind={entry.kind}>
       {entry.kind === "dir" || entry.kind === "file" ? (
-        <button type="button" className="file-open" onClick={onOpen}>
+        <button
+          type="button"
+          className="file-open"
+          // The row is one line, so a long name ends in an ellipsis: the full name stays in the tooltip
+          // (decided on 15 Nov 2026, WEB-E2E-124).
+          title={entry.name}
+          onClick={onOpen}
+        >
           <Icon glyph={entry.kind === "dir" ? Folder : FileText} size={16} />
           <span className="file-name">{entry.name}</span>
           {entry.kind === "file" && (
