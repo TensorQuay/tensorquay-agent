@@ -18,6 +18,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   port (or the host's rule with the port added), the same form and audit as any rule. Nothing waits for it: the task
   has moved on, and its next connection is decided by the list as it is then. A restarted gateway starts the record
   empty; the log keeps the rest.
+- **The agent reads PDFs (PRD item 30; ADR-0040; TOOL-U-145, PDF-U-001, PDF-U-002, CORE-U-092).** `read_file` on a PDF answers
+  its text page by page, with page numbers, for every model; on a model that reads pictures, the pages it just read are
+  shown as pictures too. The reader is built into the product (oxidize-pdf for the text, hayro for the pictures, both
+  pure Rust, pinned exactly), runs inside the task's sandbox, and is capped on file size, pages and text. Before, a PDF
+  read as "[binary file]" and the agent had to convert it with a shell tool first.
 - **A desktop sign-in can be kept for the whole task (ADR-0039 §6, amended; PRD item 24; PROTO-U-045, RT-I-060,
   GW-I-324, WEB-U-475).** On the Screen panel's ⋯ menu, "Keep the sign-in for this task" keeps what you signed into
   during a Take over across the agent's runs, until you turn it off, clear the browser's sign-ins, delete the task, or

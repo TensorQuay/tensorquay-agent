@@ -35,6 +35,8 @@ on a wide screen the page remembers your choice. In a task with a desktop, the p
 preview it as what it is:
 
 - An image (PNG, JPEG, GIF, WebP or SVG) shows as a picture, up to 10 MB.
+- The agent reads a PDF in the workspace page by page with its usual file tool, and a model that reads pictures is
+  shown the pages it just read; you don't need to convert a PDF first.
 - A Markdown document shows formatted; **Show the source** shows its text, and the panel remembers your choice.
 - A CSV or TSV file shows as a table of its first 200 rows, with how many there are; **Show as text** shows it as text.
 - A web page (HTML) shows as the page, up to 2 MB. Its scripts run in a sandbox, as the note above it says: they can't

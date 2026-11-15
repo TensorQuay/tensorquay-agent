@@ -1,5 +1,6 @@
 //! Line-numbered bounded pages without loading the source file into memory.
 mod page;
+mod pdf;
 mod record;
 mod scan;
 use super::{arguments, file_io, specification};
@@ -9,6 +10,8 @@ use record::{Record, Stamp};
 use scan::Input;
 use serde::Deserialize;
 use serde_json::{Value, json};
+
+pub use pdf::{PAGE_MARK, PDF_SUMMARY};
 
 /// The note on a page read with a guessed cursor beside a line range (TOOL-U-051): its own line, before the page's
 /// closing notice (which stays the last line a model follows) or last when there is none, within the page's bytes.
@@ -28,7 +31,7 @@ impl ReadFile {
         Self {
             spec: specification(
                 "read_file",
-                "Read line-numbered workspace text. Line numbers are not part of the file; never copy them into edit_file. A default read returns the first 200 lines, within 8 KiB. Prefer grep to find the right range first, then set start_line and optional inclusive end_line. Follow the partial notice with start_line or cursor; cursor excludes both line arguments.",
+                "Read line-numbered workspace text. Line numbers are not part of the file; never copy them into edit_file. A default read returns the first 200 lines, within 8 KiB. Prefer grep to find the right range first, then set start_line and optional inclusive end_line. Follow the partial notice with start_line or cursor; cursor excludes both line arguments. A PDF reads as text by page: start_line and end_line are then page numbers.",
                 json!({"type":"object","required":["path","start_line","end_line","cursor"],"additionalProperties":false,
                 "properties":{"path":{"type":"string"},"start_line":{"type":["integer","null"],"minimum":1},"end_line":{"type":["integer","null"],"minimum":1},"cursor":{"type":["string","null"],"description":super::CURSOR}}}),
                 true,
@@ -69,7 +72,7 @@ impl Tool for ReadFile {
         let guessed = args
             .cursor
             .as_deref()
-            .is_some_and(|token| !Record::issued(token));
+            .is_some_and(|token| !Record::issued(token) && !pdf::PdfCursor::issued(token));
         let ignored = guessed && (args.start_line.is_some() || args.end_line.is_some());
         if ignored {
             args.cursor = None;
@@ -112,17 +115,17 @@ impl Tool for ReadFile {
                 .ok()
                 .and_then(|path| path.to_str())
                 .ok_or_else(|| ToolError::PathInvalid("expected a workspace UTF-8 path".into()))?;
-            let record = Record::for_request(&args, relative, stamp)?;
-            if metadata.len() > MAX_READ_FILE_BYTES {
-                return Err(ToolError::invalid(
-                    "/path",
-                    &format!(
-                        "file is {} bytes; maximum readable size is {MAX_READ_FILE_BYTES} bytes",
-                        metadata.len()
-                    ),
-                ));
-            }
+            let record = text_record(&args, relative, stamp)?;
+            readable_size(metadata.len())?;
             let mut input = Input::new(file, cancel);
+            // A PDF reads as text by page (PRD item 30): the whole file (within MAX_READ_FILE_BYTES, checked above)
+            // goes to the reader, which is capped on pages and text.
+            if input.pdf()? {
+                let bytes = input.read_all()?;
+                return pdf::read(bytes, &args, relative, stamp, limits);
+            }
+            let record = record
+                .ok_or_else(|| ToolError::invalid("/cursor", "not a cursor for this file"))?;
             if input.probe_binary()? {
                 return Ok(summary(input.picture(), stamp.size, ignored));
             }
@@ -142,6 +145,26 @@ impl Tool for ReadFile {
         })
         .await
     }
+}
+
+/// The text read's record, from the request or its cursor; none for a PDF cursor, which is the PDF reader's (checked
+/// there against its file).
+fn text_record(args: &Args, path: &str, stamp: Stamp) -> Result<Option<Record>, ToolError> {
+    if args.cursor.as_deref().is_some_and(pdf::PdfCursor::issued) {
+        return Ok(None);
+    }
+    Record::for_request(args, path, stamp).map(Some)
+}
+
+/// A file within what one read may take.
+fn readable_size(size: u64) -> Result<(), ToolError> {
+    if size > MAX_READ_FILE_BYTES {
+        return Err(ToolError::invalid(
+            "/path",
+            &format!("file is {size} bytes; maximum readable size is {MAX_READ_FILE_BYTES} bytes"),
+        ));
+    }
+    Ok(())
 }
 
 /// `page` with the ignored-cursor note on its own line before its closing notice (every notice is a last line in

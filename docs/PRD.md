@@ -431,7 +431,8 @@ with slots, queue, eviction, parking and pin (ADR-0016).
     with its page on GitHub, and people install releases (DEV-PLAN §7).
 30. **Reading PDFs (9 Nov 2026):** the agent reads a PDF through a reader built into the product, in Rust, on an
     Apache-compatible library; no Python PDF library, and no OCR where it can be avoided. Every model gets the text;
-    a route with `vision` gets page pictures too. Planned for release 18.0.
+    a route with `vision` gets page pictures too. Built for release 18.0 (15 Nov 2026): `read_file` reads a PDF by page
+    on oxidize-pdf, chosen by the engine benchmark, and draws the pages with hayro for a model that sees.
 31. **Page previews (11 Nov 2026):** a preview runs offline and says when its page needs the internet (17.4.1). In
     18.0 a preview may load scripts, styles and fonts from a fixed list of public CDNs and the page's own files in
     the workspace; live data stays blocked.

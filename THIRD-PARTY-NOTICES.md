@@ -19,6 +19,10 @@ Regenerated at each release from the web licence checker's notices mode and `car
 | pdf.js standard fonts (Foxit, from pdfjs-dist) | BSD-3-Clause | The Foxit Type 1 fonts, served unmodified to PDF previews for PDFs using a standard font; licence text below |
 | pdf.js CMaps (Adobe, from pdfjs-dist) | BSD-3-Clause | Adobe's character maps, served unmodified to PDF previews for CJK text; licence text below |
 | Arimo 1.31 (Google, croscore fonts) | Apache-2.0 | Vendored in `web/vendor/arimo-1.31/`, unmodified; see below |
+| oxidize-pdf (crates.io, pinned exactly) | MIT | The PDF reader's text engine, used unmodified as a library; its published crate carries no licence file, so its MIT text is from the upstream repository at the pinned version |
+| Adobe CMaps (vendored in oxidize-pdf, `src/text/cmap_resources`) | BSD-3-Clause | Adobe's character maps for CJK text, used unmodified as the engine ships them; licence text below |
+| hayro and its parts (hayro-interpret, hayro-syntax, hayro-font, hayro-cmap, hayro-ccitt) | Apache-2.0 OR MIT | The PDF reader's page renderer, used unmodified as a library under Apache-2.0; hayro-font carries the standard 14 fonts' free metric-compatible substitutes under their own permissive licences |
+| pic-scale (a dependency of hayro) | BSD-3-Clause OR Apache-2.0 | Used unmodified under Apache-2.0 |
 
 Rust dependencies: every crate is under a permissive licence allowed by `deny.toml`. Where a crate offers a choice of
 licences, it is used under MIT or Apache-2.0; for example the ripgrep libraries (`ignore`, `globset`, `grep-matcher`,

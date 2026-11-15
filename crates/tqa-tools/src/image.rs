@@ -125,6 +125,63 @@ pub fn read_workspace_image(
     workspace: &WorkspaceRoot,
     path: &str,
 ) -> Result<ImageData, ImageError> {
+    let mut file = open_workspace_file(workspace, path)?;
+    let size = file.metadata().map_err(|_| ImageError::Unreadable)?.len();
+    let media_type = media_type(&mut file)?;
+    if size > MAX_IMAGE_BYTES as u64 {
+        return Err(ImageError::TooLarge);
+    }
+    let bytes = read_bounded(&mut file, MAX_IMAGE_BYTES)?;
+    Ok(ImageData { media_type, bytes })
+}
+
+/// One version of a workspace file: its length and modified time, as read with its bytes.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub struct FileStamp {
+    /// The file's length in bytes.
+    pub len: u64,
+    /// Its modified time.
+    pub modified: std::time::SystemTime,
+}
+
+/// Reads a whole file anywhere in the workspace, confined as [`read_workspace_image`] is, of at most `max` bytes: the
+/// PDF reader's way to a document the agent read (PRD item 30).
+///
+/// # Errors
+/// `Unreadable` for a path that climbs, is absolute, names a link, a missing or non-regular file; `TooLarge` past `max`.
+pub fn read_workspace_bytes(
+    workspace: &WorkspaceRoot,
+    path: &str,
+    max: usize,
+) -> Result<Vec<u8>, ImageError> {
+    read_workspace_bytes_stamped(workspace, path, max).map(|(bytes, _)| bytes)
+}
+
+/// [`read_workspace_bytes`], with the version read (its length and modified time), so a caller can tell the same
+/// file from a changed one without reading it again.
+///
+/// # Errors
+/// As [`read_workspace_bytes`].
+pub fn read_workspace_bytes_stamped(
+    workspace: &WorkspaceRoot,
+    path: &str,
+    max: usize,
+) -> Result<(Vec<u8>, FileStamp), ImageError> {
+    let mut file = open_workspace_file(workspace, path)?;
+    let metadata = file.metadata().map_err(|_| ImageError::Unreadable)?;
+    if metadata.len() > max as u64 {
+        return Err(ImageError::TooLarge);
+    }
+    let stamp = FileStamp {
+        len: metadata.len(),
+        modified: metadata.modified().map_err(|_| ImageError::Unreadable)?,
+    };
+    Ok((read_bounded(&mut file, max)?, stamp))
+}
+
+/// Opens `path`, relative to the workspace root, each directory with `O_NOFOLLOW` from the root down and the file with
+/// `O_NOFOLLOW | O_NONBLOCK`, so no link leads out; a regular file only.
+fn open_workspace_file(workspace: &WorkspaceRoot, path: &str) -> Result<File, ImageError> {
     let parts: Vec<&str> = path
         .split('/')
         .filter(|part| !part.is_empty() && *part != ".")
@@ -141,31 +198,30 @@ pub fn read_workspace_image(
             .map_err(|_| ImageError::Unreadable)?;
     }
     let flags = OFlag::O_RDONLY | OFlag::O_NOFOLLOW | OFlag::O_NONBLOCK | OFlag::O_CLOEXEC;
-    let mut file = File::from(
+    let file = File::from(
         fcntl::openat(&dir, *name, flags, Mode::empty()).map_err(|_| ImageError::Unreadable)?,
     );
-    let size = file.metadata().map_err(|_| ImageError::Unreadable)?;
-    if !size.is_file() {
+    if !file
+        .metadata()
+        .map_err(|_| ImageError::Unreadable)?
+        .is_file()
+    {
         return Err(ImageError::Unreadable);
     }
-    let media_type = media_type(&mut file)?;
-    if size.len() > MAX_IMAGE_BYTES as u64 {
-        return Err(ImageError::TooLarge);
-    }
-    let mut bytes = Vec::new();
-    file.rewind()
-        .and_then(|()| {
-            file.by_ref()
-                .take(MAX_IMAGE_BYTES as u64 + 1)
-                .read_to_end(&mut bytes)
-        })
-        .map_err(|_| ImageError::Unreadable)?;
-    if bytes.len() > MAX_IMAGE_BYTES {
-        return Err(ImageError::TooLarge);
-    }
-    Ok(ImageData { media_type, bytes })
+    Ok(file)
 }
 
+/// The whole of `file` from its start, refused past `max` bytes (a file that grows while it is read included).
+fn read_bounded(file: &mut File, max: usize) -> Result<Vec<u8>, ImageError> {
+    let mut bytes = Vec::new();
+    file.rewind()
+        .and_then(|()| file.by_ref().take(max as u64 + 1).read_to_end(&mut bytes))
+        .map_err(|_| ImageError::Unreadable)?;
+    if bytes.len() > max {
+        return Err(ImageError::TooLarge);
+    }
+    Ok(bytes)
+}
 fn media_type(file: &mut File) -> Result<ImageMediaType, ImageError> {
     let mut header = Vec::with_capacity(IMAGE_HEADER_BYTES);
     file.by_ref()

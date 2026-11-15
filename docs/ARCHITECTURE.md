@@ -69,6 +69,7 @@ Dependencies point downward only (CI gate G-07). A new crate needs an ADR.
 | 0 | `tqa-types` | Wire protocol frames, event types, JSON Schemas, IDs, error codes, the `Clock` and `Sleeper` traits; `serde`, `serde_json`, `schemars`, `thiserror` only | yes |
 | 1 | `tqa-llm` | `ModelProvider` trait; protocol adapters `openai_chat`, `openai_responses`, `anthropic_messages`; SSE streaming; retry and rate limiting; token limits; model registry (`models.toml`); the route shaping (model pinning, vendor settings) that the relay reuses | yes |
 | 1 | `tqa-context` | Message model, token counting, compaction, tool-result caps and spill, run journal (append-only file) | yes |
+| 1 | `tqa-pdf` | The PDF reader (ADR-0040): a document's text by page and its pages as PNGs, on two exactly pinned pure-Rust engines, capped on pages, nesting and picture size; no workspace dependency | yes |
 | 1 | `tqa-tools` | `Tool` trait, registry, JSON-Schema validation, builtin tools, workspace path policy, shell process manager, MCP client and prepared actions; the workspace manifest walker (skip rules, records, hashing) shared by the runtime and the gateway for run changes (ADR-0030) | yes |
 | 2 | `tqa-prompt` | System prompt assembly, instruction-file discovery (`AGENTS.md`), skills directory, tool-call fallback grammar | yes |
 | 3 | `tqa-core` | The agent loop (`Runner`), executors (native tool calls, text fallback), budgets, recovery, event emission | yes |
@@ -87,6 +88,8 @@ Rules:
 - `tqa-gateway` never links `tqa-core`; it treats the runtime as a black box behind the protocol.
 - `tqa-gateway` may link `tqa-tools` (ADR-0030) only for pure workspace logic, the manifest walker; it never registers or runs tools,
   and never uses the shell process manager. Enforced by review; G-07 allows the crate edge.
+- `tqa-tools` (for `read_file`) and `tqa-core` (for the pages a model that sees is shown) link `tqa-pdf`, so the two
+  readers are one implementation (ADR-0040); G-07 allows the two edges. Nothing else names the PDF engines.
 - `tqa-gateway` may link `tqa-context` only for its token estimate (`estimate_bytes`), so that the relay meters a step
   cut off before the model server reported its usage the same way the runtime counts it. It never builds messages,
   compacts or writes a run journal. Enforced by review; G-07 allows the crate edge (`tqa-context` builds only on
@@ -1065,3 +1068,4 @@ are in release 17.0 (PRD §6).
 | ADR-0036 | Managing skills in the product (proposed, amends ADR-0029): a draft for the Product Owner, slice 1 only, no code before the Product Owner's OK |
 | ADR-0037 | Per-service keys (accepted 30 Sep 2026; part of 17.0): a member's or a shared key for one web address, given to a run as a per-run placeholder bound to its sandbox and run; the egress proxy opens TLS only for keyed hosts, swaps the placeholder for the value in the key's own header only, scrubs responses and audits every use before it (fail closed); an install CA rotated on demand; administrators make shared keys and choose who may use them; a member's key serves only that member's runs; `git_push` and the Git relay retire for plain git over HTTPS (amends ADR-0023, ADR-0033, ADR-0035) |
 | ADR-0038 | Swarms (accepted 2 Oct 2026, built after agent teams): one goal across a person's own agent teams; the person sets up the goal and its parts (each a new lead task from a profile they pick) or confirms the coordinator's proposal; one coordinator talks to the leads, leads only to the coordinator, helpers never leave their team; only messages and attached files cross teams; one goal budget and deadline; two levels, no cycles; each page's message box talks to that page's agent; no publishing, sharing or outside agents |
+| ADR-0040 | The PDF reader (accepted, the Product Owner's decision of 9 Nov 2026; part of 18.0): one crate, `tqa-pdf`, below `tqa-tools`, wrapping the two engines the benchmark chose (oxidize-pdf for the text, hayro for the pictures; pinned exactly), with the caps before parsing (pages, nesting depth, picture size); `read_file` answers a PDF by page with a cursor, and the runner shows a model that sees the pages a result holds, drawn once per run |

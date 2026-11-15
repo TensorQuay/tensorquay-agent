@@ -20,6 +20,7 @@ tqa-types = { version = "0.1.0", path = "../tqa-types" }
 tqa-llm = { version = "0.1.0", path = "../tqa-llm" }
 tqa-context = { version = "0.1.0", path = "../tqa-context" }
 tqa-tools = { version = "0.1.0", path = "../tqa-tools" }
+tqa-pdf = { version = "0.1.0", path = "../tqa-pdf" }
 tqa-prompt = { version = "0.1.0", path = "../tqa-prompt" }
 
 [dev-dependencies]

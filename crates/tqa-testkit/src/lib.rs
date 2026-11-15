@@ -8,6 +8,7 @@ pub mod e2e;
 mod gateway;
 mod jitter;
 mod model_server;
+pub mod pdf;
 pub mod perf;
 mod provider;
 mod provider_fakes;
