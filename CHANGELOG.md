@@ -7,6 +7,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **Caps Lock types capitals on the Desktop under Take over (RT-I-059).** With Caps Lock on, a Mac viewer's letters
+  came out lower case: the screen sharer added Shift for each capital while the desktop's own Caps Lock was also on,
+  and the two cancelled. A viewer's Caps Lock no longer toggles the desktop's; letters arrive as typed, and Ctrl+A and
+  other layouts' symbols are unchanged.
 - **Only the sidebar's task list scrolls (WEB-E2E-123).** With a long task list the whole sidebar scrolled, taking New
   task, Workspaces, Channels and Search out of view. Now the brand row and those links stay at the top, the account
   row at the bottom, Search at the top of the list, and only the tasks scroll between them.
