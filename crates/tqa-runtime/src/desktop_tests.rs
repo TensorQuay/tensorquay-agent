@@ -127,15 +127,33 @@ async fn gw_i_222_a_driver_a_run_still_holds_is_profile_in_use() -> TestResult {
 }
 
 /// A process naming `profile` as its `--user-data-dir`, as a browser started by hand does; `script` is what it runs.
-fn holder(profile: &std::path::Path, script: &str) -> std::io::Result<tokio::process::Child> {
-    tokio::process::Command::new("sh")
+/// A process holding `profile` as the browser would: a shell whose own command line names it. The script ends in `:`
+/// so the shell can't hand itself over to its last command (dash execs it, and the flag would leave the command line,
+/// 15 Nov 2026: GW-I-222 saw no holder on CI), and the holder is returned only once `/proc` shows it.
+async fn holder(profile: &std::path::Path, script: &str) -> std::io::Result<tokio::process::Child> {
+    let child = tokio::process::Command::new("sh")
         .args([
             "-c",
-            script,
+            &format!("{script}; :"),
             &format!("--user-data-dir={}", profile.display()),
         ])
         .kill_on_drop(true)
-        .spawn()
+        .spawn()?;
+    let wanted = format!("--user-data-dir={}", profile.display());
+    let pid = child
+        .id()
+        .ok_or_else(|| std::io::Error::other("the holder exited at once"))?;
+    for _ in 0..100 {
+        let line = std::fs::read(format!("/proc/{pid}/cmdline")).unwrap_or_default();
+        if line
+            .split(|byte| *byte == 0)
+            .any(|argument| argument == wanted.as_bytes())
+        {
+            return Ok(child);
+        }
+        tokio::time::sleep(Duration::from_millis(20)).await;
+    }
+    Err(std::io::Error::other("the holder never named the profile"))
 }
 
 // TEST: GW-I-222
@@ -144,7 +162,7 @@ fn holder(profile: &std::path::Path, script: &str) -> std::io::Result<tokio::pro
 async fn gw_i_222_a_process_holding_the_profile_is_stopped_and_the_profile_emptied() -> TestResult {
     let root = tempfile::tempdir()?;
     let profile = signed_in(root.path())?;
-    let mut held = holder(&profile, "sleep 30")?;
+    let mut held = holder(&profile, "sleep 30").await?;
     let slot: Slot = Arc::default();
     sign_out(
         &slot,
@@ -166,7 +184,7 @@ async fn gw_i_222_a_process_holding_the_profile_is_stopped_and_the_profile_empti
 async fn gw_i_222_a_holder_ignoring_sigterm_is_killed_after_the_grace() -> TestResult {
     let root = tempfile::tempdir()?;
     let profile = signed_in(root.path())?;
-    let mut held = holder(&profile, "trap '' TERM; while :; do sleep 0.1; done")?;
+    let mut held = holder(&profile, "trap '' TERM; while :; do sleep 0.1; done").await?;
     // The shell's trap is in place before anything is sent.
     tokio::time::sleep(Duration::from_millis(200)).await;
     let slot: Slot = Arc::default();
@@ -189,7 +207,7 @@ async fn gw_i_222_a_holder_ignoring_sigterm_is_killed_after_the_grace() -> TestR
 async fn gw_i_222_a_holder_that_survives_sigkill_is_profile_in_use() -> TestResult {
     let root = tempfile::tempdir()?;
     let profile = signed_in(root.path())?;
-    let mut held = holder(&profile, "sleep 30")?;
+    let mut held = holder(&profile, "sleep 30").await?;
     // A process no signal reaches (another user's, say): the signals are sent nowhere.
     let refused = release(&profile, Duration::from_millis(100), &|_, _| ()).await;
     assert_eq!(refused, Err(SignOutFailure::ProfileInUse));
