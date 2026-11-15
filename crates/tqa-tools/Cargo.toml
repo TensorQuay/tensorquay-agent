@@ -9,6 +9,7 @@ description = "Tool contracts, validation, workspace policy, process management 
 
 [dependencies]
 tqa-types = { version = "0.1.0", path = "../tqa-types" }
+tqa-pdf = { version = "0.1.0", path = "../tqa-pdf" }
 thiserror = "~2.0"
 tokio = { version = "~1.53", features = ["process", "fs", "io-util", "rt", "sync", "time", "macros", "net"] }
 tokio-util = { version = "~0.7", features = ["rt"] }

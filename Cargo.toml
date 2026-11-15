@@ -5,6 +5,7 @@ members = [
     "crates/tqa-llm",
     "crates/tqa-context",
     "crates/tqa-tools",
+    "crates/tqa-pdf",
     "crates/tqa-prompt",
     "crates/tqa-core",
     "crates/tqa-runtime",

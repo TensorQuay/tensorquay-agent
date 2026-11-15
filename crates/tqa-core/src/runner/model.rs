@@ -2,6 +2,8 @@
 mod decisions;
 mod fallback;
 mod images;
+mod pdf_pages;
+pub(super) use pdf_pages::DrawnPages;
 mod pictures;
 pub(super) mod request;
 mod screenshots;

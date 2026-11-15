@@ -41,11 +41,18 @@ impl Execution<'_> {
                 capacity,
             )
             .await?;
+        // Then the pages of the PDFs it read, drawn, in the room left (CORE-U-092).
+        let used = needed
+            .saturating_add(attached)
+            .saturating_add(screenshots)
+            .saturating_add(pictures);
+        let (request, pages) = self.attach_pdf_pages(request, used, capacity).await?;
         Ok((
             request,
             attached
                 .saturating_add(screenshots)
-                .saturating_add(pictures),
+                .saturating_add(pictures)
+                .saturating_add(pages),
         ))
     }
 

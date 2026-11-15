@@ -7,6 +7,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Added
 
+- **The agent reads PDFs (PRD item 30; ADR-0040; TOOL-U-145, PDF-U-001, PDF-U-002, CORE-U-092).** `read_file` on a PDF answers
+  its text page by page, with page numbers, for every model; on a model that reads pictures, the pages it just read are
+  shown as pictures too. The reader is built into the product (oxidize-pdf for the text, hayro for the pictures, both
+  pure Rust, pinned exactly), runs inside the task's sandbox, and is capped on file size, pages and text. Before, a PDF
+  read as "[binary file]" and the agent had to convert it with a shell tool first.
 - **Prebuilt images for each release, for amd64 and arm64 (REL-U-013, REL-I-006).** From 18.0, a release tag builds
   the gateway, web app and Minimal, Workstation and Desktop runtimes natively for both architectures (Apple silicon
   included), checks them, and publishes them on the GitHub Container Registry as

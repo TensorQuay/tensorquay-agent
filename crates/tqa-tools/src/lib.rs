@@ -19,11 +19,14 @@ pub mod untrusted;
 mod workspace;
 pub mod workspace_tree;
 
-pub use builtin::{MAX_NOTES_BYTES, PICTURE_SUMMARY};
+pub use builtin::{MAX_NOTES_BYTES, PAGE_MARK, PDF_SUMMARY, PICTURE_SUMMARY};
 pub use context::{MAX_READ_FILE_BYTES, MIN_PAGE_BYTES, READ_PAGE_BYTES, ToolContext, ToolLimits};
 pub use error::ToolError;
 pub use git_env::{GIT_SAFETY_ENV, HostKeyEnv};
-pub use image::{ImageData, ImageError, probe_image, read_image, read_workspace_image};
+pub use image::{
+    FileStamp, ImageData, ImageError, probe_image, read_image, read_workspace_bytes,
+    read_workspace_bytes_stamped, read_workspace_image,
+};
 pub use model_names::{MAX_MODEL_TOOL_NAME_BYTES, ModelNames};
 pub use prepared::PreparedAction;
 pub use process_score::tool_command;

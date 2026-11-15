@@ -27,6 +27,23 @@ impl<'a> Input<'a> {
         file_io::cancelled(self.cancel)?;
         Ok(self.reader.fill_buf()?.contains(&0))
     }
+    /// Whether the file starts a PDF (`%PDF-`), read from the start without moving past the buffer.
+    pub(super) fn pdf(&mut self) -> Result<bool, ToolError> {
+        file_io::cancelled(self.cancel)?;
+        self.seek(0)?;
+        Ok(self.reader.fill_buf()?.starts_with(tqa_pdf::MAGIC))
+    }
+    /// The whole file from its start, for the PDF reader; the caller has checked its size.
+    pub(super) fn read_all(&mut self) -> Result<Vec<u8>, ToolError> {
+        file_io::cancelled(self.cancel)?;
+        self.seek(0)?;
+        let mut bytes = Vec::new();
+        self.reader.read_to_end(&mut bytes)?;
+        self.position = self
+            .position
+            .saturating_add(u64::try_from(bytes.len()).unwrap_or(u64::MAX));
+        Ok(bytes)
+    }
     /// The picture format the file starts with (TOOL-U-143), read from the start without moving past the buffer.
     pub(super) fn picture(&mut self) -> Option<tqa_types::ImageMediaType> {
         self.seek(0).ok()?;

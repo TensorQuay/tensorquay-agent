@@ -1,0 +1,21 @@
+[package]
+name = "tqa-pdf"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+description = "The PDF reader: a document's text by page for every model, and its pages as pictures for a model that reads them."
+
+[dependencies]
+# Text (PRD item 30; chosen by the engine benchmark, crates/tqa-pdf-bench): pinned exactly, the licence re-checked on
+# every change. Only parsing, text and decryption are built: no images, OCR, signatures or token counting.
+oxidize-pdf = { version = "=5.6.0", default-features = false, features = ["compression"] }
+# Page pictures (the benchmark's renderer): pure Rust, the standard 14 fonts built in.
+hayro = { version = "=0.9.0" }
+serde = { version = "~1.0", features = ["derive"] }
+serde_json = "~1.0"
+thiserror = "~2.0"
+
+[lints]
+workspace = true

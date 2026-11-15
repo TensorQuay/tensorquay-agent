@@ -47,6 +47,8 @@ pub(super) struct Execution<'a> {
     pub route_synced: bool,
     /// The provider's own words, sanitised, for the `run.failed` of a provider failure (CORE-U-052).
     pub provider_message: Option<String>,
+    /// The PDF pages this run drew for the model, so a page shown on every request is drawn once (CORE-U-092).
+    pub drawn_pages: std::sync::Mutex<super::model::DrawnPages>,
     /// The step whose link waits `link_waited` totals: the budget is per step (CORE-U-062).
     pub link_step: Option<u32>,
     pub link_waited: std::time::Duration,
@@ -73,6 +75,7 @@ impl<'a> Execution<'a> {
             active_route: 0,
             route_synced: false,
             provider_message: None,
+            drawn_pages: std::sync::Mutex::default(),
             native_retry: super::model::NativeRetry::default(),
             link_step: None,
             link_waited: std::time::Duration::ZERO,
