@@ -109,7 +109,11 @@ export default defineConfig({
                                                     : process.env
                                                           .TQA_STACK_SUITE ===
                                                         "previews"
-                                                      ? "previews-stack.spec.ts"
+                                                      ? // WEB-E2E-032 and the real sites of 18.0 (WEB-E2E-122) on one stack.
+                                                        [
+                                                          "previews-site-stack.spec.ts",
+                                                          "previews-stack.spec.ts",
+                                                        ]
                                                       : process.env
                                                             .TQA_STACK_SUITE ===
                                                           "titles"
@@ -148,5 +152,18 @@ export default defineConfig({
     viewport: { width: 1440, height: 1000 },
     reducedMotion: "reduce",
     browserName: stackBrowser(),
+    // Chrome on a desktop keeps a sandboxed frame off the page's thread (IsolateSandboxedIframes, site-per-process,
+    // both on by default there); Playwright's headless shell leaves them off, so a preview page busy for 8 s stalled
+    // the app's thread in the suite as it never does in Chrome (WEB-E2E-122, the finding of 12 Nov 2026). The suite
+    // runs Chromium as Chrome runs; WebKit takes no Chromium flags.
+    launchOptions:
+      stackBrowser() === "chromium"
+        ? {
+            args: [
+              "--enable-features=IsolateSandboxedIframes",
+              "--site-per-process",
+            ],
+          }
+        : {},
   },
 });

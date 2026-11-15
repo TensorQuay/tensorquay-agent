@@ -5,6 +5,14 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ## Unreleased
 
+### Added
+
+- **A workspace folder can be served as a site for the Files panel's preview (18.0).** Most sites are many files, not
+  one page: a pass minted for a folder serves its `index.html` and, by relative address, its style sheets, scripts,
+  images and fonts, read-only, for 15 minutes from the last use. The page stays sandboxed with an opaque origin; it
+  may load from the internet only what the install's network setting allows, which the browser enforces before a
+  request leaves. A built site's own routes answer its page. The pass is forgotten at a restart.
+
 ### Fixed
 
 - **The agent can look at a picture in its workspace (CORE-U-090, TOOL-U-143).** When the agent reads a picture

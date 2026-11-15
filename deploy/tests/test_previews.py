@@ -3,6 +3,7 @@
 import base64
 import io
 import json
+import tarfile
 from pathlib import Path
 import re
 import shutil
@@ -70,13 +71,36 @@ class PreviewFilesTests(unittest.TestCase):
 
 
 class ScenarioTests(unittest.TestCase):
+    def test_the_sites_are_written_in_their_folders_by_a_second_call(self):
+        """WEB-E2E-122: the owner's weather map, the built-shape site, the freeze pages and the leak page land under
+        site/ with their folders, each decoded from the checked-in file, within the argument limit."""
+        files = demo_previews.site_files(WITNESS)
+        for name in ("sg-weather-map/index.html", "sg-weather-map/app.js", "dist/index.html",
+                     "dist/assets/index-7f3a9c.js", "freeze/busy.html", "freeze/retry.html", "leak/index.html"):
+            self.assertIn(name, files)
+        self.assertIn(WITNESS.encode() + b"/site-leak.png", files["leak/index.html"])
+        commands = demo_previews.commands(WITNESS)
+        self.assertEqual(len(commands), 2)
+        # One compressed archive: the call's arguments stay in the model's context (the plain files overran it).
+        self.assertLess(len(commands[1].encode()), 24 * 1024)
+        archive = demo_previews.site_archive(WITNESS)
+        self.assertEqual(commands[1], "mkdir -p site && printf %s '{}' | base64 -d | tar xz -C site".format(
+            base64.b64encode(archive).decode()))
+        with tarfile.open(fileobj=io.BytesIO(archive), mode="r:gz") as unpacked:
+            members = {member.name: unpacked.extractfile(member).read() for member in unpacked.getmembers()}
+        self.assertEqual(members, files)
+        self.assertNotIn("site/", commands[0])
+        calls = [event for event in demo_previews.scenario(WITNESS)["responses"][0]["events"]
+                 if event["type"] == "tool_call"]
+        self.assertEqual([call["name"] for call in calls], ["shell", "shell"])
+
     def test_one_shell_call_writes_every_file_then_an_answer(self):
         scenario = demo_previews.scenario(WITNESS)
         self.assertEqual(scenario["select"], "prompt")
         responses = scenario["responses"]
         self.assertEqual([response["when"] for response in responses], [demo_previews.PROMPT] * 2)
         calls = [event for event in responses[0]["events"] if event["type"] == "tool_call"]
-        self.assertEqual([call["name"] for call in calls], ["shell"])
+        self.assertEqual([call["name"] for call in calls], ["shell", "shell"])
         command = calls[0]["arguments"]["command"]
         self.assertLess(len(command.encode()), demo_previews.COMMAND_LIMIT)
         for name, content in demo_previews.fixtures(WITNESS).items():

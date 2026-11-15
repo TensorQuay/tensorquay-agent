@@ -168,6 +168,34 @@ impl AllowList {
         })
     }
 
+    /// The list as Content-Security-Policy source expressions, for a site preview's frame (18.0 previews for real
+    /// sites): the any-host rule is `https:`; an exact host `https://host`, with `:port` for each port other than
+    /// 443 and brackets round an IPv6 address; a `*.domain` rule `https://*.domain` likewise. The browser then
+    /// blocks what the proxy would refuse before a request leaves; an empty list renders nothing.
+    pub(crate) fn csp_sources(&self) -> Vec<String> {
+        let mut sources: Vec<String> = self.0.iter().flat_map(csp_sources_of).collect();
+        sources.sort();
+        sources.dedup();
+        sources
+    }
+
+    /// What a site preview's page may reach, for the panel to name what it loads that the browser blocks: whether the
+    /// any-host rule is in the list, and the exact hosts and `*.domain` entries (without ports), sorted.
+    pub(crate) fn site_hosts(&self) -> (bool, Vec<String>) {
+        let mut any = false;
+        let mut hosts = Vec::new();
+        for rule in &self.0 {
+            match &rule.pattern {
+                Pattern::Any => any = true,
+                Pattern::Exact(host) => hosts.push(host.clone()),
+                Pattern::Subdomains(domain) => hosts.push(format!("*.{domain}")),
+            }
+        }
+        hosts.sort();
+        hosts.dedup();
+        (any, hosts)
+    }
+
     /// Decides a destination; the host is compared case-insensitively without a trailing dot.
     pub(crate) fn decide(&self, host: &str, port: u16) -> Decision {
         let host = normalized(host);
@@ -200,6 +228,26 @@ impl AllowList {
 ///
 /// # Errors
 /// The typed reason the rule is refused.
+/// One rule's CSP source expressions: `https:` for the any-host rule, else `https://host[:port]` per port.
+fn csp_sources_of(rule: &Rule) -> Vec<String> {
+    let host = match &rule.pattern {
+        Pattern::Any => return vec!["https:".to_owned()],
+        Pattern::Exact(host) if host.contains(':') => format!("[{host}]"),
+        Pattern::Exact(host) => host.clone(),
+        Pattern::Subdomains(domain) => format!("*.{domain}"),
+    };
+    rule.ports
+        .iter()
+        .map(|port| {
+            if *port == 443 {
+                format!("https://{host}")
+            } else {
+                format!("https://{host}:{port}")
+            }
+        })
+        .collect()
+}
+
 pub(crate) fn canonical(input: RuleInput) -> Result<RuleInput, RuleError> {
     let host = canonical_host(&input.host)?;
     let mut ports = input.ports;

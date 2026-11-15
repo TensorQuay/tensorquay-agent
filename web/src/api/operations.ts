@@ -71,6 +71,10 @@ export const operations = {
     method: "GET",
     path: "/api/v1/conversations/{id}/files/view",
   },
+  mintSitePass: {
+    method: "POST",
+    path: "/api/v1/conversations/{id}/site",
+  },
   fileSheet: {
     method: "GET",
     path: "/api/v1/conversations/{id}/files/sheet",

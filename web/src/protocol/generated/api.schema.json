@@ -4037,6 +4037,53 @@
           }
         }
       }
+    },
+    "SitePass": {
+      "type": "object",
+      "required": [
+        "pass",
+        "folder",
+        "url",
+        "expires_in_seconds",
+        "network"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "pass": {
+          "type": "string"
+        },
+        "folder": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "expires_in_seconds": {
+          "type": "integer"
+        },
+        "network": {
+          "$ref": "#/definitions/SiteNetwork"
+        }
+      }
+    },
+    "SiteNetwork": {
+      "type": "object",
+      "required": [
+        "any",
+        "hosts"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "any": {
+          "type": "boolean"
+        },
+        "hosts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
     }
   }
 }

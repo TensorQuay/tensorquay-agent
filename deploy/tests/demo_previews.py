@@ -15,6 +15,7 @@ from pathlib import Path
 import importlib.util
 import shutil
 import subprocess
+import tarfile
 import threading
 import zipfile
 
@@ -27,6 +28,10 @@ FOLDER = "previews"
 CONTROL, LOG = "/control", "/log"
 # A shell argument must stay under the kernel's 128 KiB single-argument limit.
 COMMAND_LIMIT = 100 * 1024
+# WEB-E2E-122 (18.0 previews for real sites): the folders the agent writes beside the previews, from deploy/tests/sites
+# (the owner's sg-weather-map, a built-shape module-script site, the freeze pages of 12 Nov 2026) plus a page that
+# reaches for the witness, so the site policy's refusal is witnessed as the report's is.
+SITES, SITE_FILES = "site", Path(__file__).resolve().parent / "sites"
 # Files over each preview limit, written in the sandbox (not embedded): HTML 2 MiB, PDF 20 MiB, sheets 10 MiB.
 LARGE = {"big.html": 3 * 1024 * 1024, "big.pdf": 21 * 1024 * 1024, "big.xlsx": 11 * 1024 * 1024}
 
@@ -218,17 +223,53 @@ def fixtures(witness):
     }
 
 
+def leak(witness):
+    """A site page that reaches for the witness by an image and a request: the site policy stops both before they leave."""
+    return ('<!doctype html><html><body><p id="leak">leak page</p><img src="{0}/site-leak.png" alt="">'
+            '<script>fetch("{0}/site-leak").catch(() => {{}});</script></body></html>').format(witness).encode()
+
+
+def site_files(witness):
+    """Every site file by its path under the site folder: the checked-in sites and the run's leak page."""
+    files = {}
+    for path in sorted(SITE_FILES.rglob("*")):
+        if path.is_file():
+            files[path.relative_to(SITE_FILES).as_posix()] = path.read_bytes()
+    files["leak/index.html"] = leak(witness)
+    return files
+
+
+def joined(lines, what):
+    command = " && ".join(lines)
+    if len(command.encode()) > COMMAND_LIMIT:
+        raise ValueError("the {} command exceeds the single-argument limit".format(what))
+    return command
+
+
 def commands(witness):
-    """The shell commands that write every file: the embedded ones decoded, the large ones generated in place."""
+    """The shell commands that write every file: the previews (embedded ones decoded, the large ones generated in
+    place), then the sites in their folders."""
     lines = ["mkdir -p " + FOLDER]
     for name, content in fixtures(witness).items():
         lines.append("printf %s '{}' | base64 -d > {}/{}".format(base64.b64encode(content).decode(), FOLDER, name))
     for name, size in LARGE.items():
         lines.append("head -c {} /dev/zero | tr '\\0' 'x' > {}/{}".format(size, FOLDER, name))
-    command = " && ".join(lines)
-    if len(command.encode()) > COMMAND_LIMIT:
-        raise ValueError("the previews command exceeds the single-argument limit")
-    return [command]
+    # One compressed archive, not a file per line: the call's arguments stay in the model's context for the rest of the
+    # task, and the plain files (46 KiB of base64) took the fixture route past its window (14 Nov 2026, first run).
+    site_lines = ["mkdir -p " + SITES,
+                  "printf %s '{}' | base64 -d | tar xz -C {}".format(base64.b64encode(site_archive(witness)).decode(), SITES)]
+    return [joined(lines, "previews"), joined(site_lines, "sites")]
+
+
+def site_archive(witness):
+    """The site files as a gzip tar (sorted, fixed times), to unpack under the site folder."""
+    buffer = io.BytesIO()
+    with tarfile.open(fileobj=buffer, mode="w:gz", compresslevel=9) as archive:
+        for name, content in sorted(site_files(witness).items()):
+            info = tarfile.TarInfo(name)
+            info.size, info.mtime, info.mode = len(content), 0, 0o644
+            archive.addfile(info, io.BytesIO(content))
+    return buffer.getvalue()
 
 
 def scenario(witness):
@@ -238,7 +279,8 @@ def scenario(witness):
     return {"model": "fixture", "select": "prompt", "responses": [
         {"when": PROMPT, "events": calls, "usage": {"prompt_tokens": 20, "completion_tokens": 20}},
         {"when": PROMPT, "events": [{"type": "text", "text": "I wrote the report, the PDFs and the spreadsheets in "
-                                     + FOLDER + "/."}], "usage": {"prompt_tokens": 40, "completion_tokens": 20}},
+                                     + FOLDER + "/, and the sites in " + SITES + "/."}],
+         "usage": {"prompt_tokens": 40, "completion_tokens": 20}},
     ]}
 
 

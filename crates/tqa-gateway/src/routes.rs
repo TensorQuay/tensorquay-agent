@@ -761,6 +761,21 @@ pub(crate) const ROUTES: &[Route] = &[
         handler: Handler::FileView,
     },
     Route {
+        method: "POST",
+        path: "/api/v1/conversations/{id}/site",
+        handler: Handler::SiteMint,
+    },
+    Route {
+        method: "GET",
+        path: "/api/v1/conversations/{id}/site/{pass}/",
+        handler: Handler::SiteRoot,
+    },
+    Route {
+        method: "GET",
+        path: "/api/v1/conversations/{id}/site/{pass}/{*path}",
+        handler: Handler::SiteFile,
+    },
+    Route {
         method: "GET",
         path: "/api/v1/conversations/{id}/files/sheet",
         handler: Handler::FileSheet,

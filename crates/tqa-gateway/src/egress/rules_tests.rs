@@ -1,4 +1,4 @@
-use super::{AllowList, Decision, RuleInput, guarded};
+use super::{ANY_HOST, AllowList, Decision, RuleInput, guarded};
 use std::net::IpAddr;
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;
@@ -534,5 +534,61 @@ fn sec_053_only_an_internal_rule_for_that_name_and_port_reaches_a_private_addres
     assert!(!allow.internal("db.corp.example", 5433));
     assert!(!allow.internal("web.corp.example", 443));
     assert!(!allow.internal("other.corp.example", 5432));
+    Ok(())
+}
+
+// TEST: GW-U-214
+#[test]
+fn gw_u_214_the_allow_list_renders_as_csp_sources_for_a_site_preview() -> TestResult {
+    let rule = |host: &str, ports: &[u16]| RuleInput {
+        host: host.to_owned(),
+        ports: ports.to_vec(),
+        internal: false,
+    };
+    assert!(AllowList::new(Vec::new())?.csp_sources().is_empty());
+    let listed = AllowList::new(vec![
+        rule("cdn.example.org", &[443]),
+        rule("*.fonts.example", &[443, 8443]),
+        rule("api.example.net", &[8080]),
+        rule("2001:db8::1", &[443]),
+    ])?;
+    assert_eq!(
+        listed.csp_sources(),
+        [
+            "https://*.fonts.example",
+            "https://*.fonts.example:8443",
+            "https://[2001:db8::1]",
+            "https://api.example.net:8080",
+            "https://cdn.example.org",
+        ]
+    );
+    assert_eq!(
+        listed.site_hosts(),
+        (
+            false,
+            [
+                "*.fonts.example",
+                "2001:db8::1",
+                "api.example.net",
+                "cdn.example.org"
+            ]
+            .map(str::to_owned)
+            .to_vec()
+        )
+    );
+    // The any-host rule is a preset's, so the stored list carries it (a typed rule refuses it).
+    let open = AllowList::stored(vec![
+        rule(ANY_HOST, &[443]),
+        rule("cdn.example.org", &[443]),
+    ])?;
+    assert_eq!(
+        open.site_hosts(),
+        (true, vec!["cdn.example.org".to_owned()])
+    );
+    assert_eq!(
+        AllowList::new(Vec::new())?.site_hosts(),
+        (false, Vec::new())
+    );
+    assert_eq!(open.csp_sources(), ["https:", "https://cdn.example.org"]);
     Ok(())
 }
