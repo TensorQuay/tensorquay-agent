@@ -15,7 +15,7 @@ use crate::GatewayError;
 mod tests;
 
 /// The workspace's private directory, never listed at the root.
-const PRIVATE: &str = ".tqa";
+pub(super) const PRIVATE: &str = ".tqa";
 
 /// One chunk of a file as the runtime read it.
 #[derive(Debug, Eq, PartialEq)]

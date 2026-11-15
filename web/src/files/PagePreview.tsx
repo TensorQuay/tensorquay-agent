@@ -5,13 +5,14 @@ import { RotateCw } from "lucide-react";
 import { useState } from "react";
 
 import { api } from "../api/client";
+import { mintSitePass } from "../api/previews";
 import { useT } from "../i18n/I18nProvider";
 import { formatSize } from "../i18n/message";
 import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
 
 import "./changes-catalogue";
-import { pageHosts } from "./page-hosts";
+import { blockedHosts, pageHosts } from "./page-hosts";
 
 /** The hosts the offline line names before it counts the rest. */
 const NAMED_HOSTS = 3;
@@ -27,6 +28,12 @@ const NAMED_HOSTS = 3;
  * The frame is offline, so a page that loads from the internet says so on a row of its own under the bar, naming the
  * hosts as text (WEB-U-467); the bar stays as it is. They're read from the page's text: `text` when the panel has all
  * of it, else its download.
+ *
+ * A page is framed from its folder served as a site (WEB-U-470: "most sites have many files"): a short-lived pass's
+ * address, so the page's own CSS, scripts, pictures, fonts and links load, and outside hosts as the install's network
+ * setting allows; the line then names the hosts that setting blocks. Scripts run by default; Stop scripts reloads the
+ * page without them. If the site can't be opened (the pass refused), the page is framed from the single-page view as
+ * before, offline.
  */
 export function PagePreview({
   conversationId,
@@ -61,13 +68,47 @@ export function PagePreview({
     // One more read after a failure (a dropped connection), so one bad moment doesn't hide the line for this version.
     retry: 1,
   }).data;
+  // The page's folder as a site; until it answers, nothing is framed (no flash of the offline view). The pass lives 15
+  // minutes from its last use; it's minted again after 10.
+  const slash = path.lastIndexOf("/");
+  const folder = slash < 0 ? "" : path.slice(0, slash);
+  const site = useQuery({
+    queryKey: ["sitePass", conversationId, folder],
+    queryFn: ({ signal }) => mintSitePass(api, conversationId, folder, signal),
+    enabled: framed,
+    staleTime: 10 * 60 * 1000,
+    retry: false,
+    // A refused pass stays refused for this view: Expand's second frame falls back at once instead of asking again.
+    retryOnMount: false,
+  });
   // Each reload is a new frame, so the page starts again from the file as it is now.
   const [load, setLoad] = useState(0);
+  const [scripts, setScripts] = useState(true);
   // A frame loads once; a second load is the page leaving itself (a link followed, which the sandbox blocks, so the
   // frame goes blank): say so, with Reload (a pass over the pages before 17.0; WEB-U-254). Counted per frame.
   const [loads, setLoads] = useState({ frame: "", count: 0 });
-  const frame = `${etag}-${load}`;
-  const left = loads.frame === frame && loads.count > 1;
+  const frame = `${etag}-${load}-${scripts ? "run" : "stop"}`;
+  const served = site.data;
+  // In the site, a link to another of its pages is followed in the frame; only the single-page view is left blank.
+  const left = !served && loads.frame === frame && loads.count > 1;
+  const blocked =
+    served?.network && hosts ? blockedHosts(hosts, served.network) : [];
+  const named = (list: readonly string[]) =>
+    new Intl.ListFormat(t.locale, { type: "conjunction" }).format([
+      ...list.slice(0, NAMED_HOSTS),
+      ...(list.length > NAMED_HOSTS
+        ? [t("files.pageHostsMore", { count: list.length - NAMED_HOSTS })]
+        : []),
+    ]);
+  const src = served
+    ? `${served.url}${path
+        .slice(slash + 1)
+        .split("/")
+        .map(encodeURIComponent)
+        .join("/")}`
+    : site.isError
+      ? api.viewUrl(conversationId, path)
+      : null;
   if (!framed)
     return (
       <p className="type-small muted files-state">
@@ -80,49 +121,52 @@ export function PagePreview({
   return (
     <div className="file-kind stack">
       <div className="file-kind-bar">
-        <span className="type-small muted">{t("files.pageSandboxed")}</span>
+        <span className="type-small muted">
+          {t(scripts ? "files.pageSandboxed" : "files.pageScriptsStopped")}
+        </span>
+        <Button variant="ghost" onClick={() => setScripts(!scripts)}>
+          {t(scripts ? "files.stopScripts" : "files.runScripts")}
+        </Button>
         <Button variant="ghost" onClick={() => setLoad(load + 1)}>
           <Icon glyph={RotateCw} size={16} />
           {t("files.reload")}
         </Button>
       </div>
-      {hosts && hosts.length > 0 && (
-        <p className="type-small muted">
-          {t("files.pageOffline", {
-            hosts: new Intl.ListFormat(t.locale, {
-              type: "conjunction",
-            }).format([
-              ...hosts.slice(0, NAMED_HOSTS),
-              ...(hosts.length > NAMED_HOSTS
-                ? [
-                    t("files.pageHostsMore", {
-                      count: hosts.length - NAMED_HOSTS,
-                    }),
-                  ]
-                : []),
-            ]),
-          })}
-        </p>
-      )}
+      {served
+        ? blocked.length > 0 && (
+            <p className="type-small muted">
+              {t("files.siteBlocked", { hosts: named(blocked) })}
+            </p>
+          )
+        : site.isError &&
+          hosts &&
+          hosts.length > 0 && (
+            <p className="type-small muted">
+              {t("files.pageOffline", { hosts: named(hosts) })}
+            </p>
+          )}
       {left && (
         <p className="type-small muted" role="status">
           {t("files.pageLeft")}
         </p>
       )}
-      <iframe
-        key={frame}
-        className="file-page"
-        title={t("files.pageFrame", { name })}
-        src={api.viewUrl(conversationId, path)}
-        sandbox="allow-scripts"
-        referrerPolicy="no-referrer"
-        onLoad={() =>
-          setLoads((was) => ({
-            frame,
-            count: was.frame === frame ? was.count + 1 : 1,
-          }))
-        }
-      />
+      {/* Framed once its address is known: a frame without one would load a blank page first and count it. */}
+      {src && (
+        <iframe
+          key={frame}
+          className="file-page"
+          title={t("files.pageFrame", { name })}
+          src={src}
+          sandbox={scripts ? "allow-scripts" : ""}
+          referrerPolicy="no-referrer"
+          onLoad={() =>
+            setLoads((was) => ({
+              frame,
+              count: was.frame === frame ? was.count + 1 : 1,
+            }))
+          }
+        />
+      )}
     </div>
   );
 }

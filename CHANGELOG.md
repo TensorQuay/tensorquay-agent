@@ -7,6 +7,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Added
 
+- **A workspace folder can be served as a site for the Files panel's preview (18.0).** Most sites are many files, not
+  one page: a pass minted for a folder serves its `index.html` and, by relative address, its style sheets, scripts,
+  images and fonts, read-only, for 15 minutes from the last use. The page stays sandboxed with an opaque origin; it
+  may load from the internet only what the install's network setting allows, which the browser enforces before a
+  request leaves. A built site's own routes answer its page. The pass is forgotten at a restart.
 - **The agent reads PDFs (PRD item 30; ADR-0040; TOOL-U-145, PDF-U-001, PDF-U-002, CORE-U-092).** `read_file` on a PDF answers
   its text page by page, with page numbers, for every model; on a model that reads pictures, the pages it just read are
   shown as pictures too. The reader is built into the product (oxidize-pdf for the text, hayro for the pictures, both

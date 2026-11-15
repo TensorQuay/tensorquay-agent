@@ -39,6 +39,21 @@ describe("WEB-U-472 page-only answers keep their validators off the first load",
       expect(client, `${name} decoded in client.ts`).not.toContain(`"${name}"`);
   });
 
+  // WEB-U-470: a site pass is minted only by the files panel's page preview, which loads on demand, so its validator
+  // travels with the previews' (src/api/previews.ts), never in the core module or decoded in the client's own file.
+  it("keeps a site pass's validator with the previews, off the first load", async () => {
+    const modules = split(await productSources(process.cwd()));
+    const holding = Object.entries(modules)
+      .filter(([, names]) => names.includes("SitePass"))
+      .map(([area]) => area);
+    expect(holding).toEqual(["previews"]);
+    const client = readFileSync(
+      join(process.cwd(), "src/api/client.ts"),
+      "utf8",
+    );
+    expect(client).not.toContain('"SitePass"');
+  });
+
   it("loads each area's validators only when its answer is first asked for (a dynamic import, never a static one)", () => {
     for (const [area] of AREAS) {
       const text = readFileSync(

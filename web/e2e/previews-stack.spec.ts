@@ -27,8 +27,9 @@ test.beforeAll(async ({ browser, baseURL }) => {
 const witness = process.env.TQA_WITNESS_URL ?? "";
 const sandboxed = "Scripts are running in a sandbox";
 /** The row a page that loads from the internet shows under the bar, which keeps the sandbox note (WEB-U-467). */
-const offline = (hosts: string) =>
-  `Previews run offline: what this page loads from ${hosts} won't show here. Download it to see it all.`;
+// 18.0 (WEB-U-470): a page is framed from its folder served as a site, so the line under the bar names what the
+// network setting blocks of what the page would load; the offline wording stays for a page the site refused.
+const blocked = (hosts: string) => `Blocked by the network setting: ${hosts}`;
 const step = (title: string) => test.step(title, () => undefined);
 
 /** Opens a file of the previews folder in the Files panel, from wherever the panel is. */
@@ -129,18 +130,20 @@ test("WEB-E2E-032 the agent's page, PDFs and spreadsheets in the Files panel", a
   await expect(inside.locator("rect.bar")).toHaveCount(4);
   expect(new URL(page.url()).pathname).toBe(`/c/${task.id}`);
 
-  // The report reaches for the witness, so the preview names it: a host from the page's text.
+  // The report reaches for the witness, so the preview names it as blocked: a host from the page's text.
   await expect(
-    report.getByText(offline(new URL(witness).hostname), { exact: true }),
+    report.getByText(blocked(new URL(witness).hostname), { exact: true }),
   ).toBeVisible();
 
-  await step("a page that loads from the internet names its hosts, as text");
+  await step(
+    "a page that loads from the internet names its hosts as blocked, as text",
+  );
   const weather = await open(panel, "weather.html");
   await expect(weather.frameLocator("iframe").locator("#now")).toHaveText(
     "Loading…",
   );
   const line = weather.getByText(
-    offline("cdn.example.org and api.example.org"),
+    blocked("cdn.example.org and api.example.org"),
     { exact: true },
   );
   await expect(line).toBeVisible();
@@ -155,6 +158,9 @@ test("WEB-E2E-032 the agent's page, PDFs and spreadsheets in the Files panel", a
   );
   await expect(notes.getByText(sandboxed, { exact: true })).toBeVisible();
   await expect(notes.getByText(/^Previews run offline/)).toHaveCount(0);
+  await expect(notes.getByText(/^Blocked by the network setting/)).toHaveCount(
+    0,
+  );
   await capture(page, "previews-self-contained");
 
   await step("opened on its own, the page is still sandboxed");

@@ -128,3 +128,24 @@ function collect(root: ParentNode, hosts: Set<string>, base: string) {
     }
   }
 }
+
+/**
+ * The hosts a page loads from that the install's network setting doesn't let it reach (WEB-U-470): none when it reaches
+ * any host; else those matching neither an exact entry nor a `*.domain` one (the domain itself and its subdomains).
+ */
+export function blockedHosts(
+  hosts: readonly string[],
+  network: { any: boolean; hosts: readonly string[] },
+): string[] {
+  if (network.any) return [];
+  const allowed = (host: string) =>
+    network.hosts.some((entry) => {
+      const rule = entry.toLowerCase().replace(/:\d+$/, "");
+      if (rule.startsWith("*.")) {
+        const domain = rule.slice(2);
+        return host === domain || host.endsWith(`.${domain}`);
+      }
+      return host === rule;
+    });
+  return hosts.filter((host) => !allowed(host.toLowerCase()));
+}

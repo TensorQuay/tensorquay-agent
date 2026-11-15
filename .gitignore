@@ -6,6 +6,8 @@ node_modules/
 .next/
 /web/out/
 dist/
+# The previews e2e's built-shape site is a checked-in fixture (WEB-E2E-122), not a build's output.
+!deploy/tests/sites/dist/
 coverage/
 playwright-report/
 test-results/

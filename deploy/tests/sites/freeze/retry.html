@@ -1,0 +1,5 @@
+<!doctype html><html><body><div id="o">Loading…</div><script>
+// a page that polls live data and retries at once on failure, as generated dashboards often do
+let n=0; async function load(){ try{ const r=await fetch('https://api.data.gov.sg/v1/environment/air-temperature'); const j=await r.json(); document.getElementById('o').textContent=JSON.stringify(j).slice(0,80);}catch(e){ n++; document.getElementById('o').textContent='retry '+n; load(); } }
+load();
+</script></body></html>

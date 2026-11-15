@@ -8,6 +8,24 @@ import "../protocol/generated/validators.previews";
  * them, and it loads on demand, so their validators live here, off a task page's first load (WEB-U-014).
  */
 
+/**
+ * A short-lived pass that serves a task's folder as a site (WEB-U-470): its `url` frames the folder's pages with their
+ * own files, outside hosts as the network setting allows. Only the panel's page preview asks for one, so its validator
+ * lives here with the other previews', off a task page's first load.
+ */
+export function mintSitePass(
+  client: ApiClient,
+  id: string,
+  folder: string,
+  signal?: AbortSignal,
+) {
+  return client.request(
+    "mintSitePass",
+    (value) => parseApi(value, "SitePass"),
+    { parameters: { id }, body: JSON.stringify({ folder }), signal },
+  );
+}
+
 export function fileContent(
   client: ApiClient,
   id: string,
