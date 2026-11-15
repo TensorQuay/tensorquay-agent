@@ -420,3 +420,48 @@ async fn core_u_040_images_count_toward_the_compaction_trigger() -> TestResult {
     }
     Ok(())
 }
+
+// TEST: CORE-U-091
+/// An iPhone HEIC photo is no picture a model reads: the agent is told what it is and how to read it (convert it and
+/// read the converted file, which CORE-U-090 shows), never left with a bare path. The owner (14 Nov 2026): the agent
+/// should figure it out itself, with no library shipped for it.
+#[tokio::test]
+async fn core_u_091_a_heic_photo_tells_the_agent_to_convert_it() -> TestResult {
+    let heic = [
+        &[0_u8, 0, 0, 24][..],
+        b"ftypheic",
+        &[0, 0, 0, 0],
+        b"mif1heic",
+    ]
+    .concat();
+    // A route that never read pictures lists attachments as data only, as before (CORE-U-039).
+    for vision in [true] {
+        let mut h = vision_harness(vec![answer()], ToolRegistry::new())?;
+        h.deps.route.vision = vision;
+        upload(&h, "IMG_2237.HEIC", &heic)?;
+        upload(&h, "a.png", PNG)?;
+        let provider = h.provider.clone();
+        assert_eq!(
+            run(h, turn(&["IMG_2237.HEIC", "a.png"])).await?,
+            RunOutcome::Completed
+        );
+        let requests = provider.requests();
+        let message = current(&requests[0])?;
+        let said = text(message);
+        assert!(
+            said.contains("\"/workspace/uploads/IMG_2237.HEIC\": a HEIC photo, which no model reads: convert it to JPEG or PNG"),
+            "vision {vision}: {said}"
+        );
+        assert!(
+            said.contains("read the converted file with read_file"),
+            "{said}"
+        );
+        // The PNG beside it goes as before.
+        assert_eq!(
+            images(message).len(),
+            usize::from(vision),
+            "vision {vision}"
+        );
+    }
+    Ok(())
+}

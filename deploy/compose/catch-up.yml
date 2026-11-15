@@ -1,0 +1,31 @@
+# WEB-E2E-121: a proxy that buffers the event stream's tail stands between the browser and the gateway, as a reverse
+# proxy that buffers responses does (real-world use on 13 November 2026: the header read Done while the transcript
+# stayed on "Working…"). It takes the gateway's published port; the gateway publishes none. The proxy runs in the
+# runtime's own image (standard-library Python), the script bound in read-only (deploy/tests/buffering_proxy.py),
+# published where the driver's browser looks (TQA_DEMO_HOST), as demo.yml publishes the gateway.
+services:
+  gateway:
+    ports: !reset []
+  proxy:
+    image: ${TQA_RUNTIME_IMAGE:?Set the runtime image under test}
+    entrypoint: ["python3", "/proxy/buffering_proxy.py"]
+    user: "1000:1000"
+    read_only: true
+    environment:
+      TQA_PROXY_UPSTREAM: gateway:8080
+      TQA_PROXY_PASS_BYTES: "2048"
+      TQA_PROXY_HOLD_SECONDS: "40"
+      TQA_PROXY_PORT: "8080"
+    depends_on:
+      gateway:
+        condition: service_healthy
+    networks: [control]
+    ports:
+      - "${TQA_DEMO_HOST:-127.0.0.1}:${TQA_HTTP_PORT:-8080}:8080"
+    volumes:
+      - type: bind
+        source: ../tests/buffering_proxy.py
+        target: /proxy/buffering_proxy.py
+        read_only: true
+        bind: {create_host_path: false}
+    mem_limit: 128m

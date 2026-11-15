@@ -2,6 +2,7 @@
 mod decisions;
 mod fallback;
 mod images;
+mod pictures;
 pub(super) mod request;
 mod screenshots;
 mod states;

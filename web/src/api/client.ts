@@ -236,6 +236,31 @@ export class ApiClient {
       { parameters: { id }, query, signal },
     );
   }
+  /**
+   * The task's stored events after `after`, a page at a time without the stream (WEB-U-468): what a page reads when
+   * its live stream is held back, the same route the stream serves.
+   */
+  events(id: string, after: number, signal?: AbortSignal) {
+    const query = new URLSearchParams({ after: String(after), limit: "1000" });
+    // Only the page's shape is checked here: each item is a stored frame, checked as the stream's own are when the
+    // store applies it (parseFrame), so a full EventPage validator would add about 4.5 KB to every page's scripts.
+    return this.transport.request(
+      "events",
+      (value) => {
+        const page = value as { items?: unknown; next_after?: unknown };
+        if (
+          typeof value !== "object" ||
+          value === null ||
+          !Array.isArray(page.items) ||
+          !(page.next_after === null || typeof page.next_after === "number")
+        )
+          // copy-lint: not user copy (internal diagnostic)
+          throw new Error("Expected a page of events");
+        return page as { items: unknown[]; next_after: number | null };
+      },
+      { parameters: { id }, query, signal },
+    );
+  }
   /** One folder of the task's workspace; `path` "" is the root. */
   files(id: string, path: string, after?: string, signal?: AbortSignal) {
     const query = new URLSearchParams({ path });

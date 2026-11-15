@@ -4,6 +4,7 @@ import { conversationId, frame, transcriptFrames } from "../test/frames";
 
 import { noticeText } from "./notice-copy";
 import {
+  CATCH_UP_WAIT_MS,
   PUBLISH_FALLBACK_MS,
   STREAM_OPEN_MAX_WAIT_MS,
   STREAM_OPEN_WAIT_MS,
@@ -412,5 +413,198 @@ describe("WEB-U-278 publishing without waiting for a frame forever", () => {
     expect(cancelled).toEqual([1]);
     expect(timers[0]?.stopped).toBe(true);
     expect(notified).not.toHaveBeenCalled();
+  });
+});
+
+/** The run's start, as the stream delivered it before a proxy held the rest back; and its end, which it holds. */
+const started = transcriptFrames.slice(0, 3);
+/** The rest of the run, its end last, contiguous as the events route pages them. */
+const rest = transcriptFrames.slice(3, 19);
+const ended = rest.at(-1);
+if (!ended || ended.type !== "event" || ended.event.type !== "run.completed")
+  throw new Error("the fixture doesn't end with run.completed");
+const lastStarted = 2;
+
+/** A store whose stream may open, with the paged read and the record re-read recorded, and every wait on request. */
+function heldBack(record: { run_status?: string; at: string } = { at: "" }) {
+  const sources: Source[] = [];
+  const urls: string[] = [];
+  const waits: { run: () => void; ms: number; stopped: boolean }[] = [];
+  const read = vi.fn<(after: number) => Promise<unknown>>();
+  const readRecord = vi.fn<() => Promise<unknown>>();
+  const store = new TranscriptStore({
+    open: (url) => {
+      const source = new Source();
+      source.readyState = 0;
+      sources.push(source);
+      urls.push(url);
+      return source;
+    },
+    schedule: (callback) => {
+      callback(0);
+      return 0;
+    },
+    cancel: vi.fn(),
+    wait: (run, ms) => waits.push({ run, ms, stopped: false }) - 1,
+    stopWaiting: (handle) => {
+      const wait = waits[handle];
+      if (wait) wait.stopped = true;
+    },
+    random: () => 0.5,
+    read,
+    readRecord,
+  });
+  store.connect(conversationId);
+  const open = (source = sources.at(-1)) => {
+    if (!source) throw new Error("no source");
+    source.readyState = 1;
+    source.dispatchEvent(new Event("open"));
+  };
+  const elapse = (ms?: number) => {
+    const pending = waits
+      .filter((wait) => !wait.stopped && (ms === undefined || wait.ms === ms))
+      .at(-1);
+    if (!pending) throw new Error("No such wait is pending: " + String(ms));
+    pending.stopped = true;
+    pending.run();
+  };
+  const settle = async () => {
+    for (let i = 0; i < 8; i += 1) await Promise.resolve();
+  };
+  if (record.run_status) store.record(record.run_status, record.at);
+  return {
+    store,
+    sources,
+    urls,
+    waits,
+    read,
+    readRecord,
+    open,
+    elapse,
+    settle,
+  };
+}
+const page = (items: unknown[], next: number | null) => ({
+  items,
+  next_after: next,
+});
+
+// TEST-PLAN WEB-U-468 (18.0): a proxy that buffers the stream opened it and delivered the run's start, then held its
+// end back: the record said Done while the page stayed on "Working…" with Stop, and nothing gave Send back.
+describe("WEB-U-468 the chat catches up when live updates are held back", () => {
+  it("reads the events it misses when the record says the run ended and no end frame comes", async () => {
+    const h = heldBack();
+    h.open();
+    for (const item of started) h.sources[0]?.send(item);
+    expect(h.store.getSnapshot().transcript.run.status).toBe("running");
+    h.read
+      .mockResolvedValueOnce(page([started[2], ...rest], ended.seq))
+      .mockResolvedValueOnce(page([], null));
+    h.store.record("completed", "2026-01-01T00:00:10Z");
+    expect(h.read).not.toHaveBeenCalled();
+    h.elapse(CATCH_UP_WAIT_MS);
+    await h.settle();
+    expect(h.read.mock.calls.map(([after]) => after)).toEqual([
+      lastStarted,
+      ended.seq,
+    ]);
+    const { transcript, connection } = h.store.getSnapshot();
+    expect(transcript.run.status).toBe("completed");
+    expect(transcript.lastSeq).toBe(ended.seq);
+    expect(h.sources[0]?.close).toHaveBeenCalled();
+    expect(h.urls[1]).toContain(`after=${ended.seq}`);
+    expect(connection).toBe("reconnecting");
+    h.open();
+    expect(h.store.getSnapshot().connection).toBe("live");
+    h.store.dispose();
+  });
+
+  it("makes no read when the end frame arrives within the wait", async () => {
+    const h = heldBack();
+    h.open();
+    for (const item of started) h.sources[0]?.send(item);
+    h.store.record("completed", "2026-01-01T00:00:10Z");
+    for (const item of rest) h.sources[0]?.send(item);
+    expect(
+      h.waits
+        .filter((wait) => wait.ms === CATCH_UP_WAIT_MS)
+        .every((wait) => wait.stopped),
+    ).toBe(true);
+    await h.settle();
+    expect(h.read).not.toHaveBeenCalled();
+    expect(h.sources).toHaveLength(1);
+    h.store.dispose();
+  });
+
+  it("reads the events on each open-wait timeout of a stream that never opens, before it reopens", async () => {
+    // A proxy can hold the headers too: a new task's page sat on "Sending…" with nothing shown.
+    const h = heldBack();
+    h.read.mockResolvedValueOnce(page(started, null));
+    h.elapse(STREAM_OPEN_WAIT_MS);
+    await h.settle();
+    expect(h.read).toHaveBeenCalledWith(0);
+    expect(h.store.getSnapshot().transcript.run.status).toBe("running");
+    expect(h.sources).toHaveLength(2);
+    expect(h.urls[1]).toContain(`after=${lastStarted}`);
+    h.store.dispose();
+  });
+
+  it("counts a failed read as a restart and gives up in words at the limit", async () => {
+    const h = heldBack();
+    h.read.mockRejectedValue(new Error("held"));
+    for (let attempt = 0; attempt < 6; attempt += 1) {
+      h.elapse();
+      await h.settle();
+    }
+    const { connection, transcript } = h.store.getSnapshot();
+    expect(connection).toBe("closed");
+    expect(transcript.banner ? noticeText(transcript.banner) : "").toBe(
+      "The transcript could not reconnect. Reload to retry.",
+    );
+    h.store.dispose();
+  });
+
+  it("re-reads the record when an open stream goes silent during a run, backing off as the open wait does", async () => {
+    const h = heldBack();
+    h.open();
+    for (const item of started) h.sources[0]?.send(item);
+    h.readRecord.mockResolvedValueOnce({
+      run_status: "running",
+      last_activity_at: "2026-01-01T00:00:01Z",
+    });
+    h.elapse(STREAM_OPEN_WAIT_MS);
+    await h.settle();
+    expect(h.readRecord).toHaveBeenCalledTimes(1);
+    expect(h.read).not.toHaveBeenCalled();
+    expect(h.waits.filter((wait) => !wait.stopped).at(-1)?.ms).toBe(
+      STREAM_OPEN_WAIT_MS * 2,
+    );
+    h.readRecord.mockResolvedValueOnce({
+      run_status: "completed",
+      last_activity_at: "2026-01-01T00:00:10Z",
+    });
+    h.read.mockResolvedValueOnce(page(rest, null));
+    h.elapse(STREAM_OPEN_WAIT_MS * 2);
+    await h.settle();
+    expect(h.read).toHaveBeenCalledWith(lastStarted);
+    expect(h.store.getSnapshot().transcript.run.status).toBe("completed");
+    h.store.dispose();
+  });
+
+  it("leaves a long step alone: silence with the record saying running never reads the events", async () => {
+    const h = heldBack();
+    h.open();
+    for (const item of started) h.sources[0]?.send(item);
+    h.readRecord.mockResolvedValue({
+      run_status: "running",
+      last_activity_at: "2026-01-01T00:00:01Z",
+    });
+    for (const ms of [1, 2, 4, 8]) {
+      h.elapse(Math.min(STREAM_OPEN_WAIT_MS * ms, STREAM_OPEN_MAX_WAIT_MS));
+      await h.settle();
+    }
+    expect(h.read).not.toHaveBeenCalled();
+    expect(h.sources).toHaveLength(1);
+    h.store.dispose();
   });
 });

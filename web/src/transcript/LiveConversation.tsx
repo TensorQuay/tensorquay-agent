@@ -75,7 +75,10 @@ export function LiveConversation({
   conversation: Conversation;
   initialMessage?: string | null;
 }) {
-  const { transcript, connection } = useTranscript(conversation.id);
+  const { transcript, connection } = useTranscript(
+    conversation.id,
+    conversation,
+  );
   // ADR-0037: the task's stored key uses, on their steps or once for their run (a page opened later).
   const keyUses = useKeyUses(conversation.id);
   const placed = useMemo(
@@ -499,6 +502,7 @@ export function LiveConversation({
         <PanelBoundary>
           <Composer
             run={transcript.run}
+            ended={!working && transcript.run.status === "running"}
             sandbox={transcript.sandbox}
             queue={transcript.queue}
             teamWait={teamWait}

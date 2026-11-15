@@ -62,7 +62,7 @@ const conversation: Conversation = {
 };
 // Each test's client, cleared and unmounted after it (WEB-U-195).
 let cache: QueryClient | undefined;
-function page() {
+function page(record: Conversation = conversation) {
   const client = new QueryClient();
   cache = client;
   client.setQueryData(["templates"], templates);
@@ -80,7 +80,7 @@ function page() {
       },
     ],
   });
-  return render(<LiveConversation conversation={conversation} />, {
+  return render(<LiveConversation conversation={record} />, {
     wrapper: ({ children }) => (
       <QueryClientProvider client={client}>{children}</QueryClientProvider>
     ),
@@ -487,5 +487,30 @@ describe("WEB-U-193 a page opened later shows the task's stored key uses", () =>
     });
     view.rerender(<LiveConversation conversation={conversation} />);
     await waitFor(() => expect(read).toHaveBeenCalledTimes(2));
+  });
+});
+
+// WEB-U-414 reaches the composer (WEB-U-468, 18.0): a run the record says ended isn't working, so Send is back and
+// Stop gone while a held-back stream still shows the run going.
+describe("WEB-U-468 the composer trusts the record over a held-back stream", () => {
+  it("gives Send back and drops Stop when the record says the run ended", () => {
+    let transcript = emptyTranscript();
+    for (const item of transcriptFrames.slice(0, 3))
+      transcript = apply(transcript, item);
+    expect(transcript.run.status).toBe("running");
+    vi.mocked(useTranscript).mockReturnValue({
+      transcript,
+      connection: "live",
+    });
+    page({
+      ...conversation,
+      run_status: "completed",
+      last_activity_at: "2026-01-01T00:00:10Z",
+    });
+    expect(screen.queryByRole("button", { name: "Stop" })).toBeNull();
+    fireEvent.change(screen.getByRole("textbox", { name: "Message" }), {
+      target: { value: "Thanks" },
+    });
+    expect(screen.getByRole("button", { name: "Send" })).toBeEnabled();
   });
 });

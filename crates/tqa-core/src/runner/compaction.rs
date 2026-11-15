@@ -37,7 +37,8 @@ impl Execution<'_> {
         let (needed, capacity) = request::measure(self).await?;
         let needed = needed
             .saturating_add(self.image_tokens().await?)
-            .saturating_add(self.screenshot_tokens()?);
+            .saturating_add(self.screenshot_tokens()?)
+            .saturating_add(self.picture_tokens()?);
         if needed.saturating_mul(100) <= u64::from(capacity).saturating_mul(COMPACT_AT_PERCENT) {
             return Ok(());
         }

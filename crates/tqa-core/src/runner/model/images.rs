@@ -14,6 +14,7 @@ enum Reason {
     LimitReached,
     RequestTooLarge,
     NoImageInput,
+    Heic,
 }
 impl Reason {
     const fn as_str(self) -> &'static str {
@@ -23,6 +24,11 @@ impl Reason {
             Self::LimitReached => "limit reached",
             Self::RequestTooLarge => "request too large",
             Self::NoImageInput => "no image input on this route",
+            Self::Heic => {
+                "a HEIC photo, which no model reads: convert it to JPEG or PNG in the workspace (with a tool you can \
+                 install or write), then read the converted file with read_file to see it; if you can't, ask the person \
+                 for a JPEG or PNG"
+            }
         }
     }
 }
@@ -201,6 +207,8 @@ impl Selection {
 fn not_sent(error: ImageError) -> Option<Reason> {
     match error {
         ImageError::NotImage => None,
+        // Converting it is the agent's way to see the photo (CORE-U-091).
+        ImageError::Heic => Some(Reason::Heic),
         ImageError::TooLarge => Some(Reason::TooLarge),
         ImageError::Unreadable => Some(Reason::Unreadable),
     }

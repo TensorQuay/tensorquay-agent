@@ -33,7 +33,20 @@ impl Execution<'_> {
         let (request, screenshots) = self
             .attach_screenshots(request, needed.saturating_add(attached), capacity)
             .await?;
-        Ok((request, attached.saturating_add(screenshots)))
+        // Then the pictures the agent read from its workspace, in the room left (CORE-U-090).
+        let (request, pictures) = self
+            .attach_pictures(
+                request,
+                needed.saturating_add(attached).saturating_add(screenshots),
+                capacity,
+            )
+            .await?;
+        Ok((
+            request,
+            attached
+                .saturating_add(screenshots)
+                .saturating_add(pictures),
+        ))
     }
 
     /// `request` with the run's latest screenshots on their tool results and the fixed line on the others, and the

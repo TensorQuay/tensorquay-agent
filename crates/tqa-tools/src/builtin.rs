@@ -24,6 +24,7 @@ pub use fetch_url::FetchUrl;
 pub use glob::Glob;
 pub use grep::Grep;
 pub use notes::{MAX_NOTES_BYTES, ReadNotes, WriteNotes};
+pub use read_file::PICTURE_SUMMARY;
 pub use read_file::ReadFile;
 use serde::de::DeserializeOwned;
 use serde_json::Value;

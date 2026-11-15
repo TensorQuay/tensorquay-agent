@@ -7,6 +7,15 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **The agent can look at a picture in its workspace (CORE-U-090, TOOL-U-143).** When the agent reads a picture
+  file with `read_file` (PNG, JPEG, GIF or WebP, recognised by its content), a model that reads pictures is shown
+  the picture itself: the latest three read in a run, within the request's room. A model that doesn't read pictures
+  is told so in plain words. Before, the agent got only "[binary file]", so it could convert a photo to JPEG and
+  still tell the person it couldn't see it.
+- **An attached iPhone HEIC photo tells the agent how to see it (CORE-U-091, TOOL-U-144).** No model reads HEIC, and
+  the product ships no HEIC decoder: the agent is told the file is a HEIC photo, to convert it to JPEG or PNG in its
+  workspace with a tool it can install or write, and to read the converted file, which it then sees; when it can't
+  (no network for a tool), it asks the person for a JPEG or PNG. Before, it got a bare path and no hint.
 - **A message whose environment couldn't start is kept, and the page says so.** A first start that failed (the
   sandbox could not be created, the runtime exited before it registered, or the model's decision engine was gone)
   told only the open stream; after a reload the message was gone without a trace. The task's queued list now keeps
@@ -24,6 +33,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   waiting for the connection; a server down only briefly (a restart) is still tried on every call, so a task's own
   retries reach it when it's back. Before, a stopped model looked available and a message on it showed "Sending…"
   for 20 seconds before failing.
+- **A task's page catches up when its live updates are held back.** Through a proxy that buffers the event stream,
+  the task's header could read Done while the transcript stayed on "Working…" with a Stop button, and nothing let
+  you send. The page now notices a run the task's record says has ended, or a stream that never opens, reads the
+  missing events itself and reopens the stream from where it got to; the Send button follows the record, so you can
+  write while the page catches up. Silence alone changes nothing: a long quiet step stays a working run.
 - **Deleting a team's lead task with its helpers now removes the helpers' own copies and the team's messages
   (GW-I-108).** Each helper's copy of the lead's files is deleted with the helper's task, whether the helper is
   deleted on its own or with its lead, and the purge removes it within minutes; a copy you started another task in

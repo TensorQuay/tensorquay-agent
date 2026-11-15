@@ -124,14 +124,19 @@ impl Tool for ReadFile {
             }
             let mut input = Input::new(file, cancel);
             if input.probe_binary()? {
-                return Ok(binary_summary(stamp.size, ignored));
+                return Ok(summary(input.picture(), stamp.size, ignored));
             }
             let text = page::render(&mut input, record, limits)?;
             if Stamp::new(&input.metadata()?)? != stamp {
                 return Err(record::stale());
             }
+            let picture = if text.is_none() {
+                input.picture()
+            } else {
+                None
+            };
             Ok(text.map_or_else(
-                || binary_summary(stamp.size, ignored),
+                || summary(picture, stamp.size, ignored),
                 |text| ToolOutput::text(if ignored { noted(&text) } else { text }),
             ))
         })
@@ -165,4 +170,24 @@ fn binary_summary(size: u64, ignored: bool) -> ToolOutput {
         String::new()
     };
     ToolOutput::text(format!("[binary file, {size} bytes]{note}"))
+}
+
+/// The first words of a picture's summary: the runner finds the result by them and, on a route that reads pictures,
+/// shows the file to the model beside it (TOOL-U-143, CORE-U-090).
+pub const PICTURE_SUMMARY: &str = "[picture file, ";
+
+/// A binary file's summary: a picture's kind and size (TOOL-U-143), else its size.
+fn summary(picture: Option<tqa_types::ImageMediaType>, size: u64, ignored: bool) -> ToolOutput {
+    picture.map_or_else(
+        || binary_summary(size, ignored),
+        |kind| picture_summary(kind, size),
+    )
+}
+
+/// A picture the model is shown on a route that reads pictures; its size and kind otherwise.
+fn picture_summary(kind: tqa_types::ImageMediaType, size: u64) -> ToolOutput {
+    ToolOutput::text(format!(
+        "{PICTURE_SUMMARY}{}, {size} bytes: shown to you as a picture when this model reads pictures]",
+        kind.as_str()
+    ))
 }
