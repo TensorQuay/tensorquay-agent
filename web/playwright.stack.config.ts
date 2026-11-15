@@ -126,7 +126,12 @@ export default defineConfig({
                                                                 .TQA_STACK_SUITE ===
                                                               "catch-up"
                                                             ? "catch-up-stack.spec.ts"
-                                                            : "full-stack.spec.ts",
+                                                            : process.env
+                                                                  .TQA_STACK_SUITE ===
+                                                                "pdf"
+                                                              ? // WEB-E2E-126: read_file on PDFs, on a route with vision and one without.
+                                                                "pdf-stack.spec.ts"
+                                                              : "full-stack.spec.ts",
   forbidOnly: Boolean(process.env.CI),
   retries: 0,
   // Baselines are never rewritten by a check run; TQA_STACK_UPDATE_SNAPSHOTS=1 rewrites the ones a suite reads, for a

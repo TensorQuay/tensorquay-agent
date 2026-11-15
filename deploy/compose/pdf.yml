@@ -1,0 +1,10 @@
+# WEB-E2E-126: read_file on PDFs against a real runtime and a scripted model, on a route with vision and one without.
+services:
+  fake-model:
+    command: ["--scenario", "/scenarios/pdf.json"]
+    volumes:
+      - type: bind
+        source: ../tests/fixtures/pdf.json
+        target: /scenarios/pdf.json
+        read_only: true
+        bind: {create_host_path: false}
