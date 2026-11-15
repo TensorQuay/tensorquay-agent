@@ -254,6 +254,36 @@ mod tests {
     use super::*;
     use std::os::unix::fs::symlink;
 
+    // TEST: TOOL-U-144
+    #[test]
+    fn tool_u_144_a_heic_photo_is_named_by_its_bytes_whatever_its_name()
+    -> Result<(), Box<dyn std::error::Error>> {
+        let workspace = tempfile::tempdir()?;
+        // An ISO media file's start: a box size, `ftyp`, then the major brand.
+        let heic = b"\x00\x00\x00\x18ftypheic\x00\x00\x00\x00mif1heic";
+        std::fs::write(workspace.path().join("IMG_0001.HEIC"), heic)?;
+        std::fs::write(workspace.path().join("renamed.jpg"), heic)?;
+        std::fs::write(
+            workspace.path().join("clip.mp4"),
+            b"\x00\x00\x00\x18ftypisom\x00\x00\x02\x00isomiso2",
+        )?;
+        let root = WorkspaceRoot::open(workspace.path()).map_err(|error| error.to_string())?;
+        for name in ["IMG_0001.HEIC", "renamed.jpg"] {
+            assert!(
+                matches!(read_workspace_image(&root, name), Err(ImageError::Heic)),
+                "{name}"
+            );
+        }
+        assert!(
+            matches!(
+                read_workspace_image(&root, "clip.mp4"),
+                Err(ImageError::NotImage)
+            ),
+            "an MP4 is no picture"
+        );
+        Ok(())
+    }
+
     // TEST: TOOL-U-143
     #[test]
     fn tool_u_143_a_picture_anywhere_in_the_workspace_is_read_and_nothing_leads_out()

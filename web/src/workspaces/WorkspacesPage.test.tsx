@@ -661,6 +661,7 @@ describe("WEB-U-073 finding a workspace", () => {
 
   // 17.3: a phone has no room for the segmented filter's four labels; it offers the same choices as the standard picker
   // (the stylesheet shows one or the other by width).
+  // WEB-U-444 (17.3): the workspace filter as the standard picker, for a phone.
   it("offers the same filters as the standard picker, for a phone", async () => {
     window.history.replaceState(null, "", "/workspaces?filter=shared_with_me");
     show([], {

@@ -140,8 +140,8 @@ describe("WEB-U-041 limits", () => {
     expect(screen.queryByText("Below the usual minimum")).toBeNull();
   });
 
-  // 17.3: the list keeps a limit to two lines (a long note whole in the line's tooltip); the limit's own place,
-  // its Edit dialog, says the note in full.
+  // WEB-U-447 (17.3): the list keeps a limit to two lines (a long note whole in the line's tooltip); the limit's own
+  // place, its Edit dialog, says the note in full.
   it("says the same note in the limit's Edit dialog", async () => {
     show(fakeLimits().api);
     await screen.findByRole("table", { name: "Limits" });
