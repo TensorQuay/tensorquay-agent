@@ -49,11 +49,11 @@ permissions:
   contents: read
 
 jobs:
+  # The contracts and the stack run side by side (15 Nov 2026: one job of both took about 65 minutes on a pull
+  # request; the contracts need no image, and only compose.rs and robustness_stack.rs start the built stack).
   gateway:
     runs-on: ubuntu-latest
-    # A 2-core runner builds three images and the coverage report after the contracts: on 7 Nov the job took 97 minutes
-    # to the contracts' end, and the browser suites and the instrumented rerun of every contract come after.
-    timeout-minutes: 300
+    timeout-minutes: 240
     # The runner's disk holds the build without debug information (tests and coverage don't need it).
     env:
       CARGO_INCREMENTAL: "0"
@@ -114,6 +114,112 @@ jobs:
           set -euo pipefail
           cargo fmt -p tqa-gateway --check
           cargo clippy -p tqa-gateway --all-targets -- -D warnings
+      - name: Run the gateway contracts against PostgreSQL (all but the two the stack job runs)
+        env:
+          SQLX_OFFLINE: "true"
+        # Every failure in one run, the database-independent contracts included (`--run-ignored all` runs both, so they
+        # have no step of their own since 14 Nov 2026). PERF-002 and PERF-003 measure a release
+        # build and refuse this debug one; a shared 2-core runner's timings would measure the runner anyway.
+        run: cargo nextest run -p tqa-gateway --run-ignored all --no-fail-fast -E 'not test(/^perf_/) and not (binary(compose) | binary(robustness_stack))'
+      - name: Prove explicitly selected database tests fail without opt-in
+        shell: bash
+        env:
+          SQLX_OFFLINE: "true"
+        run: |
+          set -euo pipefail
+          if env -u TQA_DATABASE_URL cargo nextest run -p tqa-gateway --run-ignored all \
+            -E 'test(gw_i_016_migrations_preserve_data_when_reapplied)' > missing-database.log 2>&1; then
+            cat missing-database.log
+            exit 1
+          fi
+          grep -F 'PostgreSQL tests require TQA_DATABASE_URL' missing-database.log
+      - name: Prove explicitly selected Docker tests fail without opt-in
+        shell: bash
+        env:
+          SQLX_OFFLINE: "true"
+        run: |
+          set -euo pipefail
+          if env -u TQA_DOCKER_TESTS cargo nextest run -p tqa-gateway --test compose --run-ignored all > missing-docker.log 2>&1; then
+            cat missing-docker.log
+            exit 1
+          fi
+          grep -F 'Docker tests require TQA_DOCKER_TESTS=1' missing-docker.log
+      - name: Check crate documentation
+        env:
+          SQLX_OFFLINE: "true"
+          RUSTDOCFLAGS: -D warnings
+        run: cargo doc -p tqa-gateway --no-deps
+      # Coverage runs on main only (14 Nov 2026, the owner: a pull request waited 90 minutes): the instrumented rerun of
+      # every contract took 27 of them, and the plain run above already decides a pull request.
+      - name: Free the disk for the coverage build
+        if: github.event_name == 'push'
+        # The runner had 14 GB left here on 7 Nov and the instrumented build's linker died of it (ld: Bus error). The
+        # debug test build goes (its tests are done; the cache saves whatever is rebuilt), and so do the image build
+        # layers; the images under test stay (the instrumented contracts run them with --no-build).
+        run: |
+          rm -rf target/debug
+          df -h /
+      - name: Report crate coverage
+        if: github.event_name == 'push'
+        env:
+          SQLX_OFFLINE: "true"
+        # The same contracts as above, instrumented (the release-only PERF tests left out as there). The coverage
+        # build goes once the report is printed.
+        run: |
+          cargo llvm-cov nextest -p tqa-gateway --run-ignored all --no-fail-fast -E 'not test(/^perf_/) and not (binary(compose) | binary(robustness_stack))'
+          rm -rf target/llvm-cov-target
+      - name: Stop the ephemeral database
+        if: always()
+        run: docker compose -f deploy/compose/dev.yml down --volumes
+
+  gateway-stack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    # The runner's disk holds the build without debug information (tests and coverage don't need it).
+    env:
+      CARGO_INCREMENTAL: "0"
+      CARGO_PROFILE_DEV_DEBUG: "0"
+      CARGO_PROFILE_TEST_DEBUG: "0"
+      # A 2-core runner is slower than a workstation: the harness scales its deadlines, as tools/check.sh does.
+      TQA_TEST_DEADLINE_SCALE: "4"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Free the runner's disk for the build
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache \
+            /usr/share/swift /usr/local/share/boost /usr/local/share/powershell /usr/lib/jvm /opt/az
+          docker image prune --all --force > /dev/null
+          df -h / /mnt 2>/dev/null || df -h /
+      - name: Install pinned Rust toolchain
+        run: rustup show
+      - name: Cache Cargo registry and build output
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: |
+            ~/.cargo/registry
+            target
+          key: ${{ runner.os }}-gateway-stack-rust-1.97.1-${{ hashFiles('Cargo.lock', 'Cargo.toml', 'crates/**/Cargo.toml') }}
+      - name: Install pinned test and coverage tools
+        uses: taiki-e/install-action@9114bf4d891761788c546334fd37538eae1bf8b3 # v2.87.16
+        with:
+          tool: cargo-nextest@0.9.145,cargo-llvm-cov@0.9.1
+      - name: Create ephemeral database credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          database_password="$(openssl rand -hex 32)"
+          gateway_docker_gid="$(stat -c '%g' /var/run/docker.sock)"
+          echo "::add-mask::$database_password"
+          {
+            printf 'TQA_POSTGRES_PASSWORD=%s\n' "$database_password"
+            printf 'TQA_DATABASE_URL=postgres://tqa:%s@127.0.0.1:55432/gateway\n' "$database_password"
+            printf 'DATABASE_URL=postgres://tqa:%s@127.0.0.1:55432/gateway\n' "$database_password"
+            printf 'TQA_DOCKER_GID=%s\n' "$gateway_docker_gid"
+          } >> "$GITHUB_ENV"
+      - name: Start pinned PostgreSQL
+        run: docker compose -f deploy/compose/dev.yml up -d --no-build --wait postgres
       - name: Build the static gateway image for the Docker contract
         run: docker build -f images/gateway/Dockerfile -t tqa-gateway:local .
       - name: Build the standalone web image for the Docker contract
@@ -154,15 +260,12 @@ jobs:
           npm install --global corepack@0.36.0
           corepack pnpm install --frozen-lockfile
           corepack pnpm exec playwright install --with-deps chromium
-      - name: Run all gateway contracts against PostgreSQL
+      - name: Run the gateway contracts that start the built stack
         env:
           SQLX_OFFLINE: "true"
           TQA_DOCKER_TESTS: "1"
           TQA_GATEWAY_IMAGE: tqa-gateway:local
-        # Every failure in one run, the database-independent contracts included (`--run-ignored all` runs both, so they
-        # have no step of their own since 14 Nov 2026). PERF-002 and PERF-003 measure a release
-        # build and refuse this debug one; a shared 2-core runner's timings would measure the runner anyway.
-        run: cargo nextest run -p tqa-gateway --run-ignored all --no-fail-fast -E 'not test(/^perf_/)'
+        run: cargo nextest run -p tqa-gateway --run-ignored all --no-fail-fast -E 'binary(compose) | binary(robustness_stack)'
       - name: Test the deployment harness failures without Docker
         run: python3 -m unittest discover -s deploy/tests -p 'test_*.py' -v
       - name: Run the full-stack browser and workspace contract
@@ -180,56 +283,6 @@ jobs:
           TQA_DOCKER_TESTS: "1"
           TQA_WEB_EVIDENCE_DIR: ${{ runner.temp }}/tqa-environment-evidence
         run: python3 deploy/tests/demo.py --suite environment
-      - name: Prove explicitly selected database tests fail without opt-in
-        shell: bash
-        env:
-          SQLX_OFFLINE: "true"
-        run: |
-          set -euo pipefail
-          if env -u TQA_DATABASE_URL cargo nextest run -p tqa-gateway --run-ignored all \
-            -E 'test(gw_i_016_migrations_preserve_data_when_reapplied)' > missing-database.log 2>&1; then
-            cat missing-database.log
-            exit 1
-          fi
-          grep -F 'PostgreSQL tests require TQA_DATABASE_URL' missing-database.log
-      - name: Prove explicitly selected Docker tests fail without opt-in
-        shell: bash
-        env:
-          SQLX_OFFLINE: "true"
-        run: |
-          set -euo pipefail
-          if env -u TQA_DOCKER_TESTS cargo nextest run -p tqa-gateway --test compose --run-ignored all > missing-docker.log 2>&1; then
-            cat missing-docker.log
-            exit 1
-          fi
-          grep -F 'Docker tests require TQA_DOCKER_TESTS=1' missing-docker.log
-      - name: Check crate documentation
-        env:
-          SQLX_OFFLINE: "true"
-          RUSTDOCFLAGS: -D warnings
-        run: cargo doc -p tqa-gateway --no-deps
-      # Coverage runs on main only (14 Nov 2026, the owner: a pull request waited 90 minutes): the instrumented rerun of
-      # every contract took 27 of them, and the plain run above already decides a pull request.
-      - name: Free the disk for the coverage build
-        if: github.event_name == 'push'
-        # The runner had 14 GB left here on 7 Nov and the instrumented build's linker died of it (ld: Bus error). The
-        # debug test build goes (its tests are done; the cache saves whatever is rebuilt), and so do the image build
-        # layers; the images under test stay (the instrumented contracts run them with --no-build).
-        run: |
-          rm -rf target/debug
-          docker builder prune -af > /dev/null
-          df -h /
-      - name: Report crate coverage
-        if: github.event_name == 'push'
-        env:
-          SQLX_OFFLINE: "true"
-          TQA_DOCKER_TESTS: "1"
-          TQA_GATEWAY_IMAGE: tqa-gateway:local
-        # The same contracts as above, instrumented (the release-only PERF tests left out as there). The coverage
-        # build goes once the report is printed.
-        run: |
-          cargo llvm-cov nextest -p tqa-gateway --run-ignored all --no-fail-fast -E 'not test(/^perf_/)'
-          rm -rf target/llvm-cov-target
       - name: Stop the ephemeral database
         if: always()
         run: docker compose -f deploy/compose/dev.yml down --volumes
