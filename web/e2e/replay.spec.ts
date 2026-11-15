@@ -41,6 +41,9 @@ test("WEB-U-037 a replay snapshot waits for a tool card that is still loading", 
   await run(page);
   await page.reload();
   await expect(page.getByLabel("Run status")).toHaveText(/^Done/);
+  // The turns' renderers load with the first turn (WEB-U-473): wait for the turn here, before the hold, so what the
+  // hold catches is the tool card's code, as it always was (the run's status shows before the turns do).
+  await expect(page.getByRole("button", { name: /Worked for/ })).toBeVisible();
   // Hold the tool card's code back, so the opened card is certainly still on its skeleton when the snapshot starts.
   let release = () => {};
   const held = new Promise<void>((resolve) => (release = resolve));
