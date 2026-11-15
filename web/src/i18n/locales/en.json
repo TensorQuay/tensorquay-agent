@@ -542,6 +542,7 @@
     "composer.queuedSendHandBack": "Sends when you hand back the desktop: {text}",
     "composer.queuedSendByHandBack": "From {author}, sends when the desktop is handed back: {text}",
     "composer.droppedFailed": "Not sent, because the run failed: {text}",
+    "composer.droppedNotStarted": "Not sent, because the environment couldn't start: {text}",
     "composer.droppedStopped": "Not sent, because the run was stopped: {text}",
     "composer.sendAgain": "Send again",
     "composer.dismiss": "Dismiss",

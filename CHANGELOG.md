@@ -16,6 +16,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **Caps Lock types capitals on the Desktop under Take over (RT-I-059).** With Caps Lock on, a Mac viewer's letters
+  came out lower case: the screen sharer added Shift for each capital while the desktop's own Caps Lock was also on,
+  and the two cancelled. A viewer's Caps Lock no longer toggles the desktop's; letters arrive as typed, and Ctrl+A and
+  other layouts' symbols are unchanged.
 - **The agent can look at a picture in its workspace (CORE-U-090, TOOL-U-143).** When the agent reads a picture
   file with `read_file` (PNG, JPEG, GIF or WebP, recognised by its content), a model that reads pictures is shown
   the picture itself: the latest three read in a run, within the request's room. A model that doesn't read pictures
@@ -25,6 +29,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   the product ships no HEIC decoder: the agent is told the file is a HEIC photo, to convert it to JPEG or PNG in its
   workspace with a tool it can install or write, and to read the converted file, which it then sees; when it can't
   (no network for a tool), it asks the person for a JPEG or PNG. Before, it got a bare path and no hint.
+- **A message whose environment couldn't start is kept, and the page says so.** A first start that failed (the
+  sandbox could not be created, the runtime exited before it registered, or the model's decision engine was gone)
+  told only the open stream; after a reload the message was gone without a trace. The task's queued list now keeps
+  it as dropped with the start's reason, the stream hears the queue change, and the composer reads "Not sent,
+  because the environment couldn't start" with Send again and Dismiss, as for a run that failed.
 - **Desktop menus and tool bars at the top of a window are marked again.** Since 17.1, an element whose box lay
   outside the focused window's frame got no mark; the frame's position came from a tool that, under the desktop's
   window manager, placed it about 20 pixels too low, so the menu bar and the tool bar of an application such as

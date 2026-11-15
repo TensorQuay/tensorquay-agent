@@ -2933,7 +2933,10 @@
         "reason": {
           "enum": [
             "run_failed",
-            "run_cancelled"
+            "run_cancelled",
+            "sandbox_failed",
+            "runtime_start_failed",
+            "decision_engine_unavailable"
           ]
         },
         "sent_at": {

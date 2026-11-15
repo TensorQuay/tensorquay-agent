@@ -31,6 +31,8 @@ MIX_SERVICE, MIX_ROUTE, MAX_RESPONSES = "fake-model-mix", "mix", 128
 # A lane's first conversation starts this long after the chaos starts, once the slots are under way.
 FIRST_START_SECONDS = 60
 POLL_SECONDS = 5
+# Why the gateway drops a message whose environment never started (GW-I-322): sent again by the lane, as a person does.
+START_FAILED_REASONS = ("sandbox_failed", "runtime_start_failed", "decision_engine_unavailable")
 # How long a lane conversation may take to end, and then to give back what it held after its delete (the purge
 # sweeps every minute and removes a deleted task's files and rows within minutes).
 CONVERSATION_SECONDS = 900
@@ -250,6 +252,7 @@ class Lane:
         self.state, self.next_start, self.next_poll = "waiting", start + FIRST_START_SECONDS, start
         self.count, self.records, self.retries = 0, [], 0
         self.conversation, self.started, self.deadline, self.sent = None, None, None, False
+        self.resent = set()
         # The soak's disk-full windows (wall-clock) and the clock that places a conversation among them.
         self.disk_windows, self.wall, self.opened_at = disk_windows, wall, None
 
@@ -294,6 +297,7 @@ class Lane:
         if self.state == "waiting":
             self.conversation = self.api.request("/api/v1/conversations", self.create())["id"]
             self.started, self.deadline, self.state, self.sent = now, now + CONVERSATION_SECONDS, "running", False
+            self.resent = set()
             self.opened_at = self.wall()
             self.log("mix_opened", lane=self.kind, conversation=self.conversation, number=self.count)
         if self.state == "running" and not self.sent:
@@ -301,6 +305,8 @@ class Lane:
             self.api.request(self.path() + "/messages", {"text": self.message(), "attachments": []})
             self.sent = True
         elif self.state == "running":
+            if self.resend_dropped():
+                return
             record = self.ended()
             if record is not None:
                 record.update(conversation=self.conversation, number=self.count, seconds=round(now - self.started, 1))
@@ -315,6 +321,23 @@ class Lane:
                 self.log("mix_settled", lane=self.kind, conversation=self.conversation)
                 self.state, self.count = "waiting", self.count + 1
                 self.next_start = max(self.started + self.every, now)
+
+    def resend_dropped(self):
+        """A message the gateway dropped because its environment could not start (GW-I-322, listed with the start's
+        reason) is sent again, once per dropped record, as a person does with "Not sent, because the environment
+        couldn't start"; the record itself stays for the idempotency retention. A message a failed run dropped is that
+        run's verdict (`ended` judges it), and a slow start is waited for within the conversation's bound: no timer and
+        no reading of the sandbox's state sends anything (the 24 h run of 14 Nov 2026 ended on a first start that
+        failed under an engine stall, with nothing sent again)."""
+        for item in self.api.request(self.path() + "/messages/queued")["items"]:
+            if (item.get("state") == "dropped" and item.get("reason") in START_FAILED_REASONS
+                    and item["id"] not in self.resent):
+                self.resent.add(item["id"])
+                self.api.request(self.path() + "/messages", {"text": self.message(), "attachments": []})
+                self.retries += 1
+                self.log("mix_retry", lane=self.kind, conversation=self.conversation, error=item["reason"])
+                return True
+        return False
 
     def helpers(self):
         return set()

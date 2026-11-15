@@ -290,8 +290,16 @@ async fn gw_i_183_a_purged_task_leaves_nothing_but_its_usage_and_the_audit(
 
         assert_eq!(delete(f, &cookie, &format!("/api/v1/conversations/{id}")).await?, 204);
         assert_eq!(audits(f, "tasks", task).await?, [("user".to_owned(), Some(owner.id), "delete".to_owned())]);
-        let cycle = f.gateway.purge_now().await?;
-        assert!(cycle.failed == 0, "{cycle:?}");
+        // A deleted task waits for its sandbox's teardown before its rows go: a loaded CI runner needed more than one
+        // cycle for that (14 Nov 2026), so a bounded few, each without a failure.
+        for _ in 0..50 {
+            let cycle = f.gateway.purge_now().await?;
+            assert!(cycle.failed == 0, "{cycle:?}");
+            if naming(f, task).await? == 0 {
+                break;
+            }
+            tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+        }
 
         assert_eq!(naming(f, task).await?, 0, "no row names the purged task");
         assert!(!blob.exists() && !state.exists() && !manifest.exists(), "its files are gone");

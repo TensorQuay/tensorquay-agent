@@ -67,7 +67,10 @@ keep window-manager openbox
 # Loopback only, no password; one connection per viewer (-shared -forever: a second viewer never drops the first).
 # Nothing is ever copied out: no cut text is sent to a viewer (-noclipboard -noprimary, and -seldir recv: selections
 # only received). A paste in is accepted, and the gateway passes one only from the person holding Take over (section 7).
-keep vnc x11vnc -display :0 -localhost -rfbport 5900 -nopw -forever -shared -noprimary -noclipboard -seldir recv -quiet
+# -skip_lockkeys: a viewer's Caps Lock never toggles the desktop's own (RT-I-059). The viewer already sends each letter
+# in its case, and x11vnc adds Shift for a capital; with the desktop's Caps Lock on too, the two cancelled and a Mac's
+# Caps Lock typed lower case (the owner's check, 15 Nov 2026). Ctrl+A and a non-US layout's ':' are unchanged.
+keep vnc x11vnc -display :0 -localhost -rfbport 5900 -nopw -forever -shared -noprimary -noclipboard -seldir recv -skip_lockkeys -quiet
 
 # x11vnc 0.9.17 makes the window it owns the X selections with only about 10 s into a viewer's connection (no flag
 # makes it sooner), and a paste it gets before then reaches no selection: ctrl+v in the browser got nothing (c16,
