@@ -28,6 +28,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   came out lower case: the screen sharer added Shift for each capital while the desktop's own Caps Lock was also on,
   and the two cancelled. A viewer's Caps Lock no longer toggles the desktop's; letters arrive as typed, and Ctrl+A and
   other layouts' symbols are unchanged.
+- **Only the sidebar's task list scrolls (WEB-E2E-123).** With a long task list the whole sidebar scrolled, taking New
+  task, Workspaces, Channels and Search out of view. Now the brand row and those links stay at the top, the account
+  row at the bottom, Search at the top of the list, and only the tasks scroll between them.
 - **The agent can look at a picture in its workspace (CORE-U-090, TOOL-U-143).** When the agent reads a picture
   file with `read_file` (PNG, JPEG, GIF or WebP, recognised by its content), a model that reads pictures is shown
   the picture itself: the latest three read in a run, within the request's room. A model that doesn't read pictures
