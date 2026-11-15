@@ -18,6 +18,13 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   port (or the host's rule with the port added), the same form and audit as any rule. Nothing waits for it: the task
   has moved on, and its next connection is decided by the list as it is then. A restarted gateway starts the record
   empty; the log keeps the rest.
+- **A desktop sign-in can be kept for the whole task (ADR-0039 §6, amended; PRD item 24; PROTO-U-045, RT-I-060,
+  GW-I-324, WEB-U-475).** On the Screen panel's ⋯ menu, "Keep the sign-in for this task" keeps what you signed into
+  during a Take over across the agent's runs, until you turn it off, clear the browser's sign-ins, delete the task, or
+  the desktop reaches the installation's time limit; the desktop keeps running meanwhile (it is no longer retired for
+  being idle while the switch is on). Each change is noted in the transcript with who made it, and the panel says when
+  it ends. Off, as before and by default, every run
+  starts signed out. Protocol revision 15 carries it to the runtime; an older runtime keeps the old behaviour.
 - **Prebuilt images for each release, for amd64 and arm64 (REL-U-013, REL-I-006).** From 18.0, a release tag builds
   the gateway, web app and Minimal, Workstation and Desktop runtimes natively for both architectures (Apple silicon
   included), checks them, and publishes them on the GitHub Container Registry as

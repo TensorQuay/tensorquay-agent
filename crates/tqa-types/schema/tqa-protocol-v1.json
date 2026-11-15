@@ -178,6 +178,13 @@
                 "null"
               ]
             },
+            "keep_sign_in": {
+              "description": "Whether the task keeps the desktop browser's sign-in across runs (revision 15, ADR-0039 section 6, amended\nfor 18.0): true, and a run's end leaves the profile as it is; absent or false, every run's end empties it.\nSent only to a runtime announcing revision 15 or later.",
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
             "last_stored_seq": {
               "allOf": [
                 {
@@ -485,6 +492,25 @@
           },
           "required": [
             "type"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The task's switch changed (revision 15, ADR-0039 section 6, amended for 18.0): `on` true, and the runtime keeps\nthe desktop browser's profile at every run's end; `on` false, and it empties the profile at the next run's end,\nor at once when no run is going, answering with `screen.reset` as a run's end does. Rejected on client bindings.",
+          "properties": {
+            "on": {
+              "description": "Whether the sign-in is kept from now on.",
+              "type": "boolean"
+            },
+            "type": {
+              "const": "screen.keep_sign_in",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "on"
           ],
           "type": "object"
         },
@@ -4288,6 +4314,16 @@
           "const": "screen.sign_out_failed",
           "description": "Sign out everywhere couldn't be confirmed done: the runtime couldn't clear the profile, or never answered.",
           "type": "string"
+        },
+        {
+          "const": "screen.sign_in_kept",
+          "description": "A person turned on keeping the sign-in for this task: from now on a run's end leaves the browser's profile.",
+          "type": "string"
+        },
+        {
+          "const": "screen.sign_in_released",
+          "description": "A person turned it off: the profile is emptied at the next run's end, or at once when no run is going.",
+          "type": "string"
         }
       ]
     },
@@ -4961,6 +4997,10 @@
         {
           "description": "Runtime to gateway only (revision 14, ADR-0039 section 6): a desktop run's end reset is over, its browser's\nprofile emptied (or not, `ok` false) and the browser started again. A Take over that cancelled the run is\ngranted only after it, so the reset can't clear a sign-in made under control. Unsequenced; never forwarded.",
           "properties": {
+            "kept": {
+              "description": "Whether the run's end left the profile as it was because the task keeps its sign-in (revision 15, ADR-0039\nsection 6, amended for 18.0): then `ok` is true and the browser was not started again. Absent: a wipe, as\nevery reset was before.",
+              "type": "boolean"
+            },
             "ok": {
               "description": "Whether the profile was emptied.",
               "type": "boolean"

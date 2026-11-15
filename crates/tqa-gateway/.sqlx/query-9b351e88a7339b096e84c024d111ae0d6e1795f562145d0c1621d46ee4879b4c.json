@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT model_route,template,mcp_servers,connectors,profile FROM conversations WHERE id=$1 AND state='active'",
+  "query": "SELECT model_route,template,mcp_servers,connectors,profile,keep_sign_in FROM conversations WHERE id=$1 AND state='active'",
   "describe": {
     "columns": [
       {
@@ -57,6 +57,17 @@
             "name": "profile"
           }
         }
+      },
+      {
+        "ordinal": 5,
+        "name": "keep_sign_in",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "keep_sign_in"
+          }
+        }
       }
     ],
     "parameters": {
@@ -69,8 +80,9 @@
       false,
       false,
       false,
-      true
+      true,
+      false
     ]
   },
-  "hash": "f3829835917bb24d021ab237993cf6c0b012aa418bbd56511da34f91572512f1"
+  "hash": "9b351e88a7339b096e84c024d111ae0d6e1795f562145d0c1621d46ee4879b4c"
 }

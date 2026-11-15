@@ -32,7 +32,8 @@ async fn gw_i_142_me_carries_the_default_upload_limits(pool: PgPool) -> TestResu
         assert_eq!(
             limits(f).await?,
             json!({"upload_bytes": 25 * MIB, "uploads_bytes": 1024 * MIB, "preview_html_bytes": 2 * MIB,
-                   "preview_pdf_bytes": 20 * MIB, "preview_sheet_bytes": 10 * MIB})
+                   "preview_pdf_bytes": 20 * MIB, "preview_sheet_bytes": 10 * MIB,
+                   "desktop_lifetime_seconds": 28_800})
         );
         Ok(())
     })
@@ -52,7 +53,7 @@ async fn gw_i_142_me_carries_a_smaller_configured_upload_limit(pool: PgPool) -> 
         assert_eq!(
             limits(f).await?,
             json!({"upload_bytes": 2 * MIB, "uploads_bytes": 64 * MIB, "preview_html_bytes": 2 * MIB,
-                   "preview_pdf_bytes": 20 * MIB, "preview_sheet_bytes": 10 * MIB})
+                   "preview_pdf_bytes": 20 * MIB, "preview_sheet_bytes": 10 * MIB, "desktop_lifetime_seconds": 28_800})
         );
         Ok(())
     })

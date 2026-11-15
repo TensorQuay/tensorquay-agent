@@ -43,6 +43,9 @@ pub struct Conversation {
     pub template: String,
     /// Whether the keep-alive pin holds its sandbox through idle periods.
     pub pinned: bool,
+    /// Whether the task keeps the desktop browser's sign-in across runs (ADR-0039 section 6, amended for 18.0): a
+    /// run's end leaves the browser's profile while it is on. Nothing without a desktop.
+    pub keep_sign_in: bool,
     /// UTC creation timestamp.
     #[serde(with = "time::serde::rfc3339")]
     pub created_at: time::OffsetDateTime,
@@ -91,6 +94,7 @@ pub(crate) struct Record {
     pub state: String,
     pub template: String,
     pub pinned: bool,
+    pub keep_sign_in: bool,
     pub created_at: time::OffsetDateTime,
     pub updated_at: time::OffsetDateTime,
     pub last_activity_at: time::OffsetDateTime,
@@ -128,6 +132,7 @@ impl TryFrom<Record> for Conversation {
             state: record.state,
             template: record.template,
             pinned: record.pinned,
+            keep_sign_in: record.keep_sign_in,
             created_at: record.created_at,
             updated_at: record.updated_at,
             last_activity_at: record.last_activity_at,

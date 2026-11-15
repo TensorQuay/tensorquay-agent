@@ -23,6 +23,11 @@ export function screenNoticeWords(
       return t("screen.noticeTakenOver");
     case "screen.signed_out":
       return t("screen.signedOut");
+    // The task's switch (ADR-0039 §6, amended for 18.0): the sign-in outlives the run, or stops doing so.
+    case "screen.sign_in_kept":
+      return t("screen.noticeSignInKept");
+    case "screen.sign_in_released":
+      return t("screen.noticeSignInReleased");
     // It clears the browser only; whether it couldn't or never confirmed, its sign-ins may remain (WEB-U-259).
     case "screen.sign_out_failed":
       return t(

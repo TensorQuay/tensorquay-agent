@@ -19224,6 +19224,7 @@
                             "group_invalid",
                             "name_invalid",
                             "reserved_prefix",
+                            "no_desktop",
                             "value_empty",
                             "value_too_long",
                             "value_nul",
@@ -19497,6 +19498,11 @@
                 "type": "integer",
                 "minimum": 1,
                 "description": "The largest spreadsheet the Files panel shows as a table."
+              },
+              "desktop_lifetime_seconds": {
+                "type": "integer",
+                "minimum": 60,
+                "description": "How long a task's desktop may run at most (sandbox.max_lifetime_seconds as the administrator set it): the end of a kept sign-in the Screen panel names (ADR-0039 section 6, amended for 18.0)."
               }
             },
             "required": [
@@ -19504,7 +19510,8 @@
               "uploads_bytes",
               "preview_html_bytes",
               "preview_pdf_bytes",
-              "preview_sheet_bytes"
+              "preview_sheet_bytes",
+              "desktop_lifetime_seconds"
             ]
           },
           "internet": {
@@ -19583,6 +19590,10 @@
           "pinned": {
             "type": "boolean",
             "description": "The keep-alive pin: its sandbox is never idle-retired or evicted, up to sandbox.max_lifetime_seconds."
+          },
+          "keep_sign_in": {
+            "type": "boolean",
+            "description": "Whether the task keeps the desktop browser's sign-in across runs (ADR-0039 section 6, amended for 18.0): while true a run's end leaves the browser's profile as it is; false, and every run's end empties it. Nothing without a desktop."
           },
           "workspace_id": {
             "type": "string",
@@ -19823,6 +19834,10 @@
           "pinned": {
             "type": "boolean",
             "description": "Set or clear the keep-alive pin."
+          },
+          "keep_sign_in": {
+            "type": "boolean",
+            "description": "Keep, or stop keeping, the desktop browser's sign-in across runs (ADR-0039 section 6, amended for 18.0). A change is recorded as a screen notice (screen.sign_in_kept or screen.sign_in_released, naming who made it) and reaches the task's runtime at once; off with no run going empties the profile then, off during a run at that run's end."
           },
           "mcp_servers": {
             "type": "array",
@@ -27588,7 +27603,9 @@
               "screen.taken_over",
               "screen.handed_back",
               "screen.signed_out",
-              "screen.sign_out_failed"
+              "screen.sign_out_failed",
+              "screen.sign_in_kept",
+              "screen.sign_in_released"
             ]
           },
           "by": {

@@ -185,7 +185,7 @@ pub(crate) async fn list(
     // matches only the caller's own titles, even when an administrator lists all: titles are content (SEC-044).
     let rows = crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
         sqlx::query_as!(Record,
-            "SELECT id,owner_id,title,title_source,model_route,backend,state,template,pinned,created_at,updated_at,last_activity_at,workspace_id,mcp_servers,connectors,profile_id,profile_version,profile->>'name' AS profile_name,profile->>'display_name' AS profile_display_name,(profile->>'model_route') IS NOT NULL AS \"profile_sets_route?\",(profile->>'template') IS NOT NULL AS \"profile_sets_template?\" FROM conversations \
+            "SELECT id,owner_id,title,title_source,model_route,backend,state,template,pinned,keep_sign_in,created_at,updated_at,last_activity_at,workspace_id,mcp_servers,connectors,profile_id,profile_version,profile->>'name' AS profile_name,profile->>'display_name' AS profile_display_name,(profile->>'model_route') IS NOT NULL AS \"profile_sets_route?\",(profile->>'template') IS NOT NULL AS \"profile_sets_template?\" FROM conversations \
              WHERE state<>'deleted' AND ($1 OR owner_id=$2) AND ($3::timestamptz IS NULL OR (last_activity_at,id) < ($3,$4::uuid)) \
              AND ($6 = '' OR (owner_id=$2 AND title ILIKE '%' || $6 || '%')) \
              AND NOT ($7 AND EXISTS (SELECT 1 FROM agent_team_members m WHERE m.conversation_id=conversations.id)) \

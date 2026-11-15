@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, LogOut, Maximize2 } from "lucide-react";
+import { Clock, KeyRound, LogOut, Maximize2 } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { useT } from "../i18n/I18nProvider";
@@ -16,6 +16,7 @@ import { Replay } from "./Replay";
 import { stepPicture, type ReplayStep } from "./replay-steps";
 import type { ScreenState } from "./screen-state";
 import { SignOutDialog } from "./SignOut";
+import type { KeepSignIn } from "./use-keep-sign-in";
 import { useScreen } from "./use-screen";
 import "./catalogue";
 
@@ -127,6 +128,7 @@ export function ScreenPanel({
   notices = [],
   signInMayRemain = true,
   handedBack: handedBackHere = false,
+  keepSignIn = null,
 }: {
   conversationId: string;
   /** Whether the agent's run is active, for the status line. */
@@ -147,6 +149,11 @@ export function ScreenPanel({
    * the status keeps its next step after a reload, as it does after a hand-back in this panel.
    */
   handedBack?: boolean;
+  /**
+   * The task's "keep the sign-in" switch (ADR-0039 §6, amended for 18.0; WEB-U-475): a check item in the ⋯, offered
+   * whether or not the screen is live, since it is the task's setting; null when the task has no desktop.
+   */
+  keepSignIn?: KeepSignIn | null;
 }) {
   const t = useT();
   const screen = useScreen(conversationId, true, undefined, working);
@@ -415,24 +422,46 @@ export function ScreenPanel({
   // ⋯ and Try again, after Expand in the row.
   const moreButtons = (
     <>
-      {LIVE.has(state.kind) && (
+      {(LIVE.has(state.kind) || keepSignIn) && (
         <ActionMenu
           label={t("screen.more")}
           actions={[
-            {
-              id: "sign-out",
-              label: t("screen.signOutEverywhere"),
-              icon: LogOut,
-              danger: true,
-              unavailable: working
-                ? t("screen.signOutWhileWorking")
-                : signInMayRemain
-                  ? undefined
-                  : t("screen.signOutAlreadyClear"),
-              onSelect: clear,
-            },
+            ...(keepSignIn
+              ? [
+                  {
+                    id: "keep-sign-in",
+                    label: t("screen.keepSignIn"),
+                    icon: KeyRound,
+                    checked: keepSignIn.on,
+                    note: t("screen.keepSignInNote"),
+                    onSelect: () => keepSignIn.onChange(!keepSignIn.on),
+                  },
+                ]
+              : []),
+            ...(LIVE.has(state.kind)
+              ? [
+                  {
+                    id: "sign-out",
+                    label: t("screen.signOutEverywhere"),
+                    icon: LogOut,
+                    danger: true,
+                    unavailable: working
+                      ? t("screen.signOutWhileWorking")
+                      : signInMayRemain
+                        ? undefined
+                        : t("screen.signOutAlreadyClear"),
+                    onSelect: clear,
+                  },
+                ]
+              : []),
           ]}
         />
+      )}
+      {/* A change of the switch that didn't take (WEB-U-475): said once, under the row; the item stays as it was. */}
+      {keepSignIn?.failed && (
+        <p className="type-small" data-tone="danger" role="status">
+          {t("screen.keepSignInFailed")}
+        </p>
       )}
       {/* Not for a screen that can't be opened (no desktop, not the owner's): trying again can't change that. */}
       {state.kind === "tooMany" && (
@@ -443,8 +472,20 @@ export function ScreenPanel({
     </>
   );
   // The lines under the row.
+  // The kept sign-in's end, in plain words (ADR-0039 §6, amended for 18.0; WEB-U-475): with the installation's desktop
+  // lifetime in hours when the signed-in answer gave it.
+  const kept = keepSignIn?.on && (
+    <p className="type-small muted">
+      {keepSignIn.lifetimeSeconds
+        ? t("screen.keepSignInEnds", {
+            hours: Math.round(keepSignIn.lifetimeSeconds / 3600),
+          })
+        : t("screen.keepSignInEndsUnknown")}
+    </p>
+  );
   const notes = (
     <>
+      {kept}
       {/* Take over cancels the run as Stop does (ADR-0039 §5): said before the press, while one is running. */}
       {working && state.kind === "watching" && (
         <p className="type-small muted">{t("screen.takeOverStops")}</p>

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "UPDATE conversations SET template=$2,template_digest=CASE WHEN template=$2 THEN template_digest ELSE $3 END,template_version=CASE WHEN template=$2 THEN template_version ELSE NULL END,updated_at=CASE WHEN template=$2 THEN updated_at ELSE CURRENT_TIMESTAMP END WHERE id=$1 RETURNING id,owner_id,title,title_source,model_route,backend,state,template,pinned,created_at,updated_at,last_activity_at,workspace_id,mcp_servers,connectors,profile_id,profile_version,profile->>'name' AS profile_name,profile->>'display_name' AS profile_display_name,(profile->>'model_route') IS NOT NULL AS \"profile_sets_route?\",(profile->>'template') IS NOT NULL AS \"profile_sets_template?\"",
+  "query": "INSERT INTO conversations (id, owner_id, title, model_route, backend, template, template_digest, workspace_id, mcp_servers, connectors, profile_id, profile_version, profile) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING id,owner_id,title,title_source,model_route,backend,state,template,pinned,keep_sign_in,created_at,updated_at,last_activity_at,workspace_id,mcp_servers,connectors,profile_id,profile_version,profile->>'name' AS profile_name,profile->>'display_name' AS profile_display_name,(profile->>'model_route') IS NOT NULL AS \"profile_sets_route?\",(profile->>'template') IS NOT NULL AS \"profile_sets_template?\"",
   "describe": {
     "columns": [
       {
@@ -104,6 +104,17 @@
       },
       {
         "ordinal": 9,
+        "name": "keep_sign_in",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "keep_sign_in"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
         "name": "created_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -114,7 +125,7 @@
         }
       },
       {
-        "ordinal": 10,
+        "ordinal": 11,
         "name": "updated_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -125,7 +136,7 @@
         }
       },
       {
-        "ordinal": 11,
+        "ordinal": 12,
         "name": "last_activity_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -136,7 +147,7 @@
         }
       },
       {
-        "ordinal": 12,
+        "ordinal": 13,
         "name": "workspace_id",
         "type_info": "Uuid",
         "origin": {
@@ -147,7 +158,7 @@
         }
       },
       {
-        "ordinal": 13,
+        "ordinal": 14,
         "name": "mcp_servers",
         "type_info": "TextArray",
         "origin": {
@@ -158,7 +169,7 @@
         }
       },
       {
-        "ordinal": 14,
+        "ordinal": 15,
         "name": "connectors",
         "type_info": "TextArray",
         "origin": {
@@ -169,7 +180,7 @@
         }
       },
       {
-        "ordinal": 15,
+        "ordinal": 16,
         "name": "profile_id",
         "type_info": "Uuid",
         "origin": {
@@ -180,7 +191,7 @@
         }
       },
       {
-        "ordinal": 16,
+        "ordinal": 17,
         "name": "profile_version",
         "type_info": "Int8",
         "origin": {
@@ -191,25 +202,25 @@
         }
       },
       {
-        "ordinal": 17,
+        "ordinal": 18,
         "name": "profile_name",
         "type_info": "Text",
         "origin": "Expression"
       },
       {
-        "ordinal": 18,
+        "ordinal": 19,
         "name": "profile_display_name",
         "type_info": "Text",
         "origin": "Expression"
       },
       {
-        "ordinal": 19,
+        "ordinal": 20,
         "name": "profile_sets_route?",
         "type_info": "Bool",
         "origin": "Expression"
       },
       {
-        "ordinal": 20,
+        "ordinal": 21,
         "name": "profile_sets_template?",
         "type_info": "Bool",
         "origin": "Expression"
@@ -218,11 +229,22 @@
     "parameters": {
       "Left": [
         "Uuid",
+        "Uuid",
         "Text",
-        "Text"
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Uuid",
+        "TextArray",
+        "TextArray",
+        "Uuid",
+        "Int8",
+        "Jsonb"
       ]
     },
     "nullable": [
+      false,
       false,
       false,
       false,
@@ -246,5 +268,5 @@
       null
     ]
   },
-  "hash": "f4d6aa6de74757878ecbd675256d8c6f3af25ba2fde96bdb5d597750c4a6d0b9"
+  "hash": "55d8b96aa10c4180acfad2f5ef44860301c0e0ae7400016fe65b0b6491a8a573"
 }

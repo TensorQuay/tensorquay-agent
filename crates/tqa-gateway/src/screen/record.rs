@@ -10,9 +10,16 @@ use uuid::Uuid;
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum Notice {
     TakenOver,
-    HandedBack { seconds: u64, ended: ScreenEnded },
+    HandedBack {
+        seconds: u64,
+        ended: ScreenEnded,
+    },
     SignedOut,
     SignOutFailed(ScreenNoticeReason),
+    /// A person turned on keeping the sign-in for this task.
+    SignInKept,
+    /// A person turned it off.
+    SignInReleased,
 }
 
 impl Notice {
@@ -22,13 +29,19 @@ impl Notice {
             Self::HandedBack { .. } => ScreenNoticeKind::HandedBack,
             Self::SignedOut => ScreenNoticeKind::SignedOut,
             Self::SignOutFailed(_) => ScreenNoticeKind::SignOutFailed,
+            Self::SignInKept => ScreenNoticeKind::SignInKept,
+            Self::SignInReleased => ScreenNoticeKind::SignInReleased,
         }
     }
 
     const fn reason(self) -> Option<ScreenNoticeReason> {
         match self {
             Self::SignOutFailed(reason) => Some(reason),
-            Self::TakenOver | Self::HandedBack { .. } | Self::SignedOut => None,
+            Self::TakenOver
+            | Self::HandedBack { .. }
+            | Self::SignedOut
+            | Self::SignInKept
+            | Self::SignInReleased => None,
         }
     }
 }
@@ -39,6 +52,8 @@ const fn kind_name(kind: ScreenNoticeKind) -> &'static str {
         ScreenNoticeKind::HandedBack => "screen.handed_back",
         ScreenNoticeKind::SignedOut => "screen.signed_out",
         ScreenNoticeKind::SignOutFailed => "screen.sign_out_failed",
+        ScreenNoticeKind::SignInKept => "screen.sign_in_kept",
+        ScreenNoticeKind::SignInReleased => "screen.sign_in_released",
     }
 }
 
@@ -75,7 +90,11 @@ pub(crate) async fn record(
             Some(i64::try_from(seconds).map_err(|_| GatewayError::StoreUnavailable)?),
             Some(ended_name(ended)),
         ),
-        Notice::TakenOver | Notice::SignedOut | Notice::SignOutFailed(_) => (None, None),
+        Notice::TakenOver
+        | Notice::SignedOut
+        | Notice::SignOutFailed(_)
+        | Notice::SignInKept
+        | Notice::SignInReleased => (None, None),
     };
     let at = crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
         Ok(sqlx::query_scalar!(
@@ -106,7 +125,11 @@ pub(crate) async fn record(
         seconds: seconds.and_then(|value| u64::try_from(value).ok()),
         ended: match notice {
             Notice::HandedBack { ended, .. } => Some(ended),
-            Notice::TakenOver | Notice::SignedOut | Notice::SignOutFailed(_) => None,
+            Notice::TakenOver
+            | Notice::SignedOut
+            | Notice::SignOutFailed(_)
+            | Notice::SignInKept
+            | Notice::SignInReleased => None,
         },
         reason: notice.reason(),
     };

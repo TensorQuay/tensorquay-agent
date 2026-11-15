@@ -79,7 +79,11 @@ async fn ran_and_reset(
     )
     .await?;
     runtime
-        .send(&ServerFrame::ScreenReset { ok, ready: true })
+        .send(&ServerFrame::ScreenReset {
+            ok,
+            ready: true,
+            kept: false,
+        })
         .await?;
     Ok(())
 }
@@ -234,6 +238,7 @@ async fn gw_i_305_a_running_or_pinned_desktop_or_a_failed_reset_keeps_its_place(
             .send(&ServerFrame::ScreenReset {
                 ok: true,
                 ready: true,
+                kept: false,
             })
             .await?;
         keeps_its_place(f, &second, "pinned").await?;

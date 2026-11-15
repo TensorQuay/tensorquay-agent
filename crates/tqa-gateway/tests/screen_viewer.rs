@@ -140,6 +140,7 @@ async fn cancelled_and_reset(
         .send(&ServerFrame::ScreenReset {
             ok: true,
             ready: true,
+            kept: false,
         })
         .await?;
     Ok(())
@@ -524,6 +525,7 @@ async fn gw_i_230_control_waits_for_the_cancelled_run_s_end_reset(pool: PgPool) 
             .send(&ServerFrame::ScreenReset {
                 ok: true,
                 ready: true,
+                kept: false,
             })
             .await?;
         assert_eq!(
@@ -576,6 +578,7 @@ async fn gw_i_230_with_no_reset_control_comes_10_s_after_the_press_marked_not_re
             .send(&ServerFrame::ScreenReset {
                 ok: true,
                 ready: true,
+                kept: false,
             })
             .await?;
         assert_eq!(
@@ -612,6 +615,7 @@ async fn gw_i_230_a_reset_that_couldn_t_empty_the_profile_is_said_on_control(
             .send(&ServerFrame::ScreenReset {
                 ok: false,
                 ready: true,
+                kept: false,
             })
             .await?;
         assert_eq!(
@@ -647,6 +651,7 @@ async fn gw_u_156_a_new_sandbox_starts_without_the_unclean_warning(pool: PgPool)
             .send(&ServerFrame::ScreenReset {
                 ok: false,
                 ready: true,
+                kept: false,
             })
             .await?;
         assert_eq!(
@@ -712,6 +717,7 @@ async fn gw_u_156_a_deleted_task_keeps_no_unclean_mark(pool: PgPool) -> TestResu
             .send(&ServerFrame::ScreenReset {
                 ok: false,
                 ready: true,
+                kept: false,
             })
             .await?;
         assert_eq!(
@@ -768,6 +774,7 @@ async fn gw_i_313_a_reset_without_a_ready_browser_grants_control_marked_not_read
             .send(&ServerFrame::ScreenReset {
                 ok: true,
                 ready: false,
+                kept: false,
             })
             .await?;
         assert_eq!(

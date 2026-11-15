@@ -1,0 +1,59 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT state,profile,keep_sign_in,EXISTS (SELECT 1 FROM templates t WHERE t.name=conversations.template AND 'desktop'=ANY(t.capabilities)) AS \"desktop!\" FROM conversations WHERE id=$1 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "state"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "profile",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "profile"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "keep_sign_in",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "keep_sign_in"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "desktop!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      null
+    ]
+  },
+  "hash": "2aa5433eaa1d42cb8dac0f22490b9d2a3b4bd6ae4fc0c8b4fe5f8ebfc361dc90"
+}

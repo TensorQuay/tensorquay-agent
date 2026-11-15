@@ -71,6 +71,12 @@ pub(super) fn notice(
     )
 }
 
+/// The task's sign-in switch (ADR-0039 section 6, amended for 18.0), said only when on and only to a runtime that can
+/// read it; off is every runtime's starting point.
+fn kept_sign_in(on: bool, revision: u16) -> Option<bool> {
+    (on && revision >= tqa_types::KEEP_SIGN_IN_REVISION).then_some(true)
+}
+
 /// The `session.config` for a runtime at or above the protocol floor.
 pub(super) async fn encode(
     state: &State,
@@ -80,7 +86,7 @@ pub(super) async fn encode(
     let id = crate::conversations::uuid(conversation)?;
     let record = crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
         sqlx::query!(
-            "SELECT model_route,template,mcp_servers,connectors,profile FROM conversations WHERE id=$1 AND state='active'",
+            "SELECT model_route,template,mcp_servers,connectors,profile,keep_sign_in FROM conversations WHERE id=$1 AND state='active'",
             id
         )
         .fetch_optional(&state.pool)
@@ -133,6 +139,7 @@ pub(super) async fn encode(
         run_host_keys: run_host_keys(state, conversation, revision).await,
         // The administrator's caps for a desktop environment; a change applies at the next session.
         computer_limits: computer_limits(&settings.limits, &environment)?,
+        keep_sign_in: kept_sign_in(record.keep_sign_in, revision),
         // Only a runtime that can take it (revision 11): an older one would refuse the whole configuration.
         host_ca: state
             .host_ca

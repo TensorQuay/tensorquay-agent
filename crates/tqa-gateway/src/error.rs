@@ -44,15 +44,13 @@ pub enum GatewayError {
         /// Why it was refused.
         reason: InvalidReason,
     },
-    /// A field names a route, template, tool, server or connector that does not exist (ADR-0012); reported as
-    /// `details` like [`Self::Invalid`].
+    /// An unknown route, template, tool, server or connector (ADR-0012); `details` as in [`Self::Invalid`].
     #[error("unknown reference: {field}")]
     UnknownReference {
         /// The request field that names it.
         field: &'static str,
     },
-    /// A conversation cannot be made from a profile now: `field` names what the install lacks or refuses
-    /// (ADR-0012 decision 5); reported as `details`.
+    /// A profile unusable now: `field` names what the install lacks or refuses (ADR-0012 decision 5); as `details`.
     #[error("profile unusable: {field}")]
     ProfileUnusable {
         /// The profile field.
@@ -145,9 +143,8 @@ pub enum GatewayError {
         /// What set it: `max_members`, `slots` or `per_user`.
         by: &'static str,
     },
-    /// The caller's agent team has ended (ADR-0034 point 10): team tools no longer work. For the lead, `details` is
-    /// a read's answer (`messages`, `last_seq`, `more`) recorded for its call as a read is, so the end note is shown
-    /// once by the read rule.
+    /// The caller's agent team has ended (ADR-0034 point 10): team tools no longer work. For the lead, `details` is a
+    /// read's answer (`messages`, `last_seq`, `more`) recorded as a read's, so the end note is shown once by that rule.
     #[error("the agent team has ended; its team tools no longer work")]
     TeamEnded(Option<Box<serde_json::Value>>),
     /// The administrator's acceptance check holds back the lead's `done` (ADR-0034 point 10, GW-I-198): the words say
@@ -659,6 +656,8 @@ pub enum InvalidReason {
     NameInvalid,
     /// A secret name uses a prefix reserved for per-user credentials.
     ReservedPrefix,
+    /// The setting needs a desktop, and the task's environment has none (`keep_sign_in`, ADR-0039 section 6).
+    NoDesktop,
     /// A secret value is empty.
     ValueEmpty,
     /// A secret value is longer than the store allows.
@@ -759,13 +758,11 @@ pub enum InvalidReason {
     SharedOnly,
     /// A channel's decision rule is not `human` or `majority` (ADR-0014).
     RuleInvalid,
-    /// A channel message's field is out of bounds or not allowed; the field is its path, e.g. `body.title`
-    /// (ADR-0014).
+    /// A channel message's field is out of bounds or not allowed; the field is its path, e.g. `body.title` (ADR-0014).
     MessageInvalid,
     /// The current password given to change it is not the account's password.
     PasswordIncorrect,
-    /// A new password breaks the rules the first administrator's password met: at least 12 characters, not the
-    /// email, not a common password.
+    /// A new password breaks the first administrator's rules: at least 12 characters, not the email, not common.
     PasswordWeak,
     /// The new password is the current one.
     PasswordUnchanged,
@@ -799,7 +796,7 @@ pub enum InvalidReason {
 
 impl InvalidReason {
     /// Every reason, in documentation order.
-    pub const ALL: [Self; 74] = [
+    pub const ALL: [Self; 75] = [
         Self::ParameterInvalid,
         Self::DateInvalid,
         Self::RangeReversed,
@@ -808,6 +805,7 @@ impl InvalidReason {
         Self::GroupInvalid,
         Self::NameInvalid,
         Self::ReservedPrefix,
+        Self::NoDesktop,
         Self::ValueEmpty,
         Self::ValueTooLong,
         Self::ValueNul,
@@ -888,6 +886,7 @@ impl InvalidReason {
             Self::GroupInvalid => "group_invalid",
             Self::NameInvalid => "name_invalid",
             Self::ReservedPrefix => "reserved_prefix",
+            Self::NoDesktop => "no_desktop",
             Self::ValueEmpty => "value_empty",
             Self::ValueTooLong => "value_too_long",
             Self::ValueNul => "value_nul",

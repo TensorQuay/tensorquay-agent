@@ -209,6 +209,41 @@ fn gw_u_155_a_late_grant_says_so_and_a_closed_tab_is_never_granted()
     Ok(())
 }
 
+// TEST: GW-U-215
+#[test]
+fn gw_u_215_a_reset_that_kept_the_sign_in_grants_plain_and_keeps_the_desktop_from_giving_way()
+-> Result<(), Box<dyn std::error::Error>> {
+    let screens = Screens::<u8>::default();
+    let id = task()?;
+    let start = Instant::now();
+    let (_, control) = screens
+        .with(&id, |screen| screen.open(1))
+        .ok_or("store")?
+        .map_err(|full| format!("{full:?}"))?;
+    // A clean reset first: the profile is known empty, so the idle desktop may give way.
+    screens.reset_done(&id, true, true);
+    assert!(screens.may_retire(&id));
+    // A run ends with the task keeping its sign-in: the reset says kept. Control is granted plain (nothing is unclean:
+    // the profile is as the person chose), and the desktop no longer gives way, a sign-in being in it.
+    screens.run_ended(&id);
+    screens.kept_after_run(&id, true);
+    assert!(!screens.may_retire(&id));
+    assert_eq!(
+        screens.with(&id, |screen| screen.take_over(1, start)),
+        Some(Ok(true))
+    );
+    assert_eq!(screens.grant(&id, 1, true), Some(true));
+    assert_eq!(*control.borrow(), Holder::Viewer(1));
+    assert_eq!(
+        screens.with(&id, |screen| screen.hand_back(1, start)),
+        Some(Some(Duration::ZERO))
+    );
+    // Sign out everywhere afterwards empties it: known empty again.
+    screens.signed_out(&id, true, true);
+    assert!(screens.may_retire(&id));
+    Ok(())
+}
+
 // TEST: GW-U-156
 #[test]
 fn gw_u_156_control_after_a_reset_that_couldn_t_empty_the_profile_says_so()

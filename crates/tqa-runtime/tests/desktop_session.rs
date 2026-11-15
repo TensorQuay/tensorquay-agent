@@ -210,6 +210,156 @@ async fn rt_i_051_a_desktop_run_end_reset_is_announced_once_it_is_over() -> Test
     Ok(())
 }
 
+/// Waits until `count` frames of the gateway's record satisfy `which`.
+async fn frames_counted(
+    f: &Fixture,
+    count: usize,
+    which: impl Fn(&tqa_types::ServerFrame) -> bool,
+) -> TestResult {
+    wait_for(|| {
+        f.gateway
+            .frames()
+            .iter()
+            .filter(|frame| which(frame))
+            .count()
+            == count
+    })
+    .await
+}
+
+/// Whether `frame` is the event `name`.
+fn is_event(frame: &tqa_types::ServerFrame, name: &str) -> bool {
+    matches!(frame, tqa_types::ServerFrame::Event { event, .. } if event_name(event) == name)
+}
+
+// TEST: RT-I-060
+/// A desktop sign-in kept for a whole task (ADR-0039 section 6, amended for 18.0; PRD item 24): with the task's switch
+/// on, a run's end leaves the profile and the browser as they are and says so (`screen.reset` with `kept`); switched off
+/// between runs, the profile is emptied at once and the browser started again, as a run's end does; Sign out everywhere
+/// still empties it with the switch on.
+#[tokio::test]
+async fn rt_i_060_a_task_that_keeps_its_sign_in_keeps_the_profile_at_a_run_end() -> TestResult {
+    let browser = tempfile::tempdir()?;
+    let profile = browser.path().join("profile");
+    let cookies = profile.join("Default").join("Cookies");
+    let f = Fixture::new(vec![answer(), answer()]).await?;
+    let mut session = serde_json::to_value(desktop_session()?)?;
+    session["keep_sign_in"] = json!(true);
+    f.gateway
+        .set_session(ClientFrame::parse(&serde_json::to_vec(&session)?)?)?;
+    f.gateway.set_bound(true);
+    let testing = tqa_runtime::testing::TestingHooks::default();
+    *testing.browser_profile.lock().map_err(|_| "lock")? = Some(profile.clone());
+    let reopened = testing.browser_reopened.clone();
+    let (shutdown, task) = f.launch_with(testing)?;
+    f.gateway.wait_for_registrations(1).await?;
+    signed_in_by_hand(&reopened, 1, &profile, &cookies).await?;
+    f.gateway.send(user()).await?;
+    f.wait_event("run.completed").await?;
+    // The run's end kept the sign-in: said with ok and ready (the session's bootstrap ends like a run, so one kept reset
+    // came before this run too); the profile was not emptied, and the browser was checked (the test's stand-in counts
+    // a check as a start), never the profile.
+    wait_for(|| reopened.load(Ordering::SeqCst) == 2).await?;
+    frames_counted(&f, 2, kept_reset).await?;
+    assert!(cookies.is_file(), "the sign-in is still in the profile");
+    // Off between runs: emptied at once, the browser started again, announced as a run's end reset is.
+    f.gateway
+        .send(ClientFrame::ScreenKeepSignIn { on: false })
+        .await?;
+    blank(&reopened, 3, &profile).await?;
+    frames_counted(&f, 1, |frame| clean_reset(frame) && !kept_reset(frame)).await?;
+    // On again, a sign-in, then Sign out everywhere: the switch doesn't stand in its way.
+    f.gateway
+        .send(ClientFrame::ScreenKeepSignIn { on: true })
+        .await?;
+    signed_in_by_hand(&reopened, 3, &profile, &cookies).await?;
+    f.gateway.send(ClientFrame::ScreenSignOut {}).await?;
+    frames_counted(&f, 1, |frame| {
+        matches!(
+            frame,
+            tqa_types::ServerFrame::ScreenSignOutDone { ok: true, .. }
+        )
+    })
+    .await?;
+    blank(&reopened, 4, &profile).await?;
+    // The next run's end keeps again: the switch is still on.
+    signed_in_by_hand(&reopened, 4, &profile, &cookies).await?;
+    f.gateway.send(user()).await?;
+    frames_counted(&f, 2, |frame| is_event(frame, "run.completed")).await?;
+    frames_counted(&f, 3, kept_reset).await?;
+    assert!(
+        cookies.is_file(),
+        "the second run's end kept the sign-in too"
+    );
+    assert_eq!(
+        reopened.load(Ordering::SeqCst),
+        5,
+        "checked again at the second run's end"
+    );
+    stop(shutdown, task).await?;
+    f.gateway.shutdown().await?;
+    Ok(())
+}
+
+// TEST: RT-I-060
+/// A browser that died during a kept run: the run's end finds it gone, starts it again, and says `ready` from that;
+/// one that doesn't come back is said not ready, so a waiting Take over isn't granted onto a dead browser.
+#[tokio::test]
+async fn rt_i_060_a_kept_reset_says_ready_only_when_the_browser_is() -> TestResult {
+    let browser = tempfile::tempdir()?;
+    let profile = browser.path().join("profile");
+    let f = Fixture::new(vec![answer()]).await?;
+    let mut session = serde_json::to_value(desktop_session()?)?;
+    session["keep_sign_in"] = json!(true);
+    f.gateway
+        .set_session(ClientFrame::parse(&serde_json::to_vec(&session)?)?)?;
+    f.gateway.set_bound(true);
+    let testing = tqa_runtime::testing::TestingHooks::default();
+    *testing.browser_profile.lock().map_err(|_| "lock")? = Some(profile.clone());
+    let reopened = testing.browser_reopened.clone();
+    let not_ready = testing.browser_not_ready.clone();
+    let (shutdown, task) = f.launch_with(testing)?;
+    f.gateway.wait_for_registrations(1).await?;
+    blank(&reopened, 1, &profile).await?;
+    // The browser won't take a person's keys when the run ends (it died, and its restart didn't make it in time).
+    not_ready.store(true, Ordering::SeqCst);
+    f.gateway.send(user()).await?;
+    f.wait_event("run.completed").await?;
+    wait_for(|| {
+        f.gateway.frames().iter().any(|frame| {
+            matches!(
+                frame,
+                tqa_types::ServerFrame::ScreenReset {
+                    ok: true,
+                    ready: false,
+                    kept: true
+                }
+            )
+        })
+    })
+    .await?;
+    assert_eq!(
+        reopened.load(Ordering::SeqCst),
+        2,
+        "the browser was started again"
+    );
+    stop(shutdown, task).await?;
+    f.gateway.shutdown().await?;
+    Ok(())
+}
+
+/// A run-end reset that kept the profile, as the task's switch asks.
+fn kept_reset(frame: &tqa_types::ServerFrame) -> bool {
+    matches!(
+        frame,
+        tqa_types::ServerFrame::ScreenReset {
+            ok: true,
+            ready: true,
+            kept: true
+        }
+    )
+}
+
 /// A run-end reset that emptied the profile.
 fn clean_reset(frame: &tqa_types::ServerFrame) -> bool {
     matches!(frame, tqa_types::ServerFrame::ScreenReset { ok: true, .. })

@@ -395,9 +395,11 @@ with slots, queue, eviction, parking and pin (ADR-0016).
     confirmed as v1.0's design, as built. "Recently refused" with "Allow this site" in Settings › Internet access is
     built after 17.0. Per-profile network lists come when someone asks for them. Observe mode is dropped: it would
     switch the only guardrail off for a while. None of them asks a person to approve anything.
-24. **A desktop sign-in lasts one run (8 Oct 2026, ADR-0039 §6):** in 17.0, a sign-in a person makes during Take over
-    lasts for the agent's next run only, then the desktop's browser forgets it, so work inside an account means a Take
-    over and a sign-in before each message. Keeping a sign-in for the whole task is for a later release.
+24. **A desktop sign-in lasts one run (8 Oct 2026, ADR-0039 §6), or the whole task by its switch (18.0, 15 Nov 2026):**
+    in 17.0, a sign-in a person makes during Take over lasts for the agent's next run only, then the desktop's browser
+    forgets it, so work inside an account means a Take over and a sign-in before each message. Since 18.0 a task's
+    "Keep the sign-in for this task" switch (off by default) keeps it until the switch is turned off, Sign out
+    everywhere, or the sandbox's end; each change is noted in the transcript with who made it.
 25. **The 24-hour soak's growth rule (9 Oct 2026, TEST-PLAN SOAK-001):** the gateway's memory (RSS) keeps M5's
     rule, under 5 % growth over the 12 h lifetime after its first hour. Open descriptors and database connections no
     longer take that rule. Descriptors other than the gateway's database connections (each is a socket) take the 5 %

@@ -317,10 +317,28 @@ thing.
   Take over: a sign-in made during one, after the run it cancelled has ended, is simply still in the profile when the
   next run starts, and is gone when that run ends. A Take over that no run follows leaves the profile until the sandbox
   retires, which ends it too. So every new sandbox, every later run, a person a workspace is shared with, a fork and
-  another task on the same workspace all start signed out. There is no option to keep a session across runs in this
-  version. **The Product Owner confirmed it for 17.0 (8 Oct 2026)**, after a computer-use review (work in an
+  another task on the same workspace all start signed out. Since 18.0 a task may keep its sign-in (below); without that
+  switch there is no session across runs. **The Product Owner confirmed it for 17.0 (8 Oct 2026)**, after a computer-use review (work in an
   account means a Take over and a sign-in before each message): keeping a sign-in for the whole task is for a later
   release (PRD §12, item 24).
+- **A sign-in kept for a whole task (amended for 18.0, decided on 15 Nov 2026; PRD §12 item 24).** A task has a switch,
+  `keep_sign_in` (off by default; the conversation's PATCH, shown on the Screen panel as "Keep the sign-in for this
+  task", desktop environments only; anyone who may send to the task may set it). While it is on, a run's end leaves
+  the browser's profile and the browser as the run left them, and the runtime's `screen.reset` says `kept` (the
+  gateway's Take over grant waits for it as before, marks nothing unclean, and no longer knows the profile empty, so
+  the idle desktop never gives way with a sign-in in it). The gateway carries the switch on `session.config`
+  (`keep_sign_in`) and, when it changes, with `screen.keep_sign_in` (revision 15; an older runtime gets neither and
+  wipes at every run's end as before). Off between runs, the runtime empties the profile at once and starts the
+  browser again, announced as a run's end reset is; off during a run, that run's end does it. Each change is a screen
+  notice naming who made it (`screen.sign_in_kept`, `screen.sign_in_released`): the transcript note. What is kept is
+  the profile only, in the sandbox's tmpfs: Sign out everywhere, a runtime restart, the sandbox's end and the task's
+  deletion still end it; a new sandbox, a fork, another task on the workspace and a person the workspace is
+  shared with start signed out as before (tasks themselves are never shared). While the switch is on the sandbox is
+  kept through idle and never evicted, as a pinned task's is (reviewed on 15 Nov 2026: a person's pause between
+  messages must not end the sign-in); the install's lifetime limit still ends it, and the Screen panel says so in
+  plain words, with the limit's hours. The switch is for desktop tasks only (`422 keep_sign_in: no_desktop` elsewhere)
+  and an environment switch away from a desktop clears it, so no sandbox is kept alive for nothing; at a kept run's end
+  the runtime checks the browser, starting it again if it died, and says `ready` from that.
   - **Known edge:** the cancelled run's own end empties the profile. A sign-in begun in the few seconds while that run
     is still winding down may be emptied with it; the person signs in again. This fails safe.
   - **Known edge:** the next run uses the same live browser, so the sign-in reaches it from the browser's memory.

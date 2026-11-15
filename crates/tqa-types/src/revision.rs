@@ -161,6 +161,18 @@ pub const PROTOCOL_REVISIONS: [ProtocolRevision; PROTOCOL_REVISION as usize] = [
         ],
         removes: &[],
     },
+    ProtocolRevision {
+        number: 15,
+        adds: "a desktop sign-in kept for a whole task (ADR-0039 section 6, amended for 18.0; PRD item 24): session.config's keep_sign_in says whether the task keeps the desktop browser's profile across runs, and screen.keep_sign_in (on) tells a running session when the switch changes: on, and a run's end leaves the profile and the browser as they are; off, and the runtime empties the profile at the next run's end, or at once when no run is going. screen.reset's kept says a run's end kept the profile (with ok true). The gateway's screen notices gain screen.sign_in_kept and screen.sign_in_released, who turned the switch on or off. Sent only to a runtime announcing 15; an older one wipes at every run's end as before. The floor stays 10",
+        schema: &[
+            ("ClientFrame", "keep_sign_in"),
+            ("ClientFrame", "screen.keep_sign_in"),
+            ("ServerFrame", "kept"),
+            ("ScreenNoticeKind", "screen.sign_in_kept"),
+            ("ScreenNoticeKind", "screen.sign_in_released"),
+        ],
+        removes: &[],
+    },
 ];
 
 /// A revision header or label that is not a canonical decimal from 1 to 65535.

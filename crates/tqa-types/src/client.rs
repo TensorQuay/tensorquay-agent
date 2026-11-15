@@ -96,6 +96,11 @@ pub enum ClientFrame {
         /// section 4); absent means their defaults.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         computer_limits: Option<crate::ComputerLimits>,
+        /// Whether the task keeps the desktop browser's sign-in across runs (revision 15, ADR-0039 section 6, amended
+        /// for 18.0): true, and a run's end leaves the profile as it is; absent or false, every run's end empties it.
+        /// Sent only to a runtime announcing revision 15 or later.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        keep_sign_in: Option<bool>,
     },
     /// Gateway-to-runtime route replacement for subsequent runs, rejected on client bindings.
     #[serde(rename = "session.update")]
@@ -175,6 +180,14 @@ pub enum ClientFrame {
     /// active.
     #[serde(rename = "screen.sign_out")]
     ScreenSignOut {},
+    /// The task's switch changed (revision 15, ADR-0039 section 6, amended for 18.0): `on` true, and the runtime keeps
+    /// the desktop browser's profile at every run's end; `on` false, and it empties the profile at the next run's end,
+    /// or at once when no run is going, answering with `screen.reset` as a run's end does. Rejected on client bindings.
+    #[serde(rename = "screen.keep_sign_in")]
+    ScreenKeepSignIn {
+        /// Whether the sign-in is kept from now on.
+        on: bool,
+    },
     /// The gateway's answer to a screenshot upload (revision 14, ADR-0039 section 9): kept, or why not. The runtime
     /// journals the capture's `screen.capture` only after `ok`.
     #[serde(rename = "screen.stored")]
@@ -206,6 +219,7 @@ impl ClientFrame {
                 "user.message",
                 "run.cancel",
                 "screen.sign_out",
+                "screen.keep_sign_in",
                 "screen.stored",
                 "workspace.request",
                 "workspace.cancel",

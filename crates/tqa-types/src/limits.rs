@@ -3,7 +3,7 @@
 /// The protocol version implemented by these types.
 pub const PROTOCOL_VERSION: u16 = 1;
 /// The revision of protocol 1 these types implement; see [`crate::PROTOCOL_REVISIONS`] (ADR-0026).
-pub const PROTOCOL_REVISION: u16 = 14;
+pub const PROTOCOL_REVISION: u16 = 15;
 /// The lowest runtime revision a gateway built from these types accepts; keep every check a `<` comparison against
 /// it. ADR-0035 raised it to 9: a revision-8 runtime can't read a `session.config` without the policy. Revision 10
 /// raised it to 10: an older runtime can't read a history that holds a `reply_cut` failure. Revision 11 leaves it at
@@ -22,6 +22,9 @@ pub const TEAM_WAKE_REVISION: u16 = 13;
 /// The revision that brought the Desktop (ADR-0039): a conversation whose environment declares `desktop` is refused at
 /// the link below it, so its runtime always has the `computer` tool the environment was chosen for.
 pub const DESKTOP_REVISION: u16 = 14;
+/// The revision that brought a desktop sign-in kept for a whole task (ADR-0039 section 6, amended for 18.0): the
+/// gateway sends the task's switch only to a runtime announcing it; an older runtime wipes at every run's end as before.
+pub const KEEP_SIGN_IN_REVISION: u16 = 15;
 /// The link upgrade request header carrying the runtime's revision; absent means revision 1.
 pub const PROTOCOL_REVISION_HEADER: &str = "TQA-Protocol-Revision";
 /// The runtime image label carrying the revision its runtime speaks; absent means revision 1.

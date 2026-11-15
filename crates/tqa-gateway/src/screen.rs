@@ -15,6 +15,7 @@ use tqa_types::ConversationId;
 
 pub(crate) use bridge::{HOLD as DIAL_HOLD, dial};
 pub(crate) use notices::list;
+pub(crate) use record::{Notice, record};
 pub(crate) use relay::view;
 pub(crate) use sign_out::{answered, sign_out};
 pub(crate) use store::{purge_expired, read, uploaded};
@@ -41,8 +42,14 @@ pub(crate) fn run_ended(conversation: &ConversationId) {
 
 /// The runtime's run-end reset is over (`screen.reset`): a Take over waiting for it is granted control, told when the
 /// reset couldn't empty the profile (GW-U-156).
-pub(crate) fn reset_done(conversation: &ConversationId, ok: bool, ready: bool) {
-    SCREENS.reset_done(conversation, ok, ready);
+pub(crate) fn reset_done(conversation: &ConversationId, ok: bool, ready: bool, kept: bool) {
+    if kept {
+        // The task keeps its sign-in (section 6, amended for 18.0): the profile is as the run left it, by choice, so
+        // nothing is unclean, but it isn't known empty, so the desktop never gives way with a sign-in in it.
+        SCREENS.kept_after_run(conversation, ready);
+    } else {
+        SCREENS.reset_done(conversation, ok, ready);
+    }
 }
 
 /// A new sandbox was made for `conversation`: its browser profile is empty, so the next Take over warns of nothing.

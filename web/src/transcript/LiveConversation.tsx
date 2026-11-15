@@ -39,6 +39,7 @@ import {
   waitsAfterHandBack,
 } from "../screen/notices";
 import { ScreenToggle } from "../screen/ScreenToggle";
+import { useKeepSignIn } from "../screen/use-keep-sign-in";
 import { ErrorMessage } from "../ui/ErrorMessage";
 import { PanelBoundary } from "../ui/PanelBoundary";
 import { Skeleton } from "../ui/Skeleton";
@@ -136,6 +137,8 @@ export function LiveConversation({
     (choice) => choice.id === conversation.template,
   );
   const desktop = screenOffered(environment, conversation, session?.id ?? null);
+  // The task's "keep the sign-in" switch (ADR-0039 §6, amended for 18.0), offered on a desktop task's Screen tab.
+  const keepSignIn = useKeepSignIn(conversation);
   // WEB-U-422: the Desktop tool's step words load as a Desktop task's page opens (its environment says so, whoever
   // views it), or at the first computer step; a Desktop task's steps wait for them, so none shows a stand-in label.
   const desktopTask = environment?.capabilities.includes("desktop") ?? false;
@@ -554,6 +557,7 @@ export function LiveConversation({
             runStarts={runStarts}
             screenNotices={transcript.screenNotices}
             signInMayRemain={signInMayRemain(screen.notices, transcript.runs)}
+            keepSignIn={desktop ? keepSignIn : null}
             screenHandedBack={waitsAfterHandBack(
               screen.notices,
               transcript.runs,

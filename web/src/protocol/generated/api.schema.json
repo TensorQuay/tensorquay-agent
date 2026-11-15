@@ -234,6 +234,10 @@
             "preview_sheet_bytes": {
               "type": "integer",
               "minimum": 1
+            },
+            "desktop_lifetime_seconds": {
+              "type": "integer",
+              "minimum": 60
             }
           },
           "required": [
@@ -241,7 +245,8 @@
             "uploads_bytes",
             "preview_html_bytes",
             "preview_pdf_bytes",
-            "preview_sheet_bytes"
+            "preview_sheet_bytes",
+            "desktop_lifetime_seconds"
           ]
         },
         "internet": {
@@ -315,6 +320,9 @@
           "pattern": "^[a-z][a-z0-9_-]{0,63}$"
         },
         "pinned": {
+          "type": "boolean"
+        },
+        "keep_sign_in": {
           "type": "boolean"
         },
         "workspace_id": {
@@ -3974,7 +3982,9 @@
             "screen.taken_over",
             "screen.handed_back",
             "screen.signed_out",
-            "screen.sign_out_failed"
+            "screen.sign_out_failed",
+            "screen.sign_in_kept",
+            "screen.sign_in_released"
           ]
         },
         "by": {

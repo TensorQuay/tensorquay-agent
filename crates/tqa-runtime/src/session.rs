@@ -34,6 +34,9 @@ pub(crate) struct Session {
     /// The `computer` tool's per-run caps (revision 14, ADR-0039 section 4); the defaults when the gateway sent none.
     /// Not frozen: an administrator's change reaches the next registration.
     pub computer_limits: tqa_types::ComputerLimits,
+    /// Whether the task keeps the desktop browser's sign-in across runs (revision 15, ADR-0039 section 6, amended for
+    /// 18.0); false from a gateway that says nothing. Not frozen: `screen.keep_sign_in` changes it mid-session.
+    pub keep_sign_in: bool,
 }
 impl Session {
     pub fn parse(frame: ClientFrame) -> Result<(Self, Seq), RuntimeError> {
@@ -54,6 +57,7 @@ impl Session {
             host_ca,
             run_host_keys,
             computer_limits,
+            keep_sign_in,
             ..
         } = frame
         else {
@@ -76,6 +80,7 @@ impl Session {
                 host_ca,
                 run_host_keys,
                 computer_limits: computer_limits.unwrap_or_default(),
+                keep_sign_in: keep_sign_in.unwrap_or(false),
             },
             last_stored_seq,
         ))

@@ -171,6 +171,7 @@ async fn gw_i_310_a_desktop_waiter_reads_waiting_for_a_desktop_through_a_failed_
             .send(&ServerFrame::ScreenReset {
                 ok: true,
                 ready: true,
+                kept: false,
             })
             .await?;
         f.clock.freeze();

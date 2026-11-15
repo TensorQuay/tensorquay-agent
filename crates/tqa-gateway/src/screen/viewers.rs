@@ -356,6 +356,20 @@ impl<T> Screens<T> {
         });
     }
 
+    /// A run's end kept the browser's profile (the task keeps its sign-in): a waiting Take over is granted, nothing is
+    /// marked unclean, and the profile isn't known empty, so the idle desktop doesn't give way (GW-U-200).
+    pub(super) fn kept_after_run(&self, conversation: &ConversationId, ready: bool) {
+        self.set_known_empty(conversation, false);
+        self.set_due(conversation, false);
+        Self::set(&self.not_ready, conversation, !ready);
+        self.existing(conversation, |screen| {
+            screen.reset_done();
+            if ready {
+                screen.settle_late(false);
+            }
+        });
+    }
+
     /// Puts `conversation` in or out of one of the task marks.
     fn set(
         marks: &Mutex<std::collections::HashSet<ConversationId>>,

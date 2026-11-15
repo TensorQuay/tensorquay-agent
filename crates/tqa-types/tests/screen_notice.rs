@@ -196,7 +196,14 @@ fn proto_u_041_the_runtime_says_when_a_run_end_reset_is_over()
     for ok in [true, false] {
         let wire = json!({"type": "screen.reset", "ok": ok});
         let frame = ServerFrame::parse(wire.to_string().as_bytes())?;
-        assert_eq!(frame, ServerFrame::ScreenReset { ok, ready: true });
+        assert_eq!(
+            frame,
+            ServerFrame::ScreenReset {
+                ok,
+                ready: true,
+                kept: false
+            }
+        );
         assert_eq!(serde_json::to_value(&frame)?, wire);
     }
     // The browser didn't come back in time (16r's sec_059_a): said, and carried both ways.
@@ -206,7 +213,8 @@ fn proto_u_041_the_runtime_says_when_a_run_end_reset_is_over()
         frame,
         ServerFrame::ScreenReset {
             ok: true,
-            ready: false
+            ready: false,
+            kept: false
         }
     );
     assert_eq!(serde_json::to_value(&frame)?, wire);

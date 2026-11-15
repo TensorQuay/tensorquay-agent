@@ -208,7 +208,9 @@ export type ScreenNoticeView = {
     | "screen.taken_over"
     | "screen.handed_back"
     | "screen.signed_out"
-    | "screen.sign_out_failed";
+    | "screen.sign_out_failed"
+    | "screen.sign_in_kept"
+    | "screen.sign_in_released";
   at: string;
   seconds?: number | undefined;
   ended?: "hand_back" | "socket_closed" | "restart" | undefined;

@@ -206,8 +206,10 @@ impl SandboxManager {
                 return Ok(true);
             }
         }
-        // A pinned sandbox is kept through idle up to its lifetime (keep-alive pin); the lifetime is checked above.
-        let due = !activity.pinned && idle.expired(activity.timers.idle);
+        // A pinned sandbox is kept through idle up to its lifetime (keep-alive pin); the lifetime is checked above. So
+        // is one whose task keeps a desktop sign-in (ADR-0039 section 6, amended for 18.0): the sign-in lives in the
+        // sandbox, and a person's pause between messages must not end it.
+        let due = !activity.pinned && !activity.keep_sign_in && idle.expired(activity.timers.idle);
         if due && self.mark_closing(id, Some(idle)).await? {
             self.retire(id, slot, super::Teardown::Idle).await?;
             self.after_retirement(id).await?;
@@ -393,7 +395,7 @@ impl SandboxManager {
         let row = self
             .bounded(async {
                 sqlx::query!(
-                    "SELECT s.last_action_at,c.pinned,s.idle_seconds,s.max_lifetime_seconds FROM sandbox_instances s JOIN conversations c ON c.id=s.conversation_id WHERE s.conversation_id=$1",
+                    "SELECT s.last_action_at,c.pinned,(c.keep_sign_in AND EXISTS (SELECT 1 FROM templates t WHERE t.name=c.template AND 'desktop'=ANY(t.capabilities))) AS \"keep_sign_in!\",s.idle_seconds,s.max_lifetime_seconds FROM sandbox_instances s JOIN conversations c ON c.id=s.conversation_id WHERE s.conversation_id=$1",
                     conversation
                 )
                 .fetch_one(&self.services.pool)
@@ -421,6 +423,7 @@ impl SandboxManager {
         };
         Ok(Activity {
             pinned: row.pinned,
+            keep_sign_in: row.keep_sign_in,
             timers: Timers {
                 idle: seconds(row.idle_seconds, current.idle_seconds),
                 max_lifetime: seconds(row.max_lifetime_seconds, current.max_lifetime_seconds),
@@ -503,9 +506,13 @@ pub(super) fn failure_code(cause: &GatewayError) -> tqa_types::ErrorCode {
     }
 }
 
-/// What one pass observed of a sandbox: whether its conversation is pinned, and the timers it runs under.
+/// What one pass observed of a sandbox: whether its conversation is pinned or keeps a desktop sign-in, and the timers
+/// it runs under.
 pub(super) struct Activity {
     pub pinned: bool,
+    /// The task keeps its desktop sign-in and has a desktop (ADR-0039 section 6, amended for 18.0): idle never retires
+    /// it, as a pin; without a desktop the switch keeps nothing alive.
+    pub keep_sign_in: bool,
     pub timers: Timers,
 }
 

@@ -148,13 +148,13 @@ pub(crate) async fn receive(
             return Ok(Received::Accepted);
         }
         // A desktop run's end reset is over (ADR-0039 section 6): a Take over waiting for it gets control.
-        ServerFrame::ScreenReset { ok, ready } => {
+        ServerFrame::ScreenReset { ok, ready, kept } => {
             if !ok {
                 tracing::warn!(
                     "the runtime couldn't empty the desktop browser's profile after a run"
                 );
             }
-            crate::screen::reset_done(conversation, ok, ready);
+            crate::screen::reset_done(conversation, ok, ready, kept);
             return Ok(Received::Accepted);
         }
         frame @ ServerFrame::Error {

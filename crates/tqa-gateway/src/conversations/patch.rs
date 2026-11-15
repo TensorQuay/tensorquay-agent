@@ -1,4 +1,5 @@
-//! `PATCH /conversations/{id}`: rename, pin, or pick the route or the MCP servers for the next run (ARCHITECTURE §9).
+//! `PATCH /conversations/{id}`: rename, pin, keep the desktop sign-in, or pick the route or the MCP servers for the next
+//! run (ARCHITECTURE §9).
 use super::{Conversation, Record, idempotent::Keyed, service};
 use crate::{GatewayError, app::State, auth::User};
 use axum::{
@@ -20,6 +21,10 @@ pub(crate) struct Patch {
     route: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pinned: Option<bool>,
+    /// Keep the desktop browser's sign-in across runs (ADR-0039 section 6, amended for 18.0): a change reaches the
+    /// linked runtime at once and is recorded as a screen notice naming who made it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    keep_sign_in: Option<bool>,
     /// The catalogue servers for the next run (ADR-0011); refused while a run is active, like a route change.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     mcp_servers: Option<Vec<String>>,
@@ -35,30 +40,7 @@ pub(super) async fn apply(
     headers: &HeaderMap,
     input: &Patch,
 ) -> Result<(StatusCode, Json<Value>), GatewayError> {
-    if input.title.is_none()
-        && input.route.is_none()
-        && input.pinned.is_none()
-        && input.mcp_servers.is_none()
-        && input.connectors.is_none()
-    {
-        return Err(GatewayError::BadRequest(
-            "a title, a route, a pin, mcp_servers or connectors is required",
-        ));
-    }
-    if let Some(servers) = input.mcp_servers.as_deref() {
-        service::allowed_mcp_servers(state, servers)?;
-    }
-    if let Some(connectors) = input.connectors.as_deref() {
-        service::allowed_connectors(state, connectors)?;
-    }
-    let title = input
-        .title
-        .as_deref()
-        .map(service::valid_title)
-        .transpose()?;
-    if let Some(route) = input.route.as_deref() {
-        service::allowed_route(state, route)?;
-    }
+    let title = checked(state, input)?;
     service::authorize(state, user, id, false).await?;
     let keyed = Keyed::new(
         user.id,
@@ -69,11 +51,11 @@ pub(super) async fn apply(
     let (status, body, changed) = crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
         let mut transaction = state.pool.begin().await?;
         if let Some((status, body)) = keyed.begin(state, &mut transaction).await? {
-            return Ok((status, body, false));
+            return Ok((status, body, Changed::NONE));
         }
         let uuid = super::uuid(id)?;
         // The row lock orders this change with event appends, so a run cannot start between the check and the update.
-        let current = sqlx::query!("SELECT state,profile FROM conversations WHERE id=$1 FOR UPDATE", uuid)
+        let current = sqlx::query!("SELECT state,profile,keep_sign_in,EXISTS (SELECT 1 FROM templates t WHERE t.name=conversations.template AND 'desktop'=ANY(t.capabilities)) AS \"desktop!\" FROM conversations WHERE id=$1 FOR UPDATE", uuid)
             .fetch_one(&mut *transaction)
             .await?;
         if current.state != "active" {
@@ -81,6 +63,14 @@ pub(super) async fn apply(
         }
         if let Some(copy) = current.profile {
             within_profile(input, &serde_json::from_value(copy)?)?;
+        }
+        // The switch keeps a desktop's sign-in, and with it the sandbox through idle: without a desktop it would keep
+        // a sandbox alive for nothing (the review of 15 Nov 2026).
+        if input.keep_sign_in == Some(true) && !current.desktop {
+            return Err(GatewayError::Invalid {
+                field: "keep_sign_in",
+                reason: crate::error::InvalidReason::NoDesktop,
+            });
         }
         if (input.route.is_some() || input.mcp_servers.is_some() || input.connectors.is_some())
             && crate::events::run_activity(&mut *transaction, uuid)
@@ -90,8 +80,8 @@ pub(super) async fn apply(
             return Err(GatewayError::Conflict("run_active"));
         }
         let record = sqlx::query_as!(Record,
-            "UPDATE conversations SET title=COALESCE($2,title),title_source=CASE WHEN $2::text IS NULL THEN title_source ELSE 'person' END,model_route=COALESCE($3,model_route),pinned=COALESCE($4,pinned),mcp_servers=COALESCE($5,mcp_servers),connectors=COALESCE($6,connectors),updated_at=CURRENT_TIMESTAMP WHERE id=$1 RETURNING id,owner_id,title,title_source,model_route,backend,state,template,pinned,created_at,updated_at,last_activity_at,workspace_id,mcp_servers,connectors,profile_id,profile_version,profile->>'name' AS profile_name,profile->>'display_name' AS profile_display_name,(profile->>'model_route') IS NOT NULL AS \"profile_sets_route?\",(profile->>'template') IS NOT NULL AS \"profile_sets_template?\"",
-            uuid, title, input.route.as_deref(), input.pinned, input.mcp_servers.as_deref(), input.connectors.as_deref()).fetch_one(&mut *transaction).await?;
+            "UPDATE conversations SET title=COALESCE($2,title),title_source=CASE WHEN $2::text IS NULL THEN title_source ELSE 'person' END,model_route=COALESCE($3,model_route),pinned=COALESCE($4,pinned),mcp_servers=COALESCE($5,mcp_servers),connectors=COALESCE($6,connectors),keep_sign_in=COALESCE($7,keep_sign_in),updated_at=CURRENT_TIMESTAMP WHERE id=$1 RETURNING id,owner_id,title,title_source,model_route,backend,state,template,pinned,keep_sign_in,created_at,updated_at,last_activity_at,workspace_id,mcp_servers,connectors,profile_id,profile_version,profile->>'name' AS profile_name,profile->>'display_name' AS profile_display_name,(profile->>'model_route') IS NOT NULL AS \"profile_sets_route?\",(profile->>'template') IS NOT NULL AS \"profile_sets_template?\"",
+            uuid, title, input.route.as_deref(), input.pinned, input.mcp_servers.as_deref(), input.connectors.as_deref(), input.keep_sign_in).fetch_one(&mut *transaction).await?;
         // The servers and connectors share the runtime's bound (and one name space, which the file and the API keep apart).
         if record.mcp_servers.len() + record.connectors.len() > crate::config::MAX_MCP_SERVERS {
             return Err(GatewayError::BadRequest(
@@ -103,13 +93,98 @@ pub(super) async fn apply(
             .record_about(&mut transaction, uuid, StatusCode::OK, &body)
             .await?;
         transaction.commit().await?;
-        Ok((StatusCode::OK, body, input.route.is_some()))
+        let switched = input
+            .keep_sign_in
+            .is_some_and(|wanted| wanted != current.keep_sign_in);
+        Ok((
+            StatusCode::OK,
+            body,
+            Changed {
+                route: input.route.is_some(),
+                keep_sign_in: switched.then_some(input.keep_sign_in.unwrap_or(false)),
+            },
+        ))
     })
     .await?;
-    if let (true, Some(route)) = (changed, input.route.as_deref()) {
+    if let (true, Some(route)) = (changed.route, input.route.as_deref()) {
         update_link(state, id, route).await;
     }
+    if let Some(on) = changed.keep_sign_in {
+        sign_in_switched(state, user, id, on).await;
+    }
     Ok((status, Json(body)))
+}
+
+/// The patch's fields checked against the install (something named, known servers, connectors and route, a valid
+/// title): the title, when one is named.
+fn checked<'a>(state: &State, input: &'a Patch) -> Result<Option<&'a str>, GatewayError> {
+    if input.title.is_none()
+        && input.route.is_none()
+        && input.pinned.is_none()
+        && input.keep_sign_in.is_none()
+        && input.mcp_servers.is_none()
+        && input.connectors.is_none()
+    {
+        return Err(GatewayError::BadRequest(
+            "a title, a route, a pin, keep_sign_in, mcp_servers or connectors is required",
+        ));
+    }
+    if let Some(servers) = input.mcp_servers.as_deref() {
+        service::allowed_mcp_servers(state, servers)?;
+    }
+    if let Some(connectors) = input.connectors.as_deref() {
+        service::allowed_connectors(state, connectors)?;
+    }
+    if let Some(route) = input.route.as_deref() {
+        service::allowed_route(state, route)?;
+    }
+    input.title.as_deref().map(service::valid_title).transpose()
+}
+
+/// What a patch changed beyond the row, for the steps after the commit.
+struct Changed {
+    route: bool,
+    /// The switch's new value when the patch flipped it; None when it stayed or wasn't named.
+    keep_sign_in: Option<bool>,
+}
+
+impl Changed {
+    /// A patch answered from its earlier record: nothing changed now.
+    const NONE: Self = Self {
+        route: false,
+        keep_sign_in: None,
+    };
+}
+
+/// The task's switch flipped (ADR-0039 section 6, amended for 18.0): recorded as a screen notice naming who did it, and
+/// told to the linked runtime at once when it speaks revision 15 (an older one keeps wiping at every run's end; a task
+/// without a sandbox learns it with its next session.config). Neither failing undoes the row: the setting is the record.
+async fn sign_in_switched(state: &State, user: &User, id: &ConversationId, on: bool) {
+    let notice = if on {
+        crate::screen::Notice::SignInKept
+    } else {
+        crate::screen::Notice::SignInReleased
+    };
+    if let Err(error) = crate::screen::record(state, id, user, notice).await {
+        tracing::warn!(
+            code = error.code(),
+            "a sign-in switch's notice wasn't recorded"
+        );
+    }
+    if state
+        .links
+        .sandbox(id)
+        .is_some_and(|(_, revision)| revision >= tqa_types::KEEP_SIGN_IN_REVISION)
+        && let Err(error) = state
+            .links
+            .deliver(id, ClientFrame::ScreenKeepSignIn { on })
+            .await
+    {
+        tracing::debug!(
+            code = error.code(),
+            "the sign-in switch didn't reach the runtime; the next session.config carries it"
+        );
+    }
 }
 
 /// A conversation made from a profile only narrows its servers and connectors, and keeps the route it sets

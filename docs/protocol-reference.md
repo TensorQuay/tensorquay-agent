@@ -29,6 +29,7 @@ is [ARCHITECTURE §9](ARCHITECTURE.md#9-wire-protocol-tqa-protocol-v1); the HTTP
 | `workspace.request` | link, gateway → runtime | A workspace operation (list, read, stat...) the files panel needs |
 | `workspace.cancel` | link, gateway → runtime | Cancel a workspace request |
 | `screen.sign_out` | link, gateway → runtime | Sign the desktop's browser out everywhere (ADR-0039) |
+| `screen.keep_sign_in` | link, gateway → runtime | The task's "keep the sign-in" switch changed: `on` (revision 15, ADR-0039 section 6); `session.config` carries `keep_sign_in` when on |
 | `screen.stored` | link, gateway → runtime | Whether the gateway kept an uploaded screenshot |
 
 ## Server frames (`ServerFrame`)
@@ -41,7 +42,7 @@ is [ARCHITECTURE §9](ARCHITECTURE.md#9-wire-protocol-tqa-protocol-v1); the HTTP
 | `workspace.reply` | link, runtime → gateway | One part of a workspace request's answer; never stored |
 | `screen.upload` | link, runtime → gateway | A chunk of a screenshot for the gateway's store |
 | `screen.sign_out.done` | link, runtime → gateway | The answer to `screen.sign_out`, once the browser has started again: `ok`, `reason`, and `ready` (the browser back and focused; absent: true) |
-| `screen.reset` | link, runtime → gateway | A desktop run's end reset is over: `ok` (the profile emptied) and `ready` (the browser back and focused; absent: true) |
+| `screen.reset` | link, runtime → gateway | A desktop run's end reset is over: `ok` (the profile emptied) and `ready` (the browser back and focused; absent: true); `kept` (absent: false) when the task keeps its sign-in and the profile stayed (revision 15) |
 | `message.queue` | client | The messages waiting behind the task's run changed |
 | `task.titled` | client | The model named the task |
 | `team.changed` | client | The task's agent team changed (ADR-0034) |

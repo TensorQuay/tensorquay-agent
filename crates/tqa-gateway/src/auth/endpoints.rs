@@ -71,6 +71,10 @@ struct UploadLimits {
     preview_pdf: u64,
     #[serde(rename = "preview_sheet_bytes")]
     preview_sheet: u64,
+    /// How long a task's desktop may run at most (the install's `sandbox.max_lifetime_seconds`, as the administrator
+    /// set it): the end of a kept sign-in the Screen panel names (ADR-0039 section 6, amended for 18.0).
+    #[serde(rename = "desktop_lifetime_seconds")]
+    desktop_lifetime: u64,
 }
 
 pub(crate) fn signed_in(state: &State, user: User) -> Json<SignedIn> {
@@ -86,6 +90,7 @@ pub(crate) fn signed_in(state: &State, user: User) -> Json<SignedIn> {
             preview_html: files.preview(files.preview_html_bytes),
             preview_pdf: files.preview(files.preview_pdf_bytes),
             preview_sheet: files.preview(files.preview_sheet_bytes),
+            desktop_lifetime: u64::from(state.settings.current().limits.max_lifetime_seconds),
         },
         internet: if state.config.egress.disabled || state.settings.current().egress.is_empty() {
             Internet::None

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT s.last_action_at,c.pinned,s.idle_seconds,s.max_lifetime_seconds FROM sandbox_instances s JOIN conversations c ON c.id=s.conversation_id WHERE s.conversation_id=$1",
+  "query": "SELECT s.last_action_at,c.pinned,(c.keep_sign_in AND EXISTS (SELECT 1 FROM templates t WHERE t.name=c.template AND 'desktop'=ANY(t.capabilities))) AS \"keep_sign_in!\",s.idle_seconds,s.max_lifetime_seconds FROM sandbox_instances s JOIN conversations c ON c.id=s.conversation_id WHERE s.conversation_id=$1",
   "describe": {
     "columns": [
       {
@@ -27,6 +27,12 @@
       },
       {
         "ordinal": 2,
+        "name": "keep_sign_in!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
         "name": "idle_seconds",
         "type_info": "Int4",
         "origin": {
@@ -37,7 +43,7 @@
         }
       },
       {
-        "ordinal": 3,
+        "ordinal": 4,
         "name": "max_lifetime_seconds",
         "type_info": "Int4",
         "origin": {
@@ -56,9 +62,10 @@
     "nullable": [
       false,
       false,
+      null,
       true,
       true
     ]
   },
-  "hash": "6c3271d5f4a386de0d87fcfc9dde7bc4c18556f8d5c5ae95a4de729ae456b8c9"
+  "hash": "5b725f84423649cebeff48c7a761e6c9e04926ca211396d25489092b8adbb2d5"
 }

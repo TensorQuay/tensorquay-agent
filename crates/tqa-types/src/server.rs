@@ -230,6 +230,11 @@ pub enum ServerFrame {
             skip_serializing_if = "crate::server::is_yes"
         )]
         ready: bool,
+        /// Whether the run's end left the profile as it was because the task keeps its sign-in (revision 15, ADR-0039
+        /// section 6, amended for 18.0): then `ok` is true and the browser was not started again. Absent: a wipe, as
+        /// every reset was before.
+        #[serde(default, skip_serializing_if = "crate::server::is_no")]
+        kept: bool,
     },
     /// Gateway to clients only (revision 11, ADR-0037 §1.3 of the gateway plan): the run called a keyed host with its
     /// key, once per run and key. Unsequenced and never stored; the task's host-key uses are the durable view.
@@ -398,4 +403,10 @@ pub(crate) const fn yes() -> bool {
 #[allow(clippy::trivially_copy_pass_by_ref)] // serde passes the field by reference
 pub(crate) const fn is_yes(value: &bool) -> bool {
     *value
+}
+
+/// Whether a field defaulting to false is false, so it is left out on the wire as before it existed.
+#[allow(clippy::trivially_copy_pass_by_ref)] // serde passes the field by reference
+pub(crate) const fn is_no(value: &bool) -> bool {
+    !*value
 }

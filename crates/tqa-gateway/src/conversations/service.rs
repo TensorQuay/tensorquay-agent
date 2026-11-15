@@ -163,7 +163,7 @@ impl<'a> Creation<'a> {
                 (Some(id), Some(version), Some(copy))
             });
         let record = sqlx::query_as!(Record,
-            "INSERT INTO conversations (id, owner_id, title, model_route, backend, template, template_digest, workspace_id, mcp_servers, connectors, profile_id, profile_version, profile) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING id,owner_id,title,title_source,model_route,backend,state,template,pinned,created_at,updated_at,last_activity_at,workspace_id,mcp_servers,connectors,profile_id,profile_version,profile->>'name' AS profile_name,profile->>'display_name' AS profile_display_name,(profile->>'model_route') IS NOT NULL AS \"profile_sets_route?\",(profile->>'template') IS NOT NULL AS \"profile_sets_template?\"",
+            "INSERT INTO conversations (id, owner_id, title, model_route, backend, template, template_digest, workspace_id, mcp_servers, connectors, profile_id, profile_version, profile) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING id,owner_id,title,title_source,model_route,backend,state,template,pinned,keep_sign_in,created_at,updated_at,last_activity_at,workspace_id,mcp_servers,connectors,profile_id,profile_version,profile->>'name' AS profile_name,profile->>'display_name' AS profile_display_name,(profile->>'model_route') IS NOT NULL AS \"profile_sets_route?\",(profile->>'template') IS NOT NULL AS \"profile_sets_template?\"",
             id, self.owner, self.title, self.route, self.backend, self.template, self.digest, workspace, &self.mcp_servers, &self.connectors, profile_id, profile_version, profile).fetch_one(connection).await?;
         record.try_into()
     }
@@ -288,7 +288,7 @@ pub(crate) async fn authorize(
     let id = super::uuid(id)?;
     crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
         let record = sqlx::query_as!(Record,
-            "SELECT id,owner_id,title,title_source,model_route,backend,state,template,pinned,created_at,updated_at,last_activity_at,workspace_id,mcp_servers,connectors,profile_id,profile_version,profile->>'name' AS profile_name,profile->>'display_name' AS profile_display_name,(profile->>'model_route') IS NOT NULL AS \"profile_sets_route?\",(profile->>'template') IS NOT NULL AS \"profile_sets_template?\" FROM conversations WHERE id=$1", id)
+            "SELECT id,owner_id,title,title_source,model_route,backend,state,template,pinned,keep_sign_in,created_at,updated_at,last_activity_at,workspace_id,mcp_servers,connectors,profile_id,profile_version,profile->>'name' AS profile_name,profile->>'display_name' AS profile_display_name,(profile->>'model_route') IS NOT NULL AS \"profile_sets_route?\",(profile->>'template') IS NOT NULL AS \"profile_sets_template?\" FROM conversations WHERE id=$1", id)
             .fetch_optional(&state.pool).await?.ok_or(GatewayError::NotFound)?;
         // Delete means gone: a deleted task answers like one that never was, for every read, stream and action.
         if record.state == "deleted" {

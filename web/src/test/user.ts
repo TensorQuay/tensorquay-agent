@@ -10,4 +10,5 @@ export const LIMITS: User["limits"] = {
   preview_html_bytes: 2 * 1024 * 1024,
   preview_pdf_bytes: 20 * 1024 * 1024,
   preview_sheet_bytes: 10 * 1024 * 1024,
+  desktop_lifetime_seconds: 8 * 3600,
 };

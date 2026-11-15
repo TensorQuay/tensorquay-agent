@@ -2426,6 +2426,14 @@
         {
           "const": "screen.sign_out_failed",
           "type": "string"
+        },
+        {
+          "const": "screen.sign_in_kept",
+          "type": "string"
+        },
+        {
+          "const": "screen.sign_in_released",
+          "type": "string"
         }
       ]
     },
@@ -3011,6 +3019,9 @@
         },
         {
           "properties": {
+            "kept": {
+              "type": "boolean"
+            },
             "ok": {
               "type": "boolean"
             },

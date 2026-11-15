@@ -21,6 +21,12 @@ pub enum ScreenNoticeKind {
     /// Sign out everywhere couldn't be confirmed done: the runtime couldn't clear the profile, or never answered.
     #[serde(rename = "screen.sign_out_failed")]
     SignOutFailed,
+    /// A person turned on keeping the sign-in for this task: from now on a run's end leaves the browser's profile.
+    #[serde(rename = "screen.sign_in_kept")]
+    SignInKept,
+    /// A person turned it off: the profile is emptied at the next run's end, or at once when no run is going.
+    #[serde(rename = "screen.sign_in_released")]
+    SignInReleased,
 }
 
 /// Why Sign out everywhere couldn't be confirmed (`screen.sign_out_failed`).
@@ -118,6 +124,11 @@ pub(crate) fn check_frame(frame: &ServerFrame) -> Result<(), FrameError> {
         } => check(*kind, by, (*seconds, *ended), *reason).err(),
         ServerFrame::ScreenSignOutDone { ok, reason, .. } => (*ok == reason.is_some())
             .then_some("reason comes with ok: false only, and always with it"),
+        ServerFrame::ScreenReset {
+            ok: false,
+            kept: true,
+            ..
+        } => Some("kept comes with ok: true only: a kept profile is the one the run ended with"),
         ServerFrame::ScreenUpload { data, .. } => (!crate::screen_upload::valid_chunk(data))
             .then_some("data: expected padded base64 of at most 96 KiB"),
         _ => None,

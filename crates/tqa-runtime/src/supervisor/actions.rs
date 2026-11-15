@@ -79,6 +79,9 @@ impl Supervisor {
                 self.services.screen_store.answered(&id, ok, reason);
             }
             LinkEvent::Action(ClientFrame::ScreenSignOut {}) => self.screen_sign_out().await,
+            LinkEvent::Action(ClientFrame::ScreenKeepSignIn { on }) => {
+                self.screen_keep_sign_in(on).await;
+            }
             LinkEvent::Action(_) => self.error(
                 ErrorCode::InvalidFrame,
                 "this action is not supported on the runtime link",
@@ -117,6 +120,19 @@ impl Supervisor {
         if !self.desktop() {
             return;
         }
+        // The task keeps its sign-in (revision 15, ADR-0039 section 6, amended for 18.0): the profile and the browser
+        // stay as the run left them, and the gateway is told the reset kept them, so a waiting Take over goes ahead.
+        if self.keeps_sign_in() {
+            // The browser is checked, and started again if it died during the run, before anyone types into it
+            // (the review of 15 Nov 2026): `ready` says what it found, as the wipe path's does.
+            let ready = self.reopen_browser().await;
+            self.control(ServerFrame::ScreenReset {
+                ok: true,
+                ready,
+                kept: true,
+            });
+            return;
+        }
         let (ok, ready) = match crate::desktop::sign_out(
             &self.services.desktop,
             &self.browser_profile(),
@@ -134,7 +150,53 @@ impl Supervisor {
                 (false, false)
             }
         };
-        self.control(ServerFrame::ScreenReset { ok, ready });
+        self.control(ServerFrame::ScreenReset {
+            ok,
+            ready,
+            kept: false,
+        });
+    }
+
+    /// Whether the task keeps the desktop browser's sign-in across runs (`session.config`'s `keep_sign_in`, changed by
+    /// `screen.keep_sign_in`).
+    fn keeps_sign_in(&self) -> bool {
+        self.session
+            .as_ref()
+            .is_some_and(|session| session.keep_sign_in)
+    }
+
+    /// The task's switch changed (revision 15, ADR-0039 section 6, amended for 18.0). Off with no run going, the
+    /// profile is emptied at once and the browser started again, announced as a run's end reset is; off during a run,
+    /// that run's end does it; on, nothing happens until a run ends.
+    async fn screen_keep_sign_in(&mut self, on: bool) {
+        if let Some(session) = self.session.as_mut() {
+            session.keep_sign_in = on;
+        }
+        if on || !self.desktop() || !self.runs.is_empty() {
+            return;
+        }
+        let (ok, ready) = match crate::desktop::sign_out(
+            &self.services.desktop,
+            &self.browser_profile(),
+            crate::desktop::RELEASE_WAIT,
+            &self.services.cleanup.supervised(),
+        )
+        .await
+        {
+            Ok(()) => (true, self.reopen_browser().await),
+            Err(reason) => {
+                tracing::warn!(
+                    ?reason,
+                    "desktop: the browser's profile wasn't emptied when the task stopped keeping its sign-in"
+                );
+                (false, false)
+            }
+        };
+        self.control(ServerFrame::ScreenReset {
+            ok,
+            ready,
+            kept: false,
+        });
     }
 
     /// Whether this session's environment declares the desktop.

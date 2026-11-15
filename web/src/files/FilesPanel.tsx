@@ -19,6 +19,7 @@ import { useSession } from "../auth/use-session";
 import type { ContextState } from "../context/context-state";
 import { useT } from "../i18n/I18nProvider";
 import { desktopSteps } from "../screen/replay-steps";
+import type { KeepSignIn } from "../screen/use-keep-sign-in";
 import {
   desktopWordsState,
   onDesktopWords,
@@ -77,6 +78,7 @@ export function FilesPanel({
   screenNotices = [],
   signInMayRemain = true,
   screenHandedBack = false,
+  keepSignIn = null,
 }: {
   conversationId: string;
   running: boolean;
@@ -102,6 +104,8 @@ export function FilesPanel({
   signInMayRemain?: boolean;
   /** Handed back with no run since, from the notices: the Screen panel's status keeps its next step. */
   screenHandedBack?: boolean;
+  /** The task's "keep the sign-in" switch, for the Screen tab's ⋯ (ADR-0039 §6, amended for 18.0); null: not offered. */
+  keepSignIn?: KeepSignIn | null;
 }) {
   const [localTab, setLocalTab] = useState(tab);
   // The Context tab is there only when the run loaded something; a view it was on falls back to Files.
@@ -249,6 +253,7 @@ export function FilesPanel({
               runStarts={runStarts}
               notices={screenNotices}
               signInMayRemain={signInMayRemain}
+              keepSignIn={keepSignIn}
               handedBack={screenHandedBack}
             />
           </Suspense>

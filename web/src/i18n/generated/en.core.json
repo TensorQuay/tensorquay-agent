@@ -178,6 +178,8 @@
     "screen.noticeHandedBackClosed": "The desktop was handed back when its page closed, after {time}.",
     "screen.noticeHandedBackRestart": "The desktop was handed back when the server restarted.",
     "screen.minutes": "{minutes, plural, one {# min} other {# min}}",
+    "screen.noticeSignInKept": "The desktop browser's sign-in is kept for this task.",
+    "screen.noticeSignInReleased": "The desktop browser's sign-in is no longer kept: it ends with the next run.",
     "screen.signedOut": "The desktop browser's sign-ins were cleared.",
     "screen.signOutNotCleared": "The browser's sign-ins couldn't be cleared, so they may remain. Try again.",
     "screen.signOutUnconfirmed": "Clearing the browser's sign-ins wasn't confirmed, so they may remain. Try again.",
