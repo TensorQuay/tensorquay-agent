@@ -74,19 +74,44 @@ control, double-click again.
 ## Sign-ins
 If the agent needs to work in an account, take over and sign in yourself. Never give the agent a password in a
 message. A sign-in made during Take over lasts for the agent's next run only, as the panel says while you have
-control. When that run ends, the browser forgets it, so every later run starts signed out. A new environment, another task on the same workspace, and anyone you share the
+control, unless you keep it (see [Keep the sign-in for this task](#keep-the-sign-in-for-this-task)). When that run
+ends, the browser forgets it, so every later run starts signed out. A new environment, another task on the same workspace, and anyone you share the
 workspace with all start signed out too.
 
 To end a sign-in at once, open the panel's ⋯ menu and choose **Clear the browser's sign-ins**, then **Clear sign-ins**
 to confirm. This empties the desktop browser's sign-ins, cookies and site data. It doesn't sign you out of applications
 on the desktop, which keep their own. It is available only when the agent isn't working, and only while a sign-in can
-remain: once a run has ended since your last Take over, the menu says "The browser is already signed out: each run
-ends that way." The panel says
+remain: once a run has ended since your last Take over, and the sign-in isn't kept, the menu says "The browser is
+already signed out: each run ends that way." The panel says
 **Clearing the browser's sign-ins…** until the desktop confirms, then "The desktop browser's sign-ins were cleared."
 If the browser couldn't be cleared, or the desktop didn't confirm in time, the panel says so: "The browser's sign-ins
 couldn't be cleared, so they may remain. Try again." or "Clearing the browser's sign-ins wasn't confirmed, so they may
 remain. Try again." The transcript notes the outcome too; under the panel, the line goes once a run starts or at your
 next Take over.
+
+### Keep the sign-in for this task
+<!-- Tests: WEB-U-475, GW-I-324, RT-I-060. -->
+To work in an account over several messages, open the panel's ⋯ menu and turn on **Keep the sign-in for this task**.
+It is off unless you turn it on, and the menu says what it does: "The browser stays signed in between the agent's
+runs, until you turn this off or clear its sign-ins." A sign-in you make during Take over then stays through the runs
+that follow. Under the panel, a line says what ends it: "The desktop keeps running meanwhile. The sign-in ends when its
+sign-ins are cleared, this is turned off, the task is deleted, or the desktop reaches the installation's limit of 12
+hours." (with your installation's own number). While the switch is on, the desktop isn't stopped for sitting idle
+between your messages, so the sign-in waits for you; the installation's time limit for a desktop still ends it, as the
+line says. Anyone who may send to the task can turn the switch on or off, and the transcript notes each change and who
+made it: "The desktop browser's sign-in is kept for this task." or "The desktop browser's sign-in is no longer kept: it
+ends with the next run." Turned off between runs, the browser is cleared at once and started again; turned off during
+a run, that run's end does it. If the switch couldn't be changed, the panel says "The setting didn't change. Try
+again." **Clear the browser's sign-ins** works as before while the switch is on. The switch is for a task with a
+desktop; switching the task to another environment turns it off.
+
+What is kept is the desktop browser's own store, inside the environment: a new environment, a forked task, another
+task on the same workspace and a person you share the workspace with start signed out as before, and signing out
+everywhere, a restart of the environment and deleting the task end it. One limit to know: a site that keeps you signed
+in only for the browser's session (until the browser closes) stays signed in only while the browser stays open. If the
+desktop had to start the browser again at the end of a run, that sign-in is gone, while the sign-ins a site saved for a
+set time remain. The panel's lines don't tell the two apart: if a site asks you to sign in again, take over and sign in
+once more.
 
 ## What the agent did, step by step
 Each thing the agent does on the desktop is one line in the transcript, in plain words, such as "Clicked “Save”" or
