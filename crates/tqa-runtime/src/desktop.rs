@@ -35,22 +35,36 @@ pub(crate) type Slot = Arc<Mutex<Option<Arc<dyn ScreenDriver>>>>;
 ///
 /// A browser it starts is recorded in `spared`, so the runtime's reaper leaves it alone (ADR-0039 section 10): before,
 /// the first shell command of a desktop run killed it.
-pub(crate) async fn driver(slot: &Slot, spared: &SupervisedGroups) -> Arc<dyn ScreenDriver> {
-    Box::pin(opened(slot, spared)).await.0
+///
+/// `launch` false makes the driver without starting a browser, as on a host without one: the runtime's tests that
+/// stand in for the browser (`TestingHooks::browser_profile`), so a host that has `/usr/bin/chromium` but no display
+/// doesn't wait out the browser's start bound at every run.
+pub(crate) async fn driver(
+    slot: &Slot,
+    spared: &SupervisedGroups,
+    launch: bool,
+) -> Arc<dyn ScreenDriver> {
+    Box::pin(opened(slot, spared, launch)).await.0
 }
 
 /// [`driver`], with the browser's process and a handle on it when this call started it.
 async fn opened(
     slot: &Slot,
     spared: &SupervisedGroups,
+    launch: bool,
 ) -> (Arc<dyn ScreenDriver>, Option<(u32, Arc<Browser>)>) {
     let mut held = slot.lock().await;
     if let Some(driver) = held.as_ref() {
         return (driver.clone(), None);
     }
     let mut handle = None;
-    let browser = match Browser::launch(Path::new(CHROMIUM), &profile_dir()).await {
-        Ok(browser) => {
+    let launched = if launch {
+        Some(Browser::launch(Path::new(CHROMIUM), &profile_dir()).await)
+    } else {
+        None
+    };
+    let browser = match launched {
+        Some(Ok(browser)) => {
             let browser = Arc::new(browser);
             browser.pid().map(|pid| {
                 handle = Some((pid, browser.clone()));
@@ -60,10 +74,11 @@ async fn opened(
                 }
             })
         }
-        Err(error) => {
+        Some(Err(error)) => {
             tracing::warn!(reason = %error, "desktop: the browser didn't start");
             None
         }
+        None => None,
     };
     let tree: Arc<dyn A11y> = match AtspiTree::connect().await {
         Ok(tree) => Arc::new(tree),
@@ -104,7 +119,7 @@ pub(crate) async fn reopen(slot: &Slot, spared: &SupervisedGroups) -> bool {
     }
     let readiness = reopened(
         // Boxed: the browser's launch is a large future, and this one is awaited inside the supervisor's.
-        || async { Box::pin(opened(slot, spared)).await.1 },
+        || async { Box::pin(opened(slot, spared, true)).await.1 },
         |pid, left| async move { focused(&XDo::new(Arc::new(Process)), pid, left, FOCUS_POLL).await },
         |browser: Arc<Browser>, left| async move { answering(&browser, left, FOCUS_POLL).await },
         READY_WAIT,
