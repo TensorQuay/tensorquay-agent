@@ -384,6 +384,17 @@ changelog's "Unreleased" section, and the release's pull request turns it into t
 release goes to a `release/MAJOR.MINOR` branch from its tag. The past releases were tagged once, v17.0.0 to
 v17.3.0 (CONTRIBUTING.md, "Branches, releases and tags").
 
+**Amended 15 Nov 2026 (PO): from 18.0 a release has prebuilt images on the GitHub Container Registry.** The tag
+runs `.github/workflows/images.yml`: the gateway, web and three runtime images, each built natively for amd64 and
+arm64 the way `tools/release/release.py` builds them, checked (the architecture, the protocol revision, REL-I-003 to
+REL-I-005, and pulled back through `deploy/pull-images.sh`, REL-I-006), then published as
+`ghcr.io/tensorquay/tensorquay-agent-<name>:<version>`, one index per image. The local pipeline still publishes
+nothing (REL-U-007). Before the release page lists the digests, the technical lead pulls the published amd64 images
+by digest without signing in, runs the release image tests on them (`tools/release/test_images.py`: the SBOMs'
+C1 to C6, REL-I-001, and REL-I-003 to REL-I-005), and runs the first-hour check on them; a failure holds the release
+page and is fixed in a fix release.
+A user installs either way (deploy/README.md, step 0); the test model is never published.
+
 **Unchanged from v0.2:**
 - Semantic versions; `main` always releasable behind gates; release branches only for fixes.
 - A release produces: gateway, web and runtime images by digest; the Firecracker rootfs and kernel manifest; an
