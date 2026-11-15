@@ -31,6 +31,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **A long name is never cut without a sign (WEB-E2E-124).** A name longer than its space wraps whole, a long word
+  broken anywhere: a dialog's title, a channel's name, members, posts and task board. Where a row is one line by
+  design (a channel's heading, a file's row in the Files panel, a picker's choice), the name ends in an ellipsis and
+  the whole name is its tooltip and accessible name. Before, some were cut with no sign, and a channel page or the
+  share dialog could scroll sideways.
 - **Caps Lock types capitals on the Desktop under Take over (RT-I-059).** With Caps Lock on, a Mac viewer's letters
   came out lower case: the screen sharer added Shift for each capital while the desktop's own Caps Lock was also on,
   and the two cancelled. A viewer's Caps Lock no longer toggles the desktop's; letters arrive as typed, and Ctrl+A and

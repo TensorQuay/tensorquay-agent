@@ -218,7 +218,10 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
       <section className="channel-bar" aria-label={t("channels.header")}>
         <NavigationButton />
         <div className="channel-name">
-          <h1 className="type-heading">{item.name}</h1>
+          {/* One line by design: a long name ends in an ellipsis, the whole in the tooltip (WEB-E2E-124). */}
+          <h1 className="type-heading" title={item.name}>
+            {item.name}
+          </h1>
           {beyond && (
             <p className="type-small muted" title={item.purpose}>
               {beyond}

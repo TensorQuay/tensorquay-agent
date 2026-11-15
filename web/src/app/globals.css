@@ -795,6 +795,11 @@ textarea.form-control {
   gap: var(--space-4);
   margin-bottom: var(--space-6);
 }
+/* A dialog's title wraps whole, a long name in it broken anywhere rather than cut (decided on 15 Nov 2026). */
+.dialog-header h2 {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
 .dialog-actions {
   display: flex;
   justify-content: flex-end;

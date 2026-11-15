@@ -33,8 +33,11 @@
 .channel-card:focus-within {
   border-color: var(--muted);
 }
+/* A channel's name and its lines wrap whole: a long word breaks anywhere, never cut (decided on 15 Nov 2026). */
+.channel-card a,
 .channel-card p {
   margin: 0;
+  min-width: 0;
   overflow-wrap: anywhere;
 }
 .channel-facts {
@@ -319,6 +322,14 @@
   flex-wrap: wrap;
   align-items: baseline;
   gap: var(--space-1) var(--space-2);
+}
+/* A long name in a channel's lists wraps whole, broken anywhere rather than cut (decided on 15 Nov 2026): a flex item
+   needs its minimum width freed for the wrap to happen. */
+.member-name > *,
+.channel-post-who > *,
+.task-board li > p {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 /* An agent's name opens its task: quiet like the other names, underlined on hover. */
 .member-link {
