@@ -125,13 +125,15 @@ async fn gw_i_208_a_replacement_that_cant_be_created_is_retried_and_the_run_resu
             counted,
             "a notice with a countdown while the replacement is retried"
         );
-        advance(f, 30).await;
-        let tried = f.backend.creates.load(Ordering::SeqCst);
-        assert!(
-            tried > created + 1,
-            "retried while the disk is full: {} tries",
-            tried - created
-        );
+        // Retried again while it is still full. Moved on until it is, within the deadline: a loaded runner's retry worker
+        // can miss a fixed 30 s of clock in 120 ms of real time (CI, 15 Nov: 1 try).
+        tokio::time::timeout(support::DEADLINE, async {
+            while f.backend.creates.load(Ordering::SeqCst) <= created + 1 {
+                advance(f, 5).await;
+            }
+        })
+        .await
+        .map_err(|_| "retried while the disk is full: the second try never came")?;
         // Space is back (100 s into the outage, as in the soak): the next try starts a sandbox and the run resumes.
         f.backend.fail_create.store(false, Ordering::SeqCst);
         tokio::time::timeout(support::DEADLINE, async {

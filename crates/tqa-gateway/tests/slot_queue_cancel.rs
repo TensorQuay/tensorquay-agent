@@ -569,11 +569,17 @@ async fn gw_i_312_a_stop_withdraws_the_teams_waiting_turns_and_retires_a_startin
         send(f, &cookie, &lead.id, "wake").await?;
         let wake = format!("team-wake:{}:4", lead.id.as_str());
         as_team_turn(f, "wake", &wake).await?;
-        f.gateway.sandboxes().admission_pass_now().await?;
-        assert!(
-            f.backend.created(&helper.id).is_some(),
-            "the helper's sandbox is starting"
-        );
+        // The pass starts the helper's sandbox; on a loaded runner the start lands a moment later (CI, 15 Nov: asserted
+        // at once, it wasn't there yet), so wait for it, as the lead's wait above does.
+        tokio::time::timeout(support::DEADLINE, async {
+            while f.backend.created(&helper.id).is_none() {
+                f.gateway.sandboxes().admission_pass_now().await?;
+                tokio::task::yield_now().await;
+            }
+            Ok::<_, Box<dyn std::error::Error>>(())
+        })
+        .await
+        .map_err(|_| "the helper's sandbox never started")??;
         let mut stream = f.stream(&lead.id, &cookie, 0).await?;
         assert_eq!(stream.initial, SandboxState::Queued);
         sqlx::query(

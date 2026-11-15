@@ -19,6 +19,8 @@ export const UPLOAD_LIMITS = {
   preview_html_bytes: 2 * 1024 * 1024,
   preview_pdf_bytes: 20 * 1024 * 1024,
   preview_sheet_bytes: 10 * 1024 * 1024,
+  // The install's sandbox lifetime, the end of a kept desktop sign-in (ADR-0039 section 6, amended for 18.0).
+  desktop_lifetime_seconds: 28_800,
 };
 const publicAccount = ({ id, email, role }) => ({
   id,

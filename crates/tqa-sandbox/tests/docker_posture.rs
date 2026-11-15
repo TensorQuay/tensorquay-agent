@@ -572,7 +572,9 @@ async fn sbx_c_023_a_sandbox_reaches_its_own_loopback_server_in_proxy_mode() -> 
             .backend
             .create(spec, CancellationToken::new())
             .await?;
-        let script = "cd /tmp && (python3 -m http.server 8765 --bind 127.0.0.1 >/dev/null 2>&1 &) && sleep 1 && \
+        // The server is waited for, not given a fixed second: a loaded runner's Python took longer (CI, 15 Nov).
+        let script = "cd /tmp && (python3 -m http.server 8765 --bind 127.0.0.1 >/dev/null 2>&1 &) && \
+                      for _ in $(seq 50); do curl -s -o /dev/null http://127.0.0.1:8765/ && break; sleep 0.2; done && \
                       curl -sS --max-time 5 -o /dev/null -w 'curl %{http_code}\\n' http://127.0.0.1:8765/ && \
                       curl -sS --max-time 5 -o /dev/null -w 'curl-name %{http_code}\\n' http://localhost:8765/ && \
                       python3 -c \"import urllib.request; print('python', urllib.request.urlopen('http://localhost:8765/', timeout=5).status)\"";
