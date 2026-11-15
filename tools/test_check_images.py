@@ -253,6 +253,19 @@ def chain_text(dockerfile, stage):
     return "\n".join(stage_text(dockerfile, name) for name in reversed(stage_chain(dockerfile, stage)))
 
 
+class ProtocolRevisionLabels(unittest.TestCase):
+    """PROTO-U-046: every revision label in the runtime Dockerfile is the protocol revision the code speaks. 18.0's
+    revision 15 first left the labels at 14, and only the built image's check (SBX-C-017) saw it (15 Nov 2026)."""
+
+    def test_every_runtime_label_is_the_codes_revision(self):
+        revision = re.search(r"PROTOCOL_REVISION: u16 = (\d+);",
+                             (ROOT / "crates/tqa-types/src/limits.rs").read_text()).group(1)
+        labels = re.findall(r'org\.tensorquay\.protocol-revision="(\d+)"',
+                            (ROOT / "images/runtime/Dockerfile").read_text())
+        self.assertTrue(labels, "the runtime Dockerfile has revision labels")
+        self.assertEqual(set(labels), {revision})
+
+
 class EnvironmentLabels(unittest.TestCase):
     # The built-in environments (design-environments): each runtime target says which environment it is, its name and
     # the capabilities it really has, so the gateway can register it with nobody typing an image ID.
