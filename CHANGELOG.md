@@ -49,6 +49,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **Clear the browser's sign-ins stays offered while a task keeps its sign-in (WEB-U-476).** With the switch on, a run's
+  end keeps the desktop browser's sign-in, but the Screen panel's menu said "The browser is already signed out: each run
+  ends that way" and refused the clear once a run had ended after the Take over. The panel now reads the switch's own
+  notices: a sign-in may remain past a run's end while the task kept it at that end, and the switch turned off ends it.
 - **A task deleted while the container engine fails keeps nothing behind (GW-I-325).** If the engine refused the
   sandbox's removal at the delete and again on the failure path, nothing tried again until the gateway restarted, so
   the deleted task's sandbox, screenshots and browser profile stayed. The removal is now retried in the background,

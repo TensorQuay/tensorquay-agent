@@ -58,8 +58,11 @@ export function screenNoticeWords(
  * Whether the desktop's browser may still hold a sign-in, so clearing it can matter (ADR-0039 §6, option b). A sign-in
  * is made by hand during Take over, after the stopped run's reset; it lasts until the end of the first run that starts
  * after the hand-back, whose end empties the browser. So it may remain while the task is taken over, and after the last
- * hand-back until such a run has finished. When the page can't tell (the stored notices not read), it says it may: a
- * clear not offered when needed is worse than one offered when not.
+ * hand-back until such a run has finished. A task that keeps its sign-in (the switch, ADR-0039 §6 amended for 18.0;
+ * WEB-U-476) is the exception: a run's end empties nothing while the switch is on at that end, and the switch turned
+ * off empties at once between runs or at the end of the run it fell in, so a sign-in remains until then. When the page
+ * can't tell (the stored notices not read), it says it may: a clear not offered when needed is worse than one offered
+ * when not.
  */
 export function signInMayRemain(
   notices: readonly ScreenNoticeView[] | null,
@@ -73,17 +76,46 @@ export function signInMayRemain(
   if (!handedBack) return false;
   const back = Date.parse(handedBack.at);
   // Cleared after the hand-back: nothing can remain until the next Take over (a clear during it comes before the
-  // hand-back, and a sign-in after that clear may still be there).
+  // hand-back, and a sign-in after that clear may still be there). The switch turned off after it empties as surely.
   if (
     notices.some(
       (notice) =>
-        notice.kind === "screen.signed_out" && Date.parse(notice.at) > back,
+        (notice.kind === "screen.signed_out" ||
+          notice.kind === "screen.sign_in_released") &&
+        Date.parse(notice.at) > back,
     )
   )
     return false;
   return !Object.values(runs).some(
-    (run) => Date.parse(run.startedAt) > back && run.finishedAt !== null,
+    (run) =>
+      Date.parse(run.startedAt) > back &&
+      run.finishedAt !== null &&
+      !keptAt(notices, Date.parse(run.finishedAt)),
   );
+}
+
+/**
+ * How many stored screen notices the gateway lists, the newest first (its `MAX_LISTED`, screen/notices.rs): a list this
+ * long may have lost older notices, among them the switch's.
+ */
+export const LISTED_NOTICES = 100;
+
+/**
+ * Whether the task kept its sign-in at `time`: the latest switch notice up to then says kept. Without one, a list as
+ * long as the gateway lists may have lost it, so the page can't tell and says kept (a clear not offered when needed is
+ * worse); a shorter list is whole, and the switch was never on.
+ */
+function keptAt(notices: readonly ScreenNoticeView[], time: number): boolean {
+  const latest = notices
+    .filter(
+      (notice) =>
+        (notice.kind === "screen.sign_in_kept" ||
+          notice.kind === "screen.sign_in_released") &&
+        Date.parse(notice.at) <= time,
+    )
+    .at(-1);
+  if (latest === undefined) return notices.length >= LISTED_NOTICES;
+  return latest.kind === "screen.sign_in_kept";
 }
 
 /**

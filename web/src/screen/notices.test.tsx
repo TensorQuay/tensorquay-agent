@@ -9,6 +9,7 @@ import { apply, emptyTranscript } from "../transcript/reducer";
 import type { ScreenNoticeView } from "../transcript/types";
 
 import {
+  LISTED_NOTICES,
   screenNoticeWords,
   signInMayRemain,
   takenOver,
@@ -276,6 +277,96 @@ describe("WEB-U-245 the screen notices", () => {
         next: run(4, 5),
       }),
     ).toBe(true);
+  });
+
+  // WEB-U-476 (ADR-0039 §6, amended for 18.0): with the task's sign-in kept, a run's end empties nothing, so a sign-in
+  // made by hand may remain after it, and Clear the browser's sign-ins stays offered; the switch turned off ends that.
+  it("keeps a sign-in in mind past a run's end while the task keeps it (WEB-U-476)", () => {
+    const at = (kind: ScreenNoticeView["kind"], minute: number) => ({
+      kind,
+      at: `2026-11-16T10:${String(minute).padStart(2, "0")}:00Z`,
+    });
+    const run = (start: number, end: number | null) => ({
+      startedAt: `2026-11-16T10:${String(start).padStart(2, "0")}:30Z`,
+      finishedAt:
+        end === null
+          ? null
+          : `2026-11-16T10:${String(end).padStart(2, "0")}:30Z`,
+    });
+    const signedIn = [at("screen.taken_over", 2), at("screen.handed_back", 3)];
+    // Kept before the Take over: the run after the hand-back ended, and the sign-in is still there.
+    expect(
+      signInMayRemain([at("screen.sign_in_kept", 1), ...signedIn], {
+        next: run(4, 5),
+      }),
+    ).toBe(true);
+    // Kept during that run: its end keeps it.
+    expect(
+      signInMayRemain([...signedIn, at("screen.sign_in_kept", 4)], {
+        next: run(4, 5),
+      }),
+    ).toBe(true);
+    // Turned off between runs: emptied at once.
+    expect(
+      signInMayRemain(
+        [
+          at("screen.sign_in_kept", 1),
+          ...signedIn,
+          at("screen.sign_in_released", 6),
+        ],
+        { next: run(4, 5) },
+      ),
+    ).toBe(false);
+    // Turned off during a run: that run's end empties.
+    expect(
+      signInMayRemain(
+        [
+          at("screen.sign_in_kept", 1),
+          ...signedIn,
+          at("screen.sign_in_released", 4),
+        ],
+        { next: run(4, 5) },
+      ),
+    ).toBe(false);
+    // Turned off, then on again before the Take over: kept at the run's end.
+    expect(
+      signInMayRemain(
+        [
+          at("screen.sign_in_kept", 0),
+          at("screen.sign_in_released", 1),
+          ...signedIn,
+          at("screen.sign_in_kept", 4),
+        ],
+        { next: run(5, 6) },
+      ),
+    ).toBe(true);
+    // Kept, but cleared from the panel after the hand-back: nothing remains.
+    expect(
+      signInMayRemain(
+        [at("screen.sign_in_kept", 1), ...signedIn, at("screen.signed_out", 4)],
+        {},
+      ),
+    ).toBe(false);
+    // The page gets only the newest LISTED_NOTICES: a long kept task's switch notice may have left the list. With no
+    // switch notice at or before the run's end and a list that may be cut, the page can't tell, so it may remain.
+    const minute = (n: number) =>
+      new Date(Date.parse("2026-11-16T11:00:00Z") + n * 60_000).toISOString();
+    const hands = Array.from({ length: LISTED_NOTICES / 2 }, (_, i) => [
+      { kind: "screen.taken_over" as const, at: minute(2 * i) },
+      { kind: "screen.handed_back" as const, at: minute(2 * i + 1) },
+    ]).flat();
+    expect(hands).toHaveLength(LISTED_NOTICES);
+    const late = {
+      startedAt: minute(LISTED_NOTICES + 1),
+      finishedAt: minute(LISTED_NOTICES + 2),
+    };
+    expect(signInMayRemain(hands, { late })).toBe(true);
+    // The same list one shorter is whole, so nothing was kept: the run's end emptied the browser.
+    expect(signInMayRemain(hands.slice(1), { late })).toBe(false);
+    // Kept with no Take over at all: nothing was signed in by hand.
+    expect(
+      signInMayRemain([at("screen.sign_in_kept", 1)], { r: run(2, 3) }),
+    ).toBe(false);
   });
 
   it("reads nothing for a task without a desktop and no live notice", () => {
