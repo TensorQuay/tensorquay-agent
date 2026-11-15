@@ -67,6 +67,7 @@ export const settingsOperations = {
     path: "/api/v1/admin/egress/{host}",
   },
   adminEgressPresets: { method: "GET", path: "/api/v1/admin/egress/presets" },
+  adminEgressRefusals: { method: "GET", path: "/api/v1/admin/egress/refusals" },
   adminEgressPresetApply: {
     method: "POST",
     path: "/api/v1/admin/egress/presets/{id}",

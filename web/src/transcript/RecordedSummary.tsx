@@ -1,3 +1,5 @@
+import "./turns-catalogue";
+
 /** Marks the recorded duration separately from the stable work counts. */
 export function RecordedSummary({ text }: { text: string }) {
   const match = /\b\d+(?:\.\d+)? (?:ms|s)\b/.exec(text);

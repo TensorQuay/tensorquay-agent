@@ -31,6 +31,9 @@ export const AREAS = [
   { name: "teams", registration: "src/teams/catalogue.ts" },
   // The Screen panel, its replay and its sign-out dialog, which the files panel imports lazily (WEB-U-014).
   { name: "screen", registration: "src/screen/catalogue.ts" },
+  // The turns' renderers (the presenter, the activity group and lines, the summaries), which the transcript view
+  // loads with the first turn (WEB-U-473).
+  { name: "turns", registration: "src/transcript/turns-catalogue.ts" },
   // Copy the conversation page shows only from lazily loaded views: dialogs, menus, approvals, tool cards (WEB-U-014).
   { name: "deferred", registration: "src/i18n/deferred-catalogue.ts" },
   // The New task page (its start, the first message, the workspace picker), which a task's page never loads. After

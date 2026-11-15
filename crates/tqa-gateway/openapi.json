@@ -8161,6 +8161,63 @@
         }
       }
     },
+    "/api/v1/admin/egress/refusals": {
+      "get": {
+        "operationId": "adminEgressRefusals",
+        "summary": "List recent egress refusals",
+        "description": "The destinations the policy proxy refused lately (ADR-0035 point 3), the most recent first: host, port, the refusal's code, how often and when last, and the list that refused it. A bounded record kept in memory (at most limit destinations; the least recently refused goes first); a restarted gateway starts empty and the log keeps the rest. allowable is true when a rule for that host and port would open it (the allow-list's own refusals); allowed is true when the allow-list as it is now lets it through. Allow this site is PUT /api/v1/admin/egress/{host}. Administrators only; a session or a personal token.",
+        "security": [
+          {
+            "sessionCookie": []
+          },
+          {
+            "personalToken": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The recent refusals",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminEgressRefusals"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not an administrator",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable or gateway restarting",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/admin/egress/{host}": {
       "put": {
         "operationId": "adminEgressPut",
@@ -18797,6 +18854,309 @@
           }
         }
       }
+    },
+    "/api/v1/conversations/{id}/site": {
+      "post": {
+        "operationId": "mintSitePass",
+        "summary": "Mint a pass that serves a workspace folder as a site",
+        "description": "Owner or share only (the files routes' access). The folder is a path relative to the workspace root (the root itself as an empty string); any folder that exists (404 not_found otherwise): a page beside other files, such as an agent's report.html, is opened by its name under the pass, and index.html is only what the root and a route answer. The pass is a capability: 32 random bytes, unpadded base64url, kept in the gateway's memory for 900 seconds from its last use and forgotten at a restart; at most 8 live passes per task, the 9th is 409 site_passes_limit. The answer's url is the site's root under the pass: the Files panel frames it, and the frame's own requests (CSS, scripts, images, fonts, fetches of the site's own files) resolve under it without a cookie, which an opaque sandboxed frame cannot send. A leaked pass gives read-only reads of that one folder of that one task until it expires, and nothing else. The answer also says what the install's network setting lets the page reach (network: the any-host rule, and the exact and *.domain hosts), so the panel can name what a page loads that the browser will block.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SitePassRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The pass and the site's root",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SitePass"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "site_passes_limit: 8 live passes already serve this task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or unsupported protocol",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origin, ownership or role denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not_found: the task, or no such folder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate or capacity limit reached",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable or gateway restarting",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "I/O deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/conversations/{id}/site/{pass}/": {
+      "get": {
+        "operationId": "siteRoot",
+        "summary": "The root of a workspace folder served as a site, by its pass",
+        "description": "The folder's index.html, exactly as siteFile serves it for an empty path (the same pass, headers, Content-Security-Policy and limits); a folder without an index.html is 404 not_found at its root while its files still open by name. This is the address mintSitePass answers as url.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "pass",
+            "in": "path",
+            "required": true,
+            "description": "The pass mintSitePass answered (43 characters of unpadded base64url).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The file's bytes with its extension's type"
+          },
+          "404": {
+            "description": "not_found: an unknown or expired pass, a path that climbs, or no such file and no index.html",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "body_too_large: above the page or download limit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate or capacity limit reached",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Gateway restarting",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "I/O deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/conversations/{id}/site/{pass}/{*path}": {
+      "get": {
+        "operationId": "siteFile",
+        "summary": "A file of a workspace folder served as a site, by its pass",
+        "description": "No cookie, no Origin: the pass in the path is the whole credential (see mintSitePass); an unknown or expired pass, a path that climbs or a file outside the folder is 404 not_found, with no distinction. The rest of the path (slashes included) is the file under the folder; empty, a directory, or a path with no file of that name answers the folder's index.html, so a built site's own routes work. Each file is served by its extension's type, never guessed (html/htm text/html, js/mjs text/javascript, css, json and map, svg, png/jpg/jpeg/gif/webp/ico, woff/woff2/ttf/otf, wasm, txt; anything else application/octet-stream) up to files.preview_html_bytes for a page and files.download_bytes otherwise (413 body_too_large above). Every answer carries X-Content-Type-Options: nosniff, Referrer-Policy: no-referrer, Cache-Control: no-store and Cross-Origin-Resource-Policy: cross-origin and Access-Control-Allow-Origin: * (the page's origin is opaque, so its own styles, scripts and images are cross-origin loads to the browser, and a module script is a CORS fetch from origin null; the pass guards the files); a page also carries the site's Content-Security-Policy: `sandbox allow-scripts` (an opaque origin: no cookies or API as the person), `base-uri 'none'`, `form-action 'none'`, `frame-src 'none'`, `worker-src 'none'`, `frame-ancestors 'self'`, and for script-src, style-src, img-src, font-src, media-src and connect-src the site's own root under this pass plus 'unsafe-inline' (scripts and styles) and data: and blob: (media), plus the install's network setting rendered as sources: the any-host rule as https:, an exact host as https://host (with its ports other than 443), a *.domain rule as https://*.domain; internet access turned off or an empty allow-list adds nothing, so the browser blocks every outside load before it leaves.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "pass",
+            "in": "path",
+            "required": true,
+            "description": "The pass mintSitePass answered (43 characters of unpadded base64url).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "*path",
+            "in": "path",
+            "required": true,
+            "description": "The file under the folder, slashes included; the empty rest is index.html.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The file's bytes with its extension's type"
+          },
+          "404": {
+            "description": "not_found: an unknown or expired pass, a path that climbs, or no such file and no index.html",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "body_too_large: above the page or download limit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate or capacity limit reached",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Gateway restarting",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "I/O deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -27298,6 +27658,153 @@
             "items": {
               "$ref": "#/components/schemas/ScreenNotice"
             }
+          }
+        }
+      },
+      "AdminEgressRefusal": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "host",
+          "port",
+          "reason",
+          "count",
+          "last_at",
+          "list",
+          "allowable",
+          "allowed"
+        ],
+        "properties": {
+          "host": {
+            "type": "string",
+            "description": "The refused destination's name or address, in the allow-list's canonical form."
+          },
+          "port": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "not_listed",
+              "private",
+              "disabled",
+              "internal_forbidden",
+              "internal_unconfigured",
+              "internal_unverified",
+              "key_over_plain_http"
+            ],
+            "description": "Why the proxy refused it."
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "How often it was refused since the gateway started."
+          },
+          "last_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "list": {
+            "type": "string",
+            "enum": [
+              "install"
+            ],
+            "description": "The list that refused it: the install's (per-profile lists are not built)."
+          },
+          "allowable": {
+            "type": "boolean",
+            "description": "A rule for this host and port would open it."
+          },
+          "allowed": {
+            "type": "boolean",
+            "description": "The allow-list as it is now lets this host and port through."
+          }
+        }
+      },
+      "AdminEgressRefusals": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "limit"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminEgressRefusal"
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "SitePassRequest": {
+        "type": "object",
+        "required": [
+          "folder"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "folder": {
+            "type": "string",
+            "description": "A folder relative to the workspace root (no leading /, no . or .. segment, at most 1024 bytes; never under .tqa/), or an empty string for the root; it must exist."
+          }
+        }
+      },
+      "SitePass": {
+        "type": "object",
+        "required": [
+          "pass",
+          "folder",
+          "url",
+          "expires_in_seconds",
+          "network"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "pass": {
+            "type": "string",
+            "description": "43 characters of unpadded base64url."
+          },
+          "folder": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "description": "The site's root under the pass, an absolute path on this gateway: /api/v1/conversations/{id}/site/{pass}/ (the frame's src, with index.html implied)."
+          },
+          "expires_in_seconds": {
+            "type": "integer",
+            "description": "900: the pass lives this long from its last use."
+          },
+          "network": {
+            "$ref": "#/components/schemas/SiteNetwork"
+          }
+        }
+      },
+      "SiteNetwork": {
+        "type": "object",
+        "required": [
+          "any",
+          "hosts"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "any": {
+            "type": "boolean",
+            "description": "The any-host rule is in the install's allow-list: the page may reach any https host."
+          },
+          "hosts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The exact hosts and *.domain entries the page may reach (ports left out), sorted; empty with internet access off."
           }
         }
       }

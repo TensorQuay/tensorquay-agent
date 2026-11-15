@@ -706,6 +706,82 @@
         }
       }
     },
+    "AdminEgressRefusal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "host",
+        "port",
+        "reason",
+        "count",
+        "last_at",
+        "list",
+        "allowable",
+        "allowed"
+      ],
+      "properties": {
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "not_listed",
+            "private",
+            "disabled",
+            "internal_forbidden",
+            "internal_unconfigured",
+            "internal_unverified",
+            "key_over_plain_http"
+          ]
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "last_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "list": {
+          "type": "string",
+          "enum": [
+            "install"
+          ]
+        },
+        "allowable": {
+          "type": "boolean"
+        },
+        "allowed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "AdminEgressRefusals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "items",
+        "limit"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminEgressRefusal"
+          }
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
     "AdminEgressRule": {
       "type": "object",
       "additionalProperties": false,

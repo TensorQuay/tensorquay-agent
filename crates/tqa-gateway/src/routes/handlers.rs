@@ -93,6 +93,10 @@ pub(crate) enum Handler {
     FileDownload,
     FileView,
     FileSheet,
+    /// A pass that serves a workspace folder as a site, and the files it serves (18.0 previews for real sites).
+    SiteMint,
+    SiteRoot,
+    SiteFile,
     Upload,
     RunChanges,
     RunChangesDiff,
@@ -152,6 +156,7 @@ pub(crate) enum Handler {
     AdminDecisionEnginePut,
     AdminDecisionEngineDelete,
     AdminEgress,
+    AdminEgressRefusals,
     AdminEgressPut,
     AdminEgressDelete,
     AdminEgressPresets,

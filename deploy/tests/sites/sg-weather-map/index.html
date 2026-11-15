@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Singapore Weather Map</title>
+  <link rel="stylesheet" href="style.css" />
+  <script type="importmap">
+    { "imports": { "three": "https://unpkg.com/three@0.164.1/build/three.module.js" } }
+  </script>
+  <script src="config.js"></script>
+</head>
+<body>
+  <div id="map"></div>
+
+  <aside id="panel">
+    <header>
+      <h1>🇸🇬 Singapore Weather</h1>
+      <div class="sub">Live data · <a href="https://data.gov.sg" target="_blank" rel="noopener">data.gov.sg</a> / NEA</div>
+    </header>
+
+    <section id="summary" class="card"><div class="muted">Loading…</div></section>
+
+    <section class="card">
+      <h2>Map layer</h2>
+      <div id="layer-buttons" class="seg"></div>
+      <label class="toggle" id="toggle-3d-wrap">
+        <input type="checkbox" id="toggle-3d" checked /> 3D view (three.js)
+      </label>
+      <div id="legend"></div>
+    </section>
+
+    <section id="stats" class="card"></section>
+
+    <section id="outlook" class="card"></section>
+
+    <footer>
+      <span id="updated">–</span>
+      <button id="refresh" title="Refresh now">⟳</button>
+    </footer>
+    <div id="errors"></div>
+  </aside>
+
+  <div id="key-dialog" hidden>
+    <form id="key-form" class="card">
+      <h2>Google Maps API key</h2>
+      <p>Enter a Maps JavaScript API key. Add a <b>vector Map ID</b> to enable the 3D three.js layer (optional).</p>
+      <input id="key-input" placeholder="API key (AIza…)" required />
+      <input id="mapid-input" placeholder="Map ID (optional, for 3D)" />
+      <button type="submit">Load map</button>
+      <p class="muted small">Stored in this browser's localStorage only. You can also set them in <code>config.js</code>.</p>
+    </form>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

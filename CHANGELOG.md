@@ -7,13 +7,26 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Added
 
-- **Prebuilt images for each release, for amd64 and arm64 (REL-U-013, REL-I-006).** From 18.0, a release tag builds
-  the gateway, web app and Minimal, Workstation and Desktop runtimes natively for both architectures (Apple silicon
-  included), checks them, and publishes them on the GitHub Container Registry as
-  `ghcr.io/tensorquay/tensorquay-agent-<name>:<version>`. `deploy/pull-images.sh` pulls the release the checkout is
-  on, pins each image by its digest, tags the runtimes so the environments register themselves as built ones do, and
-  prints the same three lines for the install's step 1 as `deploy/build-images.sh`: a few minutes in place of a build
-  of 20 to 45. Building from source stays as it was.
+- **A workspace folder can be served as a site for the Files panel's preview (18.0).** Most sites are many files, not
+  one page: a pass minted for a folder serves its `index.html` and, by relative address, its style sheets, scripts,
+  images and fonts, read-only, for 15 minutes from the last use. The page stays sandboxed with an opaque origin; it
+  may load from the internet only what the install's network setting allows, which the browser enforces before a
+  request leaves. A built site's own routes answer its page. The pass is forgotten at a restart.
+- **Settings › Internet access lists the sites refused lately, with Allow this site (GW-I-323, WEB-U-474).** The
+  network proxy keeps the last 200 destinations it refused (host, port, why, how often, when last). An administrator
+  sees them under Recently refused; where a rule would open the site, Allow this site opens Add a site with its host and
+  port (or the host's rule with the port added), the same form and audit as any rule. Nothing waits for it: the task
+  has moved on, and its next connection is decided by the list as it is then. A restarted gateway starts the record
+  empty; the log keeps the rest.
+
+### Changed
+
+- **The task page's first scripts are 14 KiB lighter (WEB-U-472, WEB-U-473).** The code that draws a turn, the copy
+  it shows, and the validators of answers the page reads later (a workspace, an upload, a task's key uses, a run's
+  changes, a folder's page, the accounts, a desktop's notices) load when they are first needed; a task without a turn
+  never downloads them, and a message box given focus loads them ahead of the first turn. The page's first load is
+  225 KiB gzip of JavaScript, 15 KiB under the 240 KiB line it is held to, where 17.4.1 had 1 KiB of room; nothing on
+  the page changes.
 
 ### Fixed
 

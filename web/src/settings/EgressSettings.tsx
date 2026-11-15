@@ -16,7 +16,7 @@ import { ConfirmDialog } from "../ui/ConfirmDialog";
 import { Skeleton } from "../ui/Skeleton";
 import { TableScroll } from "../ui/TableScroll";
 
-import type { EgressApi, EgressRule } from "./admin/egress";
+import type { EgressApi, EgressRefusal, EgressRule } from "./admin/egress";
 import { ruleFailure } from "./egress-copy";
 import { EgressPresets, PRESET_COPY, PRESETS_KEY } from "./EgressPresets";
 import { canonicalIpv6 } from "./host-keys/address";
@@ -24,6 +24,17 @@ import { LoadFailure } from "./LoadFailure";
 import { RuleForm } from "./RuleForm";
 
 const KEY = ["admin-egress"];
+const REFUSALS_KEY = ["admin-egress-refusals"];
+/** Each refusal's reason in words (ADR-0035 point 3), from the gateway's code. */
+const REASONS: Readonly<Record<EgressRefusal["reason"], MessageKey>> = {
+  not_listed: "egress.refusedNotListed",
+  private: "egress.refusedPrivate",
+  disabled: "egress.refusedDisabled",
+  internal_forbidden: "egress.refusedInternalForbidden",
+  internal_unconfigured: "egress.refusedInternalUnconfigured",
+  internal_unverified: "egress.refusedInternalUnverified",
+  key_over_plain_http: "egress.refusedPlainHttpKey",
+};
 const INTERNAL_STATES: Readonly<
   Record<NonNullable<EgressRule["internal_state"]>, MessageKey>
 > = {
@@ -135,6 +146,25 @@ function Egress({ api }: { api: EgressApi }) {
     setAskDone(true);
     setNotice(copy);
     void cache.invalidateQueries({ queryKey: KEY });
+    void cache.invalidateQueries({ queryKey: REFUSALS_KEY });
+  };
+  // Allow this site (ADR-0035 point 3): Add a site with the refused host and port, or that host's own rule with the
+  // port added, through the same form, its checks and its audit.
+  const allow = (host: string, port: number) => {
+    const own = items.find((item) => item.host === host);
+    open(
+      own
+        ? {
+            edit: own,
+            start: {
+              host: own.host,
+              ports: [...new Set([...own.ports, port])]
+                .sort((a, b) => a - b)
+                .join(", "),
+            },
+          }
+        : { edit: null, start: { host, ports: String(port) } },
+    );
   };
   return (
     <div className="stack">
@@ -167,6 +197,7 @@ function Egress({ api }: { api: EgressApi }) {
         onEdit={(item) => open({ edit: item })}
         onDelete={(item) => open({ remove: item })}
       />
+      <RecentRefusals api={api} disabled={disabled} onAllow={allow} />
       <RuleDialogs
         dialog={shown}
         api={api}
@@ -389,5 +420,87 @@ function DeleteRule({
     >
       <p>{t("egress.deleteBody")}</p>
     </ConfirmDialog>
+  );
+}
+
+/**
+ * The destinations the proxy refused lately (ADR-0035 point 3), the most recent first: each with its reason in words
+ * and how often, and Allow this site where a rule would open it. A tidy-up of the list, never a gate: the task has
+ * already moved on, and its next connection is decided by the list as it is then.
+ */
+function RecentRefusals({
+  api,
+  disabled,
+  onAllow,
+}: {
+  api: EgressApi;
+  disabled: boolean;
+  onAllow: (host: string, port: number) => void;
+}) {
+  const t = useT();
+  const refusals = useQuery({
+    queryKey: REFUSALS_KEY,
+    queryFn: ({ signal }) => api.refusals(signal),
+    retry: false,
+  });
+  const items = refusals.data?.items ?? [];
+  return (
+    <section className="stack" aria-labelledby="egress-refused">
+      <h2 id="egress-refused" className="type-heading">
+        {t("egress.refused")}
+      </h2>
+      {refusals.isPending ? null : refusals.isError ? (
+        <LoadFailure
+          message={t("egress.refusedFailed")}
+          onRetry={() => void refusals.refetch()}
+        />
+      ) : items.length === 0 ? (
+        <p className="muted">{t("egress.refusedNone")}</p>
+      ) : (
+        <TableScroll label={t("egress.refused")}>
+          <table className="data-table" aria-label={t("egress.refused")}>
+            <thead>
+              <tr>
+                <th scope="col">{t("egress.refusedSite")}</th>
+                <th scope="col">{t("egress.refusedReason")}</th>
+                <th scope="col">{t("egress.refusedTimes")}</th>
+                <th scope="col">
+                  <span className="visually-hidden">
+                    {t("egress.refusedAction")}
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((item) => {
+                const site = `${item.host}:${item.port}`;
+                return (
+                  <tr key={`${site}-${item.reason}`}>
+                    <th scope="row">{site}</th>
+                    <td>{t(REASONS[item.reason])}</td>
+                    <td>{t("egress.refusedCount", { count: item.count })}</td>
+                    <td>
+                      {item.allowed ? (
+                        <span className="type-small muted">
+                          {t("egress.refusedAllowed")}
+                        </span>
+                      ) : item.allowable && !disabled ? (
+                        <Button
+                          variant="ghost"
+                          aria-label={t("egress.allowSite", { site })}
+                          onClick={() => onAllow(item.host, item.port)}
+                        >
+                          {t("egress.allowThisSite")}
+                        </Button>
+                      ) : null}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </TableScroll>
+      )}
+    </section>
   );
 }

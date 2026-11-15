@@ -3,6 +3,7 @@ import type {
   EgressApi,
   EgressList,
   EgressPresetId,
+  EgressRefusal,
   EgressRule,
 } from "../settings/admin/egress";
 
@@ -60,6 +61,8 @@ export function fakeEgress({
   limit = 256,
   /** Refuses every internal rule as the gateway does a wildcard's or an address's (`internal_name_only`). */
   refuseInternal = false,
+  /** The proxy's recent refusals; `allowed` is read from the fake list as the gateway reads its live one. */
+  refusals = [] as Omit<EgressRefusal, "allowed">[],
 } = {}) {
   const store = new Map(rules.map((item) => [item.host, { ...item }]));
   const replies = new Map<string, EgressRule | null>();
@@ -136,6 +139,16 @@ export function fakeEgress({
       replies.set(key, null);
       return Promise.resolve();
     },
+    refusals: () =>
+      Promise.resolve({
+        limit: 200,
+        items: refusals.map((each) => ({
+          ...each,
+          allowed: [...store.values()].some(
+            (item) => item.host === each.host && item.ports.includes(each.port),
+          ),
+        })),
+      }),
     presets: () =>
       Promise.resolve({
         items: (Object.keys(PRESET_RULES) as EgressPresetId[]).map((id) => {

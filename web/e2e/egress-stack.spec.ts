@@ -106,3 +106,53 @@ test("SEC-001 real blocked network access", async ({ page }) => {
       { mode: 0o600 },
     );
 });
+
+// GW-I-323 and WEB-U-474 on the real stack (18.0): the real proxy's refusal shows under Settings › Internet access with
+// its reason in words, and Allow this site writes the rule through the usual form; the record then says the list lets
+// the site through. Self-contained: its own task makes the refusal, so it holds alone or after SEC-001.
+test("GW-I-323 a site the proxy refused is listed and allowed from Settings", async ({
+  page,
+}) => {
+  const logged: string[] = [];
+  page.on("console", (message) => {
+    if (["error", "warning"].includes(message.type()))
+      logged.push(message.text());
+  });
+  page.on("pageerror", (error) => logged.push(error.message));
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await bootstrap(page);
+  await page.goto("/");
+  const input = page.getByRole("textbox", { name: "Message" });
+  await input.fill("Fetch the example page.");
+  await input.press("Enter");
+  await expect(page.getByLabel("Run status")).toHaveText("Done", {
+    timeout: afterStart(30_000),
+  });
+
+  await page.goto("/settings/internet-access");
+  const table = page.getByRole("table", { name: "Recently refused" });
+  const row = table.getByRole("row", { name: /example\.invalid:443/ });
+  await expect(row).toContainText("Not in the allow-list");
+  for (const colorScheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme });
+    await capture(page, `1440-${colorScheme}-refused`);
+  }
+  await page.emulateMedia({ colorScheme: "light" });
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+
+  await row.getByRole("button", { name: "Allow example.invalid:443" }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByLabel("Host", { exact: true })).toHaveValue(
+    "example.invalid",
+  );
+  await expect(dialog.getByLabel("Ports", { exact: true })).toHaveValue("443");
+  await capture(page, "1440-light-allow-form");
+  await dialog.getByRole("button", { name: "Save rule" }).click();
+  await expect(dialog).toBeHidden();
+  await expect(row).toContainText("Allowed now");
+  await expect(
+    row.getByRole("button", { name: "Allow example.invalid:443" }),
+  ).toHaveCount(0);
+  await capture(page, "1440-light-allowed");
+  expect(logged).toEqual([]);
+});

@@ -187,6 +187,9 @@ fn method_router(handler: Handler) -> MethodRouter<Arc<AppState>> {
         Handler::FileContent => get(crate::files::content),
         Handler::FileDownload => get(crate::files::download),
         Handler::FileView => get(crate::files::view),
+        Handler::SiteMint => post(crate::files::site_mint),
+        Handler::SiteRoot => get(crate::files::site_root),
+        Handler::SiteFile => get(crate::files::site_file),
         Handler::FileSheet => get(crate::files::sheet),
         Handler::Upload => post(crate::files::upload),
         Handler::RunChanges => get(crate::files::changes::run_changes),
@@ -267,6 +270,7 @@ fn admin_method_router(handler: Handler) -> MethodRouter<Arc<AppState>> {
         Handler::AdminSecretConsumers => put(crate::admin::secret_bind),
         Handler::AdminSecretDelete => delete(crate::admin::secret_remove),
         Handler::AdminEgress => get(crate::admin::egress),
+        Handler::AdminEgressRefusals => get(crate::admin::egress_refusals),
         Handler::AdminConnectors => get(crate::admin::connectors),
         Handler::AdminConnectorPut => put(crate::admin::connector_put),
         Handler::AdminConnectorDelete => delete(crate::admin::connector_remove),
@@ -289,6 +293,19 @@ fn admin_method_router(handler: Handler) -> MethodRouter<Arc<AppState>> {
         Handler::AdminRouteModels => get(crate::relay::route_models),
         _ => MethodRouter::new(),
     }
+}
+
+/// A site's files are read by the sandboxed page from its opaque origin (`Origin: null` on a module script's CORS
+/// fetch), guarded by the pass in the path and never by a cookie: no Origin check on those reads (GW-I-321).
+fn site_read(request: &Request) -> bool {
+    request
+        .extensions()
+        .get::<MatchedPath>()
+        .is_some_and(|matched| {
+            matched
+                .as_str()
+                .starts_with("/api/v1/conversations/{id}/site/{pass}/")
+        })
 }
 
 async fn boundary(State(state): State<Arc<AppState>>, request: Request, next: Next) -> Response {
@@ -322,8 +339,9 @@ async fn boundary(State(state): State<Arc<AppState>>, request: Request, next: Ne
         && request
             .headers()
             .contains_key(axum::http::header::AUTHORIZATION);
+    let site = !changing && site_read(&request);
     // An unmatched API route cannot change state and keeps its JSON not-found response.
-    let origin = if relay || mcp || channels || page || unmatched || bearer {
+    let origin = if relay || mcp || channels || page || unmatched || bearer || site {
         Ok(())
     } else {
         auth::check_origin(request.headers(), &state.config.public_origin, changing)

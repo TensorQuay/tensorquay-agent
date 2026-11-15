@@ -20,7 +20,9 @@ pub(crate) use connectors::{list as connectors, put as connector_put, remove as 
 pub(crate) use decision_engines::{
     list as decision_engines, put as decision_engine_put, remove as decision_engine_remove,
 };
-pub(crate) use egress::{list as egress, put as egress_put, remove as egress_remove};
+pub(crate) use egress::{
+    list as egress, put as egress_put, refusals as egress_refusals, remove as egress_remove,
+};
 pub(crate) use egress_presets::{
     apply as egress_preset_apply, list as egress_presets, remove as egress_preset_remove,
 };

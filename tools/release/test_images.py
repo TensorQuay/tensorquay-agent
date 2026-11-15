@@ -156,9 +156,7 @@ class ImageHardening(unittest.TestCase):
         dockerfile = (REPOSITORY / "images/runtime/Dockerfile").read_text()
         for name in ("undici", "brace-expansion"):
             with self.subTest(name):
-                # The download line in images/fetch.py's shared form (REL-U-012, 17.4.1): "<url> /out/<name>.tgz \\".
-                fixed = re.search(r"https://registry\.npmjs\.org/{0}/-/{0}-(\S+)\.tgz /out/{0}\.tgz \\$".format(name),
-                                  dockerfile, re.MULTILINE)
+                fixed = re.search(r"/{0}/-/{0}-(\S+)\.tgz /tmp/{0}\.tgz$".format(name), dockerfile, re.MULTILINE)
                 self.assertIsNotNone(fixed)
                 bundled = json.loads(self.files("runtime-workstation").read(
                     "/usr/local/lib/node_modules/npm/node_modules/{}/package.json".format(name)))

@@ -18,6 +18,7 @@ import { Textarea } from "../ui/Textarea";
 import { useCoarsePointer } from "../ui/use-coarse-pointer";
 
 import { composerReason } from "./presentation";
+import { warmTurns } from "./turns-loader";
 import type { Transcript } from "./types";
 import { useComposerSize } from "./use-composer-size";
 
@@ -195,6 +196,10 @@ export function Composer({
       data-dragging={drop.dragging || undefined}
       {...drop.handlers}
       {...paste}
+      // The person means to send: the turns' renderers start loading, so a new task's first turn renders at once
+      // (WEB-U-473); a task with turns has them already.
+      onFocusCapture={warmTurns}
+      onPointerDownCapture={warmTurns}
       onSubmit={(event) => {
         event.preventDefault();
         void send();

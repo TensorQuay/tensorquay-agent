@@ -38,7 +38,6 @@ import {
   useScreenLines,
   waitsAfterHandBack,
 } from "../screen/notices";
-import { desktopSteps } from "../screen/replay-steps";
 import { ScreenToggle } from "../screen/ScreenToggle";
 import { ErrorMessage } from "../ui/ErrorMessage";
 import { PanelBoundary } from "../ui/PanelBoundary";
@@ -46,6 +45,11 @@ import { Skeleton } from "../ui/Skeleton";
 
 import { Composer } from "./Composer";
 import { DesktopSwitchContext, type DesktopSwitch } from "./desktop-switch";
+import {
+  desktopWordsState,
+  loadDesktopWords,
+  onDesktopWords,
+} from "./desktop-words-state";
 import { FollowControl } from "./FollowControl";
 import { noticeText } from "./notice-copy";
 import { OptimisticMessage } from "./OptimisticMessage";
@@ -54,12 +58,6 @@ import { isWorking, runEnded } from "./run-status";
 import { startedTeam } from "./started-team";
 import { placeKeyUses } from "./stored-key-uses";
 import { useTeamSlot } from "./team-slot";
-import {
-  desktopWordsState,
-  loadDesktopWords,
-  onDesktopWords,
-  toolSummary,
-} from "./tool-summary";
 import { TranscriptView } from "./TranscriptView";
 import { useActions } from "./use-actions";
 import { useFollow } from "./use-follow";
@@ -275,13 +273,6 @@ export function LiveConversation({
   // The bar gets its divider only while content sits under it (UI-GUIDELINES §7).
   const [scrolled, setScrolled] = useState(false);
   const t = useT();
-  // The task's desktop actions in words, with their runs and pictures, for the Screen tab's replay (ADR-0039 §5).
-  const screenSteps = useMemo(
-    () => desktopSteps(transcript, (tool) => toolSummary(tool, t)),
-    // Labelled again once the Desktop tool's words arrive (WEB-U-422).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [transcript, t, words],
-  );
   const runStarts = useMemo(
     () =>
       Object.fromEntries(
@@ -559,7 +550,7 @@ export function LiveConversation({
             )}
             tab={panel.tab}
             desktop={desktop}
-            screenSteps={screenSteps}
+            transcript={transcript}
             runStarts={runStarts}
             screenNotices={transcript.screenNotices}
             signInMayRemain={signInMayRemain(screen.notices, transcript.runs)}

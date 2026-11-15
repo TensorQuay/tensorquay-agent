@@ -88,6 +88,7 @@ impl Proxy {
                 let status = match refusal {
                     Refusal::Unidentified => "407 Proxy Authentication Required",
                     Refusal::Denied { host, port, reason } => {
+                        self.state.recent_refusals.refused(&host, port, reason);
                         let response = super::refusal::denied(&host, port, reason);
                         let _ =
                             tokio::time::timeout(deadline, client.write_all(response.as_bytes()))
@@ -121,7 +122,7 @@ impl Proxy {
             return Err(Refusal::Denied {
                 host,
                 port,
-                reason: "a key never goes over plain http",
+                reason: super::refusal::PLAIN_HTTP_KEY,
             });
         }
         let tunnelled = forward.is_none();

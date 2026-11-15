@@ -15,10 +15,14 @@ mod linked;
 mod remote;
 mod sheet;
 mod sheet_ods;
+mod site;
 mod view;
 pub(crate) use check::{check_attachments, prepare_attachments};
 pub(crate) use endpoints::{content, download, list, upload};
 pub(crate) use sheet::sheet;
+pub(crate) use site::{
+    Passes as SitePasses, file as site_file, mint as site_mint, root as site_root,
+};
 pub(crate) use view::view;
 
 /// The outer request-body bound for uploads: the per-file limit plus one chunk, so the handler's own check answers

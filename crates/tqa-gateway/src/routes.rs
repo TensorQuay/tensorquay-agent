@@ -427,6 +427,11 @@ pub(crate) const ROUTES: &[Route] = &[
     },
     Route {
         method: "GET",
+        path: "/api/v1/admin/egress/refusals",
+        handler: Handler::AdminEgressRefusals,
+    },
+    Route {
+        method: "GET",
         path: "/api/v1/admin/egress/presets",
         handler: Handler::AdminEgressPresets,
     },
@@ -759,6 +764,21 @@ pub(crate) const ROUTES: &[Route] = &[
         method: "GET",
         path: "/api/v1/conversations/{id}/files/view",
         handler: Handler::FileView,
+    },
+    Route {
+        method: "POST",
+        path: "/api/v1/conversations/{id}/site",
+        handler: Handler::SiteMint,
+    },
+    Route {
+        method: "GET",
+        path: "/api/v1/conversations/{id}/site/{pass}/",
+        handler: Handler::SiteRoot,
+    },
+    Route {
+        method: "GET",
+        path: "/api/v1/conversations/{id}/site/{pass}/{*path}",
+        handler: Handler::SiteFile,
     },
     Route {
         method: "GET",

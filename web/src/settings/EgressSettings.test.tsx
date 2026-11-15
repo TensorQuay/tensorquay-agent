@@ -665,3 +665,113 @@ describe("WEB-U-188 an internal server's rule", () => {
     );
   });
 });
+
+// ADR-0035 point 3: the proxy's recent refusals, and Allow this site, an administrator's tidy-up of the list.
+describe("WEB-U-474 recently refused sites", () => {
+  const refused = (
+    host: string,
+    port: number,
+    reason: "not_listed" | "private",
+    count = 1,
+  ) => ({
+    host,
+    port,
+    reason,
+    count,
+    last_at: "2026-11-15T05:00:00Z",
+    list: "install" as const,
+    allowable: reason === "not_listed",
+  });
+
+  it("lists each refusal with its reason in words and how often, and offers Allow this site only where a rule helps", async () => {
+    show(
+      fakeEgress({
+        rules: listed,
+        refusals: [
+          refused("unpkg.com", 443, "not_listed", 3),
+          refused("intranet.local", 80, "private"),
+        ],
+      }).api,
+    );
+    const section = await screen.findByRole("region", {
+      name: "Recently refused",
+    });
+    const cdn = await within(section).findByRole("row", {
+      name: /unpkg\.com:443/,
+    });
+    expect(cdn).toHaveTextContent("Not in the allow-list");
+    expect(cdn).toHaveTextContent("3 times");
+    expect(
+      within(cdn).getByRole("button", { name: "Allow unpkg.com:443" }),
+    ).toBeVisible();
+    const inside = within(section).getByRole("row", {
+      name: /intranet\.local:80/,
+    });
+    expect(inside).toHaveTextContent("A private or reserved address");
+    expect(within(inside).queryByRole("button")).toBeNull();
+  });
+
+  it("Allow this site opens Add a site with the host and port, and the saved rule shows it allowed", async () => {
+    const fake = fakeEgress({
+      rules: listed,
+      refusals: [refused("unpkg.com", 443, "not_listed")],
+    });
+    show(fake.api);
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Allow unpkg.com:443" }),
+    );
+    expect(within(dialog()).getByLabelText("Host")).toHaveValue("unpkg.com");
+    expect(within(dialog()).getByLabelText("Ports")).toHaveValue("443");
+    fireEvent.click(
+      within(dialog()).getByRole("button", { name: "Save rule" }),
+    );
+    const section = await screen.findByRole("region", {
+      name: "Recently refused",
+    });
+    expect(await within(section).findByText("Allowed now")).toBeVisible();
+    expect(fake.writes).toEqual([
+      { host: "unpkg.com", ports: [443], internal: false },
+    ]);
+  });
+
+  it("adds the port to a site that already has a rule, with the version read", async () => {
+    const fake = fakeEgress({
+      rules: listed,
+      refusals: [refused("pypi.org", 8080, "not_listed")],
+    });
+    show(fake.api);
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Allow pypi.org:8080" }),
+    );
+    expect(within(dialog()).getByLabelText("Ports")).toHaveValue("443, 8080");
+    fireEvent.click(
+      within(dialog()).getByRole("button", { name: "Save rule" }),
+    );
+    await screen.findByText("Allowed now");
+    expect(fake.writes).toEqual([
+      { host: "pypi.org", ports: [443, 8080], internal: false, version: 1 },
+    ]);
+  });
+
+  it("says when nothing was refused lately", async () => {
+    show(fakeEgress({ rules: listed }).api);
+    expect(
+      await screen.findByText("No site was refused since the gateway started."),
+    ).toBeVisible();
+  });
+
+  it("offers no Allow while egress is turned off by configuration", async () => {
+    show(
+      fakeEgress({
+        rules: listed,
+        disabled: true,
+        refusals: [refused("unpkg.com", 443, "not_listed")],
+      }).api,
+    );
+    const section = await screen.findByRole("region", {
+      name: "Recently refused",
+    });
+    await within(section).findByRole("row", { name: /unpkg\.com:443/ });
+    expect(within(section).queryByRole("button")).toBeNull();
+  });
+});
