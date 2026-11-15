@@ -95,8 +95,8 @@ To work in an account over several messages, open the panel's ⋯ menu and turn 
 It is off unless you turn it on, and the menu says what it does: "The browser stays signed in between the agent's
 runs, until you turn this off or clear its sign-ins." A sign-in you make during Take over then stays through the runs
 that follow. Under the panel, a line says what ends it: "The desktop keeps running meanwhile. The sign-in ends when its
-sign-ins are cleared, this is turned off, the task is deleted, or the desktop reaches the installation's limit of 12
-hours." (with your installation's own number). While the switch is on, the desktop isn't stopped for sitting idle
+sign-ins are cleared, this is turned off, the task is deleted, or the desktop reaches the installation's limit of …
+hours." (with your installation's own number: 8 by default). While the switch is on, the desktop isn't stopped for sitting idle
 between your messages, so the sign-in waits for you; the installation's time limit for a desktop still ends it, as the
 line says. Anyone who may send to the task can turn the switch on or off, and the transcript notes each change and who
 made it: "The desktop browser's sign-in is kept for this task." or "The desktop browser's sign-in is no longer kept: it
