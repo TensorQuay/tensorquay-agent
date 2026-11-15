@@ -75,6 +75,8 @@ describe("WEB-U-007 session redirect policy", () => {
         }),
     );
     const request = client.models();
+    // The read starts once its validators are here (WEB-U-472): the pending answer is this request's, not the logout's.
+    await vi.waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     fetch.mockResolvedValueOnce(new Response(null, { status: 204 }));
     await client.logout();
     fetch.mockResolvedValueOnce(Response.json(user));

@@ -162,8 +162,9 @@ test("WEB-U-014/WEB-U-015 follows a long Markdown stream and copies code on HTTP
   ).toBeLessThanOrEqual(250 * 1024);
   expect(
     scriptBytes,
-    "Conversation JavaScript must retain at least 10 KiB of headroom",
-  ).toBeLessThanOrEqual(240 * 1024);
+    // 18 KiB under the budget since 18.0 (WEB-U-472, WEB-U-473), 8 KiB more than WEB-U-014's 10 KiB headroom line.
+    "Conversation JavaScript must retain at least 18 KiB of headroom",
+  ).toBeLessThanOrEqual(232 * 1024);
   await expect(
     page.getByText("End of streamed answer.", { exact: true }),
   ).toBeInViewport();
@@ -256,6 +257,15 @@ test("WEB-U-014/WEB-U-015 preserves completed output while the Markdown chunk is
   page,
 }) => {
   await open(page);
+  // The turns' renderers load on the person's intent to send (WEB-U-473): here before the hold, so what the hold
+  // catches is the parser's chunk, as it always was.
+  const turns = page.waitForResponse(
+    (response) =>
+      /\/_next\/static\/.*\.js$/.test(new URL(response.url()).pathname) &&
+      response.request().resourceType() === "script",
+  );
+  await page.getByLabel("Message", { exact: true }).focus();
+  await turns;
   let release: () => void = () => {};
   const held = new Promise<void>((resolve) => {
     release = resolve;

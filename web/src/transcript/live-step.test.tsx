@@ -157,6 +157,8 @@ describe("WEB-U-437 the step words load as the run goes live", () => {
   it("names a running call's step once its words are here, with no line before", async () => {
     vi.resetModules();
     const { TranscriptView: View } = await import("./TranscriptView");
+    // The turns' renderers come with the fresh modules (WEB-U-473), as the page has them by its first turn.
+    await (await import("./turns-loader")).preloadTurns();
     render(
       <View
         transcript={[
@@ -185,6 +187,7 @@ describe("WEB-U-437 the step words load as the run goes live", () => {
       });
       const loader = await import("./step-words-loader");
       const { TranscriptView: View } = await import("./TranscriptView");
+      await (await import("./turns-loader")).preloadTurns();
       const transcript = [
         ...start,
         call(5, "read", "read_file", { path: "demo/README.md" }),

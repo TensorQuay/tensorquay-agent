@@ -9,8 +9,8 @@ const refusal = (error: Record<string, unknown>) => ({
 
 // A refusal keeps what the gateway says it concerns, so the page can explain it (ADR-0028; WEB-U-047).
 describe("WEB-U-047 refusal details", () => {
-  it("keeps what still uses a template on 409 template_in_use", () => {
-    const error = failure(
+  it("keeps what still uses a template on 409 template_in_use", async () => {
+    const error = await failure(
       409,
       new Headers(),
       refusal({
@@ -26,8 +26,8 @@ describe("WEB-U-047 refusal details", () => {
     });
   });
 
-  it("has no use details on other refusals, and keeps field problems and the wait", () => {
-    const error = failure(
+  it("has no use details on other refusals, and keeps field problems and the wait", async () => {
+    const error = await failure(
       400,
       new Headers({ "retry-after": "7" }),
       refusal({
@@ -50,8 +50,12 @@ describe("WEB-U-233 refusal details in an agent team's shapes", () => {
     ["file_too_large", 413, { path: "reports/q3.csv" }],
     ["member_limit", 409, { limit: 3, by: "slots" }],
     ["team_ended", 409, { messages: [], last_seq: 11, more: false }],
-  ])("reads %s with its object details", (code, status, details) => {
-    const error = failure(status, new Headers(), refusal({ code, details }));
+  ])("reads %s with its object details", async (code, status, details) => {
+    const error = await failure(
+      status,
+      new Headers(),
+      refusal({ code, details }),
+    );
     expect(error.code).toBe(code);
     expect(error.message).toBe("Refused.");
     expect(error.details).toEqual([]);

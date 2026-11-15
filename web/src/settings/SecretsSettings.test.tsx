@@ -316,7 +316,7 @@ describe("WEB-U-035 shared keys", () => {
         details: [{ field: "value", reason: "value_from_a_newer_gateway" }],
       },
     };
-    const refusal = failure(400, new Headers(), body);
+    const refusal = await failure(400, new Headers(), body);
     expect(refusal.code).toBe("invalid_request");
     const api: AdminApi = {
       ...admin.api,

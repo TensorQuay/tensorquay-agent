@@ -549,6 +549,7 @@
     "composer.heldList": "等待智能体的消息",
     "composer.starting": "正在启动…",
     "turn.label": "轮次",
+    "turn.loading": "正在加载对话记录",
     "activity.group": "活动",
     "activity.thinking": "思考过程",
     "activity.thinkingLive": "思考中…",

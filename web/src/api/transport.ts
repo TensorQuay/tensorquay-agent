@@ -89,7 +89,7 @@ export class Transport {
           ? await response.blob()
           : await readJson(response);
       if (!response.ok && !options.accept?.includes(response.status))
-        throw failure(response.status, response.headers, value);
+        throw await failure(response.status, response.headers, value);
       try {
         const result = decode(value, response.headers);
         this.sessionRedirect.succeeded(name);

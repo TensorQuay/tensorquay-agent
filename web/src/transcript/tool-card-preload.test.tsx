@@ -51,6 +51,7 @@ describe("WEB-U-202 a tool card's code is ready before the card opens", () => {
       vi.resetModules();
       const loader = await import("./tool-card-loader");
       const { TranscriptView: View } = await import("./TranscriptView");
+      await (await import("./turns-loader")).preloadTurns();
       render(<View transcript={finished} />);
       const group = screen.getByRole("button", { name: /Worked for/ });
       expect(group).toHaveAttribute("aria-expanded", "false");
@@ -87,6 +88,7 @@ describe("WEB-U-202 a failed preload is forgotten", () => {
       });
       const loader = await import("./tool-card-loader");
       const { TranscriptView: View } = await import("./TranscriptView");
+      await (await import("./turns-loader")).preloadTurns();
       render(<View transcript={finished} />);
       // The person means to open a step: the group starts the card's load, which fails. Restated 3 Oct 2026: it used
       // to rely on the turn's showing to start the load, which no longer does (WEB-U-202), so it had stopped running

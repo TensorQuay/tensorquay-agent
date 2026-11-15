@@ -3,7 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 
 import { ApiError } from "../api/error";
-import { uploadFile } from "../api/upload";
+import type { uploadFile } from "../api/upload";
+
+/** The uploader, loaded with the first file a person adds, off a task page's first scripts (WEB-U-473). */
+const sendFile: typeof uploadFile = async (...args) =>
+  (await import("../api/upload")).uploadFile(...args);
 
 /**
  * The gateway's default per-file limit, used until the signed-in account's own arrives (GW-I-142);
@@ -47,7 +51,7 @@ export type Attachments = ReturnType<typeof useAttachments>;
 export function useAttachments(
   /** The task to upload into; null on New task, where files are held until uploadHeld names the new task. */
   conversationId: string | null,
-  upload = uploadFile,
+  upload: typeof uploadFile = sendFile,
   /** The installation's per-file limit, from the signed-in account (`limits.upload_bytes`). */
   limit = MAX_FILE_BYTES,
 ) {

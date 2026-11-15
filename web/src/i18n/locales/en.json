@@ -551,6 +551,7 @@
     "composer.heldList": "Messages waiting for the agent",
     "composer.starting": "Starting…",
     "turn.label": "Turn",
+    "turn.loading": "Loading the transcript",
     "activity.group": "Activity",
     "activity.thinking": "Thinking",
     "activity.thinkingLive": "Thinking…",
