@@ -3,7 +3,7 @@ import struct
 import unittest
 import zlib
 
-from egress import desktop_live
+from egress import desktop_kept, desktop_live
 
 FIELDS = {"action", "ref", "text", "keys", "ms", "direction", "amount"}
 
@@ -79,6 +79,21 @@ class ScenarioTests(unittest.TestCase):
 
     def test_the_sign_in_case_runs_whoami_after_the_watched_run(self):
         self.assertEqual(desktop_live.ORDER["sign-in"], ["watched"] + ["whoami"] * 6)
+
+    def test_the_kept_case_runs_whoami_eight_times_over_two_tasks_on_one_script(self):
+        """WEB-E2E-125: five runs on the first task (before, after the sign-in, after the pause, after the browser's
+        restart, after the switch went off) and three on the second (before, after the sign-in, after Sign out
+        everywhere), both tasks on the one five-run script their shared phrase picks."""
+        self.assertEqual(desktop_live.ORDER["kept"], ["whoami"] * 8)
+        self.assertEqual(desktop_live.CONVERSATIONS["kept"], [("Do the whoami steps", ["whoami"] * 5)])
+        self.assertEqual(desktop_live.DEADLINE_SECONDS["kept"], 1800)
+        # The idle limit is short, and the pause is three of them; the cookie flush wait covers Chromium's batch.
+        self.assertEqual(desktop_kept.KEPT_IDLE_SECONDS, 20)
+        self.assertGreater(desktop_kept.COOKIE_FLUSH_SECONDS, 30)
+        self.assertIn("[/]usr/lib/chromium/chromium", desktop_kept.KILL_BROWSER)
+
+    def test_the_browser_cookie_probe_takes_several_names(self):
+        self.assertIn("process.argv[1].split(',')", desktop_live.BROWSER_COOKIES)
 
 
 class PageTests(unittest.TestCase):
@@ -204,6 +219,39 @@ class FixtureSiteLoginsTests(unittest.TestCase):
         for served in (1, 2):
             urllib.request.urlopen(base + "/login", timeout=5).read()
             self.assertEqual(logins(), start + served)
+
+    def test_login_sets_a_persistent_and_a_session_cookie_and_whoami_says_which_came(self):
+        """WEB-E2E-125: the persistent cookie decides signed in or out; the session cookie's fate is said after it."""
+        import threading
+        import urllib.request
+        from egress import upstream
+        server = upstream.Server(("127.0.0.1", 0), upstream.Handler)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        self.addCleanup(server.shutdown)
+        base = "http://127.0.0.1:{}".format(server.server_address[1])
+        with urllib.request.urlopen(base + "/login", timeout=5) as response:
+            cookies = response.headers.get_all("Set-Cookie")
+        self.assertEqual(len(cookies), 2, cookies)
+        persistent = next(cookie for cookie in cookies if cookie.startswith(upstream.SESSION + "="))
+        session = next(cookie for cookie in cookies if cookie.startswith(upstream.TAB + "="))
+        self.assertIn("Max-Age=3600", persistent)
+        self.assertNotIn("Max-Age", session)
+        self.assertNotIn("Expires", session)
+
+        def title(cookie_header):
+            request = urllib.request.Request(base + "/whoami", headers={"Cookie": cookie_header} if cookie_header else {})
+            page = urllib.request.urlopen(request, timeout=5).read().decode()
+            return page.split("<title>")[1].split("</title>")[0]
+
+        both = "{}=signed-in; {}=signed-in".format(upstream.SESSION, upstream.TAB)
+        self.assertEqual(title(both), upstream.SIGNED_IN + "; " + upstream.TAB_KEPT)
+        self.assertEqual(title(upstream.SESSION + "=signed-in"), upstream.SIGNED_IN + "; " + upstream.TAB_GONE)
+        self.assertEqual(title(upstream.TAB + "=signed-in"), upstream.SIGNED_OUT + "; " + upstream.TAB_KEPT)
+        self.assertEqual(title(None), upstream.SIGNED_OUT + "; " + upstream.TAB_GONE)
+        # The driver's readers tell the two apart by their own words, neither a part of the other.
+        for a, b in ((upstream.SIGNED_IN, upstream.SIGNED_OUT), (upstream.TAB_KEPT, upstream.TAB_GONE)):
+            self.assertNotIn(a, b)
+            self.assertNotIn(b, a)
 
 
 if __name__ == "__main__":

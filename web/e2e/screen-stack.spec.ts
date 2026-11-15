@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
-import { writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
@@ -206,6 +207,124 @@ test("SEC-059 a sign-in by hand with no run after it", async ({ page }) => {
   await page.goto(`/c/${TASK}`);
   await signInByHand(page, await screenPanel(page));
   await result(["signed-in"]);
+});
+
+/** Opens the panel's ⋯ menu and returns the kept sign-in's switch (WEB-U-475). */
+async function keepSwitch(page: Page, panel: Locator) {
+  await panel
+    .getByRole("button", { name: "More actions for the screen" })
+    .click();
+  const item = page.getByRole("menuitemcheckbox", {
+    name: new RegExp(`^${words("screen.keepSignIn")}`),
+  });
+  await expect(item).toBeVisible();
+  return item;
+}
+
+/** The panel's line naming the ends of a kept sign-in, with the installation's own hours. */
+const endsLine = (panel: Locator) =>
+  panel.getByText(
+    new RegExp(
+      `^${words("screen.keepSignInEnds")
+        .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+        .replace("\\{hours\\}", "\\d+")}$`,
+    ),
+  );
+
+/** A screenshot of the page to the evidence folder, light and dark, when the driver gives one. */
+async function capture(page: Page, name: string) {
+  const directory = process.env.TQA_WEB_EVIDENCE_DIR;
+  if (!directory) return;
+  await mkdir(directory, { recursive: true });
+  for (const colorScheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme });
+    await page.screenshot({
+      path: join(directory, `stack-screen-${name}-${colorScheme}.png`),
+    });
+  }
+  await page.emulateMedia({ colorScheme: "light" });
+}
+
+// WEB-E2E-125 (GW-I-324, RT-I-060, WEB-U-475 on the real stack): the driver's `kept` case turns the switch on or off
+// here (TQA_SCREEN_KEPT_TO), and checks what the desktop's browser then keeps or loses by itself.
+test("WEB-E2E-125 the kept sign-in's switch, turned on or off from the Screen panel", async ({
+  page,
+}) => {
+  test.skip(PHASE !== "kept-switch", "The driver's kept case");
+  test.setTimeout(budget(0, 120_000));
+  const to = process.env.TQA_SCREEN_KEPT_TO;
+  if (to !== "on" && to !== "off")
+    throw new Error("The driver must say TQA_SCREEN_KEPT_TO=on|off");
+  const checked: string[] = [];
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await signIn(page);
+  await page.goto(`/c/${TASK}`);
+  const panel = await screenPanel(page);
+  const item = await keepSwitch(page, panel);
+  await expect(item).toHaveAttribute(
+    "aria-checked",
+    to === "on" ? "false" : "true",
+  );
+  checked.push(to === "on" ? "was-off" : "was-on");
+  await item.click();
+  await expect(await keepSwitch(page, panel)).toHaveAttribute(
+    "aria-checked",
+    to === "on" ? "true" : "false",
+  );
+  await page.keyboard.press("Escape");
+  checked.push(to === "on" ? "turned-on" : "turned-off");
+  if (to === "on") {
+    await expect(endsLine(panel)).toBeVisible();
+    checked.push("ends-line");
+  } else {
+    await expect(endsLine(panel)).toHaveCount(0);
+    checked.push("no-ends-line");
+  }
+  // Said in the transcript, so the task's history keeps the change.
+  await expect(
+    page
+      .getByRole("region", { name: "Transcript" })
+      .getByText(
+        words(
+          to === "on"
+            ? "screen.noticeSignInKept"
+            : "screen.noticeSignInReleased",
+        ),
+      ),
+  ).toBeVisible();
+  checked.push("notice");
+  await axe(page);
+  await capture(page, `kept-${to}`);
+  await result(checked);
+});
+
+// WEB-E2E-125: after Clear the browser's sign-ins the switch is as it was (TQA_SCREEN_KEPT_IS), and the panel still
+// names the ends when it is on.
+test("WEB-E2E-125 the kept sign-in's switch, read without changing it", async ({
+  page,
+}) => {
+  test.skip(PHASE !== "kept-state", "The driver's kept case");
+  test.setTimeout(budget(0, 120_000));
+  const is = process.env.TQA_SCREEN_KEPT_IS;
+  if (is !== "on" && is !== "off")
+    throw new Error("The driver must say TQA_SCREEN_KEPT_IS=on|off");
+  const checked: string[] = [];
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await signIn(page);
+  await page.goto(`/c/${TASK}`);
+  const panel = await screenPanel(page);
+  await expect(await keepSwitch(page, panel)).toHaveAttribute(
+    "aria-checked",
+    is === "on" ? "true" : "false",
+  );
+  await page.keyboard.press("Escape");
+  checked.push(`is-${is}`);
+  if (is === "on") {
+    await expect(endsLine(panel)).toBeVisible();
+    checked.push("ends-line");
+  }
+  await capture(page, `kept-state-${is}`);
+  await result(checked);
 });
 
 test("SEC-059 Sign out everywhere from the Screen panel", async ({ page }) => {

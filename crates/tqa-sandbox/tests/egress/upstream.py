@@ -8,28 +8,44 @@ import threading
 import time
 
 
-# SEC-059's site with a sign-in: /login sets a session cookie (kept on disk for an hour, as a real site's "stay signed
-# in" would), and /whoami says in its title whether the browser sent it. /logins answers how many times /login was
-# served, so the driver can tell a sign-in by hand that never reached the site from one whose cookie went missing.
+# SEC-059's site with a sign-in: /login sets two cookies, a persistent one (kept on disk for an hour, as a real site's
+# "stay signed in" would) and a session one (no expiry: it lives in the browser's memory and dies with the browser), and
+# /whoami says in its title whether the browser sent the first, and after that whether it sent the second (WEB-E2E-125:
+# a kept sign-in's reset keeps a live browser, so a session cookie outlives a run only while the browser does). /logins
+# answers how many times /login was served, so the driver can tell a sign-in by hand that never reached the site from
+# one whose cookie went missing.
 SESSION = "tqa_fixture_session"
+TAB = "tqa_fixture_tab"
 SIGNED_IN = "Signed in as fixture person"
 SIGNED_OUT = "Signed out"
+TAB_KEPT = "the session cookie came too"
+TAB_GONE = "without the session cookie"
+
+
+def has_cookie(cookies, name):
+    return any(part.strip() == name + "=signed-in" for part in (cookies or "").split(";"))
 
 
 def signed_in(cookies):
-    return any(part.strip() == SESSION + "=signed-in" for part in (cookies or "").split(";"))
+    return has_cookie(cookies, SESSION)
+
+
+def whoami_title(cookies):
+    """What /whoami says: the persistent cookie decides signed in or out; the session cookie's fate follows."""
+    return "{}; {}".format(SIGNED_IN if signed_in(cookies) else SIGNED_OUT,
+                           TAB_KEPT if has_cookie(cookies, TAB) else TAB_GONE)
 
 
 class Handler(http.server.BaseHTTPRequestHandler):
     # The /login pages served so far; the server handles one request at a time.
     logins = 0
 
-    def page(self, title, cookie=None):
+    def page(self, title, cookies=()):
         body = "<!doctype html><title>{0}</title><h1>{0}</h1>".format(title).encode()
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
-        if cookie:
+        for cookie in cookies:
             self.send_header("Set-Cookie", cookie)
         self.end_headers()
         self.wfile.write(body)
@@ -37,11 +53,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/login":
             Handler.logins += 1
-            return self.page(SIGNED_IN, SESSION + "=signed-in; Max-Age=3600; Path=/; HttpOnly")
+            return self.page(SIGNED_IN, (SESSION + "=signed-in; Max-Age=3600; Path=/; HttpOnly",
+                                         TAB + "=signed-in; Path=/; HttpOnly"))
         if self.path == "/logins":
             return self.page(str(Handler.logins))
         if self.path == "/whoami":
-            return self.page(SIGNED_IN if signed_in(self.headers.get("Cookie")) else SIGNED_OUT)
+            return self.page(whoami_title(self.headers.get("Cookie")))
         body = json.dumps({"peer": self.client_address[0], "path": self.path,
                            "authorization": "Authorization" in self.headers,
                            "proxy_authorization": "Proxy-Authorization" in self.headers}).encode()

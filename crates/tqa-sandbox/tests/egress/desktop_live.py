@@ -16,6 +16,9 @@ owned stack:
   in, the one after is not; with a sign-in in the profile, a share holder's, a fork's and another of the owner's
   tasks on the workspace all start signed out; Sign out everywhere from the panel, and the next run is signed out; the
   site's cookie is never anywhere in a sandbox but the browser's tmpfs.
+- `kept`: WEB-E2E-125, a desktop sign-in kept for the whole task (ADR-0039 §6 as amended for 18.0; desktop_kept.py):
+  with the switch on, a Take over's sign-in serves the runs that follow, past an idle window and, the persistent cookie
+  only, past the browser's restart; the switch turned off or Sign out everywhere empties the profile at once.
 - `reap`: SBX-C-022. A run's shell command and the screen read after it; past the reaps that follow, every part of
   the display stack still runs, none of them under the runtime (its reaper kills every direct child it didn't start).
 
@@ -23,7 +26,7 @@ Run from the repository root on images built from the commit under test (the `re
 image and `pnpm install` in web/):
     PYTHONPATH=crates/tqa-sandbox/tests TQA_DOCKER_TESTS=1 TQA_GATEWAY_IMAGE=sha256:<gateway image id> \\
     TQA_WORKSTATION_IMAGE=<workstation image id> TQA_DESKTOP_TEST_IMAGE=<desktop image id> \\
-    [TQA_WEB_IMAGE=sha256:<web image id>] python3 -B -m egress.desktop_live tool|record|sign-in|reap
+    [TQA_WEB_IMAGE=sha256:<web image id>] python3 -B -m egress.desktop_live tool|record|sign-in|kept|reap
 """
 import argparse
 import hashlib
@@ -45,8 +48,8 @@ from . import desktop
 from .stack import ROOT, Stack, compose, keep_logs
 from .upstream import SESSION, SIGNED_IN, SIGNED_OUT
 
-CASES = ("tool", "record", "sign-in", "reap")
-DEADLINE_SECONDS = {"tool": 900, "record": 900, "sign-in": 1500, "reap": 600}
+CASES = ("tool", "record", "sign-in", "kept", "reap")
+DEADLINE_SECONDS = {"tool": 900, "record": 900, "sign-in": 1500, "kept": 1800, "reap": 600}
 RUN_SECONDS = 240
 # The runtime's browser's view of its cookies, through its debugging port (the port in its profile's
 # DevToolsActivePort, Node's own WebSocket in the Desktop image): the fixture site's cookies by name and domain, never
@@ -66,7 +69,8 @@ ws.onmessage = event => {
   const message = JSON.parse(event.data);
   if (message.id !== 1) return;
   if (message.error) fail(message.error.message);
-  const named = (message.result.cookies || []).filter(cookie => cookie.name === process.argv[1]);
+  const names = process.argv[1].split(',');
+  const named = (message.result.cookies || []).filter(cookie => names.includes(cookie.name));
   console.log(JSON.stringify({cookies: named.map(cookie => ({name: cookie.name, domain: cookie.domain}))}));
   process.exit(0);
 };
@@ -162,6 +166,9 @@ ORDER = {
     # The watched run and the two after the Take over's sign-in; a fork's task; the run after Sign out everywhere; a
     # share holder's and another of the owner's tasks.
     "sign-in": ["watched", "whoami", "whoami", "whoami", "whoami", "whoami", "whoami"],
+    # The kept task: before the sign-in, after it, after the pause, after the browser was killed, after the switch went
+    # off; then a second task: before, after the sign-in, after Sign out everywhere.
+    "kept": ["whoami"] * 8,
     "reap": ["reap"],
 }
 
@@ -178,6 +185,8 @@ CONVERSATIONS = {
     # is that task's fourth. A fork's, a share holder's and another task's desktops each run whoami once.
     "sign-in": [("Open the form and save it", ["watched", "whoami", "whoami", "whoami"]),
                 ("Do the whoami steps", ["whoami"])],
+    # Both of the case's tasks follow this one script from its start; the first takes five runs, the second three.
+    "kept": [("Do the whoami steps", ["whoami"] * 5)],
     "reap": [("Do the reap steps", ["reap"])],
 }
 
@@ -453,10 +462,10 @@ class LiveStack(Stack):
         found = json.loads(self.in_sandbox(conversation, ["node", "-e", BROWSER_COOKIES, SESSION]) or "{}")
         return found.get("error") != "no browser"
 
-    def browser_cookies(self, conversation):
+    def browser_cookies(self, conversation, names=(SESSION,)):
         """The fixture site's cookies in the runtime's browser's memory (name and domain, never a value); none when
-        the browser holds none, or there is no browser."""
-        found = json.loads(self.in_sandbox(conversation, ["node", "-e", BROWSER_COOKIES, SESSION]) or "{}")
+        the browser holds none, or there is no browser. `names` says which of the site's cookies to look for."""
+        found = json.loads(self.in_sandbox(conversation, ["node", "-e", BROWSER_COOKIES, ",".join(names)]) or "{}")
         assert found.get("error") in (None, "no browser"), "the browser's cookies weren't read: {}".format(found)
         return sorted((cookie["name"], cookie["domain"]) for cookie in found.get("cookies", []))
 
@@ -681,7 +690,7 @@ def clipboard(stack, conversation):
 
 
 def whoami(events):
-    """What the site said to the run's browser: signed in or out."""
+    """What the site said to the run's browser: signed in or out (by the persistent cookie)."""
     content = calls(events)[4]["result"]["content"]
     if SIGNED_IN in content:
         return "in"
@@ -962,6 +971,10 @@ def main():
             record(stack, results)
         elif args.case == "reap":
             reap(stack)
+        elif args.case == "kept":
+            # Its own module (G-06): it reads this one's runs and checks.
+            from . import desktop_kept
+            desktop_kept.kept(stack, results)
         else:
             sign_in(stack, results)
         assert stack.order == [], "scripted runs left over: {}".format(stack.order)
