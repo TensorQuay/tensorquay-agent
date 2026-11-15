@@ -7,6 +7,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **Caps Lock types capitals on the Desktop under Take over (RT-I-059).** With Caps Lock on, a Mac viewer's letters
+  came out lower case: the screen sharer added Shift for each capital while the desktop's own Caps Lock was also on,
+  and the two cancelled. A viewer's Caps Lock no longer toggles the desktop's; letters arrive as typed, and Ctrl+A and
+  other layouts' symbols are unchanged.
 - **The agent can look at a picture in its workspace (CORE-U-090, TOOL-U-143).** When the agent reads a picture
   file with `read_file` (PNG, JPEG, GIF or WebP, recognised by its content), a model that reads pictures is shown
   the picture itself: the latest three read in a run, within the request's room. A model that doesn't read pictures
