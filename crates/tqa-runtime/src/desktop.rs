@@ -54,6 +54,7 @@ async fn opened(
     launch: bool,
 ) -> (Arc<dyn ScreenDriver>, Option<(u32, Arc<Browser>)>) {
     let mut held = slot.lock().await;
+    forget_dead(&mut held, spared);
     if let Some(driver) = held.as_ref() {
         return (driver.clone(), None);
     }
@@ -114,8 +115,12 @@ async fn opened(
 /// which the reset says (16r's `sec_059_a`: under load the launch outlasted the old 5 s focus wait, and a person
 /// typed into a desktop with no browser yet). A browser already up (nothing emptied it) is ready.
 pub(crate) async fn reopen(slot: &Slot, spared: &SupervisedGroups) -> bool {
-    if slot.lock().await.is_some() {
-        return true;
+    {
+        let mut held = slot.lock().await;
+        forget_dead(&mut held, spared);
+        if held.is_some() {
+            return true;
+        }
     }
     let readiness = reopened(
         // Boxed: the browser's launch is a large future, and this one is awaited inside the supervisor's.
@@ -137,6 +142,37 @@ pub(crate) async fn reopen(slot: &Slot, spared: &SupervisedGroups) -> bool {
         "desktop: the browser started again"
     );
     readiness.ready
+}
+
+/// Empties the slot when the browser its driver started has died (ADR-0039 section 6: "started again if it died"), so
+/// the next [`opened`] launches it again; before, a filled slot was trusted, and after a crash, a kill or an OOM the
+/// person's keys and the next run's went to no window (104a, 16 Nov 2026). A driver a run still holds is left: the run's
+/// end checks again. A slot without a recorded browser (a driver made while none started) is never kept anyway.
+pub(crate) fn forget_dead(held: &mut Option<Arc<dyn ScreenDriver>>, spared: &SupervisedGroups) {
+    let Some(pid) = spared.spared_browser() else {
+        return;
+    };
+    if !exited(pid)
+        || held
+            .as_ref()
+            .is_none_or(|driver| Arc::strong_count(driver) > 1)
+    {
+        return;
+    }
+    tracing::warn!(pid, "desktop: the browser had died; it is started again");
+    // Dropping the driver drops the browser's handle, which reaps the exited process.
+    drop(held.take());
+    spared.browser(None);
+}
+
+/// Whether process `pid` has exited: gone, or a zombie its parent hasn't reaped yet (`/proc/<pid>/stat`'s state).
+pub(crate) fn exited(pid: i32) -> bool {
+    let Ok(stat) = std::fs::read_to_string(format!("/proc/{pid}/stat")) else {
+        return true;
+    };
+    stat.rsplit_once(") ")
+        .and_then(|(_, fields)| fields.split_whitespace().next())
+        .is_none_or(|state| matches!(state, "Z" | "X" | "x"))
 }
 
 /// The most a run-end reset waits for the reopened browser, its launch and then its window taking the focus.
