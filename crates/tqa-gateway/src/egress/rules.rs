@@ -223,11 +223,6 @@ impl AllowList {
     }
 }
 
-/// Validates one rule and returns its canonical form: a lower-case host without a trailing dot, and sorted ports. The
-/// database stores and compares rules in this form.
-///
-/// # Errors
-/// The typed reason the rule is refused.
 /// One rule's CSP source expressions: `https:` for the any-host rule, else `https://host[:port]` per port.
 fn csp_sources_of(rule: &Rule) -> Vec<String> {
     let host = match &rule.pattern {
@@ -248,6 +243,11 @@ fn csp_sources_of(rule: &Rule) -> Vec<String> {
         .collect()
 }
 
+/// Validates one rule and returns its canonical form: a lower-case host without a trailing dot, and sorted ports. The
+/// database stores and compares rules in this form.
+///
+/// # Errors
+/// The typed reason the rule is refused.
 pub(crate) fn canonical(input: RuleInput) -> Result<RuleInput, RuleError> {
     let host = canonical_host(&input.host)?;
     let mut ports = input.ports;
