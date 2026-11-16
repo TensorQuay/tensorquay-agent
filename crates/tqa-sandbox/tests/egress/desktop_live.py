@@ -18,7 +18,7 @@ owned stack:
   site's cookie is never anywhere in a sandbox but the browser's tmpfs.
 - `kept`: WEB-E2E-125, a desktop sign-in kept for the whole task (ADR-0039 §6 as amended for 18.0; desktop_kept.py):
   with the switch on, a Take over's sign-in serves the runs that follow, past an idle window and, the persistent cookie
-  only, past the browser's restart; the switch turned off or Sign out everywhere empties the profile at once.
+  only, past the browser's death in a run (RT-I-061); the switch turned off or Sign out everywhere empties the profile.
 - `reap`: SBX-C-022. A run's shell command and the screen read after it; past the reaps that follow, every part of
   the display stack still runs, none of them under the runtime (its reaper kills every direct child it didn't start).
 
@@ -152,6 +152,7 @@ def runs(upstream):
                                      computer("click", ref="e9")],
         # SEC-059: who the site thinks the browser is.
         "whoami": navigate(whoami) + [computer("observe")],
+        "kill": [("shell", {"command": KILL_BROWSER})],
         # SBX-C-022: a command, after which the runtime reaps what it leaves behind, then the screen read.
         # SBX-C-022: an application opened from the shell and a plain background process, the reap after that call,
         # then a later call that says which survived; the screen read last.
@@ -166,9 +167,8 @@ ORDER = {
     # The watched run and the two after the Take over's sign-in; a fork's task; the run after Sign out everywhere; a
     # share holder's and another of the owner's tasks.
     "sign-in": ["watched", "whoami", "whoami", "whoami", "whoami", "whoami", "whoami"],
-    # The kept task: before the sign-in, after it, after the pause, after the browser was killed, after the switch went
-    # off; then a second task: before, after the sign-in, after Sign out everywhere.
-    "kept": ["whoami"] * 8,
+    # The kept task's six runs and the second task's three, as desktop_kept.py sends them.
+    "kept": ["whoami"] * 3 + ["kill"] + ["whoami"] * 5,
     "reap": ["reap"],
 }
 
@@ -185,8 +185,8 @@ CONVERSATIONS = {
     # is that task's fourth. A fork's, a share holder's and another task's desktops each run whoami once.
     "sign-in": [("Open the form and save it", ["watched", "whoami", "whoami", "whoami"]),
                 ("Do the whoami steps", ["whoami"])],
-    # Both of the case's tasks follow this one script from its start; the first takes five runs, the second three.
-    "kept": [("Do the whoami steps", ["whoami"] * 5)],
+    # Both of the case's tasks follow this one script from its start: the first takes six runs, the second three.
+    "kept": [("Do the whoami steps", ["whoami"] * 3 + ["kill"] + ["whoami"] * 2)],
     "reap": [("Do the reap steps", ["reap"])],
 }
 
@@ -871,6 +871,8 @@ REAP_OPEN = ("cd /tmp && DISPLAY=:0 XDG_RUNTIME_DIR=/tmp/tqa-desktop "
 # runs: which of the three still runs.
 REAP_CHECK = ("sleep 12; for name in mousepad sleep chromium; do pid=$(cat /tmp/reap-$name); "
               "if [ -n \"$pid\" ] && [ -d /proc/$pid ]; then echo \"$name alive\"; else echo \"$name gone\"; fi; done")
+# WEB-E2E-125's kill run: the browser (REAP_OPEN's pattern) ends inside a run as a crash would; the reset restarts it.
+KILL_BROWSER = "pkill -f '[/]usr/lib/chromium/chromium .*--user-data-dir'; echo killed"
 # Every process in the sandbox as `<pid> <parent pid> <command line>`, from /proc.
 PROCESSES = r"""for d in /proc/[0-9]*; do
   p=${d#/proc/}; pp=$(awk '/^PPid:/ {print $2}' "$d/status" 2>/dev/null)

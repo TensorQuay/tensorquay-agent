@@ -298,6 +298,36 @@ test("WEB-E2E-125 the kept sign-in's switch, turned on or off from the Screen pa
   await result(checked);
 });
 
+// WEB-E2E-125 (RT-I-061 on the real stack): the driver killed the desktop's browser inside a run; that run's end reset
+// started it again and said whether it is ready. A Take over now is granted plain only when it did: the not-ready line
+// (GW-U-203) would say a sign-in may not last. Nothing is typed; the driver's next run proves the keys land.
+test("WEB-E2E-125 a Take over after the browser died in a run finds it started again and ready", async ({
+  page,
+}) => {
+  test.skip(PHASE !== "kept-ready", "The driver's kept case");
+  test.setTimeout(budget(0, 120_000));
+  const checked: string[] = [];
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await signIn(page);
+  await page.goto(`/c/${TASK}`);
+  const panel = await screenPanel(page);
+  await panel.getByRole("button", { name: "Take over" }).click();
+  // The runtime waits up to 20 s for the started-again browser's window, past the gateway's 10 s: a grant made before
+  // the reset is settled once it comes (GW-U-203), so the line is waited for, as signInByHand waits.
+  await expect(panel.getByRole("status").first()).toHaveText(
+    words("screen.control"),
+    { timeout: afterStart(45_000) },
+  );
+  checked.push("control-ready");
+  await capture(page, "kept-ready");
+  await panel.getByRole("button", { name: "Hand back" }).click();
+  await expect(panel.getByRole("status").first()).toHaveText(
+    words("screen.handedBackIdle"),
+  );
+  checked.push("handed-back");
+  await result(checked);
+});
+
 // WEB-E2E-125: after Clear the browser's sign-ins the switch is as it was (TQA_SCREEN_KEPT_IS), and the panel still
 // names the ends when it is on.
 test("WEB-E2E-125 the kept sign-in's switch, read without changing it", async ({

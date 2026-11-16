@@ -80,17 +80,37 @@ class ScenarioTests(unittest.TestCase):
     def test_the_sign_in_case_runs_whoami_after_the_watched_run(self):
         self.assertEqual(desktop_live.ORDER["sign-in"], ["watched"] + ["whoami"] * 6)
 
-    def test_the_kept_case_runs_whoami_eight_times_over_two_tasks_on_one_script(self):
-        """WEB-E2E-125: five runs on the first task (before, after the sign-in, after the pause, after the browser's
-        restart, after the switch went off) and three on the second (before, after the sign-in, after Sign out
-        everywhere), both tasks on the one five-run script their shared phrase picks."""
-        self.assertEqual(desktop_live.ORDER["kept"], ["whoami"] * 8)
-        self.assertEqual(desktop_live.CONVERSATIONS["kept"], [("Do the whoami steps", ["whoami"] * 5)])
+    def test_the_kept_case_runs_nine_times_over_two_tasks_on_one_script(self):
+        """WEB-E2E-125: six runs on the first task (whoami before and after the sign-in and after the pause, the run
+        that kills the browser, whoami after the restart and after the switch went off) and three on the second
+        (before, after the sign-in, after Sign out everywhere), both tasks on the one six-run script their shared
+        phrase picks: the second task's three whoami runs are the script's first three."""
+        self.assertEqual(desktop_live.ORDER["kept"], ["whoami"] * 3 + ["kill"] + ["whoami"] * 5)
+        self.assertEqual(desktop_live.CONVERSATIONS["kept"],
+                         [("Do the whoami steps", ["whoami"] * 3 + ["kill"] + ["whoami"] * 2)])
         self.assertEqual(desktop_live.DEADLINE_SECONDS["kept"], 1800)
         # The idle limit is short, and the pause is three of them; the cookie flush wait covers Chromium's batch.
         self.assertEqual(desktop_kept.KEPT_IDLE_SECONDS, 20)
         self.assertGreater(desktop_kept.COOKIE_FLUSH_SECONDS, 30)
-        self.assertIn("[/]usr/lib/chromium/chromium", desktop_kept.KILL_BROWSER)
+
+    def test_the_kill_run_ends_the_browser_inside_the_run_and_says_so(self):
+        """The browser dies while a run holds the desktop (the runtime sees no Take over, so a death while idle is only
+        found at the next run's start or reset): one shell call, by the browser's command line, and its word."""
+        table = desktop_live.runs("192.0.2.10")
+        self.assertEqual(table["kill"], [("shell", {"command": desktop_live.KILL_BROWSER})])
+        self.assertIn("[/]usr/lib/chromium/chromium", desktop_live.KILL_BROWSER)
+        self.assertTrue(desktop_live.KILL_BROWSER.endswith("echo killed"))
+
+    def test_the_kept_ready_phase_reads_the_control_line_the_reset_settles(self):
+        """After the kill run, the driver's Take over must be granted ready (the kept reset started the browser again
+        and said so): the phase waits for the plain control line, never the not-ready one, then hands back."""
+        spec = (desktop_live.ROOT / "web" / "e2e" / "screen-stack.spec.ts").read_text()
+        self.assertIn('PHASE !== "kept-ready"', spec)
+        phase = spec[spec.index('PHASE !== "kept-ready"'):]
+        phase = phase[:phase.index("await result(checked)")]
+        self.assertIn('words("screen.control")', phase)
+        self.assertNotIn("screen.controlNotReady", phase)
+        self.assertIn('"Hand back"', phase)
 
     def test_the_browser_cookie_probe_takes_several_names(self):
         self.assertIn("process.argv[1].split(',')", desktop_live.BROWSER_COOKIES)
