@@ -19,6 +19,7 @@ import demo_decision_engines
 import demo_desktop
 import demo_files
 import demo_key_use
+import demo_pdf
 import demo_previews
 import demo_egress
 import demo_environments
@@ -229,7 +230,7 @@ def main():
     parser.add_argument("--keep", action="store_true", help="Keep the stack available until Ctrl-C instead of running the browser contract")
     parser.add_argument("--suite", choices=("basic", "agents", "ux", "environment", "queue", "egress", "accounts", "files",
                                                  "workspaces", "channel-members", "models-people", "settings", "task-page",
-                                                 "reply-cut", "key-use", "previews", "titles", "desktop", "catch-up"),
+                                                 "reply-cut", "key-use", "previews", "titles", "desktop", "catch-up", "pdf"),
                         default="basic",
                         help="Select the full-stack contract")
     parser.add_argument("--backend", choices=("docker", "firecracker"), default="docker",
@@ -245,7 +246,7 @@ def main():
     env.pop("COMPOSE_PROJECT_NAME", None)
     host = "127.0.0.1" if args.suite == "basic" else demo_ux.lan_host(env)
     configuration = COMPOSE + (["-f", "deploy/compose/{}.yml".format(args.suite)] if args.suite in ("agents", "environment", "queue", "egress", "files", "workspaces", "task-page", "previews",
-                                                                                                                "titles", "desktop", "catch-up")
+                                                                                                                "titles", "desktop", "catch-up", "pdf")
                              else [])
     if args.backend == "firecracker":
         # First, so that tearing down after any failure can still interpolate the overlay.
@@ -289,6 +290,8 @@ def main():
                 demo_titles.configure(directory, env)
             elif args.suite == "desktop":
                 demo_desktop.configure(directory, env)
+            elif args.suite == "pdf":
+                demo_pdf.configure(directory, env)
         env.update(TQA_STACK_URL="http://{}:{}".format(host, port),
                    TQA_STACK_PASSWORD="synthetic-demo-" + secrets.token_hex(16),
                    TQA_STACK_RESULT=str(root / "browser.json"))
@@ -312,6 +315,8 @@ def main():
             demo_titles.verify_overlay(env, configuration)
         elif args.suite == "desktop":
             demo_desktop.verify_overlay(env, configuration)
+        elif args.suite == "pdf":
+            demo_pdf.verify_overlay(env, configuration)
         compose.command(configuration + ["up", "-d", "--no-build", "--wait", "--wait-timeout",
                                          "120" if args.backend == "firecracker" else "60"], env, timeout=180)
         print("Gateway URL: " + env["TQA_STACK_URL"], flush=True)
@@ -372,6 +377,7 @@ def main():
                           "catch-up": lambda env: verify_catch_up(env, configuration),
                           "agents": lambda env: demo_agents.verify_result(env, restarter),
                           "desktop": lambda env: demo_desktop.verify_result(env, restarter, pictures),
+                          "pdf": demo_pdf.verify_result,
                           "basic": lambda env: (verify_workspace(env), demo_run_ids.verify(env))}
                 failure = verify(args.suite, checks[args.suite], env)
             if failure is not None:

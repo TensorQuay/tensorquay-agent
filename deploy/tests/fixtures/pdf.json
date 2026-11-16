@@ -1,0 +1,14 @@
+{
+  "model": "fixture",
+  "select": "prompt",
+  "responses": [
+    {"when": "Read the attached report", "events": [{"type": "tool_call", "name": "read_file", "arguments": {"path": "uploads/report.pdf", "start_line": null, "end_line": null, "cursor": null}, "split_into": 2}], "usage": {"prompt_tokens": 20, "completion_tokens": 20}},
+    {"when": "Read the attached report", "events": [{"type": "text", "text": "The report has three pages; the second is empty."}], "usage": {"prompt_tokens": 20, "completion_tokens": 20}},
+    {"when": "Look at the attached report's pages", "events": [{"type": "tool_call", "name": "read_file", "arguments": {"path": "uploads/report.pdf", "start_line": null, "end_line": null, "cursor": null}, "split_into": 2}], "usage": {"prompt_tokens": 20, "completion_tokens": 20}},
+    {"when": "Look at the attached report's pages", "events": [{"type": "text", "text": "I looked at the report's three pages."}], "usage": {"prompt_tokens": 20, "completion_tokens": 20}},
+    {"when": "Read the attached files that can't be read", "events": [{"type": "tool_call", "name": "read_file", "arguments": {"path": "uploads/locked.pdf", "start_line": null, "end_line": null, "cursor": null}, "split_into": 2}], "usage": {"prompt_tokens": 20, "completion_tokens": 20}},
+    {"when": "Read the attached files that can't be read", "events": [{"type": "tool_call", "name": "read_file", "arguments": {"path": "uploads/broken.pdf", "start_line": null, "end_line": null, "cursor": null}, "split_into": 2}], "usage": {"prompt_tokens": 20, "completion_tokens": 20}},
+    {"when": "Read the attached files that can't be read", "events": [{"type": "tool_call", "name": "read_file", "arguments": {"path": "uploads/nested.pdf", "start_line": null, "end_line": null, "cursor": null}, "split_into": 2}], "usage": {"prompt_tokens": 20, "completion_tokens": 20}},
+    {"when": "Read the attached files that can't be read", "events": [{"type": "text", "text": "None of the three files could be read; each said why."}], "usage": {"prompt_tokens": 20, "completion_tokens": 20}}
+  ]
+}

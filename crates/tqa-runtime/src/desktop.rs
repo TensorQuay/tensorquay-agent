@@ -35,22 +35,37 @@ pub(crate) type Slot = Arc<Mutex<Option<Arc<dyn ScreenDriver>>>>;
 ///
 /// A browser it starts is recorded in `spared`, so the runtime's reaper leaves it alone (ADR-0039 section 10): before,
 /// the first shell command of a desktop run killed it.
-pub(crate) async fn driver(slot: &Slot, spared: &SupervisedGroups) -> Arc<dyn ScreenDriver> {
-    Box::pin(opened(slot, spared)).await.0
+///
+/// `launch` false makes the driver without starting a browser, as on a host without one: the runtime's tests that
+/// stand in for the browser (`TestingHooks::browser_profile`), so a host that has `/usr/bin/chromium` but no display
+/// doesn't wait out the browser's start bound at every run.
+pub(crate) async fn driver(
+    slot: &Slot,
+    spared: &SupervisedGroups,
+    launch: bool,
+) -> Arc<dyn ScreenDriver> {
+    Box::pin(opened(slot, spared, launch)).await.0
 }
 
 /// [`driver`], with the browser's process and a handle on it when this call started it.
 async fn opened(
     slot: &Slot,
     spared: &SupervisedGroups,
+    launch: bool,
 ) -> (Arc<dyn ScreenDriver>, Option<(u32, Arc<Browser>)>) {
     let mut held = slot.lock().await;
+    forget_dead(&mut held, spared);
     if let Some(driver) = held.as_ref() {
         return (driver.clone(), None);
     }
     let mut handle = None;
-    let browser = match Browser::launch(Path::new(CHROMIUM), &profile_dir()).await {
-        Ok(browser) => {
+    let launched = if launch {
+        Some(Browser::launch(Path::new(CHROMIUM), &profile_dir()).await)
+    } else {
+        None
+    };
+    let browser = match launched {
+        Some(Ok(browser)) => {
             let browser = Arc::new(browser);
             browser.pid().map(|pid| {
                 handle = Some((pid, browser.clone()));
@@ -60,10 +75,11 @@ async fn opened(
                 }
             })
         }
-        Err(error) => {
+        Some(Err(error)) => {
             tracing::warn!(reason = %error, "desktop: the browser didn't start");
             None
         }
+        None => None,
     };
     let tree: Arc<dyn A11y> = match AtspiTree::connect().await {
         Ok(tree) => Arc::new(tree),
@@ -99,12 +115,16 @@ async fn opened(
 /// which the reset says (16r's `sec_059_a`: under load the launch outlasted the old 5 s focus wait, and a person
 /// typed into a desktop with no browser yet). A browser already up (nothing emptied it) is ready.
 pub(crate) async fn reopen(slot: &Slot, spared: &SupervisedGroups) -> bool {
-    if slot.lock().await.is_some() {
-        return true;
+    {
+        let mut held = slot.lock().await;
+        forget_dead(&mut held, spared);
+        if held.is_some() {
+            return true;
+        }
     }
     let readiness = reopened(
         // Boxed: the browser's launch is a large future, and this one is awaited inside the supervisor's.
-        || async { Box::pin(opened(slot, spared)).await.1 },
+        || async { Box::pin(opened(slot, spared, true)).await.1 },
         |pid, left| async move { focused(&XDo::new(Arc::new(Process)), pid, left, FOCUS_POLL).await },
         |browser: Arc<Browser>, left| async move { answering(&browser, left, FOCUS_POLL).await },
         READY_WAIT,
@@ -122,6 +142,37 @@ pub(crate) async fn reopen(slot: &Slot, spared: &SupervisedGroups) -> bool {
         "desktop: the browser started again"
     );
     readiness.ready
+}
+
+/// Empties the slot when the browser its driver started has died (ADR-0039 section 6: "started again if it died"), so
+/// the next [`opened`] launches it again; before, a filled slot was trusted, and after a crash, a kill or an OOM the
+/// person's keys and the next run's went to no window (104a, 16 Nov 2026). A driver a run still holds is left: the run's
+/// end checks again. A slot without a recorded browser (a driver made while none started) is never kept anyway.
+pub(crate) fn forget_dead(held: &mut Option<Arc<dyn ScreenDriver>>, spared: &SupervisedGroups) {
+    let Some(pid) = spared.spared_browser() else {
+        return;
+    };
+    if !exited(pid)
+        || held
+            .as_ref()
+            .is_none_or(|driver| Arc::strong_count(driver) > 1)
+    {
+        return;
+    }
+    tracing::warn!(pid, "desktop: the browser had died; it is started again");
+    // Dropping the driver drops the browser's handle, which reaps the exited process.
+    drop(held.take());
+    spared.browser(None);
+}
+
+/// Whether process `pid` has exited: gone, or a zombie its parent hasn't reaped yet (`/proc/<pid>/stat`'s state).
+pub(crate) fn exited(pid: i32) -> bool {
+    let Ok(stat) = std::fs::read_to_string(format!("/proc/{pid}/stat")) else {
+        return true;
+    };
+    stat.rsplit_once(") ")
+        .and_then(|(_, fields)| fields.split_whitespace().next())
+        .is_none_or(|state| matches!(state, "Z" | "X" | "x"))
 }
 
 /// The most a run-end reset waits for the reopened browser, its launch and then its window taking the focus.

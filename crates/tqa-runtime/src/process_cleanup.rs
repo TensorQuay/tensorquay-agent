@@ -43,6 +43,11 @@ impl SupervisedGroups {
     pub fn browser(&self, leader: Option<i32>) {
         self.with(|spared| spared.browser = leader);
     }
+    /// The runtime's browser recorded with [`Self::browser`], if any.
+    #[must_use]
+    pub fn spared_browser(&self) -> Option<i32> {
+        self.with(|spared| spared.browser)
+    }
     /// From now on the clients of `display` (the X server's socket) are left alone: the session is a desktop's.
     pub fn display_clients(&self, display: &Path) {
         self.with(|spared| spared.display = Some(display.to_owned()));

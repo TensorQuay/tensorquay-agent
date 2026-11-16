@@ -1,7 +1,7 @@
 //! GW-I-222's runtime half and SEC-059's Sign out everywhere (ADR-0039 section 6): the session's browser closed and its
 //! profile emptied; a driver a run still holds, a process still naming the profile, and a profile that can't be
 //! removed each refuse with their reason.
-use super::{READY_WAIT, Slot, focused, release, reopened, sign_out};
+use super::{READY_WAIT, Slot, exited, focused, forget_dead, release, reopened, sign_out};
 use crate::SupervisedGroups;
 use async_trait::async_trait;
 use std::os::unix::process::ExitStatusExt as _;
@@ -542,4 +542,76 @@ async fn rt_i_057_a_browser_whose_ui_and_page_dont_answer_in_time_is_not_ready()
         late.answers.is_some_and(|took| took < bound + tick),
         "{late:?}"
     );
+}
+
+/// A child of this test that has exited but isn't reaped yet: a zombie, as the runtime's own dead browser is while its
+/// handle is held.
+fn zombie() -> Result<std::process::Child, Box<dyn std::error::Error>> {
+    let child = std::process::Command::new("true").spawn()?;
+    let pid = i32::try_from(child.id())?;
+    let deadline = std::time::Instant::now() + Duration::from_secs(5);
+    while !exited(pid) {
+        if std::time::Instant::now() > deadline {
+            return Err("the child never exited".into());
+        }
+        std::thread::sleep(Duration::from_millis(10));
+    }
+    Ok(child)
+}
+
+// TEST: RT-I-061
+/// ADR-0039 section 6, "started again if it died": a filled slot whose browser died is emptied, so the next start
+/// launches the browser again; one whose browser lives, or whose driver a run still holds, is kept (104a's real-stack
+/// case, 16 Nov 2026: a killed browser was never started again).
+#[tokio::test]
+async fn rt_i_061_a_browser_that_died_is_forgotten_so_it_starts_again() -> TestResult {
+    let mut living = std::process::Command::new("sleep").arg("30").spawn()?;
+    let mut dead = zombie()?;
+    assert!(
+        !exited(i32::try_from(living.id())?),
+        "a running process hasn't exited"
+    );
+    assert!(exited(i32::try_from(dead.id())?), "a zombie has");
+    assert!(exited(i32::MAX), "nor has a pid nobody has");
+
+    let spared = SupervisedGroups::default();
+    let slot: Slot = Arc::default();
+    // Alive: kept, and still spared.
+    spared.browser(Some(i32::try_from(living.id())?));
+    *slot.lock().await = Some(Arc::new(Idle));
+    forget_dead(&mut *slot.lock().await, &spared);
+    assert!(
+        slot.lock().await.is_some(),
+        "a living browser's driver stays"
+    );
+    assert_eq!(spared.spared_browser(), Some(i32::try_from(living.id())?));
+
+    // Dead, but a run holds the driver: kept until that run's end checks again.
+    spared.browser(Some(i32::try_from(dead.id())?));
+    let held: Arc<dyn ScreenDriver> = Arc::new(Idle);
+    *slot.lock().await = Some(held.clone());
+    forget_dead(&mut *slot.lock().await, &spared);
+    assert!(
+        slot.lock().await.is_some(),
+        "a driver a run holds isn't taken from it"
+    );
+    drop(held);
+
+    // Dead and free: forgotten, and its pid no longer spared, so the next start launches a new browser.
+    forget_dead(&mut *slot.lock().await, &spared);
+    assert!(
+        slot.lock().await.is_none(),
+        "the dead browser's driver is gone"
+    );
+    assert_eq!(spared.spared_browser(), None, "and its pid isn't spared");
+
+    // No browser recorded: nothing to judge, the slot stays as it is.
+    *slot.lock().await = Some(Arc::new(Idle));
+    forget_dead(&mut *slot.lock().await, &spared);
+    assert!(slot.lock().await.is_some());
+
+    living.kill()?;
+    living.wait()?;
+    dead.wait()?;
+    Ok(())
 }

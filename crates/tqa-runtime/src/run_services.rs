@@ -299,7 +299,19 @@ impl Services {
             // runtime's own browser does (ADR-0039 section 10).
             let spared = self.cleanup.supervised();
             spared.display_clients(std::path::Path::new(crate::desktop::DISPLAY_SOCKET));
-            Some((crate::desktop::driver(&self.desktop, &spared).await, view))
+            // A test standing in for the browser starts none (`TestingHooks::browser_profile`).
+            #[cfg(feature = "testing")]
+            let launch = self
+                .testing
+                .browser_profile
+                .lock()
+                .map_or(true, |profile| profile.is_none());
+            #[cfg(not(feature = "testing"))]
+            let launch = true;
+            Some((
+                crate::desktop::driver(&self.desktop, &spared, launch).await,
+                view,
+            ))
         } else {
             None
         };
