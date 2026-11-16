@@ -99,7 +99,34 @@ class ScenarioTests(unittest.TestCase):
         table = desktop_live.runs("192.0.2.10")
         self.assertEqual(table["kill"], [("shell", {"command": desktop_live.KILL_BROWSER})])
         self.assertIn("[/]usr/lib/chromium/chromium", desktop_live.KILL_BROWSER)
-        self.assertTrue(desktop_live.KILL_BROWSER.endswith("echo killed"))
+        self.assertIn("echo killed", desktop_live.KILL_BROWSER)
+
+    def test_the_kill_run_reads_the_dead_browsers_exit_type_before_the_reset_starts_a_new_one(self):
+        """Chromium marks its profile "Crashed" at start and "Normal" at a clean exit, and restores session cookies
+        after a crash: the kill's own shell call reads the mark once the browser is gone, since the run's end reset
+        starts a new browser that writes its own. The parser reads it from the call's content, or says unknown."""
+        self.assertIn("/run/tqa-browser/profile/Default/Preferences", desktop_live.KILL_BROWSER)
+        self.assertLess(desktop_live.KILL_BROWSER.index("echo killed"), desktop_live.KILL_BROWSER.index("exit_type"))
+        self.assertEqual(desktop_kept.exit_type('killed\n"exit_type":"Crashed"\n'), "Crashed")
+        self.assertEqual(desktop_kept.exit_type('killed\n"exit_type":"Normal"'), "Normal")
+        self.assertEqual(desktop_kept.exit_type("killed\nno-exit-type\n"), "unknown")
+
+    def test_the_restart_verdict_needs_the_persistent_cookie_and_only_records_the_session_one(self):
+        """The started-again browser must hold the persistent cookie (the kept sign-in is the profile's); the session
+        cookie may be there or not after a kill (run 6 of 16 Nov 2026 found it back, run 4 and 6b not), so the
+        verdict records it and the exit type in the printed words and never fails on it."""
+        site = "upstream.test"
+        held = (desktop_kept.SESSION, site)
+        self.assertIn("without the session cookie", desktop_kept.restarted([held], site, "Normal"))
+        both = desktop_kept.restarted([held, (desktop_kept.TAB, site)], site, "Crashed")
+        self.assertIn("with the session cookie restored", both)
+        self.assertIn("Crashed", both)
+        with self.assertRaises(AssertionError):
+            desktop_kept.restarted([(desktop_kept.TAB, site)], site, "Crashed")
+        with self.assertRaises(AssertionError):
+            desktop_kept.restarted([], site, "unknown")
+        with self.assertRaises(AssertionError):
+            desktop_kept.restarted([held, ("other", site)], site, "Normal")
 
     def test_the_kept_ready_phase_reads_the_control_line_the_reset_settles(self):
         """After the kill run, the driver's Take over must be granted ready (the kept reset started the browser again

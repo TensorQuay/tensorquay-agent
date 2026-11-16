@@ -867,12 +867,12 @@ REAP_OPEN = ("cd /tmp && DISPLAY=:0 XDG_RUNTIME_DIR=/tmp/tqa-desktop "
              "setsid sh -c 'sleep 3; exec mousepad' </dev/null >/dev/null 2>&1 & echo $! > /tmp/reap-mousepad; "
              "sleep 300 </dev/null >/dev/null 2>&1 & echo $! > /tmp/reap-sleep; "
              "pgrep -o -f '[/]usr/lib/chromium/chromium .*--user-data-dir' > /tmp/reap-chromium; echo opened")
-# Past the reaper's grace for young orphans (10 s, ADR-0039 section 10), so its later decision falls while this call
-# runs: which of the three still runs.
+# Past the reaper's grace for young orphans (10 s, ADR-0039 §10), so its decision falls in this call: who still runs.
 REAP_CHECK = ("sleep 12; for name in mousepad sleep chromium; do pid=$(cat /tmp/reap-$name); "
               "if [ -n \"$pid\" ] && [ -d /proc/$pid ]; then echo \"$name alive\"; else echo \"$name gone\"; fi; done")
-# WEB-E2E-125's kill run: the browser (REAP_OPEN's pattern) ends inside a run as a crash would; the reset restarts it.
-KILL_BROWSER = "pkill -f '[/]usr/lib/chromium/chromium .*--user-data-dir'; echo killed"
+# WEB-E2E-125's kill run: the browser dies in a run; its profile's exit mark is read once gone, the reset restarts it
+KILL_BROWSER = ("pkill -f '[/]usr/lib/chromium/chromium .*--user-data-dir'; sleep 2; echo killed; grep -o "
+                "'\"exit_type\":\"[A-Za-z]*\"' /run/tqa-browser/profile/Default/Preferences || echo no-exit-type")
 # Every process in the sandbox as `<pid> <parent pid> <command line>`, from /proc.
 PROCESSES = r"""for d in /proc/[0-9]*; do
   p=${d#/proc/}; pp=$(awk '/^PPid:/ {print $2}' "$d/status" 2>/dev/null)

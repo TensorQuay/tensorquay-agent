@@ -2,6 +2,7 @@
 `kept` case of `egress.desktop_live`, on its live desktop stack: the fixture site's two cookies (upstream.py), the runs
 and the checks of desktop_live, and screen-stack.spec.ts's kept-switch and kept-state phases for the Screen panel."""
 
+import re
 import time
 
 from .desktop_live import KILL_BROWSER, calls, hand_sign_in, whoami
@@ -25,6 +26,26 @@ def tab_cookie(events):
 # is killed (KILL_BROWSER, the kill run), or the kill takes it with the memory and the case proves nothing about the
 # restart.
 COOKIE_FLUSH_SECONDS = 45
+
+
+def exit_type(content):
+    """The dead browser's exit mark, read by the kill run's call from the profile's Preferences (KILL_BROWSER):
+    "Normal" after a clean exit, "SessionEnded" when a signal ended it in order (run 7 of 16 Nov 2026, no session
+    cookie restored), "Crashed" when the mark Chromium sets at start was never cleared; unknown otherwise."""
+    found = re.search(r'"exit_type":"([A-Za-z]+)"', content)
+    return found.group(1) if found else "unknown"
+
+
+def restarted(held, upstream, mark):
+    """The kill check's verdict on the cookies the started-again browser holds: the persistent cookie must be there (a
+    kept sign-in is the profile's); the session cookie may be or not, since Chromium restores session cookies when its
+    last exit was a crash and a kill may count as one (run 6 of 16 Nov 2026 found it back, runs 4 and 6b didn't), so
+    it is recorded with the exit mark, never failed on. Returns the words for the printed line."""
+    assert (SESSION, upstream) in held, "the started-again browser doesn't hold the persistent cookie: {}".format(held)
+    assert all(name in (SESSION, TAB) and domain == upstream for name, domain in held), \
+        "the started-again browser holds a cookie that isn't the site's two: {}".format(held)
+    cookie = "with the session cookie restored" if (TAB, upstream) in held else "without the session cookie"
+    return "{} (the dead browser's exit mark: {})".format(cookie, mark)
 
 
 def kept(stack, directory):
@@ -69,23 +90,21 @@ def kept(stack, directory):
     # with the persistent cookie, and the next run's keys reach the site through the new window.
     time.sleep(COOKIE_FLUSH_SECONDS)
     events = stack.run(task, "kill")
-    assert "killed" in calls(events)[0]["result"]["content"], "the kill run's shell call didn't run: {}".format(
-        calls(events)[0]["result"])
+    content = calls(events)[0]["result"]["content"]
+    assert "killed" in content, "the kill run's shell call didn't run: {}".format(calls(events)[0]["result"])
     found = stack.browser("kept-ready", directory / "kept-ready.json", TQA_SCREEN_TASK=task)
     assert found.get("checked") == ["control-ready", "handed-back"], found
     assert stack.browser_up(task), "no browser on the desktop after the kill run's end reset"
-    assert stack.browser_cookies(task, (SESSION, TAB)) == [(SESSION, stack.upstream)], \
-        "the started-again browser holds the persistent cookie and only it"
+    verdict = restarted(stack.browser_cookies(task, (SESSION, TAB)), stack.upstream, exit_type(content))
     written = stack.cookies(task)
     assert written and all(path.startswith("/run/tqa-browser/") for path in written), \
         "the persistent cookie is in the runtime's profile and nowhere else: {}".format(written)
     events = stack.run(task, "whoami")
     assert whoami(events) == "in", "the run after the restart wasn't signed in: its keys didn't reach the new window"
-    assert not tab_cookie(events), "the session cookie survived a browser started again"
     print("WEB-E2E-125 live: the browser killed inside a run, its end reset started it again and said ready, the "
           "profile's cookie was still there, and the next run's keys landed in the new window with the persistent "
-          "cookie and not the session cookie: a kept sign-in is the profile's, and a session cookie lives only while "
-          "the browser does", flush=True)
+          "cookie: a kept sign-in is the profile's. The new browser started {}; the next run's request {} the session "
+          "cookie".format(verdict, "carried" if tab_cookie(events) else "didn't carry"), flush=True)
     found = stack.browser("kept-switch", directory / "kept-off.json", TQA_SCREEN_TASK=task, TQA_SCREEN_KEPT_TO="off")
     assert found.get("checked") == ["was-on", "turned-off", "no-ends-line", "notice"], found
     assert stack.browser_cookies(task, (SESSION, TAB)) == [], "the switch turned off left the cookies in the browser"
