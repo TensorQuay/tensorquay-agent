@@ -83,6 +83,18 @@ impl Browser {
         if let Some(first) = args.last_mut() {
             url.clone_into(first);
         }
+        // A killed browser leaves its port file behind: read first, it named the dead browser's port and the relaunch
+        // failed (WEB-E2E-125). Only the new browser's own file may be read.
+        let port_file = profile.join("DevToolsActivePort");
+        match tokio::fs::remove_file(&port_file).await {
+            Err(error) if error.kind() != std::io::ErrorKind::NotFound => {
+                return Err(DriverError::Unavailable(format!(
+                    "the browser's old port file stays ({})",
+                    error.kind()
+                )));
+            }
+            _ => {}
+        }
         // The leader of a group of its own: the runtime records it so its reaper leaves the browser alone, and a
         // group of its own is what the reaper spares (ADR-0039 section 10).
         let process = tokio::process::Command::new(binary)
@@ -96,7 +108,7 @@ impl Browser {
             .map_err(|error| {
                 DriverError::Unavailable(format!("the browser didn't start ({})", error.kind()))
             })?;
-        let endpoint = endpoint(&profile.join("DevToolsActivePort"), START_BOUND).await?;
+        let endpoint = endpoint(&port_file, START_BOUND).await?;
         let client = Client::connect(&endpoint).await?;
         Ok(Self {
             client,

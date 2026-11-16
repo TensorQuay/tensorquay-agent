@@ -939,3 +939,38 @@ async fn tool_u_111_a_dialog_opening_during_a_snapshot_is_the_snapshot() -> Test
     );
     Ok(())
 }
+
+// TEST: TOOL-U-043
+/// A killed browser leaves its port file in the profile; the next launch waits for the new browser's own port, never
+/// dialling the dead one's (WEB-E2E-125's kill phase on the 18.0 candidate: the relaunch failed in 2 ms).
+#[tokio::test]
+async fn tool_u_043_a_relaunch_waits_past_the_dead_browsers_port_file() -> TestResult {
+    let (endpoint, _browser) = fake_browser(page_answers()).await?;
+    let fresh = endpoint
+        .trim_start_matches("ws://127.0.0.1:")
+        .replacen('/', "\n/", 1);
+    let dead = std::net::TcpListener::bind("127.0.0.1:0")?
+        .local_addr()?
+        .port();
+    let dir = tempfile::tempdir()?;
+    let profile = dir.path().join("profile");
+    std::fs::create_dir(&profile)?;
+    let port_file = profile.join("DevToolsActivePort");
+    std::fs::write(&port_file, format!("{dead}\n/devtools/browser/dead"))?;
+    // The browser writes its port file a moment after it starts, as Chromium does.
+    let binary = dir.path().join("browser");
+    std::fs::write(
+        &binary,
+        format!(
+            "#!/bin/sh\nsleep 0.3\nprintf '{fresh}' > '{}'\nexec sleep 30\n",
+            port_file.display()
+        ),
+    )?;
+    std::fs::set_permissions(
+        &binary,
+        <std::fs::Permissions as std::os::unix::fs::PermissionsExt>::from_mode(0o755),
+    )?;
+    let browser = Browser::launch(&binary, &profile).await?;
+    assert!(browser.pid().is_some(), "the new browser runs");
+    Ok(())
+}

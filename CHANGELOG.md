@@ -53,11 +53,13 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   end keeps the desktop browser's sign-in, but the Screen panel's menu said "The browser is already signed out: each run
   ends that way" and refused the clear once a run had ended after the Take over. The panel now reads the switch's own
   notices: a sign-in may remain past a run's end while the task kept it at that end, and the switch turned off ends it.
-- **A desktop browser that died is started again (RT-I-061).** The runtime kept the session's browser once started
-  and never looked at it again: after a crash, a kill or an out-of-memory end, the next run sent its keys to no window.
+- **A desktop browser that died is started again (RT-I-061).** The runtime kept the session's browser once started and
+  never looked at it again: after a crash, a kill or an out-of-memory end, the next run sent its keys to no window.
   Each run's start and each reset now see that the browser's process has exited and launch it again, as ADR-0039
-  section 6 says. Before, in 17.4 a run that started after the browser died had none until its end started one; with
-  a kept sign-in (new in 18.0) no run's end did, so the browser stayed gone.
+  section 6 says. The launch reads only the new browser's port file: a killed browser leaves its own behind, and
+  reading it first made the relaunch fail at once (TOOL-U-043, WEB-E2E-125). Before, in 17.4 a run that started after
+  the browser died had none until its end started one; with a kept sign-in (new in 18.0) no run's end did, so the
+  browser stayed gone.
 - **A task deleted while the container engine fails keeps nothing behind (GW-I-325).** If the engine refused the
   sandbox's removal at the delete and again on the failure path, nothing tried again until the gateway restarted, so
   the deleted task's sandbox, screenshots and browser profile stayed. The removal is now retried in the background,
