@@ -25,7 +25,7 @@ loopback; remote access needs an authenticated TLS reverse proxy and the matchin
 
 Start from a release: clone the newest tag from the
 [Releases page](https://github.com/TensorQuay/tensorquay-agent/releases/latest) (for example
-`git clone --branch v17.4.1 https://github.com/TensorQuay/tensorquay-agent.git`), not `main`. Then either pull the
+`git clone --branch v18.0.0 https://github.com/TensorQuay/tensorquay-agent.git`), not `main`. Then either pull the
 release's prebuilt images or build them yourself; both end with the same three `export` lines for step 1.
 
 **Pull them (from 18.0).** Each release from 18.0 has prebuilt images on the GitHub Container Registry, for amd64 and

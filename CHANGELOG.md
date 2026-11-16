@@ -3,7 +3,12 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
-## Unreleased
+## 18.0.0 (DATE)
+
+A feature release: the agent reads PDFs and pictures, a desktop sign-in can be kept for a whole task, a folder
+previews as a real site, administrators see the sites the network refused lately and can allow them, and each release
+now ships prebuilt images for amd64 and arm64. Two database migrations and a protocol revision (15); no configuration
+key changes.
 
 ### Added
 
@@ -131,6 +136,25 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **Under Take over, a key sent within a few milliseconds of a click can be lost** while the desktop's browser moves
   its focus. Type at a person's pace, or click once more and send the key again. The agent's own actions are not
   affected: each one waits for the screen to settle first.
+
+### Upgrade notes
+
+- **Two migrations, applied by the gateway at its start; back up the database first as usual.** 0104 adds the task's
+  `keep_sign_in` switch (off for every existing task), 0105 widens the screen notices' kinds for the switch's two
+  notices. Neither removes data (GW-I-324; the upgrade fixture moves to 105).
+- **Protocol revision 15: rebuild or pull every runtime image (PROTO-U-045, PROTO-U-046).** The Minimal, Workstation
+  and Desktop runtimes carry the new revision in their labels; a 17.4 runtime still works against the 18.0 gateway but
+  keeps the old behaviour (every run's end empties the browser's profile, and the kept-sign-in switch has no effect on
+  it). Pull with `deploy/pull-images.sh` or build with `deploy/build-images.sh` from the v18.0.0 tag, then start the
+  gateway and web with `--force-recreate`, as the install guide says.
+- **No `gateway.toml` key is added, renamed or removed** (`deploy/examples/gateway.toml` is unchanged since 17.4.1),
+  and no compose file, port or environment variable of the stack changes. The install guide's step 0 now offers the
+  pull in place of the build.
+- **The kept sign-in and the desktop's idle retirement:** with the switch on, a task's desktop is no longer retired for
+  being idle; it ends at the installation's desktop time limit, as before for a busy one (RT-I-060, GW-I-324). Nothing
+  to configure; worth knowing for a host that counts on idle desktops giving way.
+- **The network proxy's Recently refused record is in memory (GW-I-323):** empty after a gateway restart, the log keeps
+  the history. No retention setting.
 
 ## 17.4.1 (12 November 2026)
 
