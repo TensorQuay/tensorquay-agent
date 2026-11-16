@@ -84,9 +84,12 @@ enum Then {
 
 /// Loses `id`'s sandbox until the manager gives up on it: four losses, each replaced (after 0, 5, 15 and 45 s) with a
 /// new runtime, then the fifth in the window, which gives up. `runtime` is the live sandbox's runtime, held only to
-/// keep its link open.
+/// keep its link open. Returns once the give-up has told `team`'s lead: the manager retires the sandbox first and
+/// stores the notice after, so a test reading notices at the retirement could read none on a loaded runner (CI,
+/// 16 Nov 2026).
 async fn give_up(
     f: &support::Fixture,
+    team: Uuid,
     id: &ConversationId,
     runtime: support::runtime::Runtime,
     then: Then,
@@ -110,15 +113,34 @@ async fn give_up(
     }
     // The fifth loss in the window gives up.
     tokio::time::sleep(Duration::from_millis(1500)).await;
+    let told = failed_notices(f, team).await?;
     let lost = sandbox_of(f, id).await?;
     let created = f.backend.creates.load(Ordering::SeqCst);
     f.backend.lose(&lost).await?;
     drop(runtime.take());
     f.clock.observed().await?;
     match then {
-        Then::Retired => retired(f, conversation).await,
-        Then::StartedAgain => created_after(f, created, 0).await,
+        Then::Retired => retired(f, conversation).await?,
+        Then::StartedAgain => created_after(f, created, 0).await?,
     }
+    tokio::time::timeout(support::DEADLINE, async {
+        while failed_notices(f, team).await? <= told {
+            tokio::time::sleep(Duration::from_millis(100)).await;
+        }
+        Ok::<_, Box<dyn std::error::Error>>(())
+    })
+    .await
+    .map_err(|_| "the give-up told the lead nothing")??;
+    Ok(())
+}
+
+/// How many `member_failed` notices `team`'s lead has.
+async fn failed_notices(f: &support::Fixture, team: Uuid) -> Result<usize> {
+    Ok(notices(f, team)
+        .await?
+        .iter()
+        .filter(|(kind, _, _)| kind == "member_failed")
+        .count())
 }
 
 // TEST: GW-I-254
@@ -137,7 +159,7 @@ async fn gw_i_254_a_helper_whose_sandbox_keeps_stopping_is_told_to_the_lead_as_f
         // The harness keeps the runtimes only to hold their links open; this test takes the researcher's to lose it.
         #[allow(clippy::used_underscore_binding)]
         let runtime = t.runtimes.remove(1);
-        give_up(f, &id, runtime, Then::Retired).await?;
+        give_up(f, t.id, &id, runtime, Then::Retired).await?;
         f.gateway.reconcile_agent_teams_now().await?;
         f.gateway.reconcile_agent_teams_now().await?;
         let told = notices(f, t.id).await?;
@@ -305,7 +327,7 @@ async fn gw_i_254_a_helper_given_up_twice_counts_both_and_is_started_again(
         f.clock.observed().await?;
         #[allow(clippy::used_underscore_binding)]
         let runtime = t.runtimes.remove(1);
-        give_up(f, &id, runtime, Then::Retired).await?;
+        give_up(f, t.id, &id, runtime, Then::Retired).await?;
         let assign = |key: &'static str| {
             serde_json::json!({"type": "assign", "to": "researcher", "text": key})
         };
@@ -324,7 +346,7 @@ async fn gw_i_254_a_helper_given_up_twice_counts_both_and_is_started_again(
         let runtime = f.runtime_for(&id).await?;
         // The first wake's turn still waits behind the cut run (held, no run event stored), so admission starts a new
         // sandbox for it at once: the helper isn't left failed with nothing to start it.
-        give_up(f, &id, runtime, Then::StartedAgain).await?;
+        give_up(f, t.id, &id, runtime, Then::StartedAgain).await?;
         let told: Vec<_> = notices(f, t.id)
             .await?
             .into_iter()
