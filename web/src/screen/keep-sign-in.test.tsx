@@ -4,7 +4,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { english } from "../i18n/translate";
 import type { Conversation } from "../protocol/generated/api";
-import { clients, FakeScreenClient, FakeSocket } from "../test/screen-socket";
+import {
+  clients,
+  control,
+  FakeScreenClient,
+  FakeSocket,
+  socket,
+} from "../test/screen-socket";
 
 import { screenNoticeWords } from "./notices";
 
@@ -113,6 +119,49 @@ describe("WEB-U-475 keep the sign-in for this task", () => {
       />,
     );
     expect(screen.getByText(/installation's time limit\.$/)).toBeVisible();
+  });
+
+  // The 18.0 candidate's screens (WEB-E2E-125, 16 Nov 2026): in control with the switch on, the panel said both that
+  // the sign-in is kept until its ends and that it lasts for the next run only. Only the switch's own line is true.
+  it("in control, says a sign-in lasts for the next run only while the switch is off, and never while it is on", async () => {
+    const { ScreenPanel } = await import("./ScreenPanel");
+    const nextRunOnly =
+      "A sign-in here lasts for the agent's next run only. Each run after that starts signed out.";
+    const keep = (on: boolean) => ({
+      on,
+      pending: false,
+      failed: false,
+      lifetimeSeconds: 8 * 3600,
+      onChange: vi.fn(),
+    });
+    const { rerender } = render(
+      <ScreenPanel
+        conversationId="task-1"
+        working={false}
+        keepSignIn={keep(true)}
+      />,
+    );
+    await act(async () => {
+      socket().open();
+      await Promise.resolve();
+    });
+    await vi.waitFor(() => expect(clients).toHaveLength(1));
+    fireEvent.click(screen.getByRole("button", { name: "Take over" }));
+    act(() => socket().frame(control("you")));
+    expect(screen.getByRole("status")).toHaveTextContent(/^You have control\./);
+    expect(
+      screen.getByText(/installation's limit of 8 hours\.$/),
+    ).toBeVisible();
+    expect(screen.queryByText(nextRunOnly)).toBeNull();
+    rerender(
+      <ScreenPanel
+        conversationId="task-1"
+        working={false}
+        keepSignIn={keep(false)}
+      />,
+    );
+    expect(screen.getByText(nextRunOnly)).toBeVisible();
+    expect(screen.queryByText(/installation's limit of 8 hours\.$/)).toBeNull();
   });
 
   it("says when a change didn't take, and leaves the item as it was", async () => {
