@@ -91,17 +91,14 @@ fn brief(role: &str) -> Value {
 }
 
 async fn start(f: &Fixture, token: &str, key: &str, body: &Value) -> Result<(u16, Value)> {
-    let response = f
+    let request = f
         .client
         .post(f.url("/runtime/teams/members"))
         .bearer_auth(token)
         .header("idempotency-key", key)
         .header("x-tqa-run-id", "r-1")
-        .json(body)
-        .send()
-        .await?;
-    let status = response.status().as_u16();
-    Ok((status, response.json().await?))
+        .json(body);
+    support::send_retrying(request).await
 }
 
 async fn profile(f: &Fixture, cookie: &str, body: Value) -> Result<()> {
