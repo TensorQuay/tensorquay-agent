@@ -64,22 +64,37 @@ async fn owned_lead(f: &Fixture) -> Result<(Uuid, String, support::runtime::Runt
     ))
 }
 
+/// Starts a researcher under `key`. A retryable 503 is sent again under the same key, within the deadline, as the
+/// runtime's client does: on a loaded runner a lock wait can pass the store's `lock_timeout` (main b305bc045's CI,
+/// 16 Nov 2026: 503 for 201).
 async fn start(f: &Fixture, token: &str, key: &str, workspace: &str) -> Result<Value> {
-    let response = f
-        .client
-        .post(f.url("/runtime/teams/members"))
-        .bearer_auth(token)
-        .header("idempotency-key", key)
-        .header("x-tqa-run-id", "r-1")
-        .json(&json!({
-            "role": "researcher", "workspace": workspace,
-            "brief": {"objective": "Find the Q3 revenue by region.", "output": "A table.",
-                      "boundaries": "Don't edit the reports."},
-        }))
-        .send()
-        .await?;
-    assert_eq!(response.status(), 201);
-    Ok(response.json().await?)
+    let deadline = tokio::time::Instant::now() + support::DEADLINE;
+    loop {
+        let response = f
+            .client
+            .post(f.url("/runtime/teams/members"))
+            .bearer_auth(token)
+            .header("idempotency-key", key)
+            .header("x-tqa-run-id", "r-1")
+            .json(&json!({
+                "role": "researcher", "workspace": workspace,
+                "brief": {"objective": "Find the Q3 revenue by region.", "output": "A table.",
+                          "boundaries": "Don't edit the reports."},
+            }))
+            .send()
+            .await?;
+        let status = response.status();
+        let body: Value = response.json().await?;
+        if status == 503
+            && body["error"]["retryable"] == true
+            && tokio::time::Instant::now() < deadline
+        {
+            tokio::time::sleep(Duration::from_millis(200)).await;
+            continue;
+        }
+        assert_eq!(status, 201, "{body}");
+        return Ok(body);
+    }
 }
 
 fn member_id(started: &Value) -> Result<ConversationId> {
