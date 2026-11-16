@@ -818,6 +818,27 @@ describe("WEB-U-242 the Screen panel", () => {
   });
 });
 
+describe("WEB-U-477 the picture before its first frame", () => {
+  beforeEach(() => {
+    clients.length = 0;
+    FakeScreenClient.autoConnect = true;
+  });
+
+  it("shows the panel's own surface, not the client's dark backdrop, until the desktop's first frame", async () => {
+    // noVNC paints its own dark grey behind the picture from its connect until the first framebuffer update, about a
+    // second with x11vnc's first poll: a dark box over a desktop whose bare root is white by design (brief 112's
+    // diagnostic of the kept case, 16 Nov 2026). The panel's surface shows instead, in either theme.
+    const { ScreenPanel } = await import("./ScreenPanel");
+    render(<ScreenPanel conversationId="task-1" working />);
+    await act(async () => {
+      socket().open();
+      await Promise.resolve();
+    });
+    await connected();
+    expect(clients[0]?.background).toBe("transparent");
+  });
+});
+
 describe("WEB-U-247 Live and Replay", () => {
   const kept = [
     {

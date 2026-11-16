@@ -49,6 +49,7 @@ export const control = (holder: string) =>
 /** The screen clients made, newest last: what the panel set on each, its focus, and its connection's events. */
 export const clients: {
   viewOnly: boolean;
+  background: string;
   blur: ReturnType<typeof vi.fn>;
   focus: ReturnType<typeof vi.fn>;
   emit: (type: "connect" | "disconnect") => void;
@@ -59,6 +60,8 @@ export class FakeScreenClient {
   /** Whether a new client connects by itself, as noVNC does once its handshake is done; false holds it back. */
   static autoConnect = true;
   viewOnly = true;
+  /** The backdrop behind the picture until its first frame: the client's own dark grey, as the real one starts. */
+  background = "the client's own dark grey";
   scaleViewport = false;
   resizeSession = true;
   clipViewport = true;

@@ -7,6 +7,8 @@ declare module "@novnc/novnc" {
       options?: { shared?: boolean },
     );
     viewOnly: boolean;
+    /** The CSS background behind the picture until its first frame; noVNC's own default is a dark grey. */
+    background: string;
     scaleViewport: boolean;
     resizeSession: boolean;
     clipViewport: boolean;

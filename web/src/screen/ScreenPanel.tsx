@@ -239,6 +239,9 @@ export function ScreenPanel({
     void import("@novnc/novnc").then(({ default: RFB }) => {
       if (gone) return;
       const rfb = new RFB(target, channel, { shared: true });
+      // Until the desktop's first frame (about a second: the VNC server's first poll) the client paints its own dark
+      // backdrop; the panel's surface shows instead, as the desktop's bare root is white by design (WEB-U-477).
+      rfb.background = "transparent";
       rfb.scaleViewport = true;
       rfb.resizeSession = false;
       rfb.clipViewport = false;
