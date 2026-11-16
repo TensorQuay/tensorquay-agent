@@ -38,7 +38,10 @@ pub async fn send_retrying(
         let response = attempt.send().await?;
         let status = response.status().as_u16();
         let body: serde_json::Value = response.json().await?;
-        if !(status == 503 && body["error"]["retryable"] == true && tokio::time::Instant::now() < deadline) {
+        if !(status == 503
+            && body["error"]["retryable"] == true
+            && tokio::time::Instant::now() < deadline)
+        {
             return Ok((status, body));
         }
         tokio::time::sleep(Duration::from_millis(200)).await;
