@@ -50,8 +50,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 ### Fixed
 
 - **The Screen panel's picture no longer shows a dark box before the desktop's first frame (WEB-U-477).** For about a
-  second after the panel connects, and again after a Take over, the picture was the screen client's own dark backdrop,
-  not the desktop, whose bare root is white by design; it now shows the panel's surface until the first frame arrives.
+  second after the panel connects to the desktop (as when a task's page opens), the picture was the screen client's
+  own dark backdrop, not the desktop, whose bare root is white by design; it now shows the panel's surface until the
+  first frame arrives.
 - **Clear the browser's sign-ins stays offered while a task keeps its sign-in (WEB-U-476).** With the switch on, a run's
   end keeps the desktop browser's sign-in, but the Screen panel's menu said "The browser is already signed out: each run
   ends that way" and refused the clear once a run had ended after the Take over. The panel now reads the switch's own
