@@ -526,7 +526,10 @@ export function ScreenPanel({
           <p id={helpId} className="type-small muted">
             {t("screen.controlHelp")}
           </p>
-          <p className="type-small muted">{t("screen.controlSignIn")}</p>
+          {/* With the switch on, its own line says when the sign-in ends: "the next run only" isn't true then. */}
+          {!keepSignIn?.on && (
+            <p className="type-small muted">{t("screen.controlSignIn")}</p>
+          )}
         </>
       )}
       {!unclean && result}
