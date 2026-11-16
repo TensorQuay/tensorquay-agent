@@ -310,6 +310,42 @@ class RealModelConfigTests(unittest.TestCase):
         self.assertIn("base_url='http://vllm:8000/v1'", text)
         self.assertEqual(stack.model_route["context_window"], 32768)
 
+    def test_the_gateway_joins_the_endpoints_network_when_one_is_named(self):
+        import json
+        env = {"TQA_SOAK_MODEL_URL": "http://local-model:8000/v1", "TQA_SOAK_MODEL_NAME": "qwen",
+               "TQA_SOAK_MODEL_NETWORK": "tqa-a-model"}
+        stack, installation = self.stack(env)
+        with mock.patch.object(soak_stack.compose, "write", lambda path, text: path.write_text(text)):
+            stack.configure(rehearsal=True)
+        overlay = json.loads((installation.parent / "soak.json").read_text())
+        self.assertEqual(overlay["services"]["gateway"]["networks"], ["control", "sandboxes", "web", "tqa-a-model"])
+        self.assertEqual(overlay["networks"], {"tqa-a-model": {"external": True}})
+        self.assertIn("fake-model", overlay["services"])
+
+    def test_without_a_network_the_overlay_leaves_the_gateway_alone(self):
+        import json
+        stack, installation = self.stack({"TQA_SOAK_MODEL_URL": "http://vllm:8000/v1", "TQA_SOAK_MODEL_NAME": "qwen"})
+        with mock.patch.object(soak_stack.compose, "write", lambda path, text: path.write_text(text)):
+            stack.configure(rehearsal=True)
+        overlay = json.loads((installation.parent / "soak.json").read_text())
+        self.assertNotIn("gateway", overlay["services"])
+        self.assertNotIn("networks", overlay)
+
+    def test_an_unsafe_network_name_is_refused(self):
+        stack, _ = self.stack({"TQA_SOAK_MODEL_URL": "http://vllm:8000/v1", "TQA_SOAK_MODEL_NAME": "qwen",
+                               "TQA_SOAK_MODEL_NETWORK": "a b;c"})
+        with mock.patch.object(soak_stack.compose, "write", lambda path, text: path.write_text(text)):
+            with self.assertRaisesRegex(AuditError, "unsafe model network name"):
+                stack.configure(rehearsal=True)
+
+    def test_the_gateways_own_networks_match_the_compose_file(self):
+        import re
+        from pathlib import Path
+        text = (Path(soak_stack.__file__).resolve().parents[1] / "compose" / "docker.yml").read_text()
+        gateway = text.split("\n  gateway:\n", 1)[1].split("\n  web:\n", 1)[0]
+        found = re.search(r"^    networks: \[([^\]]*)\]", gateway, re.M).group(1)
+        self.assertEqual([n.strip() for n in found.split(",")], soak_stack.soak_real.GATEWAY_NETWORKS)
+
     def test_without_an_endpoint_the_real_soak_refuses_to_start(self):
         stack, _ = self.stack({})
         with mock.patch.object(soak_stack.compose, "write", lambda path, text: path.write_text(text)):
