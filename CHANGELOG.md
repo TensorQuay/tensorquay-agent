@@ -50,10 +50,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 ### Fixed
 
 - **A desktop browser that died is started again (RT-I-061).** The runtime kept the session's browser once started
-  and never looked at it again: after a crash, a kill or an out-of-memory end, the next run and the next Take over sent
-  their keys to no window. Each run's start and each reset now see that the browser's process has exited and launch it
-  again, as ADR-0039 section 6 says. Before, in 17.4 a run that started after the browser died had none until its
-  end started one; with a kept sign-in (new in 18.0) no run's end did, so the browser stayed gone.
+  and never looked at it again: after a crash, a kill or an out-of-memory end, the next run sent its keys to no window.
+  Each run's start and each reset now see that the browser's process has exited and launch it again, as ADR-0039
+  section 6 says. Before, in 17.4 a run that started after the browser died had none until its end started one; with
+  a kept sign-in (new in 18.0) no run's end did, so the browser stayed gone.
 - **A task deleted while the container engine fails keeps nothing behind (GW-I-325).** If the engine refused the
   sandbox's removal at the delete and again on the failure path, nothing tried again until the gateway restarted, so
   the deleted task's sandbox, screenshots and browser profile stayed. The removal is now retried in the background,
@@ -112,6 +112,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Known limits
 
+- **A browser that dies while no run is going stays gone until the next run starts or the next reset (RT-I-061).** A
+  Take over in between finds the desktop without the runtime's browser; a message to the task starts a run, which
+  starts it again.
 - **A changed Desktop limit applies to desktops that start after the change.** The screenshot and action caps go to
   a desktop when its task's environment starts, and a desktop already running keeps the caps it started with, as the
   Limits page says beside each limit. To apply a new cap to a running task, stop the task and start it again.
