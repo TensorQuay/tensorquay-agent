@@ -369,7 +369,9 @@ describe("WEB-U-245 the screen notices", () => {
   });
 
   it("reads the stored notices of every task, a desktop's or not (an administrator's stop is a notice on any)", () => {
-    const read = vi.spyOn(api, "screenNotices").mockResolvedValue({ items: [] });
+    const read = vi
+      .spyOn(api, "screenNotices")
+      .mockResolvedValue({ items: [] });
     const cache = new QueryClient();
     renderHook(
       () =>

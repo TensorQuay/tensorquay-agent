@@ -7,11 +7,11 @@ import { useId, useState } from "react";
 import { newActionKey } from "../api/action-key";
 import { ApiError } from "../api/error";
 import { RelativeTime } from "../conversations/RelativeTime";
-import { copyText } from "../transcript/copy-text";
 import { useT } from "../i18n/I18nProvider";
 import { formatNumber } from "../i18n/message";
 import type { MessageKey, Translate } from "../i18n/translate";
 import type { User } from "../protocol/generated/api";
+import { copyText } from "../transcript/copy-text";
 import { Button } from "../ui/Button";
 import { ConfirmDialog } from "../ui/ConfirmDialog";
 import { EmptyState } from "../ui/EmptyState";
@@ -122,7 +122,8 @@ function Sandboxes({
   const [stopping, setStopping] = useState<SandboxRow | null>(null);
   const [status, setStatus] = useState("");
   const stop = useMutation({
-    mutationFn: (row: SandboxRow) => api.stop(row.conversation_id, newActionKey()),
+    mutationFn: (row: SandboxRow) =>
+      api.stop(row.conversation_id, newActionKey()),
     onSuccess: (_, row) => {
       setStatus(t("sandboxes.stopped", { email: row.owner.email }));
       setStopping(null);
@@ -165,11 +166,7 @@ function Sandboxes({
         <LeftBehindSection items={data.left_behind} />
       )}
       {rows.length === 0 ? (
-        <EmptyState
-          icon={Boxes}
-          message={t("sandboxes.empty")}
-          action={null}
-        />
+        <EmptyState icon={Boxes} message={t("sandboxes.empty")} action={null} />
       ) : (
         <TableScroll label={t("sandboxes.tableLabel")}>
           <table className="data-table" aria-label={t("sandboxes.tableLabel")}>
@@ -345,7 +342,10 @@ function Row({
         </div>
       </td>
       <td>
-        <span className="status-pill type-label" data-tone={STATE_TONE[row.state]}>
+        <span
+          className="status-pill type-label"
+          data-tone={STATE_TONE[row.state]}
+        >
           {pending ? t("sandboxes.stateStopping") : t(STATE_LABEL[row.state])}
         </span>
         {row.kept_on ? (
@@ -416,11 +416,15 @@ function Measure({
 }) {
   const t = useT();
   const format = unit === "cores" ? cores : gigabytes;
-  const key: MessageKey = unit === "cores" ? "sandboxes.ofCores" : "sandboxes.ofGb";
+  const key: MessageKey =
+    unit === "cores" ? "sandboxes.ofCores" : "sandboxes.ofGb";
   if (usage !== null && size !== null)
     return (
       <span>
-        {t(key, { used: format(usage, t.locale), size: format(size, t.locale) })}
+        {t(key, {
+          used: format(usage, t.locale),
+          size: format(size, t.locale),
+        })}
       </span>
     );
   return (

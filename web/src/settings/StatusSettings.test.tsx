@@ -145,6 +145,7 @@ describe("WEB-U-033 status", () => {
       "Agent image",
       "Default environment",
       "Before a restart",
+      "Sandboxes",
     ]);
     expect(
       screen.getByRole("region", { name: "Environment engine" }),
@@ -656,13 +657,5 @@ describe("Status says whether anything was left behind after a sweep", () => {
     ).toHaveAttribute("href", "/settings/sandboxes#left-behind");
     // Never a name: the page lists those.
     expect(section).not.toHaveTextContent("tqa-sbx");
-  });
-
-  it("leaves the section out when an older gateway doesn't report it", async () => {
-    const { sandboxes: _absent, ...older } = ready;
-    fetch.mockImplementationOnce(() => json(older));
-    show();
-    expect(await screen.findByText("New tasks can start.")).toBeVisible();
-    expect(screen.queryByRole("region", { name: "Sandboxes" })).toBeNull();
   });
 });

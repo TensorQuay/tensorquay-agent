@@ -4324,6 +4324,11 @@
           "const": "screen.sign_in_released",
           "description": "A person turned it off: the profile is emptied at the next run's end, or at once when no run is going.",
           "type": "string"
+        },
+        {
+          "const": "sandbox.stopped",
+          "description": "An administrator stopped the task's sandbox from the Sandboxes page (18.1): the task keeps its files and history, and its next message starts a new sandbox.",
+          "type": "string"
         }
       ]
     },

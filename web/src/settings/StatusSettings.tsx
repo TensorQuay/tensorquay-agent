@@ -150,9 +150,7 @@ function Status({ environments }: { environments?: TemplatesApi | undefined }) {
       )}
       <KeptGitCredentials kept={status.data.git_credentials_kept} />
       <ActiveRuns active={status.data.runs_active} />
-      {status.data.sandboxes !== undefined && (
-        <SandboxesLine sandboxes={status.data.sandboxes} />
-      )}
+      <SandboxesLine sandboxes={status.data.sandboxes} />
       <div>
         <Button
           variant="secondary"
@@ -203,13 +201,9 @@ function age(seconds: number, t: ReturnType<typeof useT>): string {
 /**
  * The leak verdict (the Sandboxes page design note, §3.6): how many sandboxes run, and whether the sweeps left
  * anything unowned behind. Green names nothing; amber names what, why, the five-minute retry and the page where each
- * survivor is listed with its remove command. Left out with an older gateway that doesn't report it.
+ * survivor is listed with its remove command. The gateway always reports it (the answer requires it).
  */
-function SandboxesLine({
-  sandboxes,
-}: {
-  sandboxes: NonNullable<ReadyDetail["sandboxes"]>;
-}) {
+function SandboxesLine({ sandboxes }: { sandboxes: ReadyDetail["sandboxes"] }) {
   const t = useT();
   const heading = useId();
   const left = sandboxes.left_behind;

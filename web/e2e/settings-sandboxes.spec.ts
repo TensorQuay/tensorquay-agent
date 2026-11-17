@@ -85,9 +85,13 @@ test("stops an idle sandbox from its row, and a working one is refused with its 
   );
   await axe(page);
   await dialog.getByRole("button", { name: "Stop sandbox" }).click();
-  await expect(page.getByText("Stopping ben@example.org's sandbox.")).toBeVisible();
+  await expect(
+    page.getByText("Stopping ben@example.org's sandbox."),
+  ).toBeVisible();
   // Read again once the fake has retired it: three left.
-  await expect(page.getByText("3 of 6 running")).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText("3 of 6 running")).toBeVisible({
+    timeout: 15_000,
+  });
 });
 
 test("the kept-on Desktop of your own warns about the kept sign-in", async ({
@@ -115,7 +119,9 @@ test("the empty state", async ({ page, context }) => {
   ]);
   await page.goto("/settings/sandboxes");
   await expect(
-    page.getByText("No sandbox is running. One starts when someone sends a message."),
+    page.getByText(
+      "No sandbox is running. One starts when someone sends a message.",
+    ),
   ).toBeVisible();
   await expect(page.getByRole("table")).toHaveCount(0);
   await axe(page);

@@ -2434,6 +2434,10 @@
         {
           "const": "screen.sign_in_released",
           "type": "string"
+        },
+        {
+          "const": "sandbox.stopped",
+          "type": "string"
         }
       ]
     },

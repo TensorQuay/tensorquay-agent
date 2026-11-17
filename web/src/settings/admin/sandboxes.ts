@@ -15,9 +15,9 @@ export type LeftBehind = AdminSandboxLeftBehind;
 /** The Sandboxes page's gateway operations (the Sandboxes page design note, §2); tests replace it with a fake. */
 export type SandboxesApi = {
   /** Every running sandbox, a page of 200; `after` is the previous page's `next_after`. */
-  sandboxes(after?: string, signal?: AbortSignal): Promise<SandboxListing>;
+  sandboxes: (after?: string, signal?: AbortSignal) => Promise<SandboxListing>;
   /** Asks the gateway to stop an idle sandbox; `key` is the action's Idempotency-Key. */
-  stop(conversationId: string, key: string): Promise<void>;
+  stop: (conversationId: string, key: string) => Promise<void>;
 };
 
 export function gatewaySandboxesFor(client: ApiClient): SandboxesApi {
