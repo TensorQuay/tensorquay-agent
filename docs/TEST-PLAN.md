@@ -1933,6 +1933,14 @@ stack exhaustion on deeply nested brace patterns), reached only through the lint
 its patterns are the repository's own lint globs. No patched version is published, so it is listed in `web/package.json`
 `pnpm.auditConfig.ignoreGhsas`; remove the entry when a fix ships and the lockfile takes it.
 
+**A build-time glob advisory with no fix** (SEC-008; 18 Nov 2026). `picomatch` <= 4.0.7, GHSA-fc5q-39xc-vjpf (high:
+exponential backtracking on a glob with a single-branch repeated extglob such as `+(*)`), reached only through the
+development tools: the linter (`eslint-config-next` > `@next/eslint-plugin-next` > `fast-glob` > `micromatch`, and
+`eslint-import-resolver-typescript` > `tinyglobby`) and the test runner (`vite`, `vitest`, `fdir`). `pnpm why
+picomatch --prod` names nothing: the built web app doesn't load it, and every pattern it is given is the repository's
+own. No patched version is published, so it is listed in `pnpm.auditConfig.ignoreGhsas` beside the one above; remove
+the entry when a fix ships and the lockfile takes it.
+
 **A task's environment didn't start on a saturated host** (WEB-E2E-018, the stack's ux suite, "UX 1024 light"; 3 Oct
 2026). Working as designed; recorded for the busy-host starts the next release promises.
 - *Symptom.* The first message read "Not sent: the environment could not start" (`sandbox_failed`) after "Starting…".
