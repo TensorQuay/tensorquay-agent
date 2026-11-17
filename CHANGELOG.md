@@ -135,6 +135,12 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   (`409 has_helpers`), as deleting the lead alone is, and the web app says what to delete first; before, the
   workspace's tasks went in bulk and the team kept running for a deleted lead.
 
+### Security
+
+- **The web app is on Next.js 16.4.5** (it was 16.4.1), past GHSA-mfr8-8qww-v76h, a moderate information disclosure
+  across root params when a `'use cache'` function is called through `unstable_cache()`. The app uses neither, so it
+  was not affected. Builds no longer stop to recommend an upgrade (`experimental.agentUpgrade` is off, WEB-U-491).
+
 ### Known limits
 
 - **A browser that dies while no run is going stays gone until the next run starts or the next reset (RT-I-061).** A
