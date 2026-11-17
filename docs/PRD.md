@@ -116,7 +116,7 @@ All are measured by the TEST-PLAN procedures; PERF numbers are on the named refe
 scope, not a release. The product's releases are numbered 17.x ([CHANGELOG](../CHANGELOG.md), DEV-PLAN §4a and §7).
 Release 17.0 (3 Nov 2026), the initial release, carries v1.0's scope below and two things this section lists as
 later: agent teams (the plan's v1.1; experimental, behind the install switch `[agent_teams] enabled`, off by
-default) and computer use (a desktop environment, ADR-0039). Swarms are not built and are on hold (§12 item 21).
+default) and computer use (a desktop environment, ADR-0039). Swarms are dropped (§12 item 21).
 
 **v1.0 (in):**
 - **Harness:** a single-agent loop with streaming, native tool calling and a text-protocol fallback, tool result caps,
@@ -162,7 +162,7 @@ default) and computer use (a desktop environment, ADR-0039). Swarms are not buil
 **Non-goals for v1.0:** computer use (an agent operating a virtual desktop) and desktop streaming (a later phase; headless
 browser automation through the Workstation environment's tools is in v1.0), mobile apps, billing and credits,
 built-in connector code (connectors are MCP servers added by configuration, §6.1), an in-process plugin API,
-agent teams (v1.1) and swarms (later; the channel primitive is in), cross-conversation memory, canvas or app builders,
+agent teams (v1.1), swarms (dropped 17 Nov 2026), cross-conversation memory, canvas or app builders,
 fine-tuning, Windows hosts, a
 Kubernetes operator, a CLI product, a terminal UI or REPL of any kind, running the agent loop outside a sandbox,
 object storage for workspaces or events.
@@ -172,9 +172,10 @@ object storage for workspaces or events.
   its helpers, writes their briefs, collects their reports and decides. Roles, tools by role, delivery, budgets and
   limits are enforced by the gateway. Helpers work on their own copy or take turns on the lead's files and hand
   results back as files. No votes between agents. In release 17.0, experimental and off by default.
-- **Later: swarms** (ARCHITECTURE §16.4, ADR-0038; §12 item 21): one goal across a person's own agent teams. The
-  person sets up the goal and its parts, each a lead task from a profile they pick, or confirms the coordinator's
-  proposal; one coordinator talks to the leads. No publishing, sharing or outside agents. On hold (PO, 13 Oct 2026).
+- **Dropped: swarms** (17 Nov 2026; ARCHITECTURE §16.4, ADR-0038 withdrawn; §12 item 21): one goal across a person's own
+  agent teams. The person sets up the goal and its parts, each a lead task from a profile they pick, or confirms the
+  coordinator's proposal; one coordinator talks to the leads. No publishing, sharing or outside agents. On hold (PO, 13
+  Oct 2026).
 - OIDC single sign-on; multiple organisations per install.
 - Warm-snapshot pools for Firecracker; custom images per team; GPU pass-through for in-sandbox inference.
 - Cross-conversation memory; hooks (pre- and post-tool scripts or HTTP).
@@ -384,6 +385,7 @@ with slots, queue, eviction, parking and pin (ADR-0016).
     **Decided since (2 Oct 2026):** a Pause goal button (each team finishes its current step and waits until
     Resume); the word "Coordinator" is kept; deleting a goal deletes its teams as deleting a lead's task does.
     **On hold (PO, 13 Oct 2026):** swarms are not built, and stay so until the PO calls for them.
+    **Dropped (PO, 17 Nov 2026):** agent teams with rounds carry a goal; simpler and more efficient first.
 
 22. **Nothing specific to git in the UI or setup (2 Oct 2026, restated by the PO):** git hosts are outside services
     like any other: a person's key or token for one is kept in key management and used through the network edge

@@ -4,7 +4,7 @@
 
 We believe developers and the open-source community deserve to use AI with the best options available to them, not
 locked into one vendor's platform, and that end users deserve every level of the harness: isolated sandboxes, team
-management and, in time, agent swarms. We are building an environment and a communication system for agents, not for
+management and agent teams. We are building an environment and a communication system for agents, not for
 humans: humans set goals and watch, and everything a browser can do a program can do too. TensorQuay Agent
 is that platform. Sign in from a browser, give the agent a
 task, and it works in an isolated sandbox on its own workspace: reading, editing, running and shipping code. Models run

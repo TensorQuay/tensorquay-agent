@@ -990,9 +990,12 @@ lead decides and announces. In the product, members are shown as **helpers**.
 ### 16.3 Phasing
 Channels, the four tools, the `human` and `majority` rules and the channel page are v1.0 work (Phase 7). Agent teams
 are v1.1 (DEV-PLAN Phase 10): they reuse the channel's storage, stream and untrusted marking, not its votes or
-claims. Swarms are a later phase (Phase 12, §16.4).
+claims. Swarms were dropped on 17 Nov 2026 (§16.4).
 
-### 16.4 Swarms (later, ADR-0038)
+### 16.4 Swarms (dropped, ADR-0038 withdrawn)
+**Dropped (the product owner, 17 Nov 2026):** agent teams with rounds carry a goal. The design below stays for its
+history.
+
 A **swarm** is agent teams working on one goal, coordinated one level up the way a lead coordinates its helpers.
 ADR-0038 decides the design (accepted, built in DEV-PLAN Phase 12); this is its outline. The Product Owner set its scope
 on 2 Oct 2026:
@@ -1023,7 +1026,7 @@ lead's page** shows the goal messages that lead sent or received, as quiet lines
 ## 17. What we deliberately do not build yet
 This is v1.0's list. Since it was written, agent teams (experimental, off by default) and computer use were built and
 are in release 17.0 (PRD §6).
-- Agent teams (v1.1, §16.2) and swarms (later, §16.4); the channel primitive itself is in v1.0; cross-conversation memory; hooks; computer use (a later phase, §4.7; headless browser automation through the Workstation template's tools is in v1.0); built-in
+- Agent teams (v1.1, §16.2) and swarms (dropped, §16.4); the channel primitive itself is in v1.0; cross-conversation memory; hooks; computer use (a later phase, §4.7; headless browser automation through the Workstation template's tools is in v1.0); built-in
   connector code; an in-process plugin API; billing; Kubernetes; OIDC; multi-organisation; GPU pass-through. Each is
   listed in PRD §6 and needs a PO decision.
 
@@ -1067,5 +1070,5 @@ are in release 17.0 (PRD §6).
 | ADR-0035 | Guardrails at the network boundary (accepted 8 Oct 2026): no per-call permission policy and no approvals; the network allow-list is the only guardrail added; a refused connection names its host and port, and the prompt lists the allowed hosts; the git host's rules decide what a push may do; of the extras, recent refusals are built after 17.0, per-profile lists come when someone asks, and observe mode is dropped (PRD §12 item 23) |
 | ADR-0036 | Managing skills in the product (proposed, amends ADR-0029): a draft for the Product Owner, slice 1 only, no code before the Product Owner's OK |
 | ADR-0037 | Per-service keys (accepted 30 Sep 2026; part of 17.0): a member's or a shared key for one web address, given to a run as a per-run placeholder bound to its sandbox and run; the egress proxy opens TLS only for keyed hosts, swaps the placeholder for the value in the key's own header only, scrubs responses and audits every use before it (fail closed); an install CA rotated on demand; administrators make shared keys and choose who may use them; a member's key serves only that member's runs; `git_push` and the Git relay retire for plain git over HTTPS (amends ADR-0023, ADR-0033, ADR-0035) |
-| ADR-0038 | Swarms (accepted 2 Oct 2026, built after agent teams): one goal across a person's own agent teams; the person sets up the goal and its parts (each a new lead task from a profile they pick) or confirms the coordinator's proposal; one coordinator talks to the leads, leads only to the coordinator, helpers never leave their team; only messages and attached files cross teams; one goal budget and deadline; two levels, no cycles; each page's message box talks to that page's agent; no publishing, sharing or outside agents |
+| ADR-0038 | Swarms (accepted 2 Oct 2026; withdrawn 17 Nov 2026, swarms dropped): one goal across a person's own agent teams; the person sets up the goal and its parts (each a new lead task from a profile they pick) or confirms the coordinator's proposal; one coordinator talks to the leads, leads only to the coordinator, helpers never leave their team; only messages and attached files cross teams; one goal budget and deadline; two levels, no cycles; each page's message box talks to that page's agent; no publishing, sharing or outside agents |
 | ADR-0040 | The PDF reader (accepted, the Product Owner's decision of 9 Nov 2026; part of 18.0): one crate, `tqa-pdf`, below `tqa-tools`, wrapping the two engines the benchmark chose (oxidize-pdf for the text, hayro for the pictures; pinned exactly), with the caps before parsing (pages, nesting depth, picture size); `read_file` answers a PDF by page with a cursor, and the runner shows a model that sees the pages a result holds, drawn once per run |

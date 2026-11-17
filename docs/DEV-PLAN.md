@@ -254,7 +254,10 @@ fork's desktop each a sandbox of their own). What remains runs on the stack once
 security tests that need a Desktop sandbox (SEC-057, SEC-058, the Desktop secret search, the live sign-in), the page
 pass on the review stack (which gets the Desktop with one Desktop at once) and the lead's live check.
 
-### Phase 12 (later outline): swarms
+### Phase 12 (dropped): swarms
+**Dropped (the product owner, 17 Nov 2026):** agent teams with rounds carry a goal (§4b), and ADR-0038 is withdrawn.
+The outline below stays for its history.
+
 One goal across a person's own agent teams, designed in ADR-0038 (PRD §12 item 21): agent teams coordinated one level
 up by a coordinator task, through the same addressed delivery (ARCHITECTURE §16.4). Scope, set on 2 Oct 2026, with a Pause goal button and the word "Coordinator": one person's own teams only; each part
 of a goal becomes a new lead task from an agent profile the person picks (their own or one an administrator shared);
@@ -289,7 +292,7 @@ explained in [TEST-PLAN](TEST-PLAN.md#build-names-and-ids).
 | 9 Release hardening | yes | reached (11 Oct 2026), with the same waiver |
 | 10 Agent teams (v1.1) | yes, in 17.0; experimental, off by default | not reached yet: `gate-10.md` is a draft; a soak with agent teams in its mix is being prepared. The evaluation of one agent against a team on the same budget showed no difference either way (indicative, `agent-teams.md`) |
 | 11 Computer use | yes, in 17.0 | not reached yet: `gate-11.md` is a draft; a soak with desktop tasks in its mix is being prepared; the grounding evaluation is in `computer-grounding.md` |
-| 12 Swarms | no | a later phase; on hold (product owner, 13 Oct 2026) |
+| 12 Swarms | no | dropped (product owner, 17 Nov 2026); agent teams with rounds carry a goal |
 
 ## 4b. What comes next (17 Nov 2026)
 1. **Gates 10 and 11** (the product owner's request of 12 Nov 2026): agent teams and desktop tasks join the soak's
@@ -329,6 +332,8 @@ explained in [TEST-PLAN](TEST-PLAN.md#build-names-and-ids).
      - Verified end to end on the real stack with a real model: a first round; a follow-up that brings back two
        helpers with their context and adds one new helper; the budget and the time per round; a helper written to
        directly between rounds; and no "Couldn't start a helper" line anywhere in the run.
+     - **Teams proven** (the product owner, 17 Nov 2026): the evaluation of one agent against a team on the same
+       budget is run again on rounds, on real goals, before teams grow further.
 4. **Release 18.2: channels that work on their own** (the product owner, 17 Nov 2026). This amends ADR-0014, under
    which an agent reads a channel only while its task already runs, and a channel carries text only.
    - **Wake the agents.** A proposal, a to-do, or a post that names or replies to an agent starts that member's task,
@@ -364,7 +369,9 @@ explained in [TEST-PLAN](TEST-PLAN.md#build-names-and-ids).
      build and any router works unchanged.
    - A dev server's live preview relayed out of the sandbox over its link. The sandbox never listens for
      connections. This needs a design record and a security review first.
-7. **Later:** Phase 12, swarms, when the product owner calls for it. They build on agent teams (ADR-0038).
+7. **Swarms are dropped** (the product owner, 17 Nov 2026: "make it simpler and efficient first"). A goal is an
+   agent team's work, with rounds (18.1). The evaluation of one agent against a team on the same budget is run again
+   once rounds exist.
 
 ## 5. Parallel tracks
 Engineering runs in three streams that own disjoint parts of the tree, so they progress in parallel and meet at each
