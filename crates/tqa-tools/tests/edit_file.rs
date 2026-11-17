@@ -540,9 +540,10 @@ async fn tool_u_004_a_no_op_edit_is_no_change() -> TestResult {
         "{}",
         output.text
     );
-    // One line break before the sentence, never a blank line.
+    // The sentence on a line of its own: one line break before it, never a blank line.
     assert!(
-        !output.text.contains("\n\n1 edit changed nothing"),
+        output.text.contains("\n1 edit changed nothing")
+            && !output.text.contains("\n\n1 edit changed nothing"),
         "{}",
         output.text
     );
