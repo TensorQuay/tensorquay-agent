@@ -25,6 +25,18 @@ def route(url, model, context):
             "key_ref='secrets/local'\ncontext_window={}\nstream_usage=true\n").format(url, model, int(context))
 
 
+GATEWAY_NETWORKS = ["control", "sandboxes", "web"]
+
+
+def network_overlay(overlay, network):
+    """The soak's overlay with the gateway also on the endpoint's external network (TQA_SOAK_MODEL_NETWORK), so a
+    server started beside the stack, on a GPU, is reached by its alias there."""
+    require(bool(re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.\-]{0,62}", network)), "unsafe model network name")
+    overlay.setdefault("services", {}).setdefault("gateway", {})["networks"] = GATEWAY_NETWORKS + [network]
+    overlay.setdefault("networks", {})[network] = {"external": True}
+    return overlay
+
+
 def prompt(index):
     """One small task: a shell command and a read; every call runs (ADR-0035)."""
     lines = ["Soak task {}. Use the tools, do not describe them.".format(index)]

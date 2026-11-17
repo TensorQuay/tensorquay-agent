@@ -353,6 +353,11 @@ class Stack:
                                 "context_window": int(self.env.get("TQA_SOAK_MODEL_CONTEXT", "32768"))}
             compose.write(models, soak_real.route(self.model_route["url"], self.model_route["model"],
                                                   self.model_route["context_window"]))
+            network = self.env.get("TQA_SOAK_MODEL_NETWORK")
+            if network:
+                # The endpoint's own Docker network, which the gateway joins beside its three (deploy/compose/docker.yml).
+                overlay = self.directory.parent / "soak.json"
+                compose.write(overlay, json.dumps(soak_real.network_overlay(json.loads(overlay.read_text()), network)))
         else:
             compose.write(models, models.read_text() + "context_window=1000000\nstream_usage=true\n")
         if self.mix.on:

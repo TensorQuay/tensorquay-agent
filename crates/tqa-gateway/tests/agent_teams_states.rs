@@ -78,7 +78,7 @@ async fn researcher_done(f: &Fixture, t: &Team) -> TestResult {
 }
 
 async fn start(f: &Fixture, t: &Team, key: &str, role: &str) -> Result<(u16, Value)> {
-    let response = f
+    let request = f
         .client
         .post(f.url("/runtime/teams/members"))
         .bearer_auth(&t.lead.1)
@@ -87,11 +87,8 @@ async fn start(f: &Fixture, t: &Team, key: &str, role: &str) -> Result<(u16, Val
         .json(&json!({
             "role": role, "workspace": "own_copy",
             "brief": {"objective": "Check the totals.", "output": "A table.", "boundaries": "Read only."},
-        }))
-        .send()
-        .await?;
-    let status = response.status().as_u16();
-    Ok((status, response.json().await?))
+        }));
+    support::send_retrying(request).await
 }
 
 #[sqlx::test]

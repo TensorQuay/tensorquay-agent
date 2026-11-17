@@ -23,6 +23,31 @@ use tqa_types::{ConversationId, Event, ServerFrame};
 pub type TestResult = Result<(), Box<dyn std::error::Error>>;
 pub const DEADLINE: Duration = Duration::from_secs(10);
 
+/// Sends `request` again, under the same idempotency key, while the gateway answers a retryable 503 (a store busy past
+/// its lock timeout on a loaded runner), until [`DEADLINE`]; then gives the status and body as they came. A request
+/// that can't be cloned (a streamed body) is sent once.
+pub async fn send_retrying(
+    request: reqwest::RequestBuilder,
+) -> Result<(u16, serde_json::Value), Box<dyn std::error::Error>> {
+    let deadline = tokio::time::Instant::now() + DEADLINE;
+    loop {
+        let Some(attempt) = request.try_clone() else {
+            let response = request.send().await?;
+            return Ok((response.status().as_u16(), response.json().await?));
+        };
+        let response = attempt.send().await?;
+        let status = response.status().as_u16();
+        let body: serde_json::Value = response.json().await?;
+        if !(status == 503
+            && body["error"]["retryable"] == true
+            && tokio::time::Instant::now() < deadline)
+        {
+            return Ok((status, body));
+        }
+        tokio::time::sleep(Duration::from_millis(200)).await;
+    }
+}
+
 pub struct Fixture {
     pub client: reqwest::Client,
     stream_client: reqwest::Client,
