@@ -1,4 +1,6 @@
 """H8: the real-model soak's route, prompts, progress and mode checks (no model, no GPU)."""
+from pathlib import Path
+import tempfile
 import unittest
 
 import soak_real as real
@@ -24,6 +26,28 @@ class Route(unittest.TestCase):
                 real.route("http://vllm:8000/v1", name, 32768)
         with self.assertRaises(AuditError):
             real.route("http://vllm:8000/v1", "model", 1000)
+
+
+class Key(unittest.TestCase):
+    """18 Nov 2026: an endpoint that needs a key (Team B's engine refuses any address but loopback without one). The
+    key reaches the gateway's secret file only; nothing else of the run holds it."""
+
+    def test_the_key_file_becomes_the_local_routes_secret(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "key"
+            path.write_text("tq-0123456789abcdef\n")
+            text = real.secrets(str(path))
+        self.assertEqual(text, '[secrets]\n"secrets/local" = "tq-0123456789abcdef"\n')
+
+    def test_a_key_that_is_not_one_plain_token_is_refused_without_repeating_it(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            for value in ("", "two words", 'quote"d', "line\nbreak", "x" * 513):
+                path = Path(temporary) / "key"
+                path.write_text(value)
+                with self.subTest(len(value)), self.assertRaises(AuditError) as caught:
+                    real.secrets(str(path))
+                if len(value) > 3:
+                    self.assertNotIn(value.strip(), str(caught.exception))
 
 
 class Prompts(unittest.TestCase):

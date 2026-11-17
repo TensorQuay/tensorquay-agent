@@ -353,6 +353,10 @@ class Stack:
                                 "context_window": int(self.env.get("TQA_SOAK_MODEL_CONTEXT", "32768"))}
             compose.write(models, soak_real.route(self.model_route["url"], self.model_route["model"],
                                                   self.model_route["context_window"]))
+            key = self.env.get("TQA_SOAK_MODEL_KEY_FILE")
+            if key:
+                # An endpoint that needs a key: the route's secret becomes it, in the gateway's secret file only.
+                compose.write(self.directory / "secrets.toml", soak_real.secrets(key))
             network = self.env.get("TQA_SOAK_MODEL_NETWORK")
             if network:
                 # The endpoint's own Docker network, which the gateway joins beside its three (deploy/compose/docker.yml).

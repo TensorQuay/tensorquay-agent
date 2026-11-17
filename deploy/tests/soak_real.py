@@ -25,6 +25,15 @@ def route(url, model, context):
             "key_ref='secrets/local'\ncontext_window={}\nstream_usage=true\n").format(url, model, int(context))
 
 
+
+def secrets(path):
+    """The gateway's secret file with the `local` route's key read from `path` (TQA_SOAK_MODEL_KEY_FILE): for an
+    endpoint that needs a key. The key goes nowhere else, and a refusal never repeats it."""
+    key = open(path, encoding="utf-8").read().strip()
+    require(bool(re.fullmatch(r"[A-Za-z0-9._~+/=\-]{1,512}", key)),
+            "the model key file must hold one plain token (letters, digits and ._~+/=-, at most 512)")
+    return '[secrets]\n"secrets/local" = "{}"\n'.format(key)
+
 GATEWAY_NETWORKS = ["control", "sandboxes", "web"]
 
 
