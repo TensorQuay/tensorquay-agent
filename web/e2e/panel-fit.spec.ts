@@ -7,9 +7,9 @@ import { settled } from "./motion";
 import { createConversation, signIn } from "./session";
 import { expect, resetFront, test, type Locator, type Page } from "./test";
 
-// WEB-E2E-127 (18.0.1): what opens in the side panel fits it at desktop widths. The Screen tab's ⋯ menu is wide
-// enough for its items, inside the panel (WEB-U-479); at 390 it stays as it was, aligned to its ⋯'s end. A PDF's
-// page pictures fit the Files panel's width, its scrollbar included (WEB-U-480). Light and dark.
+// WEB-E2E-128 (18.0.1): what opens in the side panel fits it at desktop widths. The Screen tab's ⋯ menu is wide
+// enough for its items, inside the panel (WEB-U-483); at 390 it stays as it was, aligned to its ⋯'s end. A PDF's
+// page pictures fit the Files panel's width, its scrollbar included (WEB-U-484). Light and dark.
 
 async function capture(page: Page, name: string) {
   const directory = process.env.TQA_WEB_EVIDENCE_DIR;
@@ -94,7 +94,7 @@ test.beforeEach(async ({ request }) => {
 
 for (const width of [1280, 1440] as const)
   for (const colorScheme of ["light", "dark"] as const) {
-    test(`WEB-E2E-127 the Screen menu fits its panel (${width} ${colorScheme})`, async ({
+    test(`WEB-E2E-128 the Screen menu fits its panel (${width} ${colorScheme})`, async ({
       page,
     }) => {
       await page.setViewportSize({ width, height: 800 });
@@ -121,7 +121,7 @@ for (const width of [1280, 1440] as const)
       await capture(page, `screen-menu-stopped-${width}-${colorScheme}`);
     });
 
-    test(`WEB-E2E-127 a PDF's pages fit the Files panel (${width} ${colorScheme})`, async ({
+    test(`WEB-E2E-128 a PDF's pages fit the Files panel (${width} ${colorScheme})`, async ({
       page,
     }) => {
       await page.setViewportSize({ width, height: 800 });
@@ -151,7 +151,7 @@ for (const width of [1280, 1440] as const)
     });
   }
 
-test("WEB-E2E-127 the Screen menu at 390 stays aligned to its ⋯", async ({
+test("WEB-E2E-128 the Screen menu at 390 stays aligned to its ⋯", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -167,7 +167,7 @@ test("WEB-E2E-127 the Screen menu at 390 stays aligned to its ⋯", async ({
 });
 
 // The Screen's Expand: its dialog sits in the panel's markup, not its box; its ⋯ menu opens under the ⋯, in the window.
-test("WEB-E2E-127 the Screen menu in the expanded dialog opens under its ⋯", async ({
+test("WEB-E2E-128 the Screen menu in the expanded dialog opens under its ⋯", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 800 });

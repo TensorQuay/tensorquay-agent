@@ -60,7 +60,7 @@ export async function renderPdf(
       frame.setAttribute("role", "group");
       frame.setAttribute("aria-label", label(number));
       into.append(frame);
-      // The box is `width` wide with its border; the picture and its text fit inside the border (WEB-U-480).
+      // The box is `width` wide with its border; the picture and its text fit inside the border (WEB-U-484).
       const edges = getComputedStyle(frame);
       const picture =
         width -

@@ -54,7 +54,7 @@ export function Popover({
       // never wider, moved along into it, so it never covers the page beside the panel (WEB-U-432).
       let low = gap;
       let high = innerWidth - gap;
-      // A dialog opened from the panel (Expand) sits in its markup but not in its box: the window bounds it (WEB-U-479).
+      // A dialog opened from the panel (Expand) sits in its markup but not in its box: the window bounds it (WEB-U-483).
       const nearest = anchor.current?.closest("dialog, [data-menu-bounds]");
       const limit = nearest?.hasAttribute("data-menu-bounds") ? nearest : null;
       if (limit) {
@@ -67,7 +67,7 @@ export function Popover({
         );
         // As wide as the room from its trigger's start (or to its end) to the panel's far edge, so it stays under it.
         // A room narrower than the menu's least width (a ⋯ near the panel's start, its menu aligned to the ⋯'s end):
-        // the panel's whole content instead, moved along into it, still under its trigger (WEB-U-479).
+        // the panel's whole content instead, moved along into it, still under its trigger (WEB-U-483).
         const room = start
           ? high - Math.max(low, button.left)
           : Math.min(high, button.right) - low;

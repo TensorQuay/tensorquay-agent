@@ -118,7 +118,7 @@ function pdf() {
 }
 const BRIEF_PDF = pdf();
 
-/** Three letter-size pages, taller than the Files panel's column, so it scrolls (WEB-E2E-127). */
+/** Three letter-size pages, taller than the Files panel's column, so it scrolls (WEB-E2E-128). */
 function longPdf() {
   const page = (number) =>
     `BT /F1 24 Tf 72 700 Td (Page ${number} of the long brief) Tj ET`;

@@ -153,9 +153,9 @@ describe("WEB-U-091 pdf-render", () => {
     expect(destroy).toHaveBeenCalledOnce();
   });
 
-  // WEB-U-480: a page's box is the width asked, its border included; its picture and text fit inside the border, so the
+  // WEB-U-484: a page's box is the width asked, its border included; its picture and text fit inside the border, so the
   // pages never run past the panel's edge.
-  it("WEB-U-480 fits each page, its border included, in the width asked", async () => {
+  it("WEB-U-484 fits each page, its border included, in the width asked", async () => {
     const { renderPdf } = await import("./pdf-render");
     documentOf(1);
     const style = document.createElement("style");

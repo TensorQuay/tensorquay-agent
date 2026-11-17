@@ -29,8 +29,8 @@ const PAGES_1_2 =
   "--- page 2 ---\nPart 2 of the long report\n" +
   "[partial: pages 1-2 of 300; continue with cursor c1 or start_line=3]";
 
-// WEB-U-478: a PDF read's step names the pages it read, as the result's page marks say, never lines.
-describe("WEB-U-478 a PDF read says pages", () => {
+// WEB-U-482: a PDF read's step names the pages it read, as the result's page marks say, never lines.
+describe("WEB-U-482 a PDF read says pages", () => {
   it("names the pages a PDF result holds", () => {
     expect(toolSummary(read("/workspace/uploads/report.pdf", PAGES_1_2))).toBe(
       "Read uploads/report.pdf pages 1–2",

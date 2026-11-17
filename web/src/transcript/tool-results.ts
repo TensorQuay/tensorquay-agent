@@ -51,7 +51,7 @@ export function readRange(
 ): { first: string; last: string; pages: boolean } | null {
   const result = tool.result ?? "";
   // A PDF's result starts "[PDF, N pages]" and marks each page "--- page N ---" (read_file's pdf.rs); its numbered
-  // arguments are pages. The result says which it is; a read still running goes by the file's name (WEB-U-478).
+  // arguments are pages. The result says which it is; a read still running goes by the file's name (WEB-U-482).
   const path = argument(tool, "path");
   const pages = tool.result
     ? result.startsWith("[PDF, ")

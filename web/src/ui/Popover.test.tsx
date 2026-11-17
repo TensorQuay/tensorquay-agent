@@ -112,10 +112,10 @@ function AtStart() {
   );
 }
 
-// WEB-U-479: a ⋯ near its panel's start leaves its menu, aligned to the ⋯'s end, less room than the menu's least width
+// WEB-U-483: a ⋯ near its panel's start leaves its menu, aligned to the ⋯'s end, less room than the menu's least width
 // (the Screen tab's ⋯ at 1280 and 1440: "Keep the sign-i…"); it then takes the panel's content width, moved along into
 // it, still under its ⋯. Where the room is enough (a ⋯ further along, the phone's panel), it is placed as before.
-describe("WEB-U-479 a menu whose ⋯ is near its panel's start", () => {
+describe("WEB-U-483 a menu whose ⋯ is near its panel's start", () => {
   afterEach(() => vi.restoreAllMocks());
 
   function place(button: DOMRect) {
@@ -171,9 +171,9 @@ function InDialog() {
   );
 }
 
-// WEB-U-479: a dialog opened from the panel (the Screen's or a file's Expand) is bounded by the window, not the panel
+// WEB-U-483: a dialog opened from the panel (the Screen's or a file's Expand) is bounded by the window, not the panel
 // its markup sits in: its menus open under their trigger, never over the panel's strip of the page.
-describe("WEB-U-479 a menu in a dialog opened from its panel", () => {
+describe("WEB-U-483 a menu in a dialog opened from its panel", () => {
   afterEach(() => vi.restoreAllMocks());
 
   it("is placed by the window, under its trigger", () => {
