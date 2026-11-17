@@ -91,6 +91,16 @@
   padding: 0;
   list-style: none;
 }
+/* The transcript scrolls from the whole main area, so a wheel or trackpad over the side margins scrolls it and its
+   bar sits at the area's right edge (the Files panel's edge when it is open); its text stays the centred column, at
+   the width it had when the column itself scrolled (the column less the scroller's padding) (18.1, WEB-E2E-132). */
+.conversation-page > .transcript-scroll {
+  max-width: none;
+}
+.transcript-column {
+  max-width: calc(var(--transcript-width) - 2 * var(--space-1));
+  margin-inline: auto;
+}
 .transcript-scroll {
   position: relative;
   flex: 1;

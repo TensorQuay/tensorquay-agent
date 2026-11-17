@@ -14,6 +14,7 @@ test.use({ launchOptions: { ignoreDefaultArgs: ["--hide-scrollbars"] } });
 async function capture(page: Page, name: string) {
   const directory = process.env.TQA_WEB_EVIDENCE_DIR;
   if (!directory) return;
+  await settled(page);
   await mkdir(directory, { recursive: true });
   await page.screenshot({
     path: join(directory, `transcript-scrollbar-${name}.png`),
@@ -108,8 +109,10 @@ for (const [width, height] of [
         expect(edges.area - edges.text).toBeGreaterThan(100);
         // A wheel over the left margin, outside the text's column, scrolls the transcript.
         const before = await region.evaluate((element) => element.scrollTop);
+        // Left of the text's column, halfway down the visible transcript (the list itself starts far above the screen).
         const text = (await page.locator(".transcript-items").boundingBox())!;
-        await page.mouse.move(text.x - 60, text.y + 200);
+        const view = (await region.boundingBox())!;
+        await page.mouse.move(text.x - 60, view.y + view.height / 2);
         await page.mouse.wheel(0, -300);
         await expect
           .poll(() => region.evaluate((element) => element.scrollTop))
@@ -121,6 +124,9 @@ for (const [width, height] of [
           .click();
         const panel = page.getByRole("complementary", { name: "Files" });
         await expect(panel).toBeVisible();
+        await expect(
+          panel.getByRole("button", { name: "reports" }),
+        ).toBeVisible();
         await region.hover();
         await page.mouse.wheel(0, -100);
         await expect.poll(async () => (await bars(page)).overlay).toBe(1);

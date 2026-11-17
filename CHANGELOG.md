@@ -10,7 +10,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **The transcript shows no scrollbar until you scroll (WEB-U-485, WEB-E2E-132).** A long task's transcript had the
   browser's scrollbar beside it all the time, taking its width. Now a thin bar shows over the transcript's edge while
   it scrolls, by wheel, touch, keys or Jump to latest, or while the pointer is at that edge, and fades about a second
-  after; it can be dragged, and it takes no width, so nothing moves when it shows. Keys, focus and screen readers use
+  after; it can be dragged, and it takes no width, so nothing moves when it shows. The whole main area scrolls the
+  transcript now, its text still the centred column: a wheel or trackpad over the side margins scrolls it, and the bar
+  sits at the area's right edge (the Files panel's edge when it is open). Keys, focus and screen readers use
   the transcript as before. With forced colours the system's scrollbar stays.
 
 ## 18.0.0 (17 November 2026)

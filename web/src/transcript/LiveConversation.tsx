@@ -413,7 +413,7 @@ export function LiveConversation({
             setScrolled((scrollRef.current?.scrollTop ?? 0) > 0);
           }}
         >
-          <div ref={contentRef}>
+          <div ref={contentRef} className="transcript-column">
             {beginning && (
               <p className="conversation-empty muted">
                 {team.outputs.stoppedLine ??
