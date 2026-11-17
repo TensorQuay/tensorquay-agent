@@ -344,4 +344,23 @@ mod tests {
             )
         );
     }
+
+    // The search's worst case stays short: 20,000 lines of 400 bytes that all pass the cheap bounds (the same letters,
+    // in another order), each compared in full. Timed in a release build only.
+    #[test]
+    #[cfg_attr(debug_assertions, ignore = "timed in a release build")]
+    fn the_search_budget_keeps_the_worst_case_under_a_second() {
+        let anchor = "ab".repeat(LINE_BYTES / 2);
+        let line = format!(
+            "{}{}",
+            "a".repeat(LINE_BYTES / 2),
+            "b".repeat(LINE_BYTES / 2)
+        );
+        let text = format!("{line}\n").repeat(DISTANCE_BUDGET);
+        let started = std::time::Instant::now();
+        let found = nearest(&text, &anchor, None);
+        let took = started.elapsed();
+        assert_eq!(found.len(), NEAREST);
+        assert!(took < std::time::Duration::from_secs(1), "{took:?}");
+    }
 }
