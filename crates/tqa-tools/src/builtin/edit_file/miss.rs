@@ -29,7 +29,7 @@ pub(super) enum Miss {
         /// The nearest lines within [`NEAR_PERCENT`], in order, at most [`NEAREST`].
         nearest: Vec<usize>,
     },
-    /// More than one match: each match's line (the first [`LISTED`]) and how many there were.
+    /// More than one match: each match's line (the first [`LISTED`]) and how many there were, up to [`COUNTED`].
     Ambiguous { lines: Vec<usize>, total: usize },
 }
 
@@ -92,7 +92,9 @@ impl Miss {
                 format!(
                     "ambiguous; matches at lines {numbers}{}\n{}\nSend old_text with enough of its line to match \
                      once, or replace_all: true.",
-                    if more > 0 {
+                    if *total >= COUNTED {
+                        format!(" and {more} or more")
+                    } else if more > 0 {
                         format!(" and {more} more")
                     } else {
                         String::new()

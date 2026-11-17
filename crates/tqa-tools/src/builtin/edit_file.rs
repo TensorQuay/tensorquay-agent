@@ -279,10 +279,13 @@ fn matches(text: &str, old: &str, all: bool) -> Result<Vec<usize>, Miss> {
     }
     Ok(matches)
 }
-/// The first ten overlapping matches, and how many there are in all.
+/// The first ten overlapping matches, and how many there are, counted up to [`miss::COUNTED`]: an `old_text` of one
+/// repeated character in a file of it matches at every position, so the count stops there.
 fn overlapping(text: &str, old: &str) -> (Vec<usize>, usize) {
     let (mut matches, mut total, mut offset) = (Vec::new(), 0, 0);
-    while let Some(relative) = text[offset..].find(old) {
+    while total < miss::COUNTED
+        && let Some(relative) = text[offset..].find(old)
+    {
         let start = offset + relative;
         if matches.len() < miss::LISTED {
             matches.push(start);
