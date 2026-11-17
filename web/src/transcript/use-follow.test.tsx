@@ -1,6 +1,8 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { takePageScroll } from "../ui/OverlayScrollbar";
+
 import { useFollow } from "./use-follow";
 
 function Feed({ sequence }: { sequence: number }) {
@@ -272,5 +274,24 @@ describe("WEB-U-378 a reader's scroll up survives a change before its scroll eve
     update(31, 300);
     expect(region.scrollTop).toBe(100);
     expect(screen.queryByRole("button", { name: /Jump to latest/ })).toBeNull();
+  });
+});
+
+// WEB-U-485: the scroll the page makes to follow new output is marked as the page's, so the transcript's overlay bar
+// stays hidden for it; Jump to latest is the reader's own and is never marked.
+describe("WEB-U-485 the page's own scrolling is marked", () => {
+  it("marks a follow scroll, never Jump to latest's", () => {
+    const { region, update } = setup();
+    update(50);
+    expect(region.scrollTop).toBe(500);
+    expect(takePageScroll(region)).toBe(true);
+    // Used once.
+    expect(takePageScroll(region)).toBe(false);
+    region.scrollTop = 0;
+    fireEvent.scroll(region);
+    update(60);
+    fireEvent.click(screen.getByRole("button", { name: /Jump to latest/ }));
+    expect(region.scrollTop).toBe(600);
+    expect(takePageScroll(region)).toBe(false);
   });
 });

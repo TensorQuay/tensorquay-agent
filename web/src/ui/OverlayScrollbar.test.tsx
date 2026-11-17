@@ -2,7 +2,7 @@ import { act, fireEvent, render } from "@testing-library/react";
 import { useRef } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { IDLE_MS, OverlayScrollbar } from "./OverlayScrollbar";
+import { IDLE_MS, OverlayScrollbar, pageScrolled } from "./OverlayScrollbar";
 
 /** A scroller of `content` px in a `view` px box at the page's (16, 48), 600 px wide. */
 function geometry(element: HTMLElement, content: number, view: number) {
@@ -127,6 +127,34 @@ describe("WEB-U-485 the transcript's overlay scrollbar", () => {
     fireEvent.pointerUp(thumb, { pointerId: 1 });
     fireEvent.pointerMove(thumb, { clientY: 300, pointerId: 1 });
     expect(region.scrollTop).toBe(300);
+  });
+
+  // The page's own scrolling (following new output while the reader is at the bottom) shows nothing; only the
+  // reader's does. The page marks each scroll it makes; the mark is used once and lapses if no scroll follows it.
+  it("stays hidden for the page's own follow scroll; the reader's scroll still shows it", () => {
+    const { container } = render(<Page content={2000} view={500} />);
+    const { bar, thumb, region } = parts(container);
+    region.scrollTop = 1500;
+    pageScrolled(region);
+    fireEvent.scroll(region);
+    expect(bar).not.toHaveAttribute("data-shown");
+    // The thumb still follows, ready for when it shows: at the bottom of its track.
+    expect(thumb.style.transform).toBe("translateY(375px)");
+    // The mark was that scroll's: the next scroll is the reader's.
+    region.scrollTop = 1200;
+    fireEvent.scroll(region);
+    expect(bar).toHaveAttribute("data-shown");
+  });
+
+  it("lets a mark no scroll followed lapse", () => {
+    const { container } = render(<Page content={2000} view={500} />);
+    const { bar, region } = parts(container);
+    pageScrolled(region);
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+    fireEvent.scroll(region);
+    expect(bar).toHaveAttribute("data-shown");
   });
 
   it("has nothing to show when the content fits", () => {

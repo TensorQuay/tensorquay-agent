@@ -144,3 +144,37 @@ for (const [width, height] of [
         await capture(page, `${width}-${colorScheme}-files-open`);
       }
     });
+
+// While a run streams and the reader stays at the bottom, the page follows the new output by scrolling itself: that
+// shows no bar, for the run's whole length. Only the reader's own scrolling does (a wheel up, here).
+for (const [width, height] of [
+  [1280, 800],
+  [390, 844],
+] as const)
+  test(`WEB-E2E-132 no bar while the page follows a streaming run (${width})`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height });
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await signIn(page);
+    await page.goto(await createConversation(page));
+    await page
+      .getByLabel("Message", { exact: true })
+      .fill(`Stream Markdown ${"unbroken".repeat(400)}`);
+    await page.getByRole("button", { name: "Send" }).click();
+    const status = page.getByLabel("Run status");
+    // Sampled every 100 ms from the send until the run is done: the bar's opacity, and whether the page followed.
+    const samples: { overlay: number | null; scrolls: boolean }[] = [];
+    while (!/^Done/.test((await status.textContent()) ?? "")) {
+      samples.push(await bars(page));
+      await page.waitForTimeout(100);
+    }
+    expect(samples.filter((sample) => sample.scrolls).length).toBeGreaterThan(
+      5,
+    );
+    expect(samples.filter((sample) => (sample.overlay ?? 0) > 0)).toEqual([]);
+    // The reader's wheel shows it.
+    await page.getByRole("region", { name: "Transcript", exact: true }).hover();
+    await page.mouse.wheel(0, -400);
+    await expect.poll(async () => (await bars(page)).overlay).toBe(1);
+  });
