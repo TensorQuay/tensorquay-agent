@@ -364,6 +364,10 @@ drawings except the brand mark.
 - The transcript follows new content while the reader is at the bottom; scrolling up pauses it and shows a
   "Jump to latest" button, with the count of new items only when there are any ("Jump to latest · 3 new", never
   "(0 new)"); sending a message resumes following (ARCHITECTURE §11).
+- The transcript scrolls from the whole main area, its text the centred column, so a wheel or trackpad over the side
+  margins scrolls it. It shows no scrollbar at rest and keeps no room for one: a thin bar shows over the area's right
+  edge (the Files panel's edge when it is open) while it scrolls or the pointer is at that edge, and fades about a
+  second after; with forced colours the system's bar stays (18.1, WEB-E2E-132).
 - Counts in copy agree in number: "1 match", "2 matches", "1 file", "1 command".
 - Assistant text renders as Markdown (headings, lists, emphasis, inline code, fenced code with a copy button, tables,
   links) in the transcript's type scale; raw HTML from the model is shown as text.
