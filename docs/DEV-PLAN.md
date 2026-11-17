@@ -291,16 +291,39 @@ explained in [TEST-PLAN](TEST-PLAN.md#build-names-and-ids).
 | 11 Computer use | yes, in 17.0 | not reached yet: `gate-11.md` is a draft; a soak with desktop tasks in its mix is being prepared; the grounding evaluation is in `computer-grounding.md` |
 | 12 Swarms | no | a later phase; on hold (product owner, 13 Oct 2026) |
 
-## 4b. What comes next (12 Nov 2026)
+## 4b. What comes next (17 Nov 2026)
 1. **Gates 10 and 11** (the product owner's request of 12 Nov 2026): agent teams and desktop tasks join the soak's
    mix; the gates' open points are closed; `gate-10.md`, `gate-11.md` and `agent-teams.md` are brought to the
    current release's evidence, with one 24-hour soak that has both in its mix; then the technical lead's verdicts.
    Agent teams stay experimental and off by default (PRD §12 item 32).
-2. **Release 18.0:** the PDF reader and page previews that load from a fixed list of CDNs and the page's own files
-   (PRD §12 items 30 and 31); "Recently refused" with "Allow this site" (ADR-0035 point 3); keeping a desktop
-   sign-in for a whole task (ADR-0039 §6). Verified end to end before the release.
-3. **Fix releases** as findings come in (§7).
-4. **Later:** Phase 12, swarms, when the product owner calls for it.
+2. **Release 18.0:** the PDF reader and pictures in the workspace (PRD §12 items 30 and 31); a web page previewed
+   with its folder, as a site, loading from the internet what the installation's network setting allows; "Recently
+   refused" with "Allow this site" (ADR-0035 point 3); keeping a desktop sign-in for a whole task (ADR-0039 §6);
+   prebuilt images for amd64 and arm64. Verified end to end before the release.
+3. **Release 18.1** (the product owner, 17 Nov 2026), a feature release numbered MINOR under the 17 Nov amendment
+   of §7, and verified with every step of §7. It has three parts.
+   - **The administrator's Sandboxes page and the leak verdict** (the product owner's request of 7 Nov 2026).
+     Settings › Operations › Sandboxes lists every running sandbox across all people. Each row shows its owner's
+     email, its environment, its state and age, and its CPU and memory against its size. Each row has a Stop,
+     audited. Stop is never allowed on a sandbox that is working; its owner is told, and the task starts again on its
+     next message. The page shows no task title, link or content. Status gains a leak verdict: how many sandboxes
+     are running, the oldest one, and whether a sweep left a container, network or volume behind. The page lists
+     what was left behind, and the same numbers are metrics. Its design note and test rows come with the work.
+   - **Built web apps preview as they are.**
+     - An app the agent builds to preview uses relative paths and hash routes. This comes from the runtime's guidance.
+     - The preview corrects root paths in the HTML and CSS it serves.
+     - A page the preview still can't load says why, not a blank frame.
+     - An app that needs a server of its own is seen in a Desktop task: the agent runs it in its sandbox and opens it
+       in the desktop's browser.
+   - **Reference hardware** (the product owner's decision of 15 Nov 2026) replaces PRD §12 item 5: this RTX 5090
+     workstation for local models, and a stated, measured CPU-only minimum in the install guide.
+4. **Fix releases** as findings come in (§7).
+5. **Later, when people ask for them:**
+   - Previews on an origin of their own, an optional installation setting (a wildcard domain or a port range), so any
+     build and any router works unchanged.
+   - A dev server's live preview relayed out of the sandbox over its link. The sandbox never listens for
+     connections. This needs a design record and a security review first.
+6. **Later:** Phase 12, swarms, when the product owner calls for it.
 
 ## 5. Parallel tracks
 Engineering runs in three streams that own disjoint parts of the tree, so they progress in parallel and meet at each
