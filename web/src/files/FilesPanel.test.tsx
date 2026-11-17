@@ -309,20 +309,153 @@ describe("WEB-U-022 files panel focus", () => {
     expect(onClose).toHaveBeenCalledOnce();
   });
 
-  // WEB-U-087: Escape in a preview opened wide closes only that dialog, not the panel under it.
-  it("leaves Escape inside a preview opened wide to that dialog", async () => {
+  // WEB-U-087, WEB-U-494: Escape in a preview opened wide steps back to the panel; it never closes the panel.
+  it("leaves Escape inside a preview opened wide to that view", async () => {
     contents["report.html"] = text("report.html", "<p>hi</p>");
     const { onClose } = show({ target: { path: "report.html", request: 1 } });
     const panel = screen.getByRole("complementary", { name: "Files" });
     fireEvent.click(
       await within(panel).findByRole("button", { name: "Expand" }),
     );
-    const dialog = await screen.findByRole("dialog", { name: "report.html" });
     fireEvent.keyDown(
-      within(dialog).getByRole("button", { name: "Close dialog" }),
+      within(panel).getByRole("button", { name: "Full width" }),
       { key: "Escape" },
     );
     expect(onClose).not.toHaveBeenCalled();
+    expect(panel).not.toHaveAttribute("data-split");
+  });
+});
+
+/** The task layout's width the split measures, as the page gives it. */
+function layoutWidth(width: number) {
+  vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
+    () =>
+      ({
+        left: 0,
+        top: 0,
+        right: width,
+        bottom: 800,
+        width,
+        height: 800,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      }) as DOMRect,
+  );
+}
+
+// WEB-U-494 (18.1): Expand turns the panel into a split beside the chat, in place of a dialog: the same element made
+// wider, so the preview is never remounted (a page's scripts run once). Its header names the file and offers
+// Download, Full width and Close; the divider is a separator the keys move; Escape steps back once, from the file's
+// side only. Below the breakpoint there is no split, and a back arrow is the one way back.
+describe("WEB-U-494 the split view", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    layoutWidth(1020);
+  });
+  afterEach(() => vi.restoreAllMocks());
+
+  async function opened() {
+    contents["README.md"] = text("README.md", "# Title\nSecond line\n");
+    const view = show({ docks: true }, "member");
+    fireEvent.click(await screen.findByRole("button", { name: /^README\.md/ }));
+    const preview = await screen.findByRole("region", { name: "README.md" });
+    await settleLazy();
+    const panel = screen.getByRole("complementary", { name: "Files" });
+    return { ...view, panel, preview };
+  }
+
+  it("expands into a split with its own header, the preview kept", async () => {
+    const { panel, preview } = await opened();
+    const line = within(preview).getByText("Second line");
+    fireEvent.click(within(panel).getByRole("button", { name: "Expand" }));
+    expect(panel).toHaveAttribute("data-split", "split");
+    expect(panel.style.getPropertyValue("--split-share")).toBe("0.6");
+    // The tabs and the folder path give way to the split's header; focus is on the file's name.
+    expect(within(panel).queryByRole("tablist")).toBeNull();
+    const heading = within(panel).getByRole("heading", { name: "README.md" });
+    expect(heading).toHaveFocus();
+    for (const name of ["Full width", "Close the file"])
+      expect(within(panel).getByRole("button", { name })).toBeVisible();
+    expect(within(panel).getByRole("link", { name: "Download" })).toBeVisible();
+    // The very same preview: nothing was remounted.
+    expect(within(panel).getByText("Second line")).toBe(line);
+    const divider = within(panel).getByRole("separator", {
+      name: "Resize the file beside the chat",
+    });
+    expect(divider).toHaveAttribute("aria-orientation", "vertical");
+    expect(divider).toHaveAttribute("aria-valuenow", "60");
+    expect(divider).toHaveAttribute("aria-valuetext", "File 60 %, chat 40 %");
+  });
+
+  it("goes full width and back, then back to the panel, by buttons and by Escape", async () => {
+    const { panel, onClose } = await opened();
+    fireEvent.click(within(panel).getByRole("button", { name: "Expand" }));
+    fireEvent.click(within(panel).getByRole("button", { name: "Full width" }));
+    expect(panel).toHaveAttribute("data-split", "full");
+    const toggle = within(panel).getByRole("button", { name: "Show chat" });
+    expect(toggle).toHaveFocus();
+    expect(within(panel).getByRole("status")).toHaveTextContent(
+      "The chat is hidden.",
+    );
+    expect(within(panel).queryByRole("separator")).toBeNull();
+    fireEvent.keyDown(toggle, { key: "Escape" });
+    expect(panel).toHaveAttribute("data-split", "split");
+    expect(
+      within(panel).getByRole("button", { name: "Full width" }),
+    ).toHaveFocus();
+    expect(within(panel).getByRole("status")).toHaveTextContent(
+      "The chat is back.",
+    );
+    fireEvent.keyDown(
+      within(panel).getByRole("button", { name: "Full width" }),
+      { key: "Escape" },
+    );
+    expect(panel).not.toHaveAttribute("data-split");
+    expect(within(panel).getByRole("button", { name: "Expand" })).toHaveFocus();
+    expect(onClose).not.toHaveBeenCalled();
+    // Close does the same from the split.
+    fireEvent.click(within(panel).getByRole("button", { name: "Expand" }));
+    fireEvent.click(
+      within(panel).getByRole("button", { name: "Close the file" }),
+    );
+    expect(panel).not.toHaveAttribute("data-split");
+    expect(within(panel).getByRole("button", { name: "Expand" })).toHaveFocus();
+  });
+
+  it("moves the divider by its keys and remembers the share for the user", async () => {
+    const { panel } = await opened();
+    fireEvent.click(within(panel).getByRole("button", { name: "Expand" }));
+    const divider = within(panel).getByRole("separator");
+    fireEvent.keyDown(divider, { key: "ArrowLeft" });
+    expect(divider).toHaveAttribute("aria-valuenow", "62");
+    expect(panel.style.getPropertyValue("--split-share")).toBe("0.62");
+    fireEvent.keyDown(divider, { key: "Home" });
+    expect(divider).toHaveAttribute(
+      "aria-valuenow",
+      String(Math.round((1 - 360 / 1020) * 100)),
+    );
+    fireEvent.keyDown(divider, { key: "Enter" });
+    expect(divider).toHaveAttribute("aria-valuenow", "60");
+    fireEvent.keyDown(divider, { key: "ArrowRight", shiftKey: true });
+    expect(divider).toHaveAttribute("aria-valuenow", "50");
+    expect(localStorage.getItem("tqa.files-split.user-1")).toBe("0.5");
+  });
+
+  it("offers no split below the breakpoint, and a back arrow in place of the close button", async () => {
+    contents["README.md"] = text("README.md", "# Title\n");
+    const { onClose } = show({ docks: false }, "member");
+    fireEvent.click(await screen.findByRole("button", { name: /^README\.md/ }));
+    await screen.findByRole("region", { name: "README.md" });
+    const panel = screen.getByRole("complementary", { name: "Files" });
+    expect(within(panel).queryByRole("button", { name: "Expand" })).toBeNull();
+    expect(
+      within(panel).queryByRole("button", { name: "Close panel" }),
+    ).toBeNull();
+    fireEvent.click(
+      within(panel).getByRole("button", { name: "Back to the chat" }),
+    );
+    expect(onClose).toHaveBeenCalledOnce();
   });
 });
 
