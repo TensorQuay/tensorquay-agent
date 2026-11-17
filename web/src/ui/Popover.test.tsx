@@ -157,7 +157,11 @@ function InDialog() {
       data-testid="panel"
       style={{ paddingLeft: GUTTER, paddingRight: GUTTER }}
     >
-      <dialog open>
+      <dialog
+        open
+        data-testid="dialog"
+        style={{ paddingLeft: "24px", paddingRight: "24px" }}
+      >
         <button ref={anchor} type="button">
           More
         </button>
@@ -171,27 +175,45 @@ function InDialog() {
   );
 }
 
-// WEB-U-483: a dialog opened from the panel (the Screen's or a file's Expand) is bounded by the window, not the panel
-// its markup sits in: its menus open under their trigger, never over the panel's strip of the page.
+// WEB-U-483: a dialog opened from the panel (the Screen's or a file's Expand) bounds its menus by its own content, not
+// the panel its markup sits in: they open under their trigger, inside the dialog, never over the panel's strip of the
+// page or past the dialog's edge (WEB-E2E-130 at 390).
 describe("WEB-U-483 a menu in a dialog opened from its panel", () => {
   afterEach(() => vi.restoreAllMocks());
 
-  it("is placed by the window, under its trigger", () => {
-    vi.spyOn(window, "innerWidth", "get").mockReturnValue(1280);
-    vi.spyOn(HTMLElement.prototype, "offsetWidth", "get").mockReturnValue(300);
+  function place(dialog: DOMRect, button: DOMRect, width: number) {
+    vi.spyOn(window, "innerWidth", "get").mockReturnValue(
+      dialog.right + dialog.left,
+    );
+    vi.spyOn(HTMLElement.prototype, "offsetWidth", "get").mockReturnValue(
+      width,
+    );
     vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockReturnValue(160);
     vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
       function (this: HTMLElement) {
         if (this.dataset.testid === "panel") return rect(897, 0, 383, 800);
-        if (this.tagName === "BUTTON") return rect(400, 600, 36, 36);
+        if (this.dataset.testid === "dialog") return dialog;
+        if (this.tagName === "BUTTON") return button;
         return rect(0, 0, 0, 0);
       },
     );
     render(<InDialog />);
-    const surface = screen.getByRole("region", { name: "More" });
-    expect(surface.style.maxWidth).toBe("");
+    return screen.getByRole("region", { name: "More" });
+  }
+
+  it("opens under its trigger inside the dialog's content", () => {
+    // 1280: the dialog's content is 64 to 1216; the room to the ⋯'s end, 436 - 64 = 372 px, holds the menu.
+    const surface = place(rect(40, 16, 1200, 768), rect(400, 600, 36, 36), 300);
+    expect(surface.style.maxWidth).toBe("372px");
     // Aligned to the ⋯'s end: 436 - 300.
     expect(surface.style.left).toBe("136px");
+  });
+
+  it("stays inside a phone's dialog, past whose edge the window would let it run", () => {
+    // 390: the content is 44 to 346; 203 - 44 = 159 px is under the menu's least width, so it takes the 302 px.
+    const surface = place(rect(20, 16, 350, 812), rect(167, 385, 36, 36), 276);
+    expect(surface.style.maxWidth).toBe("302px");
+    expect(surface.style.left).toBe("44px");
   });
 });
 

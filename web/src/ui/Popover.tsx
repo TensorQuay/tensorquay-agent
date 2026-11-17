@@ -50,13 +50,13 @@ export function Popover({
       const gap =
         parseFloat(getComputedStyle(panel).getPropertyValue("--space-2")) || 0;
       const start = placement !== "below-end";
-      // Inside the window; and opened in a panel marked as its bounds (the Files panel), inside that panel's content:
-      // never wider, moved along into it, so it never covers the page beside the panel (WEB-U-432).
+      // Inside the window; and opened in a panel marked as its bounds (the Files panel) or in a dialog, inside its
+      // content: never wider, moved along into it, so it never covers the page beside it (WEB-U-432, WEB-U-483).
       let low = gap;
       let high = innerWidth - gap;
-      // A dialog opened from the panel (Expand) sits in its markup but not in its box: the window bounds it (WEB-U-483).
-      const nearest = anchor.current?.closest("dialog, [data-menu-bounds]");
-      const limit = nearest?.hasAttribute("data-menu-bounds") ? nearest : null;
+      // The nearest dialog or marked panel bounds it: a dialog opened from the panel (Expand) sits in the panel's markup
+      // but not in its box, so its own content does (WEB-U-483).
+      const limit = anchor.current?.closest("dialog, [data-menu-bounds]");
       if (limit) {
         const box = limit.getBoundingClientRect();
         const style = getComputedStyle(limit);

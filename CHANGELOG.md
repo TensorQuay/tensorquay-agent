@@ -57,6 +57,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   room is narrower than the menu, it now takes the panel's width. A phone's panel places it as before. A menu in a
   dialog opened from the panel (the Screen's or a spreadsheet's Expand) now opens under its button: the panel's bounds
   held it to the panel's strip of the page, where the Screen's ⋯ menu had no width at all.
+- **A menu's notes wrap at a readable width, and a menu stays inside its dialog (WEB-U-490, WEB-U-483,
+  WEB-E2E-130).** The Screen panel's ⋯ menu, opened from its Expand dialog, set each note on one line, 658 px across the
+  window, and on a phone ran past the dialog's edges. A menu item's note and its reason now wrap at 24ch (as the menu
+  already read on a phone), and a menu opened in a dialog stays inside it, beside its ⋯.
 - **A PDF's page pictures fit the Files panel (WEB-U-484, WEB-E2E-128).** They ran about 10 px past the panel's right
   edge: each page was drawn at the panel's width with its border on top, and the column's scrollbar, which arrives
   with the pages, took more. The border is now inside that width, and the scrollbar's room is kept from the start.
