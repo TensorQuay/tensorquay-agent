@@ -2,6 +2,11 @@
 
 **An open, free and efficient on-premise AI agent platform that is easy to use, for any company and any individual.**
 
+![A task: bank exports in, a checked holdings report and its cash differences out](docs/images/demo-finance-task.gif)
+
+*A task on a test install: three banks' exports (fictional) in, a checked holdings report and a list of cash differences
+out. A hosted model; local models work the same way. Sped up.*
+
 We believe developers and the open-source community deserve to use AI with the best options available to them, not
 locked into one vendor's platform, and that end users deserve every level of the harness: isolated sandboxes, team
 management and, in time, agent swarms. We are building an environment and a communication system for agents, not for
