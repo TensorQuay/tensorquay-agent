@@ -7,6 +7,12 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Changed
 
+- **A file opens beside the chat (WEB-U-494, WEB-E2E-134).** Expand on a file in the Files panel no longer opens a
+  dialog over the conversation: the file takes about 60 % of the page beside the chat, which stays readable and usable,
+  and a divider between them can be dragged or moved with the arrow keys; each person's choice is remembered in their
+  browser. Full width gives the file the whole page (Show chat brings the chat back), and Escape steps back. Every
+  kind of file that previews can be opened this way now, and a web page's preview is never loaded twice. On a phone the
+  panel takes the screen as before, with a back arrow.
 - **The transcript shows no scrollbar until you scroll (WEB-U-485, WEB-E2E-132).** A long task's transcript had the
   browser's scrollbar beside it all the time, taking its width. Now a thin bar shows over the transcript's edge while
   you scroll it, by wheel, touch, keys or Jump to latest, or while the pointer is at that edge, and fades about a
