@@ -2,7 +2,12 @@ import { act, fireEvent, render } from "@testing-library/react";
 import { useRef } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { IDLE_MS, OverlayScrollbar, pageScrolled } from "./OverlayScrollbar";
+import {
+  IDLE_MS,
+  OverlayScrollbar,
+  READER_MS,
+  readerScrolled,
+} from "./OverlayScrollbar";
 
 /** A scroller of `content` px in a `view` px box at the page's (16, 48), 600 px wide. */
 function geometry(element: HTMLElement, content: number, view: number) {
@@ -62,6 +67,12 @@ const parts = (container: HTMLElement) => {
   return { bar, thumb, region };
 };
 
+/** The reader's own scroll: their wheel on the transcript, then the scroll it makes. */
+const wheel = (region: HTMLElement) => {
+  fireEvent.wheel(region);
+  fireEvent.scroll(region);
+};
+
 // WEB-U-485 (18.1 polish): the transcript's scrollbar is drawn over its edge, so it takes no width; it is hidden at
 // rest, shows while the transcript scrolls or the pointer is at its edge, and goes a second after. It is a picture
 // of the scroll position, hidden from assistive technology: keys, focus and screen readers use the transcript itself.
@@ -81,7 +92,7 @@ describe("WEB-U-485 the transcript's overlay scrollbar", () => {
     expect(thumb.style.height).toBe("125px");
     expect(thumb.style.transform).toBe("translateY(0px)");
     region.scrollTop = 750;
-    fireEvent.scroll(region);
+    wheel(region);
     // Halfway down the 1500 px it can scroll: halfway down the 375 px the thumb can move.
     expect(thumb.style.transform).toBe("translateY(187.5px)");
   });
@@ -90,7 +101,7 @@ describe("WEB-U-485 the transcript's overlay scrollbar", () => {
     const { container } = render(<Page content={2000} view={500} />);
     const { bar, region } = parts(container);
     expect(bar).not.toHaveAttribute("data-shown");
-    fireEvent.scroll(region);
+    wheel(region);
     expect(bar).toHaveAttribute("data-shown");
     act(() => {
       vi.advanceTimersByTime(IDLE_MS - 1);
@@ -124,49 +135,69 @@ describe("WEB-U-485 the transcript's overlay scrollbar", () => {
     fireEvent.pointerMove(thumb, { clientY: 175, pointerId: 1 });
     // 75 px of the 375 the thumb can move is a fifth: a fifth of the 1500 px the transcript can scroll.
     expect(region.scrollTop).toBe(300);
+    fireEvent.scroll(region);
     fireEvent.pointerUp(thumb, { pointerId: 1 });
+    // The drag was the reader's scrolling: the bar stays until a second after it, then goes.
+    expect(container.querySelector(".overlay-scrollbar")).toHaveAttribute(
+      "data-shown",
+    );
+    act(() => {
+      vi.advanceTimersByTime(IDLE_MS);
+    });
+    expect(container.querySelector(".overlay-scrollbar")).not.toHaveAttribute(
+      "data-shown",
+    );
     fireEvent.pointerMove(thumb, { clientY: 300, pointerId: 1 });
     expect(region.scrollTop).toBe(300);
   });
 
-  // The page's own scrolling (following new output while the reader is at the bottom) shows nothing; only the
-  // reader's does. The page marks each scroll it makes; the mark is used once and lapses if no scroll follows it.
-  it("stays hidden for the page's own follow scroll; the reader's scroll still shows it", () => {
+  // Only the reader's own scrolling shows it: a scroll within a second of their wheel, touch or key on the transcript,
+  // or of Jump to latest (readerScrolled). The page's own moves (following new output, the content growing or
+  // shrinking) move the thumb and show nothing.
+  it("stays hidden for a scroll the reader didn't make; their wheel, touch, keys and Jump to latest show it", () => {
     const { container } = render(<Page content={2000} view={500} />);
     const { bar, thumb, region } = parts(container);
     region.scrollTop = 1500;
-    pageScrolled(region);
     fireEvent.scroll(region);
     expect(bar).not.toHaveAttribute("data-shown");
     // The thumb still follows, ready for when it shows: at the bottom of its track.
     expect(thumb.style.transform).toBe("translateY(375px)");
-    // The mark was that scroll's: the next scroll is the reader's.
-    region.scrollTop = 1200;
-    fireEvent.scroll(region);
-    expect(bar).toHaveAttribute("data-shown");
+    for (const input of [
+      () => fireEvent.touchMove(region),
+      () => fireEvent.keyDown(region, { key: "PageUp" }),
+      () => readerScrolled(region),
+    ]) {
+      act(() => {
+        vi.advanceTimersByTime(READER_MS + IDLE_MS + 1);
+      });
+      expect(bar).not.toHaveAttribute("data-shown");
+      input();
+      fireEvent.scroll(region);
+      expect(bar).toHaveAttribute("data-shown");
+    }
   });
 
-  it("lets a mark no scroll followed lapse", () => {
+  it("lets the reader's input lapse: a scroll more than a second after it is the page's", () => {
     const { container } = render(<Page content={2000} view={500} />);
     const { bar, region } = parts(container);
-    pageScrolled(region);
+    fireEvent.wheel(region);
     act(() => {
-      vi.advanceTimersByTime(500);
+      vi.advanceTimersByTime(READER_MS + 1);
     });
     fireEvent.scroll(region);
-    expect(bar).toHaveAttribute("data-shown");
+    expect(bar).not.toHaveAttribute("data-shown");
   });
 
   it("has nothing to show when the content fits", () => {
     const { container } = render(<Page content={400} view={500} />);
     const { bar, region } = parts(container);
-    fireEvent.scroll(region);
+    wheel(region);
     expect(bar).toHaveAttribute("hidden");
   });
 
   it("forgets its timer when it goes", () => {
     const { container, unmount } = render(<Page content={2000} view={500} />);
-    fireEvent.scroll(parts(container).region);
+    wheel(parts(container).region);
     unmount();
     expect(vi.getTimerCount()).toBe(0);
   });

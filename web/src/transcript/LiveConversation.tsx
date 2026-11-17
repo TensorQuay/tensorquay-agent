@@ -480,7 +480,7 @@ export function LiveConversation({
           <FollowControl
             unseen={unseen}
             onResume={() => {
-              resume();
+              resume("reader");
               // The button goes once the view is at the end: the transcript, now showing the latest, keeps the focus
               // instead of the page (WEB-U-274).
               scrollRef.current?.focus({ preventScroll: true });

@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { takePageScroll } from "../ui/OverlayScrollbar";
+import { readerScrolling } from "../ui/OverlayScrollbar";
 
 import { useFollow } from "./use-follow";
 
@@ -25,9 +25,11 @@ function Feed({ sequence }: { sequence: number }) {
         <div ref={contentRef} />
       </div>
       {paused && (
-        <button onClick={resume}>Jump to latest ({unseen} new)</button>
+        <button onClick={() => resume("reader")}>
+          Jump to latest ({unseen} new)
+        </button>
       )}
-      <button onClick={resume}>Send</button>
+      <button onClick={() => resume()}>Send</button>
     </>
   );
 }
@@ -277,21 +279,25 @@ describe("WEB-U-378 a reader's scroll up survives a change before its scroll eve
   });
 });
 
-// WEB-U-485: the scroll the page makes to follow new output is marked as the page's, so the transcript's overlay bar
-// stays hidden for it; Jump to latest is the reader's own and is never marked.
-describe("WEB-U-485 the page's own scrolling is marked", () => {
-  it("marks a follow scroll, never Jump to latest's", () => {
+// WEB-U-485: the transcript's overlay bar shows for the reader's own scrolling only. Jump to latest is theirs, so it
+// tells the bar; the page following new output, and a send moving the view to the reply, never do.
+describe("WEB-U-485 Jump to latest is the reader's scrolling, following isn't", () => {
+  it("tells the bar for Jump to latest only", () => {
     const { region, update } = setup();
     update(50);
     expect(region.scrollTop).toBe(500);
-    expect(takePageScroll(region)).toBe(true);
-    // Used once.
-    expect(takePageScroll(region)).toBe(false);
+    expect(readerScrolling(region)).toBe(false);
     region.scrollTop = 0;
     fireEvent.scroll(region);
     update(60);
-    fireEvent.click(screen.getByRole("button", { name: /Jump to latest/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
     expect(region.scrollTop).toBe(600);
-    expect(takePageScroll(region)).toBe(false);
+    expect(readerScrolling(region)).toBe(false);
+    region.scrollTop = 0;
+    fireEvent.scroll(region);
+    update(70);
+    fireEvent.click(screen.getByRole("button", { name: /Jump to latest/ }));
+    expect(region.scrollTop).toBe(700);
+    expect(readerScrolling(region)).toBe(true);
   });
 });

@@ -8,11 +8,31 @@ export const IDLE_MS = 1000;
 const EDGE = 16;
 /** The thumb's least height, so a very long transcript still has one to see and grab. */
 const LEAST = 32;
+/** How long after the reader's last input a scroll is theirs (a trackpad's glide sends wheel events as it goes). */
+export const READER_MS = 1000;
+
+/** When the reader last acted on each scroller (readerScrolled, or a wheel, touch or key on it). */
+const intents = new WeakMap<Element, number>();
+
+/**
+ * Says the reader is scrolling `element` by an action of theirs outside it (Jump to latest), so the scroll that
+ * follows shows the bar, as their wheel, touch and keys on it do.
+ */
+export function readerScrolled(element: Element) {
+  intents.set(element, Date.now());
+}
+
+/** Whether a scroll of `element` now is the reader's: within READER_MS of their last input on it. */
+export function readerScrolling(element: Element): boolean {
+  const at = intents.get(element);
+  return at !== undefined && Date.now() - at <= READER_MS;
+}
 
 /**
  * A scroller's scrollbar drawn over its right edge, so it takes no width (the browser's own is hidden on it,
- * conversation.css): hidden at rest, shown while the scroller scrolls by any means (wheel, touch, keys, Jump to latest,
- * following new output) until it has been still for IDLE_MS, and while the pointer is at the edge or on the thumb; the
+ * conversation.css): hidden at rest, shown while the reader scrolls it (a wheel, a touch or a key on it, Jump to latest
+ * through readerScrolled, the thumb), never for the page's own moves (following new output, the content growing or
+ * shrinking), until it has been still for IDLE_MS, and while the pointer is at the edge or on the thumb; the
  * thumb can be dragged. It is a picture of the scroll position, hidden from assistive technology: keys, focus and
  * screen readers use the scroller itself. Placed beside the scroller in the same positioned parent; with forced colours
  * the system's bar stays and this one isn't drawn.
@@ -55,6 +75,9 @@ export function OverlayScrollbar({
     };
     function scroll() {
       place();
+      // Not the reader's (the page following new output, the content growing or shrinking): the thumb moves, but
+      // nothing shows.
+      if (!readerScrolling(scroller!)) return;
       clearTimeout(idle);
       idle = setTimeout(() => {
         idle = undefined;
@@ -74,6 +97,9 @@ export function OverlayScrollbar({
       pointed = false;
       show();
     }
+    function intent() {
+      readerScrolled(scroller!);
+    }
     function enter() {
       pointed = true;
       show();
@@ -88,6 +114,8 @@ export function OverlayScrollbar({
     function pull(event: PointerEvent) {
       if (!drag) return;
       const { room, range } = measure();
+      // The reader's own scrolling, as a wheel is: the bar stays a second after the drag ends.
+      readerScrolled(scroller!);
       scroller!.scrollTop =
         drag.top + ((event.clientY - drag.y) * range) / Math.max(room, 1);
     }
@@ -97,6 +125,8 @@ export function OverlayScrollbar({
     }
     place();
     scroller.addEventListener("scroll", scroll, { passive: true });
+    for (const kind of ["wheel", "touchstart", "touchmove", "keydown"] as const)
+      scroller.addEventListener(kind, intent, { passive: true });
     scroller.addEventListener("pointermove", move);
     scroller.addEventListener("pointerleave", leave);
     handle.addEventListener("pointerenter", enter);
@@ -115,6 +145,13 @@ export function OverlayScrollbar({
       clearTimeout(idle);
       observer?.disconnect();
       scroller.removeEventListener("scroll", scroll);
+      for (const kind of [
+        "wheel",
+        "touchstart",
+        "touchmove",
+        "keydown",
+      ] as const)
+        scroller.removeEventListener(kind, intent);
       scroller.removeEventListener("pointermove", move);
       scroller.removeEventListener("pointerleave", leave);
       handle.removeEventListener("pointerenter", enter);
