@@ -138,7 +138,7 @@ for (const width of [1280, 1440] as const)
       const pages = panel.getByRole("region", { name: "Pages of long.pdf" });
       await expect(pages.getByRole("group", { name: "Page 3" })).toBeVisible();
       await settled(page);
-      const fit = await pages.evaluate((column) => {
+      const fit = await pages.evaluate((column: HTMLElement) => {
         const box = column.getBoundingClientRect();
         const right = box.left + column.clientLeft + column.clientWidth;
         return {
