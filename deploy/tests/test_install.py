@@ -16,6 +16,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "deploy" / "tools"))
@@ -74,6 +75,7 @@ class FakeSystem:
     def __init__(self, *, rootless=False, probe=None, bootstrap=201, up_fails=None, ready_after=1,
                  busy_ports=(), detail=None, group_fails=False):
         self.commands = []
+        self.environments = []
         self.requests = []
         self.rootless = rootless
         self.group_fails = group_fails
@@ -87,6 +89,7 @@ class FakeSystem:
 
     def run(self, args, *, env=None, capture=False, timeout=None):
         self.commands.append(list(args))
+        self.environments.append(env)
         if args[:2] == ["docker", "info"]:
             return "[name=seccomp,profile=builtin" + (" name=rootless" if self.rootless else "") + "]\n"
         if args[:2] == ["docker", "run"] and "stat" in args:
@@ -456,6 +459,21 @@ class FilesAsTheGuideMakesThem(Case):
         stat_line = next(command for command in system.commands if "stat" in command)
         self.assertEqual(stat_line[-4:], ["stat", "-c", "%g", "/var/run/docker.sock"])
         self.assertIn(",target=/var/run/docker.sock,readonly", " ".join(stat_line))
+
+    def test_the_shell_s_own_settings_never_reach_its_commands(self):
+        # Compose takes a variable from the shell over --env-file: a shell that followed the guide's steps by hand
+        # (export TQA_INSTALL_DIR=..., the image lines) would start another installation's files or images.
+        leftovers = {"TQA_INSTALL_DIR": "/elsewhere", "TQA_GATEWAY_IMAGE": "sha256:" + "0" * 64,
+                     "TQA_HTTP_PORT": "9999", "COMPOSE_PROJECT_NAME": "another", "COMPOSE_FILE": "other.yml"}
+        with mock.patch.dict(os.environ, dict(leftovers, TQA_IMAGE_REGISTRY="mirror.example/tensorquay")):
+            code, out, system = self.run_installer(self.yes(), system=FakeSystem(rootless=True))
+        self.assertEqual(code, 0, out.text)
+        for args, env in zip(system.commands, system.environments):
+            self.assertIsNotNone(env, args)
+            self.assertFalse(set(leftovers) & set(env), args)
+            self.assertEqual(env.get("PATH"), os.environ.get("PATH"), args)
+        pull = system.environments[[args[0].endswith("pull-images.sh") for args in system.commands].index(True)]
+        self.assertEqual(pull["TQA_IMAGE_REGISTRY"], "mirror.example/tensorquay")
 
     def test_a_failed_detection_names_the_step_and_writes_nothing(self):
         code, out, system = self.run_installer(self.yes(), system=FakeSystem(rootless=True, group_fails=True))

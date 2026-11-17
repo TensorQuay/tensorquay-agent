@@ -184,6 +184,15 @@ def parse(argv):
     return parser.parse_args(argv)
 
 
+def commands_environment():
+    """This shell's environment for the installer's commands, without its own TQA_ and COMPOSE_ settings: Compose
+    takes a variable from the shell over --env-file, so a shell that followed the guide's steps by hand (export
+    TQA_INSTALL_DIR=..., the image lines) would start another installation's files or images. TQA_IMAGE_REGISTRY stays:
+    it is deploy/pull-images.sh's own setting, a mirror of the release's images."""
+    return {name: value for name, value in os.environ.items()
+            if not name.startswith(("TQA_", "COMPOSE_")) or name == "TQA_IMAGE_REGISTRY"}
+
+
 def default_install_dir():
     data = os.environ.get("XDG_DATA_HOME") or str(Path.home() / ".local" / "share")
     return Path(data) / "tensorquay"
@@ -381,7 +390,7 @@ class Installer:
 
     def step(self, name, args, timeout):
         try:
-            return self.system.run(args, capture=True, timeout=timeout)
+            return self.system.run(args, env=commands_environment(), capture=True, timeout=timeout)
         except subprocess.CalledProcessError as error:
             report = text_io.StringIO()
             shell.command_failure(args, self.secrets_env, error, file=report, extra=self.extra)
