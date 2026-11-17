@@ -3,6 +3,16 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
+## Unreleased
+
+### Changed
+
+- **The transcript shows no scrollbar until you scroll (WEB-U-485, WEB-E2E-132).** A long task's transcript had the
+  browser's scrollbar beside it all the time, taking its width. Now a thin bar shows over the transcript's edge while
+  it scrolls, by wheel, touch, keys or Jump to latest, or while the pointer is at that edge, and fades about a second
+  after; it can be dragged, and it takes no width, so nothing moves when it shows. Keys, focus and screen readers use
+  the transcript as before. With forced colours the system's scrollbar stays.
+
 ## 18.0.0 (17 November 2026)
 
 A feature release: the agent reads PDFs and pictures, a desktop sign-in can be kept for a whole task, a folder

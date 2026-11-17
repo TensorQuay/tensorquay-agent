@@ -41,6 +41,7 @@ import {
 import { ScreenToggle } from "../screen/ScreenToggle";
 import { useKeepSignIn } from "../screen/use-keep-sign-in";
 import { ErrorMessage } from "../ui/ErrorMessage";
+import { OverlayScrollbar } from "../ui/OverlayScrollbar";
 import { PanelBoundary } from "../ui/PanelBoundary";
 import { Skeleton } from "../ui/Skeleton";
 
@@ -473,6 +474,8 @@ export function LiveConversation({
             </PanelBoundary>
           </div>
         </div>
+        {/* No scrollbar at rest, and none of its width: a thin one over the edge while it scrolls (WEB-U-485). */}
+        <OverlayScrollbar target={scrollRef} />
         {paused && (
           <FollowControl
             unseen={unseen}

@@ -64,26 +64,29 @@ for (const [width, height] of [
       expect(rest.scrolls).toBe(true);
       expect(rest.native).toBe(0);
       expect(rest.overlay).toBe(0);
-      const composer = await page
-        .getByLabel("Message", { exact: true })
-        .boundingBox();
       const column = await region.boundingBox();
       await capture(page, `${width}-${colorScheme}-rest`);
-      // Scrolling shows the overlay, and nothing moves.
+      // Scrolling shows the overlay; the column keeps its place and width.
       await region.hover();
       await page.mouse.wheel(0, -600);
       await expect.poll(async () => (await bars(page)).overlay).toBe(1);
       expect((await bars(page)).native).toBe(0);
-      expect(
-        await page.getByLabel("Message", { exact: true }).boundingBox(),
-      ).toEqual(composer);
-      expect(await region.boundingBox()).toEqual(column);
-      await expect(
-        page.getByRole("button", { name: /Jump to latest/ }),
-      ).toBeVisible();
+      const shown = await region.boundingBox();
+      expect([shown?.x, shown?.width]).toEqual([column?.x, column?.width]);
+      const jump = page.getByRole("button", { name: /Jump to latest/ });
+      await expect(jump).toBeVisible();
+      const places = async () => ({
+        composer: await page
+          .getByLabel("Message", { exact: true })
+          .boundingBox(),
+        transcript: await region.boundingBox(),
+        jump: await jump.boundingBox(),
+      });
+      const whileShown = await places();
       await capture(page, `${width}-${colorScheme}-scrolling`);
-      // About a second after the last scroll it goes.
+      // About a second after the last scroll it goes, and nothing moves as it does.
       await expect
         .poll(async () => (await bars(page)).overlay, { timeout: 3000 })
         .toBe(0);
+      expect(await places()).toEqual(whileShown);
     });
