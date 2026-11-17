@@ -98,6 +98,31 @@ class Audit(unittest.TestCase):
             with self.assertRaises(AuditError, msg=content):
                 self.tool_error(RunAudit(scripted_tools=False), content)
 
+    @staticmethod
+    def shell_timeout(audit, timeout_ms, seconds):
+        """A shell call and its timed-out result; the 17 Nov run's model asked for 10 s on "sleep 20"."""
+        arguments = {"command": "printf soak-12 > soak.txt; sleep 20; cat soak.txt", "cwd": "/workspace"}
+        if timeout_ms is not None:
+            arguments["timeout_ms"] = timeout_ms
+        audit.record({"type": "event", "seq": 1, "run_id": "r", "ts": "2000-01-01T00:00:10Z",
+                      "event": {"type": "tool.call", "call_id": "t", "name": "shell", "arguments": arguments}})
+        audit.record({"type": "event", "seq": 2, "run_id": "r", "ts": "2000-01-01T00:00:10Z",
+                      "event": {"type": "tool.start", "call_id": "t"}})
+        audit.record({"type": "event", "seq": 3, "run_id": "r", "ts": "2000-01-01T00:00:{:02d}Z".format(10 + seconds),
+                      "event": {"type": "tool.result", "call_id": "t", "status": "error",
+                                "content": "timeout: tool deadline elapsed"}})
+
+    def test_a_deadline_the_model_set_itself_is_its_own_mistake(self):
+        audit = RunAudit(scripted_tools=False)
+        self.shell_timeout(audit, 10000, 10)
+        self.assertEqual(audit.tool_outcomes, {"shell.model_error": 1})
+        self.assertEqual(audit.model_errors[0]["code"], "timeout_requested")
+
+    def test_a_timeout_under_the_default_deadline_or_far_from_the_asked_one_still_fails(self):
+        for timeout_ms, seconds in ((None, 10), (10000, 40), (60000, 10)):
+            with self.assertRaises(AuditError, msg=str((timeout_ms, seconds))):
+                self.shell_timeout(RunAudit(scripted_tools=False), timeout_ms, seconds)
+
     def test_the_scripted_model_still_fails_on_any_tool_error(self):
         with self.assertRaises(AuditError):
             self.tool_error(RunAudit(), "invalid_args: /cursor: not a cursor from an earlier read_file")

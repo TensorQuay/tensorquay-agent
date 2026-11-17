@@ -22,6 +22,9 @@ NO_SPACE = "No space left on device"
 MODEL_ERRORS = ("invalid_args", "path_invalid", "path_outside_workspace", "not_found", "unsupported",
                 "output_too_large", "denied", "egress_denied")
 MODEL_ERRORS_KEPT = 200
+# A deadline the model asked for itself (shell's timeout_ms) is its own mistake when the tool stopped at it: the 17 Nov
+# run's model asked for 10 s on "sleep 20". A timeout under the default deadline is still a failure.
+REQUESTED_DEADLINE_SLACK_MS = 3000
 
 
 class AuditError(AssertionError):
@@ -127,6 +130,7 @@ class RunAudit:
         self.window_resumes, self.disk_resumes = {}, []
         self.tool_names, self.tool_started, self.tool_outcomes = {}, {}, {}
         self.model_errors = []  # a real model's own mistakes (MODEL_ERRORS), the first MODEL_ERRORS_KEPT of them
+        self.requested_deadlines = {}  # call id -> the timeout_ms the model put in its own call, when it did
 
     def fault(self, kind, seq):
         """A successful run must complete after the latest occurrence of each fault kind."""
@@ -166,6 +170,9 @@ class RunAudit:
             require(not self.scripted_tools or event["name"] in ("shell", "read_file"), "unexpected scripted tool")
             require(len(self.tool_names) < 256, "tool audit exceeded its cap")
             self.tool_names[event["call_id"]] = event["name"]
+            requested = (event.get("arguments") or {}).get("timeout_ms")
+            if isinstance(requested, (int, float)) and not isinstance(requested, bool):
+                self.requested_deadlines[event["call_id"]] = requested
         elif kind == "tool.start":
             self.tool_started[event["call_id"]] = timestamp_seconds(frame["ts"])
         elif kind == "tool.result":
@@ -259,6 +266,14 @@ class RunAudit:
             if len(self.model_errors) < MODEL_ERRORS_KEPT:
                 self.model_errors.append({"call_id": identity, "seq": frame["seq"], "ts": frame["ts"], "tool": name,
                                           "code": event["content"].split(":", 1)[0]})
+        elif outcome == "error" and not self.scripted_tools and \
+                event.get("content") == "timeout: tool deadline elapsed" and identity in self.requested_deadlines and \
+                abs((timestamp_seconds(frame["ts"]) - self.tool_started[identity]) * 1000
+                    - self.requested_deadlines[identity]) <= REQUESTED_DEADLINE_SLACK_MS:
+            outcome = "model_error"
+            if len(self.model_errors) < MODEL_ERRORS_KEPT:
+                self.model_errors.append({"call_id": identity, "seq": frame["seq"], "ts": frame["ts"], "tool": name,
+                                          "code": "timeout_requested"})
         elif outcome != "ok":
             when, started = timestamp_seconds(frame["ts"]), self.tool_started[identity]
             matching = [window for window in self.pause_windows if window["end"] is not None and
