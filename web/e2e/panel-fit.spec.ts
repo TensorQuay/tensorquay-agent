@@ -165,3 +165,42 @@ test("WEB-E2E-127 the Screen menu at 390 stays aligned to its ⋯", async ({
   expect(Math.abs(box.right - (more.x + more.width))).toBeLessThanOrEqual(1);
   await capture(page, "screen-menu-live-390");
 });
+
+// The Screen's Expand: its dialog sits in the panel's markup, not its box; its ⋯ menu opens under the ⋯, in the window.
+test("WEB-E2E-127 the Screen menu in the expanded dialog opens under its ⋯", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await signIn(page);
+  const id = await desktopTask(page);
+  await page.goto(`/c/${encodeURIComponent(id)}`);
+  await page.getByRole("button", { name: "Screen", exact: true }).click();
+  const panel = page.getByRole("region", { name: "Screen" });
+  await panel.getByRole("button", { name: "Take over" }).click();
+  await expect(panel.getByRole("status").first()).toHaveText(
+    /^You have control\./,
+  );
+  await panel.getByRole("button", { name: "Expand" }).click();
+  const dialog = page.getByRole("dialog", { name: "Screen" });
+  const more = dialog.getByRole("button", {
+    name: "More actions for the screen",
+  });
+  await more.click();
+  const surface = page.getByRole("region", {
+    name: "More actions for the screen",
+  });
+  await expect(
+    surface.getByRole("menuitemcheckbox", {
+      name: "Keep the sign-in for this task",
+    }),
+  ).toBeVisible();
+  await settled(page);
+  const trigger = (await more.boundingBox())!;
+  const box = (await surface.boundingBox())!;
+  expect(box.x).toBeLessThanOrEqual(trigger.x + trigger.width);
+  expect(box.x + box.width).toBeGreaterThanOrEqual(trigger.x);
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThanOrEqual(1280);
+  expect(box.width).toBeGreaterThanOrEqual(192);
+  await capture(page, "screen-menu-expanded-1280");
+});

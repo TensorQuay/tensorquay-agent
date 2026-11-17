@@ -148,6 +148,53 @@ describe("WEB-U-479 a menu whose ⋯ is near its panel's start", () => {
   });
 });
 
+/** A ⋯ in a dialog opened from the panel (Expand): the dialog sits in the panel's markup but not in its box. */
+function InDialog() {
+  const anchor = useRef<HTMLButtonElement>(null);
+  return (
+    <aside
+      data-menu-bounds=""
+      data-testid="panel"
+      style={{ paddingLeft: GUTTER, paddingRight: GUTTER }}
+    >
+      <dialog open>
+        <button ref={anchor} type="button">
+          More
+        </button>
+        <Popover anchor={anchor} label="More" onClose={() => undefined}>
+          <div style={{ minWidth: "192px" }}>
+            Keep the sign-in for this task
+          </div>
+        </Popover>
+      </dialog>
+    </aside>
+  );
+}
+
+// WEB-U-479: a dialog opened from the panel (the Screen's or a file's Expand) is bounded by the window, not the panel
+// its markup sits in: its menus open under their trigger, never over the panel's strip of the page.
+describe("WEB-U-479 a menu in a dialog opened from its panel", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("is placed by the window, under its trigger", () => {
+    vi.spyOn(window, "innerWidth", "get").mockReturnValue(1280);
+    vi.spyOn(HTMLElement.prototype, "offsetWidth", "get").mockReturnValue(300);
+    vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockReturnValue(160);
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
+      function (this: HTMLElement) {
+        if (this.dataset.testid === "panel") return rect(897, 0, 383, 800);
+        if (this.tagName === "BUTTON") return rect(400, 600, 36, 36);
+        return rect(0, 0, 0, 0);
+      },
+    );
+    render(<InDialog />);
+    const surface = screen.getByRole("region", { name: "More" });
+    expect(surface.style.maxWidth).toBe("");
+    // Aligned to the ⋯'s end: 436 - 300.
+    expect(surface.style.left).toBe("136px");
+  });
+});
+
 // WEB-U-433: a menu taller than its room scrolls inside; its own scrolling must not place it again, which measured it at
 // its full height and so put its list back at the top: its last entries could never be reached. A scroll of the page
 // around its trigger still places it again.
