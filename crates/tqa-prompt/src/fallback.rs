@@ -555,7 +555,9 @@ fn two_keys(object: &Map<String, Value>) -> bool {
 /// The keys an object names its tool and its arguments under: the first of [`NAME_KEYS`] and of [`ARGUMENT_KEYS`]
 /// it has, when it has both.
 fn parts(object: &Map<String, Value>) -> Option<(&'static str, &'static str)> {
-    let name = NAME_KEYS.into_iter().find(|key| object.contains_key(*key))?;
+    let name = NAME_KEYS
+        .into_iter()
+        .find(|key| object.contains_key(*key))?;
     let arguments = ARGUMENT_KEYS
         .into_iter()
         .find(|key| object.contains_key(*key))?;
@@ -623,9 +625,7 @@ fn shape_problem(object: &Map<String, Value>) -> Option<FallbackProblem> {
         .filter(|key| key.as_str() != name_key && Some(key.as_str()) != arguments_key)
         .collect();
     if !extra.is_empty() {
-        Some(FallbackProblem::ExtraKeys {
-            keys: named(extra),
-        })
+        Some(FallbackProblem::ExtraKeys { keys: named(extra) })
     } else if arguments_key.is_none() {
         Some(FallbackProblem::NoArguments)
     } else if !object.get(name_key).is_some_and(Value::is_string) {

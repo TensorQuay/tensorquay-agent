@@ -2,6 +2,8 @@
 //! waves): an ambiguous match lists its lines; a missing one names the nearest lines; a second identical refusal shows
 //! the file's region around them. Lines are the model's own file, so nothing new is exposed. Never a looser match.
 
+use std::fmt::Write as _;
+
 /// Matching lines listed in an ambiguous refusal.
 pub(super) const LISTED: usize = 10;
 /// Lines equally near named in a not-found refusal.
@@ -70,18 +72,29 @@ impl Miss {
                 [number] => format!("not found; the nearest line is {}", named(*number)),
                 many => format!(
                     "not found; the nearest lines are:\n{}",
-                    many.iter().map(|&number| named(number)).collect::<Vec<_>>().join("\n")
+                    many.iter()
+                        .map(|&number| named(number))
+                        .collect::<Vec<_>>()
+                        .join("\n")
                 ),
             },
             Self::Ambiguous { lines: at, total } => {
-                let numbers = at.iter().map(usize::to_string).collect::<Vec<_>>().join(", ");
+                let numbers = at
+                    .iter()
+                    .map(usize::to_string)
+                    .collect::<Vec<_>>()
+                    .join(", ");
                 let more = total.saturating_sub(at.len());
                 let mut listed: Vec<usize> = at.clone();
                 listed.dedup();
                 format!(
                     "ambiguous; matches at lines {numbers}{}\n{}\nSend old_text with enough of its line to match \
                      once, or replace_all: true.",
-                    if more > 0 { format!(" and {more} more") } else { String::new() },
+                    if more > 0 {
+                        format!(" and {more} more")
+                    } else {
+                        String::new()
+                    },
                     listed.into_iter().map(named).collect::<Vec<_>>().join("\n")
                 )
             }
@@ -102,7 +115,11 @@ impl Miss {
                 .copied()
                 .or_else(|| nearest(text, old, None).first().copied()),
         }?;
-        let lines: Vec<&str> = text.strip_suffix('\n').unwrap_or(text).split('\n').collect();
+        let lines: Vec<&str> = text
+            .strip_suffix('\n')
+            .unwrap_or(text)
+            .split('\n')
+            .collect();
         let first = focus.saturating_sub(3).max(1);
         let last = (first + REGION_LINES - 1).min(lines.len());
         if first > last {
@@ -112,7 +129,8 @@ impl Miss {
             "You sent the same arguments as the call that just failed. Here are lines {first}-{last} of {path}:\n"
         );
         for number in first..=last {
-            region.push_str(&format!("{number:>6}\t{}\n", shown_line(&lines, number)));
+            // Writing to a String cannot fail.
+            let _ = writeln!(region, "{number:>6}\t{}", shown_line(&lines, number));
         }
         region.push_str("Read them and send a different old_text.");
         Some(region)
@@ -192,7 +210,11 @@ fn bag_distance(left: &[char], right: &[char]) -> usize {
         *counts.entry(character).or_default() -= 1;
     }
     let (more, fewer) = counts.values().fold((0, 0), |(more, fewer), &count| {
-        if count > 0 { (more + count.unsigned_abs(), fewer) } else { (more, fewer + count.unsigned_abs()) }
+        if count > 0 {
+            (more + count.unsigned_abs(), fewer)
+        } else {
+            (more, fewer + count.unsigned_abs())
+        }
     });
     more.max(fewer)
 }
@@ -213,7 +235,8 @@ fn distance(left: &[char], right: &[char], limit: usize) -> Option<usize> {
         current[0] = row;
         let mut smallest = current[0];
         for column in from..=to {
-            let substitution = previous[column - 1].saturating_add(usize::from(character != right[column - 1]));
+            let substitution =
+                previous[column - 1].saturating_add(usize::from(character != right[column - 1]));
             let deletion = previous[column].saturating_add(1);
             let insertion = current[column - 1].saturating_add(1);
             current[column] = substitution.min(deletion).min(insertion);
@@ -224,7 +247,10 @@ fn distance(left: &[char], right: &[char], limit: usize) -> Option<usize> {
         }
         std::mem::swap(&mut previous, &mut current);
     }
-    previous.get(width).copied().filter(|&distance| distance <= limit)
+    previous
+        .get(width)
+        .copied()
+        .filter(|&distance| distance <= limit)
 }
 
 #[cfg(test)]
@@ -247,7 +273,10 @@ mod tests {
     fn the_nearest_lines_are_the_closest_ones_only() {
         let text = "let a = 1;\nlet b = 1;\nlet bb = 22;\n";
         assert_eq!(nearest(text, "let c = 1;", Some(40)), vec![1, 2]);
-        assert_eq!(nearest(text, "nothing like it at all", Some(40)), Vec::<usize>::new());
+        assert_eq!(
+            nearest(text, "nothing like it at all", Some(40)),
+            Vec::<usize>::new()
+        );
         // Unbounded, some line is always nearest (ties named together, at most three).
         let unbounded = nearest(text, "nothing like it at all", None);
         assert!((1..=NEAREST).contains(&unbounded.len()), "{unbounded:?}");

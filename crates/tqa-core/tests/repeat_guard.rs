@@ -338,8 +338,10 @@ async fn run_harness(h: Harness) -> Result<(RunOutcome, Vec<Event>), Box<dyn Err
     Ok((outcome, sink.events()))
 }
 
-const AMBIGUOUS: &str = r#"{"path":"loop.rs","edits":[{"old_text":"if done","new_text":"if finished"}]}"#;
-const REPEATED: &str = "You sent the same arguments as the call that just failed. Here are lines 7-20 of loop.rs:\n";
+const AMBIGUOUS: &str =
+    r#"{"path":"loop.rs","edits":[{"old_text":"if done","new_text":"if finished"}]}"#;
+const REPEATED: &str =
+    "You sent the same arguments as the call that just failed. Here are lines 7-20 of loop.rs:\n";
 
 // TEST: CORE-E-041
 /// 18.1 item F (proposal D): the second identical refusal of an edit carries the file's region, so the model's input
@@ -351,15 +353,31 @@ async fn core_e_041_the_second_identical_refusal_carries_the_region() -> TestRes
     assert!(stopped(&outcome, THREE), "{outcome:?}");
     let results = tool_results(&events);
     assert_eq!(results.len(), 3, "{results:?}");
-    assert!(results.iter().all(|(_, status, _)| *status == ToolStatus::Error));
+    assert!(
+        results
+            .iter()
+            .all(|(_, status, _)| *status == ToolStatus::Error)
+    );
     let refusal = &results[0].2;
-    assert!(refusal.contains("ambiguous; matches at lines 10, 15"), "{refusal}");
-    assert!(!refusal.contains("You sent the same arguments"), "{refusal}");
+    assert!(
+        refusal.contains("ambiguous; matches at lines 10, 15"),
+        "{refusal}"
+    );
+    assert!(
+        !refusal.contains("You sent the same arguments"),
+        "{refusal}"
+    );
     let second = &results[1].2;
     assert!(second.starts_with(refusal.as_str()), "{second}");
     assert!(second.contains(REPEATED), "{second}");
-    assert!(second.contains("    10\t    if done { return; } // 10\n"), "{second}");
-    assert!(second.ends_with("Read them and send a different old_text."), "{second}");
+    assert!(
+        second.contains("    10\t    if done { return; } // 10\n"),
+        "{second}"
+    );
+    assert!(
+        second.ends_with("Read them and send a different old_text."),
+        "{second}"
+    );
     assert_eq!(&results[2].2, refusal);
     Ok(())
 }
@@ -370,12 +388,17 @@ async fn core_e_041_the_second_identical_refusal_carries_the_region() -> TestRes
 #[tokio::test]
 async fn core_e_041_a_change_after_the_region_starts_the_count_again() -> TestResult {
     let fix = r#"{"path":"loop.rs","edits":[{"old_text":"let line_1 = 1;","new_text":"let first = 1;"}]}"#;
-    let (outcome, events) = run_harness(edit_harness(&[AMBIGUOUS, AMBIGUOUS, fix, AMBIGUOUS])?).await?;
+    let (outcome, events) =
+        run_harness(edit_harness(&[AMBIGUOUS, AMBIGUOUS, fix, AMBIGUOUS])?).await?;
     assert_eq!(outcome, RunOutcome::Completed);
     let results = tool_results(&events);
     assert_eq!(results.len(), 4, "{results:?}");
     assert!(results[1].2.contains(REPEATED));
     assert_eq!(results[2].1, ToolStatus::Ok);
-    assert!(!results[3].2.contains("You sent the same arguments"), "{}", results[3].2);
+    assert!(
+        !results[3].2.contains("You sent the same arguments"),
+        "{}",
+        results[3].2
+    );
     Ok(())
 }

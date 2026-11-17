@@ -241,7 +241,12 @@ impl ToolRegistry {
     }
     /// What a repeated refusal adds ([`Tool::repeated_refusal`]) for a call's journaled arguments, normalised as a
     /// call's are; `None` for an unknown tool or arguments its schema refuses.
-    pub async fn repeated_refusal(&self, name: &str, args: &Value, cx: &ToolContext) -> Option<String> {
+    pub async fn repeated_refusal(
+        &self,
+        name: &str,
+        args: &Value,
+        cx: &ToolContext,
+    ) -> Option<String> {
         let mut args = args.clone();
         self.normalize_arguments(name, &mut args);
         let entry = self.validated_entry(name, &args).ok()?;

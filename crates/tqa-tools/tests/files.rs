@@ -376,7 +376,10 @@ async fn tool_u_003_create_parents_is_optional() -> TestResult {
     registry.prepare("write_file", &plain)?;
     assert_eq!(registry.schema_problem("write_file", &plain), None);
     WriteFile::new().call(plain, &cx).await?;
-    assert_eq!(fs::read_to_string(fixture.root().join("notes.md"))?, "one\n");
+    assert_eq!(
+        fs::read_to_string(fixture.root().join("notes.md"))?,
+        "one\n"
+    );
     let mut nulled = json!({"path": "notes.md", "content": "two\n", "create_parents": null});
     registry.normalize_arguments("write_file", &mut nulled);
     assert_eq!(nulled, json!({"path": "notes.md", "content": "two\n"}));

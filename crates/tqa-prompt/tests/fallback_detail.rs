@@ -90,26 +90,41 @@ fn prompt_u_024_a_block_reads_tool_function_and_parameters() -> Result<(), Strin
         block(r#"{"function": "read_file", "arguments": {"path": "a.py"}}"#),
         block(r#"{"name": "read_file", "parameters": {"path": "a.py"}}"#),
         block(r#"{"tool": "read_file", "arguments": {"path": "a.py"}}"#),
-        "```json\n{\"tool\": \"read_file\", \"parameters\": {\"path\": \"a.py\"}}\n```\n".to_owned(),
+        "```json\n{\"tool\": \"read_file\", \"parameters\": {\"path\": \"a.py\"}}\n```\n"
+            .to_owned(),
     ] {
-        let reply = parse_reply_detailed(&text, false, &check).map_err(|rejection| format!("{text}: {rejection:?}"))?;
+        let reply = parse_reply_detailed(&text, false, &check)
+            .map_err(|rejection| format!("{text}: {rejection:?}"))?;
         assert_eq!(reply.calls, wanted, "{text}");
-        assert_eq!(parse_reply(&text, false, &check).map(|reply| reply.calls), Ok(wanted.clone()));
+        assert_eq!(
+            parse_reply(&text, false, &check).map(|reply| reply.calls),
+            Ok(wanted.clone())
+        );
     }
     // Two names, or two argument keys: the second is an extra key, as before.
     for (text, extra) in [
-        (block(r#"{"name": "read_file", "tool": "read_file", "arguments": {"path": "a"}}"#), "tool"),
-        (block(r#"{"name": "read_file", "arguments": {"path": "a"}, "parameters": {}}"#), "parameters"),
+        (
+            block(r#"{"name": "read_file", "tool": "read_file", "arguments": {"path": "a"}}"#),
+            "tool",
+        ),
+        (
+            block(r#"{"name": "read_file", "arguments": {"path": "a"}, "parameters": {}}"#),
+            "parameters",
+        ),
     ] {
         let rejection = rejected(&text)?;
         assert_eq!(
             rejection.problem,
-            Some(FallbackProblem::ExtraKeys { keys: vec![name(extra)?] }),
+            Some(FallbackProblem::ExtraKeys {
+                keys: vec![name(extra)?]
+            }),
             "{text}"
         );
     }
     // A name under `function` that isn't a string is still not a name.
-    let rejection = rejected(&block(r#"{"function": {"name": "read_file"}, "arguments": {}}"#))?;
+    let rejection = rejected(&block(
+        r#"{"function": {"name": "read_file"}, "arguments": {}}"#,
+    ))?;
     assert_eq!(rejection.problem, Some(FallbackProblem::NameNotString));
     Ok(())
 }
@@ -121,11 +136,21 @@ fn prompt_u_024_a_block_reads_tool_function_and_parameters() -> Result<(), Strin
 fn prompt_u_024_no_name_names_the_keys_it_saw() -> Result<(), String> {
     let long = "k".repeat(33);
     let cases = [
-        (r#"{"path": "a.py", "content": "b"}"#.to_owned(), vec!["content", "path"]),
-        (r#"{"arguments": {"path": "a"}}"#.to_owned(), vec!["arguments"]),
-        (format!(r#"{{"{long}": 1, "a b": 2, "path": "x"}}"#), vec!["path"]),
         (
-            r#"{"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6, "g": 7, "h": 8, "i": 9}"#.to_owned(),
+            r#"{"path": "a.py", "content": "b"}"#.to_owned(),
+            vec!["content", "path"],
+        ),
+        (
+            r#"{"arguments": {"path": "a"}}"#.to_owned(),
+            vec!["arguments"],
+        ),
+        (
+            format!(r#"{{"{long}": 1, "a b": 2, "path": "x"}}"#),
+            vec!["path"],
+        ),
+        (
+            r#"{"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6, "g": 7, "h": 8, "i": 9}"#
+                .to_owned(),
             vec!["a", "b", "c", "d", "e", "f", "g", "h"],
         ),
         ("{}".to_owned(), vec![]),
@@ -134,7 +159,11 @@ fn prompt_u_024_no_name_names_the_keys_it_saw() -> Result<(), String> {
         let rejection = rejected(&block(&body))?;
         let keys = keys.into_iter().map(name).collect::<Result<Vec<_>, _>>()?;
         assert_eq!(rejection.failure, FallbackFailure::Malformed, "{body}");
-        assert_eq!(rejection.problem, Some(FallbackProblem::NoName { keys }), "{body}");
+        assert_eq!(
+            rejection.problem,
+            Some(FallbackProblem::NoName { keys }),
+            "{body}"
+        );
     }
     Ok(())
 }
@@ -249,6 +278,11 @@ fn prompt_u_025_rejections_carry_the_failing_call_and_the_count() -> Result<(), 
         })
     );
 
+    Ok(())
+}
+
+#[test]
+fn prompt_u_025_of_several_bad_blocks_the_first_is_described() -> Result<(), String> {
     // Several bad blocks: the first is described, the one that decides the code.
     let first = format!(
         "{}{}",

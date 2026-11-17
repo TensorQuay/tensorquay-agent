@@ -190,8 +190,9 @@ fn proto_u_044_an_older_no_name_reads_with_no_keys() -> TestResult {
             keys: vec![ProblemName::new("path").ok_or("name")?]
         }
     );
-    let nine: Result<FallbackProblem, _> =
-        serde_json::from_value(json!({"kind":"no_name","keys":["a","b","c","d","e","f","g","h","i"]}));
+    let nine: Result<FallbackProblem, _> = serde_json::from_value(
+        json!({"kind":"no_name","keys":["a","b","c","d","e","f","g","h","i"]}),
+    );
     assert!(nine.is_err(), "at most eight keys");
     Ok(())
 }

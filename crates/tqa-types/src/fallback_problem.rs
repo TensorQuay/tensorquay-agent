@@ -201,7 +201,11 @@ pub enum FallbackProblem {
         /// The keys the object had, identifier-like ones of at most [`MAX_MODEL_NAME_BYTES`], never a value, so a
         /// reader can tell arguments written at the top level from the tool named under another key (18.1 item F);
         /// at most [`MAX_PROBLEM_NAMES`]. Absent from an older runtime's.
-        #[serde(default, skip_serializing_if = "Vec::is_empty", deserialize_with = "names")]
+        #[serde(
+            default,
+            skip_serializing_if = "Vec::is_empty",
+            deserialize_with = "names"
+        )]
         #[schemars(length(max = 8))]
         keys: Vec<ProblemName>,
     },

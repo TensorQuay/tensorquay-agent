@@ -387,7 +387,8 @@ async fn tool_u_004_an_ambiguous_refusal_lists_its_lines() -> TestResult {
 
 // A: past the tenth match the rest are counted, not listed; a CRLF file's lines are shown without the carriage return.
 #[tokio::test]
-async fn tool_u_004_an_ambiguous_refusal_counts_past_ten_and_drops_carriage_returns() -> TestResult {
+async fn tool_u_004_an_ambiguous_refusal_counts_past_ten_and_drops_carriage_returns() -> TestResult
+{
     let fixture = workspace_fixture()?;
     let cx = support::context(&fixture);
     fs::write(fixture.root().join("many"), "same\r\n".repeat(12))?;
@@ -397,14 +398,18 @@ async fn tool_u_004_an_ambiguous_refusal_counts_past_ten_and_drops_carriage_retu
         .err()
         .ok_or("expected error")?;
     let detail = detail(error);
-    let mut expected = String::from("ambiguous; matches at lines 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 and 2 more\n");
+    let mut expected =
+        String::from("ambiguous; matches at lines 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 and 2 more\n");
     for number in 1..=10 {
         writeln!(expected, "line {number}: same")?;
     }
     expected.push_str("Send old_text with enough of its line to match once, or replace_all: true.");
     assert_eq!(detail, expected);
     assert!(!detail.contains('\r'));
-    assert_eq!(fs::read_to_string(fixture.root().join("many"))?, "same\r\n".repeat(12));
+    assert_eq!(
+        fs::read_to_string(fixture.root().join("many"))?,
+        "same\r\n".repeat(12)
+    );
     Ok(())
 }
 
@@ -430,7 +435,10 @@ async fn tool_u_004_a_not_found_refusal_names_the_nearest_line() -> TestResult {
         "not found; the nearest line is line 2: import { validate } from \"./validate\";"
     );
     // Lines equally near are all named, in order.
-    fs::write(fixture.root().join("pair"), "let a = 1;\nlet b = 1;\nreturn;\n")?;
+    fs::write(
+        fixture.root().join("pair"),
+        "let a = 1;\nlet b = 1;\nreturn;\n",
+    )?;
     let error = tool
         .call(request("pair", "let c = 1;", "x"), &cx)
         .await
@@ -443,14 +451,21 @@ async fn tool_u_004_a_not_found_refusal_names_the_nearest_line() -> TestResult {
     // Only the first line of a multi-line old_text is looked for.
     let error = tool
         .call(
-            request("imports.ts", "import { validate } from './validate';\nmore\n", "x"),
+            request(
+                "imports.ts",
+                "import { validate } from './validate';\nmore\n",
+                "x",
+            ),
             &cx,
         )
         .await
         .err()
         .ok_or("expected error")?;
     assert!(detail(error).starts_with("not found; the nearest line is line 2: "));
-    assert_eq!(fs::read_to_string(fixture.root().join("imports.ts"))?, IMPORTS);
+    assert_eq!(
+        fs::read_to_string(fixture.root().join("imports.ts"))?,
+        IMPORTS
+    );
     Ok(())
 }
 
@@ -462,12 +477,18 @@ async fn tool_u_004_a_far_anchor_is_just_not_found() -> TestResult {
     fs::write(fixture.root().join("imports.ts"), IMPORTS)?;
     let tool = EditFile::new();
     let error = tool
-        .call(request("imports.ts", "completely unrelated words", "x"), &cx)
+        .call(
+            request("imports.ts", "completely unrelated words", "x"),
+            &cx,
+        )
         .await
         .err()
         .ok_or("expected error")?;
     assert_eq!(detail(error), "not found");
-    fs::write(fixture.root().join("long"), format!("{}\n", "x".repeat(401)))?;
+    fs::write(
+        fixture.root().join("long"),
+        format!("{}\n", "x".repeat(401)),
+    )?;
     let error = tool
         .call(request("long", &format!("{}q", "x".repeat(390)), "x"), &cx)
         .await
@@ -505,7 +526,13 @@ async fn tool_u_004_a_no_op_edit_is_no_change() -> TestResult {
         )
         .await?;
     assert_eq!(fs::read_to_string(&path)?, "keep\nchanged\n");
-    assert!(output.text.starts_with("edited readme: 1 edits, +1 -1 lines\n"), "{}", output.text);
+    assert!(
+        output
+            .text
+            .starts_with("edited readme: 1 edits, +1 -1 lines\n"),
+        "{}",
+        output.text
+    );
     assert!(
         output
             .text
@@ -514,9 +541,17 @@ async fn tool_u_004_a_no_op_edit_is_no_change() -> TestResult {
         output.text
     );
     // An empty old_text is still refused, and a missing file is still missing.
-    let error = tool.call(request("readme", "", "x"), &cx).await.err().ok_or("expected error")?;
+    let error = tool
+        .call(request("readme", "", "x"), &cx)
+        .await
+        .err()
+        .ok_or("expected error")?;
     assert!(detail(error).contains("old text must be nonempty"));
-    assert!(tool.call(request("absent", "same", "same"), &cx).await.is_err());
+    assert!(
+        tool.call(request("absent", "same", "same"), &cx)
+            .await
+            .is_err()
+    );
     Ok(())
 }
 
@@ -532,9 +567,11 @@ async fn tool_u_004_a_repeated_refusal_carries_the_region() -> TestResult {
     fs::write(fixture.root().join("loop.rs"), &source)?;
     let lines: Vec<&str> = source.lines().collect();
     let region = |from: usize, to: usize| -> String {
-        (from..=to)
-            .map(|number| format!("{number:>6}\t{}\n", lines[number - 1]))
-            .collect()
+        (from..=to).fold(String::new(), |mut out, number| {
+            // Writing to a String cannot fail.
+            let _ = writeln!(out, "{number:>6}\t{}", lines[number - 1]);
+            out
+        })
     };
     let tool = EditFile::new();
     // Ambiguous at 10 and 15: from three lines before the first, at most 40 lines.
@@ -555,14 +592,21 @@ async fn tool_u_004_a_repeated_refusal_carries_the_region() -> TestResult {
         .repeated_refusal(&request("loop.rs", "let line_30 = 31;", "x"), &cx)
         .await
         .ok_or("expected a note")?;
-    assert!(note.contains("Here are lines 27-60 of loop.rs:\n"), "{note}");
+    assert!(
+        note.contains("Here are lines 27-60 of loop.rs:\n"),
+        "{note}"
+    );
     assert!(note.contains(&region(27, 60)));
     // An anchor near no line still gets the nearest region, whatever its distance.
     let note = tool
         .repeated_refusal(&request("loop.rs", "zzzz zzzz zzzz zzzz", "x"), &cx)
         .await
         .ok_or("expected a note")?;
-    assert!(note.starts_with("You sent the same arguments as the call that just failed. Here are lines "));
+    assert!(
+        note.starts_with(
+            "You sent the same arguments as the call that just failed. Here are lines "
+        )
+    );
     // A later edit's failure is found after the earlier edits are made in memory; the file stays as it was.
     let note = tool
         .repeated_refusal(

@@ -47,7 +47,8 @@ impl Default for EditFile {
     }
 }
 /// What an edit that names the same text twice changes: nothing (18.1 item F, proposal E).
-const NO_CHANGE: &str = "no change: old_text and new_text are the same, so the file was not changed.";
+const NO_CHANGE: &str =
+    "no change: old_text and new_text are the same, so the file was not changed.";
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Args {
@@ -113,7 +114,9 @@ impl Tool for EditFile {
         file_io::run(cx, move |cancel| {
             let (original, _) = read(&workspace, &args.path, max, cancel)?;
             Ok(match edited(&original, &args.edits, max, cancel) {
-                Err(Stopped::Miss { text, old, miss, .. }) => miss.region(&args.path, &text, &old),
+                Err(Stopped::Miss {
+                    text, old, miss, ..
+                }) => miss.region(&args.path, &text, &old),
                 Ok(_) | Err(Stopped::Tool(_)) => None,
             })
         })

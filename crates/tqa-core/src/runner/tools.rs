@@ -158,10 +158,18 @@ impl Execution<'_> {
             limits: self.runner.tool_limits,
         }
     }
-    /// A refusal, with what the tool adds when it is the second identical failure since the last change (18.1 item F,
-    /// proposal D): the model's input changes between the repeats. The first and the third are the plain refusal;
-    /// the third still stops the run (CORE-E-012, CORE-E-041).
-    async fn repeated_note(&mut self, call: &journal::Call, text: String) -> Result<String, Stop> {
+    /// A refusal (`refused`), with what the tool adds when it is the second identical failure since the last change
+    /// (18.1 item F, proposal D): the model's input changes between the repeats. The first and the third are the plain
+    /// refusal; the third still stops the run (CORE-E-012, CORE-E-041). Any other result is returned as it is.
+    async fn repeated_note(
+        &mut self,
+        call: &journal::Call,
+        text: String,
+        refused: bool,
+    ) -> Result<String, Stop> {
+        if !refused {
+            return Ok(text);
+        }
         let registry = self.runner.tools.clone();
         let changes = |name: &str| {
             registry
@@ -250,11 +258,7 @@ impl Execution<'_> {
                     .flatten(),
             ),
         };
-        let text = if refused {
-            self.repeated_note(&call, text).await?
-        } else {
-            text
-        };
+        let text = self.repeated_note(&call, text, refused).await?;
         for event in chunk_tool_output(call.id.clone(), &text) {
             self.emit(event).await?;
         }
