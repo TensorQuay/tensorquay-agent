@@ -99,7 +99,10 @@ for (const width of [390, 1280])
     const seen = await boxes;
     expect(seen.length).toBeGreaterThan(3);
     expect(new Set(seen).size, seen.join(" | ")).toBe(1);
+    // Its code has arrived: its way back, Close where it docks, a back arrow over the column (WEB-U-494).
     await expect(
-      page.getByRole("button", { name: "Close panel" }),
+      page.getByRole("button", {
+        name: width === 390 ? "Back to the chat" : "Close panel",
+      }),
     ).toBeVisible();
   });
