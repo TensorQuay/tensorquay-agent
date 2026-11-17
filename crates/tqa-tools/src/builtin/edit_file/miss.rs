@@ -297,7 +297,7 @@ mod tests {
     }
 
     #[test]
-    fn lines_of_400_bytes_are_compared_and_longer_ones_are_not() {
+    fn lines_at_the_byte_bound_are_compared_and_longer_ones_are_not() {
         let at = "a".repeat(LINE_BYTES);
         let near = format!("{}b", "a".repeat(LINE_BYTES - 1));
         assert_eq!(nearest(&format!("{near}\n"), &at, Some(40)), vec![1]);
