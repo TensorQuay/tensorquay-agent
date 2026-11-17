@@ -153,6 +153,40 @@ describe("WEB-U-091 pdf-render", () => {
     expect(destroy).toHaveBeenCalledOnce();
   });
 
+  // WEB-U-480: a page's box is the width asked, its border included; its picture and text fit inside the border, so the
+  // pages never run past the panel's edge.
+  it("WEB-U-480 fits each page, its border included, in the width asked", async () => {
+    const { renderPdf } = await import("./pdf-render");
+    documentOf(1);
+    const style = document.createElement("style");
+    style.textContent =
+      ".file-pdf-page { border: 1px solid; box-sizing: border-box; }";
+    document.head.append(style);
+    const into = document.createElement("div");
+    document.body.append(into);
+    try {
+      await renderPdf(
+        new ArrayBuffer(4),
+        into,
+        300,
+        label,
+        new AbortController().signal,
+      );
+      const page = into.querySelector<HTMLElement>(".file-pdf-page");
+      expect(page?.style.width).toBe("300px");
+      const canvas = into.querySelector("canvas");
+      expect(canvas?.style.width).toBe("298px");
+      expect(canvas?.width).toBe(596);
+      expect(page?.style.getPropertyValue("--total-scale-factor")).toBe(
+        String(298 / 600),
+      );
+      expect(layers[0]?.viewport.width).toBe(298);
+    } finally {
+      into.remove();
+      style.remove();
+    }
+  });
+
   it("draws only the first 20 pages of a long one, and says how many there are", async () => {
     const { renderPdf, MAX_PAGES } = await import("./pdf-render");
     const { drawn } = documentOf(140);

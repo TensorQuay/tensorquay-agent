@@ -93,6 +93,61 @@ describe("WEB-U-432 a menu inside its panel", () => {
   });
 });
 
+/** The Screen tab's ⋯ at the panel's start, its menu aligned to the ⋯'s end (the default), with the menu's least width. */
+function AtStart() {
+  const anchor = useRef<HTMLButtonElement>(null);
+  return (
+    <aside
+      data-menu-bounds=""
+      data-testid="panel"
+      style={{ paddingLeft: GUTTER, paddingRight: GUTTER }}
+    >
+      <button ref={anchor} type="button">
+        More
+      </button>
+      <Popover anchor={anchor} label="More" onClose={() => undefined}>
+        <div style={{ minWidth: "192px" }}>Keep the sign-in for this task</div>
+      </Popover>
+    </aside>
+  );
+}
+
+// WEB-U-479: a ⋯ near its panel's start leaves its menu, aligned to the ⋯'s end, less room than the menu's least width
+// (the Screen tab's ⋯ at 1280 and 1440: "Keep the sign-i…"); it then takes the panel's content width, moved along into
+// it, still under its ⋯. Where the room is enough (a ⋯ further along, the phone's panel), it is placed as before.
+describe("WEB-U-479 a menu whose ⋯ is near its panel's start", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  function place(button: DOMRect) {
+    vi.spyOn(window, "innerWidth", "get").mockReturnValue(1280);
+    vi.spyOn(HTMLElement.prototype, "offsetWidth", "get").mockReturnValue(300);
+    vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockReturnValue(160);
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
+      function (this: HTMLElement) {
+        if (this.dataset.testid === "panel") return rect(897, 0, 383, 800);
+        if (this.tagName === "BUTTON") return button;
+        return rect(0, 0, 0, 0);
+      },
+    );
+    render(<AtStart />);
+    return screen.getByRole("region", { name: "More" });
+  }
+
+  it("takes the panel's content width when the room to its ⋯'s end is too narrow", () => {
+    // The panel's content: 897 + 16 to 1280 - 16, so 351 px; the room to the ⋯'s end is 953 - 913 = 40 px.
+    const surface = place(rect(917, 542, 36, 36));
+    expect(surface.style.maxWidth).toBe("351px");
+    expect(surface.style.left).toBe("913px");
+  });
+
+  it("keeps the room to its ⋯'s end when the menu's least width fits it", () => {
+    // 1150 - 913 = 237 px, wider than 192: aligned to the ⋯'s end as before.
+    const surface = place(rect(1114, 542, 36, 36));
+    expect(surface.style.maxWidth).toBe("237px");
+    expect(surface.style.left).toBe("913px");
+  });
+});
+
 // WEB-U-433: a menu taller than its room scrolls inside; its own scrolling must not place it again, which measured it at
 // its full height and so put its list back at the top: its last entries could never be reached. A scroll of the page
 // around its trigger still places it again.
