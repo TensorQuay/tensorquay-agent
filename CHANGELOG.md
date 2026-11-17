@@ -49,6 +49,15 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **A PDF read's step names the pages it read, not lines (WEB-U-478).** After reading pages 1 and 2 of a PDF, the
+  step said "Read uploads/report.pdf lines 1–2"; it now says "pages 1–2", in every language. The result's own page
+  marks decide it, so a PDF saved without its extension reads as pages too.
+- **The Screen panel's ⋯ menu is wide enough for its items at desktop widths (WEB-U-479, WEB-E2E-127).** At 1280 and
+  1440 px the menu opened no wider than the room to its ⋯'s end and cut its words ("Keep the sign-i…"); where that
+  room is narrower than the menu, it now takes the panel's width. A phone's panel places it as before.
+- **A PDF's page pictures fit the Files panel (WEB-U-480, WEB-E2E-127).** They ran about 10 px past the panel's right
+  edge: each page was drawn at the panel's width with its border on top, and the column's scrollbar, which arrives
+  with the pages, took more. The border is now inside that width, and the scrollbar's room is kept from the start.
 - **The Screen panel's picture no longer shows a dark box before the desktop's first frame (WEB-U-477).** For about a
   second after the panel connects to the desktop (as when a task's page opens), the picture was the screen client's
   own dark backdrop, not the desktop, whose bare root is white by design; it now shows the panel's surface until the

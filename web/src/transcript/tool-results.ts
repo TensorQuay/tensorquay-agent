@@ -48,12 +48,21 @@ export function fileChange(
 /** The actual returned line range, falling back to explicit requested bounds while pending. */
 export function readRange(
   tool: ToolView,
-): { first: string; last: string } | null {
-  const lines = Array.from((tool.result ?? "").matchAll(/^\s*(\d+)\t/gm));
-  const first = lines[0]?.[1] ?? positiveLine(tool, "start_line");
-  const last = lines.at(-1)?.[1] ?? positiveLine(tool, "end_line");
+): { first: string; last: string; pages: boolean } | null {
+  const result = tool.result ?? "";
+  // A PDF's result starts "[PDF, N pages]" and marks each page "--- page N ---" (read_file's pdf.rs); its numbered
+  // arguments are pages. The result says which it is; a read still running goes by the file's name (WEB-U-478).
+  const path = argument(tool, "path");
+  const pages = tool.result
+    ? result.startsWith("[PDF, ")
+    : typeof path === "string" && /\.pdf$/i.test(path);
+  const marks = Array.from(
+    result.matchAll(pages ? /^--- page (\d+) ---$/gm : /^\s*(\d+)\t/gm),
+  );
+  const first = marks[0]?.[1] ?? positiveLine(tool, "start_line");
+  const last = marks.at(-1)?.[1] ?? positiveLine(tool, "end_line");
   if (first === null || last === null) return null;
-  return { first: String(first), last: String(last) };
+  return { first: String(first), last: String(last), pages };
 }
 
 /** Counts rows or explicit match counts, and whether the search stopped early. */

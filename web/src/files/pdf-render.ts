@@ -54,14 +54,21 @@ export async function renderPdf(
     const ratio = window.devicePixelRatio || 1;
     for (let number = 1; number <= shown && !signal.aborted; number++) {
       const page = await document.getPage(number);
-      const scale = width / page.getViewport({ scale: 1 }).width;
-      const viewport = page.getViewport({ scale: scale * ratio });
       // The page: a group named "Page N" holding its picture, hidden from assistive technology, and its text over it.
       const frame = into.ownerDocument.createElement("div");
       frame.className = "file-pdf-page";
       frame.setAttribute("role", "group");
       frame.setAttribute("aria-label", label(number));
-      frame.style.width = `${Math.floor(viewport.width / ratio)}px`;
+      into.append(frame);
+      // The box is `width` wide with its border; the picture and its text fit inside the border (WEB-U-480).
+      const edges = getComputedStyle(frame);
+      const picture =
+        width -
+        (parseFloat(edges.borderLeftWidth) || 0) -
+        (parseFloat(edges.borderRightWidth) || 0);
+      const scale = picture / page.getViewport({ scale: 1 }).width;
+      const viewport = page.getViewport({ scale: scale * ratio });
+      frame.style.width = `${Math.floor(width)}px`;
       // What pdf.js's text layer sizes itself and its text by: the page's CSS scale, rounded to whole pixels.
       frame.style.setProperty("--total-scale-factor", String(scale));
       frame.style.setProperty("--scale-round-x", "1px");
@@ -74,7 +81,6 @@ export async function renderPdf(
       const text = into.ownerDocument.createElement("div");
       text.className = "textLayer";
       frame.append(canvas, text);
-      into.append(frame);
       await page.render({ canvas, viewport }).promise;
       // Its text as plain text over the picture, at the CSS scale (pdf.js applies the screen's density itself).
       if (!signal.aborted)

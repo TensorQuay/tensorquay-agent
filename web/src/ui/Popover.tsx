@@ -64,10 +64,19 @@ export function Popover({
           box.right - (parseFloat(style.paddingRight) || 0),
         );
         // As wide as the room from its trigger's start (or to its end) to the panel's far edge, so it stays under it.
+        // A room narrower than the menu's least width (a ⋯ near the panel's start, its menu aligned to the ⋯'s end):
+        // the panel's whole content instead, moved along into it, still under its trigger (WEB-U-479).
         const room = start
           ? high - Math.max(low, button.left)
           : Math.min(high, button.right) - low;
-        panel.style.maxWidth = `${Math.max(room, 0)}px`;
+        const least = Math.max(
+          0,
+          ...Array.from(
+            panel.children,
+            (child) => parseFloat(getComputedStyle(child).minWidth) || 0,
+          ),
+        );
+        panel.style.maxWidth = `${Math.max(room < least ? high - low : room, 0)}px`;
       }
       const width = panel.offsetWidth;
       const left = start ? button.left : button.right - width;
