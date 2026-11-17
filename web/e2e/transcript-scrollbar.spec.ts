@@ -89,4 +89,52 @@ for (const [width, height] of [
         .poll(async () => (await bars(page)).overlay, { timeout: 3000 })
         .toBe(0);
       expect(await places()).toEqual(whileShown);
+      if (width === 1280) {
+        // The bar at the main area's right edge, not the column's; the text's column well inside it.
+        await region.hover();
+        await page.mouse.wheel(0, -200);
+        await expect.poll(async () => (await bars(page)).overlay).toBe(1);
+        const edges = await page.evaluate(() => {
+          const right = (selector: string) =>
+            document.querySelector(selector)?.getBoundingClientRect().right ??
+            NaN;
+          return {
+            bar: right(".overlay-scrollbar"),
+            area: right(".conversation-page"),
+            text: right(".transcript-items"),
+          };
+        });
+        expect(Math.abs(edges.bar - edges.area)).toBeLessThanOrEqual(1);
+        expect(edges.area - edges.text).toBeGreaterThan(100);
+        // A wheel over the left margin, outside the text's column, scrolls the transcript.
+        const before = await region.evaluate((element) => element.scrollTop);
+        const text = (await page.locator(".transcript-items").boundingBox())!;
+        await page.mouse.move(text.x - 60, text.y + 200);
+        await page.mouse.wheel(0, -300);
+        await expect
+          .poll(() => region.evaluate((element) => element.scrollTop))
+          .toBeLessThan(before);
+        // With the Files panel open, the bar sits at the panel's edge.
+        await page
+          .getByRole("region", { name: "Task header" })
+          .getByRole("button", { name: "Files", exact: true })
+          .click();
+        const panel = page.getByRole("complementary", { name: "Files" });
+        await expect(panel).toBeVisible();
+        await region.hover();
+        await page.mouse.wheel(0, -100);
+        await expect.poll(async () => (await bars(page)).overlay).toBe(1);
+        const beside = await page.evaluate(() => ({
+          bar:
+            document
+              .querySelector(".overlay-scrollbar")
+              ?.getBoundingClientRect().right ?? NaN,
+          panel:
+            document.querySelector("aside.files-panel")?.getBoundingClientRect()
+              .left ?? NaN,
+        }));
+        expect(beside.bar).toBeLessThanOrEqual(beside.panel + 1);
+        expect(beside.panel - beside.bar).toBeLessThan(40);
+        await capture(page, `${width}-${colorScheme}-files-open`);
+      }
     });

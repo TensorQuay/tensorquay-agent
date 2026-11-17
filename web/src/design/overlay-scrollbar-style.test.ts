@@ -40,6 +40,15 @@ describe("WEB-U-485 the overlay scrollbar's style", () => {
     );
   });
 
+  it("scrolls the whole main area, its text a centred column inside it", () => {
+    expect(css).toMatch(
+      /\.conversation-page > \.transcript-scroll\s*\{[^}]*max-width:\s*none/,
+    );
+    expect(css).toMatch(
+      /\.transcript-column\s*\{[^}]*max-width:\s*calc\(var\(--transcript-width\) - 2 \* var\(--space-1\)\)[^}]*margin-inline:\s*auto/,
+    );
+  });
+
   it("takes no width and fades in and out", () => {
     const bar = /\.overlay-scrollbar\s*\{([^}]*)\}/.exec(css)?.[1] ?? "";
     expect(bar).toMatch(/position:\s*absolute/);
