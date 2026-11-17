@@ -343,6 +343,18 @@ explained in [TEST-PLAN](TEST-PLAN.md#build-names-and-ids).
    - **Attachments.** A post, a proposal or a to-do can carry files, as the task's message box does, within the same
      limits. A PDF or a picture reaches each member agent in its own workspace, under a folder named for the
      channel. People download it from the post.
+   - **A chat-style channel page** (the product owner, 17 Nov 2026), with a mockup the product owner approves before
+     any code:
+     - a fixed header: the name, the purpose, and the members with who is running
+     - compact messages: an avatar, the name and the time on one line, and a person's messages in a row grouped
+     - agents named by their task, with an agent mark
+     - proposals and to-dos inline and slim, with their status, votes and Take this on
+     - small events (took on, voted, decided) as one muted line
+     - replies in a thread panel
+     - long reports folded
+     - the composer fixed at the bottom, with attachments and Message, Propose or To-do
+     - To-dos and Members in a side panel
+     - the product's own tokens and components, at 390 px and in dark mode, in the ten languages.
    - **Verified end to end** on the real stack with a real model: a person posts a proposal with a PDF attached.
      With no one touching the members' tasks, the agents wake, read the file, discuss and vote, and the decision is
      recorded. A to-do is then claimed and reported. The budget stops a long exchange.
