@@ -64,8 +64,14 @@ database or service of their own), which is chosen by its own licence.
    Adding an image to the list is a reviewed change.
 9. **An advisory ignore in `deny.toml`** (accepted 17 Oct 2026). G-05 (`cargo deny`) fails on any RustSec advisory.
    An ID goes in `[advisories] ignore` only by an amendment here, naming the IDs, the evidence that our code can't
-   reach the flaw, the gate that keeps that true, and when the ignore goes. **Today there is none.** The one there was,
-   and why it went:
+   reach the flaw, the gate that keeps that true, and when the ignore goes. **Today there is one** (below); the one
+   before it, and why it went, follows.
+   - **RUSTSEC-2026-0543, chrono is unmaintained (the Product Owner's decision, 17 Nov 2026).** An informational
+     advisory: no flaw is known and no release is patched; it names jiff and time as alternatives. No crate of ours
+     depends on chrono: oxidize-pdf (PDF dates) and rmcp (MCP timestamps) do, both without an option to leave it
+     out. The evidence and the gate: G-05-chrono (`tools/check-chrono-users.sh`) fails if chrono's direct users are anything
+     but those two, and G-05 still fails on any other advisory against chrono, which has its own ID. The ignore
+     goes when both have dropped chrono; rmcp's own issue 1469 asks for that, and we raise it with oxidize-pdf.
    - **What it was:** RUSTSEC-2026-0367, RUSTSEC-2026-0368 and RUSTSEC-2026-0369, in zip 8.6.0 and fixed in zip
      9.0.0, all in zip's extraction API (`ZipArchive::extract` and its variants, `ZipStreamReader::extract`). Ignored
      on 17 Oct 2026 because calamine 0.36.1, then the newest release, required `zip ^8.6`, and neither our code nor

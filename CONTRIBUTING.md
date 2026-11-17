@@ -154,9 +154,13 @@ CI on every pull request that changes a catalogue.
 - **People install releases, not `main`.** A release is an annotated tag `vMAJOR.MINOR.PATCH` on a commit of `main`,
   with a page on [GitHub's Releases](https://github.com/TensorQuay/tensorquay-agent/releases) carrying its notes from
   the changelog. The README and the install guide start from the newest one.
-- **Version numbers.** MAJOR for a feature release (a new capability, a database migration or a protocol change);
-  MINOR for an improvement release with none of those; PATCH for fixes only. Before 17.4 the changelog used two
-  numbers (17.3 is v17.3.0).
+- **Version numbers** follow semantic versioning from 18.0. MAJOR is for a release that an existing installation
+  can't take in place: the operator has to act, or something stops working. Examples: a `gateway.toml` key removed
+  or renamed; a compose file, port or environment variable changed; an API or wire-protocol change that older
+  clients or runtimes can't follow; runtime images that must be rebuilt. The upgrade notes say what to do. MINOR is
+  for new capabilities and improvements that upgrade in place, such as migrations the gateway applies at its start,
+  new API fields or a new page. PATCH is for fixes only. Before 18.0, MAJOR counted every new capability, migration
+  or protocol change. Before 17.4, the changelog used two numbers (17.3 is v17.3.0).
 - **Cutting a release** (maintainers): the checks of [DEV-PLAN §7](docs/DEV-PLAN.md#7-release-process) for its kind on
   the candidate commit, then a pull request that turns "Unreleased" into the version and date (and moves the version
   in the README's and the install guide's clone line), then the tag on its merge commit and the release page.

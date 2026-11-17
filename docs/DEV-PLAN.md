@@ -254,7 +254,10 @@ fork's desktop each a sandbox of their own). What remains runs on the stack once
 security tests that need a Desktop sandbox (SEC-057, SEC-058, the Desktop secret search, the live sign-in), the page
 pass on the review stack (which gets the Desktop with one Desktop at once) and the lead's live check.
 
-### Phase 12 (later outline): swarms
+### Phase 12 (dropped): swarms
+**Dropped (the product owner, 17 Nov 2026):** agent teams with rounds carry a goal (§4b), and ADR-0038 is withdrawn.
+The outline below stays for its history.
+
 One goal across a person's own agent teams, designed in ADR-0038 (PRD §12 item 21): agent teams coordinated one level
 up by a coordinator task, through the same addressed delivery (ARCHITECTURE §16.4). Scope, set on 2 Oct 2026, with a Pause goal button and the word "Coordinator": one person's own teams only; each part
 of a goal becomes a new lead task from an agent profile the person picks (their own or one an administrator shared);
@@ -289,18 +292,95 @@ explained in [TEST-PLAN](TEST-PLAN.md#build-names-and-ids).
 | 9 Release hardening | yes | reached (11 Oct 2026), with the same waiver |
 | 10 Agent teams (v1.1) | yes, in 17.0; experimental, off by default | not reached yet: `gate-10.md` is a draft; a soak with agent teams in its mix is being prepared. The evaluation of one agent against a team on the same budget showed no difference either way (indicative, `agent-teams.md`) |
 | 11 Computer use | yes, in 17.0 | not reached yet: `gate-11.md` is a draft; a soak with desktop tasks in its mix is being prepared; the grounding evaluation is in `computer-grounding.md` |
-| 12 Swarms | no | a later phase; on hold (product owner, 13 Oct 2026) |
+| 12 Swarms | no | dropped (product owner, 17 Nov 2026); agent teams with rounds carry a goal |
 
-## 4b. What comes next (12 Nov 2026)
+## 4b. What comes next (17 Nov 2026)
 1. **Gates 10 and 11** (the product owner's request of 12 Nov 2026): agent teams and desktop tasks join the soak's
    mix; the gates' open points are closed; `gate-10.md`, `gate-11.md` and `agent-teams.md` are brought to the
    current release's evidence, with one 24-hour soak that has both in its mix; then the technical lead's verdicts.
    Agent teams stay experimental and off by default (PRD §12 item 32).
-2. **Release 18.0:** the PDF reader and page previews that load from a fixed list of CDNs and the page's own files
-   (PRD §12 items 30 and 31); "Recently refused" with "Allow this site" (ADR-0035 point 3); keeping a desktop
-   sign-in for a whole task (ADR-0039 §6). Verified end to end before the release.
-3. **Fix releases** as findings come in (§7).
-4. **Later:** Phase 12, swarms, when the product owner calls for it.
+2. **Release 18.0:** the PDF reader and pictures in the workspace (PRD §12 items 30 and 31); a web page previewed
+   with its folder, as a site, loading from the internet what the installation's network setting allows; "Recently
+   refused" with "Allow this site" (ADR-0035 point 3); keeping a desktop sign-in for a whole task (ADR-0039 §6);
+   prebuilt images for amd64 and arm64. Verified end to end before the release.
+3. **Release 18.1** (the product owner, 17 Nov 2026), a feature release numbered MINOR under the 17 Nov amendment
+   of §7, and verified with every step of §7. It has six parts.
+   - **The administrator's Sandboxes page and the leak verdict** (the product owner's request of 7 Nov 2026).
+     Settings › Operations › Sandboxes lists every running sandbox across all people. Each row shows its owner's
+     email, its environment, its state and age, and its CPU and memory against its size. Each row has a Stop,
+     audited. Stop is never allowed on a sandbox that is working; its owner is told, and the task starts again on its
+     next message. The page shows no task title, link or content. Status gains a leak verdict: how many sandboxes
+     are running, the oldest one, and whether a sweep left a container, network or volume behind. The page lists
+     what was left behind, and the same numbers are metrics. Its design note and test rows come with the work.
+   - **Built web apps preview as they are.**
+     - An app the agent builds to preview uses relative paths and hash routes. This comes from the runtime's guidance.
+     - The preview corrects root paths in the HTML and CSS it serves.
+     - A page the preview still can't load says why, not a blank frame.
+     - An app that needs a server of its own is seen in a Desktop task: the agent runs it in its sandbox and opens it
+       in the desktop's browser.
+   - **Reference hardware** (the product owner's decision of 15 Nov 2026) replaces PRD §12 item 5: this RTX 5090
+     workstation for local models, and a stated, measured CPU-only minimum in the install guide.
+   - **A one-command install** (the product owner, 17 Nov 2026). A script asks for the few settings (the address,
+     a model server, the first administrator), then creates the installation's files and secrets, pulls the
+     release's images, starts the installation, and checks that it is ready. The install guide's manual steps stay,
+     for those who want them.
+   - **Rounds for agent teams** (the product owner, 17 Nov 2026). This replaces "a lead leads one team" (ADR-0034, 2
+     Oct 2026).
+     - A follow-up to a lead task whose team has stopped may start another round, with a fresh budget and time. The
+       finished helpers can come back, each continuing with its own conversation and files, and new ones can join.
+     - A lead that may not start a round is told so in plain words, so it never tries a helper it can't start.
+     - Verified end to end on the real stack with a real model: a first round; a follow-up that brings back two
+       helpers with their context and adds one new helper; the budget and the time per round; a helper written to
+       directly between rounds; and no "Couldn't start a helper" line anywhere in the run.
+     - **Teams proven** (the product owner, 17 Nov 2026): the evaluation of one agent against a team on the same
+       budget is run again on rounds, on real goals, before teams grow further.
+   - **Edits a local model recovers from** (the product owner, 17 Nov 2026). 18.0's real-model run on Qwen3.8 27B
+     completed 17 of 20 tasks one at a time, under E2E-WAVE-001's 90 %. Every miss was a refused `edit_file` that
+     the model didn't recover from. The changes:
+     - a refusal names the nearest matching lines with their numbers and exact text
+     - an ambiguous match lists its lines
+     - differences that change nothing, such as trailing spaces, are forgiven when exactly one place matches
+     - an edit that changes nothing is answered as no change
+     - a stale or unread file is named with the lines to read first.
+     Verified end to end: the task set on Qwen3.8 at 90 % or more over 60 attempts (each task three times).
+4. **Release 18.2: channels that work on their own** (the product owner, 17 Nov 2026). This amends ADR-0014, under
+   which an agent reads a channel only while its task already runs, and a channel carries text only.
+   - **Wake the agents.** A proposal, a to-do, or a post that names or replies to an agent starts that member's task,
+     as team messages wake a team (ADR-0034). Each wake is counted against the channel's budget, and an agent woken
+     by another agent's post is bounded so that two agents can't keep each other going. The "agents aren't running"
+     line stays for an agent whose task can't start.
+   - **Real time, from events, never polling between runs.** A channel event (a proposal opened, a to-do posted, a
+     mention, a reply, a decision) queues a wake for each member it concerns. Several events within a few seconds
+     make one wake. The woken run starts with what's new: for example, the proposal and how long its vote stays open.
+     While the run lasts, the agent follows the channel by long poll (`channel_wait`). Between runs, a member holds
+     no sandbox and costs nothing. The page shows each participant live: woken, reading, voted or posted, idle.
+   - **Attachments.** A post, a proposal or a to-do can carry files, as the task's message box does, within the same
+     limits. A PDF or a picture reaches each member agent in its own workspace, under a folder named for the
+     channel. People download it from the post.
+   - **A chat-style channel page** (the product owner, 17 Nov 2026), with a mockup the product owner approves before
+     any code:
+     - a fixed header: the name, the purpose, and the members with who is running
+     - compact messages: an avatar, the name and the time on one line, and a person's messages in a row grouped
+     - agents named by their task, with an agent mark
+     - proposals and to-dos inline and slim, with their status, votes and Take this on
+     - small events (took on, voted, decided) as one muted line
+     - replies in a thread panel
+     - long reports folded
+     - the composer fixed at the bottom, with attachments and Message, Propose or To-do
+     - To-dos and Members in a side panel
+     - the product's own tokens and components, at 390 px and in dark mode, in the ten languages.
+   - **Verified end to end** on the real stack with a real model: a person posts a proposal with a PDF attached.
+     With no one touching the members' tasks, the agents wake, read the file, discuss and vote, and the decision is
+     recorded. A to-do is then claimed and reported. The budget stops a long exchange.
+5. **Fix releases** as findings come in (§7).
+6. **Later, when people ask for them:**
+   - Previews on an origin of their own, an optional installation setting (a wildcard domain or a port range), so any
+     build and any router works unchanged.
+   - A dev server's live preview relayed out of the sandbox over its link. The sandbox never listens for
+     connections. This needs a design record and a security review first.
+7. **Swarms are dropped** (the product owner, 17 Nov 2026: "make it simpler and efficient first"). A goal is an
+   agent team's work, with rounds (18.1). The evaluation of one agent against a team on the same budget is run again
+   once rounds exist.
 
 ## 5. Parallel tracks
 Engineering runs in three streams that own disjoint parts of the tree, so they progress in parallel and meet at each
@@ -394,6 +474,24 @@ by digest without signing in, runs the release image tests on them (`tools/relea
 C1 to C6, REL-I-001, and REL-I-003 to REL-I-005), and runs the first-hour check on them; a failure holds the release
 page and is fixed in a fix release.
 A user installs either way (deploy/README.md, step 0); the test model is never published.
+
+**Amended 17 Nov 2026 (PO): from 18.0, version numbers follow standard semantic versioning.** MAJOR goes up only
+for a release that an existing installation can't take in place, and its upgrade notes say what to do. That means
+any of these:
+- a `gateway.toml` key removed or renamed
+- a compose file, port or environment variable changed
+- an API or wire-protocol change that older clients or runtimes can't follow
+- runtime images that must be rebuilt or pulled.
+
+MINOR goes up for new capabilities and improvements that upgrade in place: migrations the gateway applies at its
+start, new API fields, new pages. PATCH is for fixes only. This replaces the 9 Nov mapping, where MAJOR counted every
+new capability, migration or protocol change.
+
+The release kinds above still decide the verification, whatever the number. A release with a new capability, a
+migration or a protocol change keeps every step, 1 to 5.
+
+18.0.0 stays a major release: its runtime images carry protocol revision 15 and must be rebuilt or pulled. The admin
+Sandboxes page planned next is 18.1.0.
 
 **Unchanged from v0.2:**
 - Semantic versions; `main` always releasable behind gates; release branches only for fixes.

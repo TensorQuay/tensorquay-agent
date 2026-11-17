@@ -116,6 +116,9 @@ run_gate G-05 cargo deny check
 # G-05-zip (SEC-063): crates/ calls no zip extraction API (ADR-0017 point 9), and no zip advisory ignore outlives its need.
 run_gate G-05-zip-unit python3 -m unittest tools/test_check_zip_reads.py
 run_gate G-05-zip python3 tools/check-zip-reads.py
+# G-05-chrono (ADR-0017 point 9, 17 Nov 2026): chrono's unmaintained advisory is ignored only while no crate of ours
+# depends on it; its users stay oxidize-pdf and rmcp.
+run_gate G-05-chrono tools/check-chrono-users.sh
 # G-05-images (SEC-030, ADR-0017): third-party images in the compose files are on the approved list, pinned, licensed.
 run_gate G-05-images-unit python3 -m unittest tools/test_check_images.py
 run_gate G-05-images python3 tools/check-images.py

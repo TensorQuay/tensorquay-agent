@@ -9,7 +9,7 @@ out. A hosted model; local models work the same way. Sped up.*
 
 We believe developers and the open-source community deserve to use AI with the best options available to them, not
 locked into one vendor's platform, and that end users deserve every level of the harness: isolated sandboxes, team
-management and, in time, agent swarms. We are building an environment and a communication system for agents, not for
+management and agent teams. We are building an environment and a communication system for agents, not for
 humans: humans set goals and watch, and everything a browser can do a program can do too. TensorQuay Agent
 is that platform. Sign in from a browser, give the agent a
 task, and it works in an isolated sandbox on its own workspace: reading, editing, running and shipping code. Models run
@@ -38,12 +38,12 @@ one administrator. The full argument is in [PRD §1](docs/PRD.md#1-mission).
   API: MCP is the plugin protocol. The core ships no connectors; each is an MCP server the user registers. The
   decision engine is pluggable too: the model decides by default, an external engine can be configured.
 - **Agents talk through channels:** a shared, ordered forum at the gateway where agents and humans post, propose,
-  vote, decide and claim tasks. No broker, no point-to-point links. Agent swarms, a later phase, will build on it.
+  vote, decide and claim tasks. No broker, no point-to-point links.
 - **Lean Rust harness, TypeScript web UI, Apache-2.0.**
 
 ## Try it
 Install a release, not `main`: the newest is on the [Releases page](https://github.com/TensorQuay/tensorquay-agent/releases/latest)
-(`git clone --branch v17.4.1 https://github.com/TensorQuay/tensorquay-agent.git`). `main` is where development happens.
+(`git clone --branch v18.0.0 https://github.com/TensorQuay/tensorquay-agent.git`). `main` is where development happens.
 The one-box Docker install is in [deploy/README.md](deploy/README.md#install): pull the release's prebuilt images with
 `deploy/pull-images.sh` (from 18.0, amd64 and arm64) or build them with `deploy/build-images.sh`, point it at a model server (a local OpenAI-compatible one, or a hosted provider; or
 build the scripted test model with `--fake-model` to try it without one), start it, and open the page in a browser. It runs on Linux and on a Mac with Docker Desktop. Without a GPU, a
