@@ -160,7 +160,7 @@ function InDialog() {
       <dialog
         open
         data-testid="dialog"
-        style={{ paddingLeft: "24px", paddingRight: "24px" }}
+        style={{ paddingLeft: GUTTER, paddingRight: GUTTER }}
       >
         <button ref={anchor} type="button">
           More
@@ -202,18 +202,18 @@ describe("WEB-U-483 a menu in a dialog opened from its panel", () => {
   }
 
   it("opens under its trigger inside the dialog's content", () => {
-    // 1280: the dialog's content is 64 to 1216; the room to the ⋯'s end, 436 - 64 = 372 px, holds the menu.
+    // 1280: the dialog's content is 56 to 1224; the room to the ⋯'s end, 436 - 56 = 380 px, holds the menu.
     const surface = place(rect(40, 16, 1200, 768), rect(400, 600, 36, 36), 300);
-    expect(surface.style.maxWidth).toBe("372px");
+    expect(surface.style.maxWidth).toBe("380px");
     // Aligned to the ⋯'s end: 436 - 300.
     expect(surface.style.left).toBe("136px");
   });
 
   it("stays inside a phone's dialog, past whose edge the window would let it run", () => {
-    // 390: the content is 44 to 346; 203 - 44 = 159 px is under the menu's least width, so it takes the 302 px.
+    // 390: the content is 36 to 354; 203 - 36 = 167 px is under the menu's least width, so it takes the 318 px.
     const surface = place(rect(20, 16, 350, 812), rect(167, 385, 36, 36), 276);
-    expect(surface.style.maxWidth).toBe("302px");
-    expect(surface.style.left).toBe("44px");
+    expect(surface.style.maxWidth).toBe("318px");
+    expect(surface.style.left).toBe("36px");
   });
 });
 
