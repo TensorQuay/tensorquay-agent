@@ -71,6 +71,7 @@ for (const width of [1280, 1440, 1920] as const)
       ).toBeLessThanOrEqual(2);
       expect(split.chat!.width).toBeGreaterThanOrEqual(360);
       expect(await axeViolations(page)).toEqual([]);
+      await page.waitForTimeout(600);
       await capture(page, `pdf-${width}-${colorScheme}`);
 
       // The divider: a drag to the left gives the file more; the keys move it 2 %.
@@ -109,6 +110,8 @@ for (const width of [1280, 1440, 1920] as const)
       ).toBeLessThanOrEqual(1);
       expect(full.border).toBe(0);
       expect(await axeViolations(page)).toEqual([]);
+      // The pages are drawn again at the new width once it has held (300 ms).
+      await page.waitForTimeout(600);
       await capture(page, `full-${width}-${colorScheme}`);
       await page.keyboard.press("Escape");
       await expect(panel).toHaveAttribute("data-split", "split");

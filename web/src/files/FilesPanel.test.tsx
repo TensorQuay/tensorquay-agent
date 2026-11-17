@@ -329,18 +329,17 @@ describe("WEB-U-022 files panel focus", () => {
 /** The task layout's width the split measures, as the page gives it. */
 function layoutWidth(width: number) {
   vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
-    () =>
-      ({
-        left: 0,
-        top: 0,
-        right: width,
-        bottom: 800,
-        width,
-        height: 800,
-        x: 0,
-        y: 0,
-        toJSON: () => ({}),
-      }) as DOMRect,
+    () => ({
+      left: 0,
+      top: 0,
+      right: width,
+      bottom: 800,
+      width,
+      height: 800,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    }),
   );
 }
 
