@@ -16,6 +16,9 @@ const LINE_BYTES: usize = 400;
 const NEAR_PERCENT: usize = 40;
 /// Edit-distance computations at most per search: the file is under the read cap, but its lines may be many.
 const DISTANCE_BUDGET: usize = 20_000;
+/// The edit-distance cells one search computes at most, whatever the lines' lengths: a line of 400 bytes costs about
+/// 400 times its band, so the comparisons' count alone doesn't bound the time (about 0.15 s in a release build).
+const DISTANCE_CELLS: usize = 200_000_000;
 /// The region a second identical refusal shows: three lines before the first named, at most this many.
 const REGION_LINES: usize = 40;
 
@@ -175,6 +178,7 @@ pub(super) fn nearest(text: &str, old: &str, within: Option<usize>) -> Vec<usize
     let mut limit = within.map_or(usize::MAX, |percent| anchor.len() * percent / 100);
     let mut best: Vec<usize> = Vec::new();
     let mut budget = DISTANCE_BUDGET;
+    let mut cells = DISTANCE_CELLS;
     for (index, line) in text.split('\n').enumerate() {
         let line = line.trim();
         if line.is_empty() || line.len() > LINE_BYTES {
@@ -188,7 +192,10 @@ pub(super) fn nearest(text: &str, old: &str, within: Option<usize>) -> Vec<usize
             break;
         }
         budget -= 1;
-        let Some(distance) = distance(&anchor, &line, limit) else {
+        let Some(distance) = distance(&anchor, &line, limit, &mut cells) else {
+            if cells == 0 {
+                break;
+            }
             continue;
         };
         if distance < limit || best.is_empty() {
@@ -221,8 +228,9 @@ fn bag_distance(left: &[char], right: &[char]) -> usize {
     more.max(fewer)
 }
 
-/// The Levenshtein distance between `left` and `right` when it is at most `limit`, in a band of that width.
-fn distance(left: &[char], right: &[char], limit: usize) -> Option<usize> {
+/// The Levenshtein distance between `left` and `right` when it is at most `limit`, in a band of that width; each row
+/// spends its band's cells from `cells`, and a search out of cells gets `None` with `cells` at 0.
+fn distance(left: &[char], right: &[char], limit: usize, cells: &mut usize) -> Option<usize> {
     if left.len().abs_diff(right.len()) > limit {
         return None;
     }
@@ -233,9 +241,16 @@ fn distance(left: &[char], right: &[char], limit: usize) -> Option<usize> {
         let row = row + 1;
         let from = row.saturating_sub(limit).max(1);
         let to = (row.saturating_add(limit)).min(width);
-        current.fill(usize::MAX);
+        let Some(left_over) = cells.checked_sub(to + 1 - from) else {
+            *cells = 0;
+            return None;
+        };
+        *cells = left_over;
+        // Only the band is computed: the cell before it reads as out of reach, and so does the one after it, which the
+        // next row reads.
         current[0] = row;
-        let mut smallest = current[0];
+        current[from - 1] = if from > 1 { usize::MAX } else { row };
+        let mut smallest = row;
         for column in from..=to {
             let substitution =
                 previous[column - 1].saturating_add(usize::from(character != right[column - 1]));
@@ -243,6 +258,9 @@ fn distance(left: &[char], right: &[char], limit: usize) -> Option<usize> {
             let insertion = current[column - 1].saturating_add(1);
             current[column] = substitution.min(deletion).min(insertion);
             smallest = smallest.min(current[column]);
+        }
+        if to < width {
+            current[to + 1] = usize::MAX;
         }
         if smallest > limit {
             return None;
@@ -262,11 +280,12 @@ mod tests {
     #[test]
     fn distances_within_a_band() {
         let chars = |text: &str| text.chars().collect::<Vec<_>>();
-        assert_eq!(distance(&chars("kitten"), &chars("sitting"), 3), Some(3));
-        assert_eq!(distance(&chars("kitten"), &chars("sitting"), 2), None);
-        assert_eq!(distance(&chars("'./a'"), &chars("\"./a\""), 2), Some(2));
-        assert_eq!(distance(&chars(""), &chars("ab"), 2), Some(2));
-        assert_eq!(distance(&chars("界界"), &chars("界"), 1), Some(1));
+        let banded = unbounded;
+        assert_eq!(banded(&chars("kitten"), &chars("sitting"), 3), Some(3));
+        assert_eq!(banded(&chars("kitten"), &chars("sitting"), 2), None);
+        assert_eq!(banded(&chars("'./a'"), &chars("\"./a\""), 2), Some(2));
+        assert_eq!(banded(&chars(""), &chars("ab"), 2), Some(2));
+        assert_eq!(banded(&chars("界界"), &chars("界"), 1), Some(1));
         assert_eq!(bag_distance(&chars("abc"), &chars("cba")), 0);
         assert_eq!(bag_distance(&chars("abc"), &chars("abd")), 1);
     }
@@ -362,5 +381,68 @@ mod tests {
         let took = started.elapsed();
         assert_eq!(found.len(), NEAREST);
         assert!(took < std::time::Duration::from_secs(1), "{took:?}");
+    }
+
+    /// The banded distance with no cell budget.
+    fn unbounded(left: &[char], right: &[char], limit: usize) -> Option<usize> {
+        let mut cells = usize::MAX;
+        distance(left, right, limit, &mut cells)
+    }
+
+    /// The plain full-matrix distance, to check the band against.
+    fn plain(left: &[char], right: &[char]) -> usize {
+        let mut previous: Vec<usize> = (0..=right.len()).collect();
+        for (row, &character) in left.iter().enumerate() {
+            let mut current = vec![row + 1; right.len() + 1];
+            for column in 1..=right.len() {
+                current[column] = (previous[column - 1]
+                    + usize::from(character != right[column - 1]))
+                .min(previous[column] + 1)
+                .min(current[column - 1] + 1);
+            }
+            previous = current;
+        }
+        previous[right.len()]
+    }
+
+    #[test]
+    fn the_band_agrees_with_the_plain_distance() {
+        let words = [
+            "", "a", "ab", "ba", "abc", "acb", "kitten", "sitting", "aaab", "baaa", "abab", "bbaa",
+            "界a界",
+        ];
+        let pairs = words
+            .iter()
+            .flat_map(|left| words.iter().map(move |right| (*left, *right)));
+        for (left, right) in pairs {
+            let (left, right): (Vec<char>, Vec<char>) =
+                (left.chars().collect(), right.chars().collect());
+            let exact = plain(&left, &right);
+            for limit in 0..=8 {
+                assert_eq!(
+                    unbounded(&left, &right, limit),
+                    (exact <= limit).then_some(exact),
+                    "{left:?} {right:?} {limit}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn a_comparison_spends_its_band_and_stops_when_the_cells_run_out() {
+        let chars = |text: &str| text.chars().collect::<Vec<_>>();
+        // Six rows, each a band of at most three cells of six: 2, 3, 3, 3, 3, 2.
+        let mut cells = 100;
+        assert_eq!(
+            distance(&chars("kitten"), &chars("kitten"), 1, &mut cells),
+            Some(0)
+        );
+        assert_eq!(cells, 100 - 16);
+        let mut cells = 5;
+        assert_eq!(
+            distance(&chars("kitten"), &chars("kitten"), 1, &mut cells),
+            None
+        );
+        assert_eq!(cells, 0);
     }
 }
