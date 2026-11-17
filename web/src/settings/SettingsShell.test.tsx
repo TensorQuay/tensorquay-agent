@@ -123,6 +123,7 @@ describe("WEB-U-023/075 settings", () => {
         "Operations",
         [
           ["Usage", "/settings/usage"],
+          ["Sandboxes", "/settings/sandboxes"],
           ["Status", "/settings/status"],
         ],
       ],

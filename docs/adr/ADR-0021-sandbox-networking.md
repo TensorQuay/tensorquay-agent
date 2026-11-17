@@ -27,6 +27,15 @@ development-only mode with the gateway on the host uses a non-internal network, 
 Deployments run the gateway as a container on the sandbox network. The sandbox backend creates internal networks only,
 except in the explicit development mode. SEC-016 and SEC-018 test the rules.
 
+## Amendment: the sweeps keep a verdict (17 Nov 2026)
+
+The periodic removal of orphaned sandbox networks (and of stray containers, GW-I-191) reports what it found and what
+it could not remove, by name. The gateway keeps the last two passes and serves a verdict: something that failed to go
+in two consecutive passes, or was found again after a pass removed it, is left behind, named with the engine's error
+code and the command that removes it by hand (the Sandboxes page design note, §3.6). The counts are in the readiness
+detail and the metrics; the names only on the administrator's page. Named workspace volumes would join the same sweep
+in a volume workspace mode; the gateway creates and labels none today, so no volume is counted.
+
 ## Links
 
-- ARCHITECTURE §4.2 and §4.3; ADR-0004; TEST-PLAN SEC-016, SEC-018
+- ARCHITECTURE §4.2 and §4.3; ADR-0004; TEST-PLAN SEC-016, SEC-018; the Sandboxes page design note

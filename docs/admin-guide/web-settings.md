@@ -7,7 +7,7 @@ Open **Settings** from the Account menu. The sections are listed on the left in 
 - **Your account**, for every person: **Account**, **API tokens**, **Keys** and **Agent profiles**;
 - **Administration**, for administrators: **Overview**, **People**, **Models**, **Environments**, **Connectors**,
   **Decision engines**, **Internet access** and **Limits**; the installation's shared keys are on **Keys**, under **Shared**;
-- **Operations**, for administrators: **Usage** and **Status**.
+- **Operations**, for administrators: **Usage**, **Sandboxes** and **Status**.
 
 This chapter covers them all. Labels in **bold** are the words on the page. The pages' old addresses still work and
 lead to the new ones.
@@ -23,6 +23,7 @@ loaded.", and offers to try again. A refused save shows the reason next to the f
 person has chosen.
 
 - [People](#people)
+- [Sandboxes](#sandboxes)
 - [Status](#status)
 - [Models](#models)
 - [Shared keys](#shared-keys)
@@ -65,6 +66,30 @@ whether the account is **Active** or **Disabled**.
 - **Tasks:** opens the list of that person's tasks. Administrators see a task's details (owner, dates, environment,
   model and state), never its content.
 
+## Sandboxes
+<!-- The Sandboxes page design note (docs/design/sandboxes-page.md); its test rows are claimed after v18.0.0. -->
+Sandboxes lists every running sandbox across people: who owns it, its environment, whether it is **Starting**,
+**Working** (a run is going), **Idle** or **Stopping…**, what it uses of what it was given ("0.2 of 2 cores",
+"0.4 of 4 GB"; "Measuring…" for the first ten seconds, "Not available" when the engine gives no figures), when it
+started and when it was last active. An idle row says when it stops ("Stops in about 6 min"); one its owner keeps
+running says **Kept on**. The headline reads "3 of 6 running" (with "· full" when every slot is taken), then how many
+tasks wait for a sandbox, **Desktops** where a Desktop environment exists, and one **In use** line for the whole
+install. The page reads itself again every ten seconds while it is open. It shows nothing of a task but its owner and
+its environment: no title, no message, no file, and no row links to a task.
+
+**Stop now**, on a row's **⋯**, asks once ("Stop ben@example.org's sandbox?") and then stops an idle sandbox: the
+task keeps its files and history, its next message starts a new sandbox, and its owner sees "An administrator stopped
+this task's sandbox. It starts again when you send a message." in the task. A kept-on sandbox can be stopped, and the
+question says so; a Desktop keeping a sign-in loses it, and the question says that too. A working or starting sandbox,
+one a message is waiting for, and a desktop someone has taken over are never stopped: the menu item says why, and the
+gateway refuses the same way ("ben@example.org's sandbox is working now; it can't be stopped until the run ends."). The
+person can always stop their own run. Each stop is recorded in the administration audit with the task's id only.
+
+**Left behind** appears above the table only when a sweep left something unowned behind (see [Status](#status)):
+each container, network or volume by the engine's name, its age and the engine's reason, with the command that removes
+it by hand on the engine host and **Copy** beside it. The gateway keeps trying every five minutes; once the thing is
+gone the section goes with it.
+
 ## Status
 <!-- Tests: WEB-U-033, WEB-E2E-022, WEB-U-265, WEB-U-292, WEB-U-297, GW-I-229. -->
 Status answers one question first: "New tasks can start." or "New tasks can't start: … problems below.", with the
@@ -92,6 +117,14 @@ while it's open, with **Checked at** updated. "No task is working on a step, so 
 step over." is the moment to restart. A screen reader announces the count when it changes, never on each read. The
 section is left out when the count can't be read. If one of those reads fails (say, while the gateway restarts), the
 page keeps the last one and says "The latest read failed, so this shows the one before."; the next read clears it.
+
+A **Sandboxes** section says how many sandboxes run and whether the gateway's sweeps left anything unowned behind:
+"Sandboxes: 3 running, the oldest for 7 h. Nothing left behind." is the quiet case. Every five minutes the gateway
+removes containers and networks of its own that no task accounts for; one it could not remove twice in a row, or found
+again after removing it, is left behind, and the line turns amber: "Left behind after the last sweep: 1 network
+(engine_timeout). The gateway tries again every 5 minutes." with **Open Sandboxes**, where each is named with the
+command that removes it by hand. Volumes are not counted: workspaces are folders on the host. The section is left out
+with an older gateway.
 
 A **Git credentials** section appears only while some Git credentials from an earlier release couldn't become keys.
 "N Git credentials couldn't become keys: their address isn't a web address" means a person saved one for an address

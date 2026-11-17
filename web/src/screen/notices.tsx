@@ -28,6 +28,10 @@ export function screenNoticeWords(
       return t("screen.noticeSignInKept");
     case "screen.sign_in_released":
       return t("screen.noticeSignInReleased");
+    // An administrator stopped the task's sandbox from the Sandboxes page (the design note of 17 Nov 2026): the task
+    // keeps its files, and its next message starts a new one.
+    case "sandbox.stopped":
+      return t("screen.noticeSandboxStopped");
     // It clears the browser only; whether it couldn't or never confirmed, its sign-ins may remain (WEB-U-259).
     case "screen.sign_out_failed":
       return t(
@@ -166,12 +170,10 @@ export function takenOver(notices: readonly ScreenNoticeView[]): boolean {
  */
 export function useScreenLines({
   conversationId,
-  desktop,
   live,
   connection,
 }: {
   conversationId: string;
-  desktop: boolean;
   live: readonly ScreenNoticeView[];
   connection: string;
 }): {
@@ -184,7 +186,8 @@ export function useScreenLines({
   const stored = useQuery({
     queryKey: ["screen-notices", conversationId],
     queryFn: ({ signal }) => api.screenNotices(conversationId, signal),
-    enabled: desktop || live.length > 0,
+    // Every task reads them once, not only a desktop's: an administrator's sandbox.stopped notice (the Sandboxes page
+    // design note of 17 Nov 2026) can be on any task.
     retry: false,
   });
   // Back after a drop: what was said while away is read again.
