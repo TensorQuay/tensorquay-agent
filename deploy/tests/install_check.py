@@ -329,9 +329,13 @@ class Check:
                  "type=bind,source={},target=/install".format(self.install_dir), TOYBOX, "chown", "-R", "0:0",
                  "/install"], **quiet)
         for tag, saved in self.saved.items():
-            if saved and image_id(tag) != saved:
+            moved = image_id(tag)
+            if saved and moved and moved != saved:
                 run(["docker", "tag", saved, tag], **quiet)
-            elif saved is None and image_id(tag):
+                # The check's own build, now untagged: removed unless another tag or a container still holds it
+                # (never forced).
+                run(["docker", "image", "rm", moved], **quiet)
+            elif saved is None and moved:
                 run(["docker", "image", "rm", tag], **quiet)
         restored = {tag: image_id(tag) for tag in SHARED_TAGS}
         run(["rm", "-rf", str(self.scratch)], **quiet)
