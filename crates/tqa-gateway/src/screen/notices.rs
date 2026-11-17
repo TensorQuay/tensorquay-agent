@@ -88,6 +88,7 @@ fn parse_kind(kind: &str) -> Result<ScreenNoticeKind, GatewayError> {
         "screen.sign_out_failed" => Ok(ScreenNoticeKind::SignOutFailed),
         "screen.sign_in_kept" => Ok(ScreenNoticeKind::SignInKept),
         "screen.sign_in_released" => Ok(ScreenNoticeKind::SignInReleased),
+        "sandbox.stopped" => Ok(ScreenNoticeKind::SandboxStopped),
         _ => Err(GatewayError::StoreUnavailable),
     }
 }

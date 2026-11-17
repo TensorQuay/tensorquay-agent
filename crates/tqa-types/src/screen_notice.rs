@@ -27,6 +27,10 @@ pub enum ScreenNoticeKind {
     /// A person turned it off: the profile is emptied at the next run's end, or at once when no run is going.
     #[serde(rename = "screen.sign_in_released")]
     SignInReleased,
+    /// An administrator stopped the task's sandbox from the Sandboxes page (18.1): the task keeps its files and
+    /// history, and its next message starts a new sandbox.
+    #[serde(rename = "sandbox.stopped")]
+    SandboxStopped,
 }
 
 /// Why Sign out everywhere couldn't be confirmed (`screen.sign_out_failed`).

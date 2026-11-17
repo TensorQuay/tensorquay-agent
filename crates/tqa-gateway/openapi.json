@@ -7491,6 +7491,205 @@
         }
       }
     },
+    "/api/v1/admin/sandboxes": {
+      "get": {
+        "operationId": "adminSandboxes",
+        "summary": "The running sandboxes",
+        "description": "Every running sandbox with its owner, environment, state, size and measured use, the install's limits and totals, and what the sweeps left behind (the Sandboxes page). One consistent read of the records; the engine is never called, and the measured use is the sampler's last values (null until a sandbox has two samples). Nothing of a task but its id: no title, message, file, workspace, route or profile, for other people's tasks and the administrator's own alike. Ordered working, starting, stopping, then idle by soonest stop. Administrators only; a session or a personal token.",
+        "security": [
+          {
+            "sessionCookie": []
+          },
+          {
+            "personalToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "after",
+            "in": "query",
+            "required": false,
+            "description": "The conversation_id of the previous page's last row (next_after); a token nothing matches starts over.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The listing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSandboxes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameter (see details)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not an administrator",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable or gateway restarting",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/sandboxes/{conversation_id}/stop": {
+      "post": {
+        "operationId": "adminSandboxStop",
+        "summary": "Stop an idle sandbox",
+        "description": "Asks the retire path to stop the task's sandbox, as an eviction does: the sandbox goes, the task keeps its files and history, its owner reads a notice (sandbox.stopped) and its next message starts a new sandbox. Only an idle sandbox with nothing waiting and no held screen is stopped; a kept-on one is stoppable. Administrators only; a session or a personal token. Idempotency-Key required: a repeat of the key replays the first answer. Audited (area sandboxes, action stop) and counted.",
+        "security": [
+          {
+            "sessionCookie": []
+          },
+          {
+            "personalToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The task whose sandbox to stop."
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "description": "A repeat with the same key answers the first result and retires nothing twice."
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The stop is requested (or already on its way)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSandboxStop"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid Idempotency-Key, or an invalid id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not an administrator",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not_found: the task has no running sandbox",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "working: a run is going, the sandbox is starting, or a person holds its screen; work_waiting: a message is queued for it",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The key was used with another request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable or gateway restarting",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/admin/secrets": {
       "get": {
         "operationId": "adminSecrets",
@@ -21416,6 +21615,409 @@
           "truncated"
         ]
       },
+      "AdminSandboxSize": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "What the sandbox was admitted with; null until its create recorded it.",
+        "properties": {
+          "cpu_millicores": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "memory_bytes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "pids": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          }
+        },
+        "required": [
+          "cpu_millicores",
+          "memory_bytes",
+          "pids"
+        ]
+      },
+      "AdminSandboxUsage": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "The sampler's last measurement: the CPU rate between its last two samples, and the resident memory and processes of the last.",
+        "properties": {
+          "cpu_millicores": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "memory_bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "pids": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "cpu_millicores",
+          "memory_bytes",
+          "pids"
+        ]
+      },
+      "AdminSandbox": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "One running sandbox. Nothing of its task but the id.",
+        "properties": {
+          "conversation_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "For Stop; never rendered or linked."
+          },
+          "owner": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "email": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "email"
+            ]
+          },
+          "environment": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "display_name": {
+                "type": "string"
+              },
+              "desktop": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "name",
+              "display_name",
+              "desktop"
+            ]
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "starting",
+              "working",
+              "idle",
+              "stopping"
+            ]
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_activity_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "stops_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Idle: the window's end from the last activity; kept on: the lifetime's end; else null. About, by one worker pass."
+          },
+          "kept_on": {
+            "type": "boolean",
+            "description": "Pinned, or keeping a desktop sign-in; stoppable, with a warning."
+          },
+          "size": {
+            "$ref": "#/components/schemas/AdminSandboxSize"
+          },
+          "usage": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AdminSandboxUsage"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "null until measured, or when the backend has no stats."
+          },
+          "can_stop": {
+            "type": "boolean"
+          },
+          "stop_refusal": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "starting",
+              "working",
+              "stopping",
+              "work_waiting",
+              null
+            ],
+            "description": "Why Stop is refused now, when can_stop is false."
+          }
+        },
+        "required": [
+          "conversation_id",
+          "owner",
+          "environment",
+          "state",
+          "started_at",
+          "last_activity_at",
+          "stops_at",
+          "kept_on",
+          "size",
+          "usage",
+          "can_stop",
+          "stop_refusal"
+        ]
+      },
+      "AdminSandboxLeftBehind": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "An engine object no record accounts for that survived a sweep: named by the engine's name only.",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "container",
+              "network",
+              "volume"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "A container's short id, a network's or a volume's name."
+          },
+          "age_seconds": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "reason": {
+            "type": "string",
+            "description": "The engine's error code from the last failed removal."
+          },
+          "remove": {
+            "type": "string",
+            "description": "The command that removes it by hand, built from the name."
+          }
+        },
+        "required": [
+          "kind",
+          "name",
+          "age_seconds",
+          "reason",
+          "remove"
+        ]
+      },
+      "AdminSandboxes": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "backend": {
+            "type": "string",
+            "enum": [
+              "docker",
+              "firecracker"
+            ]
+          },
+          "limits": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "slots": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "per_user": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "desktops": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "idle_seconds": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "max_lifetime_seconds": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "slots",
+              "per_user",
+              "desktops",
+              "idle_seconds",
+              "max_lifetime_seconds"
+            ]
+          },
+          "totals": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "in_use": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Sandboxes holding a slot: starting, working, idle and stopping."
+              },
+              "starting": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "working": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "idle": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "stopping": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "desktops": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "waiting": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Tasks waiting for a slot: a count, never who."
+              },
+              "reserved": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "The sum of the listed sandboxes' sizes.",
+                "properties": {
+                  "cpu_millicores": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "memory_bytes": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "cpu_millicores",
+                  "memory_bytes"
+                ]
+              },
+              "usage": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "cpu_millicores": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "memory_bytes": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "measured_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    },
+                    "required": [
+                      "cpu_millicores",
+                      "memory_bytes",
+                      "measured_at"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "The sum of the measured sandboxes' use; null until one is measured."
+              }
+            },
+            "required": [
+              "in_use",
+              "starting",
+              "working",
+              "idle",
+              "stopping",
+              "desktops",
+              "waiting",
+              "reserved",
+              "usage"
+            ]
+          },
+          "items": {
+            "type": "array",
+            "maxItems": 200,
+            "items": {
+              "$ref": "#/components/schemas/AdminSandbox"
+            }
+          },
+          "next_after": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The last row's conversation_id when a next page exists; pass it as after."
+          },
+          "left_behind": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminSandboxLeftBehind"
+            },
+            "description": "Empty when the verdict is green."
+          }
+        },
+        "required": [
+          "backend",
+          "limits",
+          "totals",
+          "items",
+          "next_after",
+          "left_behind"
+        ]
+      },
+      "AdminSandboxStop": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "stopping": {
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "required": [
+          "stopping"
+        ]
+      },
       "AdminSecret": {
         "type": "object",
         "additionalProperties": false,
@@ -22553,6 +23155,101 @@
             ],
             "minimum": 0,
             "description": "Tasks mid-step now: a linked runtime that sent a run's heartbeat within 75 s, and whose latest lifecycle event says its run is going. A restart now would start each of those steps over. A count only, never which tasks or whose; null when it couldn't be read. Diagnostics only: it never makes the gateway unready."
+          },
+          "sandboxes": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "The Sandboxes page's counts and the leak verdict (counts only; the names are on the page): what the last two sweeps found that no record accounts for, and what survived them. Diagnostics only: it never makes the gateway unready.",
+            "properties": {
+              "running": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Sandboxes with a record."
+              },
+              "oldest_seconds": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "The oldest running sandbox's age."
+              },
+              "unowned": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "containers": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "networks": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "volumes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Only in the volume workspace mode."
+                  }
+                },
+                "required": [
+                  "containers",
+                  "networks"
+                ]
+              },
+              "left_behind": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "containers": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "networks": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "volumes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Only in the volume workspace mode."
+                  },
+                  "oldest_seconds": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "description": "The oldest survivor's age; null when nothing survived."
+                  },
+                  "reason": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "The oldest survivor's engine error code; null when nothing survived."
+                  }
+                },
+                "required": [
+                  "containers",
+                  "networks",
+                  "oldest_seconds",
+                  "reason"
+                ]
+              },
+              "swept_at": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time",
+                "description": "When the last sweep ran; null before the first."
+              }
+            },
+            "required": [
+              "running",
+              "oldest_seconds",
+              "unowned",
+              "left_behind",
+              "swept_at"
+            ]
           }
         },
         "required": [
@@ -22561,7 +23258,8 @@
           "sandbox",
           "templates",
           "git_credentials_kept",
-          "runs_active"
+          "runs_active",
+          "sandboxes"
         ]
       },
       "AdminConnectorWrite": {
@@ -27588,7 +28286,7 @@
       },
       "ScreenNotice": {
         "type": "object",
-        "description": "One of the gateway's screen notices (ADR-0039): never sequenced into the runtime's log, never what was typed or pasted.",
+        "description": "One of the gateway's screen notices (ADR-0039): never sequenced into the runtime's log, never what was typed or pasted. A sandbox.stopped notice says an administrator stopped the task's sandbox from the Sandboxes page; the task keeps its files and its next message starts a new one.",
         "required": [
           "kind",
           "by",
@@ -27605,7 +28303,8 @@
               "screen.signed_out",
               "screen.sign_out_failed",
               "screen.sign_in_kept",
-              "screen.sign_in_released"
+              "screen.sign_in_released",
+              "sandbox.stopped"
             ]
           },
           "by": {

@@ -14,10 +14,14 @@ mod live_usage;
 mod losses;
 mod networks;
 mod recovery;
+mod sampler;
+pub(crate) use sampler::Usage;
 mod store;
 mod strays;
 mod teardown;
+pub(crate) mod verdict;
 pub(crate) use store::Admission;
+pub(crate) use admission::Stop;
 mod worker;
 use crate::{
     GatewayConfig, GatewayError, RuntimeTokens, events::EventStore, link::LinkRegistry,
@@ -58,6 +62,8 @@ pub(crate) enum Teardown {
     HandOver,
     /// An idle sandbox makes room for queued work.
     Eviction,
+    /// An administrator stopped it from the Sandboxes page (the Sandboxes page design note, §3.3).
+    Administrator,
     /// The task's environment changed.
     EnvironmentSwitch,
     /// The task's workspace was deleted.
@@ -97,6 +103,7 @@ impl Teardown {
         match self {
             Self::HandOver => "hand_over",
             Self::Eviction => "eviction",
+            Self::Administrator => "administrator",
             Self::EnvironmentSwitch => "environment_switch",
             Self::WorkspaceDeleted => "workspace_deleted",
             Self::TeamStopped => "team_stopped",
@@ -289,6 +296,10 @@ pub struct SandboxManager {
     networks: networks::Sweeper,
     // At most this many live workspace measurements at once, gateway-wide.
     measurements: Arc<Semaphore>,
+    /// The running sandboxes' last two resource samples (the Sandboxes page).
+    samples: sampler::Samples,
+    /// The last two sweep passes, for the leak verdict (the Sandboxes page).
+    sweeps: Mutex<verdict::History>,
 }
 
 impl SandboxManager {
@@ -321,6 +332,8 @@ impl SandboxManager {
             admission: admission::Queue::default(),
             networks: networks::Sweeper::default(),
             measurements: Arc::new(Semaphore::new(live_quota::CONCURRENT_MEASUREMENTS)),
+            samples: sampler::Samples::default(),
+            sweeps: Mutex::new(verdict::History::default()),
         })
     }
 
@@ -478,6 +491,10 @@ mod failure_tests;
 #[cfg(test)]
 #[path = "manager/reason_tests.rs"]
 mod reason_tests;
+
+#[cfg(test)]
+#[path = "manager/verdict_tests.rs"]
+mod verdict_tests;
 
 #[cfg(test)]
 #[path = "manager/slot_tests.rs"]

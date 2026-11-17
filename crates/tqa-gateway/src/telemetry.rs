@@ -126,6 +126,53 @@ impl Telemetry {
             .increment(1);
     }
 
+    /// The Sandboxes page's gauges (the Sandboxes page design note, §3.6): sandboxes by state, the oldest one's age,
+    /// and what the sweeps found unowned and left behind, by kind. Set whenever the readiness detail is read.
+    #[allow(clippy::cast_precision_loss)]
+    pub fn sandboxes(
+        &self,
+        backend: &'static str,
+        states: &[(&'static str, u64)],
+        verdict: &crate::manager::verdict::Verdict,
+    ) {
+        for (state, count) in states {
+            self.recorder
+                .register_gauge(
+                    &Key::from_parts(
+                        "tqa_sandboxes",
+                        vec![Label::new("backend", backend), Label::new("state", *state)],
+                    ),
+                    &METADATA,
+                )
+                .set(*count as f64);
+        }
+        self.recorder
+            .register_gauge(&Key::from_name("tqa_sandbox_oldest_seconds"), &METADATA)
+            .set(verdict.oldest_seconds as f64);
+        let left = verdict.left_behind_counts();
+        for (name, unowned, left) in [
+            ("containers", verdict.unowned.containers, left.containers),
+            ("networks", verdict.unowned.networks, left.networks),
+            ("volumes", verdict.unowned.volumes.unwrap_or(0), left.volumes.unwrap_or(0)),
+        ] {
+            if name == "volumes" && verdict.unowned.volumes.is_none() {
+                continue;
+            }
+            self.recorder
+                .register_gauge(
+                    &Key::from_parts("tqa_sandbox_unowned", vec![Label::new("kind", name)]),
+                    &METADATA,
+                )
+                .set(unowned as f64);
+            self.recorder
+                .register_gauge(
+                    &Key::from_parts("tqa_sandbox_left_behind", vec![Label::new("kind", name)]),
+                    &METADATA,
+                )
+                .set(left as f64);
+        }
+    }
+
     /// Subnets left in the per-sandbox network pool (ADR-0021 amendment).
     pub fn network_pool_free(&self, free: u32) {
         self.recorder

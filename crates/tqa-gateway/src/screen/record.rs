@@ -20,6 +20,8 @@ pub(crate) enum Notice {
     SignInKept,
     /// A person turned it off.
     SignInReleased,
+    /// An administrator stopped the task's sandbox from the Sandboxes page; it starts again at the next message.
+    SandboxStopped,
 }
 
 impl Notice {
@@ -31,6 +33,7 @@ impl Notice {
             Self::SignOutFailed(_) => ScreenNoticeKind::SignOutFailed,
             Self::SignInKept => ScreenNoticeKind::SignInKept,
             Self::SignInReleased => ScreenNoticeKind::SignInReleased,
+            Self::SandboxStopped => ScreenNoticeKind::SandboxStopped,
         }
     }
 
@@ -41,7 +44,8 @@ impl Notice {
             | Self::HandedBack { .. }
             | Self::SignedOut
             | Self::SignInKept
-            | Self::SignInReleased => None,
+            | Self::SignInReleased
+            | Self::SandboxStopped => None,
         }
     }
 }
@@ -54,6 +58,7 @@ const fn kind_name(kind: ScreenNoticeKind) -> &'static str {
         ScreenNoticeKind::SignOutFailed => "screen.sign_out_failed",
         ScreenNoticeKind::SignInKept => "screen.sign_in_kept",
         ScreenNoticeKind::SignInReleased => "screen.sign_in_released",
+        ScreenNoticeKind::SandboxStopped => "sandbox.stopped",
     }
 }
 
@@ -94,7 +99,8 @@ pub(crate) async fn record(
         | Notice::SignedOut
         | Notice::SignOutFailed(_)
         | Notice::SignInKept
-        | Notice::SignInReleased => (None, None),
+        | Notice::SignInReleased
+        | Notice::SandboxStopped => (None, None),
     };
     let at = crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
         Ok(sqlx::query_scalar!(
@@ -129,7 +135,8 @@ pub(crate) async fn record(
             | Notice::SignedOut
             | Notice::SignOutFailed(_)
             | Notice::SignInKept
-            | Notice::SignInReleased => None,
+            | Notice::SignInReleased
+            | Notice::SandboxStopped => None,
         },
         reason: notice.reason(),
     };

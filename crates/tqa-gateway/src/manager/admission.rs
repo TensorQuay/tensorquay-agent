@@ -615,3 +615,68 @@ pub(crate) fn queued_notice(
 #[cfg(test)]
 #[path = "admission_tests.rs"]
 mod tests;
+
+/// What an administrator's stop did.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum Stop {
+    /// The retire is asked for; the worker tears the sandbox down.
+    Requested,
+    /// It was already on its way.
+    AlreadyStopping,
+}
+
+impl SandboxManager {
+    /// An administrator's stop (the Sandboxes page design note, §3.3): eviction's checks without the pinned and
+    /// keep-sign-in exclusions, under the eviction lock, then the same retire an eviction delivers. A working or
+    /// starting sandbox, one with a message waiting, and a Desktop whose screen a person holds are refused; a sandbox
+    /// already stopping answers as stopped.
+    ///
+    /// # Errors
+    /// `404 not_found` without a running sandbox; `409 working` or `409 work_waiting`; store failures.
+    pub(crate) async fn stop_by_administrator(
+        self: &Arc<Self>,
+        id: &ConversationId,
+    ) -> Result<Stop, GatewayError> {
+        let conversation = crate::conversations::uuid(id)?;
+        let record = self
+            .bounded(async {
+                Ok(sqlx::query!(
+                    "SELECT s.phase, EXISTS (SELECT 1 FROM idempotency i WHERE i.conversation_id=s.conversation_id \
+                     AND i.execution_status IN ('queued','sending')) AS \"work_waiting!\", \
+                     EXISTS (SELECT 1 FROM templates t WHERE t.name=c.template AND 'desktop'=ANY(t.capabilities)) AS \"desktop!\" \
+                     FROM sandbox_instances s JOIN conversations c ON c.id=s.conversation_id WHERE s.conversation_id=$1",
+                    conversation
+                )
+                .fetch_optional(&self.services.pool)
+                .await?)
+            })
+            .await?
+            .ok_or(GatewayError::NotFound)?;
+        match record.phase.as_str() {
+            "starting" => return Err(GatewayError::Conflict("working")),
+            "destroying" => return Ok(Stop::AlreadyStopping),
+            _ => {}
+        }
+        if record.work_waiting {
+            return Err(GatewayError::Conflict("work_waiting"));
+        }
+        let active = self
+            .bounded(crate::events::run_activity(&self.services.pool, conversation))
+            .await?;
+        if active == crate::events::RunActivity::Active {
+            return Err(GatewayError::Conflict("working"));
+        }
+        if record.desktop && !crate::screen::may_retire(id) {
+            return Err(GatewayError::Conflict("working"));
+        }
+        // Under the eviction lock, as evict_one takes it: one retire asked at a time, so a stop and an eviction never
+        // both take the same sandbox's slot for their own, and a start that lands meanwhile sees the switch.
+        let _guard = self
+            .admission
+            .evicting
+            .lock()
+            .map_err(|_| GatewayError::StoreUnavailable)?;
+        self.retire_for_switch(id, super::Teardown::Administrator)?;
+        Ok(Stop::Requested)
+    }
+}
