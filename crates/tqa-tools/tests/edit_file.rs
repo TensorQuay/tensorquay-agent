@@ -664,3 +664,25 @@ async fn tool_u_004_the_registry_asks_the_tool_for_its_region() -> TestResult {
     );
     Ok(())
 }
+
+// Past a thousand matches the count stops, and the refusal says so ("or more").
+#[tokio::test]
+async fn tool_u_004_an_ambiguous_refusal_stops_counting_at_a_thousand() -> TestResult {
+    let fixture = workspace_fixture()?;
+    let cx = support::context(&fixture);
+    fs::write(fixture.root().join("many"), "same\n".repeat(1500))?;
+    let detail = detail(
+        EditFile::new()
+            .call(request("many", "same", "other"), &cx)
+            .await
+            .err()
+            .ok_or("expected error")?,
+    );
+    assert!(
+        detail.starts_with(
+            "ambiguous; matches at lines 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 and 990 or more\n"
+        ),
+        "{detail}"
+    );
+    Ok(())
+}

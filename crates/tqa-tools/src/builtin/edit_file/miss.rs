@@ -6,6 +6,8 @@ use std::fmt::Write as _;
 
 /// Matching lines listed in an ambiguous refusal.
 pub(super) const LISTED: usize = 10;
+/// Overlapping matches counted at most, so a refusal costs a bounded number of finds.
+pub(super) const COUNTED: usize = 1_000;
 /// Lines equally near named in a not-found refusal.
 const NEAREST: usize = 3;
 /// The longest line looked at or shown in full; a longer shown line is cut.
