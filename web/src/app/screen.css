@@ -66,6 +66,9 @@
   width: 100%;
   max-width: min(1280px, calc((100dvh - 23.5rem) * 16 / 10));
   margin-inline: auto;
+  /* The picture's frame is an outline, drawn outside its box (2 px under Take over), and the dialog's scrolling content
+     clips at its edge: where the picture takes the whole width (a phone), this keeps the frame inside (WEB-E2E-131). */
+  padding-inline: calc(var(--border-width) * 2);
 }
 /* A desktop action's pictures on its card (ADR-0039 §9): side by side where they fit, one above the other when not. */
 .screen-pictures {

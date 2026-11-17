@@ -100,10 +100,6 @@ for (const [width, height] of [
           },
         };
       });
-      console.log(
-        `WEB-E2E-131 ${width} ${colorScheme}`,
-        JSON.stringify(fit.geometry),
-      );
       for (const side of ["left", "right", "top", "bottom"] as const)
         expect(fit.past[side], side).toBeLessThanOrEqual(0.5);
       await capture(page, `${width}-${colorScheme}`);
