@@ -304,7 +304,7 @@ explained in [TEST-PLAN](TEST-PLAN.md#build-names-and-ids).
    refused" with "Allow this site" (ADR-0035 point 3); keeping a desktop sign-in for a whole task (ADR-0039 §6);
    prebuilt images for amd64 and arm64. Verified end to end before the release.
 3. **Release 18.1** (the product owner, 17 Nov 2026), a feature release numbered MINOR under the 17 Nov amendment
-   of §7, and verified with every step of §7. It has five parts.
+   of §7, and verified with every step of §7. It has six parts.
    - **The administrator's Sandboxes page and the leak verdict** (the product owner's request of 7 Nov 2026).
      Settings › Operations › Sandboxes lists every running sandbox across all people. Each row shows its owner's
      email, its environment, its state and age, and its CPU and memory against its size. Each row has a Stop,
@@ -334,6 +334,15 @@ explained in [TEST-PLAN](TEST-PLAN.md#build-names-and-ids).
        directly between rounds; and no "Couldn't start a helper" line anywhere in the run.
      - **Teams proven** (the product owner, 17 Nov 2026): the evaluation of one agent against a team on the same
        budget is run again on rounds, on real goals, before teams grow further.
+   - **Edits a local model recovers from** (the product owner, 17 Nov 2026). 18.0's real-model run on Qwen3.8 27B
+     completed 17 of 20 tasks one at a time, under E2E-WAVE-001's 90 %. Every miss was a refused `edit_file` that
+     the model didn't recover from. The changes:
+     - a refusal names the nearest matching lines with their numbers and exact text
+     - an ambiguous match lists its lines
+     - differences that change nothing, such as trailing spaces, are forgiven when exactly one place matches
+     - an edit that changes nothing is answered as no change
+     - a stale or unread file is named with the lines to read first.
+     Verified end to end: the task set on Qwen3.8 at 90 % or more over 60 attempts (each task three times).
 4. **Release 18.2: channels that work on their own** (the product owner, 17 Nov 2026). This amends ADR-0014, under
    which an agent reads a channel only while its task already runs, and a channel carries text only.
    - **Wake the agents.** A proposal, a to-do, or a post that names or replies to an agent starts that member's task,
