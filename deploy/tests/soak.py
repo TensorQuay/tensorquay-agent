@@ -414,7 +414,7 @@ class Soak:
         summary = {"id": conversation, "slot": index, "generation": self.generation[index], "client_events": counts,
                    "runs": audit.started, "completed": audit.completed, "failed_during_restart": audit.failed,
                    "retry_evidence": audit.retry_evidence, "event_kinds": audit.kinds, "faults": sorted(set(audit.faults)),
-                   "tool_outcomes": audit.tool_outcomes, "pause_tool_timeouts": audit.tool_timeouts,
+                   "tool_outcomes": audit.tool_outcomes, "model_tool_errors": audit.model_errors, "pause_tool_timeouts": audit.tool_timeouts,
                    "script_responses": self.progress[index].completed,
                    "control_frames": control_frames(clients)}
         self.log("conversation_closed", summary=summary)

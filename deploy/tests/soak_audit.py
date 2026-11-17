@@ -17,6 +17,11 @@ REPLACEMENT_WINDOW_SECONDS = 600
 FAULT_KINDS = ("client_sse", "runtime_link", "gateway_restart", "gateway_kill", "db_restart", "db_outage", "db_crash",
                "engine_stall", "disk_full", "sandbox_kill", "link_cut")
 NO_SPACE = "No space left on device"
+# The failure codes a model's own call causes (tqa-tools ToolError::code): its arguments, a path, a tool it named, a
+# site the allow-list refuses. A real model makes these and goes on from the answer; the scripted model never does.
+MODEL_ERRORS = ("invalid_args", "path_invalid", "path_outside_workspace", "not_found", "unsupported",
+                "output_too_large", "denied", "egress_denied")
+MODEL_ERRORS_KEPT = 200
 
 
 class AuditError(AssertionError):
@@ -121,6 +126,7 @@ class RunAudit:
         # Resume times per disk_full window, and every one of them.
         self.window_resumes, self.disk_resumes = {}, []
         self.tool_names, self.tool_started, self.tool_outcomes = {}, {}, {}
+        self.model_errors = []  # a real model's own mistakes (MODEL_ERRORS), the first MODEL_ERRORS_KEPT of them
 
     def fault(self, kind, seq):
         """A successful run must complete after the latest occurrence of each fault kind."""
@@ -245,6 +251,14 @@ class RunAudit:
                 start <= timestamp_seconds(frame["ts"]) <= end + TOOL_RECOVERY_SECONDS
                 for start, end in self.disk_windows):
             outcome = "no_space"
+        elif outcome == "error" and not self.scripted_tools and \
+                event.get("content", "").split(":", 1)[0] in MODEL_ERRORS and ":" in event.get("content", ""):
+            # 17 Nov 2026: Qwen passed read_file a cursor of its own ("1") and the tool refused it with how to read by
+            # lines; the run went on. Counted and kept for the report, never a failure; system errors still fail below.
+            outcome = "model_error"
+            if len(self.model_errors) < MODEL_ERRORS_KEPT:
+                self.model_errors.append({"call_id": identity, "seq": frame["seq"], "ts": frame["ts"], "tool": name,
+                                          "code": event["content"].split(":", 1)[0]})
         elif outcome != "ok":
             when, started = timestamp_seconds(frame["ts"]), self.tool_started[identity]
             matching = [window for window in self.pause_windows if window["end"] is not None and
