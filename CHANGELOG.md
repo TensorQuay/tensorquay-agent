@@ -3,7 +3,7 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
-## 18.0.0 (DATE)
+## 18.0.0 (17 November 2026)
 
 A feature release: the agent reads PDFs and pictures, a desktop sign-in can be kept for a whole task, a folder
 previews as a real site, administrators see the sites the network refused lately and can allow them, and each release
@@ -138,6 +138,9 @@ key changes.
   affected: each one waits for the screen to settle first.
 - **The PDF reader's misses are its engines' (ADR-0040).** A form's field values, and text in a font with no
   ToUnicode map, read wrong or empty; a model that reads pictures sees the page as it looks.
+- **On the Firecracker backend, a task's disk is slower than the host's (PERF-012).** Inside a microVM,
+  sequential writes run at about 55 to 60 % of the host disk's speed, random writes at about 30 to 40 % and reads at
+  60 to 85 %, as in every release since 17.0. On the Docker backend, the default, each is 93 % or more.
 - **In Safari, a previewed page whose script keeps the processor busy stops the app responding until the script
   ends.** Chromium-based browsers (Chrome, Edge) run the preview apart and stay responsive, as WEB-E2E-122 checks;
   WebKit runs it on the page's own thread (8 s in the test's busy page). Close the preview or use **Stop scripts**
