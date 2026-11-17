@@ -46,16 +46,23 @@ export function fileChange(
 }
 
 /** The actual returned line range, falling back to explicit requested bounds while pending. */
+/**
+ * Whether a read read a PDF: its result starts "[PDF, N pages]" and marks each page "--- page N ---" (read_file's
+ * pdf.rs). The result says which it is; a read still running goes by the file's name (WEB-U-482, WEB-U-493).
+ */
+export function readsPdf(tool: ToolView): boolean {
+  const path = argument(tool, "path");
+  return tool.result
+    ? tool.result.startsWith("[PDF, ")
+    : typeof path === "string" && /\.pdf$/i.test(path);
+}
+
 export function readRange(
   tool: ToolView,
 ): { first: string; last: string; pages: boolean } | null {
   const result = tool.result ?? "";
-  // A PDF's result starts "[PDF, N pages]" and marks each page "--- page N ---" (read_file's pdf.rs); its numbered
-  // arguments are pages. The result says which it is; a read still running goes by the file's name (WEB-U-482).
-  const path = argument(tool, "path");
-  const pages = tool.result
-    ? result.startsWith("[PDF, ")
-    : typeof path === "string" && /\.pdf$/i.test(path);
+  // A PDF's numbered arguments are pages, and its page marks say which it holds.
+  const pages = readsPdf(tool);
   const marks = Array.from(
     result.matchAll(pages ? /^--- page (\d+) ---$/gm : /^\s*(\d+)\t/gm),
   );
