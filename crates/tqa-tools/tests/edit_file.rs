@@ -540,6 +540,12 @@ async fn tool_u_004_a_no_op_edit_is_no_change() -> TestResult {
         "{}",
         output.text
     );
+    // One line break before the sentence, never a blank line.
+    assert!(
+        !output.text.contains("\n\n1 edit changed nothing"),
+        "{}",
+        output.text
+    );
     // An empty old_text is still refused, and a missing file is still missing.
     let error = tool
         .call(request("readme", "", "x"), &cx)
@@ -625,5 +631,35 @@ async fn tool_u_004_a_repeated_refusal_carries_the_region() -> TestResult {
     ] {
         assert_eq!(tool.repeated_refusal(&args, &cx).await, None, "{args}");
     }
+    Ok(())
+}
+
+// The registry asks the tool for the region with the call's arguments as journaled; an unknown tool or arguments its
+// schema refuses add nothing.
+#[tokio::test]
+async fn tool_u_004_the_registry_asks_the_tool_for_its_region() -> TestResult {
+    let fixture = workspace_fixture()?;
+    let cx = support::context(&fixture);
+    fs::write(fixture.root().join("loop.rs"), twenty_lines()?)?;
+    let mut registry = tqa_tools::ToolRegistry::new();
+    registry.register(std::sync::Arc::new(EditFile::new()))?;
+    let args = request("loop.rs", "if done", "if finished");
+    let note = registry
+        .repeated_refusal("edit_file", &args, &cx)
+        .await
+        .ok_or("expected a note")?;
+    assert!(
+        note.starts_with(
+            "You sent the same arguments as the call that just failed. Here are lines 7-20 of loop.rs:\n"
+        ),
+        "{note}"
+    );
+    assert_eq!(registry.repeated_refusal("deploy", &args, &cx).await, None);
+    assert_eq!(
+        registry
+            .repeated_refusal("edit_file", &json!({"path": 7}), &cx)
+            .await,
+        None
+    );
     Ok(())
 }

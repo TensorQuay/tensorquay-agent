@@ -121,10 +121,8 @@ impl Miss {
             .split('\n')
             .collect();
         let first = focus.saturating_sub(3).max(1);
+        // `focus` is a line of `text`, so `first` <= `focus` <= `last`.
         let last = (first + REGION_LINES - 1).min(lines.len());
-        if first > last {
-            return None;
-        }
         let mut region = format!(
             "You sent the same arguments as the call that just failed. Here are lines {first}-{last} of {path}:\n"
         );
@@ -281,5 +279,65 @@ mod tests {
         let unbounded = nearest(text, "nothing like it at all", None);
         assert!((1..=NEAREST).contains(&unbounded.len()), "{unbounded:?}");
         assert_eq!(nearest(text, "\n\n", None), Vec::<usize>::new());
+    }
+
+    #[test]
+    fn the_bag_bound_counts_both_sides() {
+        let chars = |text: &str| text.chars().collect::<Vec<_>>();
+        assert_eq!(bag_distance(&chars("aab"), &chars("b")), 2);
+        assert_eq!(bag_distance(&chars("b"), &chars("aab")), 2);
+    }
+
+    #[test]
+    fn a_line_at_the_limit_is_near_and_ties_are_named_up_to_three() {
+        // 40 % of a 10-character anchor is 4: a line 4 edits away is near.
+        assert_eq!(nearest("abcdefghijklmn\n", "abcdefghij", Some(40)), vec![1]);
+        let ties = "let a = 1;\nlet b = 1;\nlet d = 1;\nlet e = 1;\n";
+        assert_eq!(nearest(ties, "let c = 1;", Some(40)), vec![1, 2, 3]);
+    }
+
+    #[test]
+    fn lines_of_400_bytes_are_compared_and_longer_ones_are_not() {
+        let at = "a".repeat(LINE_BYTES);
+        let near = format!("{}b", "a".repeat(LINE_BYTES - 1));
+        assert_eq!(nearest(&format!("{near}\n"), &at, Some(40)), vec![1]);
+        assert_eq!(nearest(&format!("{at}\n"), &near, Some(40)), vec![1]);
+        let over = "a".repeat(LINE_BYTES + 1);
+        assert_eq!(
+            nearest(&format!("{near}\n"), &over, None),
+            Vec::<usize>::new()
+        );
+    }
+
+    #[test]
+    fn the_search_stops_at_its_budget() {
+        // Every line is 2 edits away, then one is 1 away: past the budget it is never looked at.
+        let mut text = "let yz = 1;\n".repeat(DISTANCE_BUDGET + 1);
+        text.push_str("let x = 2;\n");
+        assert_eq!(nearest(&text, "let x = 1;", None), vec![1, 2, 3]);
+    }
+
+    #[test]
+    fn a_long_line_is_cut_on_a_character() {
+        let line = format!("{}é{}", "a".repeat(LINE_BYTES - 1), "z".repeat(10));
+        assert_eq!(
+            shown_line(&[line.as_str()], 1),
+            format!("{}…", "a".repeat(LINE_BYTES - 1))
+        );
+        assert_eq!(shown_line(&["short\r"], 1), "short");
+    }
+
+    #[test]
+    fn a_one_line_file_shows_its_line() {
+        let miss = Miss::Ambiguous {
+            lines: vec![1],
+            total: 2,
+        };
+        assert_eq!(
+            miss.region("a.rs", "x x\n", "x").as_deref(),
+            Some(
+                "You sent the same arguments as the call that just failed. Here are lines 1-1 of a.rs:\n     1\tx x\nRead them and send a different old_text."
+            )
+        );
     }
 }
