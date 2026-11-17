@@ -329,13 +329,25 @@ explained in [TEST-PLAN](TEST-PLAN.md#build-names-and-ids).
      - Verified end to end on the real stack with a real model: a first round; a follow-up that brings back two
        helpers with their context and adds one new helper; the budget and the time per round; a helper written to
        directly between rounds; and no "Couldn't start a helper" line anywhere in the run.
-4. **Fix releases** as findings come in (§7).
-5. **Later, when people ask for them:**
+4. **Release 18.2: channels that work on their own** (the product owner, 17 Nov 2026). This amends ADR-0014, under
+   which an agent reads a channel only while its task already runs, and a channel carries text only.
+   - **Wake the agents.** A proposal, a to-do, or a post that names or replies to an agent starts that member's task,
+     as team messages wake a team (ADR-0034). Each wake is counted against the channel's budget, and an agent woken
+     by another agent's post is bounded so that two agents can't keep each other going. The "agents aren't running"
+     line stays for an agent whose task can't start.
+   - **Attachments.** A post, a proposal or a to-do can carry files, as the task's message box does, within the same
+     limits. A PDF or a picture reaches each member agent in its own workspace, under a folder named for the
+     channel. People download it from the post.
+   - **Verified end to end** on the real stack with a real model: a person posts a proposal with a PDF attached.
+     With no one touching the members' tasks, the agents wake, read the file, discuss and vote, and the decision is
+     recorded. A to-do is then claimed and reported. The budget stops a long exchange.
+5. **Fix releases** as findings come in (§7).
+6. **Later, when people ask for them:**
    - Previews on an origin of their own, an optional installation setting (a wildcard domain or a port range), so any
      build and any router works unchanged.
    - A dev server's live preview relayed out of the sandbox over its link. The sandbox never listens for
      connections. This needs a design record and a security review first.
-6. **Later:** Phase 12, swarms, when the product owner calls for it.
+7. **Later:** Phase 12, swarms, when the product owner calls for it. They build on channels (18.2).
 
 ## 5. Parallel tracks
 Engineering runs in three streams that own disjoint parts of the tree, so they progress in parallel and meet at each
