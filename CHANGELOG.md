@@ -136,6 +136,10 @@ key changes.
 - **Under Take over, a key sent within a few milliseconds of a click can be lost** while the desktop's browser moves
   its focus. Type at a person's pace, or click once more and send the key again. The agent's own actions are not
   affected: each one waits for the screen to settle first.
+- **In Safari, a previewed page whose script keeps the processor busy stops the app responding until the script
+  ends.** Chromium-based browsers (Chrome, Edge) run the preview apart and stay responsive, as WEB-E2E-122
+  checks; WebKit runs it on the page's own thread (8 s in the test's busy page). Close the preview or use **Stop scripts** once the
+  page lets go. A Safari-safe way is planned for 18.1.
 - **Three small display issues, fixed in 18.0.1.** A PDF read's step names the pages it read as lines ("lines 1–2"
   for pages 1 and 2); the Screen panel's ⋯ menu cuts its descriptions short at desktop widths, though each item works
   as described; and a PDF's page pictures in the Files panel run a little past the panel's right edge.
