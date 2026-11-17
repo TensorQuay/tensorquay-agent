@@ -136,6 +136,8 @@ key changes.
 - **Under Take over, a key sent within a few milliseconds of a click can be lost** while the desktop's browser moves
   its focus. Type at a person's pace, or click once more and send the key again. The agent's own actions are not
   affected: each one waits for the screen to settle first.
+- **The PDF reader's misses are its engines' (ADR-0040).** A form's field values, and text in a font with no
+  ToUnicode map, read wrong or empty; a model that reads pictures sees the page as it looks.
 - **In Safari, a previewed page whose script keeps the processor busy stops the app responding until the script
   ends.** Chromium-based browsers (Chrome, Edge) run the preview apart and stay responsive, as WEB-E2E-122 checks;
   WebKit runs it on the page's own thread (8 s in the test's busy page). Close the preview or use **Stop scripts**
