@@ -45,7 +45,6 @@ export function fileChange(
   return null;
 }
 
-/** The actual returned line range, falling back to explicit requested bounds while pending. */
 /**
  * Whether a read read a PDF: its result starts "[PDF, N pages]" and marks each page "--- page N ---" (read_file's
  * pdf.rs). The result says which it is; a read still running goes by the file's name (WEB-U-482, WEB-U-493).
@@ -57,6 +56,7 @@ export function readsPdf(tool: ToolView): boolean {
     : typeof path === "string" && /\.pdf$/i.test(path);
 }
 
+/** The actual returned line range, falling back to explicit requested bounds while pending. */
 export function readRange(
   tool: ToolView,
 ): { first: string; last: string; pages: boolean } | null {
