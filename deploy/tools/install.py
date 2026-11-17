@@ -360,14 +360,15 @@ class Installer:
     def detect(self):
         """Rootless Docker's socket and its group, as step 1's block finds them."""
         found = {}
-        options = self.system.run(["docker", "info", "--format", "{{.SecurityOptions}}"], capture=True)
+        options = self.step("Asking Docker how it runs", ["docker", "info", "--format", "{{.SecurityOptions}}"], 120)
         if "name=rootless" in options:
             runtime = os.environ.get("XDG_RUNTIME_DIR") or "/run/user/{}".format(os.getuid())
             found["TQA_DOCKER_SOCKET"] = runtime + "/docker.sock"
-            found["TQA_DOCKER_GID"] = self.system.run(
-                ["docker", "run", "--rm", "--network", "none", "--mount",
-                 "type=bind,source={},target=/var/run/docker.sock,readonly".format(found["TQA_DOCKER_SOCKET"]),
-                 TOYBOX, "stat", "-c", "%g"], capture=True).strip()
+            # Step 1's own line: the group of the socket, mounted where the gateway sees it.
+            found["TQA_DOCKER_GID"] = self.step("Reading rootless Docker's socket group", [
+                "docker", "run", "--rm", "--network", "none", "--mount",
+                "type=bind,source={},target=/var/run/docker.sock,readonly".format(found["TQA_DOCKER_SOCKET"]),
+                TOYBOX, "stat", "-c", "%g", "/var/run/docker.sock"], 300).strip()
         return found
 
     def pull_command(self):

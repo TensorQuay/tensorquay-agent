@@ -72,10 +72,11 @@ class FakeSystem:
     """Answers the installer's commands and HTTP calls; records each."""
 
     def __init__(self, *, rootless=False, probe=None, bootstrap=201, up_fails=None, ready_after=1,
-                 busy_ports=(), detail=None):
+                 busy_ports=(), detail=None, group_fails=False):
         self.commands = []
         self.requests = []
         self.rootless = rootless
+        self.group_fails = group_fails
         self.probe = probe
         self.bootstrap = bootstrap
         self.up_fails = up_fails
@@ -88,7 +89,10 @@ class FakeSystem:
         self.commands.append(list(args))
         if args[:2] == ["docker", "info"]:
             return "[name=seccomp,profile=builtin" + (" name=rootless" if self.rootless else "") + "]\n"
-        if args[:2] == ["docker", "run"] and args[-3:] == ["stat", "-c", "%g"]:
+        if args[:2] == ["docker", "run"] and "stat" in args:
+            # As toybox's stat answers: the group of the one file named, and a refusal without one.
+            if self.group_fails or args[-4:] != ["stat", "-c", "%g", "/var/run/docker.sock"]:
+                raise shell.CommandFailed(args, 1, "stat: Needs 1 argument (see \"stat --help\")")
             return "998\n"
         if args and args[0].endswith("pull-images.sh"):
             return EXPORTS
@@ -443,6 +447,23 @@ class FilesAsTheGuideMakesThem(Case):
         compose = (self.install_dir / "compose.env").read_text()
         self.assertRegex(compose, r"(?m)^TQA_DOCKER_SOCKET=/.+/docker\.sock$")
         self.assertIn("TQA_DOCKER_GID=998\n", compose)
+
+    def test_the_socket_s_group_is_read_as_the_guide_reads_it(self):
+        # Step 1's block reads the group of the socket mounted at /var/run/docker.sock; the installer runs that line.
+        self.assertIn("stat -c %g /var/run/docker.sock", (ROOT / "deploy" / "README.md").read_text())
+        code, out, system = self.run_installer(self.yes(), system=FakeSystem(rootless=True))
+        self.assertEqual(code, 0, out.text)
+        stat_line = next(command for command in system.commands if "stat" in command)
+        self.assertEqual(stat_line[-4:], ["stat", "-c", "%g", "/var/run/docker.sock"])
+        self.assertIn(",target=/var/run/docker.sock,readonly", " ".join(stat_line))
+
+    def test_a_failed_detection_names_the_step_and_writes_nothing(self):
+        code, out, system = self.run_installer(self.yes(), system=FakeSystem(rootless=True, group_fails=True))
+        self.assertEqual(code, 3, out.text)
+        self.assertIn("Reading rootless Docker's socket group failed.", out.text)
+        self.assertIn("stat: Needs 1 argument", out.text)
+        self.assertNotIn("Traceback", out.text)
+        self.assertFalse(self.install_dir.exists())
 
     def test_a_second_install_takes_its_own_names(self):
         code, out, system = self.run_installer(self.yes("--name", "tensorquay-staging", "--port", "8081",
