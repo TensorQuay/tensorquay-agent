@@ -3,6 +3,32 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
+## Unreleased
+
+### Fixed
+
+- **A PDF read's step names the pages it read, not lines (WEB-U-482).** After reading pages 1 and 2 of a PDF, the
+  step said "Read uploads/report.pdf lines 1–2"; it now says "pages 1–2", in every language. The result's own page
+  marks decide it, so a PDF saved without its extension reads as pages too.
+- **The Screen panel's ⋯ menu is wide enough for its items at desktop widths (WEB-U-483, WEB-E2E-128).** At 1280 and
+  1440 px the menu opened no wider than the room to its ⋯'s end and cut its words ("Keep the sign-i…"); where that
+  room is narrower than the menu, it now takes the panel's width. A phone's panel places it as before. A menu in a
+  dialog opened from the panel (the Screen's or a spreadsheet's Expand) now opens under its button: the panel's bounds
+  held it to the panel's strip of the page, where the Screen's ⋯ menu had no width at all.
+- **A menu's notes wrap at a readable width, and a menu stays inside its dialog (WEB-U-490, WEB-U-483,
+  WEB-E2E-130).** The Screen panel's ⋯ menu, opened from its Expand dialog, set each note on one line, 658 px across the
+  window, and on a phone ran past the dialog's edges. A menu item's note and its reason now wrap at 24ch (as the menu
+  already read on a phone), and a menu opened in a dialog stays inside it, beside its ⋯.
+- **A PDF's page pictures fit the Files panel (WEB-U-484, WEB-E2E-128).** They ran about 10 px past the panel's right
+  edge: each page was drawn at the panel's width with its border on top, and the column's scrollbar, which arrives
+  with the pages, took more. The border is now inside that width, and the scrollbar's room is kept from the start.
+
+### Security
+
+- **The web app is on Next.js 16.4.5** (it was 16.4.1), past GHSA-mfr8-8qww-v76h, a moderate information disclosure
+  across root params when a `'use cache'` function is called through `unstable_cache()`. The app uses neither, so it
+  was not affected. Builds no longer stop to recommend an upgrade (`experimental.agentUpgrade` is off, WEB-U-491).
+
 ## 18.0.0 (17 November 2026)
 
 A feature release: the agent reads PDFs and pictures, a desktop sign-in can be kept for a whole task, a folder
@@ -54,21 +80,6 @@ key changes.
 
 ### Fixed
 
-- **A PDF read's step names the pages it read, not lines (WEB-U-482).** After reading pages 1 and 2 of a PDF, the
-  step said "Read uploads/report.pdf lines 1–2"; it now says "pages 1–2", in every language. The result's own page
-  marks decide it, so a PDF saved without its extension reads as pages too.
-- **The Screen panel's ⋯ menu is wide enough for its items at desktop widths (WEB-U-483, WEB-E2E-128).** At 1280 and
-  1440 px the menu opened no wider than the room to its ⋯'s end and cut its words ("Keep the sign-i…"); where that
-  room is narrower than the menu, it now takes the panel's width. A phone's panel places it as before. A menu in a
-  dialog opened from the panel (the Screen's or a spreadsheet's Expand) now opens under its button: the panel's bounds
-  held it to the panel's strip of the page, where the Screen's ⋯ menu had no width at all.
-- **A menu's notes wrap at a readable width, and a menu stays inside its dialog (WEB-U-490, WEB-U-483,
-  WEB-E2E-130).** The Screen panel's ⋯ menu, opened from its Expand dialog, set each note on one line, 658 px across the
-  window, and on a phone ran past the dialog's edges. A menu item's note and its reason now wrap at 24ch (as the menu
-  already read on a phone), and a menu opened in a dialog stays inside it, beside its ⋯.
-- **A PDF's page pictures fit the Files panel (WEB-U-484, WEB-E2E-128).** They ran about 10 px past the panel's right
-  edge: each page was drawn at the panel's width with its border on top, and the column's scrollbar, which arrives
-  with the pages, took more. The border is now inside that width, and the scrollbar's room is kept from the start.
 - **The Screen panel's picture no longer shows a dark box before the desktop's first frame (WEB-U-477).** For about a
   second after the panel connects to the desktop (as when a task's page opens), the picture was the screen client's
   own dark backdrop, not the desktop, whose bare root is white by design; it now shows the panel's surface until the
@@ -139,12 +150,6 @@ key changes.
   message the team had sent. Deleting the lead's workspace with its tasks is refused while the lead has helpers
   (`409 has_helpers`), as deleting the lead alone is, and the web app says what to delete first; before, the
   workspace's tasks went in bulk and the team kept running for a deleted lead.
-
-### Security
-
-- **The web app is on Next.js 16.4.5** (it was 16.4.1), past GHSA-mfr8-8qww-v76h, a moderate information disclosure
-  across root params when a `'use cache'` function is called through `unstable_cache()`. The app uses neither, so it
-  was not affected. Builds no longer stop to recommend an upgrade (`experimental.agentUpgrade` is off, WEB-U-491).
 
 ### Known limits
 
