@@ -136,6 +136,9 @@ key changes.
 - **Under Take over, a key sent within a few milliseconds of a click can be lost** while the desktop's browser moves
   its focus. Type at a person's pace, or click once more and send the key again. The agent's own actions are not
   affected: each one waits for the screen to settle first.
+- **Three small display issues, fixed in 18.0.1.** A PDF read's step names the pages it read as lines ("lines 1–2"
+  for pages 1 and 2); the Screen panel's ⋯ menu cuts its descriptions short at desktop widths, though each item works
+  as described; and a PDF's page pictures in the Files panel run a little past the panel's right edge.
 - **A lead task leads one team (experimental agent teams).** Once its team has stopped, a follow-up to the lead task
   is done without helpers. The lead may still try to start helpers it used before, and each try shows as "Couldn't
   start a helper". To take a helper's part further, write to that helper, which keeps its work and files; for a new
