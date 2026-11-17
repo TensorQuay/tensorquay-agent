@@ -364,7 +364,7 @@ explained in [TEST-PLAN](TEST-PLAN.md#build-names-and-ids).
      build and any router works unchanged.
    - A dev server's live preview relayed out of the sandbox over its link. The sandbox never listens for
      connections. This needs a design record and a security review first.
-7. **Later:** Phase 12, swarms, when the product owner calls for it. They build on channels (18.2).
+7. **Later:** Phase 12, swarms, when the product owner calls for it. They build on agent teams (ADR-0038).
 
 ## 5. Parallel tracks
 Engineering runs in three streams that own disjoint parts of the tree, so they progress in parallel and meet at each
