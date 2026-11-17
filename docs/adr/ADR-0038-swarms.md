@@ -2,8 +2,11 @@
 
 ## Status
 
-Accepted (design; built after agent teams, DEV-PLAN Phase 12). The Product Owner agreed this shape on 2026-10-02, and
-the two open points were decided that day (under "Decisions (2 Oct 2026)").
+**Withdrawn (the product owner, 17 Nov 2026): swarms are dropped.** Agent teams carry a goal, with rounds from
+18.1 (DEV-PLAN §4b), and stay one level: simpler and more efficient first. This record stays for its history.
+
+Was: accepted (design; built after agent teams, DEV-PLAN Phase 12). The Product Owner agreed this shape on 2026-10-02,
+and the two open points were decided that day (under "Decisions (2 Oct 2026)").
 
 ## Date
 

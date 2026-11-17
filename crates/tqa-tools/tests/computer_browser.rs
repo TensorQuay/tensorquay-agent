@@ -47,24 +47,31 @@ async fn rt_i_046_the_computer_tool_drives_a_real_browser() -> Result<(), Box<dy
     let errors = String::from_utf8_lossy(&output.stderr);
     // Each probe's cases counted from its own source, so a case added there is one more asked for here (c17: the
     // browser's fifth, TOOL-U-059, and the AT-SPI cases past seven made the old counts unreachable), and each run
-    // reports whatever the one before did. The image runs the AT-SPI probe's clipboard case last and alone
-    // (images/runtime/desktop-probe-run.sh: after its paste, a known limit until c18's RT-I-058).
+    // reports whatever the one before did. The image runs the AT-SPI probe's clipboard case, then RT-I-058's
+    // double-clicks after a paste, each alone and last (images/runtime/desktop-probe-run.sh); before 18.0.1 this
+    // counted one case apart, so the step failed with every case passed (the 18.0 integration, 17 Nov 2026).
     let cases = |source: &str| source.matches("\n#[ignore").count();
-    for (probe, count) in [
-        ("browser", cases(include_str!("computer_browser_probe.rs"))),
+    for (probe, count, runs) in [
+        (
+            "browser",
+            cases(include_str!("computer_browser_probe.rs")),
+            1,
+        ),
         (
             "AT-SPI",
-            cases(include_str!("computer_desktop_probe.rs")) - 1,
+            cases(include_str!("computer_desktop_probe.rs")) - 2,
+            1,
         ),
-        ("clipboard", 1),
+        ("clipboard and after-a-paste", 1, 2),
     ] {
         let all = format!("test result: ok. {count} passed; 0 failed; 0 ignored;");
-        assert!(
-            shown.contains(&all),
-            "the {probe} probe's {count} cases all ran and passed:\n{shown}\n{errors}"
+        assert_eq!(
+            shown.matches(&all).count(),
+            runs,
+            "the {probe} probe's {count} cases all ran and passed, in {runs} run(s):\n{shown}\n{errors}"
         );
     }
-    assert_eq!(shown.matches("test result: ").count(), 3, "{shown}");
+    assert_eq!(shown.matches("test result: ").count(), 4, "{shown}");
     assert!(
         output.status.success(),
         "the probe failed:\n{shown}\n{errors}"

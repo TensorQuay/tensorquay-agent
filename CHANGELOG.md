@@ -3,7 +3,12 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
-## Unreleased
+## 18.0.0 (17 November 2026)
+
+A feature release: the agent reads PDFs and pictures, a desktop sign-in can be kept for a whole task, a folder
+previews as a real site, administrators see the sites the network refused lately and can allow them, and each release
+now ships prebuilt images for amd64 and arm64. Two database migrations and a protocol revision (15); no configuration
+key changes.
 
 ### Added
 
@@ -131,6 +136,41 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **Under Take over, a key sent within a few milliseconds of a click can be lost** while the desktop's browser moves
   its focus. Type at a person's pace, or click once more and send the key again. The agent's own actions are not
   affected: each one waits for the screen to settle first.
+- **The PDF reader's misses are its engines' (ADR-0040).** A form's field values, and text in a font with no
+  ToUnicode map, read wrong or empty; a model that reads pictures sees the page as it looks.
+- **On the Firecracker backend, a task's disk is slower than the host's (PERF-012).** Inside a microVM,
+  sequential writes run at about 55 to 60 % of the host disk's speed, random writes at about 30 to 40 % and reads at
+  60 to 85 %, as in every release since 17.0. On the Docker backend, the default, each is 93 % or more.
+- **In Safari, a previewed page whose script keeps the processor busy stops the app responding until the script
+  ends.** Chromium-based browsers (Chrome, Edge) run the preview apart and stay responsive, as WEB-E2E-122 checks;
+  WebKit runs it on the page's own thread (8 s in the test's busy page). Close the preview or use **Stop scripts**
+  once the page lets go. A Safari-safe way is planned for 18.1.
+- **Three small display issues, fixed in 18.0.1.** A PDF read's step names the pages it read as lines ("lines 1–2"
+  for pages 1 and 2); the Screen panel's ⋯ menu cuts its descriptions short at desktop widths, though each item works
+  as described; and a PDF's page pictures in the Files panel run a little past the panel's right edge.
+- **A lead task leads one team (experimental agent teams).** Once its team has stopped, a follow-up to the lead task
+  is done without helpers. The lead may still try to start helpers it used before, and each try shows as "Couldn't
+  start a helper". To take a helper's part further, write to that helper, which keeps its work and files; for a new
+  round, ask a new task to lead ([Helpers](docs/user-guide/helpers.md#stop)). Planned for 18.1: rounds.
+
+### Upgrade notes
+
+- **Two migrations, applied by the gateway at its start; back up the database first as usual.** 0104 adds the task's
+  `keep_sign_in` switch (off for every existing task), 0105 widens the screen notices' kinds for the switch's two
+  notices. Neither removes data (GW-I-324; the upgrade fixture moves to 105).
+- **Protocol revision 15: rebuild or pull every runtime image (PROTO-U-045, PROTO-U-046).** The Minimal, Workstation
+  and Desktop runtimes carry the new revision in their labels; a 17.4 runtime still works against the 18.0 gateway but
+  keeps the old behaviour (every run's end empties the browser's profile, and the kept-sign-in switch has no effect on
+  it). Pull with `deploy/pull-images.sh` or build with `deploy/build-images.sh` from the v18.0.0 tag, then start the
+  gateway and web with `--force-recreate`, as the install guide says.
+- **No `gateway.toml` key is added, renamed or removed** (`deploy/examples/gateway.toml` is unchanged since 17.4.1),
+  and no compose file, port or environment variable of the stack changes. The install guide's step 0 now offers the
+  pull in place of the build.
+- **The kept sign-in and the desktop's idle retirement:** with the switch on, a task's desktop is no longer retired for
+  being idle; it ends at the installation's desktop time limit, as before for a busy one (RT-I-060, GW-I-324). Nothing
+  to configure; worth knowing for a host that counts on idle desktops giving way.
+- **The network proxy's Recently refused record is in memory (GW-I-323):** empty after a gateway restart, the log keeps
+  the history. No retention setting.
 
 ## 17.4.1 (12 November 2026)
 

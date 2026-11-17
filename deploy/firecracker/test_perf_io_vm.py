@@ -51,6 +51,22 @@ class Scenario(unittest.TestCase):
         self.assertTrue(vm.GUEST_DIRECTORY.startswith("/workspace/"))
 
 
+class Limits(unittest.TestCase):
+    """17 Nov 2026: the defaults (5 warm-ups and 50 rounds) made 442 responses, and the fixture model refuses more than
+    128, so the run ended before its first round (the 18.0 integration)."""
+
+    def test_the_default_run_fits_the_fixture_models_responses(self):
+        options = vm.parser().parse_args([])
+        scenario = vm.scenario(options.warmups + options.rounds, SIZES, "print('bench')\n")
+        self.assertLessEqual(len(scenario["responses"]), vm.MAX_RESPONSES)
+        self.assertEqual((options.warmups, options.rounds), (3, 12), "the rounds of the 11 Oct 2026 measured runs")
+
+    def test_a_run_past_the_fixture_models_responses_is_refused_before_any_stack(self):
+        with self.assertRaisesRegex(ValueError, "at most 15 rounds"):
+            vm.scenario(16, SIZES, "print('bench')\n")
+        self.assertEqual(len(vm.scenario(15, SIZES, "print('bench')\n")["responses"]), 122)
+
+
 class Heredoc(unittest.TestCase):
     def test_the_setup_call_writes_the_real_bench_byte_for_byte(self):
         source = vm.BENCH.read_text()

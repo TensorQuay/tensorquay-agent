@@ -55,6 +55,25 @@ class Script(unittest.TestCase):
         self.assertIn(ADDRESS + "/team/repo.git", commands[3])
 
 
+class Ownership(unittest.TestCase):
+    """17 Nov 2026 (the 18.0 integration): the scenario handed the tree to the containers' user, and `prepare` then
+    read gateway.toml as the host user and was refused, before any sandbox started."""
+
+    def test_the_scenario_leaves_the_tree_the_host_users_for_prepare_to_read(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary) / "stack"
+            directory.mkdir()
+            stack = microvm.MicrovmHostKeyStack(directory, {})
+            stack.address, stack.value = ADDRESS, VALUE
+            calls = []
+            with mock.patch.object(microvm.HostKeyStack, "scenario"), \
+                    mock.patch.object(compose, "ownership", side_effect=lambda *args: calls.append(args[2:])):
+                stack.scenario()
+            self.assertTrue((directory / "scenario.json").exists())
+            # The last hand-over is back to the host user; prepare gives the tree to the containers after its writes.
+            self.assertEqual(calls[-1], ())
+
+
 class MicrovmNetwork(unittest.TestCase):
     """The microVM half draws its sandbox network as the microVM stack does, and pins that network's gateway
     address in gateway.toml; for 11 days it read a fixed subnet that no longer existed, unseen without KVM."""

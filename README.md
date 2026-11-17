@@ -1,63 +1,55 @@
 # TensorQuay Agent
 
-**An open, free and efficient on-premise AI agent platform that is easy to use, for any company and any individual.**
+**A self-hosted AI agent server: every task gets its own sandboxed computer, with local or cloud models.** For a
+team sharing one machine, or one person with their own files and hardware. Rust, TypeScript, Apache-2.0.
 
 ![A task: bank exports in, a checked holdings report and its cash differences out](docs/images/demo-finance-task.gif)
 
 *A task on a test install: three banks' exports (fictional) in, a checked holdings report and a list of cash differences
 out. A hosted model; local models work the same way. Sped up.*
 
-We believe developers and the open-source community deserve to use AI with the best options available to them, not
-locked into one vendor's platform, and that end users deserve every level of the harness: isolated sandboxes, team
-management and, in time, agent swarms. We are building an environment and a communication system for agents, not for
-humans: humans set goals and watch, and everything a browser can do a program can do too. TensorQuay Agent
-is that platform. Sign in from a browser, give the agent a
-task, and it works in an isolated sandbox on its own workspace: reading, editing, running and shipping code. Models run
-locally on an OpenAI-compatible server (vLLM, SGLang or TensorQuay Engine) or, when you choose, through a cloud
-provider.
+## Quick start
 
-**Why another harness?** The existing ones are a CLI on one developer's laptop, a hosted service, or a chat window
-without a workspace. A team sharing one GPU workstation needs a fourth shape: a server on the local network that gives
-every person a sandboxed agent, works well with open models, keeps secrets out of the sandbox, and can be installed by
-one administrator. The full argument is in [PRD §1](docs/PRD.md#1-mission).
+From a release, not `main`. Linux, or a Mac with Docker Desktop; Docker Engine 27.4 and Compose 2.31 or newer.
 
-- **Multi-user on one box:** accounts, roles, persistent conversations, one sandbox per conversation, resume after
-  disconnects and restarts.
-- **Two runtime modes behind one interface:** `docker` (default; Docker Engine or Docker Desktop) and `firecracker`
-  (KVM microVMs on a Linux host). Same image, same protocol, same tests.
-- **Local-model first:** OpenAI-compatible protocols, prompt-cache-aware context, a tool-call fallback for models with
-  weak native tool calling, budgets sized for smaller context windows.
-- **Isolation by design:** inside its sandbox the agent works freely; secrets stay in the gateway's built-in encrypted
-  secret store and never enter the sandbox, and the network allow-list is the guardrail: a refused connection names
-  its host and port (ADR-0035).
-- **Workspaces on your disk:** every workspace is an owned, isolated directory or block image on the host's local disk,
-  mapped into the sandbox. A conversation binds to one workspace; conversations can reuse, fork and share workspaces.
-  No object storage in the file path.
-- **Minimal core, open extension points:** skills, MCP tools inside the sandbox, connectors as gateway-proxied MCP
-  servers with a credential vault, customised agent profiles, sandbox templates and model routes. No in-process plugin
-  API: MCP is the plugin protocol. The core ships no connectors; each is an MCP server the user registers. The
-  decision engine is pluggable too: the model decides by default, an external engine can be configured.
-- **Agents talk through channels:** a shared, ordered forum at the gateway where agents and humans post, propose,
-  vote, decide and claim tasks. No broker, no point-to-point links. Agent swarms, a later phase, will build on it.
-- **Lean Rust harness, TypeScript web UI, Apache-2.0.**
+```sh
+git clone --branch v18.0.0 https://github.com/TensorQuay/tensorquay-agent.git && cd tensorquay-agent
+deploy/pull-images.sh   # pulls the release's prebuilt images (amd64 and arm64) and prints the lines the install needs
+```
 
-## Try it
-Install a release, not `main`: the newest is on the [Releases page](https://github.com/TensorQuay/tensorquay-agent/releases/latest)
-(`git clone --branch v17.4.1 https://github.com/TensorQuay/tensorquay-agent.git`). `main` is where development happens.
-The one-box Docker install is in [deploy/README.md](deploy/README.md#install): pull the release's prebuilt images with
-`deploy/pull-images.sh` (from 18.0, amd64 and arm64) or build them with `deploy/build-images.sh`, point it at a model server (a local OpenAI-compatible one, or a hosted provider; or
-build the scripted test model with `--fake-model` to try it without one), start it, and open the page in a browser. It runs on Linux and on a Mac with Docker Desktop. Without a GPU, a
-local model works but slowly, minutes a step, too slow for helpers or the desktop: see the user guide's [Running
-without a GPU](docs/user-guide/tasks.md#running-without-a-gpu) section.
+Then choose the settings, create the installation and start it: steps 1 to 3 of the
+[install guide](deploy/README.md#install), about 10 minutes. Then open the page, create the
+[first administrator](deploy/README.md#first-administrator-route-and-task) and start a task. No model server yet?
+The guide's `--fake-model` builds a scripted one, enough to see a task run end to end.
 
-## Status
-**Releases are on the [Releases page](https://github.com/TensorQuay/tensorquay-agent/releases), each with its
-notes from the [changelog](CHANGELOG.md).** The one-box install runs end to end: accounts, tasks in
-isolated sandboxes, models through the gateway, workspaces, connectors and channels (the
-[development plan](docs/DEV-PLAN.md) has what is done and what is next). There are no prebuilt images, so the images
-are built locally, and interfaces will still change.
+## What it does
+
+- **Each task in its own sandbox, on your files.** You describe the task; the agent reads, edits, runs commands and
+  browses inside a sandbox of its own, on a workspace you keep, copy and share ([Tasks](docs/user-guide/tasks.md),
+  [Workspaces](docs/user-guide/workspaces.md), [Sharing](docs/user-guide/sharing.md)).
+- **Reads PDFs and pictures.** A PDF in the workspace is read page by page with the same file tool as everything else;
+  a model that reads pictures is shown the pages, and the pictures, too
+  ([Files, changes and context](docs/user-guide/files-and-changes.md#browse-the-workspace)).
+- **Uses a desktop, and you can take over.** A task can run on a screen with a browser, a terminal and an office
+  suite. You watch, take over to sign in somewhere, hand back, and replay what the agent did
+  ([The desktop](docs/user-guide/desktop.md#take-over-and-hand-back)).
+
+- **Previews a site with its folder.** A page the agent built shows in the Files panel with its style sheets, scripts
+  and images, still sandboxed
+  ([A web page with its folder](docs/user-guide/files-and-changes.md#a-web-page-with-its-folder)).
+- **Local models first.** Any model server with the common chat-completions API, on your machine or hosted; prompt
+  caching, a fallback for models with weak tool calling, budgets sized for small context windows
+  ([Models](docs/admin-guide/web-settings.md#models);
+  [Running without a GPU](docs/user-guide/tasks.md#running-without-a-gpu)).
+- **For administrators: people, models and the network allow-list.** Accounts and roles, model routes with their
+  keys, and the sites a sandbox may reach, with the ones it refused lately and Allow this site
+  ([People](docs/admin-guide/web-settings.md#people),
+  [Internet access](docs/admin-guide/web-settings.md#internet-access)).
+- **Agent teams, experimental and off by default.** A task can lead helpers for work that splits; an administrator
+  turns it on ([Helpers](docs/user-guide/helpers.md)).
 
 ## How it fits together
+
 ```text
 browser ── HTTPS: events streamed down, actions posted up ──► tqa-gateway ──► PostgreSQL (history, users, usage)
                                                                   │
@@ -65,51 +57,55 @@ browser ── HTTPS: events streamed down, actions posted up ──► tqa-gate
                                                                   ▼
                                          sandbox: tqa-runtime (agent loop and tools) on /workspace
 ```
-The gateway is the only public address. Each conversation gets its own sandbox on its own network, which dials out
-to the gateway and has no other network route: sandboxes cannot reach each other. Model credentials stay in the gateway. Details are in
-[ARCHITECTURE](docs/ARCHITECTURE.md).
+
+The gateway is the only public address. Each task gets its own sandbox on its own network, which dials out to the
+gateway and has no other route: sandboxes cannot reach each other. Model credentials stay in the gateway. The
+details are in [ARCHITECTURE](docs/ARCHITECTURE.md).
+
+- **Multi-user on one box:** accounts, roles, persistent tasks, one sandbox per task, resume after disconnects and
+  restarts.
+- **Two runtime modes behind one interface:** `docker` (default; Docker Engine or Docker Desktop) and `firecracker`
+  (KVM microVMs on a Linux host). Same image, same protocol, same tests.
+- **Models through the gateway:** a local server such as vLLM, SGLang or TensorQuay Engine, or a hosted provider,
+  over the common chat-completions API. The keys stay in the gateway's encrypted store and never enter a sandbox.
+- **Isolation by design:** inside its sandbox the agent works freely; the network allow-list is the guardrail, and a
+  refused connection names its host and port (ADR-0035). Workspaces are directories or block images on the host's
+  own disk, mapped into the sandbox: no object storage in the file path.
+- **Minimal core, open extension points:** skills, MCP tools inside the sandbox, connectors as gateway-proxied MCP
+  servers, agent profiles, environments and model routes; channels, where agents and people post, propose and vote.
+
+**Why another harness?** The existing ones are a CLI on one laptop, a hosted service, or a chat window without a
+workspace. A team sharing one GPU workstation needs a server that gives every person a sandboxed agent, works well with
+open models, and is installed by one administrator ([PRD §1](docs/PRD.md#1-mission)).
 
 ## Repository layout
+
 | Path | Content |
 |---|---|
 | `crates/tqa-types` | The wire protocol: typed frames and events, exported as JSON Schema |
 | `crates/tqa-llm` | Model providers, streaming, retries and the model-route registry |
 | `crates/tqa-context` | Message history, projection, resume rules, context window and write-ahead log |
-| `crates/tqa-tools` | The built-in tools (read, write, edit, search, glob, grep, shell, fetch_url, notes, and the channel and team tools) and workspace confinement |
-| `crates/tqa-prompt` | The versioned system prompt and instruction files |
-| `crates/tqa-core` | The agent loop: steps, tool batches, budgets, cancellation and resume |
+| `crates/tqa-tools` | The built-in tools (read, write, edit, search, shell, fetch_url, notes, channel and team tools) and workspace confinement |
+| `crates/tqa-core`, `crates/tqa-prompt` | The agent loop: steps, tool batches, budgets, cancellation and resume; the versioned system prompt |
 | `crates/tqa-runtime` | The process inside each sandbox: gateway link, journal, run supervisor |
 | `crates/tqa-sandbox` | Sandbox backends behind one interface (Docker, and Firecracker microVMs on a Linux KVM host) |
 | `crates/tqa-gateway` | The control plane: accounts, conversations, event store, streams, sandbox manager, relay, secrets |
-| `crates/tqa-testkit` | Fakes shared by the tests: model server, clock, provider, gateway |
-| `crates/tqa-ext-check` | The extension catalogue's linter (`tools/check.sh` runs it) |
-| `crates/tqa-vm-init` | The init process inside a Firecracker microVM |
-| `web/` | The web app (Next.js, React, TypeScript) |
-| `deploy/`, `images/` | The one-box Docker Compose deployment and the container images |
-| `docs/` | Product, architecture, plans, guidelines and decision records |
-| `tools/` | Repository gates and git guardrails |
-| `brand/` | Logo and brand assets |
-
-## Development
-Setup, prerequisites and the checks every change must pass are in [CONTRIBUTING](CONTRIBUTING.md). The one-box
-deployment is described in [deploy/README.md](deploy/README.md).
+| `crates/tqa-testkit`, `crates/tqa-ext-check`, `crates/tqa-vm-init` | Test fakes; the extension catalogue's linter; the microVM's init |
+| `web/`, `deploy/`, `images/` | The web app (Next.js, React, TypeScript); the one-box Docker Compose deployment and the container images |
+| `docs/`, `tools/` | Product, architecture, plans, guidelines, decision records, evaluation reports; the repository gates and git guardrails |
 
 ## Documents
+
 | Document | Content |
 |---|---|
-| [docs/PRD.md](docs/PRD.md) | What we build and why; goals, users, success metrics, scope, requirements, risks, decisions |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Components and crates, runtime modes, agent loop, providers, tools, wire protocol, gateway, web, security |
-| [docs/DEV-PLAN.md](docs/DEV-PLAN.md) | Phase-by-phase implementation plan with gates and estimates |
-| [docs/TEST-PLAN.md](docs/TEST-PLAN.md) | Test principles, environments, the designed test cases, performance protocol, phase gates, traceability |
-| [docs/DEV-GUIDELINES.md](docs/DEV-GUIDELINES.md) | Engineering rules: design, code style, provenance, git, tests, CI gates, review |
-| [docs/UI-GUIDELINES.md](docs/UI-GUIDELINES.md) | One visual system: brand, colour and type tokens, layout, components, states, accessibility, copy |
-| [docs/ENGINEERING-GUARDRAILS.md](docs/ENGINEERING-GUARDRAILS.md) | Practice standard: universal principles, size limits, testing standard, Rust, Go, TypeScript and React, SQL, shell, containers |
-| [docs/release.md](docs/release.md) | Release artefacts: the SBOMs and package lists every release publishes, and how to produce them |
-| [docs/admin-guide/](docs/admin-guide/README.md) | For administrators: files and settings pages: users, status, models, secrets, egress, limits, connectors, environments, usage, and everyone's API tokens, keys, connector credentials and profiles |
-| [docs/user-guide/](docs/user-guide/README.md) | For everyone: tasks, files and changes, workspaces, sharing, keys, channels and helpers |
-| [crates/tqa-gateway/openapi.json](crates/tqa-gateway/openapi.json) | The HTTP API reference (OpenAPI 3.1): every route, its fields and its error codes |
-| [AGENTS.md](AGENTS.md) | Rules for anyone working in this repository, including the git guardrails |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | How to contribute |
+| [User guide](docs/user-guide/README.md) | Tasks, files and changes, workspaces, sharing, keys, channels, the desktop and helpers |
+| [Administrator's guide](docs/admin-guide/README.md) | Files and settings pages: people, status, models, secrets, internet access, limits, connectors, environments, usage |
+| [Install guide](deploy/README.md), [CHANGELOG](CHANGELOG.md) | The one-box Docker deployment: install, first administrator, operations, upgrade notes; what each [release](https://github.com/TensorQuay/tensorquay-agent/releases) changed |
+| [PRD](docs/PRD.md), [ARCHITECTURE](docs/ARCHITECTURE.md), [DEV-PLAN](docs/DEV-PLAN.md), [TEST-PLAN](docs/TEST-PLAN.md) | What we build and why; how it is built; the phases and their gates; the designed tests |
+| [Decision records](docs/adr/README.md), [design notes](docs/design/README.md), [evaluation reports](docs/evals/README.md) | Why each decision was taken, what is being designed, and what each gate's evidence was |
+| [CONTRIBUTING](CONTRIBUTING.md), [AGENTS.md](AGENTS.md), [DEV-GUIDELINES](docs/DEV-GUIDELINES.md), [ENGINEERING-GUARDRAILS](docs/ENGINEERING-GUARDRAILS.md), [UI-GUIDELINES](docs/UI-GUIDELINES.md) | How to contribute; the rules for anyone working here, the engineering rules, the practice standard and the one visual system |
+| [HTTP API](crates/tqa-gateway/openapi.json) | The API reference (OpenAPI 3.1): every route, its fields and its error codes |
 
 ## Licence
+
 Apache License 2.0. See [LICENSE](LICENSE).
