@@ -301,7 +301,7 @@ explained in [TEST-PLAN](TEST-PLAN.md#build-names-and-ids).
    refused" with "Allow this site" (ADR-0035 point 3); keeping a desktop sign-in for a whole task (ADR-0039 §6);
    prebuilt images for amd64 and arm64. Verified end to end before the release.
 3. **Release 18.1** (the product owner, 17 Nov 2026), a feature release numbered MINOR under the 17 Nov amendment
-   of §7, and verified with every step of §7. It has four parts.
+   of §7, and verified with every step of §7. It has five parts.
    - **The administrator's Sandboxes page and the leak verdict** (the product owner's request of 7 Nov 2026).
      Settings › Operations › Sandboxes lists every running sandbox across all people. Each row shows its owner's
      email, its environment, its state and age, and its CPU and memory against its size. Each row has a Stop,
@@ -321,6 +321,14 @@ explained in [TEST-PLAN](TEST-PLAN.md#build-names-and-ids).
      a model server, the first administrator), then creates the installation's files and secrets, pulls the
      release's images, starts the installation, and checks that it is ready. The install guide's manual steps stay,
      for those who want them.
+   - **Rounds for agent teams** (the product owner, 17 Nov 2026). This replaces "a lead leads one team" (ADR-0034, 2
+     Oct 2026).
+     - A follow-up to a lead task whose team has stopped may start another round, with a fresh budget and time. The
+       finished helpers can come back, each continuing with its own conversation and files, and new ones can join.
+     - A lead that may not start a round is told so in plain words, so it never tries a helper it can't start.
+     - Verified end to end on the real stack with a real model: a first round; a follow-up that brings back two
+       helpers with their context and adds one new helper; the budget and the time per round; a helper written to
+       directly between rounds; and no "Couldn't start a helper" line anywhere in the run.
 4. **Fix releases** as findings come in (§7).
 5. **Later, when people ask for them:**
    - Previews on an origin of their own, an optional installation setting (a wildcard domain or a port range), so any

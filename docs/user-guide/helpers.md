@@ -92,6 +92,10 @@ and the lead task puts them in its workspace, by default in a folder named after
 When a team stops, the lead task's conversation gets a summary: why it stopped, each one's share of the work
 (the helpers and the lead task), their reports and the files they handed back. Every task stays: you can carry on with the lead task or with any helper, as with any task.
 
+A lead task leads one team. Once that team has stopped, the lead task works alone: a follow-up you send it is done
+without helpers. To take a helper's part further, write to that helper: it keeps its own work and files. For a new
+round of helpers, ask a new task to lead, and give it what the first team found.
+
 ## Delete
 Deleting a helper removes that helper, its messages and any files it sent that the lead hadn't taken yet. The lead is
 told. Deleting the lead task removes the team: its messages, every helper's task and the helpers' own copies of the
