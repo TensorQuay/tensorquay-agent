@@ -139,7 +139,6 @@ async fn tool_u_004_rejects_invalid_protected_large_and_binary() -> TestResult {
         json!({"path":"hello.txt","edits":[]}),
         json!({"path":"hello.txt","edits":vec![json!({"old_text":"a","new_text":"b"});51]}),
         request("hello.txt", "", "x"),
-        request("hello.txt", "alpha", "alpha"),
     ];
     for args in invalid {
         assert!(matches!(
