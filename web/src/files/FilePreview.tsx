@@ -140,7 +140,7 @@ export function FilePreview({
     <section className="file-preview" aria-label={name}>
       <div className="file-preview-heading">
         {/* A sheet leads with its rows and columns (WEB-U-182); its size is no headline there. */}
-        <span className="type-small muted">
+        <span className="file-preview-size type-small muted">
           {kind === "sheet" ? null : formatSize(file.size, t.locale)}
         </span>
         <div className="file-preview-actions">
