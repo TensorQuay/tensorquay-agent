@@ -88,6 +88,10 @@ async function openMenu(page: Page) {
   return { box, more: (await more.boundingBox())! };
 }
 
+// A desktop browser draws classic scrollbars, which take the column's width (the livepass's ~10 px); Playwright hides
+// them unless told not to.
+test.use({ launchOptions: { ignoreDefaultArgs: ["--hide-scrollbars"] } });
+
 test.beforeEach(async ({ request }) => {
   await resetFront(request, ["desktop"]);
 });
@@ -139,6 +143,9 @@ for (const width of [1280, 1440] as const)
         const right = box.left + column.clientLeft + column.clientWidth;
         return {
           scrolls: column.scrollHeight > column.clientHeight,
+          // The scrollbar takes room: the case the pages' width must leave for it.
+          scrollbar:
+            column.offsetWidth - column.clientLeft * 2 > column.clientWidth,
           sideways: column.scrollWidth > column.clientWidth,
           over: Array.from(
             column.querySelectorAll(".file-pdf-page"),
@@ -146,7 +153,12 @@ for (const width of [1280, 1440] as const)
           ).filter((past) => past > 0.5),
         };
       });
-      expect(fit).toEqual({ scrolls: true, sideways: false, over: [] });
+      expect(fit).toEqual({
+        scrolls: true,
+        scrollbar: true,
+        sideways: false,
+        over: [],
+      });
       await capture(page, `pdf-pages-${width}-${colorScheme}`);
     });
   }
