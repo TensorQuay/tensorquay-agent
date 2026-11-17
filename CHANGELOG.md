@@ -54,7 +54,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   marks decide it, so a PDF saved without its extension reads as pages too.
 - **The Screen panel's ⋯ menu is wide enough for its items at desktop widths (WEB-U-479, WEB-E2E-127).** At 1280 and
   1440 px the menu opened no wider than the room to its ⋯'s end and cut its words ("Keep the sign-i…"); where that
-  room is narrower than the menu, it now takes the panel's width. A phone's panel places it as before.
+  room is narrower than the menu, it now takes the panel's width. A phone's panel places it as before. A menu in a
+  dialog opened from the panel (the Screen's or a spreadsheet's Expand) now opens under its button: the panel's bounds
+  held it to the panel's strip of the page, where the Screen's ⋯ menu had no width at all.
 - **A PDF's page pictures fit the Files panel (WEB-U-480, WEB-E2E-127).** They ran about 10 px past the panel's right
   edge: each page was drawn at the panel's width with its border on top, and the column's scrollbar, which arrives
   with the pages, took more. The border is now inside that width, and the scrollbar's room is kept from the start.

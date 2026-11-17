@@ -54,7 +54,9 @@ export function Popover({
       // never wider, moved along into it, so it never covers the page beside the panel (WEB-U-432).
       let low = gap;
       let high = innerWidth - gap;
-      const limit = anchor.current?.closest("[data-menu-bounds]");
+      // A dialog opened from the panel (Expand) sits in its markup but not in its box: the window bounds it (WEB-U-479).
+      const nearest = anchor.current?.closest("dialog, [data-menu-bounds]");
+      const limit = nearest?.hasAttribute("data-menu-bounds") ? nearest : null;
       if (limit) {
         const box = limit.getBoundingClientRect();
         const style = getComputedStyle(limit);
