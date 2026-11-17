@@ -395,6 +395,24 @@ C1 to C6, REL-I-001, and REL-I-003 to REL-I-005), and runs the first-hour check 
 page and is fixed in a fix release.
 A user installs either way (deploy/README.md, step 0); the test model is never published.
 
+**Amended 17 Nov 2026 (PO): from 18.0, version numbers follow standard semantic versioning.** MAJOR goes up only
+for a release that an existing installation can't take in place, and its upgrade notes say what to do. That means
+any of these:
+- a `gateway.toml` key removed or renamed
+- a compose file, port or environment variable changed
+- an API or wire-protocol change that older clients or runtimes can't follow
+- runtime images that must be rebuilt or pulled.
+
+MINOR goes up for new capabilities and improvements that upgrade in place: migrations the gateway applies at its
+start, new API fields, new pages. PATCH is for fixes only. This replaces the 9 Nov mapping, where MAJOR counted every
+new capability, migration or protocol change.
+
+The release kinds above still decide the verification, whatever the number. A release with a new capability, a
+migration or a protocol change keeps every step, 1 to 5.
+
+18.0.0 stays a major release: its runtime images carry protocol revision 15 and must be rebuilt or pulled. The admin
+Sandboxes page planned next is 18.1.0.
+
 **Unchanged from v0.2:**
 - Semantic versions; `main` always releasable behind gates; release branches only for fixes.
 - A release produces: gateway, web and runtime images by digest; the Firecracker rootfs and kernel manifest; an
