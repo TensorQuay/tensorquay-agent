@@ -7,6 +7,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **Two details from the 18.0.1 live look (WEB-U-492, WEB-U-493, WEB-E2E-133).** On a phone the Files panel wrote a
+  file's size on two lines beside Expand ("661.6 / kB"); the size now reads on one line, and the actions move under it
+  when the row can't hold all three. A PDF read's output in its step scrolled sideways, its paragraphs one long line
+  each; it now wraps them, a long address or word included, while a code or text file's read keeps its lines.
 - **A PDF read's step names the pages it read, not lines (WEB-U-482).** After reading pages 1 and 2 of a PDF, the
   step said "Read uploads/report.pdf lines 1–2"; it now says "pages 1–2", in every language. The result's own page
   marks decide it, so a PDF saved without its extension reads as pages too.
