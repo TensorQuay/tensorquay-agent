@@ -81,7 +81,7 @@ class MicrovmHostKeyStack(HostKeyStack):
         compose.write(self.directory / "scenario.json", json.dumps({
             "model": "fixture", "select": "prompt",
             "responses": responses(self.address, self.address[len("https://"):], self.value)}))
-        compose.ownership(self.directory, self.env, "1000:1000")
+        # The tree stays the host user's: `prepare` reads gateway.toml next and hands the tree over after its writes.
 
     def vm_hosts(self, conversation):
         return self.command(["docker", "ps", "-aq", "--filter", "label=tqa.conversation=" + conversation]).split()
