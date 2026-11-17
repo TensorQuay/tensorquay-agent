@@ -1,6 +1,7 @@
 # The administrator's Sandboxes page and the leak verdict
 
-**State:** proposed, 17 Nov 2026, for the release after 18.0. **Decides:** the Product Owner (what the page shows and
+**State:** accepted by the technical lead on 17 Nov 2026 with seven changes (worked in below), for the release after
+18.0; the test rows are claimed after v18.0.0 is tagged. **Decides:** the Product Owner (what the page shows and
 the privacy rule, both already given on 7 Nov 2026), the technical lead (the API, the sweep accounting, the test rows).
 **Builds on:** ARCHITECTURE §4.4 (lifecycle, activeness, admission), ADR-0016 (activeness and admission), ADR-0021
 (sandbox networking and its sweeps), ADR-0039 §10 (a Desktop keeps its place), the Settings menu's three groups
@@ -74,12 +75,25 @@ Two endpoints, administrators only (`require_admin`, by session or personal toke
       "stop_refusal": null             // "starting" | "working" | "stopping" | "work_waiting" when can_stop is false
     }
   ],
-  "next_after": null                   // a page token past 200 items (max_live goes to 4096)
+  "next_after": null,                  // a page token past 200 items (max_live goes to 4096)
+  "left_behind": [                     // what survived a sweep (§3.6); empty when the verdict is green
+    {
+      "kind": "network",               // container | network | volume
+      "name": "tqa-sbx-18e7c62210a67d70",   // the engine's name, or a container's short id
+      "age_seconds": 660,
+      "reason": "engine_timeout",      // the engine's error code from the last failed removal
+      "remove": "docker network rm tqa-sbx-18e7c62210a67d70"   // the command to remove it by hand
+    }
+  ]
 }
 ```
 
 - **One consistent read** of the store under the gateway's `io_timeout`: totals and rows come from the same query, so
   "3 of 4 in use" matches the rows. The read never calls the engine; usage comes from the sampler's last values (§3.4).
+- **Resources per row:** `usage` against `size` is what the page shows on every row ("0.2 of 2 cores", "0.4 of 4 GB"):
+  the owner asked for each sandbox's resources, not a total.
+- **`left_behind`** names engine objects only (a container's short id, a network's or volume's name): nothing of a
+  task is in it, and the remove command is built from that name by the gateway, never from input.
 - **Privacy rule, as a test (GW-U-220, SEC-064):** the answer carries no title, message, file or workspace name or
   path, branch, model route, agent profile, channel or message count, for other people's rows and the administrator's
   own alike (one rule is simpler to keep than two). The test plants those strings in the fixture and searches the body.
@@ -94,7 +108,7 @@ Two endpoints, administrators only (`require_admin`, by session or personal toke
 - Body: none. `202` with `{ "stopping": true }` means the retire is requested.
 - Refusals, decided under the admission lock so a run cannot start between the check and the retire: `409 working`
   (a run is active, or the sandbox is `starting`), `409 work_waiting` (a message is queued or sending for it),
-  `409 stopping` (already on its way: answered `202` again, not an error), `404 not_found` (no live sandbox).
+  `409 stopping` (already on its way: answered `202` again, not an error), `404 not_found` (no running sandbox).
 - A kept-on sandbox is stoppable (decision 1): the page shows the warning; the API treats `kept_on` as information.
 - Audited (§3.5) and counted (`tqa_sandbox_retired_total{reason="administrator"}`).
 
@@ -147,13 +161,13 @@ mechanism to reuse).
 
 ### 3.4 CPU and memory: the backend's stats (FR-13)
 `SandboxBackend::stats(handle)` exists on both backends and returns cumulative CPU milliseconds, resident memory, a
-process count and the uptime; nothing calls it today. A **sampler** in the manager calls it for every live sandbox
+process count and the uptime; nothing calls it today. A **sampler** in the manager calls it for every running sandbox
 every 10 s, each call bounded by the backend's timeout and at most four in flight, keeps the last two samples in memory
 and derives the CPU rate from the delta (so the first value appears after the second sample, and the page says
-"Measuring…" for 10 s). It never writes the store and never fails the read. The cost is one engine call per live
-sandbox per 10 s; past 64 live sandboxes the interval stretches with the count, the same bound `live_usage.rs` puts on
-the workspace quota walk. On Firecracker the memory figure is the VM process's resident set, which grows toward the
-VM's size; the page labels it "Memory held by microVMs" there.
+"Measuring…" for 10 s). It never writes the store and never fails the read. The cost is one engine call per running
+sandbox per 10 s; past 64 running sandboxes the interval stretches with the count, the same bound `live_usage.rs`
+puts on the workspace quota walk. On Firecracker the memory figure is the VM process's resident set, which grows
+toward the VM's size; the page labels it "Memory held by microVMs" there.
 
 ### 3.5 The audit record
 `admin_audit` keeps every administrator's change by area, item and action (migrations 0031 and on; the areas and
@@ -170,31 +184,43 @@ with no sandbox) returns `NetworkSweep { removed, failed, … }`. Today both res
 keeps them:
 
 - the manager stores the last pass's time and counts, and the previous pass's, in memory;
-- **unowned** = this instance's containers and networks that no record accounts for, as the two sweeps define them;
-  **volumes**: in `workspace.mode = volume` the named workspace volumes carrying this instance's label with no
-  workspace record (a new listing beside the network one; in bind mode the count is 0 by construction and the line
-  says so);
+- **unowned** = this instance's containers and networks that no record accounts for, as the two sweeps define them,
+  and, in `workspace.mode = volume`, the named workspace volumes carrying this instance's label with no workspace
+  record (a new listing and sweep beside the network one, SBX-U-019, an ADR-0021 amendment). In bind mode there are no
+  volumes to count: the verdict's sentence leaves volumes out altogether;
 - **survived one sweep** = a thing counted `failed` in two consecutive passes, or found unowned again after a pass
   tried it; the engine's error code from the failed removal is the reason (`error.code()`, as the warn line carries it);
+- each survivor is kept by name (a container's short id, a network's or volume's name), with its age and the engine's
+  reason, and served as the listing's `left_behind` with the remove command for it (`docker rm <id>`,
+  `docker network rm <name>`, `docker volume rm <name>`; the microVM engine's equivalents on Firecracker);
 - a verdict is **green** when nothing unowned survived, **amber** when something did, with the reason and the age of
   the oldest survivor; it is never red, because the product keeps running: the reaper's rules protect the slots, the
   verdict protects the host's disk and address pool.
 
-It is served in `/readyz?detail=1` beside `runs_active` and `git_credentials_kept`:
+It is served in `/readyz?detail=1` beside `runs_active` and `git_credentials_kept` (the counts only; the names are
+on the Sandboxes page, which Status links):
 
 ```jsonc
-"environments": {
-  "live": 3, "oldest_seconds": 25200,
-  "unowned": { "containers": 0, "networks": 0, "volumes": 0 },
-  "survived_sweep": { "containers": 0, "networks": 1, "volumes": 0, "oldest_seconds": 660, "reason": "engine_timeout" },
+"sandboxes": {
+  "running": 3, "oldest_seconds": 25200,
+  "unowned": { "containers": 0, "networks": 0, "volumes": 0 },        // "volumes" is absent in bind mode
+  "left_behind": { "containers": 0, "networks": 1, "volumes": 0, "oldest_seconds": 660, "reason": "engine_timeout" },
   "swept_at": "2026-11-17T01:25:00Z"
 }
 ```
 
 and as metrics on `/metrics`: `tqa_sandboxes{backend,state}` (the gauge ARCHITECTURE §13 already names and nothing
-emits yet), `tqa_sandbox_oldest_seconds`, `tqa_sandbox_unowned{kind}` and `tqa_sandbox_unowned_survived{kind}`, so an
+emits yet), `tqa_sandbox_oldest_seconds`, `tqa_sandbox_unowned{kind}` and `tqa_sandbox_left_behind{kind}`, so an
 alert can be set without the page. The amber condition is the same rule in both places, in one function
 (`verdict(previous, last) -> Verdict`), tested with a scripted engine (GW-U-219).
+
+### 3.7 The soak reads the page
+The mix soak (SOAK-001, `deploy/tests/soak.py` with `soak_mix.py`) reads `GET /api/v1/admin/sandboxes` once a minute
+as the administrator, beside its `/readyz` poll, and keeps each answer in `chaos.jsonl` (kind `sandboxes`). Three
+things must hold over the 24 hours, and the judge checks them at the end: `in_use` equals the sandboxes the soak's own
+conversations hold at that minute (one off at most during a fault, since a retire and the read race); no item belongs
+to a conversation the soak has deleted; and at the end the verdict is green with `left_behind` empty. Under 24 hours
+of faults this is what proves the page tells the truth (SOAK-001 amended, §6).
 
 ## 4. The page
 
@@ -202,43 +228,56 @@ alert can be set without the page. The amber condition is the same rule in both 
 
 ```
 Sandboxes
-Each task runs in its own environment. An idle one sleeps after 10 minutes; the task keeps its files and
-starts again when its owner sends a message.
+Each task runs in its own sandbox, made from its environment. An idle sandbox sleeps after 10 minutes; the
+task keeps its files and starts again when its owner sends a message.
 
-3 of 4 in use                                                     Updated 14:26
-Working              1
-Idle                 2     next sleeps at 14:32 (in 6 min)
-Starting             0
-Waiting for a slot   2     tasks, not yet running
-Desktops             1 of 2
-CPU                  1.4 cores in use · 6 set aside
-Memory               3.1 GB in use · 12 GB set aside
+3 of 4 running                                                    Updated 14:26
+2 tasks are waiting for a sandbox.                       (only while something waits)
+Desktops    1 of 2                                       (only when the install has a Desktop environment)
+In use      1.4 of 6 cores · 3.1 of 12 GB set aside
+Sandboxes run as Docker containers.                      (muted)
 
-Owner               State                      Environment   Size        Started   Last activity
-ana@example.org     ● Working                  Workstation   2 CPU·4 GB  12 min    now
-ben@example.org     ○ Idle · sleeps in 6 min   Minimal       1 CPU·2 GB  1 h       4 min            ⋯
-You                 ○ Idle · kept on until 18:00  Desktop    2 CPU·4 GB  3 h       40 min           ⋯
-cai@example.org     ◌ Starting…                Workstation   2 CPU·4 GB  20 s      —
+Left behind                                              (only while the verdict is amber)
+network  tqa-sbx-18e7c62210a67d70   11 min   the engine timed out    docker network rm tqa-sbx-18e7c62210a67d70  ⧉
+
+Owner             State                       Environment  CPU            Memory          Started  Last activity
+ana@example.org   ● Working                   Workstation  0.9 of 2 cores 1.6 of 4 GB     12 min   now
+ben@example.org   ○ Idle · sleeps in ~6 min   Minimal      0.0 of 1 core  0.4 of 2 GB     1 h      4 min          ⋯
+You               ○ Idle · kept on until 18:00  Desktop    0.1 of 2 cores 1.1 of 4 GB     3 h      40 min         ⋯
+cai@example.org   ◌ Starting…                 Workstation  Measuring…     Measuring…      20 s     —
 ```
 
-- The summary is a block of label/value lines under a heading-face headline; at 4 of 4 the headline takes the warn
-  tone and reads "4 of 4 in use · full", and "New tasks wait until one sleeps." appears only while something waits.
-- Owner is the email, "You" for the administrator's own. State is a dot in the status tone (§7 Status) plus the word
-  and a muted detail. Environment is the display name. Size is the sandbox's own size. Started and Last activity are
-  relative, exact in a tooltip. The ⋯ is a RowMenu (§7 Action menu) with **Stop now**; on a working or starting row
-  it stays, dimmed, with the reason under it ("It's working. It sleeps on its own after 10 idle minutes.").
+- **The summary is short:** the headline "3 of 4 running" in heading face (at 4 of 4 the warn tone and "· full"); the
+  waiting line only while something waits; Desktops "1 of 2" only when the install has a Desktop environment; one line
+  for CPU and memory in use against what is set aside (the sum of the running sandboxes' sizes); one muted line saying
+  how sandboxes run, "as Docker containers" or "as microVMs". The working, idle and starting counts and the next sleep
+  are not repeated: the rows and the state filter show them.
+- **Left behind** (change 3 of the review) appears above the table only while the verdict is amber: one row per item
+  that survived a sweep, with the kind, the engine's name or short id, its age, the engine's reason in plain words,
+  and the remove command with a copy button (§7 Copy). The section's heading carries the count ("Left behind: 1").
+- **Resources per row:** CPU as usage of size, "0.2 of 2 cores", and Memory the same way, "0.4 of 4 GB"; the size
+  alone is the muted second part. Before the first sample both read "Measuring…"; when the backend has no stats both
+  read "Not available". Owner is the email, "You" for the administrator's own. State is a dot in the status tone (§7
+  Status) plus the word and a muted detail ("sleeps in ~6 min", computed from the record, so "about"). Environment is
+  the display name. Started and Last activity are relative, exact in a tooltip. The ⋯ is a RowMenu (§7 Action menu)
+  with **Stop now**; on a working or starting row it stays, dimmed, with the reason under it ("It's working. It sleeps
+  on its own after 10 idle minutes.").
 - From 8 rows: a search box filters by owner and a segmented control by state (§7 List tools). Rows beyond 200:
   "Showing 200 of 812" and **Show more**.
 - The page reads the list every 10 s while visible (paused while the tab is hidden; relative times tick each minute
   without a read); "Updated 14:26" says how fresh it is. No manual refresh button.
 
 ### 4.2 Stop now
-ConfirmDialog (`ui/ConfirmDialog.tsx`, 480 px): title "Stop ben@example.org's environment?"; body "Their task keeps
-its files and history. Anything still running in it, such as a server, stops. It starts again when they send a
+ConfirmDialog (`ui/ConfirmDialog.tsx`, 480 px): title "Stop ben@example.org's sandbox?"; body "Their task keeps its
+files and history. Anything still running in the sandbox, such as a server, stops. It starts again when they send a
 message."; for a kept-on one an extra line, "They kept this task on until 18:00."; for a Desktop with a kept sign-in,
-"Their kept sign-in ends with it."; buttons Cancel and **Stop environment** (filled danger, §7). After `202` the row
-reads "Stopping…" until the next read, the summary updates, a `role=status` line says "Stopped ben@example.org's
-environment.", focus returns to the next row's ⋯ or the table heading. Refusals read: `409 working` "It started working
+"Their kept sign-in ends with it."; buttons Cancel and **Stop sandbox** (filled danger, §7; the 1 Oct contract's
+wording). After `202` the row reads "Stopping…" until the next read, the summary updates, a `role=status` line says
+"Stopped ben@example.org's sandbox.", focus returns to the next row's ⋯ or the table heading. **One noun:** the page,
+its dialog and its status lines say "sandbox" throughout (the owner's word and the page title); "environment" names
+only what a sandbox is made from, in the intro sentence and the Environment column. en.json's existing strings
+(`limits.sandboxes`, `files.pageSandboxed`, `fail.sandbox`) use the same noun in the same tone.
+Refusals read: `409 working` "It started working
 again, so it wasn't stopped."; `409 work_waiting` "A message is about to start in it, so it wasn't stopped."; `404` "It
 had already stopped." (and the list is read again); anything else "That didn't work. Try again."
 
@@ -247,21 +286,24 @@ had already stopped." (and the list is read again); anything else "That didn't w
 | State | What shows |
 |---|---|
 | Loading | Skeleton (`ui/Skeleton.tsx`): the summary block and three rows; never a spinner |
-| Failed read | "Couldn't read the environments." with **Try again**; the last good numbers stay, with their Updated time (`LoadFailure.tsx`'s pattern) |
-| Empty | `ui/EmptyState.tsx`: "No environment is running. One starts when someone sends a message." No action: the one action an empty state offers would be invented here (a deliberate exception, as the 1 Oct contract noted) |
-| Not measured yet | CPU and Memory read "Measuring…" for the first 10 s |
-| Not measurable | "Not available on this server" (muted) when the backend returns no stats |
+| Failed read | "Couldn't read the sandboxes." with **Try again**; the last good numbers stay, with their Updated time (`LoadFailure.tsx`'s pattern) |
+| Empty | `ui/EmptyState.tsx`: "No sandbox is running. One starts when someone sends a message." No action: the one action an empty state offers would be invented here (a deliberate exception, as the 1 Oct contract noted) |
+| Not measured yet | every row's CPU and Memory read "Measuring…" for the first 10 s; the summary's In use line too |
+| Not measurable | every row's CPU and Memory read "Not available" (muted) when the backend returns no stats; the summary's In use line says so once |
+| Left behind | the section above the table, only while the verdict is amber; its rows never link to a task |
 | Full | the warn headline; with waiters, the waiting line |
 | A member opens it | redirected to Account; the section is absent from their menu |
-| 390 px | each sandbox is a card (as Workspaces' cards): owner and ⋯ on the first line, state and detail on the second, environment and size muted on the third; the summary's labels never wrap in en; touch targets 44 px; no horizontal scroll at any width |
+| 390 px | each sandbox is a card (as Workspaces' cards): owner and ⋯ on the first line, state and detail on the second, the environment with "0.2 of 2 cores · 0.4 of 4 GB" on the third; a Left behind row is a card too, its command on its own line with the copy button; the summary's labels never wrap in en; touch targets 44 px; no horizontal scroll at any width |
 | Dark | tokens only (§3), checked in the e2e at 1280 and 390, light and dark, with axe |
 | Ten languages | every string under `settings.sandboxes.*` in all ten catalogues (`web/src/i18n/locales`; `scripts/i18n.mjs --report` must list no missing key); numbers and units through `Intl.NumberFormat`; the state words and the summary labels are checked at 390 px in the longest language (th or ta) in the e2e |
 
 ### 4.4 Status gains one section
-Between the checks and **Before a restart**: **Environments**: "3 live, oldest 7 h · 0 unowned containers, networks or
-volumes." in the ready tone; amber: "3 live, oldest 7 h · 1 unowned network has survived a sweep (the engine timed
-out). The gateway tries again every 5 minutes; if it stays, see the admin guide." with **Open Sandboxes**. The line
-is read with the rest of `/readyz?detail=1` every 30 s, as **Before a restart** is (WEB-U-292).
+Between the checks and **Before a restart**: **Sandboxes**. Green: "Sandboxes: 3 running, the oldest for 7 h. Nothing
+left behind." in the ready tone. Amber: "Sandboxes: 3 running, the oldest for 7 h. 1 network was left behind after a
+sweep: the engine timed out. The gateway tries again every 5 minutes." with **Open Sandboxes**, which opens the page
+at its Left behind section. In volume mode the green sentence counts volumes among what is not left behind; in bind
+mode volumes are not mentioned. The line is read with the rest of `/readyz?detail=1` every 30 s, as **Before a
+restart** is (WEB-U-292).
 
 ## 5. What changes in the documents
 
@@ -274,7 +316,8 @@ is read with the rest of `/readyz?detail=1` every 30 s, as **Before a restart** 
   and doesn't, the privacy line, the 200-row page), and in **Status** the Environments line with what amber means and
   what to do (read the engine's reason, remove by hand with the commands given, or restart the engine).
 - **ADR:** an amendment to ADR-0016 (a fourth retire reason, by an administrator; the owner is told) rather than a new
-  ADR; ADR-0021 gains the volume listing if the lead wants volumes in the verdict (open question 4).
+  ADR; an amendment to ADR-0021 for the volume listing and sweep (volume mode).
+- **TEST-PLAN SOAK-001:** amended with the once-a-minute read and its three conditions (§3.7).
 - **TEST-PLAN:** the rows in §6. **CHANGELOG:** one Added line under the Unreleased section that follows v18.0.0.
 
 ## 6. Test rows (proposed ids; claimed when the work starts, after v18.0.0 is tagged)
@@ -287,38 +330,35 @@ WEB-E2E-126, SEC-063); the real-stack case takes a new E2E series, `E2E-OPS`, fo
 | GW-U-216 | P1 | The administrator's sandbox listing (FR-22; ARCHITECTURE §4.4) | `admin/sandboxes_tests.rs` with a scripted store: four sandboxes of three people: `starting`; `live` with an active run; `live` idle since 4 min with `idle_seconds` 600; `live`, pinned, 3 h old with `max_lifetime_seconds` 8 h; one `destroying`; two queued messages without a slot; limits slots 4, per_user 2, desktops 2; a member's session; a page of 201 | States starting, working, idle (`stops_at` = last activity + 10 min), idle kept on (`stops_at` = started + 8 h), stopping; totals in_use 5, waiting 2, reserved = the sum of the sizes, usage null before a sample; `can_stop` true only on the two idle rows, `stop_refusal` names the reason on the others; the order working, starting, stopping, idle by soonest stop; the member gets `403`; 200 rows and a `next_after` that returns the 201st |
 | GW-U-217 | P1 | An administrator's Stop goes through the retire path and refuses a working sandbox under the lock | `admin/sandboxes_tests.rs`: Stop on an idle sandbox; on a working one; on one with a queued message; on a `starting` one; on one already `destroying`; on a pinned idle one; on a Desktop whose screen a person holds (`screen::may_retire` false); on an unknown id; the same key twice; a run that starts between the check and the retire (the scripted store flips activeness under the lock) | `202` and `retire_for_switch(id, Teardown::Administrator)` called once; `409 working`, `409 work_waiting`, `409 working`, `202` (already stopping), `202` for the pinned one, `409 working` for the held Desktop, `404`; the repeated key answers the first result and retires nothing twice; the late start is refused, nothing retired |
 | GW-U-218 | P1 | The stop is audited, counted and told to the owner | The stop of GW-U-217's idle sandbox; the audit table; the metrics text; the owner's conversation | One `admin_audit` row: area `sandboxes`, action `stop`, actor the administrator, item the conversation id, no other field; `tqa_sandbox_retired_total{reason="administrator"}` up by one; a notice in the owner's task naming the administrator's role and the time, and no notice in any other task; no title in the audit row, the log line or the notice |
-| GW-U-219 | P1 | The leak verdict from a scripted engine (GW-I-191, SBX-U-006 as inputs) | `manager/verdict_tests.rs`: passes with (a) nothing unowned, (b) one stray container removed in the pass, (c) one network that fails to go in one pass then goes, (d) one that fails in two consecutive passes with `engine_timeout`, (e) a stray found again after a pass tried it, (f) bind mode, (g) volume mode with an unowned volume; three live sandboxes, the oldest 7 h | (a) and (b) green with `unowned` all 0 and `live` 3, `oldest_seconds` 25,200; (c) green (one pass is not survival); (d) and (e) amber with the kind, the count, the oldest survivor's age and the reason; (f) volumes 0 and the mode said; (g) amber on volumes; `/readyz?detail=1` carries the same object the metrics gauges show, and `tqa_sandboxes{state}` sums to `live` |
+| GW-U-219 | P1 | The leak verdict from a scripted engine (GW-I-191, SBX-U-006 as inputs) | `manager/verdict_tests.rs`: passes with (a) nothing unowned, (b) one stray container removed in the pass, (c) one network that fails to go in one pass then goes, (d) one that fails in two consecutive passes with `engine_timeout`, (e) a stray found again after a pass tried it, (f) bind mode, (g) volume mode with an unowned volume that survives; three running sandboxes, the oldest 7 h | (a) and (b) green with `unowned` all 0, `running` 3, `oldest_seconds` 25,200 and `left_behind` empty; (c) green (one pass is not survival); (d) and (e) amber with the kind, the count, the oldest survivor's age and the reason, and `left_behind` naming each survivor with its age, reason and remove command built from the engine's name only; (f) `volumes` absent from the readiness object; (g) amber on volumes with the volume's name and `docker volume rm <name>`; `/readyz?detail=1` carries the counts the metrics gauges show, and `tqa_sandboxes{state}` sums to `running` |
 | GW-U-220 | P0 | The listing, the audit and the notice carry nothing of a task but its id (the privacy rule; SEC-005 extended) | The GW-U-216 fixture with strings planted in every task's title, last message, a file name, a workspace name, a branch, a route name and a profile name; the administrator's own task among them; the OpenAPI document | None of the planted strings appears in the listing's body, the audit row, the log capture or the notice; the response schema's objects all have `additionalProperties: false`; a field added to the item type without a schema change fails `tests/openapi.rs` |
 | GW-I-326 | P1 | The listing on the real engine, with usage | Three sandboxes of two people on Docker (the testkit's fake model): one working in a 25 s call, two idle; the sampler's first and third passes | Rows as GW-U-216 says for the three; `usage` null on the first pass and a CPU rate and resident memory on the third, the working one's CPU above the idle ones'; `reserved` = the sum of the three sizes; on Firecracker the same rows with the memory label's `backend` = `firecracker` (SBX-C half, where the suite runs on it) |
 | GW-I-327 | P1 | An administrator's stop on the real engine: the task resumes on its files | An idle sandbox whose run wrote a file; Stop from the API; the owner's next message asks the agent to read the file | The container is gone within 15 s; the conversation and workspace stay; the next message starts another container where the agent reads the file; the owner's transcript has the notice; the audit row and the counter as GW-U-218; a stop during the next run's start is `409 working` and that run is unharmed |
-| GW-I-328 | P1 | The verdict on the real engine: a planted stray is swept, one that cannot be removed turns the verdict amber | A container and a network carrying this instance's labels and no record, older than the create budget; then a labelled container the engine refuses to remove (paused, so `remove` without force fails) | After one sweep: both planted things gone, verdict green, `removed` counted; the paused one: amber after the second pass with kind `containers`, count 1 and the engine's reason; unpaused, the next pass removes it and the verdict is green again; `/readyz?detail=1` and `/metrics` agree at each step |
+| GW-I-328 | P1 | The verdict on the real engine: a planted stray is swept, one that cannot be removed turns the verdict amber and is listed | A container, a network and, in volume mode, a volume carrying this instance's labels and no record, older than the create budget; then a labelled container the engine refuses to remove (paused, so `remove` without force fails) | After one sweep: the planted things gone, verdict green, `removed` counted; the paused one: amber after the second pass with kind `containers`, count 1 and the engine's reason, and `left_behind` holding its short id, age, reason and `docker rm <id>`; running that command (unpaused) by hand removes it, or the next pass does once unpaused, and the verdict is green again; `/readyz?detail=1` and `/metrics` agree at each step |
 | SEC-064 | P0 | The Sandboxes page is administrators only and shows sandboxes, not tasks | A member's session on `GET /api/v1/admin/sandboxes` and the stop; an administrator's listing of a member's running task; the page with the fixture of GW-U-220 | `403` for the member on both; the administrator's answer and page carry the owner's email and the environment, and none of the planted task strings; no element on the page links to another person's task |
-| WEB-U-478 | P1 | Settings › Operations › Sandboxes: the page's states | `src/settings/SandboxesSettings.test.tsx`: loading; the GW-U-216 fixture; empty; a failed read after a good one; full with waiters; usage null then measured; 201 rows; a member | Skeleton; the summary's eight lines and the rows in order with the right words and tones; the empty state with no action; "Couldn't read the environments." with Try again and the last numbers kept; the warn headline and the waiting line; "Measuring…" then "1.4 cores in use"; "Showing 200 of 201" and Show more; the member is redirected to Account and the section is absent from their menu |
+| WEB-U-478 | P1 | Settings › Operations › Sandboxes: the page's states | `src/settings/SandboxesSettings.test.tsx`: loading; the GW-U-216 fixture; empty; a failed read after a good one; full with waiters; an install without a Desktop environment; usage null, then measured, then a backend without stats; `left_behind` with one network; 201 rows; a member | Skeleton; the headline, the waiting line only with waiters, Desktops only with a Desktop environment, the In use line and the muted "run as" line; the rows in order with the right words and tones and each row's "0.2 of 2 cores" and "0.4 of 4 GB"; the empty state with no action; "Couldn't read the sandboxes." with Try again and the last numbers kept; the warn headline; "Measuring…" on every row, then the numbers, then "Not available"; the Left behind section with the kind, name, age, reason and a copyable remove command, absent when the list is empty; "Showing 200 of 201" and Show more; the member is redirected to Account and the section is absent from their menu |
 | WEB-U-479 | P1 | Stop now: the menu, the confirm and every result's words | The same fixture: ⋯ on an idle row, a working row, a kept-on row, a Desktop with a kept sign-in; confirm; the gateway answers `202`, `409 working`, `409 work_waiting`, `404`, a network failure | Stop now enabled on the idle row and dimmed with its reason on the working row; the dialog's title names the owner, the kept-on line and the kept sign-in line appear only where due; after `202` the row reads Stopping…, the status line names the owner, focus moves to the next ⋯; each refusal's sentence as §4.2; the list is read again after a `404` |
 | WEB-U-480 | P0 | The page never renders a task's title, link or count (the privacy rule) | The GW-U-220 fixture with its planted strings, and a row of the administrator's own | No planted string in the rendered page; no anchor on any row; the administrator's own row reads "You" and nothing more than the others |
-| WEB-U-481 | P1 | Settings › Status says whether anything unowned survived a sweep | `src/settings/StatusSettings.test.tsx`: `environments` green with 3 live and oldest 7 h; amber with one surviving network and reason `engine_timeout`; absent (an older gateway); a read that fails after a good one | The Environments line in the ready tone; the amber line with the kind, the reason, the five-minute retry and Open Sandboxes; the section left out when absent; the last read kept with "The latest read failed…" as Before a restart does |
+| WEB-U-481 | P1 | Settings › Status says whether anything was left behind after a sweep | `src/settings/StatusSettings.test.tsx`: `sandboxes` green with 3 running and oldest 7 h, in bind and in volume mode; amber with one network left behind and reason `engine_timeout`; absent (an older gateway); a read that fails after a good one | "Sandboxes: 3 running, the oldest for 7 h. Nothing left behind." in the ready tone, volumes mentioned only in volume mode; the amber line naming what was left behind, why, the five-minute retry, and Open Sandboxes opening the page's Left behind section; the section left out when absent; the last read kept with "The latest read failed…" as Before a restart does |
 | WEB-E2E-127 | P1 | The Sandboxes page and the Status line on the fake front, in the browser | `e2e/settings-sandboxes.spec.ts` against the fake front with the two endpoints: 1280 and 390, light and dark; stop an idle sandbox; the busy refusal; the empty state; the amber Status line; axe at each state; the summary at 390 in th | The screens as §4; the dialog and the status line read as §4.2; no horizontal scroll at 390; axe clean; the th labels do not wrap into a second line |
-| E2E-OPS-001 | P0 | The Sandboxes page and the leak verdict on the real stack | `deploy/tests/demo.py --suite sandboxes` on the real Docker stack with the fake model: three tasks by two people (one working in a long call, two idle); the administrator opens Sandboxes, stops one idle sandbox from the page and confirms; the stopped task's owner sends the next message; then a planted unowned container (this instance's labels, no record, past the create budget), the Status page read before and after the sweep (the sweep interval shortened by the stack's settings) | The page lists the three with the right owners and states; after the stop the row goes, the task's files are intact and its next message runs in a new sandbox with the notice in its transcript; the audit row exists; Status reads amber with the container counted and the engine's reason while it survives, and green once it is swept; screenshots at 1280 and 390 in the evidence folder; nothing of any task's title on the page or in the API capture |
+| E2E-OPS-001 | P0 | The Sandboxes page and the leak verdict on the real stack | `deploy/tests/demo.py --suite sandboxes` on the real Docker stack with the fake model: three tasks by two people (one working in a long call, two idle); the administrator opens Sandboxes, stops one idle sandbox from the page and confirms; the stopped task's owner sends the next message; then a planted unowned container that the engine cannot remove (paused; this instance's labels, no record, past the create budget), the Status and Sandboxes pages read before and after the sweep (the sweep interval shortened by the stack's settings); the container unpaused | The page lists the three with the right owners, states and each one's CPU and memory; after the stop the row goes, the task's files are intact and its next message runs in a new sandbox with the notice in its transcript; the audit row exists; Status reads amber naming the container and the engine's reason while it survives, and the page's Left behind row gives its short id, age, reason and a `docker rm` command that removes it once unpaused; green on both pages once it is gone; screenshots at 1280 and 390 in the evidence folder; nothing of any task's title on the page or in the API capture |
 
-## 7. Open questions for the technical lead
+| SOAK-001 (amended) | P0 | The soak reads the Sandboxes page once a minute (§3.7) | `deploy/tests/soak.py` as the administrator: `GET /api/v1/admin/sandboxes` every minute beside the `/readyz` poll, each answer in `chaos.jsonl` (kind `sandboxes`); the judge at the end | At every read, `in_use` equals the sandboxes the soak's conversations hold at that minute, one off at most during a fault; no item belongs to a conversation the soak deleted; at the end the verdict is green and `left_behind` is empty; the existing SOAK-001 expectations unchanged |
 
-1. **Operations page, not an Environments tab:** agreed as §1 argues, or do you want the tab?
-2. **`stops_at`'s authority:** computed from `last_action_at + idle_seconds` (one worker pass of drift, no new
-   plumbing), or the worker publishes its idle clock's deadline to a shared map the read uses? I'd take the first and
-   word the page "in about 6 min".
-3. **The owner's notice:** reuse the 18.0 notice mechanism (`screen_notices`'s pattern: a gateway-written transcript
-   line carrying who made it, worded by the web) generalised to a sandbox notice, or a new lifecycle event kind? The
-   first avoids a protocol change; it needs a small table or a `kind` column (one migration beside the audit one).
-4. **Volumes in the verdict:** add the named-volume listing (volume mode only) now, or ship containers and networks
-   first and say "volumes: not counted in bind mode" on the line? The soak's orphan audit already covers volumes
-   nightly.
-5. **Stopping a Desktop with a kept sign-in:** allowed with the extra warning (my proposal, under decision 1), or
-   refused like a held screen?
-6. **Ids and the `E2E-OPS` series:** the proposed numbers above, or do you want the stack case under `E2E-ENV`?
-7. **Translations:** the nine non-English catalogues: do I write them (as the team did for the settings pages) and
-   you review, or does the owner want a native check first?
-8. **The audit migration:** extend `admin_audit`'s CHECK constraints with area `sandboxes` and action `stop` (0106
-   after 18.0's 0105), or record the stop under an existing area? I'd add the area: the audit page filters by it.
-9. **Sampler bounds:** 10 s, four calls in flight, the interval stretching past 64 live sandboxes. Fine for the
-   5090 box; is there a Firecracker install where `stats` is slow enough to matter?
-10. **Metrics names:** `tqa_sandboxes{backend,state}` as ARCHITECTURE §13 already promises, plus the three in §3.6.
+## 7. Decided at the technical lead's review (17 Nov 2026)
+
+1. An Operations page, not an Environments tab.
+2. `stops_at` is computed from the record (`last_action_at + idle_seconds`), and the page says "about".
+3. The owner's notice generalises 18.0's notice pattern (a gateway-written line, worded by the web); no protocol
+   change; its table change shares migration 0106 with the audit area.
+4. Volumes are in the verdict now (volume mode); bind mode leaves them out of the sentence.
+5. A Desktop with a kept sign-in can be stopped, with the extra warning line; a held screen (Take over in progress) is
+   refused.
+6. The `E2E-OPS` series and the proposed ids, claimed after the 18.0 tag once nothing has taken them.
+7. All nine translations are written with the page and reviewed by the lead; th and ta are checked at 390 px in the
+   e2e.
+8. Audit area `sandboxes`, action `stop`, in migration 0106.
+9. The sampler's bounds stand; GW-I-326 also runs on Firecracker where the suite runs, and reports the `stats` time.
+10. The metric names stand.
+11. Stop on a working sandbox stays refused (the 1 Oct contract): an administrator never kills a person's running
+    work, and the person can cancel it themselves.
