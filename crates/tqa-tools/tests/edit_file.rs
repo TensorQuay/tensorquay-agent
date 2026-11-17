@@ -349,3 +349,238 @@ fn apply_diff(before: &str, output: &str) -> Result<String, Box<dyn Error>> {
     }
     Ok(after)
 }
+
+// 18.1 item F: refusals a local model recovers from by itself (the 18.0 Qwen waves' analysis, proposals A, B, D, E).
+
+/// Twenty lines; `if done` on lines 10 and 15 only.
+fn twenty_lines() -> Result<String, std::fmt::Error> {
+    let mut source = String::new();
+    for number in 1..=20 {
+        if number == 10 || number == 15 {
+            writeln!(source, "    if done {{ return; }} // {number}")?;
+        } else {
+            writeln!(source, "let line_{number} = {number};")?;
+        }
+    }
+    Ok(source)
+}
+
+// A: an ambiguous refusal shows each matching line with its number, then how to match once.
+#[tokio::test]
+async fn tool_u_004_an_ambiguous_refusal_lists_its_lines() -> TestResult {
+    let fixture = workspace_fixture()?;
+    let cx = support::context(&fixture);
+    fs::write(fixture.root().join("loop.rs"), twenty_lines()?)?;
+    let error = EditFile::new()
+        .call(request("loop.rs", "if done", "if finished"), &cx)
+        .await
+        .err()
+        .ok_or("expected error")?;
+    assert_eq!(
+        detail(error),
+        "ambiguous; matches at lines 10, 15\n\
+         line 10:     if done { return; } // 10\n\
+         line 15:     if done { return; } // 15\n\
+         Send old_text with enough of its line to match once, or replace_all: true."
+    );
+    Ok(())
+}
+
+// A: past the tenth match the rest are counted, not listed; a CRLF file's lines are shown without the carriage return.
+#[tokio::test]
+async fn tool_u_004_an_ambiguous_refusal_counts_past_ten_and_drops_carriage_returns() -> TestResult {
+    let fixture = workspace_fixture()?;
+    let cx = support::context(&fixture);
+    fs::write(fixture.root().join("many"), "same\r\n".repeat(12))?;
+    let error = EditFile::new()
+        .call(request("many", "same", "other"), &cx)
+        .await
+        .err()
+        .ok_or("expected error")?;
+    let detail = detail(error);
+    let mut expected = String::from("ambiguous; matches at lines 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 and 2 more\n");
+    for number in 1..=10 {
+        writeln!(expected, "line {number}: same")?;
+    }
+    expected.push_str("Send old_text with enough of its line to match once, or replace_all: true.");
+    assert_eq!(detail, expected);
+    assert!(!detail.contains('\r'));
+    assert_eq!(fs::read_to_string(fixture.root().join("many"))?, "same\r\n".repeat(12));
+    Ok(())
+}
+
+const IMPORTS: &str = "import { slugify } from \"./slug\";\nimport { validate } from \"./validate\";\n\nexport const ready = true;\n";
+
+// B: a not-found refusal names the nearest line, its number and its exact text (the quote style shows).
+#[tokio::test]
+async fn tool_u_004_a_not_found_refusal_names_the_nearest_line() -> TestResult {
+    let fixture = workspace_fixture()?;
+    let cx = support::context(&fixture);
+    fs::write(fixture.root().join("imports.ts"), IMPORTS)?;
+    let tool = EditFile::new();
+    let error = tool
+        .call(
+            request("imports.ts", "import { validate } from './validate';", "x"),
+            &cx,
+        )
+        .await
+        .err()
+        .ok_or("expected error")?;
+    assert_eq!(
+        detail(error),
+        "not found; the nearest line is line 2: import { validate } from \"./validate\";"
+    );
+    // Lines equally near are all named, in order.
+    fs::write(fixture.root().join("pair"), "let a = 1;\nlet b = 1;\nreturn;\n")?;
+    let error = tool
+        .call(request("pair", "let c = 1;", "x"), &cx)
+        .await
+        .err()
+        .ok_or("expected error")?;
+    assert_eq!(
+        detail(error),
+        "not found; the nearest lines are:\nline 1: let a = 1;\nline 2: let b = 1;"
+    );
+    // Only the first line of a multi-line old_text is looked for.
+    let error = tool
+        .call(
+            request("imports.ts", "import { validate } from './validate';\nmore\n", "x"),
+            &cx,
+        )
+        .await
+        .err()
+        .ok_or("expected error")?;
+    assert!(detail(error).starts_with("not found; the nearest line is line 2: "));
+    assert_eq!(fs::read_to_string(fixture.root().join("imports.ts"))?, IMPORTS);
+    Ok(())
+}
+
+// B: nothing within 40 % of the line's length is no nearest line; a line over 400 bytes is never named.
+#[tokio::test]
+async fn tool_u_004_a_far_anchor_is_just_not_found() -> TestResult {
+    let fixture = workspace_fixture()?;
+    let cx = support::context(&fixture);
+    fs::write(fixture.root().join("imports.ts"), IMPORTS)?;
+    let tool = EditFile::new();
+    let error = tool
+        .call(request("imports.ts", "completely unrelated words", "x"), &cx)
+        .await
+        .err()
+        .ok_or("expected error")?;
+    assert_eq!(detail(error), "not found");
+    fs::write(fixture.root().join("long"), format!("{}\n", "x".repeat(401)))?;
+    let error = tool
+        .call(request("long", &format!("{}q", "x".repeat(390)), "x"), &cx)
+        .await
+        .err()
+        .ok_or("expected error")?;
+    assert_eq!(detail(error), "not found");
+    Ok(())
+}
+
+// E: an edit whose old_text and new_text are the same is no change, said plainly; the file isn't touched.
+#[tokio::test]
+async fn tool_u_004_a_no_op_edit_is_no_change() -> TestResult {
+    let fixture = workspace_fixture()?;
+    let cx = support::context(&fixture);
+    let path = fixture.root().join("readme");
+    fs::write(&path, "keep\nother\n")?;
+    fs::File::options()
+        .write(true)
+        .open(&path)?
+        .set_modified(std::time::UNIX_EPOCH + std::time::Duration::from_secs(1000))?;
+    let before = fs::metadata(&path)?.modified()?;
+    let tool = EditFile::new();
+    let output = tool.call(request("readme", "keep", "keep"), &cx).await?;
+    assert_eq!(
+        output.text,
+        "no change: old_text and new_text are the same, so the file was not changed."
+    );
+    assert_eq!(fs::read_to_string(&path)?, "keep\nother\n");
+    assert_eq!(fs::metadata(&path)?.modified()?, before);
+    // Beside a real edit, the same-text edit is left out and said so; the real one is made.
+    let output = tool
+        .call(
+            json!({"path":"readme","edits":[{"old_text":"keep","new_text":"keep"},{"old_text":"other","new_text":"changed"}]}),
+            &cx,
+        )
+        .await?;
+    assert_eq!(fs::read_to_string(&path)?, "keep\nchanged\n");
+    assert!(output.text.starts_with("edited readme: 1 edits, +1 -1 lines\n"), "{}", output.text);
+    assert!(
+        output
+            .text
+            .ends_with("1 edit changed nothing: its old_text and new_text are the same.\n"),
+        "{}",
+        output.text
+    );
+    // An empty old_text is still refused, and a missing file is still missing.
+    let error = tool.call(request("readme", "", "x"), &cx).await.err().ok_or("expected error")?;
+    assert!(detail(error).contains("old text must be nonempty"));
+    assert!(tool.call(request("absent", "same", "same"), &cx).await.is_err());
+    Ok(())
+}
+
+// D: what the second identical refusal adds, from the tool: the file's region around the lines the refusal named.
+#[tokio::test]
+async fn tool_u_004_a_repeated_refusal_carries_the_region() -> TestResult {
+    let fixture = workspace_fixture()?;
+    let cx = support::context(&fixture);
+    let mut source = twenty_lines()?;
+    for number in 21..=60 {
+        writeln!(source, "let line_{number} = {number};")?;
+    }
+    fs::write(fixture.root().join("loop.rs"), &source)?;
+    let lines: Vec<&str> = source.lines().collect();
+    let region = |from: usize, to: usize| -> String {
+        (from..=to)
+            .map(|number| format!("{number:>6}\t{}\n", lines[number - 1]))
+            .collect()
+    };
+    let tool = EditFile::new();
+    // Ambiguous at 10 and 15: from three lines before the first, at most 40 lines.
+    let note = tool
+        .repeated_refusal(&request("loop.rs", "if done", "if finished"), &cx)
+        .await
+        .ok_or("expected a note")?;
+    assert_eq!(
+        note,
+        format!(
+            "You sent the same arguments as the call that just failed. Here are lines 7-46 of loop.rs:\n{}\
+             Read them and send a different old_text.",
+            region(7, 46)
+        )
+    );
+    // Not found, nearest line 30: the region around it.
+    let note = tool
+        .repeated_refusal(&request("loop.rs", "let line_30 = 31;", "x"), &cx)
+        .await
+        .ok_or("expected a note")?;
+    assert!(note.contains("Here are lines 27-60 of loop.rs:\n"), "{note}");
+    assert!(note.contains(&region(27, 60)));
+    // An anchor near no line still gets the nearest region, whatever its distance.
+    let note = tool
+        .repeated_refusal(&request("loop.rs", "zzzz zzzz zzzz zzzz", "x"), &cx)
+        .await
+        .ok_or("expected a note")?;
+    assert!(note.starts_with("You sent the same arguments as the call that just failed. Here are lines "));
+    // A later edit's failure is found after the earlier edits are made in memory; the file stays as it was.
+    let note = tool
+        .repeated_refusal(
+            &json!({"path":"loop.rs","edits":[{"old_text":"let line_1 = 1;","new_text":"let first = 1;"},{"old_text":"if done","new_text":"x"}]}),
+            &cx,
+        )
+        .await
+        .ok_or("expected a note")?;
+    assert!(note.contains("Here are lines 7-46 of loop.rs:\n"), "{note}");
+    assert_eq!(fs::read_to_string(fixture.root().join("loop.rs"))?, source);
+    // Nothing to add: a call that would succeed, a missing file, arguments that aren't an edit.
+    for args in [
+        request("loop.rs", "let line_1 = 1;", "let first = 1;"),
+        request("absent", "x", "y"),
+        json!({"path": 3}),
+    ] {
+        assert_eq!(tool.repeated_refusal(&args, &cx).await, None, "{args}");
+    }
+    Ok(())
+}

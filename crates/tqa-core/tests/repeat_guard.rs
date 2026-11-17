@@ -299,3 +299,83 @@ async fn core_e_041_the_same_failing_edit_three_times_still_stops() -> TestResul
     assert_eq!(editor.calls().len(), 3);
     Ok(())
 }
+
+/// The real `edit_file` in a harness whose workspace holds `loop.rs` with `if done` on lines 10 and 15.
+fn edit_harness(steps: &[&str]) -> Result<Harness, Box<dyn Error>> {
+    let mut registry = tqa_tools::ToolRegistry::new();
+    registry.register(Arc::new(tqa_tools::builtin::EditFile::new()))?;
+    let script: Vec<ProviderReply> = steps
+        .iter()
+        .enumerate()
+        .map(|(index, arguments)| calls(&[(&format!("c{index}"), "edit_file", arguments)]))
+        .chain(std::iter::once(answer()))
+        .collect();
+    let h = Harness::new(script, registry)?;
+    let source: String = (1..=20)
+        .map(|number| {
+            if number == 10 || number == 15 {
+                format!("    if done {{ return; }} // {number}\n")
+            } else {
+                format!("let line_{number} = {number};\n")
+            }
+        })
+        .collect();
+    std::fs::write(h.directory.path().join("loop.rs"), source)?;
+    Ok(h)
+}
+
+/// Runs the harness; its outcome and the events it wrote.
+async fn run_harness(h: Harness) -> Result<(RunOutcome, Vec<Event>), Box<dyn Error>> {
+    let sink = h.sink.clone();
+    let outcome = Runner::new(h.deps)?
+        .run(
+            &[],
+            Some(turn()),
+            CancellationToken::new(),
+            CancellationToken::new(),
+        )
+        .await?;
+    Ok((outcome, sink.events()))
+}
+
+const AMBIGUOUS: &str = r#"{"path":"loop.rs","edits":[{"old_text":"if done","new_text":"if finished"}]}"#;
+const REPEATED: &str = "You sent the same arguments as the call that just failed. Here are lines 7-20 of loop.rs:\n";
+
+// TEST: CORE-E-041
+/// 18.1 item F (proposal D): the second identical refusal of an edit carries the file's region, so the model's input
+/// changes between the repeats; the first and the third are the tool's plain refusal, and the third still stops the
+/// run. One `tool.result` per call.
+#[tokio::test]
+async fn core_e_041_the_second_identical_refusal_carries_the_region() -> TestResult {
+    let (outcome, events) = run_harness(edit_harness(&[AMBIGUOUS, AMBIGUOUS, AMBIGUOUS])?).await?;
+    assert!(stopped(&outcome, THREE), "{outcome:?}");
+    let results = tool_results(&events);
+    assert_eq!(results.len(), 3, "{results:?}");
+    assert!(results.iter().all(|(_, status, _)| *status == ToolStatus::Error));
+    let refusal = &results[0].2;
+    assert!(refusal.contains("ambiguous; matches at lines 10, 15"), "{refusal}");
+    assert!(!refusal.contains("You sent the same arguments"), "{refusal}");
+    let second = &results[1].2;
+    assert!(second.starts_with(refusal.as_str()), "{second}");
+    assert!(second.contains(REPEATED), "{second}");
+    assert!(second.contains("    10\t    if done { return; } // 10\n"), "{second}");
+    assert!(second.ends_with("Read them and send a different old_text."), "{second}");
+    assert_eq!(&results[2].2, refusal);
+    Ok(())
+}
+
+// TEST: CORE-E-041
+/// A successful edit after the second refusal starts the count again: the same failing call after it is a first
+/// failure again, plain, and the run goes on.
+#[tokio::test]
+async fn core_e_041_a_change_after_the_region_starts_the_count_again() -> TestResult {
+    let fix = r#"{"path":"loop.rs","edits":[{"old_text":"let line_1 = 1;","new_text":"let first = 1;"}]}"#;
+    let (outcome, events) = run_harness(edit_harness(&[AMBIGUOUS, AMBIGUOUS, fix, AMBIGUOUS])?).await?;
+    assert_eq!(outcome, RunOutcome::Completed);
+    let results = tool_results(&events);
+    assert_eq!(results.len(), 4, "{results:?}");
+    assert!(results[1].2.contains(REPEATED));
+    assert_eq!(results[2].1, ToolStatus::Ok);
+    assert!(!results[3].2.contains("You sent the same arguments"), "{}", results[3].2);
+    Ok(())
+}

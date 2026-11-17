@@ -363,3 +363,30 @@ async fn tool_u_003_replace_preserves_executable_and_private_modes() -> TestResu
     }
     Ok(())
 }
+
+// TOOL-U-003, 18.1 item F (proposal C): `create_parents` is optional, as `edit_file`'s `replace_all` is: a text-route
+// reply without it is a valid call (false), and a strict model's `null` for it means absent.
+#[tokio::test]
+async fn tool_u_003_create_parents_is_optional() -> TestResult {
+    let fixture = workspace_fixture()?;
+    let cx = support::context(&fixture);
+    let mut registry = tqa_tools::ToolRegistry::new();
+    registry.register(std::sync::Arc::new(WriteFile::new()))?;
+    let plain = json!({"path": "notes.md", "content": "one\n"});
+    registry.prepare("write_file", &plain)?;
+    assert_eq!(registry.schema_problem("write_file", &plain), None);
+    WriteFile::new().call(plain, &cx).await?;
+    assert_eq!(fs::read_to_string(fixture.root().join("notes.md"))?, "one\n");
+    let mut nulled = json!({"path": "notes.md", "content": "two\n", "create_parents": null});
+    registry.normalize_arguments("write_file", &mut nulled);
+    assert_eq!(nulled, json!({"path": "notes.md", "content": "two\n"}));
+    // Left out, it's false: a missing folder is still refused.
+    assert!(
+        WriteFile::new()
+            .call(json!({"path": "absent/file", "content": "x"}), &cx)
+            .await
+            .is_err()
+    );
+    assert!(!fixture.root().join("absent").exists());
+    Ok(())
+}

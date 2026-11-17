@@ -39,7 +39,9 @@ fn prompt_u_024_each_malformed_shape_is_named_and_stays_malformed() -> Result<()
         // 13 of 20 in the 16x replay: valid JSON, no name.
         (
             block(r#"{"arguments": {"path": "src/a.py"}}"#),
-            FallbackProblem::NoName,
+            FallbackProblem::NoName {
+                keys: vec![name("arguments")?],
+            },
         ),
         (
             block(r#"{"name": "read_file"}"#),
@@ -71,6 +73,68 @@ fn prompt_u_024_each_malformed_shape_is_named_and_stays_malformed() -> Result<()
             parse_reply(&text, false, &check).err(),
             Some(FallbackFailure::Malformed)
         );
+    }
+    Ok(())
+}
+
+// 18.1 item F (proposal F): a call block names its tool under `name`, `function` or `tool` and its arguments under
+// `arguments` or `parameters`, as a native route's whole-reply object may; still exactly one of each and nothing else.
+#[test]
+fn prompt_u_024_a_block_reads_tool_function_and_parameters() -> Result<(), String> {
+    let wanted = vec![FallbackCall {
+        name: "read_file".into(),
+        arguments: json!({"path": "a.py"}),
+    }];
+    for text in [
+        block(r#"{"tool": "read_file", "parameters": {"path": "a.py"}}"#),
+        block(r#"{"function": "read_file", "arguments": {"path": "a.py"}}"#),
+        block(r#"{"name": "read_file", "parameters": {"path": "a.py"}}"#),
+        block(r#"{"tool": "read_file", "arguments": {"path": "a.py"}}"#),
+        "```json\n{\"tool\": \"read_file\", \"parameters\": {\"path\": \"a.py\"}}\n```\n".to_owned(),
+    ] {
+        let reply = parse_reply_detailed(&text, false, &check).map_err(|rejection| format!("{text}: {rejection:?}"))?;
+        assert_eq!(reply.calls, wanted, "{text}");
+        assert_eq!(parse_reply(&text, false, &check).map(|reply| reply.calls), Ok(wanted.clone()));
+    }
+    // Two names, or two argument keys: the second is an extra key, as before.
+    for (text, extra) in [
+        (block(r#"{"name": "read_file", "tool": "read_file", "arguments": {"path": "a"}}"#), "tool"),
+        (block(r#"{"name": "read_file", "arguments": {"path": "a"}, "parameters": {}}"#), "parameters"),
+    ] {
+        let rejection = rejected(&text)?;
+        assert_eq!(
+            rejection.problem,
+            Some(FallbackProblem::ExtraKeys { keys: vec![name(extra)?] }),
+            "{text}"
+        );
+    }
+    // A name under `function` that isn't a string is still not a name.
+    let rejection = rejected(&block(r#"{"function": {"name": "read_file"}, "arguments": {}}"#))?;
+    assert_eq!(rejection.problem, Some(FallbackProblem::NameNotString));
+    Ok(())
+}
+
+// 18.1 item F (proposal G): `no_name` names the keys the object had, identifier-like ones of at most 32 bytes and at
+// most eight, never a value; so a later analysis tells arguments written at the top level from the tool under another
+// key.
+#[test]
+fn prompt_u_024_no_name_names_the_keys_it_saw() -> Result<(), String> {
+    let long = "k".repeat(33);
+    let cases = [
+        (r#"{"path": "a.py", "content": "b"}"#.to_owned(), vec!["content", "path"]),
+        (r#"{"arguments": {"path": "a"}}"#.to_owned(), vec!["arguments"]),
+        (format!(r#"{{"{long}": 1, "a b": 2, "path": "x"}}"#), vec!["path"]),
+        (
+            r#"{"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6, "g": 7, "h": 8, "i": 9}"#.to_owned(),
+            vec!["a", "b", "c", "d", "e", "f", "g", "h"],
+        ),
+        ("{}".to_owned(), vec![]),
+    ];
+    for (body, keys) in cases {
+        let rejection = rejected(&block(&body))?;
+        let keys = keys.into_iter().map(name).collect::<Result<Vec<_>, _>>()?;
+        assert_eq!(rejection.failure, FallbackFailure::Malformed, "{body}");
+        assert_eq!(rejection.problem, Some(FallbackProblem::NoName { keys }), "{body}");
     }
     Ok(())
 }
@@ -194,7 +258,12 @@ fn prompt_u_025_rejections_carry_the_failing_call_and_the_count() -> Result<(), 
     let rejection = rejected(&first)?;
     assert_eq!(
         (rejection.failure, rejection.problem),
-        (FallbackFailure::Malformed, Some(FallbackProblem::NoName))
+        (
+            FallbackFailure::Malformed,
+            Some(FallbackProblem::NoName {
+                keys: vec![name("arguments")?]
+            })
+        )
     );
     Ok(())
 }
