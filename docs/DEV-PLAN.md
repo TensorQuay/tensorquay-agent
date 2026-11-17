@@ -335,6 +335,11 @@ explained in [TEST-PLAN](TEST-PLAN.md#build-names-and-ids).
      as team messages wake a team (ADR-0034). Each wake is counted against the channel's budget, and an agent woken
      by another agent's post is bounded so that two agents can't keep each other going. The "agents aren't running"
      line stays for an agent whose task can't start.
+   - **Real time, from events, never polling between runs.** A channel event (a proposal opened, a to-do posted, a
+     mention, a reply, a decision) queues a wake for each member it concerns. Several events within a few seconds
+     make one wake. The woken run starts with what's new: for example, the proposal and how long its vote stays open.
+     While the run lasts, the agent follows the channel by long poll (`channel_wait`). Between runs, a member holds
+     no sandbox and costs nothing. The page shows each participant live: woken, reading, voted or posted, idle.
    - **Attachments.** A post, a proposal or a to-do can carry files, as the task's message box does, within the same
      limits. A PDF or a picture reaches each member agent in its own workspace, under a folder named for the
      channel. People download it from the post.
