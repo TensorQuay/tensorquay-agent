@@ -283,8 +283,9 @@ async fn deleting_a_lead_with_helpers(f: &Fixture) -> TestResult {
         remaining.is_empty(),
         "the lead and its helper: {remaining:?}"
     );
-    // The team ended for its lead's delete; or the purge already removed the lead, and the team with it (its row goes
-    // by cascade), which the 16 Nov run on CI's runner saw as no row.
+    // The team ended for its lead's delete; or the purge already took it: the purge removes the team's channel first,
+    // and the team row with it (by cascade), then the lead's own row, so a read between them finds no team and the lead
+    // still marked deleted (CI's runner, 16 and 17 Nov 2026).
     let team: Option<(String, Option<String>)> =
         sqlx::query_as("SELECT state, stop_reason FROM agent_teams WHERE id = $1")
             .bind(t.id)
@@ -301,7 +302,10 @@ async fn deleting_a_lead_with_helpers(f: &Fixture) -> TestResult {
                 .bind(&t.lead)
                 .fetch_optional(&f.pool)
                 .await?;
-        assert_eq!(lead, None, "a team is gone only with its purged lead");
+        assert!(
+            matches!(lead.as_deref(), None | Some("deleted")),
+            "a team is gone only once its lead is deleted: {lead:?}"
+        );
     }
     Ok(())
 }

@@ -346,6 +346,28 @@ class RealModelConfigTests(unittest.TestCase):
         found = re.search(r"^    networks: \[([^\]]*)\]", gateway, re.M).group(1)
         self.assertEqual([n.strip() for n in found.split(",")], soak_stack.soak_real.GATEWAY_NETWORKS)
 
+    def test_a_key_file_becomes_the_routes_secret_and_without_one_the_fixture_stays(self):
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as keys:
+            key = Path(keys) / "key"
+            key.write_text("tq-0123456789abcdef\n")
+            env = {"TQA_SOAK_MODEL_URL": "http://192.0.2.10:8001/v1", "TQA_SOAK_MODEL_NAME": "qwen",
+                   "TQA_SOAK_MODEL_CONTEXT": "65536", "TQA_SOAK_MODEL_KEY_FILE": str(key)}
+            stack, installation = self.stack(env)
+            (installation / "secrets.toml").write_text('[secrets]\n"secrets/local" = "synthetic-compose-fixture"\n')
+            with mock.patch.object(soak_stack.compose, "write", lambda path, text: path.write_text(text)):
+                stack.configure(rehearsal=True)
+        self.assertEqual((installation / "secrets.toml").read_text(),
+                         '[secrets]\n"secrets/local" = "tq-0123456789abcdef"\n')
+        self.assertEqual(stack.model_route["context_window"], 65536)
+        self.assertNotIn("tq-0123456789abcdef", repr(stack.model_route))
+        plain, installation = self.stack({"TQA_SOAK_MODEL_URL": "http://vllm:8000/v1", "TQA_SOAK_MODEL_NAME": "qwen"})
+        (installation / "secrets.toml").write_text('[secrets]\n"secrets/local" = "synthetic-compose-fixture"\n')
+        with mock.patch.object(soak_stack.compose, "write", lambda path, text: path.write_text(text)):
+            plain.configure(rehearsal=True)
+        self.assertIn("synthetic-compose-fixture", (installation / "secrets.toml").read_text())
+
     def test_without_an_endpoint_the_real_soak_refuses_to_start(self):
         stack, _ = self.stack({})
         with mock.patch.object(soak_stack.compose, "write", lambda path, text: path.write_text(text)):
