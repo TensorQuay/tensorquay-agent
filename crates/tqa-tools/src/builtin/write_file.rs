@@ -28,7 +28,7 @@ impl WriteFile {
                     "Write workspace text atomically",
                     json!({
                         "type":"object", "required":["path","content","create_parents"], "additionalProperties":false,
-                        "properties":{"path":{"type":"string"},"content":{"type":"string"},"create_parents":{"type":"boolean"}}
+                        "properties":{"path":{"type":"string"},"content":{"type":"string"},"create_parents":{"type":["boolean","null"]}}
                     }),
                     false,
                 )
@@ -46,6 +46,8 @@ impl Default for WriteFile {
 struct Args {
     path: String,
     content: String,
+    // Optional, false when left out (18.1 item F, proposal C): a text-route reply without it is a valid call.
+    #[serde(default)]
     create_parents: bool,
 }
 #[async_trait]

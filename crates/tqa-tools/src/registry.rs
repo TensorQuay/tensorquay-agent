@@ -239,6 +239,14 @@ impl ToolRegistry {
         let entry = self.validated_entry(action.tool().as_str(), action.arguments())?;
         entry.tool.call_prepared(action, cx).await
     }
+    /// What a repeated refusal adds ([`Tool::repeated_refusal`]) for a call's journaled arguments, normalised as a
+    /// call's are; `None` for an unknown tool or arguments its schema refuses.
+    pub async fn repeated_refusal(&self, name: &str, args: &Value, cx: &ToolContext) -> Option<String> {
+        let mut args = args.clone();
+        self.normalize_arguments(name, &mut args);
+        let entry = self.validated_entry(name, &args).ok()?;
+        entry.tool.repeated_refusal(&args, cx).await
+    }
     /// A prepared action's screen before it runs, for its evidence ([`Tool::before`]); `None` for an unknown tool,
     /// arguments its schema refuses, or a call that takes no evidence.
     pub async fn before(

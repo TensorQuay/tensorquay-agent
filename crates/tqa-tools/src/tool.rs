@@ -175,6 +175,13 @@ pub trait Tool: Send + Sync {
     async fn before(&self, _args: &Value, _cx: &ToolContext) -> Option<ToolImage> {
         None
     }
+    /// What to add to a refusal of the same arguments as the call that just failed, the repeat guard's second
+    /// failure (18.1 item F, proposal D): something that changes the model's input between the repeats, such as
+    /// `edit_file`'s region of the file. `None` by default, and whenever there's nothing to add; read-only, and never
+    /// fails the call.
+    async fn repeated_refusal(&self, _args: &Value, _cx: &ToolContext) -> Option<String> {
+        None
+    }
     /// Executes a call under explicit workspace, cancellation and resource limits.
     ///
     /// # Errors

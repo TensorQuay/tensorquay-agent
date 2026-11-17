@@ -196,8 +196,15 @@ pub enum JsonType {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum FallbackProblem {
-    /// The call block is a JSON object without a `name` key.
-    NoName,
+    /// The call block is a JSON object without a key naming its tool (`name`, `function` or `tool`).
+    NoName {
+        /// The keys the object had, identifier-like ones of at most [`MAX_MODEL_NAME_BYTES`], never a value, so a
+        /// reader can tell arguments written at the top level from the tool named under another key (18.1 item F);
+        /// at most [`MAX_PROBLEM_NAMES`]. Absent from an older runtime's.
+        #[serde(default, skip_serializing_if = "Vec::is_empty", deserialize_with = "names")]
+        #[schemars(length(max = 8))]
+        keys: Vec<ProblemName>,
+    },
     /// The call block is a JSON object with a `name` but without an `arguments` key.
     NoArguments,
     /// The call block is not JSON: cut off before the object closed, or a syntax error, at a line and column.
