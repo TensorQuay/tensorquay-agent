@@ -3,7 +3,7 @@
 //! the file's region around them. Lines are the model's own file, so nothing new is exposed. Never a looser match.
 
 /// Matching lines listed in an ambiguous refusal.
-const LISTED: usize = 10;
+pub(super) const LISTED: usize = 10;
 /// Lines equally near named in a not-found refusal.
 const NEAREST: usize = 3;
 /// The longest line looked at or shown in full; a longer shown line is cut.

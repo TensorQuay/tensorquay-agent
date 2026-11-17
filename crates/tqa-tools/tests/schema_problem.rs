@@ -71,7 +71,7 @@ fn tool_u_070_each_schema_problem_is_named() -> TestResult {
                 tool: name("write_file")?,
                 at: None,
                 property: name("create_parents")?,
-                expected: vec![JsonType::Boolean],
+                expected: vec![JsonType::Boolean, JsonType::Null],
             },
         ),
     ];

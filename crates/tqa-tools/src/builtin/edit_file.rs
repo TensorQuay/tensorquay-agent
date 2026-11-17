@@ -281,7 +281,7 @@ fn overlapping(text: &str, old: &str) -> (Vec<usize>, usize) {
     let (mut matches, mut total, mut offset) = (Vec::new(), 0, 0);
     while let Some(relative) = text[offset..].find(old) {
         let start = offset + relative;
-        if matches.len() < 10 {
+        if matches.len() < miss::LISTED {
             matches.push(start);
         }
         total += 1;
