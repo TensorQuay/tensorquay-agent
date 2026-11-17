@@ -246,10 +246,10 @@ fn distance(left: &[char], right: &[char], limit: usize, cells: &mut usize) -> O
             return None;
         };
         *cells = left_over;
-        // Only the band is computed: the cell before it reads as out of reach, and so does the one after it, which the
-        // next row reads.
-        current[0] = row;
-        current[from - 1] = if from > 1 { usize::MAX } else { row };
+        // Only the band is computed. The cell before it reads as `row`, which no path through it can beat (a cell's
+        // distance is at most its row). The cell after it, which the next row reads, was never written: the band
+        // moves one column a row, so it still holds its first value (row 0's, or out of reach), never under the truth.
+        current[from - 1] = row;
         let mut smallest = row;
         for column in from..=to {
             let substitution =
@@ -258,9 +258,6 @@ fn distance(left: &[char], right: &[char], limit: usize, cells: &mut usize) -> O
             let insertion = current[column - 1].saturating_add(1);
             current[column] = substitution.min(deletion).min(insertion);
             smallest = smallest.min(current[column]);
-        }
-        if to < width {
-            current[to + 1] = usize::MAX;
         }
         if smallest > limit {
             return None;
@@ -389,6 +386,22 @@ mod tests {
         distance(left, right, limit, &mut cells)
     }
 
+    /// The string of a and b that `bits`' lowest `length` bits spell, b for a one.
+    fn spelled(bits: u32, length: u32) -> String {
+        (0..length)
+            .map(|at| if bits >> at & 1 == 1 { 'b' } else { 'a' })
+            .collect()
+    }
+
+    /// Every string of a and b up to six letters, and a few of other letters and widths.
+    fn words() -> Vec<String> {
+        let mut words: Vec<String> = (0..=6u32)
+            .flat_map(|length| (0..(1u32 << length)).map(move |bits| spelled(bits, length)))
+            .collect();
+        words.extend(["kitten", "sitting", "界a界"].map(String::from));
+        words
+    }
+
     /// The plain full-matrix distance, to check the band against.
     fn plain(left: &[char], right: &[char]) -> usize {
         let mut previous: Vec<usize> = (0..=right.len()).collect();
@@ -407,18 +420,15 @@ mod tests {
 
     #[test]
     fn the_band_agrees_with_the_plain_distance() {
-        let words = [
-            "", "a", "ab", "ba", "abc", "acb", "kitten", "sitting", "aaab", "baaa", "abab", "bbaa",
-            "界a界",
-        ];
+        let words = words();
         let pairs = words
             .iter()
-            .flat_map(|left| words.iter().map(move |right| (*left, *right)));
+            .flat_map(|left| words.iter().map(move |right| (left, right)));
         for (left, right) in pairs {
             let (left, right): (Vec<char>, Vec<char>) =
                 (left.chars().collect(), right.chars().collect());
             let exact = plain(&left, &right);
-            for limit in 0..=8 {
+            for limit in 0..=6 {
                 assert_eq!(
                     unbounded(&left, &right, limit),
                     (exact <= limit).then_some(exact),
