@@ -40,24 +40,38 @@ pub(crate) struct Answer {
     pub reason: Option<&'static str>,
 }
 
-/// The role a run with `facts` gets.
+/// The role a run with `facts` gets, and why when it may not lead (A2; A7 until rounds can open).
 pub(crate) fn answer(facts: Facts) -> Answer {
     let role = |role| Answer { role, reason: None };
+    let none = |reason| Answer {
+        role: "none",
+        reason: Some(reason),
+    };
     if !facts.teams_on {
-        return role("none");
+        return none("teams_disabled");
     }
     match facts.place {
         Place::Lead => return role("lead"),
         Place::Member => return role("member"),
         Place::None => {}
     }
+    // Depth 1: a helper never leads.
     if facts.was_member {
-        return role("none");
+        return none("was_member");
     }
     match facts.ended {
-        Some(ended) if ended.note_unread => role("ended"),
+        Some(Ended { for_good: true, .. }) => none("team_ended"),
+        // Between rounds: its end note to read first.
+        Some(Ended {
+            note_unread: true, ..
+        }) => Answer {
+            role: "ended",
+            reason: Some("between_rounds"),
+        },
+        // Step 1: no round can open yet, so a task still leads one team (A7).
+        Some(_) => none("one_team"),
         None if facts.wakeable => role("may_lead"),
-        Some(_) | None => role("none"),
+        None => none("runtime_too_old"),
     }
 }
 

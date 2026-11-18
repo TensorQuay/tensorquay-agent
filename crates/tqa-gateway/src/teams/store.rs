@@ -105,6 +105,24 @@ pub(crate) async fn ended(
     }))
 }
 
+/// Whether the ended `team` ended for good, not for one of a round's reasons: its lead task was deleted or its
+/// person disabled (ADR-0034's rounds amendment, A1).
+///
+/// # Errors
+/// Storage failure.
+pub(crate) async fn ended_for_good(
+    connection: &mut PgConnection,
+    team: Uuid,
+) -> Result<bool, GatewayError> {
+    Ok(sqlx::query_scalar!(
+        "SELECT COALESCE(stop_reason IN ('lead_deleted', 'person_disabled'), false) AS \"for_good!\" \
+         FROM agent_teams WHERE id = $1",
+        team
+    )
+    .fetch_one(connection)
+    .await?)
+}
+
 /// Whether the lead of the ended `team` hasn't yet read its end note (the `ended` message): its next run is then
 /// offered `read_reports` alone, which delivers it by the read rule, so a team that ended between the lead's runs is
 /// still told once (ADR-0034 point 10).

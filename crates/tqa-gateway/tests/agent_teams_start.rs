@@ -418,8 +418,11 @@ async fn gw_i_214_a_task_linked_below_13_is_never_offered_the_lead(pool: PgPool)
             let (person, _) = f.member("owner@example.invalid").await?;
             // In no team yet, so the link takes it; but its later wakes couldn't reach it, so it never leads.
             for (revision, expected) in [
-                (tqa_types::LEAD_BRIEF_REVISION, "none"),
-                (tqa_types::TEAM_WAKE_REVISION, "may_lead"),
+                (
+                    tqa_types::LEAD_BRIEF_REVISION,
+                    json!({"role": "none", "reason": "runtime_too_old"}),
+                ),
+                (tqa_types::TEAM_WAKE_REVISION, json!({"role": "may_lead"})),
             ] {
                 let conversation = f.conversation(person.id).await?;
                 let _runtime = f.runtime_at(&conversation.id, revision).await?;
@@ -431,7 +434,7 @@ async fn gw_i_214_a_task_linked_below_13_is_never_offered_the_lead(pool: PgPool)
                     .to_owned();
                 assert_eq!(
                     role(f, &token).await?,
-                    (200, json!({"role": expected})),
+                    (200, expected),
                     "revision {revision}"
                 );
             }
@@ -585,12 +588,12 @@ async fn gw_i_202_a_runs_role_tells_which_team_tools_it_gets(pool: PgPool) -> Te
                 .await?;
             assert_eq!(
                 role(f, &member.token).await?,
-                (200, json!({"role": "none"}))
+                (200, json!({"role": "none", "reason": "was_member"}))
             );
             // One team per lead: the ended team's lead gets no team tools...
             assert_eq!(
                 role(f, &lead.token).await?,
-                (200, json!({"role": "none"}))
+                (200, json!({"role": "none", "reason": "one_team"}))
             );
             // ...except, while its end note is unread, read_reports alone, which delivers it (a team that ended
             // between its runs is still told once).
@@ -606,7 +609,7 @@ async fn gw_i_202_a_runs_role_tells_which_team_tools_it_gets(pool: PgPool) -> Te
             .await?;
             assert_eq!(
                 role(f, &lead.token).await?,
-                (200, json!({"role": "ended"}))
+                (200, json!({"role": "ended", "reason": "between_rounds"}))
             );
             sqlx::query("UPDATE agent_teams SET lead_last_read_seq = $1 WHERE lead_conversation = $2")
                 .bind(seq)
@@ -615,7 +618,7 @@ async fn gw_i_202_a_runs_role_tells_which_team_tools_it_gets(pool: PgPool) -> Te
                 .await?;
             assert_eq!(
                 role(f, &lead.token).await?,
-                (200, json!({"role": "none"})),
+                (200, json!({"role": "none", "reason": "one_team"})),
                 "once read, nothing"
             );
             // Without a runtime token, nothing.
@@ -638,7 +641,10 @@ async fn gw_i_202_with_agent_teams_off_every_role_is_none(pool: PgPool) -> TestR
             f.admin().await?;
             let (person, _) = f.member("owner@example.invalid").await?;
             let lead = task(f, person.id).await?;
-            assert_eq!(role(f, &lead.token).await?, (200, json!({"role": "none"})));
+            assert_eq!(
+                role(f, &lead.token).await?,
+                (200, json!({"role": "none", "reason": "teams_disabled"}))
+            );
             Ok(())
         },
     ))
