@@ -17,7 +17,6 @@
     "theme.light": "Clair",
     "theme.dark": "Sombre",
     "theme.current": "Thème : {theme, select, light {Clair} dark {Sombre} other {Système}}",
-    "auth.wordmark": "TensorQuay",
     "auth.setupTitle": "Créer le premier administrateur",
     "auth.signInTitle": "Connexion",
     "auth.setupIntro": "Configurez votre compte pour commencer.",

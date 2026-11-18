@@ -341,20 +341,30 @@ function DayBars({ report, range }: { report: UsageReport; range: Range }) {
   const last = dates.format(new Date(`${range.to}T00:00:00Z`));
   return (
     <figure className="usage-chart">
-      <div className="usage-days" role="img" aria-labelledby={caption}>
-        {all.map(([key, value]) => (
-          <span
-            key={key}
-            className="usage-day"
-            data-day={key}
-            data-empty={value === 0 || undefined}
-            title={`${dates.format(new Date(`${key}T00:00:00Z`))}: ${formatNumber(value, t.locale)}`}
-            style={{
-              // A share of the busiest day's height; the stylesheet turns it into the bar.
-              ["--share" as string]: busiest[1] ? value / busiest[1] : 0,
-            }}
-          />
-        ))}
+      {/* The bars and their scale beside them (the 17.2 review's finding 12): the busiest day's tokens at the top, 0 at
+          the baseline, for the eye; the caption names the busiest day for a screen reader. */}
+      <div className="usage-plot">
+        <div className="usage-days" role="img" aria-labelledby={caption}>
+          {all.map(([key, value]) => (
+            <span
+              key={key}
+              className="usage-day"
+              data-day={key}
+              data-empty={value === 0 || undefined}
+              title={`${dates.format(new Date(`${key}T00:00:00Z`))}: ${formatNumber(value, t.locale)}`}
+              style={{
+                // A share of the busiest day's height; the stylesheet turns it into the bar.
+                ["--share" as string]: busiest[1] ? value / busiest[1] : 0,
+              }}
+            />
+          ))}
+        </div>
+        <div className="usage-scale type-small muted" aria-hidden="true">
+          <span className="usage-scale-max">
+            {formatCompact(busiest[1], t.locale)}
+          </span>
+          <span>{formatNumber(0, t.locale)}</span>
+        </div>
       </div>
       <div className="usage-axis type-small muted" aria-hidden="true">
         <span>{first}</span>

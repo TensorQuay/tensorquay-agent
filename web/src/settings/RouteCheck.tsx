@@ -269,8 +269,10 @@ function CheckResult({
         </p>
       )}
       {/* The verdict speaks first; what was observed is for whoever wants it. */}
-      <details className="check-details">
-        <summary className="type-small">{t("models.checkDetails")}</summary>
+      <details className="route-group check-details">
+        <summary className="disclosure-quiet">
+          {t("models.checkDetails")}
+        </summary>
         <dl className="check-list type-small">
           {rows.map(([term, detail]) => (
             <div key={term} className="check-row-item">

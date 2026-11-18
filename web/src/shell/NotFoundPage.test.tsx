@@ -5,6 +5,8 @@ import { render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
+import { expectAppLockup } from "../test/brand";
+
 import { NotFoundPage } from "./NotFoundPage";
 
 vi.mock("next/link", () => ({
@@ -43,7 +45,8 @@ describe("the app's own 404 page", () => {
     const home = screen.getByRole("link", { name: "Go to your tasks" });
     expect(home).toHaveAttribute("href", "/");
     expect(home).toHaveAttribute("data-variant", "primary");
-    expect(screen.getByRole("img", { name: "TensorQuay" })).toBeVisible();
+    // The app's one lockup, as the sign-in pages show it (WEB-U-501).
+    expectAppLockup();
     // The skip link's target: the page is its own main, as the sign-in pages are.
     expect(screen.getByRole("main")).toHaveAttribute("id", "main");
     expect(document.title).toBe("Page not found · TensorQuay Agent");
