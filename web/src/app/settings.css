@@ -578,6 +578,61 @@
   overflow: visible;
   white-space: pre-wrap;
 }
+/* The Models cards on a phone (the 17.2 review's finding 18, decided on 18 Nov 2026): a tap anywhere opens the route,
+   as its Edit link stretched over the card with its word hidden (its name still read); the ⋯ and a card's own links
+   sit above it. One stop opens the card, its focus ring drawn around the card; then its ⋯. */
+:where(.data-table-scroll[data-cards]) .data-table.models-table tbody tr {
+  position: relative;
+}
+:where(.data-table-scroll[data-cards]) .data-table.models-table .route-open {
+  position: static;
+  width: 0;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  overflow: visible;
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.models-table
+  .route-open::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--control-radius);
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.models-table
+  .route-open-word {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.models-table
+  .route-open:focus-visible {
+  outline: none;
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.models-table
+  tbody
+  tr:has(.route-open:focus-visible) {
+  outline: var(--focus-width) solid var(--focus);
+  outline-offset: var(--focus-offset);
+}
+:where(.data-table-scroll[data-cards]) .data-table.models-table tbody tr:hover {
+  border-color: var(--muted);
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.models-table
+  td
+  a:not(.route-open),
+:where(.data-table-scroll[data-cards]) .data-table.models-table td button {
+  position: relative;
+  z-index: 1;
+}
 .data-select {
   width: auto;
   min-height: var(--min-control-height);
