@@ -17,6 +17,14 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **The text tool-call route reads `tool` or `function` for the tool's name and `parameters` for its arguments
   (PROMPT-U-024),** as the native route does; a call block without a name says which keys it had (`no_name`'s new
   optional `keys`, PROTO-U-044; never a value).
+- **The transcript shows no scrollbar until you scroll (WEB-U-485, WEB-E2E-132).** A long task's transcript had the
+  browser's scrollbar beside it all the time, taking its width. Now a thin bar shows over the transcript's edge while
+  you scroll it, by wheel, touch, keys or Jump to latest, or while the pointer is at that edge, and fades about a
+  second after; it never shows while the page follows a running task's new output. It can be dragged, and it takes
+  no width, so nothing moves when it shows. The whole main area scrolls the transcript now, its text still the
+  centred column: a wheel or trackpad over the side margins scrolls it, and the bar sits at the area's right edge (the
+  Files panel's edge when it is open). Keys, focus and screen readers use the transcript as before. With forced
+  colours the system's scrollbar stays.
 
 ## 18.0.1 (18 November 2026)
 
