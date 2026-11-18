@@ -26978,7 +26978,8 @@
               "person_message",
               "notice",
               "done",
-              "ended"
+              "ended",
+              "round_started"
             ]
           },
           "from": {
@@ -27173,6 +27174,16 @@
                 }
               }
             }
+          },
+          "round": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "round_started: the round that started; ended: the round that ended (ADR-0034's rounds amendment, A5)."
+          },
+          "tokens_all_rounds": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "ended: the tokens every round spent, this one's included."
           }
         }
       },

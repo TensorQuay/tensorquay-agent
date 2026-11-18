@@ -803,6 +803,31 @@ async fn gw_i_337_the_person_reads_the_round_every_rounds_record_and_all_rounds_
             "brought back into round 2"
         );
         assert_eq!(round_of("reviewer"), Some(json!(1)), "not in this round");
+        // The person's log has round 2's start, for them, and round 1's end note names its round (as the contract says).
+        let log = f
+            .get(
+                &format!(
+                    "/api/v1/conversations/{}/team/messages?after=0&limit=200",
+                    t.lead.0
+                ),
+                &t.cookie,
+            )
+            .await?;
+        assert_eq!(log.status(), 200);
+        let log = log.json::<Value>().await?;
+        let items = log["items"].as_array().ok_or("items")?;
+        let started = items
+            .iter()
+            .find(|item| item["type"] == json!("round_started"))
+            .ok_or("round_started")?;
+        assert_eq!(
+            (&started["round"], &started["to"]["kind"]),
+            (&json!(2), &json!("person")),
+            "{started}"
+        );
+        if let Some(ended) = items.iter().find(|item| item["type"] == json!("ended")) {
+            assert_eq!(ended["round"], json!(1), "{ended}");
+        }
         Ok(())
     })
     .await
