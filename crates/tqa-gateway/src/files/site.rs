@@ -240,39 +240,71 @@ async fn serve(
         .ok_or(GatewayError::NotFound)?;
     let folder = folder_text(&held.folder);
     let files = &state.config.files;
-    let (target, index) = target_for(&folder, rest).ok_or(GatewayError::NotFound)?;
-    let kind = content_type(&target);
-    let limit = if kind.starts_with("text/html") {
-        files.preview(files.preview_html_bytes)
-    } else {
-        files.download_bytes
-    };
-    let served = match read(state, &held.user, id, target.clone(), limit).await {
-        Ok(served) => (target, kind, served),
-        // A route of the site, not a file of it: the page answers, as a static host does for a built site.
-        Err(GatewayError::NotFound | GatewayError::PathInvalid) if !index => {
-            let page =
-                WorkspacePath::parse(&join(&folder, INDEX)).map_err(|_| GatewayError::NotFound)?;
-            let limit = files.preview(files.preview_html_bytes);
-            let served = read(state, &held.user, id, page.clone(), limit)
-                .await
-                .map_err(|error| match error {
-                    GatewayError::PathInvalid => GatewayError::NotFound,
-                    other => other,
-                })?;
-            (page, "text/html; charset=utf-8", served)
+    let page_limit = files.preview(files.preview_html_bytes);
+    // The first of the address's candidates that is a file answers (GW-U-211's order).
+    let mut found = None;
+    for target in targets_for(&folder, rest).ok_or(GatewayError::NotFound)? {
+        let kind = content_type(&target);
+        let limit = if kind.starts_with("text/html") {
+            page_limit
+        } else {
+            files.download_bytes
+        };
+        match read(state, &held.user, id, target, limit).await {
+            Ok(served) => {
+                found = Some((kind, served));
+                break;
+            }
+            Err(GatewayError::NotFound | GatewayError::PathInvalid) => {}
+            Err(error) => return Err(error),
         }
-        Err(GatewayError::PathInvalid) => return Err(GatewayError::NotFound),
-        Err(error) => return Err(error),
+    }
+    let (kind, (size, body)) = found.ok_or(GatewayError::NotFound)?;
+    let root = root_path(id, pass);
+    let origin = state
+        .config
+        .public_origin
+        .as_str()
+        .trim_end_matches('/')
+        .to_owned();
+    // A page's and a stylesheet's root paths, moved under the pass (GW-U-223); a stylesheet over the page limit and
+    // every other file are served as they are.
+    let (size, body) = if kind.starts_with("text/html")
+        || (kind.starts_with("text/css") && size <= page_limit)
+    {
+        let bytes = axum::body::to_bytes(body, usize::try_from(page_limit).unwrap_or(usize::MAX))
+            .await
+            .map_err(|_| GatewayError::BodyTooLarge)?;
+        let html = kind.starts_with("text/html");
+        let (root, origin) = (root.clone(), origin.clone());
+        let rewritten = blocking(move || {
+            Ok(if html {
+                Bytes::from(super::site_rewrite::html_under_root(
+                    &bytes,
+                    &root,
+                    &super::site_rewrite::reporter(&root, &origin),
+                ))
+            } else {
+                std::str::from_utf8(&bytes)
+                    .ok()
+                    .and_then(|css| super::site_rewrite::css_under_root(css, &root))
+                    .map_or(bytes, Bytes::from)
+            })
+        })
+        .await?;
+        (
+            u64::try_from(rewritten.len()).unwrap_or(u64::MAX),
+            Body::from(rewritten),
+        )
+    } else {
+        (size, body)
     };
-    let (_, kind, (size, body)) = served;
     let mut response = body.into_response();
     let headers = response.headers_mut();
     headers.insert(header::CONTENT_TYPE, HeaderValue::from_static(kind));
     headers.insert(header::CONTENT_LENGTH, HeaderValue::from(size));
     if kind.starts_with("text/html") {
-        let origin = state.config.public_origin.as_str().trim_end_matches('/');
-        let own = format!("{origin}{}", root_path(id, pass));
+        let own = format!("{origin}{root}");
         let outside = state.settings.current().egress.csp_sources();
         headers.insert(
             header::CONTENT_SECURITY_POLICY,
@@ -303,22 +335,41 @@ fn join(folder: &str, name: &str) -> String {
     }
 }
 
-/// The file `rest` names under `folder`, and whether it is the folder's page itself: the empty rest, a trailing slash
-/// or a last segment without an extension (a built site's route) answer `index.html`; a path that climbs or holds a
-/// link is refused as missing.
-pub(super) fn target_for(folder: &str, rest: &str) -> Option<(WorkspacePath, bool)> {
+/// The files an address under `folder` may name, in the order they are tried (GW-U-211, 18.1): the exact file; for
+/// `x/`, or `x` without an extension, `x/index.html`; for `x` without an extension, `x.html` (a static export that
+/// links `/about` writes `about.html`); then the folder's `index.html` (a single-page app's routes). A path that climbs
+/// or holds the private area is refused as missing (`None`).
+pub(super) fn targets_for(folder: &str, rest: &str) -> Option<Vec<WorkspacePath>> {
     let rest = rest.trim_start_matches('/');
     // The workspace's private area is never a site's file, whatever folder the site is.
     if rest.split('/').any(|part| part == super::remote::PRIVATE) {
         return None;
     }
-    let last = rest.rsplit('/').next().unwrap_or("");
-    if rest.is_empty() || rest.ends_with('/') || !last.contains('.') {
-        let page = WorkspacePath::parse(&join(folder, INDEX)).ok()?;
-        return Some((page, true));
+    let page = WorkspacePath::parse(&join(folder, INDEX)).ok()?;
+    if rest.is_empty() {
+        return Some(vec![page]);
     }
-    let target = WorkspacePath::parse(&join(folder, rest)).ok()?;
-    Some((target, last == INDEX))
+    let trimmed = rest.trim_end_matches('/');
+    let last = trimmed.rsplit('/').next().unwrap_or("");
+    let route = rest.ends_with('/') || !last.contains('.');
+    let mut names = Vec::new();
+    if route {
+        names.push(format!("{trimmed}/{INDEX}"));
+        if !rest.ends_with('/') {
+            names.push(format!("{trimmed}.html"));
+        }
+    } else {
+        names.push(rest.to_owned());
+    }
+    let mut targets = Vec::new();
+    for name in names {
+        // A name that climbs or isn't a workspace path names nothing.
+        targets.push(WorkspacePath::parse(&join(folder, &name)).ok()?);
+    }
+    if !targets.contains(&page) {
+        targets.push(page);
+    }
+    Some(targets)
 }
 
 /// The type a file is served with, by its extension and never guessed from its bytes.

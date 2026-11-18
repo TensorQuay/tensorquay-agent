@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { RotateCw } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { api } from "../api/client";
 import { mintSitePass } from "../api/previews";
@@ -13,6 +13,7 @@ import { Icon } from "../ui/Icon";
 
 import "./changes-catalogue";
 import { blockedHosts, pageHosts } from "./page-hosts";
+import { type SiteReport, siteReportLine, siteReportPart } from "./site-report";
 
 /** The hosts the offline line names before it counts the rest. */
 const NAMED_HOSTS = 3;
@@ -93,13 +94,36 @@ export function PagePreview({
   const left = !served && loads.frame === frame && loads.count > 1;
   const blocked =
     served?.network && hosts ? blockedHosts(hosts, served.network) : [];
-  const named = (list: readonly string[]) =>
-    new Intl.ListFormat(t.locale, { type: "conjunction" }).format([
+  const named = (list: readonly string[], beyond = 0) => {
+    const more = Math.max(0, list.length - NAMED_HOSTS) + beyond;
+    return new Intl.ListFormat(t.locale, { type: "conjunction" }).format([
       ...list.slice(0, NAMED_HOSTS),
-      ...(list.length > NAMED_HOSTS
-        ? [t("files.pageHostsMore", { count: list.length - NAMED_HOSTS })]
-        : []),
+      ...(more > 0 ? [t("files.pageHostsMore", { count: more })] : []),
     ]);
+  };
+  // What the page reported it couldn't load (the gateway's reporter, 18.1): only from this frame, whose origin is
+  // opaque, and only for this frame; a reload, Stop scripts or another page starts again with nothing said.
+  const frameRef = useRef<HTMLIFrameElement>(null);
+  const [report, setReport] = useState<{ frame: string } & SiteReport>({
+    frame: "",
+  });
+  useEffect(() => {
+    if (!served) return;
+    const listen = (event: MessageEvent) => {
+      const source = frameRef.current?.contentWindow;
+      if (!source || event.source !== source || event.origin !== "null") return;
+      const part = siteReportPart(event.data);
+      if (!part) return;
+      setReport((was) => ({
+        ...(was.frame === frame ? was : { frame }),
+        ...part,
+      }));
+    };
+    window.addEventListener("message", listen);
+    return () => window.removeEventListener("message", listen);
+  }, [served, frame]);
+  const said: SiteReport = served && report.frame === frame ? report : {};
+  const line = siteReportLine(said);
   const src = served
     ? `${served.url}${path
         .slice(slash + 1)
@@ -145,6 +169,27 @@ export function PagePreview({
               {t("files.pageOffline", { hosts: named(hosts) })}
             </p>
           )}
+      {line === "root" && said.root && (
+        <p className="type-small muted" role="status">
+          {said.root.paths.length > 0
+            ? t("files.siteRootPaths", {
+                paths: named(said.root.paths, said.root.more),
+              })
+            : t("files.siteRootPathsUnnamed")}
+        </p>
+      )}
+      {line === "missing" && said.missing && (
+        <p className="type-small muted" role="status">
+          {t("files.siteMissing", {
+            paths: named(said.missing.paths, said.missing.more),
+          })}
+        </p>
+      )}
+      {line === "empty" && (
+        <p className="type-small muted" role="status">
+          {t("files.siteEmpty")}
+        </p>
+      )}
       {left && (
         <p className="type-small muted" role="status">
           {t("files.pageLeft")}
@@ -154,6 +199,7 @@ export function PagePreview({
       {src && (
         <iframe
           key={frame}
+          ref={frameRef}
           className="file-page"
           title={t("files.pageFrame", { name })}
           src={src}

@@ -7,6 +7,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Added
 
+- **A built web app's own paths work in the preview (GW-U-223, GW-U-224, GW-I-321).** A default Vite or Create
+  React App build names its files from the server's root (`/assets/app.js`), which a preview's address can't serve,
+  so the page stayed blank. The preview now moves those paths under its own address in the page's HTML and in its
+  stylesheets; scripts are never changed. A static export's own pages open by their links (`/about` answers
+  `about.html`). Each previewed page carries a small reporter that tells the Files panel what it couldn't load.
 - **A long task can look back past its summary (CTX-U-023, CORE-E-043, E2E-RECALL-001).** When a long task is
   summarised to fit the model's window, the summarised turns are now kept as text in the task's
   `.tqa/<id>/history.md`, and the summary tells the model to search it before answering about anything earlier. Ask
