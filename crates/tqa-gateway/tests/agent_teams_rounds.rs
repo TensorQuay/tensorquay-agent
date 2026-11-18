@@ -832,3 +832,71 @@ async fn gw_i_337_the_person_reads_the_round_every_rounds_record_and_all_rounds_
     })
     .await
 }
+
+/// A usage row for `task`, `tokens` in all, at `ago` seconds before now.
+async fn usage(f: &Fixture, task: &str, tokens: i64, ago: i32) -> Result<()> {
+    sqlx::query(
+        "INSERT INTO usage (id, conversation_id, route, prompt_tokens, completion_tokens, created_at) \
+         VALUES ($1, $2::uuid, 'local', $3, 0, CURRENT_TIMESTAMP - make_interval(secs => $4))",
+    )
+    .bind(Uuid::now_v7())
+    .bind(task)
+    .bind(tokens)
+    .bind(f64::from(ago))
+    .execute(&f.pool)
+    .await?;
+    Ok(())
+}
+
+// TEST: GW-I-338
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_338_a_rounds_end_note_counts_only_that_rounds_reports_members_and_usage(
+    pool: PgPool,
+) -> TestResult {
+    support::run_configured(pool, None, ENABLED, async |f| {
+        let t = team(f).await?;
+        // The team started a while ago; round 1's usage and report come before it ends.
+        sqlx::query("UPDATE agent_teams SET created_at = CURRENT_TIMESTAMP - interval '1 hour' WHERE id = $1")
+            .bind(t.id)
+            .execute(&f.pool)
+            .await?;
+        usage(f, t.researcher.0.as_str(), 300, 1800).await?;
+        let (status, body) = send(f, &t.researcher.1, "r-2:c-1", &json!({"type": "report", "text": "Round one."})).await?;
+        assert_eq!(status, 201, "{body}");
+        // Round 1's end stops a helper still at work, as the end path does; between_rounds writes only the team row.
+        sqlx::query("UPDATE agent_team_members SET state = 'stopped' WHERE team_id = $1 AND name = 'reviewer'")
+            .bind(t.id)
+            .execute(&f.pool)
+            .await?;
+        between_rounds(f, &t).await?;
+        let (status, body) = start_with(
+            f,
+            &t,
+            "r-5:c-1",
+            json!({"role": "researcher", "workspace": "own_copy", "brief": brief()}),
+        )
+        .await?;
+        assert_eq!(status, 201, "{body}");
+        // Round 2: the researcher uses 120 tokens and reports once; the lead ends it.
+        usage(f, t.researcher.0.as_str(), 120, 0).await?;
+        sqlx::query("UPDATE agent_teams SET spent_tokens = 120 WHERE id = $1")
+            .bind(t.id)
+            .execute(&f.pool)
+            .await?;
+        let (status, body) = send(f, &t.researcher.1, "r-6:c-1", &json!({"type": "report", "text": "Round two."})).await?;
+        assert_eq!(status, 201, "{body}");
+        let (status, body) = done(f, &t.lead.1, "r-5:done", &json!({"summary": "Round two."})).await?;
+        assert_eq!(status, 200, "{body}");
+        until_ended(f, t.id).await?;
+        let notes = end_notes(f, t.id).await?;
+        let last = notes.last().ok_or("an end note")?;
+        assert_eq!(last["round"], json!(2), "{last}");
+        // Only round 2's report, and only round 2's members with round 2's usage.
+        let reports = last["reports"].as_array().ok_or("reports")?;
+        assert_eq!(reports.len(), 1, "{last}");
+        assert_eq!(last["tokens"]["members"], json!([{"name": "researcher", "tokens": 120}]), "{last}");
+        Ok(())
+    })
+    .await
+}

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT seq, author_name, body->'files' AS files FROM channel_messages WHERE channel_id = $1 AND type = 'report' ORDER BY seq",
+  "query": "SELECT seq, author_name, body->'files' AS files FROM channel_messages WHERE channel_id = $1 AND type = 'report' AND seq > GREATEST(COALESCE((SELECT MAX(r.end_seq) FROM agent_team_rounds r JOIN agent_teams t ON t.id = r.team_id WHERE r.team_id = $2 AND r.round < t.round), 0), COALESCE((SELECT MAX(s.seq) FROM channel_messages s WHERE s.channel_id = $1 AND s.type = 'round_started'), 0)) ORDER BY seq",
   "describe": {
     "columns": [
       {
@@ -34,6 +34,7 @@
     ],
     "parameters": {
       "Left": [
+        "Uuid",
         "Uuid"
       ]
     },
@@ -43,5 +44,5 @@
       null
     ]
   },
-  "hash": "3cac16ae55d9f4b85de289748f8480fc3457731c527eb58e98b4f7aaba992132"
+  "hash": "4def657d39f205cab3ac0e5f1ab44fe08e4ee2a57e692ece246f7ca7f5a185fa"
 }

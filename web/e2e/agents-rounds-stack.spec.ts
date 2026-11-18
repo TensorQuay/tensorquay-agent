@@ -132,7 +132,11 @@ test("E2E-AGENTS-040 a person's follow-up opens round 2, which brings a helper b
   await expect(
     page.getByText("Round 2 started", { exact: true }),
   ).toBeVisible();
-  await expect(page.getByRole("region", { name: /^Round 2: / })).toBeVisible();
+  const roundTwo = page.getByRole("region", { name: /^Round 2: / });
+  await expect(roundTwo).toBeVisible();
+  // Round 2's note counts round 2 only: the tallier's one report, and no share for the checker, not in this round.
+  await expect(roundTwo).toContainText("1 report from tallier");
+  await expect(roundTwo).not.toContainText("checker-r");
   await capture(page, "rounds-lead");
   // All helpers: the checker wasn't brought back.
   await strip.getByRole("button", { name: "All helpers" }).click();
