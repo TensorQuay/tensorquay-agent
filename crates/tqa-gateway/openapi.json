@@ -19877,6 +19877,10 @@
             ],
             "description": "The task's run, from the lifecycle projection (as a channel member's run_status); present on the task list's items and on one task's own read (GW-I-120), so a page opened on a task knows whether it ran before its history replays. A run that started and never ended (a crash) reads running. A client shows an unknown value as plain words."
           },
+          "screen_notices": {
+            "type": "boolean",
+            "description": "Whether the task has notices to read at /conversations/{id}/screen/notices (a desktop's screen, or an administrator's stop of its sandbox); present only on one task's own read, so the task's page asks for them only when there is one (GW-U-218)."
+          },
           "title_source": {
             "type": "string",
             "enum": [

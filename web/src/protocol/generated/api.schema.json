@@ -401,6 +401,9 @@
             "cancelled"
           ]
         },
+        "screen_notices": {
+          "type": "boolean"
+        },
         "title_source": {
           "type": "string",
           "enum": [

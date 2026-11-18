@@ -1,0 +1,42 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.phase, EXISTS (SELECT 1 FROM idempotency i WHERE i.conversation_id=s.conversation_id AND i.execution_status IN ('queued','sending')) AS \"work_waiting!\", EXISTS (SELECT 1 FROM templates t WHERE t.name=c.template AND 'desktop'=ANY(t.capabilities)) AS \"desktop!\" FROM sandbox_instances s JOIN conversations c ON c.id=s.conversation_id WHERE s.conversation_id=$1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "phase",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "sandbox_instances",
+            "name": "phase"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "work_waiting!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "desktop!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "bf5617fbc15edff5100267669d5ff8b94b3ec3ec319a83b53277ce4e1973758b"
+}

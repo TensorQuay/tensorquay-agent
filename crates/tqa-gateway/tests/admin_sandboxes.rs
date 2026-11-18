@@ -41,6 +41,13 @@ fn item<'a>(listing: &'a Value, id: &str) -> Result<&'a Value> {
         .ok_or_else(|| format!("{id} not listed").into())
 }
 
+/// One task's own read, as its owner sees it.
+async fn read(f: &Fixture, id: &str, cookie: &str) -> Result<Value> {
+    let (status, body) = call(f, Method::GET, &format!("/api/v1/conversations/{id}"), cookie, (None, None)).await?;
+    assert_eq!(status, 200, "{body}");
+    Ok(body)
+}
+
 async fn metrics(f: &Fixture) -> Result<String> {
     let response = f
         .gateway
@@ -216,6 +223,8 @@ async fn an_administrators_stop_retires_an_idle_sandbox_refuses_a_working_one_an
         .await?;
         assert_eq!(status, 400);
 
+        // Before the stop, the task's own read says it has no notice to read (the page then asks for none).
+        assert_eq!(read(f, &idle.id.to_string(), &member_cookie).await?["screen_notices"], json!(false));
         // The idle one goes: accepted, retired once, its record released; the same key answers the same.
         let path = format!("/api/v1/admin/sandboxes/{}/stop", idle.id);
         let (status, body) = call(f, Method::POST, &path, &admin_cookie, (None, Some("stop-idle"))).await?;
@@ -283,6 +292,14 @@ async fn an_administrators_stop_retires_an_idle_sandbox_refuses_a_working_one_an
         )
         .await?;
         assert_eq!(other["items"], json!([]));
+        // The task's own read says so, and only there: the stopped task has one to read, the other none, and the
+        // list's rows don't carry it.
+        assert_eq!(read(f, &idle.id.to_string(), &member_cookie).await?["screen_notices"], json!(true));
+        assert_eq!(read(f, &working.id.to_string(), &member_cookie).await?["screen_notices"], json!(false));
+        let (status, list) = call(f, Method::GET, "/api/v1/conversations", &member_cookie, (None, None)).await?;
+        assert_eq!(status, 200, "{list}");
+        let rows = list["items"].as_array().ok_or("items")?;
+        assert!(!rows.is_empty() && rows.iter().all(|row| row.get("screen_notices").is_none()), "{list}");
         Ok(())
     })
     .await

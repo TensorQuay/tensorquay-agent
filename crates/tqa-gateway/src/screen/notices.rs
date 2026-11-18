@@ -33,6 +33,23 @@ pub(super) struct Item {
     pub(super) reason: Option<ScreenNoticeReason>,
 }
 
+/// Whether the task has any notice to read, for its own read's `screen_notices` (GW-U-218): its page asks for them only
+/// then, not on every task.
+///
+/// # Errors
+/// A store failure or the IO bound.
+pub(crate) async fn any(state: &State, conversation: uuid::Uuid) -> Result<bool, GatewayError> {
+    crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
+        Ok(sqlx::query_scalar!(
+            r#"SELECT EXISTS (SELECT 1 FROM screen_notices WHERE conversation_id=$1) AS "any!""#,
+            conversation
+        )
+        .fetch_one(&state.pool)
+        .await?)
+    })
+    .await
+}
+
 /// `GET /api/v1/conversations/{id}/screen/notices`: the task's newest 100 screen notices, oldest first.
 ///
 /// # Errors

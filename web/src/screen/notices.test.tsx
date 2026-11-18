@@ -157,6 +157,8 @@ describe("WEB-U-245 the screen notices", () => {
       () =>
         useScreenLines({
           conversationId: "task-1",
+          desktop: true,
+          notices: false,
           live,
           connection: "live",
         }),
@@ -368,15 +370,15 @@ describe("WEB-U-245 the screen notices", () => {
     ).toBe(false);
   });
 
-  it("reads the stored notices of every task, a desktop's or not (an administrator's stop is a notice on any)", () => {
-    const read = vi
-      .spyOn(api, "screenNotices")
-      .mockResolvedValue({ items: [] });
+  it("reads nothing for a task without a desktop, no notice in its read and no live notice", () => {
+    const read = vi.spyOn(api, "screenNotices");
     const cache = new QueryClient();
     renderHook(
       () =>
         useScreenLines({
           conversationId: "task-2",
+          desktop: false,
+          notices: false,
           live: [],
           connection: "live",
         }),
@@ -386,7 +388,7 @@ describe("WEB-U-245 the screen notices", () => {
         ),
       },
     );
-    expect(read).toHaveBeenCalledWith("task-2", expect.anything());
+    expect(read).not.toHaveBeenCalled();
   });
 
   it("gives an administrator's stop its words", () => {

@@ -165,6 +165,8 @@ export function LiveConversation({
   // A desktop task's screen notices join the team's lines, in time order (ADR-0039 §6).
   const screen = useScreenLines({
     conversationId: conversation.id,
+    desktop,
+    notices: conversation.screen_notices === true,
     live: transcript.screenNotices,
     connection,
   });
