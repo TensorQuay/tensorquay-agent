@@ -22,6 +22,7 @@ pub(crate) mod place;
 mod place_shape;
 mod read_shape;
 pub(crate) mod reconciler;
+mod role;
 mod roles;
 pub(crate) mod runtime;
 pub(crate) mod start;

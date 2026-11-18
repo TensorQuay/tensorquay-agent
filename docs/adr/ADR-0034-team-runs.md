@@ -524,6 +524,18 @@ see of it continue across rounds; nothing is copied into a new team.
   deadline from the administrator's current limits (A4), `spent_tokens` 0, clears `stop_reason`, and stores a
   `round_started` message (gateway to the team, for people; A5) before the helper's `assign`. Earlier helpers not
   brought back keep their rows and names, so a new helper's name is still made unique against them.
+- **Only a person opens a round** (decided on 18 Nov 2026 at review; enforced by the gateway, point 2, not by the
+  prompt). A round opens only in a run that a person's message to the lead task started: not a team wake, not the
+  lead's own continuation, and not a run that was already leading when its round ended. At most one round opens per
+  such run: within it the lead starts as many helpers as the seats allow, and if that round ends in the same run, no
+  other round opens until the person writes again. Otherwise a lead could chain rounds on its own, each with a fresh
+  budget (A4), and the per-round budget would bound nothing. A `start_member` that may not open a round is refused
+  with `round_needs_person` (409), in words: "This round has ended. Answer the person with what the team found; a new
+  round can start when they write again." `read_reports` still works. The rows that hold this come with step 2: a
+  lead that ends a round with `done` and calls `start_member` in the same run is refused, no round opens and the
+  budget is unchanged; a team wake after a round ended opens none; a person's follow-up opens one, and a second
+  `start_member` in it starts a second helper in the same round; that round reaching its budget mid-run leaves the
+  next `start_member` refused.
 - **Between rounds** every task is an ordinary task, as after point 10's stop: the helpers have no team tools, the
   relay charges nothing to the team, and a person may write to any of them. `Conversation.team` keeps grouping them.
 
@@ -535,11 +547,12 @@ runtime turns into its refusal sentence (A6).
 |---|---|---|
 | `lead` | its team is `running` or `stopping` | the ten lead tools, as today |
 | `may_lead` | in no team, the runtime at the wake's revision or above | `start_member` alone, as today |
-| `ended` | it led a team that ended for a round reason | `read_reports` (the end note while unread; "nothing new" after) and `start_member`, which opens the next round in the same run; `reason: "between_rounds"` |
+| `ended` | it led a team that ended for a round reason | `read_reports` (the end note while unread; "nothing new" after) and `start_member`, which opens the next round in a run a person's message started (A1: once per such run; otherwise `round_needs_person`); `reason: "between_rounds"` |
 | `none` | agent teams are off; the task was ever a helper (depth 1); its runtime is too old; or its team ended for good | none; `reason`: `teams_disabled`, `was_member`, `runtime_too_old` or `team_ended` |
 
 `ended` no longer means "read your note, then you're ordinary": it means "between rounds", whether the note is read
-or not. The first `start_member` of a run that started as `ended` adds the other lead tools from the next model call,
+or not. The role is answered before a run has an id, so it can't know what started the run: `start_member` decides
+whether this run may open a round (A1), and refuses in words when it may not. The first `start_member` of a run that started as `ended` adds the other lead tools from the next model call,
 as the first `start_member` of a `may_lead` run does (one change of the request's prefix), with `lead_tools: true`
 in its answer.
 
