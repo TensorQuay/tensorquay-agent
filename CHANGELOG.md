@@ -5,6 +5,14 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ## Unreleased
 
+### Added
+
+- **A long task can look back past its summary (CTX-U-023, CORE-E-043, E2E-RECALL-001).** When a long task is
+  summarised to fit the model's window, the summarised turns are now kept as text in the task's
+  `.tqa/<id>/history.md`, and the summary tells the model to search it before answering about anything earlier. Ask
+  about a detail from an hour ago and the agent looks it up with its usual file tools, instead of guessing. A task
+  that is never summarised is unchanged.
+
 ### Changed
 
 - **`edit_file` says what it found, so a model can fix its next call by itself (18.1; TOOL-U-004, CORE-E-041).** An
