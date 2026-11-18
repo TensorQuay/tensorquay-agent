@@ -20,8 +20,8 @@ mod store;
 mod strays;
 mod teardown;
 pub(crate) mod verdict;
-pub(crate) use store::Admission;
 pub(crate) use admission::Stop;
+pub(crate) use store::Admission;
 mod worker;
 use crate::{
     GatewayConfig, GatewayError, RuntimeTokens, events::EventStore, link::LinkRegistry,

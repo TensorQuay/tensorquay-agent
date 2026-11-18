@@ -189,7 +189,12 @@ impl SandboxManager {
                 .await?)
             })
             .await?;
-        let mut counts = [("starting", 0u64), ("working", 0), ("idle", 0), ("stopping", 0)];
+        let mut counts = [
+            ("starting", 0u64),
+            ("working", 0),
+            ("idle", 0),
+            ("stopping", 0),
+        ];
         for row in rows {
             let index = match row.phase.as_str() {
                 "starting" => 0,
@@ -225,39 +230,40 @@ impl SandboxManager {
         let Some(docker) = &self.backend.docker else {
             return Vec::new();
         };
-        let findings = match docker.reconcile_networks(false).await {
-            Ok(sweep) => {
-                if sweep.removed > 0 || sweep.failed > 0 {
-                    tracing::warn!(
-                        removed = sweep.removed,
-                        failed = sweep.failed,
-                        "orphaned sandbox networks swept"
-                    );
-                }
-                sweep
-                    .removed_names
-                    .into_iter()
-                    .map(|name| verdict::Finding {
-                        kind: verdict::Kind::Network,
-                        name,
-                        age_seconds: 0,
-                        outcome: Ok(()),
-                    })
-                    .chain(sweep.failed_names.into_iter().map(|(name, reason)| {
-                        verdict::Finding {
+        let findings =
+            match docker.reconcile_networks(false).await {
+                Ok(sweep) => {
+                    if sweep.removed > 0 || sweep.failed > 0 {
+                        tracing::warn!(
+                            removed = sweep.removed,
+                            failed = sweep.failed,
+                            "orphaned sandbox networks swept"
+                        );
+                    }
+                    sweep
+                        .removed_names
+                        .into_iter()
+                        .map(|name| verdict::Finding {
                             kind: verdict::Kind::Network,
                             name,
                             age_seconds: 0,
-                            outcome: Err(reason),
-                        }
-                    }))
-                    .collect()
-            }
-            Err(error) => {
-                tracing::warn!(code = error.code(), "sandbox network sweep failed");
-                Vec::new()
-            }
-        };
+                            outcome: Ok(()),
+                        })
+                        .chain(sweep.failed_names.into_iter().map(|(name, reason)| {
+                            verdict::Finding {
+                                kind: verdict::Kind::Network,
+                                name,
+                                age_seconds: 0,
+                                outcome: Err(reason),
+                            }
+                        }))
+                        .collect()
+                }
+                Err(error) => {
+                    tracing::warn!(code = error.code(), "sandbox network sweep failed");
+                    Vec::new()
+                }
+            };
         self.report_pool();
         findings
     }

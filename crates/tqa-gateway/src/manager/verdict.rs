@@ -207,8 +207,8 @@ impl History {
 
     /// The verdict as of the last pass; green with nothing swept before the first.
     pub(crate) fn verdict(&self) -> Verdict {
-        self.last
-            .as_ref()
-            .map_or_else(Verdict::default, |last| verdict(self.previous.as_ref(), last))
+        self.last.as_ref().map_or_else(Verdict::default, |last| {
+            verdict(self.previous.as_ref(), last)
+        })
     }
 }

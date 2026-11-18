@@ -44,7 +44,6 @@ pub(crate) enum Refusal {
     WorkWaiting,
 }
 
-
 /// The page's order: the people most affected first.
 pub(crate) struct Order;
 
@@ -235,10 +234,12 @@ pub(crate) fn refusal(state: State, work_waiting: bool, screen_held: bool) -> Op
 /// Working, starting, stopping, then idle by soonest stop; among the working the most recently active first.
 pub(crate) fn sort(items: &mut [Item]) {
     items.sort_by(|a, b| {
-        Order::of(a.state).cmp(&Order::of(b.state)).then_with(|| match a.state {
-            State::Idle => a.stops_at.cmp(&b.stops_at),
-            _ => b.last_activity_at.cmp(&a.last_activity_at),
-        })
+        Order::of(a.state)
+            .cmp(&Order::of(b.state))
+            .then_with(|| match a.state {
+                State::Idle => a.stops_at.cmp(&b.stops_at),
+                _ => b.last_activity_at.cmp(&a.last_activity_at),
+            })
     });
 }
 
@@ -347,7 +348,11 @@ pub(crate) async fn list(
         totals.reserved.cpu_millicores += u64::from(size.cpu_millicores.unwrap_or(0));
         totals.reserved.memory_bytes += size.memory_bytes.unwrap_or(0);
         if let Some(usage) = usage {
-            used = (used.0 + usage.cpu_millicores, used.1 + usage.memory_bytes, true);
+            used = (
+                used.0 + usage.cpu_millicores,
+                used.1 + usage.memory_bytes,
+                true,
+            );
         }
         items.push(Item {
             conversation_id: row.conversation_id,
@@ -380,7 +385,9 @@ pub(crate) async fn list(
             stop_refusal,
         });
     }
-    if used.2 && let Some(measured_at) = state.manager.usage_measured_at() {
+    if used.2
+        && let Some(measured_at) = state.manager.usage_measured_at()
+    {
         totals.usage = Some(TotalUsage {
             cpu_millicores: used.0,
             memory_bytes: used.1,

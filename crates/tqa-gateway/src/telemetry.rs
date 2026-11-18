@@ -153,7 +153,11 @@ impl Telemetry {
         for (name, unowned, left) in [
             ("containers", verdict.unowned.containers, left.containers),
             ("networks", verdict.unowned.networks, left.networks),
-            ("volumes", verdict.unowned.volumes.unwrap_or(0), left.volumes.unwrap_or(0)),
+            (
+                "volumes",
+                verdict.unowned.volumes.unwrap_or(0),
+                left.volumes.unwrap_or(0),
+            ),
         ] {
             if name == "volumes" && verdict.unowned.volumes.is_none() {
                 continue;

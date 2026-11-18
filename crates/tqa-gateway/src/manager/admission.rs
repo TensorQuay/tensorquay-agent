@@ -661,7 +661,10 @@ impl SandboxManager {
             return Err(GatewayError::Conflict("work_waiting"));
         }
         let active = self
-            .bounded(crate::events::run_activity(&self.services.pool, conversation))
+            .bounded(crate::events::run_activity(
+                &self.services.pool,
+                conversation,
+            ))
             .await?;
         if active == crate::events::RunActivity::Active {
             return Err(GatewayError::Conflict("working"));

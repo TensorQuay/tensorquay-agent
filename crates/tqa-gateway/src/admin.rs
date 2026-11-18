@@ -30,10 +30,10 @@ pub(crate) use egress_presets::{
 pub(crate) use environment_images::list as environment_images;
 pub(crate) use limits::{list as limits, put as limit_put, reset as limit_reset};
 pub(crate) use mcp_servers::list as mcp_servers;
-pub(crate) use sandboxes::{list as sandboxes, stop as sandbox_stop};
 pub(crate) use routes::{
     export as routes_export, list as routes, put as route_put, remove as route_remove,
 };
+pub(crate) use sandboxes::{list as sandboxes, stop as sandbox_stop};
 pub(crate) use secrets::{
     bind as secret_bind, list as secrets, put as secret_put, reads as secret_reads,
     remind as secret_remind, remove as secret_remove,

@@ -27,7 +27,14 @@ fn lifecycle(sequence: u64, event: Event) -> ServerFrame {
 }
 
 async fn listing(f: &Fixture, cookie: &str) -> Result<Value> {
-    let (status, body) = call(f, Method::GET, "/api/v1/admin/sandboxes", cookie, (None, None)).await?;
+    let (status, body) = call(
+        f,
+        Method::GET,
+        "/api/v1/admin/sandboxes",
+        cookie,
+        (None, None),
+    )
+    .await?;
     assert_eq!(status, 200, "{body}");
     Ok(body)
 }
@@ -43,7 +50,14 @@ fn item<'a>(listing: &'a Value, id: &str) -> Result<&'a Value> {
 
 /// One task's own read, as its owner sees it.
 async fn read(f: &Fixture, id: &str, cookie: &str) -> Result<Value> {
-    let (status, body) = call(f, Method::GET, &format!("/api/v1/conversations/{id}"), cookie, (None, None)).await?;
+    let (status, body) = call(
+        f,
+        Method::GET,
+        &format!("/api/v1/conversations/{id}"),
+        cookie,
+        (None, None),
+    )
+    .await?;
     assert_eq!(status, 200, "{body}");
     Ok(body)
 }
@@ -76,18 +90,39 @@ async fn the_listing_names_every_running_sandbox_by_owner_state_and_size_and_not
         let (admin, admin_cookie) = f.admin().await?;
         let (member, member_cookie) = f.member("ben@example.invalid").await?;
         // The member's task works in a run; the administrator's own is idle. Both titles are planted.
-        let working = f.gateway.create_for_user(member.id, PLANTED_TITLE, "local").await?;
-        let idle = f.gateway.create_for_user(admin.id, "Notes for ACME-7731", "local").await?;
+        let working = f
+            .gateway
+            .create_for_user(member.id, PLANTED_TITLE, "local")
+            .await?;
+        let idle = f
+            .gateway
+            .create_for_user(admin.id, "Notes for ACME-7731", "local")
+            .await?;
         let mut working_runtime = f.runtime(&working).await?;
         let _idle_runtime = f.runtime(&idle).await?;
         working_runtime
-            .send(&lifecycle(1, Event::RunStarted { run_id: "listing-run".parse()? }))
+            .send(&lifecycle(
+                1,
+                Event::RunStarted {
+                    run_id: "listing-run".parse()?,
+                },
+            ))
             .await?;
         f.until_sequence(&working.id, 1).await?;
 
         // A member gets 403 on both operations.
-        let (status, body) = call(f, Method::GET, "/api/v1/admin/sandboxes", &member_cookie, (None, None)).await?;
-        assert_eq!((status, body["error"]["code"].as_str()), (403, Some("forbidden")));
+        let (status, body) = call(
+            f,
+            Method::GET,
+            "/api/v1/admin/sandboxes",
+            &member_cookie,
+            (None, None),
+        )
+        .await?;
+        assert_eq!(
+            (status, body["error"]["code"].as_str()),
+            (403, Some("forbidden"))
+        );
         let (status, _) = call(
             f,
             Method::POST,
@@ -101,15 +136,30 @@ async fn the_listing_names_every_running_sandbox_by_owner_state_and_size_and_not
         let listing = listing(f, &admin_cookie).await?;
         assert_eq!(listing["backend"], "docker");
         let limits = &listing["limits"];
-        for key in ["slots", "per_user", "desktops", "idle_seconds", "max_lifetime_seconds"] {
+        for key in [
+            "slots",
+            "per_user",
+            "desktops",
+            "idle_seconds",
+            "max_lifetime_seconds",
+        ] {
             assert!(limits[key].is_u64(), "limits.{key}: {limits}");
         }
         let totals = &listing["totals"];
         assert_eq!(
-            (&totals["in_use"], &totals["working"], &totals["idle"], &totals["starting"], &totals["stopping"]),
+            (
+                &totals["in_use"],
+                &totals["working"],
+                &totals["idle"],
+                &totals["starting"],
+                &totals["stopping"]
+            ),
             (&json!(2), &json!(1), &json!(1), &json!(0), &json!(0))
         );
-        assert_eq!((&totals["waiting"], &totals["desktops"]), (&json!(0), &json!(0)));
+        assert_eq!(
+            (&totals["waiting"], &totals["desktops"]),
+            (&json!(0), &json!(0))
+        );
         assert!(totals["usage"].is_null(), "nothing measured yet: {totals}");
         assert_eq!(listing["next_after"], Value::Null);
         assert_eq!(listing["left_behind"], json!([]));
@@ -119,30 +169,58 @@ async fn the_listing_names_every_running_sandbox_by_owner_state_and_size_and_not
         // The working one first, the people most affected first.
         assert_eq!(items[0]["conversation_id"], working.id.to_string());
         let row = item(&listing, &working.id.to_string())?;
-        assert_eq!(row["owner"], json!({"id": member.id.to_string(), "email": "ben@example.invalid"}));
+        assert_eq!(
+            row["owner"],
+            json!({"id": member.id.to_string(), "email": "ben@example.invalid"})
+        );
         assert_eq!(row["environment"]["display_name"], "Minimal");
         assert_eq!(row["environment"]["desktop"], false);
         assert_eq!(row["state"], "working");
         assert_eq!(row["stops_at"], Value::Null);
         assert_eq!(row["kept_on"], false);
-        assert_eq!((&row["can_stop"], &row["stop_refusal"]), (&json!(false), &json!("working")));
-        assert!(row["size"]["cpu_millicores"].as_u64().is_some_and(|cores| cores > 0), "{row}");
-        assert!(row["size"]["memory_bytes"].as_u64().is_some_and(|bytes| bytes > 0), "{row}");
-        assert!(row["size"]["pids"].as_u64().is_some_and(|pids| pids > 0), "{row}");
+        assert_eq!(
+            (&row["can_stop"], &row["stop_refusal"]),
+            (&json!(false), &json!("working"))
+        );
+        assert!(
+            row["size"]["cpu_millicores"]
+                .as_u64()
+                .is_some_and(|cores| cores > 0),
+            "{row}"
+        );
+        assert!(
+            row["size"]["memory_bytes"]
+                .as_u64()
+                .is_some_and(|bytes| bytes > 0),
+            "{row}"
+        );
+        assert!(
+            row["size"]["pids"].as_u64().is_some_and(|pids| pids > 0),
+            "{row}"
+        );
         assert!(row["usage"].is_null());
         let reserved = &totals["reserved"];
         assert_eq!(
             reserved["cpu_millicores"].as_u64(),
-            items.iter().map(|item| item["size"]["cpu_millicores"].as_u64()).sum::<Option<u64>>()
+            items
+                .iter()
+                .map(|item| item["size"]["cpu_millicores"].as_u64())
+                .sum::<Option<u64>>()
         );
         assert_eq!(
             reserved["memory_bytes"].as_u64(),
-            items.iter().map(|item| item["size"]["memory_bytes"].as_u64()).sum::<Option<u64>>()
+            items
+                .iter()
+                .map(|item| item["size"]["memory_bytes"].as_u64())
+                .sum::<Option<u64>>()
         );
 
         let row = item(&listing, &idle.id.to_string())?;
         assert_eq!(row["state"], "idle");
-        assert_eq!((&row["can_stop"], &row["stop_refusal"]), (&json!(true), &Value::Null));
+        assert_eq!(
+            (&row["can_stop"], &row["stop_refusal"]),
+            (&json!(true), &Value::Null)
+        );
         assert_eq!(row["owner"]["email"], "admin@example.invalid");
         let last = time::OffsetDateTime::parse(
             row["last_activity_at"].as_str().ok_or("last_activity_at")?,
@@ -152,16 +230,37 @@ async fn the_listing_names_every_running_sandbox_by_owner_state_and_size_and_not
             row["stops_at"].as_str().ok_or("stops_at")?,
             &time::format_description::well_known::Rfc3339,
         )?;
-        assert_eq!((stops - last).whole_seconds(), i64::try_from(limits["idle_seconds"].as_u64().ok_or("idle")?)?);
+        assert_eq!(
+            (stops - last).whole_seconds(),
+            i64::try_from(limits["idle_seconds"].as_u64().ok_or("idle")?)?
+        );
         assert!(row["started_at"].is_string());
 
         // The privacy rule: nothing of a task but its id, the administrator's own task included.
         let text = listing.to_string();
-        for planted in [PLANTED_TITLE, "ACME-7731", "Notes for", "workspace", "title", "local"] {
+        for planted in [
+            PLANTED_TITLE,
+            "ACME-7731",
+            "Notes for",
+            "workspace",
+            "title",
+            "local",
+        ] {
             assert!(!text.contains(planted), "{planted} in the listing: {text}");
         }
-        for key in ["title", "workspace_id", "workspace", "route", "profile", "message", "branch"] {
-            assert!(items.iter().all(|item| item.get(key).is_none()), "{key} on a row");
+        for key in [
+            "title",
+            "workspace_id",
+            "workspace",
+            "route",
+            "profile",
+            "message",
+            "branch",
+        ] {
+            assert!(
+                items.iter().all(|item| item.get(key).is_none()),
+                "{key} on a row"
+            );
         }
         Ok(())
     })
@@ -311,23 +410,39 @@ async fn an_administrators_stop_retires_an_idle_sandbox_refuses_a_working_one_an
 async fn the_readiness_detail_and_the_metrics_carry_the_sandbox_counts(pool: PgPool) -> TestResult {
     support::run(pool, async |f| {
         let (admin, cookie) = f.admin().await?;
-        let conversation = f.gateway.create_for_user(admin.id, "Counted", "local").await?;
+        let conversation = f
+            .gateway
+            .create_for_user(admin.id, "Counted", "local")
+            .await?;
         let _runtime = f.runtime(&conversation).await?;
         let detail: Value = f.get("/readyz?detail=1", &cookie).await?.json().await?;
         let sandboxes = &detail["sandboxes"];
         assert_eq!(sandboxes["running"], 1, "{detail}");
         assert!(sandboxes["oldest_seconds"].is_u64());
-        assert_eq!(sandboxes["unowned"], json!({"containers": 0, "networks": 0}), "bind mode: no volumes");
+        assert_eq!(
+            sandboxes["unowned"],
+            json!({"containers": 0, "networks": 0}),
+            "bind mode: no volumes"
+        );
         assert_eq!(
             sandboxes["left_behind"],
             json!({"containers": 0, "networks": 0, "oldest_seconds": null, "reason": null})
         );
         assert!(sandboxes["swept_at"].is_string() || sandboxes["swept_at"].is_null());
         let text = metrics(f).await?;
-        assert!(text.contains("tqa_sandboxes{backend=\"docker\",state=\"idle\"} 1"), "{text}");
+        assert!(
+            text.contains("tqa_sandboxes{backend=\"docker\",state=\"idle\"} 1"),
+            "{text}"
+        );
         assert!(text.contains("tqa_sandbox_oldest_seconds "), "{text}");
-        assert!(text.contains("tqa_sandbox_unowned{kind=\"containers\"} 0"), "{text}");
-        assert!(text.contains("tqa_sandbox_left_behind{kind=\"networks\"} 0"), "{text}");
+        assert!(
+            text.contains("tqa_sandbox_unowned{kind=\"containers\"} 0"),
+            "{text}"
+        );
+        assert!(
+            text.contains("tqa_sandbox_left_behind{kind=\"networks\"} 0"),
+            "{text}"
+        );
         Ok(())
     })
     .await

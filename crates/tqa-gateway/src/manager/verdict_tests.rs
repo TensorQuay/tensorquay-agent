@@ -17,11 +17,21 @@ fn pass(at: OffsetDateTime, findings: Vec<Finding>) -> Pass {
 }
 
 fn removed(kind: Kind, name: &str) -> Finding {
-    Finding { kind, name: name.into(), age_seconds: 660, outcome: Ok(()) }
+    Finding {
+        kind,
+        name: name.into(),
+        age_seconds: 660,
+        outcome: Ok(()),
+    }
 }
 
 fn failed(kind: Kind, name: &str, reason: &'static str) -> Finding {
-    Finding { kind, name: name.into(), age_seconds: 660, outcome: Err(reason) }
+    Finding {
+        kind,
+        name: name.into(),
+        age_seconds: 660,
+        outcome: Err(reason),
+    }
 }
 
 #[test]
@@ -46,7 +56,10 @@ fn a_stray_removed_in_the_pass_counts_as_unowned_and_stays_green() {
 
 #[test]
 fn one_failed_pass_is_not_survival() {
-    let previous = pass(AT - Duration::minutes(5), vec![failed(Kind::Network, "tqa-sbx-a", "engine_timeout")]);
+    let previous = pass(
+        AT - Duration::minutes(5),
+        vec![failed(Kind::Network, "tqa-sbx-a", "engine_timeout")],
+    );
     let last = pass(AT, vec![removed(Kind::Network, "tqa-sbx-a")]);
     let v = verdict(Some(&previous), &last);
     assert_eq!(v.tone, Tone::Green);
@@ -57,8 +70,22 @@ fn one_failed_pass_is_not_survival() {
 
 #[test]
 fn a_failure_in_two_consecutive_passes_is_amber_and_named_with_its_remove_command() {
-    let previous = pass(AT - Duration::minutes(5), vec![failed(Kind::Network, "tqa-sbx-18e7c62210a67d70", "engine_timeout")]);
-    let last = pass(AT, vec![failed(Kind::Network, "tqa-sbx-18e7c62210a67d70", "engine_timeout")]);
+    let previous = pass(
+        AT - Duration::minutes(5),
+        vec![failed(
+            Kind::Network,
+            "tqa-sbx-18e7c62210a67d70",
+            "engine_timeout",
+        )],
+    );
+    let last = pass(
+        AT,
+        vec![failed(
+            Kind::Network,
+            "tqa-sbx-18e7c62210a67d70",
+            "engine_timeout",
+        )],
+    );
     let v = verdict(Some(&previous), &last);
     assert_eq!(v.tone, Tone::Amber);
     assert_eq!(v.left_behind.len(), 1);
@@ -67,7 +94,10 @@ fn a_failure_in_two_consecutive_passes_is_amber_and_named_with_its_remove_comman
     assert_eq!(survivor.name, "tqa-sbx-18e7c62210a67d70");
     assert_eq!(survivor.age_seconds, 660);
     assert_eq!(survivor.reason, "engine_timeout");
-    assert_eq!(survivor.remove, "docker network rm tqa-sbx-18e7c62210a67d70");
+    assert_eq!(
+        survivor.remove,
+        "docker network rm tqa-sbx-18e7c62210a67d70"
+    );
     assert_eq!(v.left_behind_counts().networks, 1);
     assert_eq!(v.oldest_left_behind_seconds(), Some(660));
     assert_eq!(v.reason(), Some("engine_timeout"));
@@ -75,9 +105,15 @@ fn a_failure_in_two_consecutive_passes_is_amber_and_named_with_its_remove_comman
 
 #[test]
 fn a_stray_found_again_after_a_pass_tried_it_is_a_survivor() {
-    let previous = pass(AT - Duration::minutes(5), vec![removed(Kind::Container, "0123456789ab")]);
+    let previous = pass(
+        AT - Duration::minutes(5),
+        vec![removed(Kind::Container, "0123456789ab")],
+    );
     // The engine said it removed it, and it is listed again: the removal did not hold.
-    let last = pass(AT, vec![failed(Kind::Container, "0123456789ab", "engine_error")]);
+    let last = pass(
+        AT,
+        vec![failed(Kind::Container, "0123456789ab", "engine_error")],
+    );
     let v = verdict(Some(&previous), &last);
     assert_eq!(v.tone, Tone::Amber);
     assert_eq!(v.left_behind[0].remove, "docker rm 0123456789ab");
@@ -86,9 +122,15 @@ fn a_stray_found_again_after_a_pass_tried_it_is_a_survivor() {
 
 #[test]
 fn volume_mode_counts_volumes_and_an_unowned_volume_that_survives_is_amber() {
-    let mut previous = pass(AT - Duration::minutes(5), vec![failed(Kind::Volume, "tqa-ws-abc", "engine_timeout")]);
+    let mut previous = pass(
+        AT - Duration::minutes(5),
+        vec![failed(Kind::Volume, "tqa-ws-abc", "engine_timeout")],
+    );
     previous.volumes = true;
-    let mut last = pass(AT, vec![failed(Kind::Volume, "tqa-ws-abc", "engine_timeout")]);
+    let mut last = pass(
+        AT,
+        vec![failed(Kind::Volume, "tqa-ws-abc", "engine_timeout")],
+    );
     last.volumes = true;
     let v = verdict(Some(&previous), &last);
     assert_eq!(v.unowned.volumes, Some(1));
@@ -111,7 +153,10 @@ fn volume_mode_counts_volumes_and_an_unowned_volume_that_survives_is_amber() {
 fn the_remove_command_is_built_from_the_engine_name_only() {
     // A name the engine never produces is still only quoted into the command, never interpreted.
     let odd = failed(Kind::Network, "tqa-sbx-x", "engine_timeout");
-    let v = verdict(Some(&pass(AT - Duration::minutes(5), vec![odd.clone()])), &pass(AT, vec![odd]));
+    let v = verdict(
+        Some(&pass(AT - Duration::minutes(5), vec![odd.clone()])),
+        &pass(AT, vec![odd]),
+    );
     assert_eq!(v.left_behind[0].remove, "docker network rm tqa-sbx-x");
     assert_eq!(Kind::Container.remove("abc"), "docker rm abc");
     assert_eq!(Verdict::default().tone, Tone::Green);

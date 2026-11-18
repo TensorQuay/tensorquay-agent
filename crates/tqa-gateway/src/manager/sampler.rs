@@ -53,7 +53,10 @@ fn usage(previous: &Sample, last: &Sample) -> Usage {
     let elapsed_ms = u64::try_from(last.at.saturating_duration_since(previous.at).as_millis())
         .unwrap_or(u64::MAX)
         .max(1);
-    let cpu_ms = last.stats.cpu_millis.saturating_sub(previous.stats.cpu_millis);
+    let cpu_ms = last
+        .stats
+        .cpu_millis
+        .saturating_sub(previous.stats.cpu_millis);
     Usage {
         cpu_millicores: u64::try_from(u128::from(cpu_ms) * 1000 / u128::from(elapsed_ms))
             .unwrap_or(u64::MAX),
