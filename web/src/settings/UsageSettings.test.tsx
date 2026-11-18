@@ -553,3 +553,29 @@ describe("WEB-U-127 usage reads the same on day one as later", () => {
     expect(page.textContent).toMatch(/\d(\.\d)?K\b/);
   });
 });
+
+// WEB-U-499 (18.1, the 17.2 review's finding 12, decided on 18 Nov 2026): the chart has a labelled scale, its busiest
+// day's tokens at the top of the bars, for the eye (its caption already names it for a screen reader); each share is
+// its percentage, read as words.
+describe("WEB-U-499 the usage chart's scale and the shares", () => {
+  it("labels the scale with the busiest day's tokens, beside the bars", async () => {
+    const { api } = fake(answers());
+    show(api);
+    const chart = await screen.findByRole("img", { name: /^Tokens per day/ });
+    const figure = chart.closest("figure")!;
+    const max = figure.querySelector(".usage-scale-max");
+    expect(max).toHaveTextContent(/^33\.3K$/);
+    expect(max?.closest('[aria-hidden="true"]')).not.toBeNull();
+    expect(chart.contains(max)).toBe(false);
+  });
+
+  it("says each share as its percentage", async () => {
+    const { api } = fake(answers());
+    show(api);
+    const byPerson = await screen.findByRole("table", {
+      name: "Usage by person",
+    });
+    for (const share of byPerson.querySelectorAll(".usage-share"))
+      expect(share).toHaveTextContent(/^\d+%$/);
+  });
+});

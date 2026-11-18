@@ -1172,11 +1172,30 @@ button.model-option:focus-visible {
   justify-content: space-between;
   gap: var(--space-2);
 }
+/* In ink (the accent is the brand's and non-text marks', the 17.2 review's finding 12), its top rounded 2 px. */
 .usage-day {
   flex: 1 1 0;
   min-width: var(--border-width);
   height: calc(var(--share, 0) * 100%);
-  background: var(--accent);
+  background: var(--ink);
+  border-radius: calc(2 * var(--border-width)) calc(2 * var(--border-width)) 0 0;
+}
+/* The bars with their scale at the right: the busiest day's tokens level with the bars' top, 0 at the baseline. */
+.usage-plot {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+.usage-plot > .usage-days {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.usage-scale {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: var(--space-16);
+  text-align: end;
 }
 .usage-day[data-empty] {
   background: transparent;
@@ -1187,13 +1206,16 @@ button.model-option:focus-visible {
   gap: var(--space-6);
   align-items: start;
 }
-/* A share reads as its number, with a thin bar under it for the eye. */
+/* A share reads as its number, on a 4 px track for the eye: its part of the whole in ink over the line colour. */
 .usage-share {
   display: inline-block;
   min-width: var(--space-12);
-  padding-bottom: var(--space-1);
-  background: linear-gradient(var(--accent), var(--accent)) left bottom /
-    calc(var(--share, 0) * 100%) calc(2 * var(--border-width)) no-repeat;
+  padding-bottom: calc(2 * var(--space-1));
+  background:
+    linear-gradient(var(--ink), var(--ink)) left bottom /
+      calc(var(--share, 0) * 100%) var(--space-1) no-repeat,
+    linear-gradient(var(--line), var(--line)) left bottom / 100% var(--space-1)
+      no-repeat;
 }
 
 /* Status (WEB-U-033): whether new tasks can start, in the colour of its answer; each failing check set apart. */
