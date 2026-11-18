@@ -40,7 +40,7 @@ PASS_AT = 9
 
 
 def events_of(stack, conversation):
-    return [item.get("event") or {} for item in stack.stored(conversation)]
+    return [item.get("event") or {} for page in stack.stored(conversation) for item in page]
 
 
 def kinds(events, kind):
