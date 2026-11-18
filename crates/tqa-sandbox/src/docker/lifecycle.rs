@@ -323,11 +323,12 @@ impl DockerBackend {
         .await;
         // Forced removal is still required if a busy process or an unresponsive stop timed out.
         self.force_remove(&handle.id).await?;
-        match &token_id {
-            Some(token_id) => self.remove_token(token_id).await,
-            None => tracing::warn!(
+        if let Some(token_id) = &token_id {
+            self.remove_token(token_id).await;
+        } else {
+            tracing::warn!(
                 "a sandbox container without its credential label was removed; its token directory is unknown"
-            ),
+            );
         }
         if let Some(network) = network
             && let Err(error) = self.detach_network(&network, None).await
