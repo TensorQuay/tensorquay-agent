@@ -1184,6 +1184,10 @@ button.model-option:focus-visible {
 .status-verdict-line[data-tone="danger"] {
   color: var(--danger);
 }
+/* The leak verdict's line (the Sandboxes page design note, §3.6): amber in the warn colour while something survived. */
+.status-sandboxes-line[data-tone="warn"] {
+  color: var(--warn);
+}
 .status-problem {
   padding: var(--space-3) var(--space-4);
   border-left: calc(2 * var(--border-width)) solid var(--danger);

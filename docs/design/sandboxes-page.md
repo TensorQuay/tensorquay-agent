@@ -81,7 +81,7 @@ Two endpoints, administrators only (`require_admin`, by session or personal toke
       "kind": "network",               // container | network | volume
       "name": "tqa-sbx-18e7c62210a67d70",   // the engine's name, or a container's short id
       "age_seconds": 660,
-      "reason": "engine_timeout",      // the engine's error code from the last failed removal
+      "reason": "timeout",      // the engine's error code from the last failed removal
       "remove": "docker network rm tqa-sbx-18e7c62210a67d70"   // the command to remove it by hand
     }
   ]
@@ -204,7 +204,7 @@ on the Sandboxes page, which Status links):
 "sandboxes": {
   "running": 3, "oldest_seconds": 25200,
   "unowned": { "containers": 0, "networks": 0, "volumes": 0 },        // "volumes" is absent in bind mode
-  "left_behind": { "containers": 0, "networks": 1, "volumes": 0, "oldest_seconds": 660, "reason": "engine_timeout" },
+  "left_behind": { "containers": 0, "networks": 1, "volumes": 0, "oldest_seconds": 660, "reason": "timeout" },
   "swept_at": "2026-11-17T01:25:00Z"
 }
 ```

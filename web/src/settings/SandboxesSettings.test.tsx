@@ -260,7 +260,7 @@ describe("WEB-U-486 the Sandboxes page's states", () => {
               kind: "network",
               name: "tqa-sbx-18e7c62210a67d70",
               age_seconds: 660,
-              reason: "engine_timeout",
+              reason: "sandbox_failed",
               remove: "docker network rm tqa-sbx-18e7c62210a67d70",
             },
           ],
@@ -269,7 +269,7 @@ describe("WEB-U-486 the Sandboxes page's states", () => {
     );
     const section = await screen.findByRole("region", { name: "Left behind" });
     expect(section).toHaveTextContent(
-      "A network tqa-sbx-18e7c62210a67d70, 11 minutes old: engine_timeout",
+      "A network tqa-sbx-18e7c62210a67d70, 11 minutes old: the engine wouldn't remove it",
     );
     expect(
       within(section).getByText("docker network rm tqa-sbx-18e7c62210a67d70"),

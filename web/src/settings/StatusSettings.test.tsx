@@ -638,7 +638,7 @@ describe("WEB-U-489 Status says whether anything was left behind after a sweep",
             containers: 0,
             networks: 1,
             oldest_seconds: 660,
-            reason: "engine_timeout",
+            reason: "timeout",
           },
         },
       }),
@@ -646,11 +646,15 @@ describe("WEB-U-489 Status says whether anything was left behind after a sweep",
     show();
     const section = await screen.findByRole("region", { name: "Sandboxes" });
     expect(section).toHaveTextContent(
-      "Sandboxes: 3 running, the oldest for 7 h. Left behind after the last sweep: 1 network (engine_timeout). The gateway tries again every 5 minutes.",
+      "Sandboxes: 3 running, the oldest for 7 h. Left behind after the last sweep: 1 network (the engine timed out). The gateway tries again every 5 minutes.",
     );
     expect(within(section).getByRole("status")).toHaveAttribute(
       "data-tone",
       "warn",
+    );
+    // Drawn in the warn colour, not the plain text's (the real-stack run, 18 Nov 2026).
+    expect(within(section).getByRole("status")).toHaveClass(
+      "status-sandboxes-line",
     );
     expect(
       within(section).getByRole("link", { name: "Open Sandboxes" }),

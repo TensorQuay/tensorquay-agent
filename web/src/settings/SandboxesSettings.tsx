@@ -26,6 +26,7 @@ import type {
 } from "./admin/sandboxes";
 import { LoadFailure } from "./LoadFailure";
 import { RowMenu } from "./RowMenu";
+import { reasonWords } from "./sandbox-reason";
 
 /** How often an open Sandboxes page reads the listing again: the sampler's own period. */
 export const SANDBOXES_REFRESH_MS = 10_000;
@@ -466,7 +467,7 @@ function LeftBehindSection({ items }: { items: readonly LeftBehind[] }) {
                 kind: item.kind,
                 name: item.name,
                 age: Math.max(1, Math.round(item.age_seconds / 60)),
-                reason: item.reason,
+                reason: reasonWords(item.reason, t),
               })}
             </span>
             <span className="sandboxes-remove">

@@ -13,6 +13,7 @@ import { Skeleton } from "../ui/Skeleton";
 import type { TemplatesApi } from "./admin/templates";
 import { unavailableKey } from "./environment-copy";
 import { settingsApi } from "./requests";
+import { reasonWords } from "./sandbox-reason";
 
 /**
  * The readiness checks an administrator can act on, in reading order, each with what its failure means and what to
@@ -218,7 +219,11 @@ function SandboxesLine({ sandboxes }: { sandboxes: ReadyDetail["sandboxes"] }) {
         {t("health.sandboxesTitle")}
       </h2>
       {/* A polite live line: a verdict that turns amber while someone watches is heard, as the active count is. */}
-      <p role="status" data-tone={amber ? "warn" : "ok"}>
+      <p
+        role="status"
+        className="status-sandboxes-line"
+        data-tone={amber ? "warn" : "ok"}
+      >
         {amber
           ? t("health.sandboxesAmber", {
               running: sandboxes.running,
@@ -228,7 +233,7 @@ function SandboxesLine({ sandboxes }: { sandboxes: ReadyDetail["sandboxes"] }) {
                   t("health.sandboxesWhat", { count: left[kind] ?? 0, kind }),
                 )
                 .join(", "),
-              reason: left.reason ?? "",
+              reason: reasonWords(left.reason, t),
             })
           : t("health.sandboxesGreen", { running: sandboxes.running, oldest })}
       </p>
