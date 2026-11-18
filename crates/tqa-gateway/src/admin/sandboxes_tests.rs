@@ -61,10 +61,15 @@ fn only_an_idle_sandbox_with_nothing_waiting_and_no_held_screen_can_be_stopped()
     assert_eq!(refusal(State::Idle, true, false), Some(Refusal::WorkWaiting));
     // A held screen (Take over in progress) reads as working: a person has it.
     assert_eq!(refusal(State::Idle, false, true), Some(Refusal::Working));
-    assert_eq!(Refusal::Working.as_str(), "working");
-    assert_eq!(Refusal::WorkWaiting.as_str(), "work_waiting");
-    assert_eq!(Refusal::Starting.as_str(), "starting");
-    assert_eq!(Refusal::Stopping.as_str(), "stopping");
+    // The codes the listing's stop_refusal carries.
+    for (refusal, code) in [
+        (Refusal::Working, "working"),
+        (Refusal::WorkWaiting, "work_waiting"),
+        (Refusal::Starting, "starting"),
+        (Refusal::Stopping, "stopping"),
+    ] {
+        assert_eq!(serde_json::to_value(refusal).ok(), Some(serde_json::json!(code)));
+    }
 }
 
 #[test]

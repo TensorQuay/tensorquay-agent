@@ -11,6 +11,9 @@ use time::OffsetDateTime;
 pub(crate) enum Kind {
     Container,
     Network,
+    /// A workspace volume in volume mode: the volume sweep that finds them isn't built yet (SBX-U-019), so only the
+    /// verdict's tests make one today.
+    #[cfg_attr(not(test), allow(dead_code))]
     Volume,
 }
 

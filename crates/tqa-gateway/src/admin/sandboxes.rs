@@ -44,16 +44,6 @@ pub(crate) enum Refusal {
     WorkWaiting,
 }
 
-impl Refusal {
-    pub(crate) const fn as_str(self) -> &'static str {
-        match self {
-            Self::Starting => "starting",
-            Self::Working => "working",
-            Self::Stopping => "stopping",
-            Self::WorkWaiting => "work_waiting",
-        }
-    }
-}
 
 /// The page's order: the people most affected first.
 pub(crate) struct Order;
@@ -181,7 +171,7 @@ struct Totals {
 }
 
 #[derive(Serialize)]
-struct Listing {
+pub(crate) struct Listing {
     backend: &'static str,
     limits: Limits,
     totals: Totals,
@@ -444,9 +434,9 @@ pub(crate) async fn stop(
             }
             let outcome = state.manager.stop_by_administrator(&id).await?;
             if outcome == Stop::Requested {
-                crate::settings::audit::audit(
+                crate::settings::audit(
                     &mut transaction,
-                    &crate::settings::audit::Change {
+                    &crate::settings::Change {
                         area: "sandboxes",
                         actor: Some(user.id),
                         item: &id.to_string(),

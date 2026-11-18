@@ -9,7 +9,7 @@ use std::{
     time::{Duration, Instant},
 };
 use time::OffsetDateTime;
-use tqa_sandbox::{SandboxBackend, SandboxStats};
+use tqa_sandbox::SandboxStats;
 use tqa_types::ConversationId;
 
 /// How often every running sandbox is sampled, with fewer than [`STRETCH_FROM`] running.
@@ -19,7 +19,7 @@ const STRETCH_FROM: u32 = 64;
 /// Engine calls in flight at once.
 const IN_FLIGHT: usize = 4;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 struct Sample {
     at: Instant,
     stats: SandboxStats,
@@ -49,7 +49,7 @@ pub(crate) fn interval(running: u32) -> Duration {
 }
 
 /// The CPU rate between two samples, in millicores, and the later sample's memory and processes.
-fn usage(previous: Sample, last: Sample) -> Usage {
+fn usage(previous: &Sample, last: &Sample) -> Usage {
     let elapsed_ms = u64::try_from(last.at.saturating_duration_since(previous.at).as_millis())
         .unwrap_or(u64::MAX)
         .max(1);
@@ -67,7 +67,7 @@ impl SandboxManager {
     pub(crate) fn usage_of(&self, id: &ConversationId) -> Option<Usage> {
         let by = self.samples.by.lock().ok()?;
         let (previous, last) = by.get(id)?;
-        previous.map(|previous| usage(previous, *last))
+        previous.as_ref().map(|previous| usage(previous, last))
     }
 
     /// When the running sandboxes were last sampled.

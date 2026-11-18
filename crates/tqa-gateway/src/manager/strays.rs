@@ -16,7 +16,7 @@ pub struct ContainerSweep {
     pub failed: usize,
     /// Each stray by its short id and age, with the engine's error code when it could not be removed, for the leak
     /// verdict (the Sandboxes page design note, §3.6).
-    pub findings: Vec<super::verdict::Finding>,
+    pub(crate) findings: Vec<super::verdict::Finding>,
 }
 
 impl SandboxManager {
