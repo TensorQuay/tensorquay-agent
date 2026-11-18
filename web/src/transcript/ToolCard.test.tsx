@@ -366,3 +366,59 @@ describe("WEB-U-368 a desktop step's output names its element, never its ref", (
     expect(shown.split("\n")[0]).not.toMatch(/\be8\b/);
   });
 });
+
+// WEB-U-493 (18.1 polish, from the 18.0.1 live look): a PDF read's output is prose, its lines a page's paragraphs, so
+// its block wraps them (and a long address or word inside them); a code or text file's read keeps its lines as they
+// are, scrolling sideways. What was read decides, as its step's summary decides pages or lines (WEB-U-482).
+describe("WEB-U-493 a PDF read's output wraps", () => {
+  const pdf =
+    "[PDF, 3 pages]\n--- page 1 ---\n" +
+    "The reading room opened in a former boathouse on the east bank of the river. ".repeat(
+      4,
+    ) +
+    "\nSee https://example.invalid/" +
+    "a".repeat(160) +
+    "\n[end of document: 3 pages]";
+  const read = (path: string, text: string): ToolView => ({
+    ...tool,
+    name: "read_file",
+    arguments: { path },
+    status: "ok",
+    output: text,
+    result: text,
+  });
+  const blocks = () =>
+    screen
+      .getAllByRole("group")
+      .filter(
+        (block) =>
+          block.tagName === "PRE" && !block.classList.contains("result-text"),
+      )
+      .filter(
+        (block) => block.getAttribute("aria-label") !== "What it was given",
+      );
+
+  it("wraps a PDF read's lines", () => {
+    render(<ToolCard tool={read("uploads/report.pdf", pdf)} initiallyOpen />);
+    const [output] = blocks();
+    expect(output).toHaveClass("prose-lines");
+  });
+
+  it("keeps a code file's lines, and a .pdf name read back as numbered lines", () => {
+    const { unmount } = render(
+      <ToolCard
+        tool={read("src/app.py", `     1\tvalue = "${"x".repeat(300)}"\n`)}
+        initiallyOpen
+      />,
+    );
+    expect(blocks()[0]).not.toHaveClass("prose-lines");
+    unmount();
+    render(
+      <ToolCard
+        tool={read("notes.pdf", "     1\tfirst\n     2\tsecond\n")}
+        initiallyOpen
+      />,
+    );
+    expect(blocks()[0]).not.toHaveClass("prose-lines");
+  });
+});

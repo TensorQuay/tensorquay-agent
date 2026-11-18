@@ -214,9 +214,16 @@ button.file-open:hover {
 }
 .file-preview-heading {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
+}
+/* The file's size reads on one line ("661.6 kB" wrapped beside Expand at 390): it never breaks or shrinks, and where the
+   row can't hold it and both actions, the actions move under it together, at the row's end (18.1, WEB-U-492). */
+.file-preview-size {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 /* An image, a rendered document or a table, as the agent made it; the text a toggle away. */
 .file-kind {
@@ -365,6 +372,7 @@ button.file-open:hover {
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  margin-inline-start: auto;
 }
 /* Expand: the same preview wide, over the conversation. */
 .preview-dialog {

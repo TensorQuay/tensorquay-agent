@@ -12,29 +12,26 @@ type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 const ON: &str = "[agent_teams]\nenabled=true\n";
 
+// A retryable 503 (the store busy past its lock timeout on a loaded runner) is sent again, as other suites do.
 async fn get(f: &Fixture, cookie: &str) -> Result<(u16, Value)> {
-    let response = f
-        .client
-        .get(f.url("/api/v1/admin/agent-teams"))
-        .header("origin", f.origin())
-        .header("cookie", cookie)
-        .send()
-        .await?;
-    let status = response.status().as_u16();
-    Ok((status, response.json().await?))
+    support::send_retrying(
+        f.client
+            .get(f.url("/api/v1/admin/agent-teams"))
+            .header("origin", f.origin())
+            .header("cookie", cookie),
+    )
+    .await
 }
 
 async fn put(f: &Fixture, cookie: &str, body: &Value) -> Result<(u16, Value)> {
-    let response = f
-        .client
-        .put(f.url("/api/v1/admin/agent-teams"))
-        .header("origin", f.origin())
-        .header("cookie", cookie)
-        .json(body)
-        .send()
-        .await?;
-    let status = response.status().as_u16();
-    Ok((status, response.json().await?))
+    support::send_retrying(
+        f.client
+            .put(f.url("/api/v1/admin/agent-teams"))
+            .header("origin", f.origin())
+            .header("cookie", cookie)
+            .json(body),
+    )
+    .await
 }
 
 fn code(answer: &Value) -> Value {

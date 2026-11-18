@@ -318,6 +318,12 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+/* A PDF read's output is prose, a page's paragraphs: it wraps, a long address or word included, where a code file's
+   keeps its lines and scrolls (18.1, WEB-U-493). */
+.code-block.prose-lines {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 .transcript-notice {
   padding-left: var(--space-3);
   border-left: var(--border-width) solid var(--line);
