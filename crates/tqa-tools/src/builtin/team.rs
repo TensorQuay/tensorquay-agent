@@ -5,9 +5,9 @@
 //! its first one succeeds (TOOL-U-037).
 mod client;
 mod done;
+mod refusals;
 mod tools;
 pub use client::{ReadAnswer, TeamClient, TeamFailure};
 pub use done::{ACCEPTANCE_TIMEOUT, AcceptanceShell};
-pub use tools::{
-    RoleAnswer, TeamRole, grouped, take_files, tools_for_answer, tools_for_role, tools_with_check,
-};
+pub use refusals::{RoleAnswer, tools_for_answer};
+pub use tools::{TeamRole, grouped, take_files, tools_for_role, tools_with_check};
