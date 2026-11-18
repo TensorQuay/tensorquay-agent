@@ -93,6 +93,7 @@ export function RunStatus({
     tone: string;
     took?: string | null;
     short?: string | null;
+    finished?: boolean;
   } = failure
     ? {
         word: notSentMessage(failure, t),
@@ -107,6 +108,7 @@ export function RunStatus({
           elapsed: null,
           tone: "warn",
           took: null,
+          finished: false,
           short: null,
         }
       : leadCarriesOn && ended === "failed" && !working
@@ -116,6 +118,7 @@ export function RunStatus({
             elapsed: null,
             tone: "warn",
             took: null,
+            finished: false,
             short: leadCarriesOn.short,
           }
         : (teamStopped && ended === "completed" && !working) ||
@@ -126,6 +129,7 @@ export function RunStatus({
               elapsed: null,
               tone: "muted",
               took: null,
+              finished: false,
               short: null,
             }
           : leadWaiting && ended === "completed" && !working
@@ -135,6 +139,7 @@ export function RunStatus({
                 elapsed: null,
                 tone: "muted",
                 took: null,
+                finished: false,
                 short: null,
               }
             : teamPending &&
@@ -153,12 +158,14 @@ export function RunStatus({
                   elapsed: null,
                   tone: ended === "failed" ? "warn" : "muted",
                   took: null,
+                  finished: false,
                   short: null,
                 }
               : runPresentation(transcript, now, t, stored, team, storedAt);
   const { word: label, elapsed } = status;
-  // Done is the one status with the "ok" tone: off the screen, or grey (DONE_IN_HEADER).
-  const finished = !sending && !failure && status.tone === "ok";
+  // A finished run's Done, as runPresentation says it outright: off the screen, or grey (DONE_IN_HEADER). Every other
+  // status keeps its word, whatever its tone.
+  const finished = !sending && !failure && status.finished === true;
   // The header shows one short word at every width (WEB-U-155): a failure's state alone, a working run without its
   // count. The whole is still read, and in the tooltip.
   const short = sending
