@@ -38,13 +38,16 @@ def verdicts(lines, tasks, switches):
     """What a passing dry run must show, as a list of problems (empty when it passed)."""
     problems = []
     final = runner.final(lines)
+    # A team's scripted session starts one helper; a rounds task's starts two in round 1 and adds one in round 2.
+    helpers = {getattr(task, "id", task): 3 if getattr(task, "follow_up", None) else 1 for task in tasks}
     for line in final:
         name = f"{line['task']} {line['side']}"
         if line.get("passed") is not True:
             problems.append(f"{name}: not passed ({line.get('check')}, {line.get('problem')})")
         if line.get("failures"):
             problems.append(f"{name}: failure classes {line['failures']}")
-        if line["side"] == "team" and (line.get("helpers") != 1 or line.get("stop_reason") != "done"):
+        if line["side"] == "team" and (line.get("helpers") != helpers.get(line["task"], 1)
+                                       or line.get("stop_reason") != "done"):
             problems.append(f"{name}: {line.get('helpers')} helper(s), ended by {line.get('stop_reason')}")
         if line["side"] == "single" and line.get("helpers"):
             problems.append(f"{name}: a single agent has a team")
