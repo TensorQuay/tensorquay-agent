@@ -36,7 +36,7 @@ TOPICS = ["the history of the city's parks", "how the parks are funded", "the tr
           "public toilets and kiosks", "what visitors say in surveys"]
 MAX_WORK_TURNS = len(TOPICS)
 TURN_SECONDS = 600
-PASS_AT = 9
+PASS_OF = (9, 10)  # the share of runs that must be right (9 of 10), for any number of runs
 
 
 def events_of(stack, conversation):
@@ -161,10 +161,12 @@ def main(argv=None):
         failure = compose.retire(env, failure, configuration=stack.configuration)
         compose.cleanup(directory, env, temporary, failure, compose=stack.configuration)
     passed = sum(1 for record in records if record.get("passed"))
-    result = {"id": "E2E-RECALL-001", "detail": options.detail, "runs": len(records), "passed": passed, "pass_at": PASS_AT,
+    pass_at = -(-len(records) * PASS_OF[0] // PASS_OF[1])  # rounded up, in integers
+    result = {"id": "E2E-RECALL-001", "detail": options.detail, "runs": len(records), "passed": passed,
+              "pass_at": pass_at,
               "searched_history": sum(1 for record in records if record.get("searched_history")),
               "context_window": int(env["TQA_SOAK_MODEL_CONTEXT"]), "model": env.get("TQA_SOAK_MODEL_NAME"),
-              "status": "passed" if failure is None and passed >= PASS_AT else "failed",
+              "status": "passed" if failure is None and records and passed >= pass_at else "failed",
               "failure": None if failure is None else str(failure)[:500], "records": records}
     (output / "result.json").write_text(json.dumps(result, indent=2) + "\n")
     print("E2E-RECALL-001 {}: {} of {} right ({} searched the history)".format(
