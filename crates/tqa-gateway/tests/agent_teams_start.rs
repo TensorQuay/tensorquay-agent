@@ -545,15 +545,16 @@ async fn set_limit(f: &Fixture, cookie: &str, key: &str, value: u64) -> Result<(
         .and_then(|items| items.iter().find(|item| item["key"] == key))
         .and_then(|item| item["version"].as_i64())
         .ok_or_else(|| format!("no {key} in the listing"))?;
-    let response = f
-        .client
-        .put(f.url(&format!("/api/v1/admin/limits/{key}")))
-        .header("origin", f.origin())
-        .header("cookie", cookie)
-        .json(&json!({"value": value, "version": version}))
-        .send()
-        .await?;
-    assert_eq!(response.status().as_u16(), 200, "{key}");
+    // A retryable 503 (the store busy past its lock timeout on a loaded runner) is sent again.
+    let (status, answer) = support::send_retrying(
+        f.client
+            .put(f.url(&format!("/api/v1/admin/limits/{key}")))
+            .header("origin", f.origin())
+            .header("cookie", cookie)
+            .json(&json!({"value": value, "version": version})),
+    )
+    .await?;
+    assert_eq!(status, 200, "{key}: {answer}");
     Ok(())
 }
 
@@ -567,15 +568,15 @@ async fn gw_i_203_the_administrators_settings_apply_to_the_next_helper_and_team(
     Box::pin(support::run_configured(pool, Some(registry()?), &config(""), async |f| {
         let (_, admin) = f.admin().await?;
         // The helper's route, set by the administrator (no file value).
-        let put = f
-            .client
-            .put(f.url("/api/v1/admin/agent-teams"))
-            .header("origin", f.origin())
-            .header("cookie", &admin)
-            .json(&json!({"member_route": "spare", "acceptance_check": null, "version": 0}))
-            .send()
-            .await?;
-        assert_eq!(put.status().as_u16(), 200);
+        let (status, answer) = support::send_retrying(
+            f.client
+                .put(f.url("/api/v1/admin/agent-teams"))
+                .header("origin", f.origin())
+                .header("cookie", &admin)
+                .json(&json!({"member_route": "spare", "acceptance_check": null, "version": 0})),
+        )
+        .await?;
+        assert_eq!(status, 200, "{answer}");
         // A team's budget and deadline, and the cap on helpers, from the next team and helper on.
         set_limit(f, &admin, "agent_teams.token_budget", 50_000).await?;
         set_limit(f, &admin, "agent_teams.deadline_minutes", 30).await?;
