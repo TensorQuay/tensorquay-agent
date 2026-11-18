@@ -854,7 +854,7 @@ async fn tool_u_147_under_none_every_team_tool_is_refused_in_words_for_its_reaso
         ]);
     for (reason, sentence) in cases {
         let fake = Arc::new(Fake::default());
-        let tools = tools_for_answer(fake.clone(), RoleAnswer::parse("none", reason), None);
+        let tools = tools_for_answer(fake.clone(), &RoleAnswer::parse("none", reason), None);
         assert!(offered(&tools).is_empty(), "{reason:?}: nothing offered");
         let mut names: Vec<String> = tools
             .iter()
@@ -886,7 +886,7 @@ async fn tool_u_147_between_rounds_read_reports_works_and_the_rest_say_why() -> 
     let fake = Arc::new(Fake::default());
     let tools = tools_for_answer(
         fake.clone(),
-        RoleAnswer::parse("ended", Some("between_rounds")),
+        &RoleAnswer::parse("ended", Some("between_rounds")),
         None,
     );
     assert_eq!(offered(&tools), ["read_reports"]);
@@ -921,7 +921,7 @@ fn tool_u_147_a_lead_a_helper_and_a_task_that_may_lead_are_offered_as_before() {
     ] {
         let answer = RoleAnswer::parse(role, reason);
         assert_eq!(
-            offered(&tools_for_answer(client(), answer, None)),
+            offered(&tools_for_answer(client(), &answer, None)),
             offered(&tools_for_role(client(), TeamRole::parse(role))),
             "{role}"
         );

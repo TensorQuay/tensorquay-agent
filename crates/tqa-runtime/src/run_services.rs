@@ -231,7 +231,7 @@ impl Services {
             .get("shell")
             .cloned()
             .map(builtin::team::AcceptanceShell::new);
-        for tool in builtin::team::tools_for_answer(client, answer, check) {
+        for tool in builtin::team::tools_for_answer(client, &answer, check) {
             tools
                 .register(tool)
                 .map_err(|_| RuntimeError::Configuration("team tool schemas"))?;

@@ -68,7 +68,7 @@ impl RoleAnswer {
 /// reaches the gateway, and its model's tool list is as before.
 pub fn tools_for_answer(
     client: Arc<dyn TeamClient>,
-    answer: RoleAnswer,
+    answer: &RoleAnswer,
     check: Option<AcceptanceShell>,
 ) -> Vec<Arc<dyn Tool>> {
     match answer.role {

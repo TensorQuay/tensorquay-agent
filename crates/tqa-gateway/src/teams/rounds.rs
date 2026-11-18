@@ -109,12 +109,11 @@ fn chosen(helpers: &[Helper<'_>], role: &str) -> Start {
                 | HelperState::Stuck => false,
             }
     });
-    match finished {
-        Some(helper) => Start::BringBack(helper.name.to_owned()),
-        None => {
-            let names: Vec<&str> = helpers.iter().map(|helper| helper.name).collect();
-            Start::New(super::validate::unique_name(role, &names))
-        }
+    if let Some(helper) = finished {
+        Start::BringBack(helper.name.to_owned())
+    } else {
+        let names: Vec<&str> = helpers.iter().map(|helper| helper.name).collect();
+        Start::New(super::validate::unique_name(role, &names))
     }
 }
 
