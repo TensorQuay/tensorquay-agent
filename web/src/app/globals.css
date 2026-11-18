@@ -143,9 +143,8 @@
   --pill-radius: 999px;
   --display-size: 30px;
   --heading-size: 22px;
-  /* The UI standard: a task's title is 18 px, weight 700 (the app ships 400 and 700, §4). The whole scale is one
-     step bigger, decided on 9 Nov 2026: body 16/24, small 14, nav 15/22, labels 13. */
-  --task-title-size: 18px;
+  /* The whole scale is one step bigger, decided on 9 Nov 2026: body 16/24, small 14, nav 15/22, labels 13. A task's
+     title in its header is at body size, in regular weight (WEB-U-495, decided on 17 Nov 2026). */
   --body-size: 16px;
   --small-size: 14px;
   --label-size: 13px;
