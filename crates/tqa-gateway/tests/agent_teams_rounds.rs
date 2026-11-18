@@ -6,6 +6,11 @@
 //!   a team wake's run, and a second round in one run are refused `round_needs_person`; within the round a run opened,
 //!   a second helper joins that round.
 //! - GW-I-332: each round's end note carries its round and `tokens_all_rounds`; an ended round is charged nothing.
+//! - GW-I-333 (step 3, A3): `start_member` naming a finished helper, in any letter case, brings it back: the same task
+//!   and row, `starting` in the new round, its round's turn sent once, and the answer says so.
+//! - GW-I-334 (step 3): a bring-back's refusals: a changed workspace or profile, `fresh_copy` for a `my_files` helper,
+//!   `workspace_gone` when its copy no longer exists.
+//! - SEC-067 (step 3): a brought-back helper gets no more than its lead's current settings, narrowed between rounds.
 #[path = "support/agent_team.rs"]
 mod agent_team;
 #[path = "support/fixture.rs"]
@@ -329,4 +334,198 @@ async fn until_ended(f: &Fixture, team: Uuid) -> Result<()> {
         tokio::time::sleep(std::time::Duration::from_millis(50)).await;
     }
     Err("the team didn't end".into())
+}
+
+/// The lead's `start_member` with a raw body (a bring-back's `files`, a changed `workspace`), in its current run.
+async fn start_with(f: &Fixture, t: &Team, key: &str, body: Value) -> Result<(u16, Value)> {
+    let mut request = f
+        .client
+        .post(f.url("/runtime/teams/members"))
+        .bearer_auth(&t.lead.1)
+        .header("idempotency-key", key);
+    if let Some(run) = run_of(&t.lead.1) {
+        request = request.header("x-tqa-run-id", run);
+    }
+    support::send_retrying(request.json(&body)).await
+}
+
+fn brief() -> Value {
+    json!({"objective": "Check round two's totals.", "output": "A table.", "boundaries": "Read only."})
+}
+
+/// Round 1 ends at `done` with `researcher` done, and a person's follow-up starts the lead's next run.
+async fn between_rounds(f: &Fixture, t: &Team) -> Result<()> {
+    sqlx::query(
+        "UPDATE agent_team_members SET state = 'done' WHERE team_id = $1 AND name = 'researcher'",
+    )
+    .bind(t.id)
+    .execute(&f.pool)
+    .await?;
+    end_round(f, t.id, "done", 5).await?;
+    turn(f, t, 2, "r-5", true).await
+}
+
+/// A helper's row: its state and round.
+async fn helper(f: &Fixture, t: &Team, name: &str) -> Result<(String, i32)> {
+    Ok(sqlx::query_as(
+        "SELECT state, round FROM agent_team_members WHERE team_id = $1 AND name = $2",
+    )
+    .bind(t.id)
+    .bind(name)
+    .fetch_one(&f.pool)
+    .await?)
+}
+
+// TEST: GW-I-333
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_333_naming_a_finished_helper_brings_it_back(pool: PgPool) -> TestResult {
+    support::run_configured(pool, None, ENABLED, async |f| {
+        let t = team(f).await?;
+        between_rounds(f, &t).await?;
+        let members_before: i64 = sqlx::query_scalar("SELECT count(*) FROM agent_team_members WHERE team_id = $1")
+            .bind(t.id)
+            .fetch_one(&f.pool)
+            .await?;
+        // Any letter case; the default own_copy passes for an own_copy helper.
+        let (status, body) = start_with(
+            f,
+            &t,
+            "r-5:c-1",
+            json!({"role": "Researcher", "workspace": "own_copy", "brief": brief(), "files": "keep"}),
+        )
+        .await?;
+        assert_eq!(status, 201, "{body}");
+        assert_eq!(
+            (&body["brought_back"], &body["files"], &body["round"], &body["member"]["name"]),
+            (&json!(true), &json!("keep"), &json!(2), &json!("researcher"))
+        );
+        assert_eq!(body["member"]["conversation"], json!(t.researcher.0.as_str()), "the same task");
+        let members_after: i64 = sqlx::query_scalar("SELECT count(*) FROM agent_team_members WHERE team_id = $1")
+            .bind(t.id)
+            .fetch_one(&f.pool)
+            .await?;
+        assert_eq!(members_after, members_before, "the same row, no new helper");
+        assert_eq!(helper(f, &t, "researcher").await?, ("starting".to_owned(), 2));
+        // Its round's turn, once, keyed per helper and round.
+        let turns: i64 = sqlx::query_scalar(
+            "SELECT count(*) FROM idempotency WHERE conversation_id = $1 AND key LIKE 'team-round:%:2'",
+        )
+        .bind(Uuid::parse_str(t.researcher.0.as_str())?)
+        .fetch_one(&f.pool)
+        .await?;
+        assert_eq!(turns, 1);
+        // A new role word is a new helper in the same round.
+        let (status, body) = start_with(
+            f,
+            &t,
+            "r-5:c-2",
+            json!({"role": "fact checker", "workspace": "own_copy", "brief": brief()}),
+        )
+        .await?;
+        assert_eq!(status, 201, "{body}");
+        assert_eq!(body.get("brought_back"), None, "{body}");
+        Ok(())
+    })
+    .await
+}
+
+// TEST: GW-I-334
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_334_a_bring_backs_refusals(pool: PgPool) -> TestResult {
+    support::run_configured(pool, None, ENABLED, async |f| {
+        let t = team(f).await?;
+        between_rounds(f, &t).await?;
+        let invalid = |answer: &(u16, Value)| {
+            answer.0 == 400 && answer.1["error"]["details"][0]["reason"] == "parameter_invalid"
+        };
+        // A changed workspace: the helper's own, named in the refusal.
+        let answer = start_with(
+            f,
+            &t,
+            "r-5:c-1",
+            json!({"role": "researcher", "workspace": "my_files", "brief": brief()}),
+        )
+        .await?;
+        assert!(invalid(&answer), "{answer:?}");
+        assert!(answer.1.to_string().contains("own copy"), "{answer:?}");
+        // Its copy gone: keep can't, and fresh_copy is named as the way.
+        let workspace: Uuid = sqlx::query_scalar("SELECT workspace_id FROM conversations WHERE id = $1")
+            .bind(Uuid::parse_str(t.researcher.0.as_str())?)
+            .fetch_one(&f.pool)
+            .await?;
+        sqlx::query("UPDATE workspaces SET state = 'deleted' WHERE id = $1")
+            .bind(workspace)
+            .execute(&f.pool)
+            .await?;
+        let answer = start_with(
+            f,
+            &t,
+            "r-5:c-2",
+            json!({"role": "researcher", "workspace": "own_copy", "brief": brief(), "files": "keep"}),
+        )
+        .await?;
+        assert_eq!((answer.0, &answer.1["error"]["code"]), (409, &json!("workspace_gone")), "{answer:?}");
+        assert!(answer.1.to_string().contains("fresh_copy"), "{answer:?}");
+        // A my_files helper takes keep only.
+        sqlx::query("UPDATE agent_team_members SET workspace = 'my_files', state = 'done' WHERE team_id = $1 AND name = 'reviewer'")
+            .bind(t.id)
+            .execute(&f.pool)
+            .await?;
+        let answer = start_with(
+            f,
+            &t,
+            "r-5:c-3",
+            json!({"role": "reviewer", "workspace": "my_files", "brief": brief(), "files": "fresh_copy"}),
+        )
+        .await?;
+        assert!(invalid(&answer), "{answer:?}");
+        assert_eq!(helper(f, &t, "reviewer").await?.0, "done", "nothing changed");
+        Ok(())
+    })
+    .await
+}
+
+// TEST: SEC-067
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn sec_067_a_brought_back_helper_gets_no_more_than_its_leads_current_settings(
+    pool: PgPool,
+) -> TestResult {
+    support::run_configured(pool, None, ENABLED, async |f| {
+        let t = team(f).await?;
+        let (lead_task, helper_task) = (Uuid::parse_str(t.lead.0.as_str())?, Uuid::parse_str(t.researcher.0.as_str())?);
+        // Round 1: the helper had what its lead had then.
+        sqlx::query("UPDATE conversations SET mcp_servers = ARRAY['docs', 'wiki-mcp'], connectors = ARRAY['tracker', 'wiki'] WHERE id = ANY($1)")
+            .bind(vec![lead_task, helper_task])
+            .execute(&f.pool)
+            .await?;
+        between_rounds(f, &t).await?;
+        // Between rounds the lead's settings narrowed.
+        sqlx::query("UPDATE conversations SET mcp_servers = ARRAY['docs'], connectors = ARRAY['tracker'] WHERE id = $1")
+            .bind(lead_task)
+            .execute(&f.pool)
+            .await?;
+        let (status, body) = start_with(
+            f,
+            &t,
+            "r-5:c-1",
+            json!({"role": "researcher", "workspace": "own_copy", "brief": brief()}),
+        )
+        .await?;
+        assert_eq!(status, 201, "{body}");
+        let (servers, connectors): (Vec<String>, Vec<String>) =
+            sqlx::query_as("SELECT mcp_servers, connectors FROM conversations WHERE id = $1")
+                .bind(helper_task)
+                .fetch_one(&f.pool)
+                .await?;
+        assert_eq!(
+            (servers, connectors),
+            (vec!["docs".to_owned()], vec!["tracker".to_owned()]),
+            "no more than the lead has now"
+        );
+        Ok(())
+    })
+    .await
 }
