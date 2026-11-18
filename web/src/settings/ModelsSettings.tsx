@@ -350,13 +350,15 @@ function RouteRow({
         )}
       </td>
       <td className="data-cell-action">
+        {/* Edit in the table; on a phone card the whole card (the 17.2 review's finding 18): the stylesheet stretches
+            it over the card and hides its word, its name still read. */}
         <Link
           href={`${LIST}/${encodeURIComponent(item.name)}`}
-          className="button"
+          className="button route-open"
           data-variant="ghost"
           aria-label={t("models.editName", { name: routeLabel(item) })}
         >
-          {t("models.edit")}
+          <span className="route-open-word">{t("models.edit")}</span>
         </Link>
         <RowMenu
           label={t("models.more", { name: routeLabel(item) })}

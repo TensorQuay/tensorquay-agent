@@ -578,6 +578,56 @@
   overflow: visible;
   white-space: pre-wrap;
 }
+/* The Models cards on a phone (the 17.2 review's finding 18, decided on 18 Nov 2026): a tap anywhere opens the route,
+   its Edit link laid over the whole card with its word hidden (a box a keyboard audit sees) (its name still read); the ⋯ and a card's own links
+   sit above it. One stop opens the card, its focus ring drawn around the card; then its ⋯. */
+:where(.data-table-scroll[data-cards]) .data-table.models-table tbody tr {
+  position: relative;
+}
+:where(.data-table-scroll[data-cards]) .data-table.models-table .route-open {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--control-radius);
+  background: transparent;
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.models-table
+  .route-open-word {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.models-table
+  .route-open:focus-visible {
+  outline: none;
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.models-table
+  tbody
+  tr:has(.route-open:focus-visible) {
+  outline: var(--focus-width) solid var(--focus);
+  outline-offset: var(--focus-offset);
+}
+:where(.data-table-scroll[data-cards]) .data-table.models-table tbody tr:hover {
+  border-color: var(--muted);
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.models-table
+  td
+  a:not(.route-open),
+:where(.data-table-scroll[data-cards]) .data-table.models-table td button {
+  position: relative;
+  z-index: 1;
+}
 .data-select {
   width: auto;
   min-height: var(--min-control-height);
@@ -743,6 +793,29 @@ details.route-group[open] > summary::before {
 }
 details.route-group > summary::-webkit-details-marker {
   display: none;
+}
+/* A quiet disclosure (the 17.2 review's finding 11, decided on 18 Nov 2026): the route form's Advanced and Reasoning
+   read as toggles beside the bold section labels, a ghost button's look: body size in regular weight, its own padding
+   and radius, the hover tint, and the focus ring. Its chevron is the group's. */
+details.route-group > summary.disclosure-quiet {
+  align-self: flex-start;
+  padding-inline: var(--space-2);
+  margin-inline-start: calc(-1 * var(--space-2));
+  border-radius: var(--control-radius);
+  font-size: var(--body-size);
+  line-height: var(--body-leading);
+  font-weight: 400;
+}
+details.route-group > summary.disclosure-quiet:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--paper),
+    var(--ink) var(--hover-share)
+  );
+}
+details.route-group > summary.disclosure-quiet:focus-visible {
+  outline: var(--focus-width) solid var(--focus);
+  outline-offset: var(--focus-offset);
 }
 .fallback-list {
   margin: 0;
@@ -1149,11 +1222,30 @@ button.model-option:focus-visible {
   justify-content: space-between;
   gap: var(--space-2);
 }
+/* In ink (the accent is the brand's and non-text marks', the 17.2 review's finding 12), its top rounded 2 px. */
 .usage-day {
   flex: 1 1 0;
   min-width: var(--border-width);
   height: calc(var(--share, 0) * 100%);
-  background: var(--accent);
+  background: var(--ink);
+  border-radius: calc(2 * var(--border-width)) calc(2 * var(--border-width)) 0 0;
+}
+/* The bars with their scale at the right: the busiest day's tokens level with the bars' top, 0 at the baseline. */
+.usage-plot {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+.usage-plot > .usage-days {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.usage-scale {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: var(--space-16);
+  text-align: end;
 }
 .usage-day[data-empty] {
   background: transparent;
@@ -1164,13 +1256,16 @@ button.model-option:focus-visible {
   gap: var(--space-6);
   align-items: start;
 }
-/* A share reads as its number, with a thin bar under it for the eye. */
+/* A share reads as its number, on a 4 px track for the eye: its part of the whole in ink over the line colour. */
 .usage-share {
   display: inline-block;
   min-width: var(--space-12);
-  padding-bottom: var(--space-1);
-  background: linear-gradient(var(--accent), var(--accent)) left bottom /
-    calc(var(--share, 0) * 100%) calc(2 * var(--border-width)) no-repeat;
+  padding-bottom: calc(2 * var(--space-1));
+  background:
+    linear-gradient(var(--ink), var(--ink)) left bottom /
+      calc(var(--share, 0) * 100%) var(--space-1) no-repeat,
+    linear-gradient(var(--line), var(--line)) left bottom / 100% var(--space-1)
+      no-repeat;
 }
 
 /* Status (WEB-U-033): whether new tasks can start, in the colour of its answer; each failing check set apart. */

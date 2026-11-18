@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { expectAppLockup } from "../test/brand";
 import { LIMITS } from "../test/user";
 
 import { JoinForm } from "./JoinForm";
@@ -147,5 +148,13 @@ describe("WEB-U-355 join's password, said by the page", () => {
       "true",
     );
     expect(fetch).toHaveBeenCalledTimes(1);
+  });
+});
+
+// TEST: WEB-U-501
+describe("WEB-U-501 the join page shows the app's one lockup", () => {
+  it("shows the mark with TensorQuay Agent", () => {
+    show();
+    expectAppLockup();
   });
 });

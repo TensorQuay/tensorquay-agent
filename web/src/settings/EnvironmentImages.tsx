@@ -220,7 +220,9 @@ export function ImageChoice({
         open={open}
         onToggle={(event) => setOpened(event.currentTarget.open)}
       >
-        <summary className="type-small">{t("environments.advanced")}</summary>
+        <summary className="disclosure-quiet">
+          {t("environments.advanced")}
+        </summary>
         <div className="stack">
           <Input
             label={t("environments.imageId")}
@@ -264,7 +266,7 @@ function BuildHelp() {
   const t = useT();
   return (
     <details className="route-group build-help">
-      <summary className="type-body-strong">
+      <summary className="disclosure-quiet">
         {t("environments.buildHelp")}
       </summary>
       <div className="stack">
