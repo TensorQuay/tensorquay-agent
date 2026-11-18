@@ -111,10 +111,6 @@ describe("WEB-U-497 a team tool refused in words reads as such", () => {
       "Its team has ended for good.",
     ],
     [
-      "This task's team has ended, and for now a task leads one team. Do the work yourself, and say so; to lead helpers again, the person can start a new task.",
-      "Its team has ended, and a task leads one team.",
-    ],
-    [
       "Your team's round has ended. Read its end note with read_reports, or start the next round with start_member; the other team tools come back once a round runs.",
       "Its team's round has ended.",
     ],

@@ -2692,7 +2692,6 @@
     "activity.teamWasMember": "曾作为助手的任务不能带领团队。",
     "activity.teamRuntimeOld": "此任务的环境版本过旧，无法带领助手。",
     "activity.teamEndedForGood": "其团队已永久结束。",
-    "activity.teamOneTeam": "其团队已结束，一个任务只能带领一个团队。",
     "activity.teamBetweenRounds": "其团队的这一轮已结束。",
     "activity.pushOutcomeUnknown": "无法确定更改是否已保存。请先检查项目再重试。",
     "activity.pushExpired": "保存用时过长未被允许，因此没有保存任何内容。请重试。",

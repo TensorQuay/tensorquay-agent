@@ -790,7 +790,7 @@ async fn tool_u_065_the_persons_message_to_the_lead_reads_in_fixed_words() -> Te
 
 /// Each reason a run may not lead, and the sentence a team tool's call is answered with (ADR-0034's rounds
 /// amendment, A6 and A7).
-const SENTENCES: [(&str, &str); 5] = [
+const SENTENCES: [(&str, &str); 4] = [
     (
         "teams_disabled",
         "Helpers are switched off for this installation. Do the work yourself, and say in your answer that you \
@@ -809,11 +809,6 @@ const SENTENCES: [(&str, &str); 5] = [
         "team_ended",
         "This team has ended for good (its lead task was deleted or its person's account was turned off). Do the \
          work yourself, and say so.",
-    ),
-    (
-        "one_team",
-        "This task's team has ended, and for now a task leads one team. Do the work yourself, and say so; to \
-         lead helpers again, the person can start a new task.",
     ),
 ];
 

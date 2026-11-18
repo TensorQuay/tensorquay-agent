@@ -152,10 +152,6 @@ pub fn sentence(reason: Option<&str>) -> &'static str {
             "This team has ended for good (its lead task was deleted or its person's account was turned off). Do \
              the work yourself, and say so."
         }
-        Some("one_team") => {
-            "This task's team has ended, and for now a task leads one team. Do the work yourself, and say so; to \
-             lead helpers again, the person can start a new task."
-        }
         Some("between_rounds") => {
             "Your team's round has ended. Read its end note with read_reports, or start the next round with \
              start_member; the other team tools come back once a round runs."

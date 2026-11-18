@@ -367,7 +367,6 @@
     "activity.teamWasMember": "A task that was a helper can't lead a team.",
     "activity.teamRuntimeOld": "This task's environment is too old to lead helpers.",
     "activity.teamEndedForGood": "Its team has ended for good.",
-    "activity.teamOneTeam": "Its team has ended, and a task leads one team.",
     "activity.teamBetweenRounds": "Its team's round has ended.",
     "activity.pushOutcomeUnknown": "It isn't clear whether the changes were saved. Check the project before trying again.",
     "activity.pushExpired": "Saving took too long to be allowed, so nothing was saved. Try again.",

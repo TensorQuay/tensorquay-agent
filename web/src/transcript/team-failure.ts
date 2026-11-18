@@ -40,8 +40,6 @@ const REASONS: readonly (readonly [string, MessageKey])[] = [
   // copy-lint: not user copy (the runtime's sentence, matched, never shown)
   ["This team has ended for good", "activity.teamEndedForGood"],
   // copy-lint: not user copy (the runtime's sentence, matched, never shown)
-  ["This task's team has ended", "activity.teamOneTeam"],
-  // copy-lint: not user copy (the runtime's sentence, matched, never shown)
   ["Your team's round has ended", "activity.teamBetweenRounds"],
 ];
 
