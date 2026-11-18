@@ -126,6 +126,8 @@ pub(crate) struct Started {
     pub(crate) fork: Option<(Uuid, Uuid, u64)>,
     /// A helper brought back (ADR-0034's rounds amendment, A3): its files and the round it joins.
     pub(crate) brought_back: Option<(tqa_types::BroughtBackFiles, u32)>,
+    /// A helper brought back with a fresh copy, and its old copy, deleted once the new one is made.
+    pub(crate) replaced: Option<(Uuid, Uuid)>,
 }
 
 /// The administrator's limits in force (ADR-0034 S6, ADR-0028): the cap from the next helper, the budget and the
@@ -165,9 +167,9 @@ pub(crate) async fn start_member(
     if let Some(back) = super::bring_back::find(connection, leader, &request.role).await? {
         return super::bring_back::start(
             connection,
+            state,
             (leader, owner, run),
-            request,
-            back,
+            (request, back),
             (cap, &teams),
         )
         .await;
@@ -226,6 +228,7 @@ pub(crate) async fn start_member(
             .fork
             .map(|(source, quota)| (source, member.workspace, quota)),
         brought_back: None,
+        replaced: None,
     })
 }
 

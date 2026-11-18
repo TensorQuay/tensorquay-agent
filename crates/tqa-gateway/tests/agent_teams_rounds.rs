@@ -585,3 +585,52 @@ async fn gw_i_335_the_sweep_sends_a_brought_back_helpers_round_turn(pool: PgPool
     })
     .await
 }
+
+// TEST: GW-I-336
+// `files: fresh_copy` (A3): the helper brought back works in a new fork of its lead's files now, and its old copy is
+// deleted once the new one is ready.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_336_fresh_copy_gives_a_brought_back_helper_a_new_fork(pool: PgPool) -> TestResult {
+    support::run_configured(pool, None, ENABLED, async |f| {
+        let t = team(f).await?;
+        between_rounds(f, &t).await?;
+        let workspace_of = async |task: &str| -> Result<Uuid> {
+            Ok(sqlx::query_scalar("SELECT workspace_id FROM conversations WHERE id = $1")
+                .bind(Uuid::parse_str(task)?)
+                .fetch_one(&f.pool)
+                .await?)
+        };
+        let (lead_files, old_copy) = (workspace_of(t.lead.0.as_str()).await?, workspace_of(t.researcher.0.as_str()).await?);
+        let (status, body) = start_with(
+            f,
+            &t,
+            "r-5:c-1",
+            json!({"role": "researcher", "workspace": "own_copy", "brief": brief(), "files": "fresh_copy"}),
+        )
+        .await?;
+        assert_eq!(status, 201, "{body}");
+        assert_eq!(body["files"], json!("fresh_copy"));
+        let new_copy = workspace_of(t.researcher.0.as_str()).await?;
+        assert_ne!(new_copy, old_copy, "a new copy");
+        let forked_from: Option<Uuid> = sqlx::query_scalar("SELECT forked_from FROM workspaces WHERE id = $1")
+            .bind(new_copy)
+            .fetch_one(&f.pool)
+            .await?;
+        assert_eq!(forked_from, Some(lead_files), "of the lead's files now");
+        let mut old_state = String::new();
+        for _ in 0..200 {
+            old_state = sqlx::query_scalar("SELECT state FROM workspaces WHERE id = $1")
+                .bind(old_copy)
+                .fetch_one(&f.pool)
+                .await?;
+            if old_state == "deleted" {
+                break;
+            }
+            tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+        }
+        assert_eq!(old_state, "deleted", "the old copy goes once the new one is ready");
+        Ok(())
+    })
+    .await
+}

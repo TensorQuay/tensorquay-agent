@@ -1,6 +1,6 @@
 //! Bringing a finished helper back (ADR-0034's rounds amendment, A3): `start_member` naming a helper of this team that
 //! has finished brings that helper back, its task, row and name kept, instead of starting a new one. Its workspace and
-//! profile are its own; `files` keeps its copy or (not yet built) takes a fresh one; and it gets no more than its lead
+//! profile are its own; `files` keeps its copy or takes a fresh one; and it gets no more than its lead
 //! has now (SEC-067).
 use super::start::{Started, open_team};
 use crate::GatewayError;
@@ -101,13 +101,7 @@ fn check(
             said: format!("{name} works on the lead's own files, so it takes keep only"),
         });
     }
-    if files == BroughtBackFiles::FreshCopy {
-        return Err(GatewayError::ConflictSaid {
-            code: "fresh_copy_unavailable",
-            said: "A fresh copy for a helper brought back isn't available yet; bring it back with files keep".into(),
-        });
-    }
-    if !back.my_files && !back.copy_ready {
+    if !back.my_files && files == BroughtBackFiles::Keep && !back.copy_ready {
         return Err(GatewayError::ConflictSaid {
             code: "workspace_gone",
             said: format!(
@@ -126,9 +120,9 @@ fn check(
 /// round's own refusals (`round_needs_person`, `team_ended`, `team_stopped`), `member_limit`, storage failure.
 pub(crate) async fn start(
     connection: &mut PgConnection,
+    state: &crate::app::State,
     (leader, owner, run): (Uuid, Uuid, &str),
-    request: &StartMember,
-    back: Finished,
+    (request, back): (&StartMember, Finished),
     (cap, teams): (super::cap::Cap, &AgentTeams),
 ) -> Result<Started, GatewayError> {
     let (theirs, files) = check(request, &back)?;
@@ -147,19 +141,12 @@ pub(crate) async fn start(
             by: cap.by,
         });
     }
-    // No more than its lead has now (SEC-067): its servers and connectors narrowed to the lead's, in its own order.
-    sqlx::query!(
-        "UPDATE conversations h SET \
-         mcp_servers = ARRAY(SELECT x FROM unnest(h.mcp_servers) WITH ORDINALITY AS a(x, i) \
-                             WHERE x = ANY(l.mcp_servers) ORDER BY i), \
-         connectors = ARRAY(SELECT x FROM unnest(h.connectors) WITH ORDINALITY AS a(x, i) \
-                            WHERE x = ANY(l.connectors) ORDER BY i) \
-         FROM conversations l WHERE h.id = $1 AND l.id = $2",
-        back.conversation,
-        leader
-    )
-    .execute(&mut *connection)
-    .await?;
+    let (fork, replaced) = if files == BroughtBackFiles::FreshCopy {
+        fresh_copy(connection, state, (leader, owner), &back).await?
+    } else {
+        (None, None)
+    };
+    narrow(connection, back.conversation, leader).await?;
     let round = sqlx::query_scalar!(
         "UPDATE agent_team_members m SET state = 'starting', round = t.round FROM agent_teams t \
          WHERE m.conversation_id = $1 AND t.id = m.team_id RETURNING t.round",
@@ -190,7 +177,85 @@ pub(crate) async fn start(
         }),
         channel,
         seq,
-        fork: None,
+        fork,
         brought_back: Some((files, u32::try_from(round).unwrap_or(u32::MAX))),
+        replaced: replaced.map(|old| (back.conversation, old)),
     })
+}
+
+/// A fresh copy for a helper brought back: a new fork of its lead's files now, the helper's task moved to it; its old
+/// copy is answered, to delete once the new one is ready.
+async fn fresh_copy(
+    connection: &mut PgConnection,
+    state: &crate::app::State,
+    (leader, owner): (Uuid, Uuid),
+    back: &Finished,
+) -> Result<(Option<(Uuid, Uuid, u64)>, Option<Uuid>), GatewayError> {
+    let row = sqlx::query!(
+        "SELECT l.workspace_id AS lead_files, h.workspace_id AS old FROM conversations l, conversations h \
+         WHERE l.id = $1 AND h.id = $2",
+        leader,
+        back.conversation
+    )
+    .fetch_one(&mut *connection)
+    .await?;
+    let (lead_files, old) = (row.lead_files, row.old);
+    let copy = Uuid::now_v7();
+    let title: String = back.name.chars().take(100).collect();
+    let (stored, _) = crate::workspaces::fork::begin(
+        connection,
+        owner,
+        lead_files,
+        (copy, &title, crate::workspaces::Kind::HelperCopy),
+    )
+    .await?;
+    sqlx::query!(
+        "UPDATE conversations SET workspace_id = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2",
+        copy,
+        back.conversation
+    )
+    .execute(&mut *connection)
+    .await?;
+    let quota = crate::workspaces::quota(&state.config, stored);
+    Ok((Some((lead_files, copy, quota)), Some(old)))
+}
+
+/// No more than its lead has now (SEC-067): a helper brought back keeps only the servers and connectors its lead has.
+async fn narrow(
+    connection: &mut PgConnection,
+    helper: Uuid,
+    leader: Uuid,
+) -> Result<(), GatewayError> {
+    sqlx::query!(
+        "UPDATE conversations h SET \
+         mcp_servers = ARRAY(SELECT x FROM unnest(h.mcp_servers) WITH ORDINALITY AS a(x, i) \
+                             WHERE x = ANY(l.mcp_servers) ORDER BY i), \
+         connectors = ARRAY(SELECT x FROM unnest(h.connectors) WITH ORDINALITY AS a(x, i) \
+                            WHERE x = ANY(l.connectors) ORDER BY i) \
+         FROM conversations l WHERE h.id = $1 AND l.id = $2",
+        helper,
+        leader
+    )
+    .execute(&mut *connection)
+    .await?;
+    Ok(())
+}
+
+/// Deletes a brought-back helper's old copy once its fresh one is made: the purge takes its files. Only a copy no
+/// active task still works in.
+///
+/// # Errors
+/// Storage failure.
+pub(crate) async fn delete_old_copy(
+    state: &crate::app::State,
+    old: Uuid,
+) -> Result<(), GatewayError> {
+    sqlx::query!(
+        "UPDATE workspaces SET state = 'deleted', updated_at = CURRENT_TIMESTAMP WHERE id = $1 AND state <> 'deleted' \
+         AND NOT EXISTS (SELECT 1 FROM conversations WHERE workspace_id = $1 AND state = 'active')",
+        old
+    )
+    .execute(&state.pool)
+    .await?;
+    Ok(())
 }

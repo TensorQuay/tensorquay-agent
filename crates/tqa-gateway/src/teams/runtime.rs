@@ -392,7 +392,7 @@ pub(crate) async fn start(
             &request,
         )?;
         if let Some((status, body)) = keyed.begin(&state, &mut transaction).await? {
-            return Ok(((status, Json(body)), None));
+            return Ok(((status, Json(body)), (None, None)));
         }
         let started =
             super::start::start_member(&mut transaction, &state, (leader, owner), &request, &run)
@@ -409,10 +409,13 @@ pub(crate) async fn start(
             .await?;
         transaction.commit().await?;
         state.channels.published(started.channel, started.seq);
-        Ok(((StatusCode::CREATED, Json(body)), started.fork))
+        Ok((
+            (StatusCode::CREATED, Json(body)),
+            (started.fork, started.replaced),
+        ))
     })
     .await;
-    let (answer, fork) = match started {
+    let (answer, (fork, replaced)) = match started {
         Err(GatewayError::TeamEnded(None)) => {
             let refused = Err(GatewayError::TeamEnded(None));
             return ended(&state, leader, (&key, &run), refused).await;
@@ -433,7 +436,18 @@ pub(crate) async fn start(
         if !state.config.uses_block_images() {
             state.storage.workspace(copy).await?;
         }
+        // A helper brought back with a fresh copy lets go of the old one first (ADR-0034's rounds amendment, A3).
+        if let Some((helper, _)) = replaced
+            && let Ok(helper) = helper.to_string().parse()
+        {
+            state
+                .manager
+                .retire_for_switch(&helper, crate::manager::Teardown::WorkspaceDeleted)?;
+        }
         crate::workspaces::fork::copy(&state, (source, copy), quota).await?;
+        if let Some((_, old)) = replaced {
+            super::bring_back::delete_old_copy(&state, old).await?;
+        }
     }
     Ok(answer)
 }
