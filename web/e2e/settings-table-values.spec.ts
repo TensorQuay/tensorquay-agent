@@ -66,6 +66,13 @@ const WRAPS: Shown[] = [
     kind: "profileLabel",
   },
   { page: "/settings/people", table: "People", kind: "email" },
+  // The Sandboxes page: an owner's address and an environment's names wrap whole in their columns.
+  { page: "/settings/sandboxes", table: "Running sandboxes", kind: "email" },
+  {
+    page: "/settings/sandboxes",
+    table: "Running sandboxes",
+    kind: "environmentLabel",
+  },
   { page: "/settings/connectors", table: "Connectors", kind: "connectorLabel" },
   { page: "/settings/connectors", table: "Connectors", kind: "connectorName" },
   {
@@ -216,6 +223,7 @@ const TABLES: Record<string, string[]> = {
   "/settings/limits": ["Limits", "Helper limits"],
   "/settings/usage": ["Usage by person", "Usage by model"],
   "/settings/tokens": ["Your tokens"],
+  "/settings/sandboxes": ["Running sandboxes"],
   "/workspaces": ["Workspaces"],
   person: ["a person's tasks"],
 };

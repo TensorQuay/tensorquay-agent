@@ -160,6 +160,39 @@ afterEach(() => {
 });
 
 describe("WEB-U-486 the Sandboxes page's states", () => {
+  // Five columns and the ⋯, to fit a 600 px area as a table (decided on 18 Nov 2026): CPU over memory in one Use
+  // cell, Started in Last activity's tooltip.
+  it("is five columns and the ⋯: Use holds CPU over memory, Last activity names the start", async () => {
+    show(fake([listing()]));
+    const table = await screen.findByRole("table", {
+      name: "Running sandboxes",
+    });
+    expect(
+      within(table)
+        .getAllByRole("columnheader")
+        .map((header) => header.textContent),
+    ).toEqual([
+      "Owner",
+      "State",
+      "Environment",
+      "Use",
+      "Last activity",
+      "Actions",
+    ]);
+    const working = within(table).getAllByRole("row")[1]!;
+    const use = within(working).getAllByRole("cell")[3]!;
+    expect(
+      [...use.querySelectorAll(".sandboxes-use > *")].map(
+        (line) => line.textContent,
+      ),
+    ).toEqual(["1.4 of 2 cores", "3.1 GB of 4 GB"]);
+    const last = within(working).getAllByRole("cell")[4]!;
+    expect(last.querySelector("time")).toHaveAttribute(
+      "title",
+      expect.stringMatching(/^Last activity .+ · Started .+$/),
+    );
+  });
+
   // The real-stack run's numbers (18 Nov 2026): a small use never rounds to nothing, and one core is one core.
   it("says a small use in megabytes, and one core as one core", async () => {
     const MIB = 2 ** 20;

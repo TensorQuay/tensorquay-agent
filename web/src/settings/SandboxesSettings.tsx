@@ -6,7 +6,7 @@ import { useId, useState } from "react";
 
 import { newActionKey } from "../api/action-key";
 import { ApiError } from "../api/error";
-import { RelativeTime } from "../conversations/RelativeTime";
+import { absoluteTime, RelativeTime } from "../conversations/RelativeTime";
 import { useT } from "../i18n/I18nProvider";
 import { formatNumber } from "../i18n/message";
 import type { MessageKey, Translate } from "../i18n/translate";
@@ -192,13 +192,11 @@ function Sandboxes({
                 <th scope="col">{t("sandboxes.state")}</th>
                 <th scope="col">{t("sandboxes.environment")}</th>
                 <th scope="col" className="numeric">
-                  {t("sandboxes.cpu")}
+                  {t("sandboxes.use")}
                 </th>
-                <th scope="col" className="numeric">
-                  {t("sandboxes.memory")}
+                <th scope="col" className="sandboxes-activity">
+                  {t("sandboxes.lastActivity")}
                 </th>
-                <th scope="col">{t("sandboxes.started")}</th>
-                <th scope="col">{t("sandboxes.lastActivity")}</th>
                 <th scope="col">
                   <span className="sr-only">{t("common.actions")}</span>
                 </th>
@@ -365,39 +363,42 @@ function Row({
           {pending ? t("sandboxes.stateStopping") : t(STATE_LABEL[row.state])}
         </span>
         {row.kept_on ? (
-          <span className="cell-note" title={t("sandboxes.keptOn")}>
+          <span className="cell-note sandboxes-detail">
             {t("sandboxes.keptOn")}
           </span>
         ) : stops ? (
-          <span className="cell-note" title={stops}>
-            {stops}
-          </span>
+          <span className="cell-note sandboxes-detail">{stops}</span>
         ) : null}
       </td>
       <td>
         <span className="cell-whole">{row.environment.display_name}</span>
       </td>
       <td className="numeric">
-        <Measure
-          usage={row.usage?.cpu_millicores ?? null}
-          size={row.size.cpu_millicores}
-          unit="cores"
-          measured={measured}
+        {/* CPU over memory, one line each: the two measures share a column so the table fits 600 px. */}
+        <span className="sandboxes-use">
+          <Measure
+            usage={row.usage?.cpu_millicores ?? null}
+            size={row.size.cpu_millicores}
+            unit="cores"
+            measured={measured}
+          />
+          <Measure
+            usage={row.usage?.memory_bytes ?? null}
+            size={row.size.memory_bytes}
+            unit="memory"
+            measured={measured}
+          />
+        </span>
+      </td>
+      <td className="sandboxes-activity">
+        {/* When it started rides in the tooltip, with the last activity's own time. */}
+        <RelativeTime
+          value={row.last_activity_at}
+          title={t("sandboxes.activityTitle", {
+            last: absoluteTime(row.last_activity_at, t.locale),
+            started: absoluteTime(row.started_at, t.locale),
+          })}
         />
-      </td>
-      <td className="numeric">
-        <Measure
-          usage={row.usage?.memory_bytes ?? null}
-          size={row.size.memory_bytes}
-          unit="memory"
-          measured={measured}
-        />
-      </td>
-      <td>
-        <RelativeTime value={row.started_at} />
-      </td>
-      <td>
-        <RelativeTime value={row.last_activity_at} />
       </td>
       <td className="data-cell-action">
         <RowMenu
@@ -451,7 +452,7 @@ function Measure({
         {measured ? t("sandboxes.notAvailable") : t("sandboxes.measuring")}
       </span>
       {size !== null && (
-        <span className="cell-note">
+        <span className="muted sandboxes-size">
           {unit === "cores"
             ? t("sandboxes.sizeCores", { size: coreCount(size) })
             : t("sandboxes.sizeMemory", { size: memory(size, t) })}

@@ -1276,3 +1276,46 @@ tr[data-expired] td:not(.data-cell-action) {
 .page-section-list {
   min-width: 0;
 }
+
+/* The Sandboxes page (the design note, §4.1; five columns from 18 Nov 2026): a row's Use is CPU over memory, one line
+   each; a left-behind thing's remove command sits beside its Copy with the standard gap, wrapping under it when short
+   of room. */
+.sandboxes-use {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+/* Measured on the size alone: the size on its own muted line under "Measuring…" or "Not available". */
+.sandboxes-size {
+  display: block;
+}
+/* So the table fits a 600 px area (UI-GUIDELINES §7 Table): the state's detail ("Stops in about 10 min") wraps whole
+   under its pill instead of keeping a note column's share, and Last activity wraps too; its start is in the tooltip. */
+.data-table td .cell-note.sandboxes-detail {
+  min-width: 0;
+  contain: none;
+  overflow: visible;
+  white-space: normal;
+}
+:where(.data-table-scroll:not([data-cards])) .data-table .sandboxes-activity,
+:where(.data-table-scroll:not([data-cards]))
+  .data-table
+  .sandboxes-activity
+  time {
+  white-space: normal;
+}
+/* From a 740 px area the five columns fit with these on one line (about 720 px at their widest on touch), so the 600
+   to 739 px band wraps them (1024 px with its 700 px area among them). */
+@container data-table (width >= 740px) {
+  .data-table td .cell-note.sandboxes-detail,
+  .data-table .sandboxes-activity,
+  .data-table .sandboxes-activity time {
+    white-space: nowrap;
+  }
+}
+.sandboxes-remove {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
