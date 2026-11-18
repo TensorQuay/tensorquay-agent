@@ -31,6 +31,8 @@ fn schema_accepts(event: &Value) -> Result<bool, Box<dyn Error>> {
 fn proto_u_044_each_kind_round_trips_and_the_schema_accepts_it() -> TestResult {
     let kinds = [
         json!({"kind":"no_name"}),
+        // 18.1 item F (proposal G): the keys the object had, never a value.
+        json!({"kind":"no_name","keys":["content","path"]}),
         json!({"kind":"no_arguments"}),
         json!({"kind":"not_json","cut_off":true,"line":12,"column":3}),
         json!({"kind":"not_object"}),
@@ -172,5 +174,25 @@ fn proto_u_044_names_and_lists_are_bounded() -> TestResult {
             "{pointer:?}"
         );
     }
+    Ok(())
+}
+
+// 18.1 item F (proposal G): an older runtime's `no_name` has no keys; it reads as none and is written back as it came.
+#[test]
+fn proto_u_044_an_older_no_name_reads_with_no_keys() -> TestResult {
+    let older: FallbackProblem = serde_json::from_value(json!({"kind":"no_name"}))?;
+    assert_eq!(older, FallbackProblem::NoName { keys: vec![] });
+    assert_eq!(serde_json::to_value(&older)?, json!({"kind":"no_name"}));
+    let newer: FallbackProblem = serde_json::from_value(json!({"kind":"no_name","keys":["path"]}))?;
+    assert_eq!(
+        newer,
+        FallbackProblem::NoName {
+            keys: vec![ProblemName::new("path").ok_or("name")?]
+        }
+    );
+    let nine: Result<FallbackProblem, _> = serde_json::from_value(
+        json!({"kind":"no_name","keys":["a","b","c","d","e","f","g","h","i"]}),
+    );
+    assert!(nine.is_err(), "at most eight keys");
     Ok(())
 }
