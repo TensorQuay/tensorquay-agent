@@ -3,6 +3,17 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
+## Unreleased
+
+### Fixed
+
+- **A task that may not lead helpers is told why, never "unknown tool" (TOOL-U-147, RT-I-062, GW-I-329,
+  WEB-U-497).** A lead whose team had ended, asked to continue, called its old team tools and was answered three
+  times that no such tool exists, while the page said "Couldn't start a helper" each time. Now the gateway says why
+  a task may not lead (helpers switched off, the task was a helper, its environment too old, or its team has ended),
+  the task is answered in one plain sentence that tells it to do the work itself and say so, and the page reads
+  "Can't lead helpers here" with the reason.
+
 ## 18.0.1 (18 November 2026)
 
 A fix release: a PDF read's step names its pages, the Screen panel's ⋯ menu fits its items and stays inside its
