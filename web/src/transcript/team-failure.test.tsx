@@ -88,3 +88,60 @@ describe("WEB-U-399 a helper that couldn't start, in words", () => {
     ).toBeVisible();
   });
 });
+
+// WEB-U-497 (18.1, ADR-0034's rounds amendment A6): a task that may not lead is answered in words by its runtime
+// (`teams_unavailable`), and its page says so once, muted: "Can't lead helpers here", with the reason in the page's
+// words, never "Couldn't start a helper". A real failure still reads as one.
+describe("WEB-U-497 a team tool refused in words reads as such", () => {
+  it.each([
+    [
+      "Helpers are switched off for this installation. Do the work yourself, and say in your answer that you worked without helpers.",
+      "Helpers are switched off for this installation.",
+    ],
+    [
+      "This task was a helper, and a helper can't lead a team. Do the work yourself, and say so.",
+      "A task that was a helper can't lead a team.",
+    ],
+    [
+      "This environment can't lead helpers (its runtime is too old). Do the work yourself, and say so; the person can start the task in a newer environment.",
+      "This task's environment is too old to lead helpers.",
+    ],
+    [
+      "This team has ended for good (its lead task was deleted or its person's account was turned off). Do the work yourself, and say so.",
+      "Its team has ended for good.",
+    ],
+    [
+      "This task's team has ended, and for now a task leads one team. Do the work yourself, and say so; to lead helpers again, the person can start a new task.",
+      "Its team has ended, and a task leads one team.",
+    ],
+    [
+      "Your team's round has ended. Read its end note with read_reports, or start the next round with start_member; the other team tools come back once a round runs.",
+      "Its team's round has ended.",
+    ],
+  ])("%s", (sentence, words) => {
+    const { container } = render(
+      <TranscriptView
+        transcript={start(`teams_unavailable: ${sentence}`, null)}
+      />,
+    );
+    expect(screen.getByText("Can't lead helpers here")).toBeVisible();
+    expect(screen.getByText(words)).toHaveClass("activity-next");
+    expect(container.textContent).not.toContain("Couldn't start a helper");
+    expect(container.textContent).not.toContain("teams_unavailable");
+  });
+
+  it("keeps a real failure's words", () => {
+    render(
+      <TranscriptView
+        transcript={start(
+          "member_limit: the agent team already has 3 helpers, the most allowed by max_members",
+          null,
+        )}
+      />,
+    );
+    expect(
+      screen.getByText("Couldn't start a helper: DuckDB researcher"),
+    ).toBeVisible();
+    expect(screen.queryByText("Can't lead helpers here")).toBeNull();
+  });
+});

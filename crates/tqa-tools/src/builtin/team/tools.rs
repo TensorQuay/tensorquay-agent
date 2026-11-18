@@ -42,6 +42,35 @@ impl TeamRole {
     }
 }
 
+/// `GET /runtime/teams/role`'s whole answer: the role, and why a run may not lead (ADR-0034's rounds amendment, A2).
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct RoleAnswer {
+    /// Which team tools the run is offered.
+    pub role: TeamRole,
+    /// Why it may not lead (`none` and `ended`), for the sentence a team tool's call is answered with.
+    pub reason: Option<String>,
+}
+
+impl RoleAnswer {
+    /// The answer the gateway gave.
+    #[must_use]
+    pub fn parse(role: &str, reason: Option<&str>) -> Self {
+        Self {
+            role: TeamRole::parse(role),
+            reason: reason.map(str::to_owned),
+        }
+    }
+}
+
+/// The team tools a run with `answer` gets.
+pub fn tools_for_answer(
+    client: Arc<dyn TeamClient>,
+    answer: RoleAnswer,
+    check: Option<AcceptanceShell>,
+) -> Vec<Arc<dyn Tool>> {
+    tools_with_check(client, answer.role, check)
+}
+
 /// The team tools a run with `role` gets, `done` without a way to run an acceptance check.
 pub fn tools_for_role(client: Arc<dyn TeamClient>, role: TeamRole) -> Vec<Arc<dyn Tool>> {
     tools_with_check(client, role, None)

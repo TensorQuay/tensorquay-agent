@@ -6,7 +6,8 @@
 mod support;
 use serde_json::{Value, json};
 use support::*;
-use tqa_types::ClientFrame;
+use tqa_testkit::{Script, Scripted};
+use tqa_types::{ClientFrame, Event, ServerFrame, ToolStatus};
 
 const TEAM_TOOLS: [&str; 12] = [
     "send_to_lead",
@@ -181,4 +182,84 @@ async fn rt_i_042_a_role_call_that_times_out_leaves_the_run_without_team_tools()
         .count();
     assert_eq!(asked, 1, "the role is asked once per run start");
     Ok(())
+}
+
+/// The run's tool results, in order: each one's content and whether it was an error.
+fn tool_results(f: &Fixture) -> Vec<(String, bool)> {
+    f.gateway
+        .stored()
+        .iter()
+        .filter_map(|frame| match frame {
+            ServerFrame::Event {
+                event: Event::ToolResult {
+                    content, status, ..
+                },
+                ..
+            } => Some((content.clone(), *status != ToolStatus::Ok)),
+            _ => None,
+        })
+        .collect()
+}
+
+/// A model that calls `start_member` once, then answers.
+fn calls_start_member() -> Script {
+    Script::new(vec![Scripted::ToolCall {
+        name: "start_member".into(),
+        arguments_json: json!({"role": "researcher", "brief": {"objective": "o", "output": "p",
+            "boundaries": "b"}})
+        .to_string(),
+        split_into: 1,
+    }])
+}
+
+// TEST: RT-I-062
+#[tokio::test]
+async fn rt_i_062_the_runtime_gives_a_run_that_may_not_lead_its_reasons_sentence() -> TestResult {
+    let f = Fixture::in_memory(vec![calls_start_member(), answer()]).await?;
+    f.gateway.set_team_role_with("none", "was_member");
+    f.gateway.set_bound(true);
+    let (shutdown, task) = f.launch()?;
+    f.gateway.wait_for_registrations(1).await?;
+    f.gateway.send(user()).await?;
+    f.wait_event("run.completed").await?;
+    stop(shutdown, task).await?;
+    let results = tool_results(&f);
+    assert_eq!(results.len(), 1, "{results:?}");
+    let (content, is_error) = &results[0];
+    assert!(is_error, "a refusal: {content}");
+    assert!(
+        content.contains("This task was a helper, and a helper can't lead a team. Do the work yourself, and say so."),
+        "{content}"
+    );
+    assert!(!content.contains("unknown tool"), "{content}");
+    let started = f
+        .gateway
+        .requests()
+        .iter()
+        .filter(|request| {
+            request.path.starts_with("/runtime/teams/") && request.path != "/runtime/teams/role"
+        })
+        .count();
+    assert_eq!(started, 0, "nothing reached the gateway's team routes");
+    // The model's tool list is as before: no team tool offered.
+    assert_eq!(offered_in(&f)?, Vec::<String>::new());
+    Ok(())
+}
+
+/// The team tools the first model request of a finished fixture offered.
+fn offered_in(f: &Fixture) -> Result<Vec<String>, Box<dyn std::error::Error>> {
+    let body: Value = f
+        .gateway
+        .model_requests()
+        .into_iter()
+        .next()
+        .ok_or("no model request")?
+        .body;
+    Ok(body["tools"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|tool| tool["function"]["name"].as_str().map(str::to_owned))
+        .filter(|name| TEAM_TOOLS.contains(&name.as_str()))
+        .collect())
 }
