@@ -3,6 +3,21 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
+## 18.0.2 (19 November 2026)
+
+A fix release: a tool call whose number or true/false a model sent as text runs instead of being refused until
+the run stopped. No migration, protocol or configuration change: upgrade in place.
+
+### Fixed
+
+- **A tool call whose number or true/false arrives as text still runs (TOOL-U-146).** One model server sends an
+  optional number, such as the shell's time limit, as `"30000"` instead of `30000`. The tools refused it, and a model
+  that couldn't see why sent it again until the run stopped. The agent's own tools now take an exact number, `true`,
+  `false` or `null` written as text where the setting takes no text. Anything else is still refused, and the refusal
+  now says what was sent (`expected null or integer, got a string`). Tools from a connected server get their
+  arguments exactly as the model wrote them, as before. The shell had lost its own argument rules inside the
+  runtime's process-cleanup wrapper, so a blank or `null` optional value reached it too; it now has them.
+
 ## 18.0.1 (18 November 2026)
 
 A fix release: a PDF read's step names its pages, the Screen panel's ⋯ menu fits its items and stays inside its
