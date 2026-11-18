@@ -1,9 +1,9 @@
-import { mkdir } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { expect, test, type Page } from "@playwright/test";
 
-import { edgeLead, stopStarted, writing } from "./agents-stack-api";
+import { edgeLead, events, stopStarted, writing } from "./agents-stack-api";
 import { afterStart, budget } from "./stack-start";
 import { bootstrap } from "./ux/flow";
 
@@ -124,6 +124,35 @@ test("E2E-AGENTS-040 a person's follow-up opens round 2, which brings a helper b
   expect(started.map((each) => [each.round, each.to.kind])).toEqual([
     [2, "person"],
   ]);
+
+  // What the run left, for a failure's reading: the team, its log, and each helper's events (types and runs).
+  const directory = process.env.TQA_WEB_EVIDENCE_DIR;
+  if (directory) {
+    const helpers = await page.request.get(
+      `/api/v1/conversations/${leadId}/team`,
+    );
+    const each = (
+      (await helpers.json()) as {
+        helpers: { conversation: string; name: string }[];
+      }
+    ).helpers;
+    const journals: Record<string, [number, string | undefined][]> = {};
+    for (const helper of each) {
+      const frames = (await events(page, helper.conversation)) as {
+        seq: number;
+        event?: { type: string };
+      }[];
+      journals[helper.name] = frames.map((frame) => [
+        frame.seq,
+        frame.event?.type,
+      ]);
+    }
+    await mkdir(directory, { recursive: true });
+    await writeFile(
+      join(directory, "rounds-diagnostics.json"),
+      JSON.stringify({ team, log: items, journals }, null, 1),
+    );
+  }
 
   // The page: the strip names the round, the transcript its start and round 2's end note.
   await page.goto(`/c/${encodeURIComponent(leadId)}`);
