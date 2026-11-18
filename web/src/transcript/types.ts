@@ -210,7 +210,8 @@ export type ScreenNoticeView = {
     | "screen.signed_out"
     | "screen.sign_out_failed"
     | "screen.sign_in_kept"
-    | "screen.sign_in_released";
+    | "screen.sign_in_released"
+    | "sandbox.stopped";
   at: string;
   seconds?: number | undefined;
   ended?: "hand_back" | "socket_closed" | "restart" | undefined;

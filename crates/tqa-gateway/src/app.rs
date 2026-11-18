@@ -913,6 +913,7 @@ async fn build_manager(
     step("sandbox reconciliation", Box::pin(manager.reconcile())).await?;
     manager.start_admission();
     manager.start_network_sweep();
+    manager.start_usage_sampler();
     manager.start_internal_inventory();
     Ok((manager, own))
 }

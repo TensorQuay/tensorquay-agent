@@ -202,6 +202,16 @@ applies on top. When a run needs a sandbox and no slot is free, in order:
 3. never evict a busy sandbox before its max lifetime, and never evict a pinned one.
 The UI shows slots in use. Diagnostics warn when the budget is smaller than one sandbox.
 
+**The administrator's view (Settings › Operations › Sandboxes; the Sandboxes page design note).** One listing of every
+running sandbox across people, from the admission records: owner, environment, state (starting, working, idle,
+stopping, from the phase and the run activity above), the size it was admitted with, its measured use (the backend's
+`stats`, sampled every 10 s) and when an idle one stops. Nothing of a task but its id: no title, message, file,
+workspace, route or profile. An administrator's **Stop** goes through the eviction path with the same checks minus the
+pinned and keep-sign-in exclusions: a working or starting sandbox, one with a message waiting and a Desktop whose
+screen a person holds are refused; the retire is audited (`admin_audit` area `sandboxes`, action `stop`), counted
+(`tqa_sandbox_retired_total{reason="administrator"}`) and told to the owner as a `sandbox.stopped` notice beside the
+transcript. The task keeps its files and history, and its next message starts a new sandbox.
+
 **Keep-alive pin.** A user may pin a conversation: its sandbox stays live through idle up to the max lifetime, so its
 next message starts without waking a sandbox. Pins count against the user's cap. A pin keeps the sandbox, not
 processes: background processes stop when the command that started them returns, and its answer tells the model so
@@ -857,6 +867,14 @@ Rules:
   `tqa_provider_errors_total{route,code}`, `tqa_sandboxes{backend,state}`, `tqa_event_lag_seconds`.
 - An admin diagnostics page (backed by `/readyz` detail) checks the backend, images, KVM, model endpoints and the
   database.
+- The leak verdict (the Sandboxes page design note, §3.6): the periodic sweeps of stray containers and orphaned
+  networks keep their last two passes; something the engine could not remove in two consecutive passes, or found again
+  after a pass tried it, is **left behind**, named by the engine's name with its age, the engine's error code and the
+  command that removes it by hand. The counts are served in `/readyz?detail=1` (`sandboxes`) and as
+  `tqa_sandboxes{backend,state}`, `tqa_sandbox_oldest_seconds`, `tqa_sandbox_unowned{kind}` and
+  `tqa_sandbox_left_behind{kind}`; the names are on the Sandboxes page only. Green when nothing survived, amber when
+  something did, never red: the product keeps running. The gateway creates and labels no volume today, so the
+  `volumes` count is absent (it is defined for a volume workspace mode, should one come).
 
 ## 14. Configuration
 - One validated TOML per server component (`gateway.toml`, `models.toml`); environment variables only for secrets and

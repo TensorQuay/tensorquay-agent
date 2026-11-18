@@ -158,6 +158,7 @@ describe("WEB-U-245 the screen notices", () => {
         useScreenLines({
           conversationId: "task-1",
           desktop: true,
+          notices: false,
           live,
           connection: "live",
         }),
@@ -369,7 +370,7 @@ describe("WEB-U-245 the screen notices", () => {
     ).toBe(false);
   });
 
-  it("reads nothing for a task without a desktop and no live notice", () => {
+  it("reads nothing for a task without a desktop, no notice in its read and no live notice", () => {
     const read = vi.spyOn(api, "screenNotices");
     const cache = new QueryClient();
     renderHook(
@@ -377,6 +378,7 @@ describe("WEB-U-245 the screen notices", () => {
         useScreenLines({
           conversationId: "task-2",
           desktop: false,
+          notices: false,
           live: [],
           connection: "live",
         }),
@@ -387,5 +389,13 @@ describe("WEB-U-245 the screen notices", () => {
       },
     );
     expect(read).not.toHaveBeenCalled();
+  });
+
+  it("gives an administrator's stop its words", () => {
+    expect(
+      screenNoticeWords({ kind: "sandbox.stopped", at: "t" }, english),
+    ).toBe(
+      "An administrator stopped this task's sandbox. It starts again when you send a message.",
+    );
   });
 });

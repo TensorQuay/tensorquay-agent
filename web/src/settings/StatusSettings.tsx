@@ -13,6 +13,7 @@ import { Skeleton } from "../ui/Skeleton";
 import type { TemplatesApi } from "./admin/templates";
 import { unavailableKey } from "./environment-copy";
 import { settingsApi } from "./requests";
+import { reasonWords } from "./sandbox-reason";
 
 /**
  * The readiness checks an administrator can act on, in reading order, each with what its failure means and what to
@@ -149,6 +150,7 @@ function Status({ environments }: { environments?: TemplatesApi | undefined }) {
       )}
       <KeptGitCredentials kept={status.data.git_credentials_kept} />
       <ActiveRuns active={status.data.runs_active} />
+      <SandboxesLine sandboxes={status.data.sandboxes} />
       <div>
         <Button
           variant="secondary"
@@ -184,6 +186,66 @@ function ActiveRuns({ active }: { active: ReadyDetail["runs_active"] }) {
           ? t("health.activeNone")
           : t("health.activeSome", { count: active })}
       </p>
+    </section>
+  );
+}
+
+/** "7 h" or "40 min": how long the oldest sandbox has run, to the hour past one. */
+function age(seconds: number, t: ReturnType<typeof useT>): string {
+  const minutes = Math.max(1, Math.round(seconds / 60));
+  return minutes < 60
+    ? t("health.minutes", { count: minutes })
+    : t("health.hours", { count: Math.round(minutes / 60) });
+}
+
+/**
+ * The leak verdict (the Sandboxes page design note, §3.6): how many sandboxes run, and whether the sweeps left
+ * anything unowned behind. Green names nothing; amber names what, why, the five-minute retry and the page where each
+ * survivor is listed with its remove command. The gateway always reports it (the answer requires it).
+ */
+function SandboxesLine({ sandboxes }: { sandboxes: ReadyDetail["sandboxes"] }) {
+  const t = useT();
+  const heading = useId();
+  const left = sandboxes.left_behind;
+  const kinds = (["containers", "networks", "volumes"] as const).filter(
+    (kind) => (left[kind] ?? 0) > 0,
+  );
+  const amber = kinds.length > 0;
+  const oldest = age(sandboxes.oldest_seconds, t);
+  return (
+    <section className="stack" aria-labelledby={heading}>
+      <h2 id={heading} className="type-body-strong">
+        {t("health.sandboxesTitle")}
+      </h2>
+      {/* A polite live line: a verdict that turns amber while someone watches is heard, as the active count is. */}
+      <p
+        role="status"
+        className="status-sandboxes-line"
+        data-tone={amber ? "warn" : "ok"}
+      >
+        {amber
+          ? t("health.sandboxesAmber", {
+              running: sandboxes.running,
+              oldest,
+              what: kinds
+                .map((kind) =>
+                  t("health.sandboxesWhat", { count: left[kind] ?? 0, kind }),
+                )
+                .join(", "),
+              reason: reasonWords(left.reason, t),
+            })
+          : t("health.sandboxesGreen", { running: sandboxes.running, oldest })}
+      </p>
+      {sandboxes.unowned.volumes === undefined && (
+        <p className="type-small muted">{t("health.sandboxesNoVolumes")}</p>
+      )}
+      {amber && (
+        <p className="type-small">
+          <Link href="/settings/sandboxes#left-behind">
+            {t("health.openSandboxes")}
+          </Link>
+        </p>
+      )}
     </section>
   );
 }

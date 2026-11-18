@@ -12,6 +12,14 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   so the page stayed blank. The preview now moves those paths under its own address in the page's HTML and in its
   stylesheets; scripts are never changed. A static export's own pages open by their links (`/about` answers
   `about.html`). Each previewed page carries a small reporter that tells the Files panel what it couldn't load.
+- **Administrators see every running sandbox, and can stop an idle one (Settings › Operations › Sandboxes;
+  GW-U-216 to 220, SEC-066, WEB-U-486 to 489, WEB-E2E-129).** Each row names its owner, environment, state and when it
+  stops, with its CPU and memory against its size; the page shows the slots in use and anyone waiting. Stop now retires
+  an idle sandbox the same way its idle window would: the task and its files stay, its next message starts a new one,
+  and its owner reads a notice saying an administrator stopped it. A working sandbox is never stopped. Each stop is
+  audited. The page shows nothing of a task but its owner and environment. Settings › Status now says whether a sweep
+  left anything behind (a container, a network, or a volume in volume mode) and why, and the page's Left behind section
+  gives each one's remove command. One database migration.
 - **A long task can look back past its summary (CTX-U-023, CORE-E-043, E2E-RECALL-001).** When a long task is
   summarised to fit the model's window, the summarised turns are now kept as text in the task's
   `.tqa/<id>/history.md`, and the summary tells the model to search it before answering about anything earlier. Ask

@@ -1675,6 +1675,391 @@
         "generation"
       ]
     },
+    "AdminSandbox": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "conversation_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "owner": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "email": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "email"
+          ]
+        },
+        "environment": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "display_name": {
+              "type": "string"
+            },
+            "desktop": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "name",
+            "display_name",
+            "desktop"
+          ]
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "starting",
+            "working",
+            "idle",
+            "stopping"
+          ]
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "last_activity_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "stops_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "kept_on": {
+          "type": "boolean"
+        },
+        "size": {
+          "$ref": "#/definitions/AdminSandboxSize"
+        },
+        "usage": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/AdminSandboxUsage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "can_stop": {
+          "type": "boolean"
+        },
+        "stop_refusal": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "starting",
+            "working",
+            "stopping",
+            "work_waiting",
+            null
+          ]
+        }
+      },
+      "required": [
+        "conversation_id",
+        "owner",
+        "environment",
+        "state",
+        "started_at",
+        "last_activity_at",
+        "stops_at",
+        "kept_on",
+        "size",
+        "usage",
+        "can_stop",
+        "stop_refusal"
+      ]
+    },
+    "AdminSandboxLeftBehind": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "container",
+            "network",
+            "volume"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "age_seconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reason": {
+          "type": "string"
+        },
+        "remove": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "name",
+        "age_seconds",
+        "reason",
+        "remove"
+      ]
+    },
+    "AdminSandboxSize": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cpu_millicores": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "memory_bytes": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "pids": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        }
+      },
+      "required": [
+        "cpu_millicores",
+        "memory_bytes",
+        "pids"
+      ]
+    },
+    "AdminSandboxStop": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stopping": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "required": [
+        "stopping"
+      ]
+    },
+    "AdminSandboxUsage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cpu_millicores": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "memory_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pids": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "cpu_millicores",
+        "memory_bytes",
+        "pids"
+      ]
+    },
+    "AdminSandboxes": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "backend": {
+          "type": "string",
+          "enum": [
+            "docker",
+            "firecracker"
+          ]
+        },
+        "limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "slots": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "per_user": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "desktops": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "idle_seconds": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "max_lifetime_seconds": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "slots",
+            "per_user",
+            "desktops",
+            "idle_seconds",
+            "max_lifetime_seconds"
+          ]
+        },
+        "totals": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "in_use": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "starting": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "working": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "idle": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "stopping": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "desktops": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "waiting": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "reserved": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cpu_millicores": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "memory_bytes": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "cpu_millicores",
+                "memory_bytes"
+              ]
+            },
+            "usage": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "cpu_millicores": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "memory_bytes": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "measured_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "cpu_millicores",
+                    "memory_bytes",
+                    "measured_at"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "in_use",
+            "starting",
+            "working",
+            "idle",
+            "stopping",
+            "desktops",
+            "waiting",
+            "reserved",
+            "usage"
+          ]
+        },
+        "items": {
+          "type": "array",
+          "maxItems": 200,
+          "items": {
+            "$ref": "#/definitions/AdminSandbox"
+          }
+        },
+        "next_after": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "left_behind": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminSandboxLeftBehind"
+          }
+        }
+      },
+      "required": [
+        "backend",
+        "limits",
+        "totals",
+        "items",
+        "next_after",
+        "left_behind"
+      ]
+    },
     "AdminSecret": {
       "type": "object",
       "additionalProperties": false,

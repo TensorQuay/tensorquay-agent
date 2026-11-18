@@ -210,6 +210,14 @@ export const ANSWERS: {
     },
   },
   {
+    api: /^\/api\/v1\/admin\/sandboxes$/,
+    fields: {
+      "items[].owner.email": "email",
+      "items[].environment.name": "environmentName",
+      "items[].environment.display_name": "environmentLabel",
+    },
+  },
+  {
     api: /^\/api\/v1\/(users|invitations)$/,
     fields: { "items[].email": "email" },
   },

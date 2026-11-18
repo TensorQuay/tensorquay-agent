@@ -135,6 +135,9 @@ pub(crate) enum Handler {
     Users,
     UserChange,
     AdminUsage,
+    /// The Sandboxes page: the listing and an administrator's stop (the Sandboxes page design note).
+    AdminSandboxes,
+    AdminSandboxStop,
     AdminSecrets,
     AdminSecretPut,
     AdminSecretReminder,

@@ -2441,6 +2441,10 @@
         {
           "const": "screen.sign_in_released",
           "type": "string"
+        },
+        {
+          "const": "sandbox.stopped",
+          "type": "string"
         }
       ]
     },
@@ -2907,9 +2911,12 @@
               "type": "string"
             },
             "by": {
-              "allOf": [
+              "anyOf": [
                 {
                   "$ref": "#/definitions/ScreenPerson"
+                },
+                {
+                  "type": "null"
                 }
               ]
             },
@@ -2956,7 +2963,6 @@
           "required": [
             "type",
             "kind",
-            "by",
             "at",
             "after_seq"
           ],

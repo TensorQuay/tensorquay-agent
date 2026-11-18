@@ -7,6 +7,11 @@ import type { Endpoint } from "../api/operations";
  */
 export const settingsOperations = {
   adminUsage: { method: "GET", path: "/api/v1/admin/usage" },
+  adminSandboxes: { method: "GET", path: "/api/v1/admin/sandboxes" },
+  adminSandboxStop: {
+    method: "POST",
+    path: "/api/v1/admin/sandboxes/{conversation_id}/stop",
+  },
   adminSecrets: { method: "GET", path: "/api/v1/admin/secrets" },
   adminSecretPut: { method: "PUT", path: "/api/v1/admin/secrets/{name}" },
   adminSecretDelete: {

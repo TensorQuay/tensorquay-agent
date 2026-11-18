@@ -80,9 +80,11 @@ pub(crate) async fn get(
         .remove(&super::uuid(&id)?)
         .unwrap_or(crate::channels::store::RunStatus::Idle);
     let [conversation] = conversation;
+    let screen_notices = Some(crate::screen::any_notices(&state, super::uuid(&id)?).await?);
     Ok(Json(Listed {
         conversation,
         run_status,
+        screen_notices,
     }))
 }
 
@@ -145,6 +147,9 @@ pub(crate) struct Listed {
     #[serde(flatten)]
     conversation: Conversation,
     run_status: crate::channels::store::RunStatus,
+    /// Whether the task has notices to read (GW-U-218); on one task's own read only, absent from the list's rows.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    screen_notices: Option<bool>,
 }
 
 #[derive(Serialize)]
@@ -210,6 +215,7 @@ pub(crate) async fn list(
             Listed {
                 conversation,
                 run_status,
+                screen_notices: None,
             }
         })
         .collect();

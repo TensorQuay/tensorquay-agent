@@ -167,6 +167,7 @@ export function LiveConversation({
   const screen = useScreenLines({
     conversationId: conversation.id,
     desktop,
+    notices: conversation.screen_notices === true,
     live: transcript.screenNotices,
     connection,
   });

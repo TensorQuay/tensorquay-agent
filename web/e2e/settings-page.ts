@@ -19,6 +19,7 @@ export const TABLE_PAGES = [
   "/settings/internet-access",
   "/settings/limits",
   "/settings/usage",
+  "/settings/sandboxes",
   "/settings/tokens",
   "/workspaces",
 ] as const;

@@ -24,6 +24,7 @@ import {
   screenFixture,
   restartScreen,
   screenNoticesRoute,
+  hasScreenNotices,
   screenSignOutRoute,
   screenshotRoute,
   screenUpgrade,
@@ -652,7 +653,11 @@ async function handle(request, response) {
     return;
   }
   if (!suffix && method === "GET") {
-    json(response, 200, metadata(conversation));
+    // As the gateway: only a task's own read says whether it has notices to read.
+    json(response, 200, {
+      ...metadata(conversation),
+      screen_notices: hasScreenNotices(conversation.id),
+    });
     return;
   }
   if (!suffix && method === "PATCH") {
