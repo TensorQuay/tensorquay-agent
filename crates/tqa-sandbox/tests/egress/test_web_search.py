@@ -7,7 +7,7 @@ import unittest
 
 from egress import web_search
 
-GOLDEN = Path(__file__).resolve().parents[3] / "tqa-prompt/tests/fixtures/system-v14-workstation-open-web.txt"
+GOLDEN = Path(__file__).resolve().parents[3] / "tqa-prompt/tests/fixtures/system-v15-workstation-open-web.txt"
 
 
 class WebSearchDriverTests(unittest.TestCase):

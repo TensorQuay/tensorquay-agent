@@ -24,7 +24,7 @@ pub use skills::{
     SkillSet, SkillTier, SkipReason, SkippedSkill, discover_skills, parse_manifest,
     render_skill_index,
 };
-pub use system::{PROMPT_VERSION, WorkspaceFacts, system_prompt};
+pub use system::{PROMPT_VERSION, WEB_APPS_LINE, WorkspaceFacts, system_prompt};
 
 /// Returns this crate's package name.
 #[must_use]
