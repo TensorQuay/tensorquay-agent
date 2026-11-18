@@ -11,6 +11,7 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   file's size on two lines beside Expand ("661.6 / kB"); the size now reads on one line, and the actions move under it
   when the row can't hold all three. A PDF read's output in its step scrolled sideways, its paragraphs one long line
   each; it now wraps them, a long address or word included, while a code or text file's read keeps its lines.
+
 - **A PDF read's step names the pages it read, not lines (WEB-U-482).** After reading pages 1 and 2 of a PDF, the
   step said "Read uploads/report.pdf lines 1–2"; it now says "pages 1–2", in every language. The result's own page
   marks decide it, so a PDF saved without its extension reads as pages too.
@@ -32,8 +33,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Security
 
-- **The web app is on Next.js 16.4.5** (it was 16.4.1), past GHSA-mfr8-8qww-v76h, a moderate information disclosure
-  across root params when a `'use cache'` function is called through `unstable_cache()`. The app uses neither, so it
+- **The web app is on Next.js 16.4.5** (it was 16.4.1), past two moderate advisories in which a `'use cache'`
+  function's entry could serve one root param's content for another: GHSA-mfr8-8qww-v76h (through `unstable_cache()`)
+  and GHSA-vc7v-qv4w-wrv8 (nested `'use cache'` functions). The app uses neither `'use cache'` nor root params, so it
   was not affected. Builds no longer stop to recommend an upgrade (`experimental.agentUpgrade` is off, WEB-U-491).
 
 ## 18.0.0 (17 November 2026)

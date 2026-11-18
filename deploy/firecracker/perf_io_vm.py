@@ -31,6 +31,9 @@ GUEST_DIRECTORY = "/workspace/perf-io"
 HEREDOC = "PERF_IO_BENCH"
 # The bench's phases, in order; the host acts between them.
 PHASES = ("seq-write", "rand-write", "seq-read", "rand-read")
+# The fixture model's most responses in one scenario (crates/tqa-testkit/src/standalone/scenario.rs): the bench's
+# setup and its answer, then a call and an answer per phase of each round, warm-ups included.
+MAX_RESPONSES = 128
 MEASURES = ("seq_write_mbps", "seq_read_mbps", "rand_write_ops", "rand_read_ops")
 RATIO_MIN = 0.70
 # Each guest round within the shell tool's 30 s deadline with room to spare: 64 MiB sequential, 4096 random 4 KiB.
@@ -61,6 +64,10 @@ def scenario(rounds, sizes, source):
     body = source if source.endswith("\n") else source + "\n"
     setup = "cat > {} <<'{}'\n{}{}".format(GUEST_BENCH, HEREDOC, body, HEREDOC)
     responses = [shell(setup), answer("The bench is in place.")]
+    most = (MAX_RESPONSES - len(responses)) // (2 * len(PHASES))
+    if rounds > most:
+        raise ValueError("the fixture model takes at most {} responses, so at most {} rounds with the warm-ups; "
+                         "{} asked".format(MAX_RESPONSES, most, rounds))
     for index in range(rounds):
         for phase in PHASES:
             arguments = bench_arguments(GUEST_DIRECTORY, sizes, index) + ["--phase", phase]
@@ -269,13 +276,19 @@ def check(options):
     return run
 
 
+def parser():
+    """The run's options. 3 warm-ups and 12 rounds, as the measured runs of 11 Oct 2026: the most the fixture model's
+    script holds is 15 in all."""
+    options = argparse.ArgumentParser(description=__doc__)
+    options.add_argument("--warmups", type=int, default=3)
+    options.add_argument("--rounds", type=int, default=12)
+    options.add_argument("--size-mib", type=int, default=DEFAULT_SIZE_MIB)
+    options.add_argument("--random-ops", type=int, default=DEFAULT_RANDOM_OPS)
+    return options
+
+
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--warmups", type=int, default=5)
-    parser.add_argument("--rounds", type=int, default=50)
-    parser.add_argument("--size-mib", type=int, default=DEFAULT_SIZE_MIB)
-    parser.add_argument("--random-ops", type=int, default=DEFAULT_RANDOM_OPS)
-    options = parser.parse_args()
+    options = parser().parse_args()
     sizes = {"size_mib": options.size_mib, "random_ops": options.random_ops}
     script = scenario(options.warmups + options.rounds, sizes, BENCH.read_text())
     stack.run("perf-012", script, check(options))
