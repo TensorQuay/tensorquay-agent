@@ -28,11 +28,15 @@ import shell  # noqa: E402
 HERE = Path(__file__).resolve().parent
 POSTGRES = re.compile(r"^(TQA_POSTGRES_PASSWORD|TQA_BOOTSTRAP_TOKEN)=[0-9a-f]{64}$", re.M)
 ADMIN_PASSWORD = "correct horse battery"
+# deploy/pull-images.sh's output, as it printed it for 18.0.0 on this kind of host.
 EXPORTS = (
-    "== 10:00:00 pulling ghcr.io/tensorquay/tqa-gateway:18.1.0\n"
+    "== 10:00:00 pulling ghcr.io/tensorquay/tensorquay-agent-runtime:18.1.0\n"
+    "== 10:00:01 pulling ghcr.io/tensorquay/tensorquay-agent-gateway:18.1.0\n"
+    "== 10:00:01 pulling ghcr.io/tensorquay/tensorquay-agent-web:18.1.0\n"
+    "== 10:00:01 done. For step 1:\n"
     "export TQA_RUNTIME_IMAGE='sha256:" + "a" * 64 + "'\n"
-    "export TQA_GATEWAY_IMAGE='ghcr.io/tensorquay/tqa-gateway@sha256:" + "b" * 64 + "'\n"
-    "export TQA_WEB_IMAGE='ghcr.io/tensorquay/tqa-web@sha256:" + "c" * 64 + "'\n"
+    "export TQA_GATEWAY_IMAGE='ghcr.io/tensorquay/tensorquay-agent-gateway@sha256:" + "b" * 64 + "'\n"
+    "export TQA_WEB_IMAGE='ghcr.io/tensorquay/tensorquay-agent-web@sha256:" + "c" * 64 + "'\n"
 )
 
 
@@ -90,7 +94,7 @@ class FakeSystem:
     def run(self, args, *, env=None, capture=False, timeout=None):
         self.commands.append(list(args))
         self.environments.append(env)
-        if args[:2] == ["docker", "info"]:
+        if args == ["docker", "info", "--format", "{{.SecurityOptions}}"]:
             return "[name=seccomp,profile=builtin" + (" name=rootless" if self.rootless else "") + "]\n"
         if args[:2] == ["docker", "run"] and "stat" in args:
             # As toybox's stat answers: the group of the one file named, and a refusal without one.
@@ -99,9 +103,31 @@ class FakeSystem:
             return "998\n"
         if args and args[0].endswith("pull-images.sh"):
             return EXPORTS
-        if "up" in args and self.up_fails is not None:
-            raise shell.CommandFailed(args, 1, self.up_fails(env))
-        return ""
+        if args[:2] == ["docker", "run"] and "chown" in args:
+            # As chown answers: every path it names must be in the folder it mounts.
+            mount = next(arg for arg in args if arg.startswith("type=bind,source="))
+            source = Path(mount.split("source=", 1)[1].split(",", 1)[0])
+            for name in args[args.index("chown") + 3:]:
+                if not (source / name.removeprefix("/install/")).exists():
+                    raise shell.CommandFailed(args, 1, "chown: {}: No such file or directory".format(name))
+            return ""
+        if args[:3] == ["docker", "build", "-f"]:
+            if not (ROOT / args[3]).is_file():
+                raise shell.CommandFailed(args, 1, "failed to read dockerfile: open {}: no such file".format(args[3]))
+            return ""
+        if args[:2] == ["docker", "compose"]:
+            # Compose reads both files before anything else.
+            for flag, base in (("--env-file", None), ("-f", ROOT)):
+                path = Path(args[args.index(flag) + 1])
+                if not (base / path if base else path).is_file():
+                    raise shell.CommandFailed(args, 1, "couldn't find {}".format(path))
+            if "up" in args and self.up_fails is not None:
+                raise shell.CommandFailed(args, 1, self.up_fails(env))
+            return ""
+        if args[:3] == ["docker", "run", "-d"] or args[:2] == ["docker", "pull"]:
+            return ""
+        # A command a real host would answer in its own way: the fake must know it, never answer it blindly.
+        raise AssertionError("a command the scripted host doesn't know: {}".format(args))
 
     def http(self, method, url, *, body=None, headers=None, timeout=None):
         self.requests.append((method, url, body, dict(headers or {})))
@@ -327,7 +353,8 @@ class ExistingInstall(Case):
     def test_an_existing_install_is_refused_and_left_as_it_was(self):
         self.install_dir.mkdir(parents=True)
         env = self.install_dir / "compose.env"
-        env.write_text("TQA_HTTP_PORT=8081\nTQA_GATEWAY_IMAGE=ghcr.io/tensorquay/tqa-gateway@sha256:" + "b" * 64 + "\n")
+        env.write_text("TQA_HTTP_PORT=8081\nTQA_GATEWAY_IMAGE=ghcr.io/tensorquay/tensorquay-agent-gateway@sha256:"
+                       + "b" * 64 + "\n")
         before = env.read_bytes()
         code, out, system = self.run_installer(self.yes())
         self.assertEqual(code, 2)
@@ -382,8 +409,8 @@ class FilesAsTheGuideMakesThem(Case):
             "TQA_INSTALL_DIR": str(root), "TQA_PROVIDER_KEY_FILE": str(key),
             "TQA_MODEL_BASE_URL": "https://models.example/v1", "TQA_MODEL": "example-model",
             "TQA_MODEL_CONTEXT": "32768", "TQA_RUNTIME_IMAGE": "sha256:" + "a" * 64,
-            "TQA_GATEWAY_IMAGE": "ghcr.io/tensorquay/tqa-gateway@sha256:" + "b" * 64,
-            "TQA_WEB_IMAGE": "ghcr.io/tensorquay/tqa-web@sha256:" + "c" * 64, "TQA_HTTP_PORT": "8080",
+            "TQA_GATEWAY_IMAGE": "ghcr.io/tensorquay/tensorquay-agent-gateway@sha256:" + "b" * 64,
+            "TQA_WEB_IMAGE": "ghcr.io/tensorquay/tensorquay-agent-web@sha256:" + "c" * 64, "TQA_HTTP_PORT": "8080",
         }
 
     def by_block(self, block, root, key, more=()):
