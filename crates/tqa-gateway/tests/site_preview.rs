@@ -99,7 +99,18 @@ async fn gw_i_321_a_folder_is_served_as_a_site_by_its_pass(pool: PgPool) -> Test
                 .and_then(|v| v.to_str().ok()),
             Some("nosniff")
         );
-        assert_eq!(page.bytes().await?.as_ref(), PAGE);
+        // The page as it came, with the reporter first in its head (18.1, GW-U-222); its relative paths unchanged.
+        let served = page.text().await?;
+        let head = served.find("<head>").ok_or("head")? + "<head>".len();
+        assert!(
+            served[head..].starts_with("<script>(()=>{const B="),
+            "{served}"
+        );
+        let end = head + served[head..].find("</script>").ok_or("reporter")? + "</script>".len();
+        assert_eq!(
+            format!("{}{}", &served[..head], &served[end..]).as_bytes(),
+            PAGE
+        );
         // Its files, by their types; a route of the site answers the page.
         for (file, kind, starts) in [
             ("style.css", "text/css; charset=utf-8", "h1 {"),
@@ -225,6 +236,101 @@ async fn gw_i_321_a_folder_is_served_as_a_site_by_its_pass(pool: PgPool) -> Test
         )
         .await?;
         assert_eq!((status, refused.as_str()), (409, "site_passes_limit"));
+        Ok(())
+    })
+    .await
+}
+
+/// The workspace's own folder on the host, for writing a built app as a build writes it.
+fn workspace_root(
+    f: &Fixture,
+    conversation: &tqa_types::ConversationId,
+) -> Result<std::path::PathBuf> {
+    let (mount, _) = f.backend.mounts(conversation).ok_or("mounts")?;
+    let tqa_sandbox::WorkspaceSource::HostDirectory(root) = mount.source else {
+        return Err("a host-directory workspace".into());
+    };
+    Ok(root)
+}
+
+fn write(root: &std::path::Path, files: &[(&str, &str)]) -> Result<()> {
+    for (name, text) in files {
+        let path = root.join(name);
+        std::fs::create_dir_all(path.parent().ok_or("parent")?)?;
+        std::fs::write(path, text)?;
+    }
+    Ok(())
+}
+
+// TEST: GW-I-321
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_321_built_apps_preview_as_they_are(pool: PgPool) -> TestResult {
+    support::run(pool, async |f: &Fixture| {
+        let (user, cookie) = f.admin().await?;
+        let conversation = f.conversation(user.id).await?;
+        let task = conversation.id.to_string();
+        let _runtime = f.runtime(&conversation).await?;
+        let root = workspace_root(f, &conversation.id)?;
+        // A default Vite build: root paths in the page and in its stylesheet, and in a string of its script.
+        let script = "const logo = \"/assets/logo.png\"; import(\"./about-1.js\");";
+        write(
+            &root,
+            &[
+                (
+                    "vite/dist/index.html",
+                    "<!doctype html><html><head><script type=\"module\" crossorigin src=\"/assets/index-1.js\"></script>\
+<link rel=\"stylesheet\" href=\"/assets/index-1.css\"></head><body><div id=\"root\"></div></body></html>",
+                ),
+                ("vite/dist/assets/index-1.css", "body{background:url(/assets/bg.png)}"),
+                ("vite/dist/assets/index-1.js", script),
+                // A relative build: nothing to move.
+                (
+                    "relative/dist/index.html",
+                    "<!doctype html><html><head><script src=\"./assets/a.js\"></script></head><body></body></html>",
+                ),
+                ("relative/dist/assets/a.css", "body{background:url(./bg.png)}"),
+                // A two-page static export that links `/about` and writes `about.html`.
+                ("export/out/index.html", "<!doctype html><html><head></head><body><a href=\"/about\">About</a></body></html>"),
+                ("export/out/about.html", "<!doctype html><html><head></head><body><h1>About us</h1></body></html>"),
+            ],
+        )?;
+        let (status, minted) = mint(f, &cookie, &task, "vite/dist").await?;
+        assert_eq!(status, 201, "{minted}");
+        let url = minted["url"].as_str().ok_or("url")?.to_owned();
+        let page = fetch(f, &url).await?;
+        let policy = page
+            .headers()
+            .get("content-security-policy")
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or("")
+            .to_owned();
+        assert!(policy.contains(&format!("{}{url} 'unsafe-inline'", f.origin())), "the policy is unchanged: {policy}");
+        let length = page.content_length();
+        let html = page.text().await?;
+        assert_eq!(length, Some(html.len() as u64), "Content-Length is the rewritten length");
+        assert!(html.contains(&format!("src=\"{url}assets/index-1.js\"")), "{html}");
+        assert!(html.contains(&format!("href=\"{url}assets/index-1.css\"")), "{html}");
+        assert_eq!(html.matches("tqa-site-report").count(), 1, "{html}");
+        let css = fetch(f, &format!("{url}assets/index-1.css")).await?.text().await?;
+        assert_eq!(css, format!("body{{background:url({url}assets/bg.png)}}"));
+        // Scripts are never changed.
+        let js = fetch(f, &format!("{url}assets/index-1.js")).await?.text().await?;
+        assert_eq!(js, script);
+        // A relative build's files come back as they are (the page gains only its reporter).
+        let (_, minted) = mint(f, &cookie, &task, "relative/dist").await?;
+        let relative = minted["url"].as_str().ok_or("url")?.to_owned();
+        let html = fetch(f, &relative).await?.text().await?;
+        assert!(html.contains("<script src=\"./assets/a.js\">"), "{html}");
+        let css = fetch(f, &format!("{relative}assets/a.css")).await?.text().await?;
+        assert_eq!(css, "body{background:url(./bg.png)}");
+        // The export: its link moves under the pass, `/about` answers about.html, an unknown route the first page.
+        let (_, minted) = mint(f, &cookie, &task, "export/out").await?;
+        let export = minted["url"].as_str().ok_or("url")?.to_owned();
+        let html = fetch(f, &export).await?.text().await?;
+        assert!(html.contains(&format!("href=\"{export}about\"")), "{html}");
+        assert!(fetch(f, &format!("{export}about")).await?.text().await?.contains("About us"));
+        assert!(fetch(f, &format!("{export}no/such/route")).await?.text().await?.contains("href="));
         Ok(())
     })
     .await
