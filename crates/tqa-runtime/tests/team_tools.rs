@@ -71,8 +71,8 @@ async fn rt_i_042_each_role_gets_its_team_tools() -> TestResult {
                 "take_files",
             ],
         ),
-        // A lead whose team ended, its end note unread: the read that delivers it.
-        (Some("ended"), vec!["read_reports"]),
+        // A lead between rounds: its note to read, and the next round to open (ADR-0034's rounds amendment, A2).
+        (Some("ended"), vec!["read_reports", "start_member"]),
         (Some("none"), vec![]),
         // An older gateway, without the route.
         (None, vec![]),

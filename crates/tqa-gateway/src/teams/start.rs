@@ -14,6 +14,8 @@ pub(crate) struct Joining<'a> {
     pub(crate) member: Uuid,
     pub(crate) role: &'a str,
     pub(crate) workspace: WorkspaceMode,
+    /// The lead's run that calls: only a person's run may open a round (ADR-0034's rounds amendment, A1).
+    pub(crate) run: Option<&'a str>,
 }
 
 /// The team the member joined, and its name there.
@@ -58,11 +60,14 @@ pub(crate) async fn join(
     {
         return Err(GatewayError::Denied("not_lead"));
     }
-    let (team, channel, first) = open_team(connection, joining.lead, owner, teams).await?;
-    // A done helper keeps its seat until it is stopped: it may be given more work.
+    let (team, channel, first) =
+        open_team(connection, (joining.lead, joining.run), owner, teams).await?;
+    // A done helper keeps its seat until it is stopped: it may be given more work. Seats are per round: an earlier
+    // round's helpers hold none (ADR-0034's rounds amendment, A4).
     let live = sqlx::query_scalar!(
-        "SELECT count(*) AS \"live!\" FROM agent_team_members WHERE team_id = $1 \
-         AND state <> 'stopped' AND NOT (state = 'failed' AND NOT failed_run)",
+        "SELECT count(*) AS \"live!\" FROM agent_team_members m JOIN agent_teams t ON t.id = m.team_id \
+         WHERE m.team_id = $1 AND m.round = t.round \
+         AND m.state <> 'stopped' AND NOT (m.state = 'failed' AND NOT m.failed_run)",
         team
     )
     .fetch_one(&mut *connection)
@@ -87,8 +92,9 @@ pub(crate) async fn join(
         let taken: Vec<&str> = taken.iter().map(String::as_str).collect();
         let name = super::validate::unique_name(joining.role, &taken);
         let inserted = sqlx::query_scalar!(
-            "INSERT INTO agent_team_members (conversation_id, team_id, name, role, workspace) \
-             VALUES ($1, $2, $3, $4, $5) ON CONFLICT (team_id, lower(name)) DO NOTHING RETURNING name",
+            "INSERT INTO agent_team_members (conversation_id, team_id, name, role, workspace, round) \
+             SELECT $1, $2, $3, $4, $5, round FROM agent_teams WHERE id = $2 \
+             ON CONFLICT (team_id, lower(name)) DO NOTHING RETURNING name",
             joining.member,
             team,
             name,
@@ -131,6 +137,7 @@ pub(crate) async fn start_member(
     state: &crate::app::State,
     (leader, owner): (Uuid, Uuid),
     request: &tqa_types::StartMember,
+    run: &str,
 ) -> Result<Started, GatewayError> {
     let caller = super::store::caller(connection, leader).await?;
     super::roles::allowed(
@@ -164,6 +171,7 @@ pub(crate) async fn start_member(
         member: member.conversation,
         role: &request.role,
         workspace: request.workspace,
+        run: Some(run),
     };
     let joined = join(connection, &joining, cap, &teams).await?;
     retitle(connection, member.conversation, &joined.name).await?;
@@ -244,14 +252,15 @@ pub(crate) async fn profile_named(
 }
 
 /// The team's log channel and its row: the budget and the deadline from the limits in force.
-/// The lead's open team, or a new one: `(team, channel, first)`. A lead leads one team: once it has ended, its team
-/// tools answer `team_ended` (ADR-0034 point 10).
+/// The lead's open team, or a new one: `(team, channel, first)`. A team ended for one of a round's reasons opens its
+/// next round here, on a person's run only and once per run (ADR-0034's rounds amendment, A1); one ended for good
+/// answers `team_ended`.
 ///
 /// # Errors
-/// `409 team_stopped` while it stops, `409 team_ended`, storage failure.
+/// `409 team_stopped` while it stops, `409 team_ended`, `409 round_needs_person`, storage failure.
 async fn open_team(
     connection: &mut PgConnection,
-    lead: Uuid,
+    (lead, run): (Uuid, Option<&str>),
     owner: Uuid,
     teams: &AgentTeams,
 ) -> Result<(Uuid, Uuid, bool), GatewayError> {
@@ -261,18 +270,27 @@ async fn open_team(
     )
     .fetch_optional(&mut *connection)
     .await?;
-    Ok(match open {
-        Some(row) if row.state != "running" => return Err(GatewayError::Conflict("team_stopped")),
-        Some(row) => (row.id, row.channel_id, false),
-        // A task leads one team: once it has ended, its team tools answer team_ended (ADR-0034 point 10).
-        None if super::store::ended(connection, lead).await?.is_some() => {
+    if let Some(row) = open {
+        if row.state != "running" {
+            return Err(GatewayError::Conflict("team_stopped"));
+        }
+        return Ok((row.id, row.channel_id, false));
+    }
+    if let Some(ended) = super::store::ended(connection, lead).await? {
+        if super::store::ended_for_good(connection, ended.team).await? {
             return Err(GatewayError::TeamEnded(None));
         }
-        None => {
-            let (team, channel) = create(connection, lead, owner, teams).await?;
-            (team, channel, true)
+        let Some(run) = run else {
+            return Err(GatewayError::Conflict("round_needs_person"));
+        };
+        if !super::rounds_store::may_open(connection, (lead, ended.team), run).await? {
+            return Err(GatewayError::Conflict("round_needs_person"));
         }
-    })
+        super::rounds_store::open(connection, ended.team, run, teams).await?;
+        return Ok((ended.team, ended.channel, true));
+    }
+    let (team, channel) = create(connection, lead, owner, teams).await?;
+    Ok((team, channel, true))
 }
 
 async fn create(
@@ -298,6 +316,13 @@ async fn create(
         owner,
         i64::try_from(teams.token_budget).unwrap_or(i64::MAX),
         i32::try_from(teams.deadline_minutes).unwrap_or(i32::MAX)
+    )
+    .execute(&mut *connection)
+    .await?;
+    sqlx::query!(
+        "INSERT INTO agent_team_rounds (team_id, round, token_budget, deadline_at) \
+         SELECT id, 1, token_budget, deadline_at FROM agent_teams WHERE id = $1",
+        team
     )
     .execute(&mut *connection)
     .await?;

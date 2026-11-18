@@ -59,7 +59,7 @@ async fn start(f: &Fixture, t: &Team, key: &str, role: &str) -> Result<(u16, Val
         "role": role, "workspace": "own_copy",
         "brief": {"objective": "Check the totals.", "output": "A table.", "boundaries": "Read only."},
     }));
-    Ok(support::send_retrying(request).await?)
+    support::send_retrying(request).await
 }
 
 /// Ends the team's current round for `reason`, `ago` seconds back.
@@ -193,6 +193,37 @@ async fn gw_i_331_only_a_persons_follow_up_opens_a_round_once_per_run(pool: PgPo
         let answer = start(f, &t, "r-6:c-3", "checker").await?;
         assert!(refused(&answer), "{answer:?}");
         assert_eq!(row(f, t.id).await?.0, 2, "no third round");
+        Ok(())
+    })
+    .await
+}
+
+// TEST: GW-I-331
+// The two cases asked at review: a person's message queued while a team wake's run is still going (its run comes
+// after the wake's, so it may open a round), and a person's run that started while its round was still running and
+// saw it end mid-run (it may not).
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_331_a_queued_persons_message_opens_a_round_and_a_run_older_than_the_end_doesnt(
+    pool: PgPool,
+) -> TestResult {
+    support::run_configured(pool, None, ENABLED, async |f| {
+        let t = team(f).await?;
+        // A person's run that started while round 1 ran; round 1 ends in it.
+        turn(f, &t, 2, "r-5", true).await?;
+        tokio::time::sleep(std::time::Duration::from_millis(20)).await;
+        end_round(f, t.id, "budget", 0).await?;
+        let answer = start(f, &t, "r-5:c-1", "writer").await?;
+        assert!(
+            answer.0 == 409 && answer.1["error"]["code"] == "round_needs_person",
+            "{answer:?}"
+        );
+        // A team wake's run, and the person's message queued behind it: the person's own run opens round 2.
+        turn(f, &t, 4, "r-6", false).await?;
+        turn(f, &t, 6, "r-7", true).await?;
+        let (status, body) = start(f, &t, "r-7:c-1", "writer").await?;
+        assert_eq!(status, 201, "{body}");
+        assert_eq!(row(f, t.id).await?.0, 2);
         Ok(())
     })
     .await

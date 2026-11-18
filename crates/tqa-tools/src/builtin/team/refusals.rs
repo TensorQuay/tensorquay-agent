@@ -3,7 +3,7 @@
 use super::client::TeamClient;
 use super::done::AcceptanceShell;
 use super::tools::{TeamRole, tools_with_check};
-use crate::{Tool, ToolContext, ToolError, ToolOutput, ToolSpec};
+use crate::{PreparedAction, Tool, ToolContext, ToolError, ToolOutput, ToolSpec};
 use async_trait::async_trait;
 use serde_json::Value;
 use std::sync::Arc;
@@ -39,17 +39,100 @@ pub fn tools_for_answer(
 ) -> Vec<Arc<dyn Tool>> {
     match answer.role {
         TeamRole::None => refused_all(&client, sentence(answer.reason.as_deref()), &[]),
-        TeamRole::Ended => {
-            // Step 1: no round can open yet, so the tools a round brings back say one_team's sentence (A7).
-            let mut tools = tools_with_check(client.clone(), TeamRole::Ended, check);
-            tools.extend(refused_all(
-                &client,
-                sentence(Some("one_team")),
-                &["read_reports"],
-            ));
-            tools
-        }
+        TeamRole::Ended => between_rounds(&client, check),
         role => tools_with_check(client, role, check),
+    }
+}
+
+/// A lead between rounds (A2): `read_reports` and `start_member` offered; the other lead tools known and answering
+/// `between_rounds`' sentence until `start_member` opens the next round, then working as a lead's; the helper's two
+/// refused in the same words.
+fn between_rounds(
+    client: &Arc<dyn TeamClient>,
+    check: Option<AcceptanceShell>,
+) -> Vec<Arc<dyn Tool>> {
+    let sentence = sentence(Some("between_rounds"));
+    let mut tools: Vec<Arc<dyn Tool>> = tools_with_check(client.clone(), TeamRole::MayLead, check)
+        .into_iter()
+        .map(|tool| match tool.spec().name.as_str() {
+            "start_member" => tool,
+            "read_reports" => Arc::new(AlwaysOffered(tool)) as Arc<dyn Tool>,
+            _ => Arc::new(UntilRound {
+                inner: tool,
+                sentence,
+            }) as Arc<dyn Tool>,
+        })
+        .collect();
+    tools.extend(
+        tools_with_check(client.clone(), TeamRole::Member, None)
+            .into_iter()
+            .map(|tool| {
+                Arc::new(RefusedInWords {
+                    spec: tool.spec().clone(),
+                    sentence,
+                }) as Arc<dyn Tool>
+            }),
+    );
+    tools
+}
+
+/// A tool offered whatever the run's state: a lead between rounds reads its end note before any round opens.
+struct AlwaysOffered(Arc<dyn Tool>);
+
+#[async_trait]
+impl Tool for AlwaysOffered {
+    fn spec(&self) -> &ToolSpec {
+        self.0.spec()
+    }
+    fn null_means_absent(&self) -> bool {
+        self.0.null_means_absent()
+    }
+    async fn call(&self, args: Value, cx: &ToolContext) -> Result<ToolOutput, ToolError> {
+        self.0.call(args, cx).await
+    }
+    async fn call_prepared(
+        &self,
+        action: PreparedAction,
+        cx: &ToolContext,
+    ) -> Result<ToolOutput, ToolError> {
+        self.0.call_prepared(action, cx).await
+    }
+}
+
+/// A lead tool between rounds: answered in words until a round opens (the tool is offered again), then the tool.
+struct UntilRound {
+    inner: Arc<dyn Tool>,
+    sentence: &'static str,
+}
+
+#[async_trait]
+impl Tool for UntilRound {
+    fn spec(&self) -> &ToolSpec {
+        self.inner.spec()
+    }
+    fn null_means_absent(&self) -> bool {
+        self.inner.null_means_absent()
+    }
+    fn offered(&self) -> bool {
+        self.inner.offered()
+    }
+    async fn call(&self, args: Value, cx: &ToolContext) -> Result<ToolOutput, ToolError> {
+        if self.inner.offered() {
+            self.inner.call(args, cx).await
+        } else {
+            Err(ToolError::channel("teams_unavailable", self.sentence))
+        }
+    }
+    async fn call_prepared(
+        &self,
+        action: PreparedAction,
+        cx: &ToolContext,
+    ) -> Result<ToolOutput, ToolError> {
+        if self.inner.offered() {
+            self.inner.call_prepared(action, cx).await
+        } else {
+            Err(ToolError::channel("teams_unavailable", self.sentence))
+        }
     }
 }
 

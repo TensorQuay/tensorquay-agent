@@ -125,11 +125,13 @@ pub enum TeamMessageType {
     Done,
     /// The gateway's end note, to the lead: how and why the team ended (ADR-0034 point 10).
     Ended,
+    /// The gateway to the team: a round started (ADR-0034's rounds amendment, A5), for people; never read by a model.
+    RoundStarted,
 }
 
 impl TeamMessageType {
     /// Every type.
-    pub const ALL: [Self; 12] = [
+    pub const ALL: [Self; 13] = [
         Self::Assign,
         Self::Question,
         Self::Answer,
@@ -142,6 +144,7 @@ impl TeamMessageType {
         Self::Notice,
         Self::Done,
         Self::Ended,
+        Self::RoundStarted,
     ];
 
     /// The longest text a message of this type carries, in bytes.
@@ -155,7 +158,7 @@ impl TeamMessageType {
             | Self::PersonMessage
             | Self::Ended => 16 * 1024,
             Self::Question | Self::Ask | Self::Decision | Self::Done => 8 * 1024,
-            Self::PersonQuestion | Self::Notice => 4 * 1024,
+            Self::PersonQuestion | Self::Notice | Self::RoundStarted => 4 * 1024,
         }
     }
 
@@ -358,13 +361,27 @@ pub enum TeamMessageBody {
         /// The lead's `done` summary, when it ended that way.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         summary: Option<String>,
-        /// The tokens the team spent.
+        /// The tokens the team spent in this round.
         tokens: EndTokens,
+        /// The round this note ends (ADR-0034's rounds amendment, A1); absent on a note from before rounds.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        round: Option<u32>,
+        /// The tokens of every round so far, this one included (A4); absent on a note from before rounds.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        tokens_all_rounds: Option<i64>,
         /// Each member's reports, by message seq.
         reports: Vec<EndReport>,
         /// The files the members handed back with their reports.
         files: Vec<EndFile>,
         /// The note in the gateway's fixed sentences.
+        text: String,
+    },
+    /// The gateway to the team: its next round started (ADR-0034's rounds amendment, A5). People see it; a lead's
+    /// read never returns it.
+    RoundStarted {
+        /// The round that started.
+        round: u32,
+        /// The gateway's fixed sentence.
         text: String,
     },
 }
@@ -450,6 +467,7 @@ impl TeamMessageBody {
             Self::Notice { .. } => TeamMessageType::Notice,
             Self::Done { .. } => TeamMessageType::Done,
             Self::Ended { .. } => TeamMessageType::Ended,
+            Self::RoundStarted { .. } => TeamMessageType::RoundStarted,
         }
     }
 
@@ -468,7 +486,8 @@ impl TeamMessageBody {
             | Self::PersonMessage { text, .. }
             | Self::Notice { text, .. }
             | Self::Done { text }
-            | Self::Ended { text, .. } => text,
+            | Self::Ended { text, .. }
+            | Self::RoundStarted { text, .. } => text,
         }
     }
 }

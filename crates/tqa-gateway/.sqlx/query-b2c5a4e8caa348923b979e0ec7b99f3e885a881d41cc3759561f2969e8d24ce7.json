@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT t.round, t.spent_tokens + COALESCE((SELECT SUM(r.spent_tokens) FROM agent_team_rounds r WHERE r.team_id = t.id AND r.round < t.round), 0)::bigint AS \"all!\" FROM agent_teams t WHERE t.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "round",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "round"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "all!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "b2c5a4e8caa348923b979e0ec7b99f3e885a881d41cc3759561f2969e8d24ce7"
+}

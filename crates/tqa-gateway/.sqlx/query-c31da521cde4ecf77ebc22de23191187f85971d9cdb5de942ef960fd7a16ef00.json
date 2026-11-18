@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO agent_team_rounds (team_id, round, token_budget, deadline_at, opened_by_run) SELECT id, round, token_budget, deadline_at, $2 FROM agent_teams WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c31da521cde4ecf77ebc22de23191187f85971d9cdb5de942ef960fd7a16ef00"
+}

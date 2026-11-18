@@ -104,7 +104,8 @@ async fn gw_i_108_a_lead_whose_team_ended_never_leads_again(pool: PgPool) -> Tes
             .send()
             .await?;
         let role: Value = response.json().await?;
-        assert_eq!(role["role"], "none", "the next run gets no team tools");
+        // Between rounds (ADR-0034's rounds amendment, A2): its note, and a round only on a person's follow-up.
+        assert_eq!(role, json!({"role": "ended", "reason": "between_rounds"}));
         let response = f
             .client
             .post(f.url("/runtime/teams/members"))
@@ -116,12 +117,35 @@ async fn gw_i_108_a_lead_whose_team_ended_never_leads_again(pool: PgPool) -> Tes
             .await?;
         assert_eq!(response.status().as_u16(), 409);
         let refused: Value = response.json().await?;
-        assert_eq!(refused["error"]["code"], "team_ended");
+        // The run that was leading when the team ended opens no round (A1).
+        assert_eq!(refused["error"]["code"], "round_needs_person");
         let teams: i64 = sqlx::query_scalar("SELECT count(*) FROM agent_teams WHERE lead_conversation = $1")
             .bind(Uuid::parse_str(t.lead.0.as_str())?)
             .fetch_one(&f.pool)
             .await?;
         assert_eq!(teams, 1, "no second team");
+        let round: i32 = sqlx::query_scalar("SELECT round FROM agent_teams WHERE lead_conversation = $1")
+            .bind(Uuid::parse_str(t.lead.0.as_str())?)
+            .fetch_one(&f.pool)
+            .await?;
+        assert_eq!(round, 1, "no round opened");
+        // Ended for good (its person disabled): team_ended, whatever run asks.
+        sqlx::query("UPDATE agent_teams SET stop_reason = 'person_disabled' WHERE lead_conversation = $1")
+            .bind(Uuid::parse_str(t.lead.0.as_str())?)
+            .execute(&f.pool)
+            .await?;
+        let response = f
+            .client
+            .post(f.url("/runtime/teams/members"))
+            .bearer_auth(&t.lead.1)
+            .header("idempotency-key", "r-1:c-10")
+            .header("x-tqa-run-id", "r-1")
+            .json(&json!({"role": "r", "brief": {"objective": "o", "output": "p", "boundaries": "b"}}))
+            .send()
+            .await?;
+        assert_eq!(response.status().as_u16(), 409);
+        let refused: Value = response.json().await?;
+        assert_eq!(refused["error"]["code"], "team_ended");
         Ok(())
     })
     .await

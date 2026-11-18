@@ -627,6 +627,24 @@ pub(crate) async fn end_note(
     insert(connection, &message, body).await
 }
 
+/// Stores a message from the gateway for people (the `round_started` line, ADR-0034's rounds amendment A5), addressed
+/// to the person, so no lead's or helper's read returns it and no wake follows.
+///
+/// # Errors
+/// `429 channel_rate`, storage failure.
+pub(crate) async fn post_gateway(
+    connection: &mut PgConnection,
+    channel: Uuid,
+    body: &TeamMessageBody,
+) -> Result<u64, GatewayError> {
+    let message = Message {
+        channel,
+        author: None,
+        to: ("person", None),
+    };
+    insert(connection, &message, body).await
+}
+
 /// Stores the lead's brief as the team's next message, an `assign` to the new member (the S1 contract): the brief is
 /// in the log like everything else, and it is the member's first message to read.
 ///
@@ -958,6 +976,7 @@ pub(crate) const fn type_text(kind: TeamMessageType) -> &'static str {
         TeamMessageType::Notice => "notice",
         TeamMessageType::Done => "done",
         TeamMessageType::Ended => "ended",
+        TeamMessageType::RoundStarted => "round_started",
     }
 }
 

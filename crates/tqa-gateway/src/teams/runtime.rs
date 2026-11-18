@@ -395,7 +395,8 @@ pub(crate) async fn start(
             return Ok(((status, Json(body)), None));
         }
         let started =
-            super::start::start_member(&mut transaction, &state, (leader, owner), &request).await?;
+            super::start::start_member(&mut transaction, &state, (leader, owner), &request, &run)
+                .await?;
         let body = json!({ "member": started.member, "seq": started.seq, "lead_tools": true });
         keyed
             .record(&mut transaction, StatusCode::CREATED, &body)

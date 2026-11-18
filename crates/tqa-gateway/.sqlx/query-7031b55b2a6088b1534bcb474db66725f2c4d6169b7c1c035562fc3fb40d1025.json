@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO agent_team_members (conversation_id, team_id, name, role, workspace) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (team_id, lower(name)) DO NOTHING RETURNING name",
+  "query": "INSERT INTO agent_team_members (conversation_id, team_id, name, role, workspace, round) SELECT $1, $2, $3, $4, $5, round FROM agent_teams WHERE id = $2 ON CONFLICT (team_id, lower(name)) DO NOTHING RETURNING name",
   "describe": {
     "columns": [
       {
@@ -28,5 +28,5 @@
       false
     ]
   },
-  "hash": "dbe2938b3a1d50e64ba29f347b9fc3e973c3024535bc3438fbb9f7fd2bb9d912"
+  "hash": "7031b55b2a6088b1534bcb474db66725f2c4d6169b7c1c035562fc3fb40d1025"
 }

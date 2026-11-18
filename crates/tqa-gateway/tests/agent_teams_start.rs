@@ -496,10 +496,10 @@ async fn gw_i_329_the_role_says_why_a_run_may_not_lead(pool: PgPool) -> TestResu
                 .bind(lead.id)
                 .execute(&f.pool)
                 .await?;
-            // Step 1: rounds can't open yet, so a lead whose note is read still leads one team.
+            // Its note read, the lead is still between rounds: it may open the next on a person's follow-up.
             assert_eq!(
                 role(f, &lead.token).await?,
-                (200, json!({"role": "none", "reason": "one_team"}))
+                (200, json!({"role": "ended", "reason": "between_rounds"}))
             );
             // Its person disabled: ended for good, whether the note is read or not.
             sqlx::query("UPDATE agent_teams SET stop_reason = 'person_disabled'")
@@ -593,7 +593,7 @@ async fn gw_i_202_a_runs_role_tells_which_team_tools_it_gets(pool: PgPool) -> Te
             // One team per lead: the ended team's lead gets no team tools...
             assert_eq!(
                 role(f, &lead.token).await?,
-                (200, json!({"role": "none", "reason": "one_team"}))
+                (200, json!({"role": "ended", "reason": "between_rounds"}))
             );
             // ...except, while its end note is unread, read_reports alone, which delivers it (a team that ended
             // between its runs is still told once).
@@ -618,7 +618,7 @@ async fn gw_i_202_a_runs_role_tells_which_team_tools_it_gets(pool: PgPool) -> Te
                 .await?;
             assert_eq!(
                 role(f, &lead.token).await?,
-                (200, json!({"role": "none", "reason": "one_team"})),
+                (200, json!({"role": "ended", "reason": "between_rounds"})),
                 "once read, nothing"
             );
             // Without a runtime token, nothing.

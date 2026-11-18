@@ -76,7 +76,7 @@ fn gw_u_222_none_says_why() {
 
 // TEST: GW-U-222
 #[test]
-fn gw_u_222_a_team_ended_for_a_rounds_reason_is_between_rounds_then_one_team_until_rounds_exist() {
+fn gw_u_222_a_team_ended_for_a_rounds_reason_is_between_rounds() {
     assert_eq!(
         answer(Facts {
             ended: Some(Ended {
@@ -87,7 +87,7 @@ fn gw_u_222_a_team_ended_for_a_rounds_reason_is_between_rounds_then_one_team_unt
         }),
         says("ended", Some("between_rounds"))
     );
-    // Step 1 (A7): once the note is read, a task still leads one team; step 2 makes this `ended` with start_member.
+    // Once its note is read, still between rounds (step 2 removed step 1's one_team).
     for wakeable in [true, false] {
         assert_eq!(
             answer(Facts {
@@ -98,7 +98,7 @@ fn gw_u_222_a_team_ended_for_a_rounds_reason_is_between_rounds_then_one_team_unt
                 wakeable,
                 ..IN_NO_TEAM
             }),
-            says("none", Some("one_team"))
+            says("ended", Some("between_rounds"))
         );
     }
 }

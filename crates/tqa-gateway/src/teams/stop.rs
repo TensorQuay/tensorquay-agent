@@ -81,33 +81,7 @@ pub(crate) async fn finish(state: &State, team: Uuid) -> Result<bool, GatewayErr
     })
     .await?;
     // `None` when another pass ended it first (its note is the one that stays); else the note's seq, if it was stored.
-    let ended = step(state, async {
-        let mut transaction = state.pool.begin().await?;
-        end_members(&mut transaction, team).await?;
-        let seq = match super::store::end_note(&mut transaction, row.channel_id, &body).await {
-            Ok(seq) => Some(seq),
-            // A stop always finishes: a log over its day's messages ends without the note rather than stay stopping.
-            Err(GatewayError::ChannelRate(_)) => {
-                tracing::warn!(team = %team, "the agent team's end note wasn't stored: its log is over its day's messages");
-                None
-            }
-            Err(error) => return Err(error),
-        };
-        let changed = sqlx::query!(
-            "UPDATE agent_teams SET state = 'ended', ended_at = CURRENT_TIMESTAMP WHERE id = $1 AND state = 'stopping'",
-            team
-        )
-        .execute(&mut *transaction)
-        .await?
-        .rows_affected();
-        if changed != 1 {
-            transaction.rollback().await?;
-            return Ok(None);
-        }
-        transaction.commit().await?;
-        Ok(Some(seq))
-    })
-    .await?;
+    let ended = store_end(state, team, row.channel_id, &body).await?;
     let Some(seq) = ended else {
         return Ok(false);
     };
@@ -337,6 +311,49 @@ fn reason(stored: Option<&str>) -> EndReason {
     }
 }
 
+/// Stores the end note, sets `ended` and closes the round's record (ADR-0034's rounds amendment, A1), in one
+/// transaction: `None` when another pass ended the team first, else the note's seq if it was stored.
+async fn store_end(
+    state: &State,
+    team: Uuid,
+    channel: Uuid,
+    body: &TeamMessageBody,
+) -> Result<Option<Option<u64>>, GatewayError> {
+    step(state, async {
+        let mut transaction = state.pool.begin().await?;
+        end_members(&mut transaction, team).await?;
+        let seq = match super::store::end_note(&mut transaction, channel, body).await {
+            Ok(seq) => Some(seq),
+            // A stop always finishes: a log over its day's messages ends without the note rather than stay stopping.
+            Err(GatewayError::ChannelRate(_)) => {
+                tracing::warn!(team = %team, "the agent team's end note wasn't stored: its log is over its day's messages");
+                None
+            }
+            Err(error) => return Err(error),
+        };
+        let changed = sqlx::query!(
+            "UPDATE agent_teams SET state = 'ended', ended_at = CURRENT_TIMESTAMP WHERE id = $1 AND state = 'stopping'",
+            team
+        )
+        .execute(&mut *transaction)
+        .await?
+        .rows_affected();
+        if changed != 1 {
+            transaction.rollback().await?;
+            return Ok(None);
+        }
+        super::rounds_store::close(
+            &mut transaction,
+            team,
+            seq.and_then(|seq| i64::try_from(seq).ok()),
+        )
+        .await?;
+        transaction.commit().await?;
+        Ok(Some(seq))
+    })
+    .await
+}
+
 /// The end note's parts, read from the team's log and the relay's usage, and its sentences.
 async fn note(
     connection: &mut PgConnection,
@@ -346,6 +363,7 @@ async fn note(
     idle_minutes: u32,
 ) -> Result<TeamMessageBody, GatewayError> {
     let tokens = tokens(connection, team).await?;
+    let (round, tokens_all_rounds) = super::rounds_store::totals(connection, team).await?;
     let (reports, files) = reports(connection, channel).await?;
     let summary = if reason == EndReason::Done {
         sqlx::query_scalar!(
@@ -369,6 +387,8 @@ async fn note(
         reason,
         summary,
         tokens,
+        round: Some(round),
+        tokens_all_rounds: Some(tokens_all_rounds),
         reports,
         files,
         text,

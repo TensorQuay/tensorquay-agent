@@ -889,21 +889,23 @@ async fn tool_u_147_between_rounds_read_reports_works_and_the_rest_say_why() -> 
         &RoleAnswer::parse("ended", Some("between_rounds")),
         None,
     );
-    assert_eq!(offered(&tools), ["read_reports"]);
+    // The note to read, and the next round to open (A2).
+    assert_eq!(offered(&tools), ["read_reports", "start_member"]);
     let mut names: Vec<String> = tools
         .iter()
         .map(|tool| tool.spec().name.as_str().to_owned())
         .collect();
     names.sort();
     assert_eq!(names, team_names());
+    let between = "Your team's round has ended. Read its end note with read_reports, or start the next round with \
+                   start_member; the other team tools come back once a round runs.";
     for tool in &tools {
         let name = tool.spec().name.as_str();
         let result = tool.call(json!({}), &cx).await;
-        if name == "read_reports" {
-            assert_eq!(refused(result), None, "read_reports reads");
+        if name == "read_reports" || name == "start_member" {
+            assert_eq!(refused(result), None, "{name} works");
         } else {
-            // Step 1: no round can open yet, so the other eleven say one_team's sentence (A7).
-            assert_eq!(refused(result).as_deref(), Some(SENTENCES[4].1), "{name}");
+            assert_eq!(refused(result).as_deref(), Some(between), "{name}");
         }
     }
     Ok(())

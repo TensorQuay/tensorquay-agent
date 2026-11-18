@@ -24,6 +24,7 @@ mod read_shape;
 pub(crate) mod reconciler;
 mod role;
 mod roles;
+pub(crate) mod rounds_store;
 // The rounds state table (ADR-0034's rounds amendment): tested now, wired into start_member by step 2.
 #[cfg(test)]
 mod rounds;

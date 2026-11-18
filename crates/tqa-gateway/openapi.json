@@ -16908,7 +16908,7 @@
                         "none",
                         "ended"
                       ],
-                      "description": "member or lead in a running agent team; may_lead when the task may start one; ended for a lead between rounds (read_reports, and start_member once rounds open); none otherwise. With ended and none, reason says why (ADR-0034's rounds amendment, A2)."
+                      "description": "member or lead in a running agent team; may_lead when the task may start one; ended for a lead between rounds (read_reports, and start_member, which opens the next round on a person's follow-up); none otherwise. With ended and none, reason says why (ADR-0034's rounds amendment, A2)."
                     },
                     "reason": {
                       "type": "string",
@@ -16917,10 +16917,9 @@
                         "was_member",
                         "runtime_too_old",
                         "team_ended",
-                        "one_team",
                         "between_rounds"
                       ],
-                      "description": "Why the run may not lead, on ended (between_rounds) and none: the runtime answers a team tool's call with this reason's sentence (A6). one_team holds until rounds can open (A7)."
+                      "description": "Why the run may not lead, on ended (between_rounds) and none: the runtime answers a team tool's call with this reason's sentence (ADR-0034's rounds amendment, A6)."
                     }
                   }
                 }
