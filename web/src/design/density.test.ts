@@ -220,7 +220,6 @@ describe("WEB-U-451 one type scale, one step up", () => {
     ["display-size", "30px"],
     ["heading-size", "22px"],
     ["heading-line-height", "30px"],
-    ["task-title-size", "18px"],
     ["body-size", "16px"],
     ["body-leading", "1.5"],
     ["small-size", "14px"],

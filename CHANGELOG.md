@@ -25,6 +25,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **The text tool-call route reads `tool` or `function` for the tool's name and `parameters` for its arguments
   (PROMPT-U-024),** as the native route does; a call block without a name says which keys it had (`no_name`'s new
   optional `keys`, PROTO-U-044; never a value).
+- **The task's header is one quiet line (WEB-U-495, WEB-E2E-135).** The title is in regular type at body size, and
+  the workspace it is in (and the profile it came from) follows it in grey on the same line, giving way first when
+  room is short. A finished task no longer says "Done" there: the end of the transcript and the sidebar say it, and a
+  screen reader still hears it. Every other state (Working…, Waiting for you, Failed, Stopped) stays on the line.
 - **A file opens beside the chat (WEB-U-494, WEB-E2E-134).** Expand on a file in the Files panel no longer opens a
   dialog over the conversation: the file takes about 60 % of the page beside the chat, which stays readable and usable,
   and a divider between them can be dragged or moved with the arrow keys; each person's choice is remembered in their
