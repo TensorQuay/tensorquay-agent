@@ -744,6 +744,29 @@ details.route-group[open] > summary::before {
 details.route-group > summary::-webkit-details-marker {
   display: none;
 }
+/* A quiet disclosure (the 17.2 review's finding 11, decided on 18 Nov 2026): the route form's Advanced and Reasoning
+   read as toggles beside the bold section labels, a ghost button's look: body size in regular weight, its own padding
+   and radius, the hover tint, and the focus ring. Its chevron is the group's. */
+details.route-group > summary.disclosure-quiet {
+  align-self: flex-start;
+  padding-inline: var(--space-2);
+  margin-inline-start: calc(-1 * var(--space-2));
+  border-radius: var(--control-radius);
+  font-size: var(--body-size);
+  line-height: var(--body-leading);
+  font-weight: 400;
+}
+details.route-group > summary.disclosure-quiet:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--paper),
+    var(--ink) var(--hover-share)
+  );
+}
+details.route-group > summary.disclosure-quiet:focus-visible {
+  outline: var(--focus-width) solid var(--focus);
+  outline-offset: var(--focus-offset);
+}
 .fallback-list {
   margin: 0;
   padding: 0;
