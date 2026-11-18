@@ -50,11 +50,13 @@ export function Popover({
       const gap =
         parseFloat(getComputedStyle(panel).getPropertyValue("--space-2")) || 0;
       const start = placement !== "below-end";
-      // Inside the window; and opened in a panel marked as its bounds (the Files panel), inside that panel's content:
-      // never wider, moved along into it, so it never covers the page beside the panel (WEB-U-432).
+      // Inside the window; and opened in a panel marked as its bounds (the Files panel) or in a dialog, inside its
+      // content: never wider, moved along into it, so it never covers the page beside it (WEB-U-432, WEB-U-483).
       let low = gap;
       let high = innerWidth - gap;
-      const limit = anchor.current?.closest("[data-menu-bounds]");
+      // The nearest dialog or marked panel bounds it: a dialog opened from the panel (Expand) sits in the panel's markup
+      // but not in its box, so its own content does (WEB-U-483).
+      const limit = anchor.current?.closest("dialog, [data-menu-bounds]");
       if (limit) {
         const box = limit.getBoundingClientRect();
         const style = getComputedStyle(limit);
@@ -64,10 +66,19 @@ export function Popover({
           box.right - (parseFloat(style.paddingRight) || 0),
         );
         // As wide as the room from its trigger's start (or to its end) to the panel's far edge, so it stays under it.
+        // A room narrower than the menu's least width (a ⋯ near the panel's start, its menu aligned to the ⋯'s end):
+        // the panel's whole content instead, moved along into it, still under its trigger (WEB-U-483).
         const room = start
           ? high - Math.max(low, button.left)
           : Math.min(high, button.right) - low;
-        panel.style.maxWidth = `${Math.max(room, 0)}px`;
+        const least = Math.max(
+          0,
+          ...Array.from(
+            panel.children,
+            (child) => parseFloat(getComputedStyle(child).minWidth) || 0,
+          ),
+        );
+        panel.style.maxWidth = `${Math.max(room < least ? high - low : room, 0)}px`;
       }
       const width = panel.offsetWidth;
       const left = start ? button.left : button.right - width;

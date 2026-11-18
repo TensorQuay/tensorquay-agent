@@ -144,6 +144,8 @@
     "tool.read": "읽음 {path}",
     "tool.readLine": " {first}행",
     "tool.readLines": " {first}–{last}행",
+    "tool.readPage": " {first}쪽",
+    "tool.readPages": " {first}–{last}쪽",
     "tool.count": " · {count, plural, other {{unit, select, file {파일} other {일치}} #개}}",
     "tool.partial": " (일부)",
     "tool.used": "{name} 사용함",

@@ -144,6 +144,8 @@
     "tool.read": "Lu {path}",
     "tool.readLine": " ligne {first}",
     "tool.readLines": " lignes {first}–{last}",
+    "tool.readPage": " page {first}",
+    "tool.readPages": " pages {first}–{last}",
     "tool.count": " · {count, plural, one {# {unit, select, file {fichier} other {résultat}}} other {# {unit, select, file {fichiers} other {résultats}}}}",
     "tool.partial": " (partiel)",
     "tool.used": "Utilisé {name}",

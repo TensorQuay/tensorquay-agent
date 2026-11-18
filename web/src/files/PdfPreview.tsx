@@ -19,6 +19,8 @@ type Drawn =
 
 /** The widest a page is drawn, in CSS pixels. */
 const MAX_PAGE_WIDTH = 960;
+/** How long a new width must hold before the pages are drawn again at it (a drag ends). */
+const SETTLE_MS = 300;
 
 const FAILURES: Record<PdfFailure, MessageKey> = {
   damaged: "files.pdfDamaged",
@@ -66,19 +68,43 @@ export function PdfPreview({
     label.current = (page) => t("files.pdfPage", { page: String(page) });
   }, [t]);
   const [drawn, setDrawn] = useState<Drawn>({ state: "drawing" });
+  // The width the pages were drawn at; a new one, once it has settled (the split's divider dragged, the panel opened
+  // wide), draws them again from the bytes already here (WEB-U-494).
+  const [width, setWidth] = useState(0);
+  const drawnAt = useRef(0);
+  useEffect(() => {
+    const into = pages.current;
+    if (!into || typeof ResizeObserver === "undefined") return;
+    let settle: ReturnType<typeof setTimeout> | undefined;
+    const observer = new ResizeObserver(() => {
+      clearTimeout(settle);
+      settle = setTimeout(() => {
+        const now = Math.min(into.clientWidth || 320, MAX_PAGE_WIDTH);
+        if (drawnAt.current && Math.abs(now - drawnAt.current) >= 1)
+          setWidth(now);
+      }, SETTLE_MS);
+    });
+    observer.observe(into);
+    return () => {
+      clearTimeout(settle);
+      observer.disconnect();
+    };
+  }, []);
   const data = bytes.data;
   useEffect(() => {
     const into = pages.current;
     if (!data || !into) return;
     const stop = new AbortController();
     into.replaceChildren();
+    // A page is drawn at the view's width, up to a readable one when opened wide.
+    const at = Math.min(into.clientWidth || 320, MAX_PAGE_WIDTH);
+    drawnAt.current = at;
     void import("./pdf-render").then(async ({ renderPdf }) => {
       try {
         const done = await renderPdf(
           data,
           into,
-          // A page is drawn at the view's width, up to a readable one when opened wide.
-          Math.min(into.clientWidth || 320, MAX_PAGE_WIDTH),
+          at,
           (page) => label.current(page),
           stop.signal,
         );
@@ -92,7 +118,7 @@ export function PdfPreview({
       stop.abort();
       into.replaceChildren();
     };
-  }, [data]);
+  }, [data, width]);
   if (!small)
     return (
       <p className="type-small muted files-state">

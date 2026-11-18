@@ -75,10 +75,10 @@ Coding agents are plentiful. Verified 22 Sep 2026, the gaps for our target are:
 
 | Existing option | What it is | Gap for a team box |
 |---|---|---|
-| Terminal coding agents (Codex CLI, Claude Code, OpenCode, aider) | Excellent single-user CLIs on the developer's machine | Single user, no shared server, no sandbox per conversation, UIs tied to the vendor or to a local terminal; some are not Apache-2.0 |
-| OpenHands (MIT) | Web UI + per-conversation Docker sandbox, Python | Closest prior art. Python runtime, heavy image, Docker only (no microVM), multi-user is enterprise-only, tuned for frontier cloud models |
-| Hosted agent platforms (Codex Cloud, Devin, Cursor cloud agents) | Cloud sandboxes with web UIs | Not installable on-premise; data leaves the network |
-| Self-hosted chat UIs (Open WebUI, LibreChat) | Chat over local models | Chat, not an agent with an isolated workspace and tools |
+| Terminal coding agents | Excellent single-user CLIs on the developer's machine | Single user, no shared server, no sandbox per conversation, UIs tied to the vendor or to a local terminal; some are not Apache-2.0 |
+| Open-source web agents with a sandbox per conversation | Web UI + per-conversation Docker sandbox, Python | Closest prior art (§11). Python runtime, heavy image, Docker only (no microVM), multi-user is enterprise-only, tuned for frontier cloud models |
+| Hosted agent platforms | Cloud sandboxes with web UIs | Not installable on-premise; data leaves the network |
+| Self-hosted chat UIs | Chat over local models | Chat, not an agent with an isolated workspace and tools |
 
 **What TensorQuay Agent does instead:** a Rust harness and gateway, one image that runs as a Docker container or a
 Firecracker microVM, multi-user from day one, local-model-first prompting and budgets, and a first-class path to

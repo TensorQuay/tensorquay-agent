@@ -2,6 +2,8 @@
 
 import { useLayoutEffect, useRef, useState } from "react";
 
+import { readerScrolled } from "../ui/OverlayScrollbar";
+
 const bottomThresholdPixels = 24;
 
 /** Whether nothing is left below the view, within the threshold. */
@@ -42,9 +44,14 @@ export function useFollow(sequence: number) {
       setPausedAt(latest.current);
     } else bottom();
   }
-  function bottom() {
+  /**
+   * Puts the view at the bottom. The reader's Jump to latest (`reader`) is their own scrolling, so it tells the
+   * transcript's overlay bar, which shows for it; the page's own following shows nothing (WEB-U-485).
+   */
+  function bottom(reader = false) {
     const element = ref.current;
     if (!element) return;
+    if (reader) readerScrolled(element);
     element.scrollTop = Math.max(
       0,
       element.scrollHeight - element.clientHeight,
@@ -75,10 +82,11 @@ export function useFollow(sequence: number) {
     if (contentRef.current) observer.observe(contentRef.current);
     return () => observer.disconnect();
   }, []);
-  function resume() {
+  /** Follows again from the bottom: the reader's Jump to latest (`"reader"`), or the page's own, as a send is. */
+  function resume(by: "reader" | "page" = "page") {
     following.current = true;
     setPausedAt(null);
-    bottom();
+    bottom(by === "reader");
   }
   function onScroll() {
     const element = ref.current;

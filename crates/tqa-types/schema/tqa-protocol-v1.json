@@ -2499,8 +2499,16 @@
       "description": "What was wrong with a text-protocol reply. An unknown `kind` from a newer runtime reads as [`Self::Other`].",
       "oneOf": [
         {
-          "description": "The call block is a JSON object without a `name` key.",
+          "description": "The call block is a JSON object without a key naming its tool (`name`, `function` or `tool`).",
           "properties": {
+            "keys": {
+              "description": "The keys the object had, identifier-like ones of at most [`MAX_MODEL_NAME_BYTES`], never a value, so a\nreader can tell arguments written at the top level from the tool named under another key (18.1 item F);\nat most [`MAX_PROBLEM_NAMES`]. Absent from an older runtime's.",
+              "items": {
+                "$ref": "#/definitions/ProblemName"
+              },
+              "maxItems": 8,
+              "type": "array"
+            },
             "kind": {
               "const": "no_name",
               "type": "string"

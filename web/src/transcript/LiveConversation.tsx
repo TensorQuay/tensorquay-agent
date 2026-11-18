@@ -41,6 +41,7 @@ import {
 import { ScreenToggle } from "../screen/ScreenToggle";
 import { useKeepSignIn } from "../screen/use-keep-sign-in";
 import { ErrorMessage } from "../ui/ErrorMessage";
+import { OverlayScrollbar } from "../ui/OverlayScrollbar";
 import { PanelBoundary } from "../ui/PanelBoundary";
 import { Skeleton } from "../ui/Skeleton";
 
@@ -413,7 +414,7 @@ export function LiveConversation({
             setScrolled((scrollRef.current?.scrollTop ?? 0) > 0);
           }}
         >
-          <div ref={contentRef}>
+          <div ref={contentRef} className="transcript-column">
             {beginning && (
               <p className="conversation-empty muted">
                 {team.outputs.stoppedLine ??
@@ -474,11 +475,13 @@ export function LiveConversation({
             </PanelBoundary>
           </div>
         </div>
+        {/* No scrollbar at rest, and none of its width: a thin one over the edge while it scrolls (WEB-U-485). */}
+        <OverlayScrollbar target={scrollRef} />
         {paused && (
           <FollowControl
             unseen={unseen}
             onResume={() => {
-              resume();
+              resume("reader");
               // The button goes once the view is at the end: the transcript, now showing the latest, keeps the focus
               // instead of the page (WEB-U-274).
               scrollRef.current?.focus({ preventScroll: true });
@@ -534,6 +537,7 @@ export function LiveConversation({
       {panel.open && (
         <PanelBoundary>
           <LazyFilesPanel
+            docks={docks}
             conversationId={conversation.id}
             target={panel.target}
             running={transcript.run.status === "running"}

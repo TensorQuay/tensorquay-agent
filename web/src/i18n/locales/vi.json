@@ -144,6 +144,8 @@
     "tool.read": "Đã đọc {path}",
     "tool.readLine": " dòng {first}",
     "tool.readLines": " dòng {first}–{last}",
+    "tool.readPage": " trang {first}",
+    "tool.readPages": " trang {first}–{last}",
     "tool.count": " · {count, plural, other {# {unit, select, file {tệp} other {kết quả khớp}}}}",
     "tool.partial": " (một phần)",
     "tool.used": "Đã dùng {name}",

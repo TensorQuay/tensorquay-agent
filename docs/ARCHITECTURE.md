@@ -592,6 +592,14 @@ pub trait ModelProvider: Send + Sync {
   message with fixed fields (goal, done, pending, decisions, key paths, open errors) rather than free prose. The
   last N turns and every tool result they reference are kept. **Pinned** items are never compacted: the task
   statement, the instruction files and the run notes (§7.1). The summary prompt is fixed and versioned.
+- **In-task recall** (18.1; the Product Owner, 18 Nov 2026: a question about something long ago must be answerable
+  with a tool): each compaction first appends the turns it replaces, as readable text, to the task's
+  `/workspace/.tqa/<conversation_id>/history.md` beside its notes and spill files, once per `through_seq` and
+  atomically (each person's message and answer whole, each tool call with its arguments, each result up to 8 KiB with
+  the size of the rest). The journaled summary then names that file in `key_paths`, and its projection adds one fixed
+  sentence: search it (grep, then read_file) before answering about anything earlier, never guess. No new tool, no
+  protocol change. A task that never compacts writes nothing and sends what it did before; a history that can't be
+  written leaves the compaction as it was (CTX-U-023, CORE-E-043, E2E-RECALL-001).
 - **Dedupe**: a tool result whose content hash equals an earlier result (the same file read twice) replaces the
   earlier copy with a one-line stub pointing at the latest. Small-window local models gain the most from this.
 - Tool result cap: `max_bytes` per result (default 64 KiB, overridable per route), and never more than half of the input
@@ -604,7 +612,7 @@ pub trait ModelProvider: Send + Sync {
 | Tier | What | v1.0 |
 |---|---|---|
 | Working memory | The context window above | yes |
-| Run memory | The journal, plus a **notes file** `/workspace/.tqa/<conversation_id>/notes.md` the agent writes with `write_notes` and reads with `read_notes`; it is pinned and re-injected after every compaction, so what the agent chose to remember survives | yes |
+| Run memory | The journal, plus a **notes file** `/workspace/.tqa/<conversation_id>/notes.md` the agent writes with `write_notes` and reads with `read_notes`; it is pinned and re-injected after every compaction, so what the agent chose to remember survives; and the task's **history file** `/workspace/.tqa/<conversation_id>/history.md`, the text of every summarised turn, which the summary names for the agent to search (§7, in-task recall) | yes |
 | Long-term memory | Cross-conversation and cross-workspace memory | v1.1: explicit, inspectable files per workspace and per user, retrieved through a `memory_search` tool, never injected automatically; no vector database in the core |
 
 ## 8. Tools (`tqa-tools`)

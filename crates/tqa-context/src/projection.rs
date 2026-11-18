@@ -240,7 +240,7 @@ fn detailed(problem: &FallbackProblem) -> Option<String> {
 fn described(problem: &FallbackProblem, shown: usize) -> Option<(String, String)> {
     use FallbackProblem as P;
     Some(match problem {
-        P::NoName => (
+        P::NoName { .. } => (
             "the tqa_call block has no \"name\" key".into(),
             ONE_OBJECT.into(),
         ),

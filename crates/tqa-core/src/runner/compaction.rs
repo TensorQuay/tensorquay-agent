@@ -103,10 +103,18 @@ impl Execution<'_> {
         capacity: u32,
         attempt: u32,
     ) -> Result<(), Stop> {
-        let (source, summary) = match self.summarise(plan, capacity, attempt).await? {
+        let (source, mut summary) = match self.summarise(plan, capacity, attempt).await? {
             Some(summary) => (CompactionSource::Model, summary),
             None => (CompactionSource::Fallback, plan.fallback.clone()),
         };
+        // The replaced turns go to the task's history file first, so the summary can name it and the model can search
+        // it later (CORE-E-043). A write that fails names nothing: the compaction is then as before.
+        if self.write_history(plan).await? {
+            name_history(
+                &mut summary.key_paths,
+                tqa_context::history_path(&self.runner.conversation_id),
+            );
+        }
         self.emit(Event::Compaction {
             through_seq: plan.through_seq,
             source,
@@ -115,6 +123,33 @@ impl Execution<'_> {
         })
         .await?;
         Ok(())
+    }
+
+    /// Appends `plan`'s replaced turns to the task's history file beside the spill folder; whether it was written.
+    async fn write_history(&mut self, plan: &CompactionPlan) -> Result<bool, Stop> {
+        let Some(directory) = self
+            .runner
+            .spill_dir
+            .parent()
+            .map(std::path::Path::to_path_buf)
+        else {
+            return Ok(false);
+        };
+        let (through, text) = (plan.through_seq, plan.replaced_text());
+        let written = self
+            .watch()
+            .wait(tokio::task::spawn_blocking(move || {
+                tqa_context::append_history(&directory, through, &text)
+            }))
+            .await?;
+        match written {
+            Ok(Ok(())) => Ok(true),
+            Ok(Err(error)) => {
+                tracing::warn!(%error, "compaction: the history file could not be written");
+                Ok(false)
+            }
+            Err(_) => Ok(false),
+        }
     }
 
     /// Returns the model's summary, `None` when it is unusable, or the run's interruption.
@@ -288,4 +323,16 @@ fn parse_summary(text: &str) -> Result<CompactionSummary, &'static str> {
     let summary: CompactionSummary = serde_json::from_str(body.trim()).map_err(|_| "parse")?;
     summary.validate().map_err(|_| "bounds")?;
     Ok(summary)
+}
+
+/// Names the task's history file among a summary's key paths, once; a full list gives up its last path for it, since
+/// the history holds the text every other path came from (CORE-E-043).
+fn name_history(key_paths: &mut Vec<String>, path: String) {
+    if key_paths.contains(&path) {
+        return;
+    }
+    if key_paths.len() >= tqa_types::MAX_COMPACTION_ITEMS {
+        key_paths.pop();
+    }
+    key_paths.push(path);
 }

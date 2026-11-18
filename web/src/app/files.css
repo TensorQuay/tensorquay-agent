@@ -42,6 +42,78 @@
     box-shadow: var(--elevation);
   }
 }
+/* The split view (18.1, WEB-U-494): a preview opened wide takes its share of the task layout beside the chat, the
+   panel's left edge its divider; full width takes the whole main area from its edge, no line, the chat hidden. Only
+   where the panel docks: below it the narrow panel above always applies. */
+@container conversation-layout (min-width: 900px) {
+  .conversation-layout:has(> .files-panel[data-split]) {
+    gap: 0;
+  }
+  .files-panel[data-split="split"] {
+    position: relative;
+    flex: 0 0 calc(var(--split-share) * 100%);
+    width: calc(var(--split-share) * 100%);
+  }
+  .files-panel[data-split="full"] {
+    flex: 1 1 auto;
+    width: auto;
+    padding-left: 0;
+    border-left: 0;
+  }
+  .conversation-layout:has(> .files-panel[data-split="full"])
+    > .conversation-page {
+    display: none;
+  }
+}
+/* The divider: an 8 px grab area over the panel's 1 px edge, taking no width; a short grip shows where to hold. */
+.files-divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--space-1) * -1);
+  z-index: 2;
+  width: var(--space-2);
+  cursor: col-resize;
+  touch-action: none;
+}
+.files-divider::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--space-1);
+  height: var(--space-8);
+  border-radius: var(--radius-pill);
+  background: var(--line);
+  transform: translate(-50%, -50%);
+}
+.files-divider:hover::after,
+.files-divider:focus-visible::after {
+  background: var(--muted);
+}
+/* The split's header: the file's name, which gives way first, its size, Download, Full width and Close. */
+.split-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--bar-height);
+}
+.split-name {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: var(--nav-font-size);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.split-heading > .type-small {
+  white-space: nowrap;
+}
+/* A PDF's pages, drawn up to their readable width, sit in the middle of the split, as they did in the dialog. */
+.files-panel[data-split] .file-pdf {
+  align-items: center;
+}
 .files-heading {
   display: flex;
   align-items: center;
@@ -207,13 +279,15 @@ button.file-open:hover {
   background: var(--page-canvas);
   color-scheme: light;
 }
-/* A PDF's pages, drawn by pdf.js, one under another at the panel's width. */
+/* A PDF's pages, drawn by pdf.js, one under another at the panel's width. Its scrollbar's room is kept from the start,
+   so the width the pages are drawn at, measured before they arrive, is still theirs once they scroll (WEB-E2E-128). */
 .file-pdf {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
   max-height: 70vh;
   overflow: auto;
+  scrollbar-gutter: stable;
 }
 .preview-dialog .file-pdf {
   max-height: calc(100dvh - 220px);

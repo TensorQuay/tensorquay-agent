@@ -144,6 +144,8 @@
     "tool.read": "Dibaca {path}",
     "tool.readLine": " baris {first}",
     "tool.readLines": " baris {first}–{last}",
+    "tool.readPage": " halaman {first}",
+    "tool.readPages": " halaman {first}–{last}",
     "tool.count": " · {count, plural, other {# {unit, select, file {fail} other {padanan}}}}",
     "tool.partial": " (separa)",
     "tool.used": "Menggunakan {name}",

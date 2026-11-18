@@ -15,6 +15,82 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   audited. The page shows nothing of a task but its owner and environment. Settings › Status now says whether a sweep
   left anything behind (a container, a network, or a volume in volume mode) and why, and the page's Left behind section
   gives each one's remove command. One database migration.
+- **A long task can look back past its summary (CTX-U-023, CORE-E-043, E2E-RECALL-001).** When a long task is
+  summarised to fit the model's window, the summarised turns are now kept as text in the task's
+  `.tqa/<id>/history.md`, and the summary tells the model to search it before answering about anything earlier. Ask
+  about a detail from an hour ago and the agent looks it up with its usual file tools, instead of guessing. A task
+  that is never summarised is unchanged.
+
+### Changed
+
+- **`edit_file` says what it found, so a model can fix its next call by itself (18.1; TOOL-U-004, CORE-E-041).** An
+  `old_text` that matches more than once lists the matching lines with their text (past ten, how many more, counted to a
+  thousand); one that matches nowhere names the nearest lines with their numbers and text, never a looser match; the
+  same refused call sent a second time also returns the file's lines around them, and a third still stops the run. An
+  edit whose `old_text` and `new_text` are the same is answered "no change" and leaves the file as it was; among real
+  edits it is skipped and said.
+- **`write_file`'s `create_parents` is optional (TOOL-U-003),** read as false when absent.
+- **The text tool-call route reads `tool` or `function` for the tool's name and `parameters` for its arguments
+  (PROMPT-U-024),** as the native route does; a call block without a name says which keys it had (`no_name`'s new
+  optional `keys`, PROTO-U-044; never a value).
+- **A file opens beside the chat (WEB-U-494, WEB-E2E-134).** Expand on a file in the Files panel no longer opens a
+  dialog over the conversation: the file takes about 60 % of the page beside the chat, which stays readable and usable,
+  and a divider between them can be dragged or moved with the arrow keys; each person's choice is remembered in their
+  browser. Full width gives the file the whole page (Show chat brings the chat back), and Escape steps back. Every
+  kind of file that previews can be opened this way now, and a web page's preview is never loaded twice. On a phone the
+  panel takes the screen as before, with a back arrow.
+- **The transcript shows no scrollbar until you scroll (WEB-U-485, WEB-E2E-132).** A long task's transcript had the
+  browser's scrollbar beside it all the time, taking its width. Now a thin bar shows over the transcript's edge while
+  you scroll it, by wheel, touch, keys or Jump to latest, or while the pointer is at that edge, and fades about a
+  second after; it never shows while the page follows a running task's new output. It can be dragged, and it takes
+  no width, so nothing moves when it shows. The whole main area scrolls the transcript now, its text still the
+  centred column: a wheel or trackpad over the side margins scrolls it, and the bar sits at the area's right edge (the
+  Files panel's edge when it is open). Keys, focus and screen readers use the transcript as before. With forced
+  colours the system's scrollbar stays.
+
+### Fixed
+
+- **A tool call whose number or true/false arrives as text still runs (TOOL-U-146).** One model server sends an
+  optional number, such as the shell's time limit, as `"30000"` instead of `30000`. The tools refused it, and a model
+  that couldn't see why sent it again until the run stopped. The agent's own tools now take an exact number, `true`,
+  `false` or `null` written as text where the setting takes no text. Anything else is still refused, and the refusal
+  now says what was sent (`expected null or integer, got a string`). Tools from a connected server get their
+  arguments exactly as the model wrote them, as before. The shell had lost its own argument rules inside the
+  runtime's process-cleanup wrapper, so a blank or `null` optional value reached it too; it now has them.
+
+## 18.0.1 (18 November 2026)
+
+A fix release: a PDF read's step names its pages, the Screen panel's ⋯ menu fits its items and stays inside its
+dialog, the expanded screen picture keeps its frame on a phone, and a PDF's page pictures fit the Files panel. The web
+app moves to Next.js 16.4.5. No migration, protocol or configuration change: upgrade in place with 18.0.1's images.
+
+### Fixed
+
+- **A PDF read's step names the pages it read, not lines (WEB-U-482).** After reading pages 1 and 2 of a PDF, the
+  step said "Read uploads/report.pdf lines 1–2"; it now says "pages 1–2", in every language. The result's own page
+  marks decide it, so a PDF saved without its extension reads as pages too.
+- **The Screen panel's ⋯ menu is wide enough for its items at desktop widths (WEB-U-483, WEB-E2E-128).** At 1280 and
+  1440 px the menu opened no wider than the room to its ⋯'s end and cut its words ("Keep the sign-i…"); where that
+  room is narrower than the menu, it now takes the panel's width. A phone's panel places it as before. A menu in a
+  dialog opened from the panel (the Screen's or a spreadsheet's Expand) now opens under its button: the panel's bounds
+  held it to the panel's strip of the page, where the Screen's ⋯ menu had no width at all.
+- **A menu's notes wrap at a readable width, and a menu stays inside its dialog (WEB-U-490, WEB-U-483,
+  WEB-E2E-130).** The Screen panel's ⋯ menu, opened from its Expand dialog, set each note on one line, 658 px across the
+  window, and on a phone ran past the dialog's edges. A menu item's note and its reason now wrap at 24ch (as the menu
+  already read on a phone), and a menu opened in a dialog stays inside it, beside its ⋯.
+- **The expanded screen's picture keeps its frame at a phone's width (WEB-E2E-131).** Under Take over, the picture in
+  the Screen's Expand dialog took the dialog's whole width at 390 px, and its frame, drawn just outside it, was cut on
+  both sides; the dialog now leaves the frame its room.
+- **A PDF's page pictures fit the Files panel (WEB-U-484, WEB-E2E-128).** They ran about 10 px past the panel's right
+  edge: each page was drawn at the panel's width with its border on top, and the column's scrollbar, which arrives
+  with the pages, took more. The border is now inside that width, and the scrollbar's room is kept from the start.
+
+### Security
+
+- **The web app is on Next.js 16.4.5** (it was 16.4.1), past two moderate advisories in which a `'use cache'`
+  function's entry could serve one root param's content for another: GHSA-mfr8-8qww-v76h (through `unstable_cache()`)
+  and GHSA-vc7v-qv4w-wrv8 (nested `'use cache'` functions). The app uses neither `'use cache'` nor root params, so it
+  was not affected. Builds no longer stop to recommend an upgrade (`experimental.agentUpgrade` is off, WEB-U-491).
 
 ## 18.0.0 (17 November 2026)
 

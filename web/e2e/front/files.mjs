@@ -32,6 +32,7 @@ function seed() {
   put("reports/brief.pdf", BRIEF_PDF);
   put("reports/chinese.pdf", CHINESE_PDF);
   put("reports/symbol.pdf", SYMBOL_PDF);
+  put("reports/long.pdf", LONG_PDF);
   put("reports/broken.pdf", "%PDF-1.7\nthis is not a PDF body\n%%EOF\n");
   // Its bytes are only a stand-in: the fake front answers the sheet itself (SALES below); the gateway parses real files.
   put("reports/sales.xlsx", Uint8Array.from([0x50, 0x4b, 0x03, 0x04, 0, 0]));
@@ -116,6 +117,27 @@ function pdf() {
   ]);
 }
 const BRIEF_PDF = pdf();
+
+/** Three letter-size pages, taller than the Files panel's column, so it scrolls (WEB-E2E-128). */
+function longPdf() {
+  const page = (number) =>
+    `BT /F1 24 Tf 72 700 Td (Page ${number} of the long brief) Tj ET`;
+  const contents = [1, 2, 3].map(page);
+  return pdfOf([
+    "<< /Type /Catalog /Pages 2 0 R >>",
+    "<< /Type /Pages /Kids [3 0 R 4 0 R 5 0 R] /Count 3 >>",
+    ...[0, 1, 2].map(
+      (index) =>
+        `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents ${index + 6} 0 R /Resources << /Font << /F1 9 0 R >> >> >>`,
+    ),
+    ...contents.map(
+      (content) =>
+        `<< /Length ${content.length} >>\nstream\n${content}\nendstream`,
+    ),
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+  ]);
+}
+const LONG_PDF = longPdf();
 
 /**
  * A one-page PDF in Chinese, its font not embedded: STSong-Light with the UniGB-UCS2-H CMap (Adobe-GB1), which pdf.js

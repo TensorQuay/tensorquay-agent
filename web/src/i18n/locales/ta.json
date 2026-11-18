@@ -144,6 +144,8 @@
     "tool.read": "படிக்கப்பட்டது {path}",
     "tool.readLine": " வரி {first}",
     "tool.readLines": " வரிகள் {first}–{last}",
+    "tool.readPage": " பக்கம் {first}",
+    "tool.readPages": " பக்கங்கள் {first}–{last}",
     "tool.count": " · {count, plural, one {# {unit, select, file {கோப்பு} other {பொருத்தம்}}} other {# {unit, select, file {கோப்புகள்} other {பொருத்தங்கள்}}}}",
     "tool.partial": " (பகுதி)",
     "tool.used": "{name} பயன்படுத்தப்பட்டது",

@@ -54,13 +54,14 @@ fn tool_u_070_each_schema_problem_is_named() -> TestResult {
             },
         ),
         (
+            // create_parents is optional (18.1 item F, proposal C); content isn't.
             "write_file",
-            json!({"path": "a/b.py", "content": "x = 1\n"}),
+            json!({"path": "a/b.py", "create_parents": true}),
             FallbackProblem::MissingProperty {
                 tool: name("write_file")?,
                 at: None,
-                property: name("create_parents")?,
-                expected: vec![JsonType::Boolean],
+                property: name("content")?,
+                expected: vec![JsonType::String],
             },
         ),
         (
@@ -70,7 +71,7 @@ fn tool_u_070_each_schema_problem_is_named() -> TestResult {
                 tool: name("write_file")?,
                 at: None,
                 property: name("create_parents")?,
-                expected: vec![JsonType::Boolean],
+                expected: vec![JsonType::Boolean, JsonType::Null],
             },
         ),
     ];

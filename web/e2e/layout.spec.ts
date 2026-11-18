@@ -79,9 +79,10 @@ for (const width of [1024, 1440])
           "first transcript line within 64 px",
         ).toBeLessThanOrEqual(64);
         // The UI standard: one conversation width, 720 px, whether the sidebar is expanded or a rail: the reading
-        // column, the transcript and the composer (the header above it spans the main area, WEB-E2E-117).
+        // column, the transcript's text and the composer (the header above it spans the main area, WEB-E2E-117; the
+        // transcript scrolls from the whole main area since 18.1, WEB-E2E-132, its text the centred column).
         for (const part of [
-          ".transcript-scroll",
+          ".transcript-column",
           ".conversation-page > .composer",
         ])
           expect((await box(page, part)).width, part).toBeLessThanOrEqual(720);
