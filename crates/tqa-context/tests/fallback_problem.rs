@@ -64,6 +64,11 @@ const CASES: &[(&str, &str, &str)] = &[
     ),
     (
         "malformed",
+        r#"{"kind":"no_name","keys":["content","path"]}"#,
+        "[The last reply could not be read as a tool call: the tqa_call block has no \"name\" key. Each block holds one object with exactly two keys: \"name\", the tool, and \"arguments\". Reply again with each call in its own tqa_call block.]",
+    ),
+    (
+        "malformed",
         r#"{"kind":"no_arguments"}"#,
         "[The last reply could not be read as a tool call: the tqa_call block has no \"arguments\" key. Each block holds one object with exactly two keys: \"name\", the tool, and \"arguments\". Reply again with each call in its own tqa_call block.]",
     ),
