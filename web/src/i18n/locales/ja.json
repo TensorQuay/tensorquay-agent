@@ -150,6 +150,8 @@
     "tool.read": "読み取り {path}",
     "tool.readLine": " {first} 行目",
     "tool.readLines": " {first}–{last} 行目",
+    "tool.readPage": " {first} ページ目",
+    "tool.readPages": " {first}–{last} ページ目",
     "tool.count": " · {count, plural, other {# {unit, select, file {個のファイル} other {件の一致}}}}",
     "tool.partial": " (一部)",
     "tool.used": "{name} を使用",

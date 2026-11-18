@@ -13,7 +13,7 @@ out. A hosted model; local models work the same way. Sped up.*
 From a release, not `main`. Linux, or a Mac with Docker Desktop; Docker Engine 27.4 and Compose 2.31 or newer.
 
 ```sh
-git clone --branch v18.0.0 https://github.com/TensorQuay/tensorquay-agent.git && cd tensorquay-agent
+git clone --branch v18.0.1 https://github.com/TensorQuay/tensorquay-agent.git && cd tensorquay-agent
 deploy/pull-images.sh   # pulls the release's prebuilt images (amd64 and arm64) and prints the lines the install needs
 ```
 
