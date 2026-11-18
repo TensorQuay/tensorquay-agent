@@ -31,14 +31,29 @@ import { reasonWords } from "./sandbox-reason";
 /** How often an open Sandboxes page reads the listing again: the sampler's own period. */
 export const SANDBOXES_REFRESH_MS = 10_000;
 
+const MIB = 2 ** 20;
 const GIB = 2 ** 30;
 
 /** Cores from millicores, to a tenth. */
 const cores = (millicores: number, locale: string) =>
   formatNumber(Math.round(millicores / 100) / 10, locale);
-/** Gigabytes (binary) from bytes, to a tenth. */
-const gigabytes = (bytes: number, locale: string) =>
-  formatNumber(Math.round((bytes / GIB) * 10) / 10, locale);
+/** Cores from millicores, to a tenth, as a number for a message's plural. */
+const coreCount = (millicores: number) => Math.round(millicores / 100) / 10;
+/**
+ * Memory with its own unit, so a small use never rounds to nothing (the real-stack run read "0 of 0.5 GB" for 8.7 MB):
+ * under a gibibyte in megabytes (a tenth below 100), else in gigabytes to a tenth; both binary.
+ */
+function memory(bytes: number, t: Translate) {
+  if (bytes < GIB) {
+    const megabytes = bytes / MIB;
+    const n =
+      megabytes < 100 ? Math.round(megabytes * 10) / 10 : Math.round(megabytes);
+    return t("sandboxes.megabytes", { n: formatNumber(n, t.locale) });
+  }
+  return t("sandboxes.gigabytes", {
+    n: formatNumber(Math.round((bytes / GIB) * 10) / 10, t.locale),
+  });
+}
 
 const STATE_LABEL: Readonly<Record<SandboxRow["state"], MessageKey>> = {
   starting: "sandboxes.stateStarting",
@@ -291,13 +306,13 @@ function Summary({ data, t }: { data: SandboxListing; t: Translate }) {
         {used
           ? t("sandboxes.inUse", {
               cores: cores(used.cpu_millicores, t.locale),
-              reservedCores: cores(totals.reserved.cpu_millicores, t.locale),
-              memory: gigabytes(used.memory_bytes, t.locale),
-              reservedMemory: gigabytes(totals.reserved.memory_bytes, t.locale),
+              reservedCores: coreCount(totals.reserved.cpu_millicores),
+              memory: memory(used.memory_bytes, t),
+              reservedMemory: memory(totals.reserved.memory_bytes, t),
             })
           : t("sandboxes.reserved", {
-              cores: cores(totals.reserved.cpu_millicores, t.locale),
-              memory: gigabytes(totals.reserved.memory_bytes, t.locale),
+              cores: coreCount(totals.reserved.cpu_millicores),
+              memory: memory(totals.reserved.memory_bytes, t),
             })}
       </p>
       <p className="type-small muted">
@@ -416,16 +431,18 @@ function Measure({
   measured: boolean;
 }) {
   const t = useT();
-  const format = unit === "cores" ? cores : gigabytes;
-  const key: MessageKey =
-    unit === "cores" ? "sandboxes.ofCores" : "sandboxes.ofGb";
   if (usage !== null && size !== null)
     return (
       <span>
-        {t(key, {
-          used: format(usage, t.locale),
-          size: format(size, t.locale),
-        })}
+        {unit === "cores"
+          ? t("sandboxes.ofCores", {
+              used: cores(usage, t.locale),
+              size: coreCount(size),
+            })
+          : t("sandboxes.ofMemory", {
+              used: memory(usage, t),
+              size: memory(size, t),
+            })}
       </span>
     );
   return (
@@ -435,9 +452,9 @@ function Measure({
       </span>
       {size !== null && (
         <span className="cell-note">
-          {t(unit === "cores" ? "sandboxes.sizeCores" : "sandboxes.sizeGb", {
-            size: format(size, t.locale),
-          })}
+          {unit === "cores"
+            ? t("sandboxes.sizeCores", { size: coreCount(size) })
+            : t("sandboxes.sizeMemory", { size: memory(size, t) })}
         </span>
       )}
     </span>

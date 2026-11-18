@@ -31,7 +31,7 @@ for (const [width, name] of [
       const working = table.getByRole("row", { name: /Working/ });
       await expect(working).toContainText("ben@example.org");
       await expect(working).toContainText("1.4 of 2 cores");
-      await expect(working).toContainText("3.1 of 4 GB");
+      await expect(working).toContainText("3.1 GB of 4 GB");
       await expect(table.getByRole("row", { name: /Kept on/ })).toContainText(
         "You",
       );

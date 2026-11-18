@@ -160,12 +160,52 @@ afterEach(() => {
 });
 
 describe("WEB-U-486 the Sandboxes page's states", () => {
+  // The real-stack run's numbers (18 Nov 2026): a small use never rounds to nothing, and one core is one core.
+  it("says a small use in megabytes, and one core as one core", async () => {
+    const MIB = 2 ** 20;
+    const small = row({
+      conversation_id: "0195d8c0-0000-7000-8000-00000000c00a",
+      size: { cpu_millicores: 1000, memory_bytes: 512 * MIB, pids: 512 },
+      usage: { cpu_millicores: 0, memory_bytes: 8.7 * MIB, pids: 3 },
+    });
+    show(
+      fake([
+        listing({
+          items: [small],
+          totals: {
+            ...listing().totals,
+            in_use: 1,
+            working: 0,
+            starting: 0,
+            idle: 1,
+            desktops: 0,
+            reserved: { cpu_millicores: 3000, memory_bytes: 1.5 * GIB },
+            usage: {
+              cpu_millicores: 0,
+              memory_bytes: 15.2 * MIB,
+              measured_at: "2026-11-17T01:26:05Z",
+            },
+          },
+        }),
+      ]),
+    );
+    expect(
+      await screen.findByText(
+        "In use: 0 of 3 cores · 15.2 MB of 1.5 GB set aside",
+      ),
+    ).toBeVisible();
+    const table = screen.getByRole("table", { name: "Running sandboxes" });
+    expect(table).toHaveTextContent("0 of 1 core");
+    expect(table).not.toHaveTextContent("1 cores");
+    expect(table).toHaveTextContent("8.7 MB of 512 MB");
+  });
+
   it("shows the headline, the lines under it, and every row in order with its resources", async () => {
     show(fake([listing()]));
     expect(await screen.findByText("4 of 6 running")).toBeVisible();
     expect(screen.getByText("Desktops: 1 of 2")).toBeVisible();
     expect(
-      screen.getByText("In use: 1.8 of 8 cores · 3.9 of 16 GB set aside"),
+      screen.getByText("In use: 1.8 of 8 cores · 3.9 GB of 16 GB set aside"),
     ).toBeVisible();
     expect(
       screen.getByText("Sandboxes run as Docker containers."),
@@ -179,7 +219,7 @@ describe("WEB-U-486 the Sandboxes page's states", () => {
     expect(rows[1]).toHaveTextContent("ben@example.org");
     expect(rows[1]).toHaveTextContent("Working");
     expect(rows[1]).toHaveTextContent("1.4 of 2 cores");
-    expect(rows[1]).toHaveTextContent("3.1 of 4 GB");
+    expect(rows[1]).toHaveTextContent("3.1 GB of 4 GB");
     expect(rows[2]).toHaveTextContent("Starting");
     // Measured elsewhere but not here: not available, with the size muted under it.
     expect(rows[2]).toHaveTextContent("Not available");
