@@ -38,6 +38,7 @@ import { FilePath } from "./FilePath";
 import { PanelTabs, type PanelTab } from "./PanelTabs";
 import {
   clampShare,
+  DEFAULT_SHARE,
   keyedShare,
   rememberShare,
   rememberedShare,
@@ -441,9 +442,7 @@ function Divider({
         event.preventDefault();
         onShare(next);
       }}
-      onDoubleClick={() =>
-        onShare(keyedShare("Enter", false, share, width) ?? share)
-      }
+      onDoubleClick={() => onShare(DEFAULT_SHARE)}
       onPointerDown={(event) => {
         if (event.button !== 0) return;
         event.preventDefault();
