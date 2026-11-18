@@ -77,12 +77,14 @@ class FakeSystem:
     """Answers the installer's commands and HTTP calls; records each."""
 
     def __init__(self, *, rootless=False, probe=None, bootstrap=201, up_fails=None, ready_after=1,
-                 busy_ports=(), detail=None, group_fails=False):
+                 busy_ports=(), detail=None, group_fails=False, workstation=None):
         self.commands = []
         self.environments = []
         self.requests = []
         self.rootless = rootless
         self.group_fails = group_fails
+        # The ID of a tqa-runtime:workstation already on the host (another build's), or None.
+        self.workstation = workstation
         self.probe = probe
         self.bootstrap = bootstrap
         self.up_fails = up_fails
@@ -124,6 +126,10 @@ class FakeSystem:
             if "up" in args and self.up_fails is not None:
                 raise shell.CommandFailed(args, 1, self.up_fails(env))
             return ""
+        if args == ["docker", "image", "inspect", "--format", "{{.Id}}", "tqa-runtime:workstation"]:
+            if self.workstation is None:
+                raise shell.CommandFailed(args, 1, "Error response from daemon: No such image: tqa-runtime:workstation")
+            return self.workstation + "\n"
         if args[:3] == ["docker", "run", "-d"] or args[:2] == ["docker", "pull"]:
             return ""
         # A command a real host would answer in its own way: the fake must know it, never answer it blindly.
@@ -501,6 +507,29 @@ class FilesAsTheGuideMakesThem(Case):
             self.assertEqual(env.get("PATH"), os.environ.get("PATH"), args)
         pull = system.environments[[args[0].endswith("pull-images.sh") for args in system.commands].index(True)]
         self.assertEqual(pull["TQA_IMAGE_REGISTRY"], "mirror.example/tensorquay")
+
+    def test_another_builds_workstation_on_the_host_is_named(self):
+        # The gateway takes a tqa-runtime:workstation already on the host as this installation's Workstation (the
+        # guide's "Which image an environment runs"): without --workstation the installer says which image that is.
+        other = "sha256:" + "d246e473fd79" + "0" * 52
+        code, out, system = self.run_installer(self.yes(), system=FakeSystem(workstation=other))
+        self.assertEqual(code, 0, out.text)
+        self.assertIn("This computer already has a Workstation image from another build (sha256:d246e473fd79)",
+                      out.text)
+        self.assertIn("Settings › Environments", out.text)
+        self.assertLess(out.text.index("another build"), out.text.index("Starting…"))
+
+    def test_no_line_without_another_workstation(self):
+        code, out, _ = self.run_installer(self.yes(), system=FakeSystem())
+        self.assertEqual(code, 0, out.text)
+        self.assertNotIn("another build", out.text)
+
+    def test_no_line_when_the_pull_brings_this_releases_workstation(self):
+        # With --workstation the pull tags this release's own image, so there's nothing to say.
+        code, out, _ = self.run_installer(self.yes("--workstation"), system=FakeSystem(
+            workstation="sha256:" + "e" * 64))
+        self.assertEqual(code, 0, out.text)
+        self.assertNotIn("another build", out.text)
 
     def test_a_failed_detection_names_the_step_and_writes_nothing(self):
         code, out, system = self.run_installer(self.yes(), system=FakeSystem(rootless=True, group_fails=True))

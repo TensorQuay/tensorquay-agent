@@ -449,7 +449,23 @@ class Installer:
                                                   FAKE_IMAGE, "."], 3600)
         self.write_files(images, detected)
         self.io.say("Created {}.".format(self.install_dir))
+        self.name_other_workstation()
         return self.start(images)
+
+    def name_other_workstation(self):
+        """The gateway takes a tqa-runtime:workstation already on the host as this installation's Workstation (the
+        guide's "Which image an environment runs"). Without --workstation, that image is another build's: say which, and
+        where to check it. Read after the pull, so --workstation (or --desktop) has already moved the tag."""
+        if self.args.workstation or self.args.desktop:
+            return
+        try:
+            found = self.system.run(["docker", "image", "inspect", "--format", "{{.Id}}", "tqa-runtime:workstation"],
+                                    env=commands_environment(), capture=True, timeout=60).strip()
+        except subprocess.CalledProcessError:
+            return
+        self.io.say("This computer already has a Workstation image from another build ({}); this installation will "
+                    "offer it as its Workstation environment. Before the first task, check it in Settings › "
+                    "Environments (the install guide's \"Which image an environment runs\").".format(found[:19]))
 
     def start(self, images):
         if not images["TQA_RUNTIME_IMAGE"].startswith("sha256:"):
