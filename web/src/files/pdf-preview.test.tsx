@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { FileContent } from "../protocol/generated/api";
 import { conversationId } from "../test/frames";
+import { Splittable } from "../test/split";
 import { LIMITS } from "../test/user";
 
 import { FilePreview } from "./FilePreview";
@@ -58,7 +59,9 @@ function show(path: string) {
     limits: LIMITS,
   });
   const wrapper = ({ children }: { children: ReactNode }) => (
-    <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    <QueryClientProvider client={client}>
+      <Splittable>{children}</Splittable>
+    </QueryClientProvider>
   );
   return render(
     <FilePreview
@@ -160,19 +163,39 @@ describe("WEB-U-091 a PDF in the Files panel", () => {
     expect(screen.getByRole("link", { name: "Download" })).toBeTruthy();
   });
 
-  it("opens wide on Expand, drawn again at the dialog's width", async () => {
+  // WEB-U-091, WEB-U-494: Expand opens the PDF as a split, the panel made wider: once the width settles the pages are
+  // drawn again at it, from the one download; a resize that leaves the width as it was draws nothing again.
+  it("is drawn again at the split's width once it settles, from one download", async () => {
     files["brief.pdf"] = content("brief.pdf", 900);
     draws(1, 1);
+    let width = 320;
+    vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockImplementation(
+      () => width,
+    );
+    const observed: (() => void)[] = [];
+    vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        constructor(callback: () => void) {
+          observed.push(callback);
+        }
+        observe() {}
+        disconnect() {}
+      },
+    );
     show("brief.pdf");
     await screen.findByRole("group", { name: "Page 1" });
+    expect(renderPdf).toHaveBeenCalledTimes(1);
+    expect(renderPdf.mock.calls[0]?.[2]).toBe(320);
+    for (const changed of observed) changed();
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    expect(renderPdf).toHaveBeenCalledTimes(1);
     fireEvent.click(screen.getByRole("button", { name: "Expand" }));
-    const dialog = await screen.findByRole("dialog", { name: "brief.pdf" });
-    expect(
-      await within(dialog).findByRole("group", { name: "Page 1" }),
-    ).toBeTruthy();
+    width = 612;
+    for (const changed of observed) changed();
+    await vi.waitFor(() => expect(renderPdf).toHaveBeenCalledTimes(2));
+    expect(renderPdf.mock.calls[1]?.[2]).toBe(612);
     expect(screen.getAllByRole("group", { name: "Page 1" })).toHaveLength(1);
-    // Drawn twice (the panel, then the dialog) from one download.
-    expect(renderPdf).toHaveBeenCalledTimes(2);
     expect(downloads()).toBe(1);
   });
 

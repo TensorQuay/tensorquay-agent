@@ -28,6 +28,15 @@ title (renamed in place), the status, the task's model and environment as two sm
 ⋯ menu, on one line. Where it is narrow (a phone, or beside the files panel) the pickers show as their icons, never a
 cut name; the title and the status give way first, never the controls.
 
+**The files panel's split view** (18.1). Where the panel docks, Expand on a file's preview opens it as a split beside
+the chat, never a dialog: the same panel made wider, so a page's scripts run once. The file takes 60 % of the task's
+layout by default, the chat at least 360 px and the file at least 400; the divider, the panel's left edge, is dragged
+or moved by keys (arrows 2 %, Shift 10 %, Home and End to the limits, Enter back to 60 %), and its share is remembered
+per person in the browser. The split's header names the file and offers its size, Download, Full width (the file across
+the main area from its edge, the chat hidden; Show chat brings it back) and Close; Escape steps back once, from the
+file's side only. Below the breakpoint (900 px of the layout) there is no split: the panel takes the column, and a back
+arrow is its one way back.
+
 **The composer.** One rounded input at the foot of the conversation. Inside it, bottom row: "+" on the left (attach;
 on New task also Workspace… and Agent profile…, which add chips above the text); Send (Stop while working) on the
 right. The choices that matter (the model, "Local model ▾"; the environment, "Workstation ▾") are small text buttons in

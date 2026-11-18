@@ -536,6 +536,7 @@ export function LiveConversation({
       {panel.open && (
         <PanelBoundary>
           <LazyFilesPanel
+            docks={docks}
             conversationId={conversation.id}
             target={panel.target}
             running={transcript.run.status === "running"}
