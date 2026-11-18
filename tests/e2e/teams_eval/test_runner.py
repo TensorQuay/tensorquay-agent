@@ -203,6 +203,29 @@ class Following(unittest.TestCase):
         self.assertEqual(followed.runs, 2, "the lead woken by a report runs again")
         self.assertEqual(runner.answer(api.log), "Final report.")
 
+    def test_a_rounds_task_sends_its_follow_up_once_after_the_first_end(self):
+        """E2E-AGENTS-041 (ADR-0034's rounds amendment): a task with a follow-up is the person's second ask. Once the
+        first ask has ended (the lead's run, and its team), the follow-up goes once, and the attempt follows the run it
+        starts to the team's next end."""
+        first = run_frames(1, run="r1")
+        second = run_frames(len(first) + 1, run="r2", text="Round two's report.")
+        api = FakeApi([first, second], teams=[team_record()])
+        rounds = task(".")._replace(follow_up="Count them once more.")
+        followed = runner.follow(rounds, "team", settings(api), "w1")
+        self.assertIsNone(followed.problem)
+        sent = [call[1] for call in api.calls if call[0] == "send_message"]
+        self.assertEqual(sent[1:], ["Count them once more."])
+        self.assertEqual((followed.runs, followed.followed_up), (2, True))
+        self.assertEqual(runner.answer(api.log), "Round two's report.")
+
+    def test_a_follow_up_is_never_sent_after_the_deadline(self):
+        api = FakeApi([run_frames(1, ending="run.cancelled")], teams=[team_record(state="running")])
+        rounds = task(".", wall=10)._replace(follow_up="Count them once more.")
+        followed = runner.follow(rounds, "team", settings(api, clock=Clock(step=5)), "w1")
+        self.assertTrue(followed.deadline_passed)
+        self.assertFalse(followed.followed_up)
+        self.assertNotIn(("send_message", "Count them once more."), api.calls)
+
     def test_a_lead_that_never_started_helpers_ends_with_its_run(self):
         api = FakeApi([run_frames(1)], teams=[None])
         followed = runner.follow(task("."), "team", settings(api), "w1")

@@ -111,13 +111,14 @@ def run(env, root, directory, scenario, origin, images, tasks, tqa_e2e):
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--only", action="append", default=[], help="run only this task (repeatable)")
+    parser.add_argument("--tag", default=runner.TAG, help="run the tasks with this tag (teams-rounds for the rounds run)")
     parser.add_argument("--tqa-e2e", help="a built tqa-e2e binary (default: cargo run)")
     parser.add_argument("--keep", type=Path, help="copy the run and the packets here before teardown")
     parser.add_argument("--logs", type=Path, help="save the redacted gateway and scripted-model logs here")
     args = parser.parse_args()
     if os.environ.get("TQA_DOCKER_TESTS") != "1":
         raise SystemExit("Docker tests require TQA_DOCKER_TESTS=1")
-    tasks = runner.select_tasks(HERE / "tasks", args.only)
+    tasks = runner.select_tasks(HERE / "tasks", args.only, args.tag)
     tqa_e2e = ([str(Path(args.tqa_e2e).resolve())] if args.tqa_e2e
                else ["cargo", "run", "-q", "-p", "tqa-testkit", "--bin", "tqa-e2e", "--"])
     env = os.environ.copy()
