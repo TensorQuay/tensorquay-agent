@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { expectAppLockup } from "../test/brand";
+
 import { NotFoundPage } from "./NotFoundPage";
 
 vi.mock("next/link", () => ({

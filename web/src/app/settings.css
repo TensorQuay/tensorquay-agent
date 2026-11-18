@@ -579,26 +579,21 @@
   white-space: pre-wrap;
 }
 /* The Models cards on a phone (the 17.2 review's finding 18, decided on 18 Nov 2026): a tap anywhere opens the route,
-   as its Edit link stretched over the card with its word hidden (its name still read); the ⋯ and a card's own links
+   its Edit link laid over the whole card with its word hidden (a box a keyboard audit sees) (its name still read); the ⋯ and a card's own links
    sit above it. One stop opens the card, its focus ring drawn around the card; then its ⋯. */
 :where(.data-table-scroll[data-cards]) .data-table.models-table tbody tr {
   position: relative;
 }
 :where(.data-table-scroll[data-cards]) .data-table.models-table .route-open {
-  position: static;
-  width: 0;
-  min-width: 0;
-  padding: 0;
-  border: 0;
-  overflow: visible;
-}
-:where(.data-table-scroll[data-cards])
-  .data-table.models-table
-  .route-open::after {
-  content: "";
   position: absolute;
   inset: 0;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  border: 0;
   border-radius: var(--control-radius);
+  background: transparent;
 }
 :where(.data-table-scroll[data-cards])
   .data-table.models-table

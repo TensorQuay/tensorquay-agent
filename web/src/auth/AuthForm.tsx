@@ -9,10 +9,10 @@ import { api, ApiError } from "../api/client";
 import { useRequest } from "../api/use-request";
 import { useT } from "../i18n/I18nProvider";
 import { APP_NAME } from "../lib/app";
+import { BrandLockup } from "../ui/BrandLockup";
 import { Button } from "../ui/Button";
 import { ErrorMessage } from "../ui/ErrorMessage";
 import { Input } from "../ui/Input";
-import { BrandLockup } from "../ui/BrandLockup";
 
 import {
   emailProblem,

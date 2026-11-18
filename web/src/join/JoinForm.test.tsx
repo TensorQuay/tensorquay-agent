@@ -2,9 +2,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { expectAppLockup } from "../test/brand";
 import { LIMITS } from "../test/user";
 
-import { expectAppLockup } from "../test/brand";
 import { JoinForm } from "./JoinForm";
 
 const replace = vi.fn();

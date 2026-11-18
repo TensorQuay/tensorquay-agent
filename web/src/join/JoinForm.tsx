@@ -12,11 +12,11 @@ import { passwordProblem, type FieldProblem } from "../auth/field-problems";
 import { PasswordField } from "../auth/PasswordField";
 import { useT } from "../i18n/I18nProvider";
 import { APP_NAME } from "../lib/app";
+import { BrandLockup } from "../ui/BrandLockup";
 import { Button } from "../ui/Button";
 import { ErrorMessage } from "../ui/ErrorMessage";
 import { Input } from "../ui/Input";
 import { Skeleton } from "../ui/Skeleton";
-import { BrandLockup } from "../ui/BrandLockup";
 
 import { lookupInvitation } from "./lookup";
 

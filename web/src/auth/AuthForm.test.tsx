@@ -3,10 +3,10 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { api, ApiError } from "../api/client";
+import { expectAppLockup } from "../test/brand";
 import { conversationId } from "../test/frames";
 import { LIMITS } from "../test/user";
 
-import { expectAppLockup } from "../test/brand";
 import { AuthForm } from "./AuthForm";
 import { returnPath } from "./return-path";
 

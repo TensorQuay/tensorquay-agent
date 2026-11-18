@@ -23,7 +23,9 @@ const card = ":where(.data-table-scroll[data-cards]) .data-table.models-table";
 describe("WEB-U-502 a Models card opens on a tap", () => {
   it("stretches the card's link over it and hides its word", () => {
     expect(rule(`${card} tbody tr`)).toMatch(/position:\s*relative/);
-    expect(rule(`${card} .route-open::after`)).toMatch(/inset:\s*0/);
+    const link = rule(`${card} .route-open`);
+    expect(link).toMatch(/position:\s*absolute/);
+    expect(link).toMatch(/inset:\s*0/);
     expect(rule(`${card} .route-open-word`)).toMatch(
       /clip-path:\s*inset\(50%\)/,
     );
