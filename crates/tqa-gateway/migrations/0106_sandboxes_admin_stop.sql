@@ -5,7 +5,7 @@ ALTER TABLE admin_audit
     ADD CONSTRAINT admin_audit_area_check
         CHECK (area IN ('secrets', 'routes', 'egress', 'limits', 'connectors', 'templates', 'profiles',
                         'git_credentials', 'connector_credentials', 'channels', 'decision_engines', 'account',
-                        'host_keys', 'tasks', 'workspaces', 'sandboxes'));
+                        'host_keys', 'tasks', 'workspaces', 'agent_teams', 'sandboxes'));
 ALTER TABLE admin_audit
     DROP CONSTRAINT admin_audit_action_check,
     ADD CONSTRAINT admin_audit_action_check
