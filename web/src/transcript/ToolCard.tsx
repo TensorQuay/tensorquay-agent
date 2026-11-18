@@ -15,7 +15,7 @@ import { argumentLine, durationLabel } from "./presentation";
 import { pushFailure } from "./push-failure";
 import { teamFailure } from "./team-failure";
 import { TEAM_READS, teamReadCount } from "./team-read";
-import { argument, needsGitCredential } from "./tool-results";
+import { argument, needsGitCredential, readsPdf } from "./tool-results";
 import { namedRef } from "./tool-summary";
 import { foldTraceback } from "./traceback";
 import type { ToolView } from "./types";
@@ -157,7 +157,13 @@ export function ToolCard({
           <>
             {/* The output has its own label, never under the arguments. */}
             <p className="type-label muted">{t("toolcard.outputHeading")}</p>
-            <ScrollBlock label={t("toolcard.output")}>{output}</ScrollBlock>
+            {/* A PDF's text is prose: its lines wrap; a code or text file keeps its lines (WEB-U-493). */}
+            <ScrollBlock
+              label={t("toolcard.output")}
+              prose={tool.name === "read_file" && readsPdf(tool)}
+            >
+              {output}
+            </ScrollBlock>
             {(lines.length > previewLines || trace.folded) && (
               <Button variant="ghost" onClick={() => setShowAll(!showAll)}>
                 {t(showAll ? "toolcard.showLess" : "toolcard.showMore")}
@@ -242,15 +248,18 @@ export function ToolCard({
 function ScrollBlock({
   label,
   result = false,
+  prose = false,
   children,
 }: {
   label: string;
   result?: boolean;
+  /** Lines of prose (a PDF's text), wrapped instead of scrolled. */
+  prose?: boolean;
   children: ReactNode;
 }) {
   return (
     <pre
-      className={`code-block type-code${result ? " result-text" : ""}`}
+      className={`code-block type-code${result ? " result-text" : ""}${prose ? " prose-lines" : ""}`}
       role="group"
       tabIndex={0}
       aria-label={label}

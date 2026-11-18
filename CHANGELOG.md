@@ -7,6 +7,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Added
 
+- **A built web app's own paths work in the preview (GW-U-223, GW-U-224, GW-I-321).** A default Vite or Create
+  React App build names its files from the server's root (`/assets/app.js`), which a preview's address can't serve,
+  so the page stayed blank. The preview now moves those paths under its own address in the page's HTML and in its
+  stylesheets; scripts are never changed. A static export's own pages open by their links (`/about` answers
+  `about.html`). Each previewed page carries a small reporter that tells the Files panel what it couldn't load.
 - **Administrators see every running sandbox, and can stop an idle one (Settings › Operations › Sandboxes;
   GW-U-216 to 220, SEC-066, WEB-U-486 to 489, WEB-E2E-129).** Each row names its owner, environment, state and when it
   stops, with its CPU and memory against its size; the page shows the slots in use and anyone waiting. Stop now retires
@@ -69,6 +74,11 @@ dialog, the expanded screen picture keeps its frame on a phone, and a PDF's page
 app moves to Next.js 16.4.5. No migration, protocol or configuration change: upgrade in place with 18.0.1's images.
 
 ### Fixed
+
+- **Two details from the 18.0.1 live look (WEB-U-492, WEB-U-493, WEB-E2E-133).** On a phone the Files panel wrote a
+  file's size on two lines beside Expand ("661.6 / kB"); the size now reads on one line, and the actions move under it
+  when the row can't hold all three. A PDF read's output in its step scrolled sideways, its paragraphs one long line
+  each; it now wraps them, a long address or word included, while a code or text file's read keeps its lines.
 
 - **A PDF read's step names the pages it read, not lines (WEB-U-482).** After reading pages 1 and 2 of a PDF, the
   step said "Read uploads/report.pdf lines 1–2"; it now says "pages 1–2", in every language. The result's own page
