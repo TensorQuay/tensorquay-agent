@@ -144,6 +144,8 @@
     "tool.read": "อ่าน {path}",
     "tool.readLine": " บรรทัด {first}",
     "tool.readLines": " บรรทัด {first}–{last}",
+    "tool.readPage": " หน้า {first}",
+    "tool.readPages": " หน้า {first}–{last}",
     "tool.count": " · {count, plural, other {# {unit, select, file {ไฟล์} other {รายการที่ตรงกัน}}}}",
     "tool.partial": " (บางส่วน)",
     "tool.used": "ใช้ {name}",
