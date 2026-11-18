@@ -237,6 +237,17 @@ test("WEB-E2E-129 the phone cards read in three lines, without field labels", as
     }),
   );
   expect(cards).toHaveLength(4);
+  // The summary wraps only between its clauses, never inside one ("· 5.4" / "of 16 GB set aside").
+  const clauses = await page.evaluate(() =>
+    [...document.querySelectorAll(".sandboxes-headline .sandboxes-clause")].map(
+      (clause) => ({
+        text: clause.textContent,
+        lines: clause.getClientRects().length,
+      }),
+    ),
+  );
+  expect(clauses.length).toBeGreaterThanOrEqual(3);
+  expect(clauses.filter((clause) => clause.lines !== 1)).toEqual([]);
   for (const card of cards) {
     expect(
       card.labels.every(

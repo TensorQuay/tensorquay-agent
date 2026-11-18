@@ -155,6 +155,16 @@ function show(api: SandboxesApi, me: User = admin) {
   return cache;
 }
 
+/** The summary under the page's name, once it reads `text` (its clauses are spans, joined by " · "). */
+async function summaryLine(text: string) {
+  return waitFor(() => {
+    const line = document.querySelector<HTMLElement>(".sandboxes-headline");
+    expect(line).toHaveTextContent(text, { normalizeWhitespace: false });
+    expect(line!.textContent).toBe(text);
+    return line!;
+  });
+}
+
 afterEach(() => {
   vi.restoreAllMocks();
 });
@@ -258,7 +268,7 @@ describe("WEB-U-486 the Sandboxes page's states", () => {
       ]),
     );
     expect(
-      await screen.findByText(
+      await summaryLine(
         "1 of 6 running · 0 of 3 cores · 15.2 MB of 1.5 GB set aside",
       ),
     ).toBeVisible();
@@ -272,7 +282,7 @@ describe("WEB-U-486 the Sandboxes page's states", () => {
   // and how sandboxes run, muted; no number larger than the page's name.
   it("shows one muted summary line under the page's name, and every row in order with its resources", async () => {
     show(fake([listing()]));
-    const summary = await screen.findByText(
+    const summary = await summaryLine(
       "4 of 6 running · Desktops 1 of 2 · 1.8 of 8 cores · 3.9 of 16 GB set aside",
     );
     expect(summary).toBeVisible();
@@ -314,7 +324,7 @@ describe("WEB-U-486 the Sandboxes page's states", () => {
         },
       ]),
     );
-    const summary = await screen.findByText(
+    const summary = await summaryLine(
       "4 of 4 running · full · Desktops 1 of 2 · 1.8 of 8 cores · 3.9 of 16 GB set aside",
     );
     expect(summary).toBeVisible();
@@ -328,7 +338,7 @@ describe("WEB-U-486 the Sandboxes page's states", () => {
     const data = listing({ items: [{ ...IDLE, usage: null }] });
     show(fake([{ ...data, totals: { ...data.totals, usage: null } }]));
     expect(
-      await screen.findByText("1 of 6 running · 8 cores · 16 GB set aside"),
+      await summaryLine("1 of 6 running · 8 cores · 16 GB set aside"),
     ).toBeVisible();
     expect(screen.queryByText(/Desktops/)).toBeNull();
     // Once on the row, its set-aside line under it (the 140 review: never a word twice).

@@ -1309,6 +1309,10 @@ tr[data-expired] td:not(.data-cell-action) {
     white-space: nowrap;
   }
 }
+/* The summary's clauses stay whole: a narrow line wraps only at a " · " between them. */
+.sandboxes-clause {
+  white-space: nowrap;
+}
 /* Full: the summary line says so in the warn colour. */
 .sandboxes-headline[data-tone="warn"] {
   color: var(--warn);

@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Boxes } from "lucide-react";
-import { useId, useState } from "react";
+import { Fragment, useId, useState } from "react";
 
 import { newActionKey } from "../api/action-key";
 import { ApiError } from "../api/error";
@@ -334,7 +334,13 @@ function Summary({ data, t }: { data: SandboxListing; t: Translate }) {
         className="type-small muted sandboxes-headline"
         data-tone={full ? "warn" : undefined}
       >
-        {parts.join(" · ")}
+        {/* Each clause whole, so a narrow line wraps only at a " · " (reviewed on 18 Nov 2026). */}
+        {parts.map((part, index) => (
+          <Fragment key={part}>
+            {index > 0 && " · "}
+            <span className="sandboxes-clause">{part}</span>
+          </Fragment>
+        ))}
       </p>
       {totals.waiting > 0 && (
         <p className="type-small">
