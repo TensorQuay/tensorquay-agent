@@ -277,7 +277,7 @@ async fn open_team(
         return Ok((row.id, row.channel_id, false));
     }
     if let Some(ended) = super::store::ended(connection, lead).await? {
-        if super::store::ended_for_good(connection, ended.team).await? {
+        if super::rounds_store::ended_for_good(connection, ended.team).await? {
             return Err(GatewayError::TeamEnded(None));
         }
         let Some(run) = run else {

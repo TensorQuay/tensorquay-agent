@@ -6,6 +6,24 @@ use crate::config::AgentTeams;
 use sqlx::PgConnection;
 use uuid::Uuid;
 
+/// Whether the ended `team` ended for good, not for one of a round's reasons: its lead task was deleted or its
+/// person disabled (ADR-0034's rounds amendment, A1).
+///
+/// # Errors
+/// Storage failure.
+pub(crate) async fn ended_for_good(
+    connection: &mut PgConnection,
+    team: Uuid,
+) -> Result<bool, GatewayError> {
+    Ok(sqlx::query_scalar!(
+        "SELECT COALESCE(stop_reason IN ('lead_deleted', 'person_disabled'), false) AS \"for_good!\" \
+         FROM agent_teams WHERE id = $1",
+        team
+    )
+    .fetch_one(connection)
+    .await?)
+}
+
 /// Whether the lead's `run` may open its ended `team`'s next round (A1, decided on 18 Nov 2026 at review): a person's
 /// message started the run (the last `message.user` before its `run.started` has no team wake and no lead brief; a
 /// turn too large to keep inline is a person's, since the gateway's are short), the round had ended when the run

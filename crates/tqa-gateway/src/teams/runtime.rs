@@ -471,7 +471,11 @@ pub(crate) async fn role(
                 (super::role::Place::None, false) => {
                     match store::ended(&mut connection, conversation).await? {
                         Some(ended) => Some(super::role::Ended {
-                            for_good: store::ended_for_good(&mut connection, ended.team).await?,
+                            for_good: super::rounds_store::ended_for_good(
+                                &mut connection,
+                                ended.team,
+                            )
+                            .await?,
                             note_unread: store::end_unread(&mut connection, ended.team).await?,
                         }),
                         None => None,
