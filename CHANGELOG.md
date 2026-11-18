@@ -3,7 +3,11 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
-## Unreleased
+## 18.0.1 (18 November 2026)
+
+A fix release: a PDF read's step names its pages, the Screen panel's ⋯ menu fits its items and stays inside its
+dialog, the expanded screen picture keeps its frame on a phone, and a PDF's page pictures fit the Files panel. The web
+app moves to Next.js 16.4.5. No migration, protocol or configuration change: upgrade in place with 18.0.1's images.
 
 ### Fixed
 
