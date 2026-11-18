@@ -375,20 +375,22 @@ function Row({
       </td>
       <td className="numeric">
         {/* CPU over memory, one line each: the two measures share a column so the table fits 600 px. */}
-        <span className="sandboxes-use">
-          <Measure
-            usage={row.usage?.cpu_millicores ?? null}
-            size={row.size.cpu_millicores}
-            unit="cores"
-            measured={measured}
-          />
-          <Measure
-            usage={row.usage?.memory_bytes ?? null}
-            size={row.size.memory_bytes}
-            unit="memory"
-            measured={measured}
-          />
-        </span>
+        {row.usage ? (
+          <span className="sandboxes-use">
+            <Measure
+              usage={row.usage.cpu_millicores}
+              size={row.size.cpu_millicores}
+              unit="cores"
+            />
+            <Measure
+              usage={row.usage.memory_bytes}
+              size={row.size.memory_bytes}
+              unit="memory"
+            />
+          </span>
+        ) : (
+          <Unmeasured row={row} measured={measured} />
+        )}
       </td>
       <td className="sandboxes-activity">
         {/* When it started rides in the tooltip, with the last activity's own time. */}
@@ -419,45 +421,67 @@ function Row({
   );
 }
 
-/** "0.2 of 2 cores" or "0.4 of 4 GB": the use against the size, the size alone until measured. */
+/** "0.2 of 2 cores" or "0.4 GB of 4 GB": the measured use against the size (the size alone when it wasn't recorded). */
 function Measure({
   usage,
   size,
   unit,
-  measured,
 }: {
-  usage: number | null;
+  usage: number;
   size: number | null;
   unit: "cores" | "memory";
-  measured: boolean;
 }) {
   const t = useT();
-  if (usage !== null && size !== null)
+  if (unit === "cores")
     return (
       <span>
-        {unit === "cores"
-          ? t("sandboxes.ofCores", {
+        {size === null
+          ? cores(usage, t.locale)
+          : t("sandboxes.ofCores", {
               used: cores(usage, t.locale),
               size: coreCount(size),
-            })
-          : t("sandboxes.ofMemory", {
-              used: memory(usage, t),
-              size: memory(size, t),
             })}
       </span>
     );
   return (
     <span>
-      <span className="muted">
-        {measured ? t("sandboxes.notAvailable") : t("sandboxes.measuring")}
-      </span>
-      {size !== null && (
-        <span className="muted sandboxes-size">
-          {unit === "cores"
-            ? t("sandboxes.sizeCores", { size: coreCount(size) })
-            : t("sandboxes.sizeMemory", { size: memory(size, t) })}
+      {size === null
+        ? memory(usage, t)
+        : t("sandboxes.ofMemory", {
+            used: memory(usage, t),
+            size: memory(size, t),
+          })}
+    </span>
+  );
+}
+
+/**
+ * A Use cell without a measure (the 140 review): what's set aside, muted, on one line ("1 core · 2 GB"). A starting
+ * sandbox has nothing to measure yet, so that's all; a running one says "Measuring…" before the sampler's first pass,
+ * or "Not available" once when its sample failed while others were read. Two lines at most.
+ */
+function Unmeasured({ row, measured }: { row: SandboxRow; measured: boolean }) {
+  const t = useT();
+  const { cpu_millicores: cpu, memory_bytes: bytes } = row.size;
+  const aside =
+    cpu !== null && bytes !== null
+      ? t("sandboxes.setAsideLine", {
+          cores: coreCount(cpu),
+          memory: memory(bytes, t),
+        })
+      : cpu !== null
+        ? t("sandboxes.sizeCores", { size: coreCount(cpu) })
+        : bytes !== null
+          ? t("sandboxes.sizeMemory", { size: memory(bytes, t) })
+          : null;
+  return (
+    <span className="sandboxes-use">
+      {row.state !== "starting" && (
+        <span className="muted">
+          {measured ? t("sandboxes.notAvailable") : t("sandboxes.measuring")}
         </span>
       )}
+      {aside !== null && <span className="muted">{aside}</span>}
     </span>
   );
 }

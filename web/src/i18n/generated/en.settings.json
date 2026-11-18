@@ -1570,6 +1570,7 @@
     "sandboxes.ofMemory": "{used} of {size}",
     "sandboxes.sizeCores": "{size, plural, one {# core} other {# cores}}",
     "sandboxes.sizeMemory": "{size}",
+    "sandboxes.setAsideLine": "{cores, plural, one {# core} other {# cores}} · {memory}",
     "sandboxes.megabytes": "{n} MB",
     "sandboxes.gigabytes": "{n} GB",
     "sandboxes.measuring": "Measuring…",

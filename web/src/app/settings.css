@@ -1285,10 +1285,6 @@ tr[data-expired] td:not(.data-cell-action) {
   flex-direction: column;
   align-items: flex-end;
 }
-/* Measured on the size alone: the size on its own muted line under "Measuring…" or "Not available". */
-.sandboxes-size {
-  display: block;
-}
 /* So the table fits a 600 px area (UI-GUIDELINES §7 Table): the state's detail ("Stops in about 10 min") wraps whole
    under its pill instead of keeping a note column's share, and Last activity wraps too; its start is in the tooltip. */
 .data-table td .cell-note.sandboxes-detail {

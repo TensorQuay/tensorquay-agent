@@ -160,6 +160,38 @@ afterEach(() => {
 });
 
 describe("WEB-U-486 the Sandboxes page's states", () => {
+  // A Use cell without a measure (the 140 review, 18 Nov 2026): a starting sandbox shows only what's set aside, muted,
+  // on one line; a running one the sampler couldn't read says "Not available" once, then what's set aside.
+  it("shows what's set aside for a sandbox without a measure, never Not available twice", async () => {
+    show(fake([listing()]));
+    const table = await screen.findByRole("table", {
+      name: "Running sandboxes",
+    });
+    const useOf = (state: RegExp) =>
+      within(table)
+        .getAllByRole("row")
+        .find((row) => state.test(row.textContent ?? ""))!
+        .querySelectorAll("td")[3]!;
+    const starting = useOf(/Starting/);
+    expect(starting).toHaveTextContent(/^2 cores · 4 GB$/);
+    expect(starting.querySelector(".muted")).toHaveTextContent(
+      "2 cores · 4 GB",
+    );
+    expect(starting).not.toHaveTextContent("Not available");
+  });
+
+  it("says Not available once for a running sandbox whose sample failed, then what's set aside", async () => {
+    show(fake([listing({ items: [{ ...WORKING, usage: null }] })]));
+    const table = await screen.findByRole("table", {
+      name: "Running sandboxes",
+    });
+    const cell = within(table)
+      .getAllByRole("row")[1]!
+      .querySelectorAll("td")[3]!;
+    expect(cell).toHaveTextContent(/^Not available2 cores · 4 GB$/);
+    expect(cell.textContent?.match(/Not available/g)).toHaveLength(1);
+  });
+
   // Five columns and the ⋯, to fit a 600 px area as a table (decided on 18 Nov 2026): CPU over memory in one Use
   // cell, Started in Last activity's tooltip.
   it("is five columns and the ⋯: Use holds CPU over memory, Last activity names the start", async () => {
@@ -254,9 +286,9 @@ describe("WEB-U-486 the Sandboxes page's states", () => {
     expect(rows[1]).toHaveTextContent("1.4 of 2 cores");
     expect(rows[1]).toHaveTextContent("3.1 GB of 4 GB");
     expect(rows[2]).toHaveTextContent("Starting");
-    // Measured elsewhere but not here: not available, with the size muted under it.
-    expect(rows[2]).toHaveTextContent("Not available");
-    expect(rows[2]).toHaveTextContent("2 cores");
+    // Starting: nothing to measure yet, so only what's set aside (the 140 review).
+    expect(rows[2]).not.toHaveTextContent("Not available");
+    expect(rows[2]).toHaveTextContent("2 cores · 4 GB");
     expect(rows[3]).toHaveTextContent("Idle");
     expect(rows[3]).toHaveTextContent("Stops in about 4 min");
     expect(rows[4]).toHaveTextContent("You");
@@ -288,7 +320,9 @@ describe("WEB-U-486 the Sandboxes page's states", () => {
     expect(await screen.findByText("1 of 6 running")).toBeVisible();
     expect(screen.queryByText(/^Desktops:/)).toBeNull();
     expect(screen.getByText("Set aside: 8 cores · 16 GB")).toBeVisible();
-    expect(screen.getAllByText("Measuring…")).toHaveLength(2);
+    // Once on the row, its set-aside line under it (the 140 review: never a word twice).
+    expect(screen.getAllByText("Measuring…")).toHaveLength(1);
+    expect(screen.getByText("2 cores · 4 GB")).toBeVisible();
   });
 
   it("names the microVM backend's memory for what it is", async () => {

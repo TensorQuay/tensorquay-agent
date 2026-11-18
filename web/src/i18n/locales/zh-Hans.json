@@ -2933,6 +2933,7 @@
     "sandboxes.ofMemory": "{used} / {size}",
     "sandboxes.sizeCores": "{size} 核",
     "sandboxes.sizeMemory": "{size}",
+    "sandboxes.setAsideLine": "{cores} 核 · {memory}",
     "sandboxes.megabytes": "{n} MB",
     "sandboxes.gigabytes": "{n} GB",
     "sandboxes.measuring": "测量中…",
