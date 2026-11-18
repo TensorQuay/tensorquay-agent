@@ -10,6 +10,7 @@ import {
 } from "./desktop-words-state";
 import { blockedAccess } from "./egress";
 import { noticeText } from "./notice-copy";
+import { refusedInWords } from "./team-failure";
 import {
   argument,
   bounded,
@@ -303,10 +304,17 @@ function connectorCall(
 const helper = (tool: ToolView, key: string, t: Translate) =>
   bounded(argument(tool, key), t("tool.aHelper"), 48);
 // A start that failed never says "Started" beside its Failed mark (WEB-U-399, real-world use before 17.0).
+// A run that may not lead here is told so in words, and the page says so rather than "Couldn't start a helper"
+// (WEB-U-497).
 const startMember: Summary = (tool, t) =>
-  t(tool.status === "error" ? "tool.startHelperFailed" : "tool.startedHelper", {
-    name: helper(tool, "role", t),
-  });
+  refusedInWords(tool)
+    ? t("tool.cantLeadHere")
+    : t(
+        tool.status === "error"
+          ? "tool.startHelperFailed"
+          : "tool.startedHelper",
+        { name: helper(tool, "role", t) },
+      );
 const assign: Summary = (tool, t) =>
   t("tool.gaveWork", { name: helper(tool, "to", t) });
 const stopMember: Summary = (tool, t) =>
