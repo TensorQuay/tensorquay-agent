@@ -116,7 +116,7 @@ fn a_stray_found_again_after_a_pass_tried_it_is_a_survivor() {
     );
     let v = verdict(Some(&previous), &last);
     assert_eq!(v.tone, Tone::Amber);
-    assert_eq!(v.left_behind[0].remove, "docker rm 0123456789ab");
+    assert_eq!(v.left_behind[0].remove, "docker rm -f 0123456789ab");
     assert_eq!(v.left_behind[0].reason, "engine_error");
 }
 
@@ -158,7 +158,8 @@ fn the_remove_command_is_built_from_the_engine_name_only() {
         &pass(AT, vec![odd]),
     );
     assert_eq!(v.left_behind[0].remove, "docker network rm tqa-sbx-x");
-    assert_eq!(Kind::Container.remove("abc"), "docker rm abc");
+    // A paused or running container needs -f: plain `docker rm` refuses both (the real-stack run, 18 Nov 2026).
+    assert_eq!(Kind::Container.remove("abc"), "docker rm -f abc");
     assert_eq!(Verdict::default().tone, Tone::Green);
     assert_eq!(Verdict::default().swept_at, None);
 }

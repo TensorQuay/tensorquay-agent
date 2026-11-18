@@ -21,7 +21,8 @@ impl Kind {
     /// The command that removes the object by hand, built from the engine's name only.
     pub(crate) fn remove(self, name: &str) -> String {
         match self {
-            Self::Container => format!("docker rm {name}"),
+            // Forced: plain `docker rm` refuses a paused or a running container, which is what a survivor often is.
+            Self::Container => format!("docker rm -f {name}"),
             Self::Network => format!("docker network rm {name}"),
             Self::Volume => format!("docker volume rm {name}"),
         }
