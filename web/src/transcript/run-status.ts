@@ -60,6 +60,9 @@ type Presentation = {
   took?: string | null;
   /** The state alone, where the whole status has no room (the header under 768 px, WEB-U-112). */
   short?: string | null;
+  /** A run that completed: the header's "Done", which it reads but doesn't show (WEB-U-495). Said outright, never
+   * inferred from a tone another status might share. */
+  finished?: boolean;
 };
 
 function status(
@@ -166,7 +169,7 @@ function beforeReplay(stored: StoredRunStatus, t: Translate): Presentation {
     case "running":
       return status(t("run.working"), "info");
     case "completed":
-      return { ...status(t("run.done"), "ok"), took: null };
+      return { ...status(t("run.done"), "ok"), took: null, finished: true };
     case "cancelled":
       return status(t("run.stopped"), "muted");
     case "failed":
@@ -272,7 +275,11 @@ export function runPresentation(
             ),
           })
         : null;
-      return { ...status(t("run.done"), "ok", environment), took };
+      return {
+        ...status(t("run.done"), "ok", environment),
+        took,
+        finished: true,
+      };
     }
     case "cancelled":
       return status(t("run.stopped"), "muted", environment);

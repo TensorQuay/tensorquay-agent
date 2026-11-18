@@ -89,8 +89,12 @@ function show() {
 }
 const toggle = () => screen.getByRole("button", { name: "Files" });
 const panel = () => screen.queryByRole("complementary", { name: "Files" });
-/** The panel's own controls, once its code has arrived (WEB-U-176: it loads when wanted). */
-const loaded = () => screen.findByRole("button", { name: "Close panel" });
+/**
+ * The panel's own way back, once its code has arrived (WEB-U-176: it loads when wanted): Close where it docks, a back
+ * arrow where it takes the column (WEB-U-494).
+ */
+const WAY_BACK = /^(Close panel|Back to the chat)$/;
+const loaded = () => screen.findByRole("button", { name: WAY_BACK });
 
 describe("WEB-U-022 files panel placement", () => {
   // The UI standard's header: a quiet Files icon beside the ⋯ (it was the word, the design direction's P2). It is
@@ -117,7 +121,7 @@ describe("WEB-U-022 files panel placement", () => {
     await loaded();
     fireEvent.click(
       within(panel() as HTMLElement).getByRole("button", {
-        name: "Close panel",
+        name: "Back to the chat",
       }),
     );
     expect(panel()).toBeNull();
@@ -169,7 +173,7 @@ describe("WEB-U-022 files panel placement", () => {
     fireEvent.click(toggle());
     await loaded();
     fireEvent.click(screen.getByRole("tab", { name: "Changes" }));
-    fireEvent.click(screen.getByRole("button", { name: "Close panel" }));
+    fireEvent.click(screen.getByRole("button", { name: WAY_BACK }));
     fireEvent.click(toggle());
     expect(screen.getByRole("tab", { name: "Changes" })).toHaveAttribute(
       "aria-selected",

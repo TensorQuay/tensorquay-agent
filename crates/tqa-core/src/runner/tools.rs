@@ -117,14 +117,7 @@ impl Execution<'_> {
             return Ok(());
         };
         self.reserve_failure_slot(call).await?;
-        let cx = ToolContext {
-            workspace: self.runner.workspace.clone(),
-            cancel: self.children.child_token(),
-            clock: self.runner.clock.clone(),
-            sleeper: self.runner.sleeper.clone(),
-            env_allow: self.runner.env_allow.clone(),
-            limits: self.runner.tool_limits,
-        };
+        let cx = self.tool_context();
         // The screen before an action, journaled ahead of its start (ADR-0039 "The record"); kept or not, the action
         // goes on. Taken only for the desktop's own tool, and when there is a store to keep it in.
         let before = if self.runner.screen_store.is_some() && call.name == "computer" {
@@ -153,6 +146,49 @@ impl Execution<'_> {
             (call, result, before_kept)
         });
         Ok(())
+    }
+    /// A tool call's context: the run's workspace, clock and limits, cancelled with the run's children.
+    fn tool_context(&self) -> ToolContext {
+        ToolContext {
+            workspace: self.runner.workspace.clone(),
+            cancel: self.children.child_token(),
+            clock: self.runner.clock.clone(),
+            sleeper: self.runner.sleeper.clone(),
+            env_allow: self.runner.env_allow.clone(),
+            limits: self.runner.tool_limits,
+        }
+    }
+    /// A refusal (`refused`), with what the tool adds when it is the second identical failure since the last change
+    /// (18.1 item F, proposal D): the model's input changes between the repeats. The first and the third are the plain
+    /// refusal; the third still stops the run (CORE-E-012, CORE-E-041). Any other result is returned as it is.
+    async fn repeated_note(
+        &mut self,
+        call: &journal::Call,
+        text: String,
+        refused: bool,
+    ) -> Result<String, Stop> {
+        if !refused {
+            return Ok(text);
+        }
+        let registry = self.runner.tools.clone();
+        let changes = |name: &str| {
+            registry
+                .get(name)
+                .is_some_and(|tool| tool.spec().changes_workspace)
+        };
+        let failed = journal::failure_count(&self.frames, &self.run_id()?, call, changes);
+        if failed.recent != 1 {
+            return Ok(text);
+        }
+        let cx = self.tool_context();
+        let note = self
+            .watch()
+            .wait(registry.repeated_refusal(&call.name, &call.arguments, &cx))
+            .await?;
+        Ok(match note {
+            Some(note) => format!("{text}\n{note}"),
+            None => text,
+        })
     }
     async fn tool_finished(
         &mut self,
@@ -190,6 +226,7 @@ impl Execution<'_> {
             Ok(output) => self.record_captures(&call, output, before_kept).await?,
             Err(_) => None,
         };
+        let refused = matches!(&result, Err(error) if *error != ToolError::Cancelled);
         let (status, text, exit_code, failure) = match result {
             Ok(output) => (
                 if output.exit_code.is_some_and(|code| code != 0) {
@@ -221,6 +258,7 @@ impl Execution<'_> {
                     .flatten(),
             ),
         };
+        let text = self.repeated_note(&call, text, refused).await?;
         for event in chunk_tool_output(call.id.clone(), &text) {
             self.emit(event).await?;
         }
