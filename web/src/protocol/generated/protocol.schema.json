@@ -1616,6 +1616,13 @@
       "oneOf": [
         {
           "properties": {
+            "keys": {
+              "items": {
+                "$ref": "#/definitions/ProblemName"
+              },
+              "maxItems": 8,
+              "type": "array"
+            },
             "kind": {
               "const": "no_name",
               "type": "string"
