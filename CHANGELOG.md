@@ -7,7 +7,7 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Added
 
-- **A built web app's own paths work in the preview (GW-U-221, GW-U-222, GW-I-321).** A default Vite or Create
+- **A built web app's own paths work in the preview (GW-U-223, GW-U-224, GW-I-321).** A default Vite or Create
   React App build names its files from the server's root (`/assets/app.js`), which a preview's address can't serve,
   so the page stayed blank. The preview now moves those paths under its own address in the page's HTML and in its
   stylesheets; scripts are never changed. A static export's own pages open by their links (`/about` answers

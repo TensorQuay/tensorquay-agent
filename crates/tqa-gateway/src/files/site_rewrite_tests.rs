@@ -1,5 +1,5 @@
-//! GW-U-221: root paths in what a site pass serves are moved under the pass (18.1, built web apps preview as they
-//! are); scripts never change. GW-U-222: the reporter goes first in each page's head, once.
+//! GW-U-223: root paths in what a site pass serves are moved under the pass (18.1, built web apps preview as they
+//! are); scripts never change. GW-U-224: the reporter goes first in each page's head, once.
 use super::*;
 
 const ROOT: &str = "/api/v1/conversations/c1/site/p1/";
@@ -9,9 +9,9 @@ fn page(html: &str) -> String {
         .unwrap_or_default()
 }
 
-// TEST: GW-U-221
+// TEST: GW-U-223
 #[test]
-fn gw_u_221_the_root_path_rule() {
+fn gw_u_223_the_root_path_rule() {
     for (url, moved) in [
         ("/x", Some("/api/v1/conversations/c1/site/p1/x")),
         ("/", Some("/api/v1/conversations/c1/site/p1/")),
@@ -44,9 +44,9 @@ fn gw_u_221_the_root_path_rule() {
     }
 }
 
-// TEST: GW-U-221
+// TEST: GW-U-223
 #[test]
-fn gw_u_221_every_attribute_of_the_table() {
+fn gw_u_223_every_attribute_of_the_table() {
     let html = page(
         r#"<html><head><script type="module" src="/assets/a.js"></script><link rel="stylesheet" href="/assets/a.css"><link rel="preload" as="image" imagesrcset="/i/a.png 1x, /i/b.png 2x"></head><body><img src="/logo.png" srcset="/l1.png 1x,/l2.png 2x, ./l3.png 3x"><picture><source src="/s.webm" srcset="/s.png"></picture><video src="/v.mp4" poster="/p.png"><track src="/t.vtt"></video><audio src="/a.mp3"></audio><a href="/about">About</a><map><area href="/area"></map><svg><image href="/svg.png"/><use xlink:href="/sprite.svg#i"/></svg></body></html>"#,
     );
@@ -71,9 +71,9 @@ fn gw_u_221_every_attribute_of_the_table() {
     }
 }
 
-// TEST: GW-U-221
+// TEST: GW-U-223
 #[test]
-fn gw_u_221_style_is_moved_and_scripts_are_never_changed() {
+fn gw_u_223_style_is_moved_and_scripts_are_never_changed() {
     let html = page(
         r#"<head><style>body{background:url(/bg.png)} @import "/more.css";</style><script>const a = "/assets/logo.png"; fetch("/data.json")</script><script type="importmap">{"imports":{"x":"/x.js"}}</script></head><body><div style="background: url('/d.png')" onclick="go('/x')"></div><p>/not/a/path</p></body>"#,
     );
@@ -98,9 +98,9 @@ fn gw_u_221_style_is_moved_and_scripts_are_never_changed() {
     assert!(html.contains("<p>/not/a/path</p>"), "{html}");
 }
 
-// TEST: GW-U-221
+// TEST: GW-U-223
 #[test]
-fn gw_u_221_odd_case_and_quoting() {
+fn gw_u_223_odd_case_and_quoting() {
     let html = page("<HEAD><SCRIPT SRC=/a.js></SCRIPT><LINK HREF='/b.css' REL=stylesheet></HEAD>");
     assert!(
         html.contains("/api/v1/conversations/c1/site/p1/a.js"),
@@ -112,9 +112,9 @@ fn gw_u_221_odd_case_and_quoting() {
     );
 }
 
-// TEST: GW-U-221
+// TEST: GW-U-223
 #[test]
-fn gw_u_221_css() {
+fn gw_u_223_css() {
     for (css, moved) in [
         (
             "a{b:url(/x.png)}",
@@ -147,9 +147,9 @@ fn gw_u_221_css() {
     }
 }
 
-// TEST: GW-U-221
+// TEST: GW-U-223
 #[test]
-fn gw_u_221_srcset_keeps_descriptors_and_separators() {
+fn gw_u_223_srcset_keeps_descriptors_and_separators() {
     assert_eq!(
         srcset_under_root("/a.png 480w, /b.png 800w,/c.png", ROOT).as_deref(),
         Some(
@@ -160,9 +160,9 @@ fn gw_u_221_srcset_keeps_descriptors_and_separators() {
     assert_eq!(srcset_under_root("a.png 1x, b.png 2x", ROOT), None);
 }
 
-// TEST: GW-U-222
+// TEST: GW-U-224
 #[test]
-fn gw_u_222_the_reporter_goes_first_in_the_head_once() {
+fn gw_u_224_the_reporter_goes_first_in_the_head_once() {
     let with_head =
         page("<!doctype html><html><head><title>t</title></head><body><p>x</p></body></html>");
     assert!(
@@ -183,9 +183,9 @@ fn gw_u_222_the_reporter_goes_first_in_the_head_once() {
     assert_eq!(page(""), "<script>R</script>");
 }
 
-// TEST: GW-U-222
+// TEST: GW-U-224
 #[test]
-fn gw_u_222_the_reporter_names_the_pass_and_the_panel_origin() {
+fn gw_u_224_the_reporter_names_the_pass_and_the_panel_origin() {
     let script = reporter(ROOT, "https://agent.example.org");
     assert!(script.starts_with("<script>") && script.ends_with("</script>"));
     assert!(

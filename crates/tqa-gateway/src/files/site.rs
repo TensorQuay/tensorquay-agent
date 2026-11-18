@@ -267,7 +267,7 @@ async fn serve(
         .as_str()
         .trim_end_matches('/')
         .to_owned();
-    // A page's and a stylesheet's root paths, moved under the pass (GW-U-221); a stylesheet over the page limit and
+    // A page's and a stylesheet's root paths, moved under the pass (GW-U-223); a stylesheet over the page limit and
     // every other file are served as they are.
     let (size, body) = if kind.starts_with("text/html")
         || (kind.starts_with("text/css") && size <= page_limit)
