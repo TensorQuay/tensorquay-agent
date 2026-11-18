@@ -58,6 +58,7 @@ reqwest = { version = "=0.12.28", default-features = false, features = ["rustls-
 # The Git relay serves its routes on the egress listener's connections; all already in the lock file.
 bytes = "=1.12.1"
 http-body-util = "=0.1.5"
+lol_html = "=3.0.3"
 hyper = { version = "=1.11.1", features = ["server", "client", "http1"] }
 hyper-util = { version = "=0.1.20", features = ["tokio"] }
 # TCP keepalive on every socket the gateway accepts (`net`, GW-U-205); already in the lock file via tokio. `all` for

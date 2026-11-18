@@ -235,3 +235,70 @@ test("WEB-E2E-122 real sites in the Files panel: the owner's map, a built site, 
   ).toEqual([]);
   expect(new URL(page.url()).pathname).toBe(`/c/${task.id}`);
 });
+
+// WEB-E2E-140 (18.1, built web apps preview as they are; GW-U-223, GW-U-224, WEB-U-500): a default Vite build names
+// its files from the server's root. The gateway moves its page's and stylesheet's root paths under the pass, so it
+// draws, styled; its logo is a root-path string in its script, which is never rewritten, so the panel names it and says
+// what to ask. An app that draws nothing says so, and a static export follows its link to its second page.
+test("WEB-E2E-140 a built web app previews as it is, and the panel says what it couldn't load", async ({
+  page,
+  baseURL,
+}) => {
+  test.setTimeout(budget(1, 240_000));
+  if (!baseURL) throw new Error("The driver must supply the stack origin");
+
+  await step("the agent writes the sites");
+  await signIn(page);
+  const created = await page.request.post("/api/v1/conversations", {
+    headers: { "Idempotency-Key": randomUUID(), Origin: baseURL },
+    data: { title: "Built apps", model_route: "local" },
+  });
+  expect(created.status()).toBe(201);
+  const task = (await created.json()) as { id: string };
+  await page.goto(`/c/${task.id}`);
+  await page
+    .getByLabel("Message", { exact: true })
+    .fill("Make the preview files");
+  await page.getByRole("button", { name: "Send", exact: true }).click();
+  await expect(page.getByLabel("Run status")).toHaveText(/^Done/, {
+    timeout: afterStart(90_000),
+  });
+  const panel = await openFilesPanel(page);
+  await panel.getByRole("button", { name: "Refresh files" }).click();
+
+  await step(
+    "a default Vite build draws, styled; the logo its script names at the root is named on the line",
+  );
+  const vite = await openSite(panel, ["site", "vite-default"], "index.html");
+  const inside = vite.frameLocator("iframe");
+  await expect(inside.locator("#title")).toHaveText("Built app", {
+    timeout: 15_000,
+  });
+  await expect(inside.locator("#title")).toHaveCSS("color", "rgb(0, 128, 128)");
+  await expect(
+    vite.getByText(
+      "This page asks for files at the server's root (/assets/logo-9f8e7d.png), which a preview can't serve. Ask the agent to build it with relative paths.",
+    ),
+  ).toBeVisible({ timeout: 15_000 });
+  await capture(page, "previews-built-vite-default");
+
+  await step("an app that draws nothing says so");
+  const empty = await openSite(panel, ["site", "empty-app"], "index.html");
+  await expect(
+    empty.getByText(
+      "This page drew nothing. An app with routes previews with a hash router: ask the agent to use one.",
+    ),
+  ).toBeVisible({ timeout: 15_000 });
+  await capture(page, "previews-built-empty");
+
+  await step("a static export follows its link to its second page");
+  const exported = await openSite(panel, ["site", "export"], "index.html");
+  const pages = exported.frameLocator("iframe");
+  await expect(pages.locator("#title")).toHaveText("Home");
+  await pages.locator("#about").click();
+  await expect(pages.locator("#title")).toHaveText("About us");
+  await expect(exported.getByText(/^This page /)).toHaveCount(0);
+  await expect(
+    exported.getByText(/^Links in a preview don't open here/),
+  ).toHaveCount(0);
+});

@@ -414,6 +414,19 @@ function beginRun(conversation, text) {
         }
         // WEB-U-327: the run's first call is the lead's read of its team, answered with the runtime's marked block
         // for the model (a person's step-in), as tqa-tools writes it; the page says how many messages, never the block.
+        // WEB-E2E-133: the run's first call reads a PDF (prose lines, a long address in them), or a code file with one
+        // long line, for the step's output block: the PDF's wraps, the code's keeps its lines.
+        const read = READS[text];
+        if (read && event.call_id === firstCall(frames)) {
+          if (event.type === "tool.call")
+            Object.assign(event, {
+              name: "read_file",
+              arguments: read.arguments,
+            });
+          if (event.type === "tool.output") event.data = read.content;
+          if (event.type === "tool.result")
+            Object.assign(event, { status: "ok", content: read.content });
+        }
         if (text === TEAM_READ && event.call_id === firstCall(frames)) {
           if (event.type === "tool.call")
             Object.assign(event, { name: "read_reports", arguments: {} });
@@ -648,6 +661,28 @@ export function resume(conversation) {
 export const WRAPPED = "Answer in a result tag.";
 /** WEB-U-327: a run whose first call reads the team's messages. */
 export const TEAM_READ = "Check for reports";
+
+/** What "Read the report PDF" and "Read the code file" read (WEB-E2E-133): read_file's own result shapes. */
+const READS = {
+  "Read the report PDF": {
+    arguments: { path: "uploads/report.pdf", start_line: 1, end_line: 2 },
+    content: [
+      "[PDF, 300 pages]",
+      "--- page 1 ---",
+      "Part 1 of the long report",
+      "The reading room opened in a former boathouse on the east bank of the river. Its long windows face the water, and on bright mornings the light moves across the tables like a slow tide.",
+      `The catalogue is at https://example.invalid/${"catalogue-".repeat(16)}index and in the hall.`,
+      "--- page 2 ---",
+      "Part 2 of the long report",
+      "The room is open six days a week and closed on Sundays and public holidays. During the winter months it closes one hour earlier, because the path along the river is not lit after dark.",
+      "[partial: pages 1-2 of 300; continue with cursor c1 or start_line=3]",
+    ].join("\n"),
+  },
+  "Read the code file": {
+    arguments: { path: "src/app.py" },
+    content: `     1\tdef main():\n     2\t    values = [${Array.from({ length: 40 }, (_, at) => `"item-${at}"`).join(", ")}]\n     3\t    print(values)\n`,
+  },
+};
 const TEAM_READ_BLOCK =
   '<signed-in-person source="person" seq="5" type="person_message" from="your person" id="b332b4cc72cc104b">\n' +
   "Use only facts you can name a source for.\n" +

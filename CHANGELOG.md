@@ -7,6 +7,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Added
 
+- **A built web app's own paths work in the preview (GW-U-223, GW-U-224, GW-I-321).** A default Vite or Create
+  React App build names its files from the server's root (`/assets/app.js`), which a preview's address can't serve,
+  so the page stayed blank. The preview now moves those paths under its own address in the page's HTML and in its
+  stylesheets; scripts are never changed. A static export's own pages open by their links (`/about` answers
+  `about.html`). Each previewed page carries a small reporter that tells the Files panel what it couldn't load.
 - **The agent builds web apps that preview (PROMPT-U-028).** Where a web app can be built (Node, with the npm
   registry among the allowed sites), the instructions say the Files panel previews a built folder under a
   sub-path: build with relative paths (Vite `base: './'`, Create React App `"homepage": "."`) and a hash router,
@@ -20,6 +25,13 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Changed
 
+- **The rest of the 17.2 design review (18.1; WEB-U-498, WEB-U-499, WEB-U-501 to WEB-U-504, WEB-E2E-136).** A
+  Settings form's Advanced and its other disclosures are quiet toggles beside their bold section labels. The usage
+  chart is drawn in ink with its busiest day's tokens on its scale, and each share is its percentage on a thin track.
+  Status reads as one list, in one text size. Sign-in, setup, joining and the 404 page show the same lockup as the
+  app, the mark with "TensorQuay Agent". On a phone a Models card opens its route when tapped. In the dark theme your
+  messages have a thin edge, so they stand apart from the page.
+
 - **`edit_file` says what it found, so a model can fix its next call by itself (18.1; TOOL-U-004, CORE-E-041).** An
   `old_text` that matches more than once lists the matching lines with their text (past ten, how many more, counted to a
   thousand); one that matches nowhere names the nearest lines with their numbers and text, never a looser match; the
@@ -30,6 +42,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **The text tool-call route reads `tool` or `function` for the tool's name and `parameters` for its arguments
   (PROMPT-U-024),** as the native route does; a call block without a name says which keys it had (`no_name`'s new
   optional `keys`, PROTO-U-044; never a value).
+- **The task's header is one quiet line (WEB-U-495, WEB-E2E-135).** The title is in regular type at body size, and
+  the workspace it is in (and the profile it came from) follows it in grey on the same line, giving way first when
+  room is short. A finished task no longer says "Done" there: the end of the transcript and the sidebar say it, and a
+  screen reader still hears it. Every other state (Working…, Waiting for you, Failed, Stopped) stays on the line.
 - **A file opens beside the chat (WEB-U-494, WEB-E2E-134).** Expand on a file in the Files panel no longer opens a
   dialog over the conversation: the file takes about 60 % of the page beside the chat, which stays readable and usable,
   and a divider between them can be dragged or moved with the arrow keys; each person's choice is remembered in their
@@ -62,6 +78,11 @@ dialog, the expanded screen picture keeps its frame on a phone, and a PDF's page
 app moves to Next.js 16.4.5. No migration, protocol or configuration change: upgrade in place with 18.0.1's images.
 
 ### Fixed
+
+- **Two details from the 18.0.1 live look (WEB-U-492, WEB-U-493, WEB-E2E-133).** On a phone the Files panel wrote a
+  file's size on two lines beside Expand ("661.6 / kB"); the size now reads on one line, and the actions move under it
+  when the row can't hold all three. A PDF read's output in its step scrolled sideways, its paragraphs one long line
+  each; it now wraps them, a long address or word included, while a code or text file's read keeps its lines.
 
 - **A PDF read's step names the pages it read, not lines (WEB-U-482).** After reading pages 1 and 2 of a PDF, the
   step said "Read uploads/report.pdf lines 1–2"; it now says "pages 1–2", in every language. The result's own page

@@ -17,7 +17,6 @@
     "theme.light": "Cerah",
     "theme.dark": "Gelap",
     "theme.current": "Tema: {theme, select, light {Cerah} dark {Gelap} other {Sistem}}",
-    "auth.wordmark": "TensorQuay",
     "auth.setupTitle": "Cipta pentadbir pertama",
     "auth.signInTitle": "Log masuk",
     "auth.setupIntro": "Sediakan akaun anda untuk mula bekerja.",

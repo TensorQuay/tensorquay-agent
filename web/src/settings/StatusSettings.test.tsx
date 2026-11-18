@@ -572,3 +572,45 @@ describe("WEB-U-299 Status's sections and verdict", () => {
     }
   });
 });
+
+// WEB-U-504 (18.1, the 17.2 review's finding 13, decided on 18 Nov 2026): Status reads as one list. Its lines are in
+// one body size (the page's intro under its name stays small, as every Settings page's does), and its one-line
+// sections are named in the section-label style, not 22 px headings.
+describe("WEB-U-504 Status reads as one list", () => {
+  it.each([
+    [
+      "ready",
+      {
+        ...ready,
+        git_credentials_kept: { not_web_address: 1, waiting: 0 },
+        runs_active: 2,
+      },
+    ],
+    ["failing", failing({ database: false })],
+  ] as const)(
+    "names its sections as labels and says its lines in one size (%s)",
+    async (_, answer) => {
+      fetch.mockImplementationOnce(() => json(answer));
+      show();
+      await screen.findByText(/^Checked at /);
+      const headings = screen.getAllByRole("heading", { level: 2 });
+      expect(headings.length).toBeGreaterThanOrEqual(2);
+      for (const heading of headings) {
+        expect(heading).toHaveClass("type-body-strong");
+        expect(heading).not.toHaveClass("type-heading");
+      }
+      for (const line of [
+        /^Checked at /,
+        /^Environments run as Docker containers\.$/,
+      ])
+        expect(screen.getByText(line)).not.toHaveClass("type-small");
+      if (answer.ready)
+        expect(screen.getByText(/^Passing: /)).not.toHaveClass("type-small");
+      expect(
+        screen.getByText(
+          "Whether this installation can start tasks. New tasks fail until every check passes.",
+        ),
+      ).toHaveClass("type-small", "muted");
+    },
+  );
+});

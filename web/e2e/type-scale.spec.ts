@@ -90,7 +90,8 @@ for (const [width, colorScheme] of [
           .getByRole("region", { name: "Task header" })
           .getByRole("heading", { level: 1 }),
       );
-      expect.soft(title.size).toBe(18);
+      // The task header's title is at body size, in regular weight (WEB-U-495, decided on 17 Nov 2026).
+      expect.soft(title.size).toBe(16);
     });
 
     await test.step("the task list", async () => {

@@ -176,6 +176,9 @@
   background: var(--surface);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--control-radius);
+  /* Apart from the page in the dark theme by the composer's line colour, clear in the light (the 17.2 review's finding
+     19, decided on 18 Nov 2026); inset, so the bubble keeps its size. */
+  box-shadow: inset 0 0 0 var(--border-width) var(--message-edge);
 }
 /* A waiting message's Cancel (WEB-U-167): a quiet action at the bubble's end, the waiting itself said in the header. */
 .user-message .message-cancel {
@@ -312,6 +315,12 @@
   align-self: flex-start;
 }
 .result-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+/* A PDF read's output is prose, a page's paragraphs: it wraps, a long address or word included, where a code file's
+   keeps its lines and scrolls (18.1, WEB-U-493). */
+.code-block.prose-lines {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
@@ -811,9 +820,13 @@ textarea.composer-input {
   overflow: clip;
   overflow-clip-margin: var(--space-1);
 }
+/* The title, then its profile and workspace muted on the same line ("· In CodeWS"); the origin gives way first, the
+   title last (18.1, WEB-U-495). */
 .conversation-name {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: baseline;
+  gap: var(--space-1);
   min-width: 0;
 }
 .conversation-title h1,
@@ -1119,8 +1132,19 @@ textarea.composer-input {
 }
 
 /* "From {profile}" under a task's title (ADR-0012): one small line, truncated with the title. */
+/* The title keeps its whole width while the origin gives way, down to nothing; only a title longer than the line
+   itself is cut. Proportional shrinking alone took a fraction of a pixel from the title and drew its ellipsis. */
+.conversation-name > h1 {
+  flex-shrink: 0;
+  max-width: 100%;
+}
 .conversation-origin {
+  flex-shrink: 1000;
   line-height: var(--compact-leading);
+}
+.conversation-origin::before {
+  content: "·" / "";
+  margin-inline-end: var(--space-1);
 }
 /* A task that could not load keeps its header; the transcript's place says so, centred. */
 .conversation-failure {
