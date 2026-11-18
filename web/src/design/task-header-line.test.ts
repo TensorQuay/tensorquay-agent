@@ -36,5 +36,9 @@ describe("WEB-U-495 the header's one quiet line", () => {
     expect(declared(name, "flex-direction")).toBe("row");
     expect(declared(name, "align-items")).toBe("baseline");
     expect(declared(rule(".conversation-origin"), "flex-shrink")).toBe("1000");
+    // The title never shrinks for the origin: only past the whole line is it cut.
+    const title = rule(".conversation-name > h1");
+    expect(declared(title, "flex-shrink")).toBe("0");
+    expect(declared(title, "max-width")).toBe("100%");
   });
 });

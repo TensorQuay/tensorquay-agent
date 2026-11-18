@@ -58,10 +58,17 @@ async function header(page: Page) {
       size: style.fontSize,
       weight: style.fontWeight,
       lines: Math.round(box(title).height / parseFloat(style.lineHeight)),
+      // On the title's line: the origin's box inside the title's (they share a baseline, not a size).
       sameLine: origin
-        ? Math.abs(box(origin).bottom - box(title).bottom) <= 3
+        ? box(origin).top >= box(title).top - 1 &&
+          box(origin).bottom <= box(title).bottom + 1
         : null,
-      titleCut: title.scrollWidth > title.clientWidth + 1,
+      // Cut: its text wider than its box, measured exactly (scrollWidth rounds a fraction of a pixel away).
+      titleCut: (() => {
+        const range = document.createRange();
+        range.selectNodeContents(title);
+        return range.getBoundingClientRect().width > box(title).width + 0.5;
+      })(),
       originCut: origin ? origin.scrollWidth > origin.clientWidth + 1 : null,
       originText: origin?.textContent ?? "",
       word: word?.textContent ?? "",

@@ -811,9 +811,13 @@ textarea.composer-input {
   overflow: clip;
   overflow-clip-margin: var(--space-1);
 }
+/* The title, then its profile and workspace muted on the same line ("· In CodeWS"); the origin gives way first, the
+   title last (18.1, WEB-U-495). */
 .conversation-name {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: baseline;
+  gap: var(--space-1);
   min-width: 0;
 }
 .conversation-title h1,
@@ -1119,8 +1123,19 @@ textarea.composer-input {
 }
 
 /* "From {profile}" under a task's title (ADR-0012): one small line, truncated with the title. */
+/* The title keeps its whole width while the origin gives way, down to nothing; only a title longer than the line
+   itself is cut. Proportional shrinking alone took a fraction of a pixel from the title and drew its ellipsis. */
+.conversation-name > h1 {
+  flex-shrink: 0;
+  max-width: 100%;
+}
 .conversation-origin {
+  flex-shrink: 1000;
   line-height: var(--compact-leading);
+}
+.conversation-origin::before {
+  content: "·" / "";
+  margin-inline-end: var(--space-1);
 }
 /* A task that could not load keeps its header; the transcript's place says so, centred. */
 .conversation-failure {

@@ -453,10 +453,11 @@ h3 {
   letter-spacing: var(--display-tracking);
   font-weight: 400;
 }
+/* The task's title in its header: body size, regular weight, one quiet line with its origin (18.1, WEB-U-495). */
 .type-task-title {
-  font-size: var(--task-title-size);
-  line-height: var(--heading-leading);
-  font-weight: 700;
+  font-size: var(--body-size);
+  line-height: var(--body-leading);
+  font-weight: 400;
 }
 .type-heading {
   font-size: var(--heading-size);
