@@ -17,7 +17,6 @@
     "theme.light": "สว่าง",
     "theme.dark": "มืด",
     "theme.current": "ธีม: {theme, select, light {สว่าง} dark {มืด} other {ตามระบบ}}",
-    "auth.wordmark": "TensorQuay",
     "auth.setupTitle": "สร้างผู้ดูแลระบบคนแรก",
     "auth.signInTitle": "ลงชื่อเข้าใช้",
     "auth.setupIntro": "ตั้งค่าบัญชีของคุณเพื่อเริ่มทำงาน",

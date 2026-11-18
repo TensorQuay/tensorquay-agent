@@ -332,7 +332,7 @@ export function Reasoning(section: Section) {
   const t = useT();
   return (
     <details className="route-group" open={section.draft.reasoning}>
-      <summary className="type-body-strong">{t("models.reasoning")}</summary>
+      <summary className="disclosure-quiet">{t("models.reasoning")}</summary>
       <div className="stack">
         <Check
           section={section}
@@ -492,7 +492,7 @@ export function Advanced({
   const roles = ROLES[section.draft.protocol];
   return (
     <details className="route-group" open={open || undefined}>
-      <summary className="type-body-strong">{t("models.advanced")}</summary>
+      <summary className="disclosure-quiet">{t("models.advanced")}</summary>
       <div className="stack">
         {children}
         {/* The per-route tool-schema settings; the defaults suit most routes (WEB-U-057). */}

@@ -28,6 +28,13 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Changed
 
+- **The rest of the 17.2 design review (18.1; WEB-U-498, WEB-U-499, WEB-U-501 to WEB-U-504, WEB-E2E-136).** A
+  Settings form's Advanced and its other disclosures are quiet toggles beside their bold section labels. The usage
+  chart is drawn in ink with its busiest day's tokens on its scale, and each share is its percentage on a thin track.
+  Status reads as one list, in one text size. Sign-in, setup, joining and the 404 page show the same lockup as the
+  app, the mark with "TensorQuay Agent". On a phone a Models card opens its route when tapped. In the dark theme your
+  messages have a thin edge, so they stand apart from the page.
+
 - **`edit_file` says what it found, so a model can fix its next call by itself (18.1; TOOL-U-004, CORE-E-041).** An
   `old_text` that matches more than once lists the matching lines with their text (past ten, how many more, counted to a
   thousand); one that matches nowhere names the nearest lines with their numbers and text, never a looser match; the

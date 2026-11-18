@@ -17,7 +17,6 @@
     "theme.light": "라이트",
     "theme.dark": "다크",
     "theme.current": "테마: {theme, select, light {라이트} dark {다크} other {시스템}}",
-    "auth.wordmark": "TensorQuay",
     "auth.setupTitle": "첫 번째 관리자 만들기",
     "auth.signInTitle": "로그인",
     "auth.setupIntro": "계정을 설정하고 작업을 시작하세요.",

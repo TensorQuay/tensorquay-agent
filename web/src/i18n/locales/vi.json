@@ -17,7 +17,6 @@
     "theme.light": "Sáng",
     "theme.dark": "Tối",
     "theme.current": "Giao diện: {theme, select, light {Sáng} dark {Tối} other {Hệ thống}}",
-    "auth.wordmark": "TensorQuay",
     "auth.setupTitle": "Tạo quản trị viên đầu tiên",
     "auth.signInTitle": "Đăng nhập",
     "auth.setupIntro": "Thiết lập tài khoản để bắt đầu làm việc.",

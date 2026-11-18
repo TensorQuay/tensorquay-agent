@@ -921,3 +921,22 @@ describe("WEB-U-293 deleting a route from the configuration file", () => {
     ).toBeNull();
   });
 });
+
+// WEB-U-498 (18.1, the 17.2 review's finding 11, decided on 18 Nov 2026): the route form's section labels keep their
+// weight, and Advanced is a quiet disclosure (a ghost button's look, regular weight, its chevron), so a group label and
+// a toggle no longer look the same.
+describe("WEB-U-498 the route form's Advanced is a quiet disclosure", () => {
+  it("draws Advanced as a quiet disclosure, the section labels as labels", async () => {
+    show(fakeRoutes({ routes: listed }).api);
+    await screen.findByRole("table", { name: "Model routes" });
+    await go("Add route");
+    const advanced = within(page()).getByText("Advanced");
+    expect(advanced.tagName).toBe("SUMMARY");
+    expect(advanced).toHaveClass("disclosure-quiet");
+    expect(advanced).not.toHaveClass("type-body-strong");
+    for (const label of ["Route", "Key"])
+      expect(
+        within(page()).getAllByText(label, { exact: true })[0],
+      ).toHaveClass("type-body-strong");
+  });
+});

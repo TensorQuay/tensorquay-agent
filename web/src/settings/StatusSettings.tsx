@@ -92,7 +92,8 @@ function Status({ environments }: { environments?: TemplatesApi | undefined }) {
   return (
     <div className="stack">
       <p className="type-small muted">{t("health.intro")}</p>
-      {/* The one line first: can new tasks start right now. */}
+      {/* The one line first: can new tasks start right now. Then one list, its lines in one body size and its sections
+          named as labels (the 17.2 review's finding 13, decided on 18 Nov 2026). */}
       <div className="stack status-verdict">
         {/* Polite and live, so a change after Check again or a 30 s read is heard; a read that leaves it as it was says
             nothing (an accessibility review before 17.0). Checked at, below, isn't live. */}
@@ -105,12 +106,10 @@ function Status({ environments }: { environments?: TemplatesApi | undefined }) {
             ? t("health.canStart")
             : t("health.cannotStart", { count: Math.max(failed.length, 1) })}
         </p>
-        <p className="type-small muted">
-          {t("health.checkedAt", { time: checkedAt })}
-        </p>
+        <p className="muted">{t("health.checkedAt", { time: checkedAt })}</p>
         {/* Always there and live, empty while reads succeed, so a failed read is heard when it happens. */}
         {/* Quiet: an older read is shown, nothing is wrong with the installation (WEB-U-361). */}
-        <p role="status" className="type-small muted">
+        <p role="status" className="muted">
           {status.isError ? t("health.readFailed") : null}
         </p>
       </div>
@@ -121,7 +120,7 @@ function Status({ environments }: { environments?: TemplatesApi | undefined }) {
           className="stack status-problem"
           aria-labelledby={`status-${key}`}
         >
-          <h2 id={`status-${key}`} className="type-heading">
+          <h2 id={`status-${key}`} className="type-body-strong">
             {t(label)}
           </h2>
           <p>
@@ -132,13 +131,13 @@ function Status({ environments }: { environments?: TemplatesApi | undefined }) {
         </section>
       ))}
       {passed.length > 0 && (
-        <p className="type-small muted">
+        <p className="muted">
           {t("health.passing", {
             checks: passed.map(({ label }) => t(label)).join(", "),
           })}
         </p>
       )}
-      <p className="type-small muted">
+      <p className="muted">
         {t(microVm ? "health.runsMicroVm" : "health.runsDocker")}
       </p>
       {templates.default !== null && (
@@ -177,7 +176,7 @@ function ActiveRuns({ active }: { active: ReadyDetail["runs_active"] }) {
   if (active === null) return null;
   return (
     <section className="stack" aria-labelledby={heading}>
-      <h2 id={heading} className="type-heading">
+      <h2 id={heading} className="type-body-strong">
         {t("health.activeTitle")}
       </h2>
       {/* A polite live line, so a screen reader hears the count when it changes while someone waits for a gap; the 30 s
@@ -215,7 +214,7 @@ function SandboxesLine({ sandboxes }: { sandboxes: ReadyDetail["sandboxes"] }) {
   const oldest = age(sandboxes.oldest_seconds, t);
   return (
     <section className="stack" aria-labelledby={heading}>
-      <h2 id={heading} className="type-heading">
+      <h2 id={heading} className="type-body-strong">
         {t("health.sandboxesTitle")}
       </h2>
       {/* A polite live line: a verdict that turns amber while someone watches is heard, as the active count is. */}
@@ -265,7 +264,7 @@ function KeptGitCredentials({
   if (kept === null || kept.not_web_address + kept.waiting === 0) return null;
   return (
     <section className="stack" aria-labelledby={heading}>
-      <h2 id={heading} className="type-heading">
+      <h2 id={heading} className="type-body-strong">
         {t("health.gitKeptTitle")}
       </h2>
       {kept.not_web_address > 0 && (
@@ -308,7 +307,7 @@ function DefaultEnvironment({
   )?.display_name;
   return (
     <section className="stack" aria-labelledby="status-default-environment">
-      <h2 id="status-default-environment" className="type-heading">
+      <h2 id="status-default-environment" className="type-body-strong">
         {t("health.defaultEnvironment")}
       </h2>
       <p className="environment-pills">
@@ -332,8 +331,8 @@ function DefaultEnvironment({
       </p>
       {!offered && (
         <>
-          <p className="type-small">{t(unavailableKey(reason))}</p>
-          <p className="type-small">
+          <p>{t(unavailableKey(reason))}</p>
+          <p>
             <Link href="/settings/environments">
               {t("health.openEnvironments")}
             </Link>
@@ -341,9 +340,7 @@ function DefaultEnvironment({
         </>
       )}
       {pending !== null && pending > 0 && (
-        <p className="type-small muted">
-          {t("health.checksPending", { count: pending })}
-        </p>
+        <p className="muted">{t("health.checksPending", { count: pending })}</p>
       )}
     </section>
   );

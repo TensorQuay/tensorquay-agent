@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { api, ApiError } from "../api/client";
+import { expectAppLockup } from "../test/brand";
 import { conversationId } from "../test/frames";
 import { LIMITS } from "../test/user";
 
@@ -352,5 +353,13 @@ describe("WEB-U-355 sign-in and setup fields, said by the page", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Enter the setup token.")).toBeInTheDocument();
     expect(bootstrap).not.toHaveBeenCalled();
+  });
+});
+
+// TEST: WEB-U-501
+describe("WEB-U-501 the sign-in and setup pages show the app's one lockup", () => {
+  it.each(["login", "setup"] as const)("on %s", (mode) => {
+    page(mode);
+    expectAppLockup();
   });
 });
