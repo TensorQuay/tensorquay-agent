@@ -114,7 +114,7 @@ test("E2E-AGENTS-040 a person's follow-up opens round 2, which brings a helper b
 
   // The log has one round_started, for round 2, to the person.
   const log = await page.request.get(
-    `/api/v1/conversations/${leadId}/team/messages?after=0&limit=500`,
+    `/api/v1/conversations/${leadId}/team/messages?after=0&limit=200`,
   );
   expect(log.status()).toBe(200);
   const { items } = (await log.json()) as {
