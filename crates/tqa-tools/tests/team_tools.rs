@@ -929,3 +929,51 @@ fn tool_u_147_a_lead_a_helper_and_a_task_that_may_lead_are_offered_as_before() {
         );
     }
 }
+
+// TEST: TOOL-U-148
+// Bringing a finished helper back is start_member's (ADR-0034's rounds amendment, A3): its schema takes `files`, its
+// description says the match rule, and a bring-back's answer says so first, never as a new helper.
+#[tokio::test]
+async fn tool_u_148_start_member_brings_a_finished_helper_back_in_its_own_words() -> TestResult {
+    let client = || Arc::new(Fake::default()) as Arc<dyn TeamClient>;
+    let tools = tools_for_role(client(), TeamRole::Lead);
+    let start = named(&tools, "start_member")?;
+    let spec = start.spec();
+    assert!(
+        spec.description.contains(
+            "Name a helper that has finished to bring it back with its history and its files. For a new helper on \
+             the same job, use a new role word."
+        ),
+        "{}",
+        spec.description
+    );
+    let files = &spec.parameters["properties"]["files"];
+    assert_eq!(files["type"], json!(["string", "null"]), "{files}");
+    assert_eq!(
+        files["enum"],
+        json!(["keep", "fresh_copy", null]),
+        "{files}"
+    );
+    let fixture = tqa_testkit::workspace_fixture()?;
+    let cx = support::context(&fixture);
+    let fake = Arc::new(Fake {
+        start: json!({"member": {"name": "researcher", "workspace": "own_copy", "state": "starting"},
+                      "seq": 31, "lead_tools": true, "brought_back": true, "files": "keep", "round": 2}),
+        ..Fake::default()
+    });
+    let tools = tools_for_role(fake.clone(), TeamRole::Lead);
+    let brought = named(&tools, "start_member")?
+        .call(
+            json!({"role": "researcher", "workspace": null, "profile": null, "files": "keep",
+                   "brief": {"objective": "o", "output": "p", "sources": null, "boundaries": "b"}}),
+            &cx,
+        )
+        .await?;
+    assert_eq!(
+        brought.text,
+        "Brought back researcher for round 2 (its copy kept); its brief is message 31. It reports to you."
+    );
+    let sent = fake.sent.lock().map_err(|_| "lock")?.clone();
+    assert_eq!(sent[0].1["files"], json!("keep"), "{sent:?}");
+    Ok(())
+}

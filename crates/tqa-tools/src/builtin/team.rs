@@ -6,6 +6,7 @@
 mod client;
 mod done;
 mod refusals;
+mod rounds_words;
 mod tools;
 pub use client::{ReadAnswer, TeamClient, TeamFailure};
 pub use done::{ACCEPTANCE_TIMEOUT, AcceptanceShell};
