@@ -26838,7 +26838,8 @@
         "required": [
           "role",
           "id",
-          "state"
+          "state",
+          "round"
         ],
         "properties": {
           "role": {
@@ -26927,6 +26928,11 @@
           "can_stop": {
             "type": "boolean",
             "description": "Whether its person's Stop helper would stop it now: while the team runs, any helper but a stopped one or one that couldn't start (a member's own person only)."
+          },
+          "round": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "The team's current round (ADR-0034's rounds amendment, A5): 1, then one more each time a person's follow-up opens a new round."
           }
         }
       },
@@ -27206,7 +27212,8 @@
           "tokens",
           "tokens_estimated",
           "activity",
-          "last_message"
+          "last_message",
+          "round"
         ],
         "properties": {
           "conversation": {
@@ -27324,6 +27331,11 @@
                 "type": "null"
               }
             ]
+          },
+          "round": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "The round it last joined: below the team's round, it is not in this round."
           }
         }
       },
@@ -27339,7 +27351,10 @@
           "budget",
           "waiting_for_you",
           "helpers",
-          "version"
+          "version",
+          "round",
+          "rounds",
+          "tokens_all_rounds"
         ],
         "properties": {
           "id": {
@@ -27454,6 +27469,80 @@
             "type": "integer",
             "minimum": 0,
             "description": "Rises with every change; team.changed names it."
+          },
+          "round": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "The team's current round (ADR-0034's rounds amendment, A5): 1, then one more each time a person's follow-up opens a new round."
+          },
+          "rounds": {
+            "type": "array",
+            "description": "Every round so far, newest last: the current one from the team itself, live.",
+            "items": {
+              "type": "object",
+              "required": [
+                "round",
+                "started_at",
+                "ended_at",
+                "stop_reason",
+                "budget"
+              ],
+              "properties": {
+                "round": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "started_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "ended_at": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Null while the round runs."
+                },
+                "stop_reason": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "description": "As the team's stop_reason."
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "budget": {
+                  "type": "object",
+                  "required": [
+                    "tokens",
+                    "spent"
+                  ],
+                  "properties": {
+                    "tokens": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "spent": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tokens_all_rounds": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "The tokens every round spent, this one's included."
           }
         }
       },

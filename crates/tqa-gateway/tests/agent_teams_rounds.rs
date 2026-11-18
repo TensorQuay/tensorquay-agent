@@ -11,6 +11,9 @@
 //! - GW-I-334 (step 3): a bring-back's refusals: a changed workspace or profile, `fresh_copy` for a `my_files` helper,
 //!   `workspace_gone` when its copy no longer exists.
 //! - SEC-067 (step 3): a brought-back helper gets no more than its lead's current settings, narrowed between rounds.
+//! - GW-I-337 (step 4, A5): what the person reads: `GET …/team` says the round, every round's record (newest last) and
+//!   all rounds' tokens, and each helper's round; `Conversation.team` says the round; the team's version rises when a
+//!   round opens.
 #[path = "support/agent_team.rs"]
 mod agent_team;
 #[path = "support/fixture.rs"]
@@ -693,6 +696,113 @@ async fn sec_067_a_lead_profile_narrowed_between_rounds_narrows_the_helper_broug
                 .await?;
             assert_eq!(tools, json!(["read_file"]), "{role}: no more than its lead's profile now");
         }
+        Ok(())
+    })
+    .await
+}
+
+/// The person's team answer for the lead, and the lead's own `Conversation.team`.
+async fn people_read(f: &Fixture, t: &Team) -> Result<(Value, Value)> {
+    let team = f
+        .get(
+            &format!("/api/v1/conversations/{}/team", t.lead.0),
+            &t.cookie,
+        )
+        .await?;
+    assert_eq!(team.status(), 200);
+    let lead = f
+        .get(&format!("/api/v1/conversations/{}", t.lead.0), &t.cookie)
+        .await?;
+    assert_eq!(lead.status(), 200);
+    Ok((
+        team.json::<Value>().await?,
+        lead.json::<Value>().await?["team"].clone(),
+    ))
+}
+
+// TEST: GW-I-337
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_337_the_person_reads_the_round_every_rounds_record_and_all_rounds_tokens(
+    pool: PgPool,
+) -> TestResult {
+    support::run_configured(pool, None, ENABLED, async |f| {
+        let t = team(f).await?;
+        let (one, lead_one) = people_read(f, &t).await?;
+        assert_eq!(one["round"], json!(1), "{one}");
+        assert_eq!(lead_one["round"], json!(1), "{lead_one}");
+        let rounds = one["rounds"].as_array().ok_or("rounds")?;
+        assert_eq!(rounds.len(), 1, "{one}");
+        assert_eq!(
+            (&rounds[0]["round"], &rounds[0]["ended_at"]),
+            (&json!(1), &Value::Null)
+        );
+        for helper in one["helpers"].as_array().ok_or("helpers")? {
+            assert_eq!(helper["round"], json!(1), "{helper}");
+        }
+        let before = one["version"].as_u64().ok_or("version")?;
+        // Round 1 spends 1,200 tokens, ends at `done`, and a person's follow-up brings the researcher back.
+        sqlx::query("UPDATE agent_teams SET spent_tokens = 1200 WHERE id = $1")
+            .bind(t.id)
+            .execute(&f.pool)
+            .await?;
+        between_rounds(f, &t).await?;
+        let (status, body) = start_with(
+            f,
+            &t,
+            "r-5:c-1",
+            json!({"role": "researcher", "workspace": "own_copy", "brief": brief()}),
+        )
+        .await?;
+        assert_eq!(status, 201, "{body}");
+        // The version rises once the change is flushed (at most a second).
+        let mut two = Value::Null;
+        let mut lead_two = Value::Null;
+        for _ in 0..50 {
+            (two, lead_two) = people_read(f, &t).await?;
+            if two["version"]
+                .as_u64()
+                .is_some_and(|version| version > before)
+            {
+                break;
+            }
+            tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+        }
+        assert!(two["version"].as_u64().ok_or("version")? > before, "{two}");
+        assert_eq!(two["round"], json!(2), "{two}");
+        assert_eq!(lead_two["round"], json!(2), "{lead_two}");
+        let rounds = two["rounds"].as_array().ok_or("rounds")?;
+        assert_eq!(rounds.len(), 2, "{two}");
+        assert_eq!(rounds[0]["round"], json!(1));
+        assert_eq!(rounds[0]["stop_reason"], json!("done"));
+        assert!(rounds[0]["ended_at"].is_string(), "{two}");
+        assert_eq!(rounds[0]["budget"]["spent"], json!(1200));
+        assert!(
+            rounds[0]["budget"]["tokens"]
+                .as_i64()
+                .is_some_and(|tokens| tokens > 0)
+        );
+        assert!(rounds[0]["started_at"].is_string());
+        assert_eq!(rounds[1]["round"], json!(2));
+        assert_eq!(
+            (&rounds[1]["ended_at"], &rounds[1]["stop_reason"]),
+            (&Value::Null, &Value::Null)
+        );
+        assert_eq!(rounds[1]["budget"]["spent"], two["budget"]["spent"]);
+        let spent = two["budget"]["spent"].as_i64().ok_or("spent")?;
+        assert_eq!(two["tokens_all_rounds"], json!(1200 + spent));
+        let round_of = |name: &str| {
+            two["helpers"]
+                .as_array()
+                .and_then(|rows| rows.iter().find(|row| row["name"] == json!(name)))
+                .map(|row| row["round"].clone())
+        };
+        assert_eq!(
+            round_of("researcher"),
+            Some(json!(2)),
+            "brought back into round 2"
+        );
+        assert_eq!(round_of("reviewer"), Some(json!(1)), "not in this round");
         Ok(())
     })
     .await
