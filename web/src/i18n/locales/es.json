@@ -144,6 +144,8 @@
     "tool.read": "Leído {path}",
     "tool.readLine": " línea {first}",
     "tool.readLines": " líneas {first}–{last}",
+    "tool.readPage": " página {first}",
+    "tool.readPages": " páginas {first}–{last}",
     "tool.count": " · {count, plural, one {# {unit, select, file {archivo} other {coincidencia}}} other {# {unit, select, file {archivos} other {coincidencias}}}}",
     "tool.partial": " (parcial)",
     "tool.used": "Usado {name}",

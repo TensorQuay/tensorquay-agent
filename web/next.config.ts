@@ -17,6 +17,9 @@ const BUILD_INPUTS = [
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // No build asks the registry for upgrades or stops itself to recommend one: upgrades are the team's decision
+  // (18.0.1, WEB-U-491).
+  experimental: { agentUpgrade: false },
   // ADR-0017 disables image optimisation so no native image dependency is needed.
   images: { unoptimized: true },
   // Fixed when the build runs, as it was while the design reference was prerendered: every page renders per request

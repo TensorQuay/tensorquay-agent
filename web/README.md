@@ -25,7 +25,7 @@ optional native image dependency; image optimisation is disabled.
 
 | Package                             | Version |
 | ----------------------------------- | ------- |
-| Next.js / eslint-config-next        | 16.4.1  |
+| Next.js / eslint-config-next        | 16.4.5  |
 | React / React DOM                   | 19.2.8  |
 | Ajv                                 | 8.20.0  |
 | TanStack Query                      | 5.103.2 |
