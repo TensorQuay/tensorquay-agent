@@ -1,7 +1,6 @@
 {
   "language": "English",
   "messages": {
-    "auth.wordmark": "TensorQuay",
     "auth.setupTitle": "Create the first administrator",
     "auth.signInTitle": "Sign in",
     "auth.setupIntro": "Set up your account to start working.",

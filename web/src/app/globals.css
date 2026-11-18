@@ -256,7 +256,6 @@
   --icon-text: 16px;
   --icon-control: 20px;
   --mark-header: 24px;
-  --wordmark-height: 24px;
   --border-width: 1px;
   --focus-width: 2px;
   --focus-offset: 2px;
@@ -718,14 +717,13 @@ textarea.form-control {
 .empty-icon {
   color: var(--muted);
 }
-.brand-wordmark {
-  display: block;
-  height: var(--wordmark-height);
-  width: auto;
-  aspect-ratio: 330.25 / 64;
-  max-width: 100%;
-  background: var(--ink);
-  mask: url("/brand/wordmark.svg") left center / contain no-repeat;
+/* The app's one lockup on the pages before sign-in (the 17.2 review's finding 16): the mark and the product's name,
+   spaced as the sidebar's. */
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--control-height);
 }
 .empty-state {
   display: flex;
@@ -1221,7 +1219,7 @@ textarea.form-control {
   gap: var(--space-8);
 }
 /* A quiet mark above the form (the design direction): the page's heading carries the words. */
-.auth-column .brand-wordmark {
+.auth-column .brand-lockup {
   align-self: flex-start;
   margin: var(--space-2) 0;
 }

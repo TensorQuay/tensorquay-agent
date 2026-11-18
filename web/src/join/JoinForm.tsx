@@ -16,6 +16,7 @@ import { Button } from "../ui/Button";
 import { ErrorMessage } from "../ui/ErrorMessage";
 import { Input } from "../ui/Input";
 import { Skeleton } from "../ui/Skeleton";
+import { BrandLockup } from "../ui/BrandLockup";
 
 import { lookupInvitation } from "./lookup";
 
@@ -63,11 +64,7 @@ export function JoinForm({ token }: { token: string }) {
   return (
     <section className="auth-column">
       <title>{t("join.tab", { product: APP_NAME })}</title>
-      <span
-        className="brand-wordmark"
-        role="img"
-        aria-label={t("auth.wordmark")}
-      />
+      <BrandLockup />
       <header className="stack auth-heading">
         <h1 className="type-display">
           {t("join.title", { product: APP_NAME })}

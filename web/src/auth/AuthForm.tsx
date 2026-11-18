@@ -12,6 +12,7 @@ import { APP_NAME } from "../lib/app";
 import { Button } from "../ui/Button";
 import { ErrorMessage } from "../ui/ErrorMessage";
 import { Input } from "../ui/Input";
+import { BrandLockup } from "../ui/BrandLockup";
 
 import {
   emailProblem,
@@ -160,11 +161,7 @@ export function AuthForm({ mode }: { mode: "login" | "setup" }) {
       <title>
         {t(setup ? "auth.setupTab" : "auth.signInTab", { product: APP_NAME })}
       </title>
-      <span
-        className="brand-wordmark"
-        role="img"
-        aria-label={t("auth.wordmark")}
-      />
+      <BrandLockup />
       <header className="stack auth-heading">
         <h1 className="type-display">
           {t(setup ? "auth.setupTitle" : "auth.signInTitle")}

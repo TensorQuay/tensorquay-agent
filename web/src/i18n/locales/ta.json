@@ -17,7 +17,6 @@
     "theme.light": "வெளிர்",
     "theme.dark": "இருள்",
     "theme.current": "தோற்றம்: {theme, select, light {வெளிர்} dark {இருள்} other {கணினி}}",
-    "auth.wordmark": "TensorQuay",
     "auth.setupTitle": "முதல் நிர்வாகியை உருவாக்கு",
     "auth.signInTitle": "உள்நுழை",
     "auth.setupIntro": "வேலையைத் தொடங்க உங்கள் கணக்கை அமைக்கவும்.",

@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { useT } from "../i18n/I18nProvider";
 import { APP_NAME } from "../lib/app";
+import { BrandLockup } from "../ui/BrandLockup";
 
 import { TabTitle } from "./TabTitle";
 
@@ -20,11 +21,7 @@ export function NotFoundPage() {
     <main id="main" className="login-page">
       <section className="auth-column">
         <TabTitle>{t("notFound.tab", { product: APP_NAME })}</TabTitle>
-        <span
-          className="brand-wordmark"
-          role="img"
-          aria-label={t("auth.wordmark")}
-        />
+        <BrandLockup />
         <header className="stack auth-heading">
           <h1 className="type-display">{t("notFound.title")}</h1>
           <p className="type-small muted">{t("notFound.body")}</p>

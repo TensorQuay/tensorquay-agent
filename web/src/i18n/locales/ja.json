@@ -17,7 +17,6 @@
     "theme.light": "ライト",
     "theme.dark": "ダーク",
     "theme.current": "テーマ：{theme, select, light {ライト} dark {ダーク} other {システム}}",
-    "auth.wordmark": "TensorQuay",
     "auth.setupTitle": "最初の管理者を作成",
     "auth.signInTitle": "サインイン",
     "auth.setupIntro": "アカウントを設定して作業を始めましょう。",

@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { LIMITS } from "../test/user";
 
+import { expectAppLockup } from "../test/brand";
 import { JoinForm } from "./JoinForm";
 
 const replace = vi.fn();
@@ -147,5 +148,13 @@ describe("WEB-U-355 join's password, said by the page", () => {
       "true",
     );
     expect(fetch).toHaveBeenCalledTimes(1);
+  });
+});
+
+// TEST: WEB-U-501
+describe("WEB-U-501 the join page shows the app's one lockup", () => {
+  it("shows the mark with TensorQuay Agent", () => {
+    show();
+    expectAppLockup();
   });
 });

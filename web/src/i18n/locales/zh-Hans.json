@@ -16,7 +16,6 @@
     "theme.light": "浅色",
     "theme.dark": "深色",
     "theme.current": "主题：{theme, select, light {浅色} dark {深色} other {跟随系统}}",
-    "auth.wordmark": "TensorQuay",
     "auth.setupTitle": "创建第一个管理员",
     "auth.signInTitle": "登录",
     "auth.setupIntro": "设置你的账户以开始工作。",
