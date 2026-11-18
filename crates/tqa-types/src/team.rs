@@ -95,6 +95,21 @@ pub struct StartMember {
     /// An agent profile the person may use, by ID.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub profile: Option<String>,
+    /// A helper brought back: its copy as it is, or a fresh copy of the lead's files (ADR-0034's rounds amendment,
+    /// A3); ignored for a new helper.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub files: Option<BroughtBackFiles>,
+}
+
+/// A brought-back helper's files (ADR-0034's rounds amendment, A3).
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum BroughtBackFiles {
+    /// Its copy as it is, files it changed and never reported included.
+    #[default]
+    Keep,
+    /// A new copy of the lead's files now, replacing its copy.
+    FreshCopy,
 }
 
 /// A stored message's type.

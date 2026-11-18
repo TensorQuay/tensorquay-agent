@@ -18,6 +18,7 @@ fn start(role: &str, objective: &str) -> StartMember {
         },
         workspace: WorkspaceMode::OwnCopy,
         profile: None,
+        files: None,
     }
 }
 
@@ -113,6 +114,7 @@ fn gw_u_125_each_brief_rule_names_its_field_and_reason() {
         (
             StartMember {
                 profile: Some("Legal Reviewer".into()),
+                files: None,
                 ..start("r", "o")
             },
             "profile",

@@ -16752,6 +16752,14 @@
                   },
                   "profile": {
                     "type": "string"
+                  },
+                  "files": {
+                    "type": "string",
+                    "enum": [
+                      "keep",
+                      "fresh_copy"
+                    ],
+                    "description": "A helper brought back by naming it (ADR-0034's rounds amendment, A3): keep its copy as it is (the default) or take a fresh copy of the lead's files; ignored for a new helper."
                   }
                 }
               }

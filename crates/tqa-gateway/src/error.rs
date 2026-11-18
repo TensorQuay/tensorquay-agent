@@ -40,6 +40,15 @@ pub enum GatewayError {
         /// Why it was refused.
         reason: InvalidReason,
     },
+    /// As [`Self::Invalid`] with `parameter_invalid`, in a sentence that says what the field must be instead (a helper
+    /// brought back keeps its own workspace and profile, ADR-0034's rounds amendment A3).
+    #[error("{said}")]
+    ParameterRefused {
+        /// The request field, by its documented name.
+        field: &'static str,
+        /// What to do instead, in words for a model.
+        said: String,
+    },
     /// As [`Self::Invalid`], for a field named only at run time: one a strict decoder refused, unknown fields included.
     #[error("invalid request field {field}")]
     InvalidField {
@@ -330,9 +339,10 @@ impl GatewayError {
         match self {
             Self::ForFile { refusal, .. } => refusal.code(),
             Self::Configuration(_) | Self::ConfigurationField(_) => "configuration",
-            Self::BadRequest(_) | Self::Invalid { .. } | Self::InvalidField { .. } => {
-                "invalid_request"
-            }
+            Self::BadRequest(_)
+            | Self::Invalid { .. }
+            | Self::InvalidField { .. }
+            | Self::ParameterRefused { .. } => "invalid_request",
             Self::UnknownReference { .. } => "unknown_reference",
             Self::ProfileUnusable { .. } => "profile_unusable",
             Self::SetByProfile { .. } => "set_by_profile",
@@ -421,6 +431,7 @@ impl GatewayError {
             Self::BadRequest(_)
             | Self::Invalid { .. }
             | Self::InvalidField { .. }
+            | Self::ParameterRefused { .. }
             | Self::Protocol(_)
             | Self::UnsupportedProtocol(_)
             | Self::InvitationInvalid
@@ -494,6 +505,7 @@ impl GatewayError {
             Self::BadRequest(_)
             | Self::Invalid { .. }
             | Self::InvalidField { .. }
+            | Self::ParameterRefused { .. }
             | Self::UnknownReference { .. }
             | Self::ProfileUnusable { .. }
             | Self::SetByProfile { .. }
@@ -564,6 +576,10 @@ impl IntoResponse for GatewayError {
         }
         if let Self::Invalid { field, reason } = &self {
             error["details"] = serde_json::json!([{"field": field, "reason": reason.as_str()}]);
+        }
+        if let Self::ParameterRefused { field, .. } = &self {
+            let reason = InvalidReason::ParameterInvalid.as_str();
+            error["details"] = serde_json::json!([{"field": field, "reason": reason}]);
         }
         if let Self::UnknownReference { field } = &self {
             let reason = InvalidReason::UnknownReference.as_str();
