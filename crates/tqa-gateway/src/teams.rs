@@ -2,6 +2,7 @@
 //! runtime routes, built slice by slice (DEV-PLAN Phase 10).
 // The cursor's rules as a pure model, tested (GW-U-126) and mirrored by the store's SQL.
 mod acceptance;
+mod bring_back;
 pub(crate) mod budget;
 pub(crate) mod cap;
 pub(crate) mod changed;

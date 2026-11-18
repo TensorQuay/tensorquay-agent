@@ -136,6 +136,15 @@ pub enum GatewayError {
     /// A stable conflict reason prevents this operation.
     #[error("operation conflicts with current state: {0}")]
     Conflict(&'static str),
+    /// As [`Self::Conflict`], in a sentence that says what to do instead (a brought-back helper's copy is gone:
+    /// `fresh_copy`, ADR-0034's rounds amendment A3).
+    #[error("{said}")]
+    ConflictSaid {
+        /// The stable code.
+        code: &'static str,
+        /// What to do instead, in words for a model.
+        said: String,
+    },
     /// One of an agent team's handed-back files was refused (ADR-0034 point 6); `details: {path}` names it.
     #[error("{path}: {refusal}")]
     ForFile {
@@ -363,7 +372,10 @@ impl GatewayError {
             Self::FilesUnavailable => "files_unavailable",
             Self::NotFound => "not_found",
             Self::UserNotFound => "user_not_found",
-            Self::Missing(code) | Self::Denied(code) | Self::Conflict(code) => code,
+            Self::Missing(code)
+            | Self::Denied(code)
+            | Self::Conflict(code)
+            | Self::ConflictSaid { code, .. } => code,
             Self::MemberLimit { .. } => "member_limit",
             Self::TeamEnded(_) => "team_ended",
             Self::AcceptanceFailed(..) => "acceptance_failed",
@@ -448,6 +460,7 @@ impl GatewayError {
                 StatusCode::NOT_FOUND
             }
             Self::Conflict(_)
+            | Self::ConflictSaid { .. }
             | Self::MemberLimit { .. }
             | Self::TeamEnded(_)
             | Self::AcceptanceFailed(..)
@@ -529,6 +542,7 @@ impl GatewayError {
             | Self::Unauthorized
             | Self::NotFound
             | Self::Conflict(_)
+            | Self::ConflictSaid { .. }
             | Self::MemberLimit { .. }
             | Self::TeamEnded(_)
             | Self::AcceptanceFailed(..)

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT seq, body FROM channel_messages WHERE channel_id = $1 AND to_conversation = $2 AND type = 'assign' ORDER BY seq LIMIT 1",
+  "query": "SELECT seq, body FROM channel_messages WHERE channel_id = $1 AND to_conversation = $2 AND type = 'assign' ORDER BY CASE WHEN $3 > 1 THEN -seq ELSE seq END LIMIT 1",
   "describe": {
     "columns": [
       {
@@ -29,7 +29,8 @@
     "parameters": {
       "Left": [
         "Uuid",
-        "Uuid"
+        "Uuid",
+        "Int4"
       ]
     },
     "nullable": [
@@ -37,5 +38,5 @@
       false
     ]
   },
-  "hash": "315f48f34c4cae82d7edf5cbc434f96e719138b407d1a689d6f2fd3e6119e9f9"
+  "hash": "8ee1b930e430980f31353b8429ae4d618246c35a20001abf956b01fa16d3d1cb"
 }

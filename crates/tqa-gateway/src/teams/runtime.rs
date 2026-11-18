@@ -397,7 +397,13 @@ pub(crate) async fn start(
         let started =
             super::start::start_member(&mut transaction, &state, (leader, owner), &request, &run)
                 .await?;
-        let body = json!({ "member": started.member, "seq": started.seq, "lead_tools": true });
+        let mut body = json!({ "member": started.member, "seq": started.seq, "lead_tools": true });
+        // A helper brought back says so (ADR-0034's rounds amendment, A3).
+        if let Some((files, round)) = started.brought_back {
+            body["brought_back"] = json!(true);
+            body["files"] = json!(files);
+            body["round"] = json!(round);
+        }
         keyed
             .record(&mut transaction, StatusCode::CREATED, &body)
             .await?;

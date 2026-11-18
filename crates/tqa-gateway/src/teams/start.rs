@@ -124,6 +124,22 @@ pub(crate) struct Started {
     pub(crate) seq: u64,
     /// An own copy's source, the copy, and its quota.
     pub(crate) fork: Option<(Uuid, Uuid, u64)>,
+    /// A helper brought back (ADR-0034's rounds amendment, A3): its files and the round it joins.
+    pub(crate) brought_back: Option<(tqa_types::BroughtBackFiles, u32)>,
+}
+
+/// The administrator's limits in force (ADR-0034 S6, ADR-0028): the cap from the next helper, the budget and the
+/// deadline from the next team or round; the file's values are only their seeds.
+fn limits_now(state: &crate::app::State) -> (super::cap::Cap, AgentTeams) {
+    let limits = state.settings.current().limits;
+    let cap = super::cap::cap(limits.team_max_members, limits.slots, limits.per_user);
+    let teams = AgentTeams {
+        max_members: limits.team_max_members,
+        token_budget: limits.team_token_budget,
+        deadline_minutes: limits.team_deadline_minutes,
+        ..state.config.agent_teams.clone()
+    };
+    (cap, teams)
 }
 
 /// `start_member`'s work in the caller's transaction: the caller may lead (depth 1), the profile it names, the member
@@ -144,19 +160,21 @@ pub(crate) async fn start_member(
         caller.map(|caller| caller.role),
         super::roles::Route::StartMember,
     )?;
+    // A finished helper named again comes back, its own task and row (ADR-0034's rounds amendment, A3).
+    let (cap, teams) = limits_now(state);
+    if let Some(back) = super::bring_back::find(connection, leader, &request.role).await? {
+        return super::bring_back::start(
+            connection,
+            (leader, owner, run),
+            request,
+            back,
+            (cap, &teams),
+        )
+        .await;
+    }
     let profile = match &request.profile {
         Some(name) => Some(profile_named(connection, state, owner, name).await?),
         None => None,
-    };
-    // The administrator's limits in force (ADR-0034 S6, ADR-0028): the cap from the next helper, the budget and the
-    // deadline from the next team; the file's values are only their seeds.
-    let limits = state.settings.current().limits;
-    let cap = super::cap::cap(limits.team_max_members, limits.slots, limits.per_user);
-    let teams = AgentTeams {
-        max_members: limits.team_max_members,
-        token_budget: limits.team_token_budget,
-        deadline_minutes: limits.team_deadline_minutes,
-        ..state.config.agent_teams.clone()
     };
     let member = crate::conversations::member::create(
         connection,
@@ -207,6 +225,7 @@ pub(crate) async fn start_member(
         fork: member
             .fork
             .map(|(source, quota)| (source, member.workspace, quota)),
+        brought_back: None,
     })
 }
 
@@ -258,7 +277,7 @@ pub(crate) async fn profile_named(
 ///
 /// # Errors
 /// `409 team_stopped` while it stops, `409 team_ended`, `409 round_needs_person`, storage failure.
-async fn open_team(
+pub(super) async fn open_team(
     connection: &mut PgConnection,
     (lead, run): (Uuid, Option<&str>),
     owner: Uuid,

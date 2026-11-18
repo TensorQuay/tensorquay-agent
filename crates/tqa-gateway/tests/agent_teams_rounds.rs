@@ -406,7 +406,11 @@ async fn gw_i_333_naming_a_finished_helper_brings_it_back(pool: PgPool) -> TestR
             .fetch_one(&f.pool)
             .await?;
         assert_eq!(members_after, members_before, "the same row, no new helper");
-        assert_eq!(helper(f, &t, "researcher").await?, ("starting".to_owned(), 2));
+        // Starting in round 2, as a new helper's answer says; by now its round's turn is sent (queued or working).
+        assert_eq!(body["member"]["state"], json!("starting"));
+        let (state, round) = helper(f, &t, "researcher").await?;
+        assert!(["starting", "queued", "working"].contains(&state.as_str()), "{state}");
+        assert_eq!(round, 2);
         // Its round's turn, once, keyed per helper and round.
         let turns: i64 = sqlx::query_scalar(
             "SELECT count(*) FROM idempotency WHERE conversation_id = $1 AND key LIKE 'team-round:%:2'",
