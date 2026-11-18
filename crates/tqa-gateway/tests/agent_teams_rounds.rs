@@ -229,6 +229,31 @@ async fn gw_i_331_a_queued_persons_message_opens_a_round_and_a_run_older_than_th
     .await
 }
 
+// TEST: GW-I-331
+// Once per run on its own: a person's run opens round 2, and round 2's end is (as written straight to the store)
+// earlier than that run's start, so only the run's opened round, recorded with it, refuses a third (the negative
+// control of 18 Nov 2026 found no other case held this rule alone).
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_331_a_run_that_opened_a_round_opens_no_other(pool: PgPool) -> TestResult {
+    support::run_configured(pool, None, ENABLED, async |f| {
+        let t = team(f).await?;
+        end_round(f, t.id, "done", 60).await?;
+        turn(f, &t, 2, "r-5", true).await?;
+        let (status, body) = start(f, &t, "r-5:c-1", "writer").await?;
+        assert_eq!(status, 201, "{body}");
+        end_round(f, t.id, "done", 30).await?;
+        let answer = start(f, &t, "r-5:c-2", "editor").await?;
+        assert!(
+            answer.0 == 409 && answer.1["error"]["code"] == "round_needs_person",
+            "{answer:?}"
+        );
+        assert_eq!(row(f, t.id).await?.0, 2, "no third round");
+        Ok(())
+    })
+    .await
+}
+
 /// The team's end notes' bodies, oldest first.
 async fn end_notes(f: &Fixture, team: Uuid) -> Result<Vec<Value>> {
     Ok(sqlx::query_scalar(
