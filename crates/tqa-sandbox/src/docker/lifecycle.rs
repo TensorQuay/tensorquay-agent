@@ -306,10 +306,9 @@ impl DockerBackend {
             .config
             .and_then(|config| config.labels)
             .unwrap_or_default();
-        let token_id = labels
-            .get("tqa.token_id")
-            .cloned()
-            .ok_or_else(|| SandboxError::Backend("credential directory label is missing".into()))?;
+        // A container without its credential label (a half-made one) is still removed, or the sweep could never take
+        // it (SBX-U-020); only its token directory, which the label names, is then unknown.
+        let token_id = labels.get("tqa.token_id").cloned();
         let network = labels.get(NETWORK_LABEL).cloned();
         let stopped = io::request(
             self.config.destroy_timeout,
@@ -324,7 +323,12 @@ impl DockerBackend {
         .await;
         // Forced removal is still required if a busy process or an unresponsive stop timed out.
         self.force_remove(&handle.id).await?;
-        self.remove_token(&token_id).await;
+        match &token_id {
+            Some(token_id) => self.remove_token(token_id).await,
+            None => tracing::warn!(
+                "a sandbox container without its credential label was removed; its token directory is unknown"
+            ),
+        }
         if let Some(network) = network
             && let Err(error) = self.detach_network(&network, None).await
         {
