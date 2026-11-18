@@ -112,8 +112,18 @@ def one_run(stack, index, output, detail="word"):
         )
         record["passed"] = record["compactions"] >= 2 and record["right"] and not record["other_word"]
         (output / "run-{}.json".format(index)).write_text(json.dumps(events, indent=1) + "\n")
-    except Exception as error:  # a run that breaks is a failed run, reported with why
+    except Exception as error:  # a run that breaks is a failed run, reported with why and with its events so far
         record.update(passed=False, error="{}: {}".format(type(error).__name__, str(error)[:300]))
+        try:
+            events = events_of(stack, conversation)
+            (output / "run-{}-failed.json".format(index)).write_text(json.dumps(events, indent=1) + "\n")
+            last = events[-1] if events else {}
+            record.update(events=len(events), last_event=last.get("type"),
+                          runs_ended=len([e for e in events if e.get("type") in ("run.completed", "run.failed")]),
+                          last_text=next((e.get("text", "")[-160:] for e in reversed(events)
+                                          if e.get("type") in ("text.delta", "reasoning.delta")), None))
+        except Exception as reading:  # the stack itself may be the cause
+            record.update(events_unreadable="{}: {}".format(type(reading).__name__, str(reading)[:200]))
     print("== {} run {}: {}".format(time.strftime("%H:%M:%S"), index, json.dumps(
         {key: record.get(key) for key in ("passed", "compactions", "searched_history", "right", "answer", "error")})),
         flush=True)
