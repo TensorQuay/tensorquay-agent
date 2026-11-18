@@ -301,6 +301,8 @@
     "tool.read": "Read {path}",
     "tool.readLine": " line {first}",
     "tool.readLines": " lines {first}–{last}",
+    "tool.readPage": " page {first}",
+    "tool.readPages": " pages {first}–{last}",
     "tool.count": " · {count, plural, one {# {unit, select, file {file} other {match}}} other {# {unit, select, file {files} other {matches}}}}",
     "tool.lookedFor": "Looked for “{text}” in {path}",
     "tool.lookedForPattern": "Looked for a pattern in {path}",

@@ -81,8 +81,13 @@ const readFile: Summary = (tool, t) => {
     t("tool.read", { path }) +
     (range
       ? range.first === range.last
-        ? t("tool.readLine", { first: range.first })
-        : t("tool.readLines", range)
+        ? t(range.pages ? "tool.readPage" : "tool.readLine", {
+            first: range.first,
+          })
+        : t(range.pages ? "tool.readPages" : "tool.readLines", {
+            first: range.first,
+            last: range.last,
+          })
       : "")
   );
 };
