@@ -13,6 +13,37 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   about a detail from an hour ago and the agent looks it up with its usual file tools, instead of guessing. A task
   that is never summarised is unchanged.
 
+### Changed
+
+- **`edit_file` says what it found, so a model can fix its next call by itself (18.1; TOOL-U-004, CORE-E-041).** An
+  `old_text` that matches more than once lists the matching lines with their text (past ten, how many more, counted to a
+  thousand); one that matches nowhere names the nearest lines with their numbers and text, never a looser match; the
+  same refused call sent a second time also returns the file's lines around them, and a third still stops the run. An
+  edit whose `old_text` and `new_text` are the same is answered "no change" and leaves the file as it was; among real
+  edits it is skipped and said.
+- **`write_file`'s `create_parents` is optional (TOOL-U-003),** read as false when absent.
+- **The text tool-call route reads `tool` or `function` for the tool's name and `parameters` for its arguments
+  (PROMPT-U-024),** as the native route does; a call block without a name says which keys it had (`no_name`'s new
+  optional `keys`, PROTO-U-044; never a value).
+- **The transcript shows no scrollbar until you scroll (WEB-U-485, WEB-E2E-132).** A long task's transcript had the
+  browser's scrollbar beside it all the time, taking its width. Now a thin bar shows over the transcript's edge while
+  you scroll it, by wheel, touch, keys or Jump to latest, or while the pointer is at that edge, and fades about a
+  second after; it never shows while the page follows a running task's new output. It can be dragged, and it takes
+  no width, so nothing moves when it shows. The whole main area scrolls the transcript now, its text still the
+  centred column: a wheel or trackpad over the side margins scrolls it, and the bar sits at the area's right edge (the
+  Files panel's edge when it is open). Keys, focus and screen readers use the transcript as before. With forced
+  colours the system's scrollbar stays.
+
+### Fixed
+
+- **A tool call whose number or true/false arrives as text still runs (TOOL-U-146).** One model server sends an
+  optional number, such as the shell's time limit, as `"30000"` instead of `30000`. The tools refused it, and a model
+  that couldn't see why sent it again until the run stopped. The agent's own tools now take an exact number, `true`,
+  `false` or `null` written as text where the setting takes no text. Anything else is still refused, and the refusal
+  now says what was sent (`expected null or integer, got a string`). Tools from a connected server get their
+  arguments exactly as the model wrote them, as before. The shell had lost its own argument rules inside the
+  runtime's process-cleanup wrapper, so a blank or `null` optional value reached it too; it now has them.
+
 ## 18.0.1 (18 November 2026)
 
 A fix release: a PDF read's step names its pages, the Screen panel's ⋯ menu fits its items and stays inside its

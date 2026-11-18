@@ -87,9 +87,10 @@ fn write_file() -> Result<Arc<FakeTool>, ToolError> {
         ToolSpec {
             name: ToolName::new("write_file")?,
             description: "Test write_file".into(),
+            // As the real tool's: create_parents is optional (nullable), content isn't (18.1 item F, proposal C).
             parameters: json!({"type":"object","required":["path","content","create_parents"],
                 "additionalProperties":false,"properties":{"path":{"type":"string"},"content":{"type":"string"},
-                "create_parents":{"type":"boolean"}}}),
+                "create_parents":{"type":["boolean","null"]}}}),
             parallel_safe: false,
             changes_workspace: true,
         },
@@ -112,7 +113,9 @@ async fn core_u_088_a_block_without_a_name_is_retried_naming_it() -> TestResult 
         retries(&sink.events()),
         vec![(
             "fallback_parse: malformed".to_owned(),
-            Some(FallbackProblem::NoName)
+            Some(FallbackProblem::NoName {
+                keys: vec![tqa_types::ProblemName::new("arguments").ok_or("name")?]
+            })
         )]
     );
     let requests = provider.requests();
@@ -201,10 +204,10 @@ async fn core_u_088_a_journal_without_the_problem_resumes_with_todays_sentence()
 
 // TEST: CORE-U-089
 #[tokio::test]
-async fn core_u_089_a_write_file_without_create_parents_names_both() -> TestResult {
+async fn core_u_089_a_write_file_without_content_names_both() -> TestResult {
     let tool = write_file()?;
-    let without = "```tqa_call\n{\"name\": \"write_file\", \"arguments\": {\"path\": \"a/b.py\", \"content\": \"x = 1\"}}\n```\n";
-    let with = "```tqa_call\n{\"name\": \"write_file\", \"arguments\": {\"path\": \"a/b.py\", \"content\": \"x = 1\", \"create_parents\": true}}\n```\n";
+    let without = "```tqa_call\n{\"name\": \"write_file\", \"arguments\": {\"path\": \"a/b.py\", \"create_parents\": true}}\n```\n";
+    let with = "```tqa_call\n{\"name\": \"write_file\", \"arguments\": {\"path\": \"a/b.py\", \"content\": \"x = 1\"}}\n```\n";
     let h = harness(
         vec![text(without), text(with), text("Done.")],
         std::slice::from_ref(&tool),
@@ -216,14 +219,14 @@ async fn core_u_089_a_write_file_without_create_parents_names_both() -> TestResu
     assert_eq!(retried[0].0, "fallback_parse: schema");
     assert!(
         matches!(&retried[0].1, Some(FallbackProblem::MissingProperty { tool, property, .. })
-            if tool.as_str() == "write_file" && property.as_str() == "create_parents"),
+            if tool.as_str() == "write_file" && property.as_str() == "content"),
         "{retried:?}"
     );
     assert_eq!(
         last_user(&provider.requests()[1]).as_deref(),
         Some(
-            "[The last reply could not be read as a tool call: write_file needs \"create_parents\" (a boolean). Add \
-             it to the arguments. Reply again with each call in its own tqa_call block.]"
+            "[The last reply could not be read as a tool call: write_file needs \"content\" (a string). Add it to \
+             the arguments. Reply again with each call in its own tqa_call block.]"
         )
     );
     // Never the call's content.

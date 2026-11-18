@@ -142,9 +142,10 @@ async function spans(page: Page, header: Locator, at: string) {
       `${at}: nothing past it`,
     )
     .toBe(true);
-  // The reading column stays where it was: at most 720 px, centred under the header.
+  // The reading column stays where it was: at most 720 px, centred under the header. The transcript scrolls from the
+  // whole main area since 18.1 (WEB-E2E-132); its text is the column.
   for (const part of [
-    page.getByRole("region", { name: "Transcript" }),
+    page.locator(".transcript-column"),
     page.getByRole("form", { name: "Message composer" }),
   ]) {
     const placed = await box(part);
