@@ -231,26 +231,36 @@ const START_LIMIT_MINUTES: i32 = 10;
 ///
 /// # Errors
 /// Storage failure.
+///
+/// A brought-back helper's round turn goes the same way, under its round's key and timed from the round's start
+/// (ADR-0034's rounds amendment, A3).
 pub(crate) async fn sweep(state: &State) -> Result<(), GatewayError> {
     if !state.config.agent_teams.enabled {
         return Ok(());
     }
     sqlx::query!(
         "UPDATE agent_team_members m SET state = CASE WHEN i.execution_status = 'queued' THEN 'queued' \
-         ELSE 'working' END, last_read_seq = GREATEST(m.last_read_seq, COALESCE((SELECT MIN(a.seq) \
+         ELSE 'working' END, last_read_seq = GREATEST(m.last_read_seq, COALESCE((SELECT CASE WHEN m.round > 1 \
+         THEN MAX(a.seq) ELSE MIN(a.seq) END \
          FROM channel_messages a JOIN agent_teams t ON t.channel_id = a.channel_id WHERE t.id = m.team_id \
          AND a.to_conversation = m.conversation_id AND a.type = 'assign'), 0)) \
          FROM idempotency i WHERE m.state = 'starting' \
-         AND i.conversation_id = m.conversation_id AND i.key = 'team-start:' || m.conversation_id::text"
+         AND i.conversation_id = m.conversation_id AND i.key = CASE WHEN m.round > 1 \
+         THEN 'team-round:' || m.conversation_id::text || ':' || m.round \
+         ELSE 'team-start:' || m.conversation_id::text END"
     )
     .execute(&state.pool)
     .await?;
     let due = sqlx::query!(
         "SELECT m.conversation_id, m.name, t.channel_id, \
-         m.created_at < CURRENT_TIMESTAMP - make_interval(mins => $1) AS \"overdue!\" \
+         COALESCE((SELECT r.started_at FROM agent_team_rounds r WHERE r.team_id = m.team_id \
+         AND r.round = m.round AND m.round > 1), m.created_at) \
+         < CURRENT_TIMESTAMP - make_interval(mins => $1) AS \"overdue!\" \
          FROM agent_team_members m JOIN agent_teams t ON t.id = m.team_id \
          WHERE m.state = 'starting' AND NOT EXISTS (SELECT 1 FROM idempotency i \
-         WHERE i.conversation_id = m.conversation_id AND i.key = 'team-start:' || m.conversation_id::text)",
+         WHERE i.conversation_id = m.conversation_id AND i.key = CASE WHEN m.round > 1 \
+         THEN 'team-round:' || m.conversation_id::text || ':' || m.round \
+         ELSE 'team-start:' || m.conversation_id::text END)",
         START_LIMIT_MINUTES
     )
     .fetch_all(&state.pool)

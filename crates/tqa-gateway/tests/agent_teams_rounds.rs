@@ -533,3 +533,55 @@ async fn sec_067_a_brought_back_helper_gets_no_more_than_its_leads_current_setti
     })
     .await
 }
+
+// TEST: GW-I-335
+// The first-turn sweep knows a round's turn (A3): a helper brought back whose turn didn't go out gets it from the
+// sweep, under its round's key, timed from the round's start, never failed for a start long ago in round 1.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_335_the_sweep_sends_a_brought_back_helpers_round_turn(pool: PgPool) -> TestResult {
+    support::run_configured(pool, None, ENABLED, async |f| {
+        let t = team(f).await?;
+        between_rounds(f, &t).await?;
+        let (status, body) = start_with(
+            f,
+            &t,
+            "r-5:c-1",
+            json!({"role": "researcher", "workspace": "own_copy", "brief": brief()}),
+        )
+        .await?;
+        assert_eq!(status, 201, "{body}");
+        let helper_task = Uuid::parse_str(t.researcher.0.as_str())?;
+        // As if the send after the start had failed, for a helper first started long ago.
+        let mut transaction = f.pool.begin().await?;
+        sqlx::query("DELETE FROM idempotency WHERE conversation_id = $1 AND key LIKE 'team-round:%'")
+            .bind(helper_task)
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query(
+            "UPDATE agent_team_members SET state = 'starting', created_at = CURRENT_TIMESTAMP - INTERVAL '2 hours' \
+             WHERE conversation_id = $1",
+        )
+        .bind(helper_task)
+        .execute(&mut *transaction)
+        .await?;
+        transaction.commit().await?;
+        let mut sent = 0;
+        for _ in 0..200 {
+            sent = sqlx::query_scalar::<_, i64>(
+                "SELECT count(*) FROM idempotency WHERE conversation_id = $1 AND key LIKE 'team-round:%:2'",
+            )
+            .bind(helper_task)
+            .fetch_one(&f.pool)
+            .await?;
+            if sent == 1 {
+                break;
+            }
+            tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+        }
+        assert_eq!(sent, 1, "the sweep sent its round turn");
+        assert_ne!(helper(f, &t, "researcher").await?.0, "failed", "not failed for its old start");
+        Ok(())
+    })
+    .await
+}
