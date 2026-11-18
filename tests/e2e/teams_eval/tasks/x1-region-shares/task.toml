@@ -1,0 +1,7 @@
+id = "x1-region-shares"
+title = "Region totals, then each region's share on a follow-up"
+tags = ["teams-rounds", "teams-report"]
+budgets = { max_steps = 80, wall_clock_secs = 1800, max_tokens = 1000000 }
+protected = []
+check = { image = "runtime", timeout_secs = 180 }
+follow_up = "Thank you. Now add a third column to the table in regions.md with each region's share of the overall total, as a whole percent. If a helper worked out the totals, bring that same helper back for this."

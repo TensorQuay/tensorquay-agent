@@ -1,0 +1,38 @@
+{
+ "model": "fixture",
+ "select": "prompt",
+ "responses": [
+  {
+   "when": "The file `sales.csv` lists sales by region (columns `region` and `amount`, in euros). Write `regions.md` with a markdown",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "write_file",
+     "arguments": {
+      "path": "regions.md",
+      "content": "# Sales by region\n\n| Region | Total | Share |\n|---|---|---|\n| North | 3551.49 | 20 % |\n| South | 997.72 | 6 % |\n| East | 6672.79 | 38 % |\n| West | 3509.02 | 20 % |\n| Central | 3012.70 | 17 % |\n",
+      "create_parents": true
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The file `sales.csv` lists sales by region (columns `region` and `amount`, in euros). Write `regions.md` with a markdown",
+   "events": [
+    {
+     "type": "text",
+     "text": "Done: regions.md."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  }
+ ]
+}

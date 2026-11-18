@@ -70,3 +70,42 @@ def team(task):
         text(helper, "I reported to my lead."),
     ]
     return {"model": "fixture", "select": "prompt", "responses": responses}
+
+
+def rounds(task):
+    """A rounds task's team session (ADR-0034's rounds amendment): round 1, the lead starts the scout, which reports;
+    the lead writes the first ask's answer (the task's `wrong` files, all round 1 asked for) and calls done. The
+    person's follow-up then starts the lead's next run, which brings the scout back by its name with its copy kept
+    (round 2); it reports again, and the lead writes the full answer and calls done."""
+    lead = phrase(task.statement)
+    helper = f"You are {HELPER}"
+
+    def brief(objective):
+        return {"objective": objective, "output": "One line to the lead.", "sources": None,
+                "boundaries": "Don't edit the lead's files."}
+
+    def report(words):
+        return call(helper, "send_to_lead", {"type": "report", "text": words, "question_seq": None, "files": None})
+
+    responses = [
+        call(lead, "start_member", {"role": HELPER, "workspace": "own_copy", "profile": None,
+                                    "brief": brief(f"Read the data for {task.id} and report what you find.")}),
+        text(lead, "I started a helper; I'll continue when it reports."),
+        call(lead, "read_reports", {"wait": 30, "limit": None}),
+        *writes(lead, task.wrong),
+        call(lead, "done", {"summary": f"Round 1: wrote {', '.join(sorted(task.wrong))}."}),
+        text(lead, "Round 1 is done."),
+        # The person's follow-up: this run opens round 2 and brings the scout back by its name.
+        call(lead, "start_member", {"role": HELPER, "workspace": "own_copy", "profile": None, "files": "keep",
+                                    "brief": brief(f"Check the data for {task.id} again for the follow-up.")}),
+        text(lead, "I brought the helper back; I'll continue when it reports."),
+        call(lead, "read_reports", {"wait": 30, "limit": None}),
+        *writes(lead, files(task)),
+        call(lead, "done", {"summary": f"Round 2: wrote {', '.join(sorted(files(task)))}."}),
+        text(lead, "Round 2 is done."),
+        report("I read the data."),
+        text(helper, "I reported to my lead."),
+        report("I checked the data again."),
+        text(helper, "I reported to my lead again."),
+    ]
+    return {"model": "fixture", "select": "prompt", "responses": responses}

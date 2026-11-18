@@ -80,7 +80,15 @@ class Tasks(unittest.TestCase):
                             target.parent.mkdir(parents=True, exist_ok=True)
                             target.write_text(event["arguments"]["content"])
                     names = [event["name"] for event in calls]
-                    if side == "team":
+                    # A rounds task's team runs two rounds: a start, a read and done each, the second bringing the
+                    # scout back (ADR-0034's rounds amendment); it takes no file.
+                    rounds = "follow_up" in (task_dir / "task.toml").read_text()
+                    if side == "team" and rounds:
+                        self.assertEqual([n for n in names if n not in ("write_file", "shell")],
+                                         ["start_member", "read_reports", "done"] * 2)
+                        starts = [event for event in calls if event["name"] == "start_member"]
+                        self.assertEqual(starts[1]["arguments"].get("files"), "keep", "round 2 brings the scout back")
+                    elif side == "team":
                         self.assertEqual([n for n in names if n not in ("write_file", "shell")],
                                          ["start_member", "read_reports", "take_files", "done"])
                         taken = workspace / "uploads" / "scout-scout-notes.md"
