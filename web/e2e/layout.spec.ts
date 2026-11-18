@@ -259,8 +259,13 @@ async function barState(page: Page) {
     range.selectNodeContents(clause);
     const text = range.getBoundingClientRect();
     const box = clause.getBoundingClientRect();
+    // A finished run's Done is read, not shown (WEB-U-495): nothing of the word on the screen.
+    const unseen =
+      Boolean(
+        clause.querySelector("[role='status']")?.classList.contains("sr-only"),
+      ) && !clause.getAttribute("data-short");
     // Text below the one-line box is out of sight; text on the line must fit it horizontally.
-    const outside = text.top >= box.bottom - 0.5 || box.width < 0.5;
+    const outside = unseen || text.top >= box.bottom - 0.5 || box.width < 0.5;
     const inside =
       !outside && text.left >= box.left - 0.5 && text.right <= box.right + 0.5;
     const word = document
@@ -307,8 +312,12 @@ test("WEB-U-007 the bar keeps the status whole and truncates the title", async (
     await field.press("Enter");
     await expect(page.locator(".conversation-bar h1")).toHaveText(title);
     const state = await barState(page);
-    expect(state.clause, `${title}: status whole`).toBe("whole");
-    expect(state.aligned, `${title}: status centred with the title`).toBe(true);
+    // Never cut: whole, or (a finished run's Done, WEB-U-495) not on the screen at all.
+    expect(state.clause, `${title}: status never cut`).not.toBe("cut");
+    if (state.clause === "whole")
+      expect(state.aligned, `${title}: status centred with the title`).toBe(
+        true,
+      );
     if (title.startsWith("A deliberately"))
       expect(state.titleTruncated, `${title}: the title gives way`).toBe(true);
   }
@@ -318,9 +327,8 @@ test("WEB-U-007 the bar keeps the status whole and truncates the title", async (
   await field.fill("Short");
   await field.press("Enter");
   await page.getByRole("button", { name: "Collapse sidebar" }).click();
-  expect(await barState(page)).toEqual({
-    clause: "whole",
-    titleTruncated: false,
-    aligned: true,
-  });
+  const rail = await barState(page);
+  expect(rail.titleTruncated).toBe(false);
+  // The status is never cut: here a finished run's Done, read and not shown (WEB-U-495).
+  expect(rail.clause).not.toBe("cut");
 });
