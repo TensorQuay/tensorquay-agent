@@ -174,8 +174,9 @@ fn a_page_holds_two_hundred_rows_and_names_the_next() {
     } = page(items.clone(), None);
     assert_eq!(first.len(), 200);
     assert_eq!(first[0].conversation_id.as_u128(), 1);
-    let token = next_after.expect("a 201st row makes a next page");
-    assert_eq!(token, first[199].conversation_id.to_string());
+    // A 201st row makes a next page, named by the 200th row.
+    assert_eq!(next_after, Some(first[199].conversation_id.to_string()));
+    let token = next_after.unwrap_or_default();
     let Page {
         items: second,
         next_after,

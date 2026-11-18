@@ -274,6 +274,146 @@ fn after(query: Option<&str>) -> Result<Option<String>, GatewayError> {
     Ok(after)
 }
 
+/// One running sandbox as the store holds it, with its owner, environment and whether work is going or waiting.
+struct Row {
+    conversation_id: uuid::Uuid,
+    state: State,
+    created_at: OffsetDateTime,
+    last_action_at: OffsetDateTime,
+    idle_seconds: Option<i32>,
+    max_lifetime_seconds: Option<i32>,
+    cpu_millicores: Option<i32>,
+    memory_bytes: Option<i64>,
+    pids: Option<i32>,
+    owner_id: uuid::Uuid,
+    email: String,
+    template: String,
+    display_name: String,
+    desktop: bool,
+    /// Pinned, or a Desktop whose sign-in is kept: it stops at its lifetime, not after its idle window.
+    kept_on: bool,
+    work_waiting: bool,
+}
+
+/// The running sandboxes (at most `max_live`) and the tasks waiting for a slot, read in one transaction.
+async fn read_rows(state: &Shared, max_live: i64) -> Result<(Vec<Row>, i64), GatewayError> {
+    crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
+        let mut transaction = state.pool.begin().await?;
+        let rows = sqlx::query!(
+
+            "SELECT s.conversation_id, s.phase, s.created_at, s.last_action_at, s.idle_seconds, s.max_lifetime_seconds, \
+             s.cpu_millicores, s.memory_bytes, s.pids, c.owner_id, u.email::text AS \"email!\", c.template, \
+             COALESCE(t.display_name, c.template) AS \"display_name!\", \
+             COALESCE('desktop'=ANY(t.capabilities), false) AS \"desktop!\", c.pinned, c.keep_sign_in, \
+             COALESCE((SELECT e.lifecycle FROM events e WHERE e.conversation_id=s.conversation_id AND e.lifecycle IS NOT NULL \
+                       ORDER BY e.seq DESC LIMIT 1) IN ('run.started','run.resumed'), false) AS \"working!\", \
+             EXISTS (SELECT 1 FROM idempotency i WHERE i.conversation_id=s.conversation_id \
+                     AND i.execution_status IN ('queued','sending')) AS \"work_waiting!\" \
+             FROM sandbox_instances s JOIN conversations c ON c.id=s.conversation_id JOIN users u ON u.id=c.owner_id \
+             LEFT JOIN templates t ON t.name=c.template ORDER BY s.created_at, s.conversation_id LIMIT $1",
+            max_live
+        )
+        .fetch_all(&mut *transaction)
+        .await?
+        .into_iter()
+        .map(|row| Row {
+            conversation_id: row.conversation_id,
+            state: item_state(&row.phase, row.working),
+            created_at: row.created_at,
+            last_action_at: row.last_action_at,
+            idle_seconds: row.idle_seconds,
+            max_lifetime_seconds: row.max_lifetime_seconds,
+            cpu_millicores: row.cpu_millicores,
+            memory_bytes: row.memory_bytes,
+            pids: row.pids,
+            owner_id: row.owner_id,
+            email: row.email,
+            template: row.template,
+            display_name: row.display_name,
+            desktop: row.desktop,
+            kept_on: row.pinned || (row.keep_sign_in && row.desktop),
+            work_waiting: row.work_waiting,
+        })
+        .collect();
+        let waiting = sqlx::query_scalar!(
+            "SELECT count(DISTINCT i.conversation_id) AS \"waiting!\" FROM idempotency i WHERE i.execution_status='queued' \
+             AND NOT EXISTS (SELECT 1 FROM sandbox_instances s WHERE s.conversation_id=i.conversation_id)"
+        )
+        .fetch_one(&mut *transaction)
+        .await?;
+        transaction.commit().await?;
+        Ok((rows, waiting))
+    })
+    .await
+}
+
+/// One row as the page shows it: its state, when it stops, its size and measured use, and whether it may be stopped.
+fn item(
+    state: &Shared,
+    row: Row,
+    limits: &crate::settings::limits::Limits,
+) -> Result<Item, GatewayError> {
+    let id: ConversationId = row
+        .conversation_id
+        .to_string()
+        .parse()
+        .map_err(|_| GatewayError::StoreUnavailable)?;
+    let item_state = row.state;
+    let kept_on = row.kept_on;
+    let screen_held = row.desktop && !crate::screen::may_retire(&id);
+    let stop_refusal = refusal(item_state, row.work_waiting, screen_held);
+    let size = Size {
+        cpu_millicores: row.cpu_millicores.and_then(|n| u32::try_from(n).ok()),
+        memory_bytes: row.memory_bytes.and_then(|n| u64::try_from(n).ok()),
+        pids: row.pids.and_then(|n| u32::try_from(n).ok()),
+    };
+    let usage = state.manager.usage_of(&id);
+    Ok(Item {
+        conversation_id: row.conversation_id,
+        owner: Owner {
+            id: row.owner_id,
+            email: row.email,
+        },
+        environment: Environment {
+            name: row.template,
+            display_name: row.display_name,
+            desktop: row.desktop,
+        },
+        state: item_state,
+        started_at: row.created_at,
+        last_activity_at: row.last_action_at,
+        stops_at: stops_at(
+            item_state,
+            kept_on,
+            row.created_at,
+            row.last_action_at,
+            row.idle_seconds.and_then(|n| u32::try_from(n).ok()),
+            row.max_lifetime_seconds.and_then(|n| u32::try_from(n).ok()),
+            limits.idle_seconds,
+            limits.max_lifetime_seconds,
+        ),
+        kept_on,
+        size,
+        usage,
+        can_stop: stop_refusal.is_none(),
+        stop_refusal,
+    })
+}
+
+/// Adds `item` to the totals: its state, a Desktop, and the size it reserves.
+fn count(totals: &mut Totals, item: &Item) {
+    match item.state {
+        State::Starting => totals.starting += 1,
+        State::Working => totals.working += 1,
+        State::Idle => totals.idle += 1,
+        State::Stopping => totals.stopping += 1,
+    }
+    totals.in_use += 1;
+    totals.desktops += u64::from(item.environment.desktop);
+    totals.reserved.cpu_millicores += u64::from(item.size.cpu_millicores.unwrap_or(0));
+    totals.reserved.memory_bytes += item.size.memory_bytes.unwrap_or(0);
+}
+
 /// `GET /api/v1/admin/sandboxes` (administrator, session or token): one consistent read of the records under the
 /// gateway's `io_timeout`; the engine is never called, the measured use comes from the sampler's last values.
 ///
@@ -288,109 +428,31 @@ pub(crate) async fn list(
     let after = after(query.as_deref())?;
     let limits = state.settings.current().limits;
     let max_live = i64::from(state.config.sandbox.max_live);
-    let (rows, waiting) = crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
-        let mut transaction = state.pool.begin().await?;
-        let rows = sqlx::query!(
-            "SELECT s.conversation_id, s.phase, s.created_at, s.last_action_at, s.idle_seconds, s.max_lifetime_seconds, \
-             s.cpu_millicores, s.memory_bytes, s.pids, c.owner_id, u.email::text AS \"email!\", c.template, \
-             COALESCE(t.display_name, c.template) AS \"display_name!\", \
-             COALESCE('desktop'=ANY(t.capabilities), false) AS \"desktop!\", c.pinned, c.keep_sign_in, \
-             COALESCE((SELECT e.lifecycle FROM events e WHERE e.conversation_id=s.conversation_id AND e.lifecycle IS NOT NULL \
-                       ORDER BY e.seq DESC LIMIT 1) IN ('run.started','run.resumed'), false) AS \"working!\", \
-             EXISTS (SELECT 1 FROM idempotency i WHERE i.conversation_id=s.conversation_id \
-                     AND i.execution_status IN ('queued','sending')) AS \"work_waiting!\" \
-             FROM sandbox_instances s JOIN conversations c ON c.id=s.conversation_id JOIN users u ON u.id=c.owner_id \
-             LEFT JOIN templates t ON t.name=c.template ORDER BY s.created_at, s.conversation_id LIMIT $1",
-            max_live
-        )
-        .fetch_all(&mut *transaction)
-        .await?;
-        let waiting = sqlx::query_scalar!(
-            "SELECT count(DISTINCT i.conversation_id) AS \"waiting!\" FROM idempotency i WHERE i.execution_status='queued' \
-             AND NOT EXISTS (SELECT 1 FROM sandbox_instances s WHERE s.conversation_id=i.conversation_id)"
-        )
-        .fetch_one(&mut *transaction)
-        .await?;
-        transaction.commit().await?;
-        Ok((rows, waiting))
-    })
-    .await?;
+    let (rows, waiting) = read_rows(&state, max_live).await?;
     let mut totals = Totals {
         waiting: u64::try_from(waiting).unwrap_or(0),
         ..Totals::default()
     };
-    let mut used = (0u64, 0u64, false);
+    let mut measured = (0u64, 0u64, false);
     let mut items = Vec::with_capacity(rows.len());
     for row in rows {
-        let id: ConversationId = row
-            .conversation_id
-            .to_string()
-            .parse()
-            .map_err(|_| GatewayError::StoreUnavailable)?;
-        let item_state = item_state(&row.phase, row.working);
-        let kept_on = row.pinned || (row.keep_sign_in && row.desktop);
-        let screen_held = row.desktop && !crate::screen::may_retire(&id);
-        let stop_refusal = refusal(item_state, row.work_waiting, screen_held);
-        let size = Size {
-            cpu_millicores: row.cpu_millicores.and_then(|n| u32::try_from(n).ok()),
-            memory_bytes: row.memory_bytes.and_then(|n| u64::try_from(n).ok()),
-            pids: row.pids.and_then(|n| u32::try_from(n).ok()),
-        };
-        let usage = state.manager.usage_of(&id);
-        match item_state {
-            State::Starting => totals.starting += 1,
-            State::Working => totals.working += 1,
-            State::Idle => totals.idle += 1,
-            State::Stopping => totals.stopping += 1,
-        }
-        totals.in_use += 1;
-        totals.desktops += u64::from(row.desktop);
-        totals.reserved.cpu_millicores += u64::from(size.cpu_millicores.unwrap_or(0));
-        totals.reserved.memory_bytes += size.memory_bytes.unwrap_or(0);
-        if let Some(usage) = usage {
-            used = (
-                used.0 + usage.cpu_millicores,
-                used.1 + usage.memory_bytes,
+        let item = item(&state, row, &limits)?;
+        count(&mut totals, &item);
+        if let Some(usage) = item.usage {
+            measured = (
+                measured.0 + usage.cpu_millicores,
+                measured.1 + usage.memory_bytes,
                 true,
             );
         }
-        items.push(Item {
-            conversation_id: row.conversation_id,
-            owner: Owner {
-                id: row.owner_id,
-                email: row.email,
-            },
-            environment: Environment {
-                name: row.template,
-                display_name: row.display_name,
-                desktop: row.desktop,
-            },
-            state: item_state,
-            started_at: row.created_at,
-            last_activity_at: row.last_action_at,
-            stops_at: stops_at(
-                item_state,
-                kept_on,
-                row.created_at,
-                row.last_action_at,
-                row.idle_seconds.and_then(|n| u32::try_from(n).ok()),
-                row.max_lifetime_seconds.and_then(|n| u32::try_from(n).ok()),
-                limits.idle_seconds,
-                limits.max_lifetime_seconds,
-            ),
-            kept_on,
-            size,
-            usage,
-            can_stop: stop_refusal.is_none(),
-            stop_refusal,
-        });
+        items.push(item);
     }
-    if used.2
+    if measured.2
         && let Some(measured_at) = state.manager.usage_measured_at()
     {
         totals.usage = Some(TotalUsage {
-            cpu_millicores: used.0,
-            memory_bytes: used.1,
+            cpu_millicores: measured.0,
+            memory_bytes: measured.1,
             measured_at,
         });
     }
