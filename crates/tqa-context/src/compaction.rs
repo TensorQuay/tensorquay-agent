@@ -28,6 +28,18 @@ pub struct CompactionPlan {
 }
 
 impl CompactionPlan {
+    /// The replaced turns as readable text, in order, for the task's history file (CTX-U-023): each person's message
+    /// and each answer whole, each tool call with its arguments, each result up to [`HISTORY_RESULT_BYTES`] with the
+    /// size of the rest. Reasoning stays out: it was never shown to the person and the model doesn't reread it.
+    #[must_use]
+    pub fn replaced_text(&self) -> String {
+        let mut names = std::collections::HashMap::new();
+        let mut text = String::new();
+        for message in &self.replaced {
+            history_entry(&mut text, &mut names, message);
+        }
+        text
+    }
     /// Renders the earlier summary and the replaced messages as one JSON array of data,
     /// keeping the earlier summary and then the newest messages that fit in `max_bytes`.
     #[must_use]
@@ -130,9 +142,20 @@ pub(crate) fn pinned_users(history: &History) -> Vec<usize> {
 }
 
 /// Renders a summary as a labelled data block; its text is JSON-escaped, never instructions.
+/// When its `key_paths` name the task's history file, one sentence after the block says to search it before answering
+/// about anything earlier (CTX-U-023); a summary without one reads as it always did.
 pub(crate) fn summary_message(summary: &CompactionSummary) -> Message {
     let data = serde_json::to_string(summary).unwrap_or_else(|_| "{}".into());
-    Message::new(Role::User, format!("{COMPACTION_SUMMARY_PREFIX}{data}]"))
+    let mut text = format!("{COMPACTION_SUMMARY_PREFIX}{data}]");
+    if let Some(path) = summary.key_paths.iter().find(|path| is_history_path(path)) {
+        use std::fmt::Write as _;
+        let _ = write!(
+            text,
+            "\nThe full text of the summarised turns is in {path}: search it (grep, then read_file) before answering \
+             about anything earlier, and never guess."
+        );
+    }
+    Message::new(Role::User, text)
 }
 
 fn message_data(message: &Message) -> Value {
@@ -241,4 +264,110 @@ fn trim_bytes(text: &str, max: usize) -> &str {
         end -= 1;
     }
     &text[..end]
+}
+
+/// One replaced message as readable text; `names` joins each result to its call's tool name.
+fn history_entry(
+    text: &mut String,
+    names: &mut std::collections::HashMap<tqa_types::ToolCallId, String>,
+    message: &Message,
+) {
+    use std::fmt::Write as _;
+    match message.role {
+        Role::User => {
+            let _ = write!(text, "### Person\n\n{}\n\n", message.text);
+        }
+        Role::Assistant => {
+            text.push_str("### Answer\n\n");
+            if !message.text.is_empty() {
+                let _ = write!(text, "{}\n\n", message.text);
+            }
+            for call in &message.tool_calls {
+                names.insert(call.call_id.clone(), call.name.clone());
+                let _ = writeln!(text, "- calls `{}` with `{}`", call.name, call.arguments);
+            }
+            text.push('\n');
+        }
+        Role::Tool => {
+            let name = message
+                .tool_call_id
+                .as_ref()
+                .and_then(|id| names.get(id))
+                .map_or("a tool", String::as_str);
+            let _ = write!(
+                text,
+                "### Result of `{name}`\n\n{}\n\n",
+                bounded_result(&message.text)
+            );
+        }
+        Role::System => {}
+    }
+}
+
+/// The most of one tool result the history keeps; the rest is named by its size (the result's own spill notice, when
+/// it had one, is in the kept head).
+pub const HISTORY_RESULT_BYTES: usize = 8 * 1024;
+
+fn bounded_result(text: &str) -> String {
+    if text.len() <= HISTORY_RESULT_BYTES {
+        return text.to_owned();
+    }
+    let mut cut = HISTORY_RESULT_BYTES;
+    while !text.is_char_boundary(cut) {
+        cut -= 1;
+    }
+    format!("{}\n[… {} more bytes]", &text[..cut], text.len() - cut)
+}
+
+/// Where a task's history file lives, relative to the workspace, beside its run notes (CTX-U-023).
+#[must_use]
+pub fn history_path(conversation: &tqa_types::ConversationId) -> String {
+    format!(".tqa/{}/history.md", conversation.as_str())
+}
+
+/// Appends one compaction's replaced turns to the history file in `directory` (the task's `.tqa/<id>`), once per
+/// `through_seq`: a section already there (a retried compaction) is left as it is. The file is replaced atomically, so
+/// a reader never sees half a section (CORE-E-043).
+///
+/// # Errors
+/// Any I/O error reading or writing the file; the caller then names no history file.
+pub fn append_history(
+    directory: &std::path::Path,
+    through_seq: Seq,
+    text: &str,
+) -> std::io::Result<()> {
+    let path = directory.join("history.md");
+    let mut existing = match std::fs::read_to_string(&path) {
+        Ok(existing) => existing,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => String::new(),
+        Err(error) => return Err(error),
+    };
+    let marker = format!("<!-- through_seq {through_seq} -->");
+    if existing.lines().any(|line| line == marker) {
+        return Ok(());
+    }
+    if existing.is_empty() {
+        existing.push_str(
+            "# The task's summarised turns\n\nEach section below is the text of turns a summary replaced, oldest \
+             first.\n",
+        );
+    }
+    {
+        use std::fmt::Write as _;
+        let _ = write!(
+            existing,
+            "\n{marker}\n## Turns summarised through event {through_seq}\n\n{text}"
+        );
+    }
+    std::fs::create_dir_all(directory)?;
+    let staged = directory.join(".history.md.tmp");
+    std::fs::write(&staged, existing)?;
+    std::fs::rename(&staged, &path)
+}
+
+/// Whether `path` is a task's history file as [`history_path`] makes it.
+fn is_history_path(path: &str) -> bool {
+    path.strip_prefix(".tqa/")
+        .and_then(|rest| rest.strip_suffix("/history.md"))
+        .is_some_and(|id| !id.is_empty() && !id.contains('/'))
 }

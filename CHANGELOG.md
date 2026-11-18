@@ -3,6 +3,16 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
+## Unreleased
+
+### Added
+
+- **A long task can look back past its summary (CTX-U-023, CORE-E-043, E2E-RECALL-001).** When a long task is
+  summarised to fit the model's window, the summarised turns are now kept as text in the task's
+  `.tqa/<id>/history.md`, and the summary tells the model to search it before answering about anything earlier. Ask
+  about a detail from an hour ago and the agent looks it up with its usual file tools, instead of guessing. A task
+  that is never summarised is unchanged.
+
 ## 18.0.1 (18 November 2026)
 
 A fix release: a PDF read's step names its pages, the Screen panel's ⋯ menu fits its items and stays inside its
