@@ -18,6 +18,40 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   (PROMPT-U-024),** as the native route does; a call block without a name says which keys it had (`no_name`'s new
   optional `keys`, PROTO-U-044; never a value).
 
+## 18.0.1 (18 November 2026)
+
+A fix release: a PDF read's step names its pages, the Screen panel's ⋯ menu fits its items and stays inside its
+dialog, the expanded screen picture keeps its frame on a phone, and a PDF's page pictures fit the Files panel. The web
+app moves to Next.js 16.4.5. No migration, protocol or configuration change: upgrade in place with 18.0.1's images.
+
+### Fixed
+
+- **A PDF read's step names the pages it read, not lines (WEB-U-482).** After reading pages 1 and 2 of a PDF, the
+  step said "Read uploads/report.pdf lines 1–2"; it now says "pages 1–2", in every language. The result's own page
+  marks decide it, so a PDF saved without its extension reads as pages too.
+- **The Screen panel's ⋯ menu is wide enough for its items at desktop widths (WEB-U-483, WEB-E2E-128).** At 1280 and
+  1440 px the menu opened no wider than the room to its ⋯'s end and cut its words ("Keep the sign-i…"); where that
+  room is narrower than the menu, it now takes the panel's width. A phone's panel places it as before. A menu in a
+  dialog opened from the panel (the Screen's or a spreadsheet's Expand) now opens under its button: the panel's bounds
+  held it to the panel's strip of the page, where the Screen's ⋯ menu had no width at all.
+- **A menu's notes wrap at a readable width, and a menu stays inside its dialog (WEB-U-490, WEB-U-483,
+  WEB-E2E-130).** The Screen panel's ⋯ menu, opened from its Expand dialog, set each note on one line, 658 px across the
+  window, and on a phone ran past the dialog's edges. A menu item's note and its reason now wrap at 24ch (as the menu
+  already read on a phone), and a menu opened in a dialog stays inside it, beside its ⋯.
+- **The expanded screen's picture keeps its frame at a phone's width (WEB-E2E-131).** Under Take over, the picture in
+  the Screen's Expand dialog took the dialog's whole width at 390 px, and its frame, drawn just outside it, was cut on
+  both sides; the dialog now leaves the frame its room.
+- **A PDF's page pictures fit the Files panel (WEB-U-484, WEB-E2E-128).** They ran about 10 px past the panel's right
+  edge: each page was drawn at the panel's width with its border on top, and the column's scrollbar, which arrives
+  with the pages, took more. The border is now inside that width, and the scrollbar's room is kept from the start.
+
+### Security
+
+- **The web app is on Next.js 16.4.5** (it was 16.4.1), past two moderate advisories in which a `'use cache'`
+  function's entry could serve one root param's content for another: GHSA-mfr8-8qww-v76h (through `unstable_cache()`)
+  and GHSA-vc7v-qv4w-wrv8 (nested `'use cache'` functions). The app uses neither `'use cache'` nor root params, so it
+  was not affected. Builds no longer stop to recommend an upgrade (`experimental.agentUpgrade` is off, WEB-U-491).
+
 ## 18.0.0 (17 November 2026)
 
 A feature release: the agent reads PDFs and pictures, a desktop sign-in can be kept for a whole task, a folder

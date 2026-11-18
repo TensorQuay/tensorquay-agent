@@ -207,13 +207,15 @@ button.file-open:hover {
   background: var(--page-canvas);
   color-scheme: light;
 }
-/* A PDF's pages, drawn by pdf.js, one under another at the panel's width. */
+/* A PDF's pages, drawn by pdf.js, one under another at the panel's width. Its scrollbar's room is kept from the start,
+   so the width the pages are drawn at, measured before they arrive, is still theirs once they scroll (WEB-E2E-128). */
 .file-pdf {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
   max-height: 70vh;
   overflow: auto;
+  scrollbar-gutter: stable;
 }
 .preview-dialog .file-pdf {
   max-height: calc(100dvh - 220px);
