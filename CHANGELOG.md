@@ -3,6 +3,15 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
+## Unreleased
+
+### Added
+
+- **Install in one command (INST-U-001, INST-I-001).** From a release's checkout, `deploy/install.sh` asks where
+  people will open TensorQuay Agent, which model server to use (or none, for a first try with the test model) and who
+  the first administrator is. It then pulls the release, writes what the guide's steps make by hand, starts it, and
+  creates that administrator. It never changes an existing installation. The guide's steps by hand stay as they are.
+
 ## 18.0.1 (18 November 2026)
 
 A fix release: a PDF read's step names its pages, the Screen panel's ⋯ menu fits its items and stays inside its

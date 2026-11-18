@@ -21,6 +21,15 @@ loopback; remote access needs an authenticated TLS reverse proxy and the matchin
 
 ## Install
 
+**In one command (from 18.1).** From a release's checkout, `deploy/install.sh` asks three things: where people will
+open TensorQuay Agent, which model server to use (or none, to try it with the test model), and who the first
+administrator is. It then pulls the release's images, writes what steps 1 and 2 below make by hand, starts the stack,
+waits until it is ready and creates that administrator. Most of its ten minutes or so is the pull. It never changes
+an existing installation: to upgrade one, see [Upgrading to a new release](#upgrading-to-a-new-release).
+`deploy/install.sh --help` lists its options: `--yes` with the answers as flags for a scripted install (the
+administrator's password only ever from a file), and `--name`, `--network-pool` and `--port` for a second
+installation on the host. The steps below do the same by hand and remain the reference.
+
 ### 0. Pull or build the images
 
 Start from a release: clone the newest tag from the
