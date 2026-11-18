@@ -3298,7 +3298,8 @@
       "required": [
         "role",
         "id",
-        "state"
+        "state",
+        "round"
       ],
       "properties": {
         "role": {
@@ -3380,6 +3381,10 @@
         },
         "can_stop": {
           "type": "boolean"
+        },
+        "round": {
+          "type": "integer",
+          "minimum": 1
         }
       }
     },
@@ -3423,7 +3428,8 @@
             "person_message",
             "notice",
             "done",
-            "ended"
+            "ended",
+            "round_started"
           ]
         },
         "from": {
@@ -3614,6 +3620,14 @@
               }
             }
           }
+        },
+        "round": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "tokens_all_rounds": {
+          "type": "integer",
+          "minimum": 0
         }
       }
     },
@@ -3653,7 +3667,8 @@
         "tokens",
         "tokens_estimated",
         "activity",
-        "last_message"
+        "last_message",
+        "round"
       ],
       "properties": {
         "conversation": {
@@ -3766,6 +3781,10 @@
               "type": "null"
             }
           ]
+        },
+        "round": {
+          "type": "integer",
+          "minimum": 1
         }
       }
     },
@@ -3781,7 +3800,10 @@
         "budget",
         "waiting_for_you",
         "helpers",
-        "version"
+        "version",
+        "round",
+        "rounds",
+        "tokens_all_rounds"
       ],
       "properties": {
         "id": {
@@ -3888,6 +3910,75 @@
           }
         },
         "version": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "round": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "rounds": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "round",
+              "started_at",
+              "ended_at",
+              "stop_reason",
+              "budget"
+            ],
+            "properties": {
+              "round": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "started_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "ended_at": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "stop_reason": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "budget": {
+                "type": "object",
+                "required": [
+                  "tokens",
+                  "spent"
+                ],
+                "properties": {
+                  "tokens": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "spent": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tokens_all_rounds": {
           "type": "integer",
           "minimum": 0
         }

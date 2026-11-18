@@ -106,6 +106,7 @@ describe("WEB-U-410 a team's words for a wait for the workspace", () => {
     role,
     id: "team",
     state,
+    round: 1,
   });
   it("says a helper's turn and a lead's wait for a helper, only while the team runs", () => {
     expect(teamWaitWords(place("member", "running"), english)).toBe(
@@ -124,6 +125,7 @@ describe("WEB-U-410 a team's words for a wait for the workspace", () => {
 describe("WEB-U-419 a waiting helper names the task using the lead's files", () => {
   const member = {
     role: "member" as const,
+    round: 1,
     id: "team",
     state: "running" as const,
   };
