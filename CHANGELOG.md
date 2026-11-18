@@ -5,6 +5,19 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ## Unreleased
 
+### Changed
+
+- **`edit_file` says what it found, so a model can fix its next call by itself (18.1; TOOL-U-004, CORE-E-041).** An
+  `old_text` that matches more than once lists the matching lines with their text (past ten, how many more, counted to a
+  thousand); one that matches nowhere names the nearest lines with their numbers and text, never a looser match; the
+  same refused call sent a second time also returns the file's lines around them, and a third still stops the run. An
+  edit whose `old_text` and `new_text` are the same is answered "no change" and leaves the file as it was; among real
+  edits it is skipped and said.
+- **`write_file`'s `create_parents` is optional (TOOL-U-003),** read as false when absent.
+- **The text tool-call route reads `tool` or `function` for the tool's name and `parameters` for its arguments
+  (PROMPT-U-024),** as the native route does; a call block without a name says which keys it had (`no_name`'s new
+  optional `keys`, PROTO-U-044; never a value).
+
 ### Fixed
 
 - **A tool call whose number or true/false arrives as text still runs (TOOL-U-146).** One model server sends an
