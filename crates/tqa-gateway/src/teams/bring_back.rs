@@ -220,7 +220,10 @@ async fn fresh_copy(
     Ok((Some((lead_files, copy, quota)), Some(old)))
 }
 
-/// No more than its lead has now (SEC-067): a helper brought back keeps only the servers and connectors its lead has.
+/// No more than its lead has now (SEC-067): a helper brought back keeps only the servers and connectors its lead has,
+/// and its profile is narrowed to its lead's as it is now, as a new helper's is: one that carried its lead's copy (or
+/// none) takes the lead's copy now; one with a profile of its own keeps only the tools the lead's profile allows now
+/// (reviewed on 18 Nov 2026: the narrower profile is taken, never a refusal).
 async fn narrow(
     connection: &mut PgConnection,
     helper: Uuid,
@@ -235,6 +238,67 @@ async fn narrow(
          FROM conversations l WHERE h.id = $1 AND l.id = $2",
         helper,
         leader
+    )
+    .execute(&mut *connection)
+    .await?;
+    narrow_profile(connection, helper, leader).await
+}
+
+/// The profile half of [`narrow`].
+async fn narrow_profile(
+    connection: &mut PgConnection,
+    helper: Uuid,
+    leader: Uuid,
+) -> Result<(), GatewayError> {
+    let row = sqlx::query!(
+        "SELECT l.profile_id AS lead_id, l.profile_version AS lead_version, l.profile AS lead_profile, \
+         h.profile_id AS own_id, h.profile AS own_profile FROM conversations l, conversations h \
+         WHERE l.id = $1 AND h.id = $2",
+        leader,
+        helper
+    )
+    .fetch_one(&mut *connection)
+    .await?;
+    let tools = |profile: &Option<serde_json::Value>| -> Option<Vec<String>> {
+        profile
+            .as_ref()
+            .and_then(|copy| copy.get("tools"))
+            .and_then(serde_json::Value::as_array)
+            .map(|tools| {
+                tools
+                    .iter()
+                    .filter_map(|tool| tool.as_str().map(str::to_owned))
+                    .collect()
+            })
+    };
+    let carried = row.own_id.is_none() || row.own_id == row.lead_id;
+    if carried {
+        // Its lead's copy as it is now, as a new helper without a profile takes it.
+        sqlx::query!(
+            "UPDATE conversations SET profile_id = $2, profile_version = $3, profile = $4 WHERE id = $1",
+            helper,
+            row.lead_id,
+            row.lead_version,
+            row.lead_profile
+        )
+        .execute(&mut *connection)
+        .await?;
+        return Ok(());
+    }
+    let Some(allowed) = tools(&row.lead_profile) else {
+        return Ok(());
+    };
+    let kept: Vec<String> = match tools(&row.own_profile) {
+        Some(own) => own
+            .into_iter()
+            .filter(|tool| allowed.contains(tool))
+            .collect(),
+        None => allowed,
+    };
+    sqlx::query!(
+        "UPDATE conversations SET profile = jsonb_set(profile, '{tools}', to_jsonb($2::text[])) WHERE id = $1",
+        helper,
+        &kept
     )
     .execute(&mut *connection)
     .await?;

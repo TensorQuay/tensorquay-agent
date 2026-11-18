@@ -947,6 +947,13 @@ async fn tool_u_148_start_member_brings_a_finished_helper_back_in_its_own_words(
         "{}",
         spec.description
     );
+    // A fresh copy discards the helper's unreported changes, and says so (reviewed on 18 Nov 2026).
+    assert!(
+        spec.description
+            .contains("fresh_copy starts from the lead's files now and discards this helper's unreported changes"),
+        "{}",
+        spec.description
+    );
     let files = &spec.parameters["properties"]["files"];
     assert_eq!(files["type"], json!(["string", "null"]), "{files}");
     assert_eq!(
@@ -956,24 +963,29 @@ async fn tool_u_148_start_member_brings_a_finished_helper_back_in_its_own_words(
     );
     let fixture = tqa_testkit::workspace_fixture()?;
     let cx = support::context(&fixture);
-    let fake = Arc::new(Fake {
-        start: json!({"member": {"name": "researcher", "workspace": "own_copy", "state": "starting"},
-                      "seq": 31, "lead_tools": true, "brought_back": true, "files": "keep", "round": 2}),
-        ..Fake::default()
-    });
-    let tools = tools_for_role(fake.clone(), TeamRole::Lead);
-    let brought = named(&tools, "start_member")?
-        .call(
-            json!({"role": "researcher", "workspace": null, "profile": null, "files": "keep",
-                   "brief": {"objective": "o", "output": "p", "sources": null, "boundaries": "b"}}),
-            &cx,
-        )
-        .await?;
-    assert_eq!(
-        brought.text,
-        "Brought back researcher for round 2 (its copy kept); its brief is message 31. It reports to you."
-    );
-    let sent = fake.sent.lock().map_err(|_| "lock")?.clone();
-    assert_eq!(sent[0].1["files"], json!("keep"), "{sent:?}");
+    for (files, seq, words) in [
+        ("keep", 31, "its copy kept"),
+        (
+            "fresh_copy",
+            32,
+            "a fresh copy of your files; its unreported changes were discarded",
+        ),
+    ] {
+        let fake = Arc::new(Fake {
+            start: json!({"member": {"name": "researcher", "workspace": "own_copy", "state": "starting"},
+                          "seq": seq, "lead_tools": true, "brought_back": true, "files": files, "round": 2}),
+            ..Fake::default()
+        });
+        let tools = tools_for_role(fake.clone(), TeamRole::Lead);
+        let args = json!({"role": "researcher", "workspace": null, "profile": null, "files": files,
+                          "brief": {"objective": "o", "output": "p", "sources": null, "boundaries": "b"}});
+        let brought = named(&tools, "start_member")?.call(args, &cx).await?;
+        let expected = format!(
+            "Brought back researcher for round 2 ({words}); its brief is message {seq}. It reports to you."
+        );
+        assert_eq!(brought.text, expected);
+        let sent = fake.sent.lock().map_err(|_| "lock")?.clone();
+        assert_eq!(sent[0].1["files"], json!(files), "{sent:?}");
+    }
     Ok(())
 }

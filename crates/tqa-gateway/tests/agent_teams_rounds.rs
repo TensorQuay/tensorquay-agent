@@ -634,3 +634,66 @@ async fn gw_i_336_fresh_copy_gives_a_brought_back_helper_a_new_fork(pool: PgPool
     })
     .await
 }
+
+// TEST: SEC-067
+// The lead's profile narrowed between rounds (a person switched the lead task to fewer tools): the helper brought back
+// gets no more than its lead's profile now, whether it carried a copy of its lead's profile or one of its own
+// (reviewed on 18 Nov 2026: the narrower profile is taken, as a new helper's is narrowed, never a refusal).
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn sec_067_a_lead_profile_narrowed_between_rounds_narrows_the_helper_brought_back(
+    pool: PgPool,
+) -> TestResult {
+    support::run_configured(pool, None, ENABLED, async |f| {
+        let t = team(f).await?;
+        let lead_task = Uuid::parse_str(t.lead.0.as_str())?;
+        let (copied, own) = (
+            Uuid::parse_str(t.researcher.0.as_str())?,
+            Uuid::parse_str(t.reviewer.0.as_str())?,
+        );
+        let profile = |tools: &[&str]| json!({"name": "analyst", "tools": tools});
+        let set = async |task: Uuid, id: Uuid, value: Value| -> Result<()> {
+            sqlx::query("UPDATE conversations SET profile_id = $2, profile_version = 1, profile = $3 WHERE id = $1")
+                .bind(task)
+                .bind(id)
+                .bind(value)
+                .execute(&f.pool)
+                .await?;
+            Ok(())
+        };
+        // Round 1: the lead and the researcher (a copy of its lead's) allow shell, read_file and grep; the reviewer
+        // has a profile of its own allowing the same.
+        let (lead_profile, own_profile) = (Uuid::now_v7(), Uuid::now_v7());
+        set(lead_task, lead_profile, profile(&["shell", "read_file", "grep"])).await?;
+        set(copied, lead_profile, profile(&["shell", "read_file", "grep"])).await?;
+        set(own, own_profile, json!({"name": "reviewer", "tools": ["shell", "read_file", "grep"]})).await?;
+        sqlx::query("UPDATE agent_team_members SET state = 'done' WHERE team_id = $1 AND name = 'reviewer'")
+            .bind(t.id)
+            .execute(&f.pool)
+            .await?;
+        between_rounds(f, &t).await?;
+        // Between rounds a person narrowed the lead task's profile to read_file alone.
+        sqlx::query("UPDATE conversations SET profile = $2, profile_version = 2 WHERE id = $1")
+            .bind(lead_task)
+            .bind(profile(&["read_file"]))
+            .execute(&f.pool)
+            .await?;
+        for (key, role, task) in [("r-5:c-1", "researcher", copied), ("r-5:c-2", "reviewer", own)] {
+            let (status, body) = start_with(
+                f,
+                &t,
+                key,
+                json!({"role": role, "workspace": "own_copy", "brief": brief()}),
+            )
+            .await?;
+            assert_eq!(status, 201, "{role}: {body}");
+            let tools: Value = sqlx::query_scalar("SELECT profile->'tools' FROM conversations WHERE id = $1")
+                .bind(task)
+                .fetch_one(&f.pool)
+                .await?;
+            assert_eq!(tools, json!(["read_file"]), "{role}: no more than its lead's profile now");
+        }
+        Ok(())
+    })
+    .await
+}

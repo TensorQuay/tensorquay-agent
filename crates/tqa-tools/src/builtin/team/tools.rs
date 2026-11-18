@@ -239,7 +239,7 @@ impl Start {
         Self {
             spec: super::super::specification(
                 "start_member",
-                "Start a helper: a task of the same person that works on one part of your task from your brief and reports back to you. Start helpers only when the work splits; one for simple work, two to four typically. Name a helper that has finished to bring it back with its history and its files. For a new helper on the same job, use a new role word.",
+                "Start a helper: a task of the same person that works on one part of your task from your brief and reports back to you. Start helpers only when the work splits; one for simple work, two to four typically. Name a helper that has finished to bring it back with its history and its files. For a new helper on the same job, use a new role word. files: fresh_copy starts from the lead's files now and discards this helper's unreported changes.",
                 parameters,
                 false,
             ),
