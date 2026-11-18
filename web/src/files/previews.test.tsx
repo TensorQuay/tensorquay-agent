@@ -12,6 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { FileContent, SheetPreview } from "../protocol/generated/api";
 import { conversationId } from "../test/frames";
 import { choose } from "../test/picker";
+import { Splittable } from "../test/split";
 import { LIMITS } from "../test/user";
 
 import { FilePreview } from "./FilePreview";
@@ -91,7 +92,9 @@ function show(path: string) {
     limits: LIMITS,
   });
   const wrapper = ({ children }: { children: ReactNode }) => (
-    <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    <QueryClientProvider client={client}>
+      <Splittable>{children}</Splittable>
+    </QueryClientProvider>
   );
   return render(
     <FilePreview
@@ -169,23 +172,20 @@ describe("WEB-U-087 a web page in the Files panel", () => {
     expect(screen.queryByText(note)).toBeNull();
   });
 
-  it("Expand opens the page wide in a dialog, one frame at a time, and closing brings it back", async () => {
+  // WEB-U-494: Expand opens the page as a split beside the chat: the same frame, never a second one, so its scripts
+  // run once; Close brings the panel back with that frame still.
+  it("Expand opens the page as a split, its one frame kept, and Close brings it back", async () => {
     files["out/report.html"] = content("out/report.html", 900, "<p>hi</p>");
     show("out/report.html");
-    await screen.findByTitle("Preview of report.html");
+    const frame = await screen.findByTitle("Preview of report.html");
     fireEvent.click(screen.getByRole("button", { name: "Expand" }));
-    const dialog = await screen.findByRole("dialog", { name: "report.html" });
-    const wide = within(dialog).getByTitle("Preview of report.html");
-    expect(wide.getAttribute("sandbox")).toBe("allow-scripts");
-    expect(screen.getAllByTitle("Preview of report.html")).toHaveLength(1);
-    expect(
-      within(dialog).getByText("Scripts are running in a sandbox"),
-    ).toBeTruthy();
-    fireEvent.click(
-      within(dialog).getByRole("button", { name: "Close dialog" }),
-    );
-    expect(screen.queryByRole("dialog", { name: "report.html" })).toBeNull();
-    expect(screen.getAllByTitle("Preview of report.html")).toHaveLength(1);
+    expect(screen.getByRole("heading", { name: "report.html" })).toBeTruthy();
+    expect(screen.getAllByTitle("Preview of report.html")).toEqual([frame]);
+    expect(frame.getAttribute("sandbox")).toBe("allow-scripts");
+    expect(screen.getByText("Scripts are running in a sandbox")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Close the file" }));
+    expect(screen.queryByRole("heading", { name: "report.html" })).toBeNull();
+    expect(screen.getAllByTitle("Preview of report.html")).toEqual([frame]);
   });
 
   it("doesn't frame a page over the preview limit, and says so with both sizes", async () => {
@@ -397,7 +397,7 @@ describe("WEB-U-088 a spreadsheet in the Files panel", () => {
     room.mockRestore();
   });
 
-  it("caps a long cell with its full text on hover, and opens the sheet wide on Expand", async () => {
+  it("caps a long cell with its full text on hover, and opens the sheet as a split on Expand", async () => {
     const long = "https://example.invalid/a/very/long/address/for/the/sales";
     files["sales.xlsx"] = content("sales.xlsx", 5000, null);
     sheets[""] = {
@@ -411,11 +411,15 @@ describe("WEB-U-088 a spreadsheet in the Files panel", () => {
     const cell = (text: string) => within(table).getByText(text).closest("td");
     expect(cell(long)?.getAttribute("title")).toBe(long);
     expect(cell("short")?.getAttribute("title")).toBeNull();
+    // WEB-U-494: Expand opens the sheet as a split beside the chat, its table the same.
+    const totals = screen.getByRole("table", {
+      name: "Sheet Totals of sales.xlsx",
+    });
     fireEvent.click(screen.getByRole("button", { name: "Expand" }));
-    const dialog = await screen.findByRole("dialog", { name: "sales.xlsx" });
+    expect(screen.getByRole("heading", { name: "sales.xlsx" })).toBeTruthy();
     expect(
-      within(dialog).getByRole("table", { name: "Sheet Totals of sales.xlsx" }),
-    ).toBeTruthy();
+      screen.getByRole("table", { name: "Sheet Totals of sales.xlsx" }),
+    ).toBe(totals);
   });
 
   it("aligns a column right when more than half its cells are numbers, its heading too", async () => {
@@ -593,10 +597,17 @@ describe("WEB-U-088 a spreadsheet in the Files panel", () => {
     expect(screen.getByRole("link", { name: "Download" })).toBeTruthy();
   });
 
-  it("offers Expand only for pages and sheets", async () => {
+  // WEB-U-494 (decided on 18 Nov 2026): every kind that previews opens as a split, a text file too; a note (an empty
+  // or binary file, or one over its limit, below) has nothing to widen.
+  it("offers Expand for every file that previews, not for a note", async () => {
     files["notes.txt"] = content("notes.txt", 5, "hello");
-    show("notes.txt");
+    const { unmount } = show("notes.txt");
     await screen.findByText("hello");
+    expect(screen.getByRole("button", { name: "Expand" })).toBeTruthy();
+    unmount();
+    files["empty.txt"] = content("empty.txt", 0, "");
+    show("empty.txt");
+    expect(await screen.findByText("This file is empty.")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Expand" })).toBeNull();
   });
 

@@ -91,6 +91,16 @@
   padding: 0;
   list-style: none;
 }
+/* The transcript scrolls from the whole main area, so a wheel or trackpad over the side margins scrolls it and its
+   bar sits at the area's right edge (the Files panel's edge when it is open); its text stays the centred column, at
+   the width it had when the column itself scrolled (the column less the scroller's padding) (18.1, WEB-E2E-132). */
+.conversation-page > .transcript-scroll {
+  max-width: none;
+}
+.transcript-column {
+  max-width: calc(var(--transcript-width) - 2 * var(--space-1));
+  margin-inline: auto;
+}
 .transcript-scroll {
   position: relative;
   flex: 1;
@@ -101,6 +111,53 @@
   overflow-anchor: none;
   scroll-behavior: auto;
   padding: var(--space-1);
+}
+/* The transcript's scrollbar (18.1 polish, WEB-U-485): the browser's own takes width and is always there, so it is
+   hidden here and OverlayScrollbar draws a thin one over the transcript's right edge, shown while it scrolls or the
+   pointer is at the edge, fading about a second after (no fade with reduced motion: the global rule). With forced
+   colours the system's bar stays and the overlay isn't drawn. */
+@media not (forced-colors: active) {
+  .transcript-scroll {
+    scrollbar-width: none;
+  }
+  .transcript-scroll::-webkit-scrollbar {
+    display: none;
+  }
+}
+.overlay-scrollbar {
+  position: absolute;
+  z-index: 1;
+  width: var(--space-3);
+  transform: translateX(-100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-panel) ease-out;
+}
+.overlay-scrollbar[data-shown] {
+  opacity: 1;
+}
+/* Not one of the page's centred column parts: it sits where OverlayScrollbar places it. */
+.conversation-page > .overlay-scrollbar {
+  width: var(--space-3);
+  max-width: none;
+  margin: 0;
+}
+.overlay-thumb {
+  position: absolute;
+  top: 0;
+  right: calc(var(--space-1) / 2);
+  width: calc(var(--space-1) * 1.5);
+  border-radius: var(--radius-pill);
+  background: var(--muted);
+  touch-action: none;
+}
+.overlay-scrollbar[data-shown] .overlay-thumb {
+  pointer-events: auto;
+}
+@media (forced-colors: active) {
+  .overlay-scrollbar {
+    display: none;
+  }
 }
 /* §5b: the composer sits 16 px below the transcript's last line (4 px gap + 12 px). */
 .conversation-page > .composer {
@@ -760,9 +817,13 @@ textarea.composer-input {
   overflow: clip;
   overflow-clip-margin: var(--space-1);
 }
+/* The title, then its profile and workspace muted on the same line ("· In CodeWS"); the origin gives way first, the
+   title last (18.1, WEB-U-495). */
 .conversation-name {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: baseline;
+  gap: var(--space-1);
   min-width: 0;
 }
 .conversation-title h1,
@@ -1068,8 +1129,19 @@ textarea.composer-input {
 }
 
 /* "From {profile}" under a task's title (ADR-0012): one small line, truncated with the title. */
+/* The title keeps its whole width while the origin gives way, down to nothing; only a title longer than the line
+   itself is cut. Proportional shrinking alone took a fraction of a pixel from the title and drew its ellipsis. */
+.conversation-name > h1 {
+  flex-shrink: 0;
+  max-width: 100%;
+}
 .conversation-origin {
+  flex-shrink: 1000;
   line-height: var(--compact-leading);
+}
+.conversation-origin::before {
+  content: "·" / "";
+  margin-inline-end: var(--space-1);
 }
 /* A task that could not load keeps its header; the transcript's place says so, centred. */
 .conversation-failure {

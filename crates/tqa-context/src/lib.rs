@@ -16,8 +16,8 @@ pub use cap::{
     CappedResult, MAX_RESULT_WINDOW_SHARE, MIN_RESULT_BYTES, cap_tool_result, window_result_cap,
 };
 pub use compaction::{
-    COMPACT_MIN_KEEP_TURNS, COMPACTION_SUMMARY_PREFIX, CompactionPlan, plan_compaction,
-    plan_compaction_keeping,
+    COMPACT_MIN_KEEP_TURNS, COMPACTION_SUMMARY_PREFIX, CompactionPlan, HISTORY_RESULT_BYTES,
+    append_history, history_path, plan_compaction, plan_compaction_keeping,
 };
 pub use dedupe::{DEDUPE_MIN_BYTES, dedupe_stub};
 pub use error::ContextError;

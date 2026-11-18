@@ -110,6 +110,13 @@ fn model_summary() -> CompactionSummary {
         ..CompactionSummary::default()
     }
 }
+/// The summary as journaled: the model's, plus the task's history file it now names (CORE-E-043).
+fn journaled(mut summary: CompactionSummary) -> CompactionSummary {
+    summary
+        .key_paths
+        .push(".tqa/conversation/history.md".into());
+    summary
+}
 fn compactions(events: &[Event]) -> Vec<(CompactionSource, CompactionSummary)> {
     events
         .iter()
@@ -203,7 +210,7 @@ async fn core_u_025_long_history_compacts_once_and_the_next_request_fits() -> Te
     let events = sink.events();
     assert_eq!(
         compactions(&events),
-        vec![(CompactionSource::Model, model_summary())]
+        vec![(CompactionSource::Model, journaled(model_summary()))]
     );
     let requests = provider.requests();
     assert_eq!(requests.len(), 2);
@@ -289,7 +296,7 @@ async fn core_u_025_a_fenced_json_summary_is_accepted() -> TestResult {
     assert_eq!(run_turn(h, &history).await?, RunOutcome::Completed);
     assert_eq!(
         compactions(&sink.events()),
-        vec![(CompactionSource::Model, model_summary())]
+        vec![(CompactionSource::Model, journaled(model_summary()))]
     );
     Ok(())
 }

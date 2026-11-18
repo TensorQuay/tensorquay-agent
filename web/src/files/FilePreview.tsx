@@ -1,8 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Download, Maximize2 } from "lucide-react";
-import { useState } from "react";
+import { Download, Maximize2, MessageSquare, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 import { api } from "../api/client";
 import { fileContent } from "../api/previews";
@@ -10,7 +10,6 @@ import { useSession } from "../auth/use-session";
 import { useT } from "../i18n/I18nProvider";
 import { formatSize } from "../i18n/message";
 import { Button } from "../ui/Button";
-import { Dialog } from "../ui/Dialog";
 import { Icon } from "../ui/Icon";
 import { Skeleton } from "../ui/Skeleton";
 
@@ -25,6 +24,7 @@ import {
   TextView,
 } from "./preview-kinds";
 import { SheetPreview } from "./SheetPreview";
+import { useSplit, type SplitMode } from "./split-context";
 import "./changes-catalogue";
 
 /** The gateway's preview bound; the note names it when a preview stops early. */
@@ -51,8 +51,32 @@ export function FilePreview({
   onBack: () => void;
 }) {
   const t = useT();
-  // A page, a PDF or a sheet opens wide on request, over the conversation (Escape closes it).
-  const [expanded, setExpanded] = useState(false);
+  // Expand opens the file as a split beside the chat (WEB-U-494): the same preview, the panel made wider.
+  const split = useSplit();
+  const splitting = split.mode !== "panel";
+  const heading = useRef<HTMLHeadingElement>(null);
+  const toggle = useRef<HTMLButtonElement>(null);
+  const expand = useRef<HTMLButtonElement>(null);
+  const before = useRef<SplitMode>(split.mode);
+  // What changed, said once: a name changing under the focus isn't always read again.
+  const [status, setStatus] = useState("");
+  // Focus follows each move: into the split, its name; between split and full width, the same button; back to the
+  // panel, Expand.
+  useEffect(() => {
+    const from = before.current;
+    before.current = split.mode;
+    if (from === split.mode) return;
+    if (from === "panel") heading.current?.focus();
+    else if (split.mode === "panel") expand.current?.focus();
+    else toggle.current?.focus();
+    setStatus(
+      split.mode === "full"
+        ? t("files.chatHidden")
+        : from === "full"
+          ? t("files.chatBack")
+          : "",
+    );
+  }, [split.mode, t]);
   const content = useQuery({
     queryKey: ["file", conversationId, path],
     queryFn: ({ signal }) => fileContent(api, conversationId, path, signal),
@@ -75,7 +99,7 @@ export function FilePreview({
   }
   const file = content.data;
   const kind = previewKind(name);
-  // A page, PDF or sheet opens wide; one over its preview limit shows only a note, so it has nothing to expand (a pass
+  // A page, PDF or sheet over its preview limit shows only a note, so it has nothing to expand (a pass
   // over the pages before 17.0; WEB-U-255).
   const previewLimit =
     kind === "page"
@@ -85,7 +109,13 @@ export function FilePreview({
         : kind === "sheet"
           ? limits.preview_sheet_bytes
           : null;
-  const wide = previewLimit !== null && file.size <= previewLimit;
+  // Every kind that previews opens wide, where the layout has room for the split; a note has nothing to widen.
+  const wide =
+    split.docks &&
+    (previewLimit !== null
+      ? file.size <= previewLimit
+      : kind === "image" ||
+        (!file.binary && file.text !== null && file.text !== ""));
   const view =
     kind === "image" ? (
       <ImagePreview
@@ -138,14 +168,21 @@ export function FilePreview({
     );
   return (
     <section className="file-preview" aria-label={name}>
-      <div className="file-preview-heading">
+      {/* One heading row, the panel's or the split's, then the one view: switching never remounts the view, so a
+          page's scripts run once across Expand and back (WEB-U-494). */}
+      <div className={splitting ? "split-heading" : "file-preview-heading"}>
+        {splitting && (
+          <h2 className="split-name" tabIndex={-1} ref={heading}>
+            {name}
+          </h2>
+        )}
         {/* A sheet leads with its rows and columns (WEB-U-182); its size is no headline there. */}
         <span className="file-preview-size type-small muted">
           {kind === "sheet" ? null : formatSize(file.size, t.locale)}
         </span>
         <div className="file-preview-actions">
-          {wide && (
-            <Button variant="ghost" onClick={() => setExpanded(true)}>
+          {wide && !splitting && (
+            <Button ref={expand} variant="ghost" onClick={split.expand}>
               <Icon glyph={Maximize2} size={16} />
               {t("files.expand")}
             </Button>
@@ -161,20 +198,36 @@ export function FilePreview({
               {t("files.download")}
             </span>
           </a>
+          {splitting && (
+            <>
+              <Button ref={toggle} variant="ghost" onClick={split.toggleFull}>
+                <Icon
+                  glyph={split.mode === "full" ? MessageSquare : Maximize2}
+                  size={16}
+                />
+                {t(
+                  split.mode === "full" ? "files.showChat" : "files.fullWidth",
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                className="icon-button"
+                aria-label={t("files.closeFile")}
+                title={t("files.closeFile")}
+                onClick={split.close}
+              >
+                <Icon glyph={X} size={16} />
+              </Button>
+            </>
+          )}
         </div>
+        {splitting && (
+          <p className="sr-only" role="status">
+            {status}
+          </p>
+        )}
       </div>
-      {/* One view at a time: a page's scripts never run twice. */}
-      {!expanded && view}
-      {wide && (
-        <Dialog
-          open={expanded}
-          title={name}
-          className="preview-dialog"
-          onClose={() => setExpanded(false)}
-        >
-          {expanded && view}
-        </Dialog>
-      )}
+      {view}
       {file.truncated &&
         (kind === "document" || kind === "table" || kind === "text") && (
           <p className="type-small muted">

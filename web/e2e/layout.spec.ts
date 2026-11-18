@@ -79,9 +79,10 @@ for (const width of [1024, 1440])
           "first transcript line within 64 px",
         ).toBeLessThanOrEqual(64);
         // The UI standard: one conversation width, 720 px, whether the sidebar is expanded or a rail: the reading
-        // column, the transcript and the composer (the header above it spans the main area, WEB-E2E-117).
+        // column, the transcript's text and the composer (the header above it spans the main area, WEB-E2E-117; the
+        // transcript scrolls from the whole main area since 18.1, WEB-E2E-132, its text the centred column).
         for (const part of [
-          ".transcript-scroll",
+          ".transcript-column",
           ".conversation-page > .composer",
         ])
           expect((await box(page, part)).width, part).toBeLessThanOrEqual(720);
@@ -258,8 +259,13 @@ async function barState(page: Page) {
     range.selectNodeContents(clause);
     const text = range.getBoundingClientRect();
     const box = clause.getBoundingClientRect();
+    // A finished run's Done is read, not shown (WEB-U-495): nothing of the word on the screen.
+    const unseen =
+      Boolean(
+        clause.querySelector("[role='status']")?.classList.contains("sr-only"),
+      ) && !clause.getAttribute("data-short");
     // Text below the one-line box is out of sight; text on the line must fit it horizontally.
-    const outside = text.top >= box.bottom - 0.5 || box.width < 0.5;
+    const outside = unseen || text.top >= box.bottom - 0.5 || box.width < 0.5;
     const inside =
       !outside && text.left >= box.left - 0.5 && text.right <= box.right + 0.5;
     const word = document
@@ -306,8 +312,12 @@ test("WEB-U-007 the bar keeps the status whole and truncates the title", async (
     await field.press("Enter");
     await expect(page.locator(".conversation-bar h1")).toHaveText(title);
     const state = await barState(page);
-    expect(state.clause, `${title}: status whole`).toBe("whole");
-    expect(state.aligned, `${title}: status centred with the title`).toBe(true);
+    // Never cut: whole, or (a finished run's Done, WEB-U-495) not on the screen at all.
+    expect(state.clause, `${title}: status never cut`).not.toBe("cut");
+    if (state.clause === "whole")
+      expect(state.aligned, `${title}: status centred with the title`).toBe(
+        true,
+      );
     if (title.startsWith("A deliberately"))
       expect(state.titleTruncated, `${title}: the title gives way`).toBe(true);
   }
@@ -317,9 +327,8 @@ test("WEB-U-007 the bar keeps the status whole and truncates the title", async (
   await field.fill("Short");
   await field.press("Enter");
   await page.getByRole("button", { name: "Collapse sidebar" }).click();
-  expect(await barState(page)).toEqual({
-    clause: "whole",
-    titleTruncated: false,
-    aligned: true,
-  });
+  const rail = await barState(page);
+  expect(rail.titleTruncated).toBe(false);
+  // The status is never cut: here a finished run's Done, read and not shown (WEB-U-495).
+  expect(rail.clause).not.toBe("cut");
 });

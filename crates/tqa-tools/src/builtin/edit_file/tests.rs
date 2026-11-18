@@ -43,3 +43,14 @@ fn tool_u_004_concurrent_length_or_mtime_change_is_not_overwritten() -> Result<(
     }
     Ok(())
 }
+
+// Overlapping matches are counted up to a bound, so an old_text of one repeated character in a file of it
+// costs a bounded number of finds, not one per position.
+#[test]
+fn tool_u_004_overlapping_matches_are_counted_to_a_bound() {
+    let (listed, total) = overlapping(&"a".repeat(5000), &"a".repeat(64));
+    assert_eq!(listed.len(), miss::LISTED);
+    assert_eq!(total, miss::COUNTED);
+    let (listed, total) = overlapping("x a a a y", "a");
+    assert_eq!((listed, total), (vec![2, 4, 6], 3));
+}

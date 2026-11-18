@@ -17,6 +17,13 @@ import {
 import type { Transcript } from "./types";
 
 /** Updates elapsed time once per second while work is active; recorded completion never uses a clock. */
+/**
+ * How the header shows a finished run's "Done" (18.1, WEB-U-495): the header shows no "Done" (decided on 17 Nov 2026), as the
+ * transcript's end and the sidebar say it; "hidden" takes the word off the screen and keeps it read, "muted" shows it
+ * grey. Hidden or grey is the Product Owner's choice: this one constant, its own test either way.
+ */
+export const DONE_IN_HEADER: "hidden" | "muted" = "hidden";
+
 export function RunStatus({
   transcript,
   sending = false,
@@ -30,6 +37,7 @@ export function RunStatus({
   teamPending = false,
   teamStopped = false,
   helperStopped = false,
+  done = DONE_IN_HEADER,
 }: {
   transcript: Transcript;
   sending?: boolean;
@@ -61,6 +69,8 @@ export function RunStatus({
    * Stopped, never Ready, as its page says it was stopped before it started.
    */
   helperStopped?: boolean;
+  /** A finished run's "Done": off the screen (still read) or grey (DONE_IN_HEADER). */
+  done?: "hidden" | "muted";
 }) {
   const [now, setNow] = useState(() => Date.now());
   const working = isWorking(transcript, stored, storedAt);
@@ -83,6 +93,7 @@ export function RunStatus({
     tone: string;
     took?: string | null;
     short?: string | null;
+    finished?: boolean;
   } = failure
     ? {
         word: notSentMessage(failure, t),
@@ -97,6 +108,7 @@ export function RunStatus({
           elapsed: null,
           tone: "warn",
           took: null,
+          finished: false,
           short: null,
         }
       : leadCarriesOn && ended === "failed" && !working
@@ -106,6 +118,7 @@ export function RunStatus({
             elapsed: null,
             tone: "warn",
             took: null,
+            finished: false,
             short: leadCarriesOn.short,
           }
         : (teamStopped && ended === "completed" && !working) ||
@@ -116,6 +129,7 @@ export function RunStatus({
               elapsed: null,
               tone: "muted",
               took: null,
+              finished: false,
               short: null,
             }
           : leadWaiting && ended === "completed" && !working
@@ -125,6 +139,7 @@ export function RunStatus({
                 elapsed: null,
                 tone: "muted",
                 took: null,
+                finished: false,
                 short: null,
               }
             : teamPending &&
@@ -143,10 +158,14 @@ export function RunStatus({
                   elapsed: null,
                   tone: ended === "failed" ? "warn" : "muted",
                   took: null,
+                  finished: false,
                   short: null,
                 }
               : runPresentation(transcript, now, t, stored, team, storedAt);
   const { word: label, elapsed } = status;
+  // A finished run's Done, as runPresentation says it outright: off the screen, or grey (DONE_IN_HEADER). Every other
+  // status keeps its word, whatever its tone.
+  const finished = !sending && !failure && status.finished === true;
   // The header shows one short word at every width (WEB-U-155): a failure's state alone, a working run without its
   // count. The whole is still read, and in the tooltip.
   const short = sending
@@ -164,9 +183,11 @@ export function RunStatus({
         role="group"
         aria-label={t("run.statusLabel")}
         className="type-small"
-        data-tone={status.tone}
+        data-tone={finished && done === "muted" ? "muted" : status.tone}
         // Shown by the stylesheet in place of the whole at every width (WEB-U-155), never read (the whole is).
-        data-short={short ?? undefined}
+        data-short={
+          finished && done === "hidden" ? undefined : (short ?? undefined)
+        }
         // A long status truncates in a narrow bar; the whole text stays in its tooltip.
         title={
           sending
@@ -178,7 +199,9 @@ export function RunStatus({
         <span
           role="status"
           aria-live="polite"
-          className={short ? "sr-only" : undefined}
+          className={
+            short || (finished && done === "hidden") ? "sr-only" : undefined
+          }
         >
           {sending ? t("run.sending") : label}
           {/* The recovery as its notice gave it: announced once, not on each tick of the visible countdown. */}
