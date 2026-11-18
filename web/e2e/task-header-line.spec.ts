@@ -71,6 +71,12 @@ async function header(page: Page) {
       })(),
       originCut: origin ? origin.scrollWidth > origin.clientWidth + 1 : null,
       originText: origin?.textContent ?? "",
+      // What a sighted person could see of the word: its box (sr-only leaves 1 × 1 px), and a short word drawn for it.
+      wordBox: word
+        ? [Math.round(box(word).width), Math.round(box(word).height)]
+        : null,
+      shortWord:
+        word?.closest("[data-short]")?.getAttribute("data-short") ?? null,
       word: word?.textContent ?? "",
       // Shown: the word itself, or the short word the group draws in its place (WEB-U-155).
       wordShown:
@@ -118,9 +124,16 @@ for (const [width, height] of [
         // The workspace gives way first: cut while the title still reads whole.
         expect(done.titleCut).toBe(false);
       }
-      // Done is read, not shown.
+      // Done stays in the accessibility tree on purpose (the status announces the run's end), and a sighted person
+      // sees none of it: no box at the title's line, no short word in its place.
       expect(done.word).toBe("Done");
       expect(done.wordShown).toBe(false);
+      expect(done.wordBox![0]).toBeLessThanOrEqual(1);
+      expect(done.wordBox![1]).toBeLessThanOrEqual(1);
+      expect(done.shortWord).toBeNull();
+      await expect(
+        page.getByRole("status").filter({ hasText: /^Done$/ }),
+      ).toHaveCount(1);
       await capture(page, `done-${width}-${colorScheme}`);
     });
 
@@ -160,5 +173,7 @@ for (const colorScheme of ["light", "dark"] as const)
     expect(narrow.lines).toBe(1);
     expect(narrow.overflow).toBe(false);
     expect(narrow.wordShown).toBe(false);
+    expect(narrow.wordBox![0]).toBeLessThanOrEqual(1);
+    expect(narrow.shortWord).toBeNull();
     await capture(page, `split-1280-${colorScheme}`);
   });
