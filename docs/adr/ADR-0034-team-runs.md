@@ -76,7 +76,7 @@ of that forum, with every member reading the channel and the team deciding by vo
        normal wait;
      - members ask the lead, never the person directly. A member has no tool that reaches a person.
 
-2. **Enforced by the gateway, not by prompts.**
+2. **Enforced by the gateway, not by prompts.** (Amended 18 Nov 2026 by "Amendment 2026-11-18: rounds", A2 and A6: the role answer says why.)
    - **Roles are stored by the gateway.** When a member is started, the gateway stores each conversation's role
      (`lead` or `member`) and its agent team. No route an agent can call changes a role, and no API changes the role of
      a running agent team's conversation.
@@ -95,7 +95,7 @@ of that forum, with every member reading the channel and the team deciding by vo
      can't read what was sent to one.
    - **Depth is 1.** Members never get `start_member`, and a lead can't become a member of another agent team.
 
-3. **No setup by a person.**
+3. **No setup by a person.** (Amended 18 Nov 2026 by "Amendment 2026-11-18: rounds", A1 and A3: a lead may lead its team again, in rounds.)
    - A person starts one normal task and asks it to lead ("split this into parts and get helpers"). There is no team
      profile and no team form.
    - **The lead starts members itself** with `start_member(role, brief, workspace, profile?)`:
@@ -316,7 +316,7 @@ of that forum, with every member reading the channel and the team deciding by vo
    - Nothing is counted and no rule is evaluated: v1.1 adds no decision rule. The `quorum` and `lead` rules and
      agent votes are dropped.
 
-8. **The budget is enforced by the gateway, at the relay** (kept from the 28 Sep version).
+8. **The budget is enforced by the gateway, at the relay** (kept from the 28 Sep version). (Amended 18 Nov 2026 by "Amendment 2026-11-18: rounds", A4: per round.)
    - **What counts:** the agent team's tokens are prompt plus completion tokens across the lead's and the members'
      runs from the first `start_member` on, as the relay meters them. The runtime reports nothing the budget trusts.
      The relay adds each response's usage to `agent_teams.spent_tokens` in the transaction that records the usage.
@@ -405,7 +405,7 @@ of that forum, with every member reading the channel and the team deciding by vo
      reminder, nor shown on the page: once, never twice. The page's held line says the lead gets it at its next check
      of the team (WEB-U-402).
 
-10. **Stopping.** An agent team stops when one of these happens:
+10. **Stopping.** An agent team stops when one of these happens (Amended 18 Nov 2026 by "Amendment 2026-11-18: rounds", A1: these end a round; only a deleted lead task or a disabled person ends the team for good.):
     - the lead calls `done(summary)`. When the administrator set `agent_teams.acceptance_check` (a command, for
       example a test suite), `done` first runs it in the lead's workspace; if it fails, `done` is refused with
       `acceptance_failed` and the check's output, and the team keeps working (proposal D, decided; GW-I-198).
@@ -434,7 +434,8 @@ of that forum, with every member reading the channel and the team deciding by vo
     channel (read-only). It then posts the gateway's end note into the lead's task: the reason, tokens per member and
     in all, each member's reports and the files handed back. After the stop, every task is an ordinary task again,
     without team tools: a person can continue any of them. **A lead leads one team** (decided 2 Oct 2026): after its
-    end, `start_member` answers `team_ended`.
+    end, `start_member` answers `team_ended`. (Amended 18 Nov 2026: one team in any number of rounds; `team_ended`
+    means ended for good, A1.)
     - **One stop path (slice 4):** whatever starts a stop only sets `stopping` with its reason. The reconciler carries
       a stopping team to `ended`:
       - it cancels the members' active runs, marks the members still at work `stopped`, and marks the team turns
@@ -456,7 +457,7 @@ of that forum, with every member reading the channel and the team deciding by vo
         call (the `team_ended` refusal row) or, when the team ended between its runs, from the role `ended`, which
         offers `read_reports` alone. The person sees it on the lead's page (slice 6).
 
-11. **Orchestration is data plus a reconciler** (kept from the 28 Sep version).
+11. **Orchestration is data plus a reconciler** (kept from the 28 Sep version). (Amended 18 Nov 2026 by "Amendment 2026-11-18: rounds", A1: the `round` column and `agent_team_rounds`.)
     - An agent team is a row (`agent_teams`: lead conversation, channel, state `running → stopping → ended`, budget,
       deadline, spent, stop reason) plus `agent_team_members` (conversation, role, workspace mode, state, last-read
       seq). It has no process of its own.
@@ -489,6 +490,137 @@ of that forum, with every member reading the channel and the team deciding by vo
     role in the session configuration needs the revision raised is settled at build time, by that rule.
     - **(a) Kept, v1.0, landed (TOOL-U-036):** the runtime's channel client passes a message it can't parse through
       as marked raw JSON.
+
+## Amendment 2026-11-18: rounds (18.1)
+
+**Status: proposed on 18 Nov 2026, for review before any code.** Built in five steps (below); step 1 first, which
+fixes the reported failure on its own.
+
+**What went wrong.** A lead ran its team to its end, read its end note and answered. The person then wrote a
+follow-up to the lead task, asking for more of the same work. The new run asked its role at start and got `none`
+(point 10: one team per lead), so it had no team tool. Its history, though, was full of its own `start_member`
+calls, so it called `start_member` three times, each with a fresh brief. The runtime knew no such tool and refused
+each as an unknown tool; the page showed "Couldn't start a helper" three times; the lead then did the work alone and
+answered as if it had led (the Product Owner's report, 17 Nov 2026). Two things went wrong: a lead whose team has
+ended cannot lead again, and a lead that cannot is told nothing it can act on. Rounds answer the first; the second
+stays possible even with rounds (agent teams off, a task that was a helper), so it gets its own fix (A6).
+
+**A1. A team works in rounds.** A team is one lead and its log for as long as the lead task exists. A round is what
+point 10 called the team's life: it starts with the first helper's start, has its own budget and time (A4), and ends
+for one of point 10's reasons. The team's row, its log, its seqs, its helpers' rows and names, and everything people
+see of it continue across rounds; nothing is copied into a new team.
+- The states stay `running`, `stopping` and `ended`. A column `round` (from 1) says which round they belong to, and
+  `agent_team_rounds` keeps each round's record: `round`, `started_at`, `token_budget`, `deadline_at`,
+  `spent_tokens`, `ended_at`, `stop_reason` and the seq of its end note. The team's own `token_budget`,
+  `deadline_at`, `spent_tokens` and `stop_reason` are the current round's (the code reads them where it does today);
+  the rounds table is the history. `agent_teams_one_open_idx` stays: one team per lead.
+- **What ends a round** is what ended the team (point 10): `done`, a person's Stop team, the budget, the deadline,
+  the idle stop. The stop path is unchanged. The end note's `reason`, `summary` and `tokens` are the round's; it
+  gains `round` and `tokens_all_rounds`.
+- **What ends the team for good** is only what removes it: the lead task deleted (point 5) or its person disabled.
+  `team_ended` keeps its code and now means "for good": no round follows.
+- **A round opens** on the first successful `start_member` (a new helper or one brought back, A3) of a lead whose
+  team ended for a round reason. In that transaction the gateway sets `running`, `round + 1`, a fresh budget and
+  deadline from the administrator's current limits (A4), `spent_tokens` 0, clears `stop_reason`, and stores a
+  `round_started` message (gateway to the team, for people; A5) before the helper's `assign`. Earlier helpers not
+  brought back keep their rows and names, so a new helper's name is still made unique against them.
+- **Between rounds** every task is an ordinary task, as after point 10's stop: the helpers have no team tools, the
+  relay charges nothing to the team, and a person may write to any of them. `Conversation.team` keeps grouping them.
+
+**A2. A run's role at its start** (`GET /runtime/teams/role`, point 2). Its five answers stay; what changes is when
+`ended` and `none` come, what `ended` offers, and that `none` and `ended` say why, in a new field `reason`, which the
+runtime turns into its refusal sentence (A6).
+
+| Answer | When | Tools offered |
+|---|---|---|
+| `lead` | its team is `running` or `stopping` | the ten lead tools, as today |
+| `may_lead` | in no team, the runtime at the wake's revision or above | `start_member` alone, as today |
+| `ended` | it led a team that ended for a round reason | `read_reports` (the end note while unread; "nothing new" after) and `start_member`, which opens the next round in the same run; `reason: "between_rounds"` |
+| `none` | agent teams are off; the task was ever a helper (depth 1); its runtime is too old; or its team ended for good | none; `reason`: `teams_disabled`, `was_member`, `runtime_too_old` or `team_ended` |
+
+`ended` no longer means "read your note, then you're ordinary": it means "between rounds", whether the note is read
+or not. The first `start_member` of a run that started as `ended` adds the other lead tools from the next model call,
+as the first `start_member` of a `may_lead` run does (one change of the request's prefix), with `lead_tools: true`
+in its answer.
+
+**A3. Bringing a finished helper back is `start_member`'s** (decided 17 Nov 2026: no new tool, since today's waves
+showed a local model losing its way among many tools: Workstation 17 of 20 against Minimal 19 of 20; a lead keeps ten
+tools, a lead between rounds two).
+- **The match:** `role` is compared with the team's helper names in any letter case. It brings that helper back when
+  the helper has finished (`done`, `stopped`, `waiting`, or `failed` with `failed_run`). It starts a new helper,
+  named as today (`-2`, `-3`), when no helper has that name, when the named one is live in this round, or when it is
+  gone. So an unmatched name is a new helper, never an error, and the answer's first words say which happened
+  ("Brought back researcher", "Started helper researcher-2"). The tool's description says the rule: "Name a helper
+  that has finished to bring it back with its history and its files. For a new helper on the same job, use a new
+  role word."
+- **`files`** (optional, a bring-back only): `keep` (the default: its copy as it is, unreported changes included) or
+  `fresh_copy` (a new fork of the lead's files, the old copy deleted once the new one is ready). A `my_files` helper
+  takes `keep` only; a copy that no longer exists answers `workspace_gone` (409) naming `fresh_copy`. On a new helper
+  `files` is ignored.
+- **`workspace` and `profile`** on a bring-back are the helper's own: absent or equal pass, a different value is
+  `parameter_invalid` naming the helper's values.
+- **The same task:** its history, brief, reports and anything a person wrote to it between rounds are its context.
+  Its turn goes as a first turn does, one key per helper per round (`team-round:<helper>:<round>`), so a restart
+  never sends it twice; behind a run a person started, it is queued and the answer says `queued`. It is told the
+  gateway's fixed frame (the round, its last report's seq, the decisions since its last read) and the lead's new
+  brief, untrusted, with `brief`'s three required parts.
+- **The answer** gains `brought_back: true`, `files` and `round`. **Seats** are per round: a brought-back helper takes
+  one as a new one does; helpers not brought back hold none.
+
+**A4. Budget and time per round** (point 8). Each round starts with the administrator's current Tokens per team and
+Time per team (their `applies` becomes `next_round`), from its first helper's start. The 80 % notice, the helpers'
+stop and the 100 % stop are the round's; the relay meters the round; an ended round is charged nothing. No new limit:
+`max_rounds` and a ceiling across rounds are not proposed.
+
+**A5. What people see** (the S6 contract). `GET …/team` gains `round`, `rounds: [{round, started_at, ended_at,
+stop_reason, budget: {tokens, spent}}]` (newest last) and `tokens_all_rounds`; `Conversation.team` gains `round`;
+`version` rises when a round opens. A new stored message type, `round_started` (gateway to the team: `round`,
+`brought_back`, `started`), which the page words as a quiet line ("Round 2 started: brought back researcher and
+writer, and started reviewer") and `read_reports` never returns. The strip names the round from round 2 on; All
+helpers marks a helper not in this round "Not in this round".
+
+**A6. A task that may not lead is told so in words, never "unknown tool".** A task with `none`, or `ended`, still has
+a history that may be full of team tools. The runtime keeps the twelve team tool names (the ten lead tools and the
+helpers' two) known without offering them: a call to one it doesn't offer is answered, as a tool error with code
+`teams_unavailable`, by one fixed sentence for the role's `reason`, and never reaches the gateway. The model's tool
+list is unchanged, so the request's prefix is too, and a task that never led isn't nudged (proposal F).
+- `teams_disabled`: "Helpers are switched off for this installation. Do the work yourself, and say in your answer
+  that you worked without helpers."
+- `was_member`: "This task was a helper, and a helper can't lead a team. Do the work yourself, and say so."
+- `runtime_too_old`: "This environment can't lead helpers (its runtime is too old). Do the work yourself, and say so;
+  the person can start the task in a newer environment."
+- `team_ended`: "This team has ended for good (its lead task was deleted or its person's account was turned off).
+  Do the work yourself, and say so."
+- `between_rounds` (`ended`; a lead tool other than the two it is offered): "Your team's round has ended. Read its
+  end note with read_reports, or start the next round with start_member; the other team tools come back once a
+  round runs."
+
+The page words such a result once, muted: "Can't lead helpers here: {the reason in the page's words}"; "Couldn't
+start a helper" stays for a real failure. The core's repeat guard still applies.
+
+**A7. Step 1, before rounds exist.** Step 1 builds the pure rounds state table (A1 to A3, tested in every cell, used
+by nothing yet), `reason` on the role answer and A6's sentences. Until step 2 makes a round openable, a lead whose
+team ended for a round reason and whose note is read gets `none` with a step-1 reason, `one_team`: "This task's team
+has ended, and for now a task leads one team. Do the work yourself, and say so; to lead helpers again, the person can
+start a new task." While its note is unread it gets `ended` as today, `read_reports` alone, with `reason:
+"between_rounds"` and the other eleven names refused in words with `one_team`'s sentence. Step 2 removes `one_team`:
+from then on that lead is `ended`, with `start_member`.
+
+**Compatibility.** `reason` is a new field of an HTTP answer; a runtime that doesn't read it ignores it and behaves as
+today. The runtime reads `round_started` as a marked unknown block (TOOL-U-036) and needs no revision, so neither
+addition takes a revision row (ADR-0026). `runtime_too_old` is answered to every runtime below the wake's revision;
+only a runtime that reads `reason` turns it into a sentence, and those are all above it, so in practice that sentence
+is never sent; it is kept so the answer is complete.
+
+**The steps.** (1) the pure state table, the role route with its reasons and the runtime's sentences (A2, A6, A7);
+(2) rounds in the stop path and the relay, `start_member` opening a round, the rounds table and the end note (A1, A4);
+(3) the bring-back (A3); (4) the web (A5); (5) the end-to-end cases on the fake model and then on a real model on the
+stack.
+
+**Documents** this amends: points 2, 3, 8, 10 and 11 (each notes it); the S1 contract (`start_member`'s match rule and
+`files`, the `team_ended` refusal, the role answers and `reason`, `teams_unavailable`); the S6 contract (`round`,
+`rounds`, `tokens_all_rounds`, `round_started`); the user guide's and admin guide's Helpers pages and the CHANGELOG,
+with the step that ships each.
 
 ## Security
 
@@ -737,6 +869,11 @@ revision 12, which no release has carried yet):
   `201 {"seq": n}`; or refused, with nothing stored.
 
 ### Routes and the twelve tools
+Amended 18 Nov 2026 (rounds): `GET /runtime/teams/role` answers `{"role", "reason"?}`, `reason` on `ended`
+(`between_rounds`) and `none` (`teams_disabled`, `was_member`, `runtime_too_old`, `team_ended`; and `one_team` until
+rounds are built), A2 and A7; `start_member` brings a finished helper back by name and takes `files`, A3; a team tool
+the run isn't offered is refused by the runtime in words (`teams_unavailable`), A6.
+
 | Tool | Role | Route | Request | Answer (and the text the model sees) |
 |---|---|---|---|---|
 | `start_member` | lead | `POST /runtime/teams/members` | the brief above | `201 {"member": {"name", "conversation", "workspace", "workspace_id", "profile"?, "left_out"?: [tool or connector], "consistent"?: bool, "state": "starting"` or `"queued", "position"?}, "seq", "lead_tools": true}`. "Started helper researcher (own copy); its brief is message 3. It reports to you." On the first one the runtime adds the other nine lead tools from the next model call |
@@ -772,7 +909,7 @@ the other nine lead tools are added from the next model call of that run, and fr
 | `profile_unusable` | 409 | the `profile` names something that can't be used now (an existing code, ADR-0012) | no | GW-I-106 |
 | `member_gone` | 409 | the addressee is stopped, couldn't start or deleted; `stop_member` on a helper that couldn't start (a done one, or one whose run failed, is stopped) | no | GW-I-109, GW-I-111 |
 | `team_stopped` | 409 | the agent team is stopping; at the relay, a member's call (the lead's passes, point 8) | no | GW-I-107, GW-I-108, GW-I-109 |
-| `team_ended` | 409 | the agent team has ended, on every tool route, `start_member` included (a lead leads one team). For the lead, while it has unread messages, the end note among them, `details` is a read's answer (`messages`, `last_seq`, `more`), recorded under the call's key for its run exactly as a read is: a repeat answers the same, and `last_read_seq` advances when that call's `tool.result` is stored. The tool shows them as `read_reports` does, each a marked block. A member's, and the lead's once nothing is unread, carry no `details`. `GET /runtime/teams/role` answers `ended` while the lead's end note is unread (`read_reports` alone), then `none` | no | GW-I-108, TOOL-U-037 |
+| `team_ended` | 409 | the agent team has ended, on every tool route, `start_member` included (a lead leads one team). For the lead, while it has unread messages, the end note among them, `details` is a read's answer (`messages`, `last_seq`, `more`), recorded under the call's key for its run exactly as a read is: a repeat answers the same, and `last_read_seq` advances when that call's `tool.result` is stored. The tool shows them as `read_reports` does, each a marked block. A member's, and the lead's once nothing is unread, carry no `details`. `GET /runtime/teams/role` answers `ended` while the lead's end note is unread (`read_reports` alone), then `none`. Amended 18 Nov 2026 (rounds, A1, A2 and A7): `team_ended` is a team ended for good; a lead between rounds is `ended` with `read_reports` and `start_member` | no | GW-I-108, TOOL-U-037 |
 | `member_limit` | 409 | the lead already has as many helpers as the effective cap allows, a done one counting until it is stopped (the message says so, and that `stop_member` frees its seat): `max_members` (default 3, at most 8), the slots or the per-user cap, each minus one (`details: {limit, by}`, `by` being `max_members`, `slots` or `per_user`) | no | GW-I-106, GW-I-196, SEC-037 |
 | `team_budget` | 409 | the agent team's budget or deadline is spent (the same code as at the relay) | no | GW-I-107, SEC-039 |
 | `runtime_too_old` | 426 | the lead's environment can't run the team tools (`needs`, `has`) | no | TOOL-U-037 |
@@ -877,6 +1014,9 @@ list is unchanged. With `q`, `scope=top` is ignored: a search finds a member, wi
 (off means no trace, in both directions: no member vanishes from a list).
 
 ### The team
+Amended 18 Nov 2026 (rounds, A5): the team gains `round`, `rounds` (newest last) and `tokens_all_rounds`,
+`Conversation.team` gains `round`, and the log gains the gateway's `round_started` message.
+
 `GET /api/v1/conversations/{id}/team`, `id` being the lead's task or any member's. `404 no_team` for a task in no team.
 ```json
 {"id": "<team>", "state": "running", "stop_reason": null, "lead": {"id": "<task>"},
