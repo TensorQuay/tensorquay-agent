@@ -289,6 +289,36 @@ the gateway that hides client addresses (SEC-009).
 
 ## Settings and operations
 
+### Upgrading to a new release
+
+Read the release's notes in the [changelog](../CHANGELOG.md) first: a fix or minor release upgrades in place; a major
+one names any further steps under [Upgrade notes](#upgrade-notes). From the new release's checkout, with
+`TQA_INSTALL_DIR` set as in step 1:
+
+1. **Back up the database**, and leave the installation folder as it is:
+
+   ```sh
+   docker compose --env-file "$TQA_INSTALL_DIR/compose.env" -f deploy/compose/docker.yml exec -T postgres \
+     pg_dump -U tqa -d gateway --format=custom > "tensorquay-$(date +%Y%m%d-%H%M).dump"
+   ```
+
+2. **Check out the release and get its images:** `git fetch --tags && git checkout v<version>`, then
+   `deploy/pull-images.sh` (or `deploy/build-images.sh`), which prints the three `export` lines.
+3. **Point the installation at them:** in `$TQA_INSTALL_DIR/compose.env`, replace the `TQA_GATEWAY_IMAGE` and
+   `TQA_WEB_IMAGE` lines with the new values; in `$TQA_INSTALL_DIR/gateway.toml`, set `image` under `[runtime]` to the
+   new `TQA_RUNTIME_IMAGE`. Check the file with the new gateway, as the admin guide's
+   [Upgrading](../docs/admin-guide/README.md#upgrading) shows.
+4. **Start it again** with step 3's last three lines: the `pull` (for registry images), the `up`, and the `readyz`
+   check.
+
+To go back, put the earlier image lines back and restore the dump before starting the earlier version, since a newer
+gateway may have stored settings an earlier one can't read:
+
+```sh
+docker compose --env-file "$TQA_INSTALL_DIR/compose.env" -f deploy/compose/docker.yml exec -T postgres \
+  pg_restore -U tqa -d gateway --clean --if-exists < tensorquay-<date>.dump
+```
+
 ### Two or more installations on one host
 
 Each installation needs its own directory, Compose project, gateway container name, sandbox network, port and
