@@ -2323,6 +2323,42 @@
       "events": [
         {
           "type": "tool_call",
+          "name": "read_reports",
+          "arguments": {
+            "wait": 30,
+            "limit": null
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "ROUNDS-A count the regions over two rounds",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "read_reports",
+          "arguments": {
+            "wait": 30,
+            "limit": null
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "ROUNDS-A count the regions over two rounds",
+      "events": [
+        {
+          "type": "tool_call",
           "name": "done",
           "arguments": {
             "summary": "Round two: still four regions."
