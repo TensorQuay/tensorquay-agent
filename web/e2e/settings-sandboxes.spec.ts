@@ -22,7 +22,7 @@ for (const [width, name] of [
       await page.goto("/settings/sandboxes");
       await expect(page).toHaveTitle("Sandboxes · TensorQuay Agent");
       await expect(page.getByText("4 of 6 running")).toBeVisible();
-      await expect(page.getByText("Desktops: 1 of 2")).toBeVisible();
+      await expect(page.getByText(/Desktops 1 of 2/)).toBeVisible();
       await expect(
         page.getByText("Sandboxes run as Docker containers."),
       ).toBeVisible();
@@ -31,7 +31,7 @@ for (const [width, name] of [
       const working = table.getByRole("row", { name: /Working/ });
       await expect(working).toContainText("ben@example.org");
       await expect(working).toContainText("1.4 of 2 cores");
-      await expect(working).toContainText("3.1 GB of 4 GB");
+      await expect(working).toContainText("3.1 of 4 GB");
       await expect(table.getByRole("row", { name: /Kept on/ })).toContainText(
         "You",
       );
@@ -185,3 +185,74 @@ for (const [language, headers] of [
     }
     await capture(page, `sandboxes-390-${language}`);
   });
+
+// The phone cards (reviewed on 18 Nov 2026): a line with the owner and the state pill, ⋯ at its end; then the
+// environment and the last activity, muted, on one line; then the use on one line ("1.4 of 2 cores · 3.1 of 4 GB"); all
+// left-aligned, with no per-field label. The table above 600 px keeps its right-aligned numbers.
+test("WEB-E2E-129 the phone cards read in three lines, without field labels", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await signIn(page);
+  await pinTime(page);
+  await page.goto("/settings/sandboxes");
+  await expect(page.getByText(/^4 of 6 running/)).toBeVisible();
+  const cards = await page.evaluate(() =>
+    [
+      ...document.querySelectorAll<HTMLTableRowElement>(".data-table tbody tr"),
+    ].map((row) => {
+      const cells = [...row.querySelectorAll<HTMLElement>("td")];
+      const box = (element: Element) => element.getBoundingClientRect();
+      const [owner, , environment, use, activity, action] = cells.map(box);
+      const pill = box(row.querySelector(".status-pill")!);
+      const parts = [
+        ...row.querySelectorAll<HTMLElement>(".sandboxes-use > *"),
+      ].map(box);
+      return {
+        labels: cells.map((cell) => getComputedStyle(cell, "::before").content),
+        lineOne:
+          Math.abs(owner!.top - pill.top) <= 4 &&
+          Math.abs(owner!.top - action!.top) <= 4,
+        actionLast: action!.left > pill.right,
+        lineTwo:
+          environment!.top > owner!.bottom - 1 &&
+          Math.abs(environment!.top - activity!.top) <= 2 &&
+          activity!.left > environment!.left,
+        mutedTwo: [cells[2]!, cells[4]!].every(
+          (cell) =>
+            getComputedStyle(cell).color ===
+            getComputedStyle(document.querySelector(".muted")!).color,
+        ),
+        lineThree:
+          use!.top >= environment!.bottom - 1 &&
+          parts.every((part) => Math.abs(part.top - parts[0]!.top) <= 2),
+        ownerOneLine:
+          owner!.height <=
+          parseFloat(getComputedStyle(cells[0]!).lineHeight) + 2,
+        left: [owner!.left, environment!.left, use!.left].every(
+          (x) => Math.abs(x - owner!.left) <= 1,
+        ),
+        useAlign: getComputedStyle(cells[3]!).textAlign,
+      };
+    }),
+  );
+  expect(cards).toHaveLength(4);
+  for (const card of cards) {
+    expect(
+      card.labels.every(
+        (content) => content === "none" || content === "normal",
+      ),
+    ).toBe(true);
+    expect(card).toMatchObject({
+      lineOne: true,
+      ownerOneLine: true,
+      actionLast: true,
+      lineTwo: true,
+      mutedTwo: true,
+      lineThree: true,
+      left: true,
+    });
+    expect(card.useAlign).not.toBe("right");
+  }
+  await capture(page, "sandboxes-cards-390", { fullPage: true });
+});

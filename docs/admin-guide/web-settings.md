@@ -72,9 +72,11 @@ Sandboxes lists every running sandbox across people: who owns it, its environmen
 **Working** (a run is going), **Idle** or **Stopping…**, what it uses of what it was given ("0.2 of 2 cores", "0.4 of 4
 GB"; "Measuring…" for the first ten seconds, "Not available" when the engine gives no figures), when it started and when
 it was last active. An idle row says when it stops ("Stops in about 6 min"); one its owner keeps running says **Kept
-on**. The headline reads "3 of 6 running" (with "· full" when every slot is taken), then how many tasks wait for a
-sandbox, **Desktops: … of …** where a Desktop environment exists, and one **In use** line for the whole install. The
-page reads itself again every ten seconds while it is open. It shows nothing of a task but its owner and its
+on**. Under the page's name one muted line sums up the whole install ("4 of 6 running · Desktops 1 of 2 · 1.6 of 8 cores ·
+5.4 of 16 GB set aside", with "· full" when every slot is taken, and the desktops only where a Desktop environment
+exists), then how many tasks wait for a sandbox. A starting sandbox shows what it was given ("1 core · 2 GB set
+aside"). On a phone each sandbox is a card: its owner and state, then its environment and last activity, then its use.
+The page reads itself again every ten seconds while it is open. It shows nothing of a task but its owner and its
 environment: no title, no message, no file, and no row links to a task.
 
 **Stop now**, in a row's ⋯ menu, asks once ("Stop ben@example.org's sandbox?") and then stops an idle sandbox: the task
@@ -82,7 +84,9 @@ keeps its files and history, its next message starts a new sandbox, and its owne
 task's sandbox. It starts again when you send a message." in the task. A kept-on sandbox can be stopped, and the
 question says so; a Desktop keeping a sign-in loses it, and the question says that too. A working or starting sandbox,
 one a message is waiting for, and a desktop someone has taken over are never stopped: the menu item says why, and the
-gateway refuses the same way ("…'s sandbox is working now; it can't be stopped until the run ends."). The person can
+gateway refuses the same way ("…'s sandbox is working now; it can't be stopped until the run ends."). When a sandbox
+changes between the page's read and your answer, the question says why and offers only **Close**, and the page reads
+the list again so the row shows what it is now. The person can
 always stop their own run. Each stop is recorded in the administration audit with the task's id only.
 
 **Left behind** appears above the table only when a sweep left something unowned behind (see [Status](#status)):

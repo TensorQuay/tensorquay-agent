@@ -34,6 +34,26 @@ export const SANDBOXES_REFRESH_MS = 10_000;
 const MIB = 2 ** 20;
 const GIB = 2 ** 30;
 
+/**
+ * "3.1 of 4 GB": a use against its size, the unit said once when both are in it (reviewed on 18 Nov 2026), else each
+ * with its own ("410 MB of 2 GB").
+ */
+function memoryOf(used: number, size: number, t: Translate) {
+  if (used >= GIB && size >= GIB)
+    return t("sandboxes.ofMemory", {
+      used: formatNumber(Math.round((used / GIB) * 10) / 10, t.locale),
+      size: memory(size, t),
+    });
+  return t("sandboxes.ofMemory", {
+    used: memory(used, t),
+    size: memory(size, t),
+  });
+}
+
+/** A Stop the gateway refused because the row changed: a 409 (working, waiting) or a 404 (gone). Nothing to retry. */
+const refused = (error: Error) =>
+  error instanceof ApiError && (error.status === 409 || error.status === 404);
+
 /** Cores from millicores, to a tenth. */
 const cores = (millicores: number, locale: string) =>
   formatNumber(Math.round(millicores / 100) / 10, locale);
@@ -146,8 +166,9 @@ function Sandboxes({
       void queries.invalidateQueries({ queryKey: ["admin-sandboxes"] });
     },
     onError: (error) => {
-      // Gone already: the list is read again, and the dialog says so meanwhile.
-      if (error instanceof ApiError && error.code === "not_found")
+      // Refused (it's working, a message waits, or it's gone): the row has changed, so the list is read again and the
+      // dialog says why meanwhile (reviewed on 18 Nov 2026).
+      if (refused(error))
         void queries.invalidateQueries({ queryKey: ["admin-sandboxes"] });
     },
   });
@@ -185,7 +206,10 @@ function Sandboxes({
         <EmptyState icon={Boxes} message={t("sandboxes.empty")} action={null} />
       ) : (
         <TableScroll label={t("sandboxes.tableLabel")}>
-          <table className="data-table" aria-label={t("sandboxes.tableLabel")}>
+          <table
+            className="data-table sandboxes-table"
+            aria-label={t("sandboxes.tableLabel")}
+          >
             <thead className="type-label">
               <tr>
                 <th scope="col">{t("sandboxes.owner")}</th>
@@ -258,6 +282,7 @@ function Sandboxes({
           pending={stop.isPending}
           error={stop.error}
           errorCopy={(error) => stopRefusal(error, stopping.owner.email, t)}
+          final={refused}
           onConfirm={() => stop.mutate(stopping)}
           onClose={() => setStopping(null)}
         >
@@ -272,47 +297,50 @@ function Sandboxes({
   );
 }
 
-/** The headline and the three lines under it (the note's §4.1): running of slots, waiting, desktops, in use, how. */
+/**
+ * Under the page's name, like every Settings page (reviewed on 18 Nov 2026): one muted line (running of slots, the
+ * desktops, the use against what's set aside), how many wait when any do, and how sandboxes run, muted.
+ */
 function Summary({ data, t }: { data: SandboxListing; t: Translate }) {
   const { totals, limits } = data;
   const full = totals.in_use >= limits.slots;
   const used = totals.usage;
+  const parts = [
+    t("sandboxes.headline", {
+      running: totals.in_use,
+      slots: limits.slots,
+      full: full ? "yes" : "no",
+    }),
+    totals.desktops > 0
+      ? t("sandboxes.desktops", {
+          running: totals.desktops,
+          slots: limits.desktops,
+        })
+      : null,
+    used
+      ? t("sandboxes.inUse", {
+          cores: cores(used.cpu_millicores, t.locale),
+          reservedCores: coreCount(totals.reserved.cpu_millicores),
+          memory: memoryOf(used.memory_bytes, totals.reserved.memory_bytes, t),
+        })
+      : t("sandboxes.reserved", {
+          cores: coreCount(totals.reserved.cpu_millicores),
+          memory: memory(totals.reserved.memory_bytes, t),
+        }),
+  ].filter((part) => part !== null);
   return (
     <div className="stack sandboxes-summary">
       <p
-        className="type-display sandboxes-headline"
+        className="type-small muted sandboxes-headline"
         data-tone={full ? "warn" : undefined}
       >
-        {t("sandboxes.headline", {
-          running: totals.in_use,
-          slots: limits.slots,
-          full: full ? "yes" : "no",
-        })}
+        {parts.join(" · ")}
       </p>
       {totals.waiting > 0 && (
-        <p>{t("sandboxes.waiting", { count: totals.waiting })}</p>
-      )}
-      {totals.desktops > 0 && (
         <p className="type-small">
-          {t("sandboxes.desktops", {
-            running: totals.desktops,
-            slots: limits.desktops,
-          })}
+          {t("sandboxes.waiting", { count: totals.waiting })}
         </p>
       )}
-      <p className="type-small">
-        {used
-          ? t("sandboxes.inUse", {
-              cores: cores(used.cpu_millicores, t.locale),
-              reservedCores: coreCount(totals.reserved.cpu_millicores),
-              memory: memory(used.memory_bytes, t),
-              reservedMemory: memory(totals.reserved.memory_bytes, t),
-            })
-          : t("sandboxes.reserved", {
-              cores: coreCount(totals.reserved.cpu_millicores),
-              memory: memory(totals.reserved.memory_bytes, t),
-            })}
-      </p>
       <p className="type-small muted">
         {t(
           data.backend === "firecracker"
@@ -444,14 +472,7 @@ function Measure({
       </span>
     );
   return (
-    <span>
-      {size === null
-        ? memory(usage, t)
-        : t("sandboxes.ofMemory", {
-            used: memory(usage, t),
-            size: memory(size, t),
-          })}
-    </span>
+    <span>{size === null ? memory(usage, t) : memoryOf(usage, size, t)}</span>
   );
 }
 
@@ -474,13 +495,26 @@ function Unmeasured({ row, measured }: { row: SandboxRow; measured: boolean }) {
         : bytes !== null
           ? t("sandboxes.sizeMemory", { size: memory(bytes, t) })
           : null;
+  // Starting: its size, the same shape as a measured row's use (reviewed on 18 Nov 2026): the cores over the memory
+  // set aside in the table, "2 cores · 4 GB set aside" on a phone card.
+  if (row.state === "starting")
+    return (
+      <span className="sandboxes-use muted">
+        {cpu !== null && (
+          <span>{t("sandboxes.sizeCores", { size: coreCount(cpu) })}</span>
+        )}
+        {bytes !== null && (
+          <span>
+            {t("sandboxes.setAsideMemory", { memory: memory(bytes, t) })}
+          </span>
+        )}
+      </span>
+    );
   return (
     <span className="sandboxes-use">
-      {row.state !== "starting" && (
-        <span className="muted">
-          {measured ? t("sandboxes.notAvailable") : t("sandboxes.measuring")}
-        </span>
-      )}
+      <span className="muted">
+        {measured ? t("sandboxes.notAvailable") : t("sandboxes.measuring")}
+      </span>
       {aside !== null && <span className="muted">{aside}</span>}
     </span>
   );

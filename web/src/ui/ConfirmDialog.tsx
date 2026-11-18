@@ -18,6 +18,7 @@ export function ConfirmDialog({
   pending,
   error,
   errorCopy,
+  final,
   onConfirm,
   onClose,
   children,
@@ -27,11 +28,17 @@ export function ConfirmDialog({
   pending: boolean;
   error: Error | null;
   errorCopy?: (error: Error) => string | null;
+  /**
+   * Whether a failure settles it: the thing changed, so there is nothing to confirm again. The dialog then says why as
+   * its own notice, with space above, and offers only Close.
+   */
+  final?: (error: Error) => boolean;
   onConfirm: () => void;
   onClose: () => void;
   children: ReactNode;
 }) {
   const t = useT();
+  const settled = error !== null && (final?.(error) ?? false);
   return (
     <Dialog
       open
@@ -40,18 +47,30 @@ export function ConfirmDialog({
         if (!pending) onClose();
       }}
       actions={
-        <>
-          <Button variant="secondary" disabled={pending} onClick={onClose}>
-            {t("common.cancel")}
+        settled ? (
+          <Button variant="secondary" onClick={onClose}>
+            {t("common.close")}
           </Button>
-          <Button variant="danger" loading={pending} onClick={onConfirm}>
-            {confirm}
-          </Button>
-        </>
+        ) : (
+          <>
+            <Button variant="secondary" disabled={pending} onClick={onClose}>
+              {t("common.cancel")}
+            </Button>
+            <Button variant="danger" loading={pending} onClick={onConfirm}>
+              {confirm}
+            </Button>
+          </>
+        )
       }
     >
       <p>{children}</p>
-      <ErrorMessage error={error && (errorCopy?.(error) ?? error)} />
+      {settled ? (
+        <p role="alert" className="confirm-notice">
+          {errorCopy?.(error) ?? error.message}
+        </p>
+      ) : (
+        <ErrorMessage error={error && (errorCopy?.(error) ?? error)} />
+      )}
     </Dialog>
   );
 }

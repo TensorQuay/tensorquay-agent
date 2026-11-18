@@ -172,11 +172,14 @@ describe("WEB-U-486 the Sandboxes page's states", () => {
         .getAllByRole("row")
         .find((row) => state.test(row.textContent ?? ""))!
         .querySelectorAll("td")[3]!;
+    // Its size, the same shape as the others' use (reviewed on 18 Nov 2026): "2 cores · 4 GB set aside", muted.
     const starting = useOf(/Starting/);
-    expect(starting).toHaveTextContent(/^2 cores · 4 GB$/);
-    expect(starting.querySelector(".muted")).toHaveTextContent(
-      "2 cores · 4 GB",
-    );
+    expect(starting.querySelector(".sandboxes-use")).toHaveClass("muted");
+    expect(
+      [...starting.querySelectorAll(".sandboxes-use > span")].map(
+        (part) => part.textContent,
+      ),
+    ).toEqual(["2 cores", "4 GB set aside"]);
     expect(starting).not.toHaveTextContent("Not available");
   });
 
@@ -217,7 +220,7 @@ describe("WEB-U-486 the Sandboxes page's states", () => {
       [...use.querySelectorAll(".sandboxes-use > *")].map(
         (line) => line.textContent,
       ),
-    ).toEqual(["1.4 of 2 cores", "3.1 GB of 4 GB"]);
+    ).toEqual(["1.4 of 2 cores", "3.1 of 4 GB"]);
     const last = within(working).getAllByRole("cell")[4]!;
     expect(last.querySelector("time")).toHaveAttribute(
       "title",
@@ -256,7 +259,7 @@ describe("WEB-U-486 the Sandboxes page's states", () => {
     );
     expect(
       await screen.findByText(
-        "In use: 0 of 3 cores · 15.2 MB of 1.5 GB set aside",
+        "1 of 6 running · 0 of 3 cores · 15.2 MB of 1.5 GB set aside",
       ),
     ).toBeVisible();
     const table = screen.getByRole("table", { name: "Running sandboxes" });
@@ -265,16 +268,19 @@ describe("WEB-U-486 the Sandboxes page's states", () => {
     expect(table).toHaveTextContent("8.7 MB of 512 MB");
   });
 
-  it("shows the headline, the lines under it, and every row in order with its resources", async () => {
+  // Like every Settings page (reviewed on 18 Nov 2026): the page's name is its heading, then one muted summary line
+  // and how sandboxes run, muted; no number larger than the page's name.
+  it("shows one muted summary line under the page's name, and every row in order with its resources", async () => {
     show(fake([listing()]));
-    expect(await screen.findByText("4 of 6 running")).toBeVisible();
-    expect(screen.getByText("Desktops: 1 of 2")).toBeVisible();
-    expect(
-      screen.getByText("In use: 1.8 of 8 cores · 3.9 GB of 16 GB set aside"),
-    ).toBeVisible();
-    expect(
-      screen.getByText("Sandboxes run as Docker containers."),
-    ).toBeVisible();
+    const summary = await screen.findByText(
+      "4 of 6 running · Desktops 1 of 2 · 1.8 of 8 cores · 3.9 of 16 GB set aside",
+    );
+    expect(summary).toBeVisible();
+    expect(summary).toHaveClass("type-small", "muted");
+    expect(document.querySelector(".type-display")).toBeNull();
+    expect(screen.getByText("Sandboxes run as Docker containers.")).toHaveClass(
+      "muted",
+    );
     expect(screen.queryByText(/waiting for a sandbox/)).toBeNull();
     const rows = within(
       screen.getByRole("table", { name: "Running sandboxes" }),
@@ -284,11 +290,11 @@ describe("WEB-U-486 the Sandboxes page's states", () => {
     expect(rows[1]).toHaveTextContent("ben@example.org");
     expect(rows[1]).toHaveTextContent("Working");
     expect(rows[1]).toHaveTextContent("1.4 of 2 cores");
-    expect(rows[1]).toHaveTextContent("3.1 GB of 4 GB");
+    expect(rows[1]).toHaveTextContent("3.1 of 4 GB");
     expect(rows[2]).toHaveTextContent("Starting");
     // Starting: nothing to measure yet, so only what's set aside (the 140 review).
     expect(rows[2]).not.toHaveTextContent("Not available");
-    expect(rows[2]).toHaveTextContent("2 cores · 4 GB");
+    expect(rows[2]).toHaveTextContent("2 cores4 GB set aside");
     expect(rows[3]).toHaveTextContent("Idle");
     expect(rows[3]).toHaveTextContent("Stops in about 4 min");
     expect(rows[4]).toHaveTextContent("You");
@@ -308,7 +314,11 @@ describe("WEB-U-486 the Sandboxes page's states", () => {
         },
       ]),
     );
-    expect(await screen.findByText("4 of 4 running · full")).toBeVisible();
+    const summary = await screen.findByText(
+      "4 of 4 running · full · Desktops 1 of 2 · 1.8 of 8 cores · 3.9 of 16 GB set aside",
+    );
+    expect(summary).toBeVisible();
+    expect(summary).toHaveAttribute("data-tone", "warn");
     expect(
       screen.getByText("2 tasks are waiting for a sandbox."),
     ).toBeVisible();
@@ -317,9 +327,10 @@ describe("WEB-U-486 the Sandboxes page's states", () => {
   it("leaves Desktops out without a Desktop environment, and says Measuring… before the first sample", async () => {
     const data = listing({ items: [{ ...IDLE, usage: null }] });
     show(fake([{ ...data, totals: { ...data.totals, usage: null } }]));
-    expect(await screen.findByText("1 of 6 running")).toBeVisible();
-    expect(screen.queryByText(/^Desktops:/)).toBeNull();
-    expect(screen.getByText("Set aside: 8 cores · 16 GB")).toBeVisible();
+    expect(
+      await screen.findByText("1 of 6 running · 8 cores · 16 GB set aside"),
+    ).toBeVisible();
+    expect(screen.queryByText(/Desktops/)).toBeNull();
     // Once on the row, its set-aside line under it (the 140 review: never a word twice).
     expect(screen.getAllByText("Measuring…")).toHaveLength(1);
     expect(screen.getByText("2 cores · 4 GB")).toBeVisible();
@@ -520,6 +531,60 @@ describe("WEB-U-487 Stop now: the menu, the confirm and every result's words", (
     );
     expect(await within(dialog).findByText(sentence)).toBeVisible();
   });
+
+  // After a refusal the row has changed (reviewed on 18 Nov 2026): the dialog says why as its own notice, offers only
+  // Close, and the list is read again so the row shows what it is now.
+  it.each(["working", "work_waiting", "not_found"])(
+    "offers only Close after a %s refusal, and reads the list again",
+    async (code) => {
+      const stop = vi.fn<SandboxesApi["stop"]>(() =>
+        Promise.reject(
+          new ApiError(code === "not_found" ? 404 : 409, code, "refused"),
+        ),
+      );
+      const now = listing({
+        items: listing().items.map((item) =>
+          item.conversation_id === IDLE.conversation_id
+            ? {
+                ...item,
+                state: "working",
+                can_stop: false,
+                stop_refusal: "working",
+              }
+            : item,
+        ),
+      });
+      const api = fake([listing(), now], stop);
+      show(api);
+      fireEvent.click(await openStop("ben@example.org", 1));
+      const dialog = await screen.findByRole("dialog", {
+        name: "Stop ben@example.org's sandbox?",
+      });
+      fireEvent.click(
+        within(dialog).getByRole("button", { name: "Stop sandbox" }),
+      );
+      const notice = await within(dialog).findByRole("alert");
+      expect(notice).toHaveClass("confirm-notice");
+      expect(notice).not.toHaveClass("error-message");
+      expect(
+        within(dialog).queryByRole("button", { name: "Stop sandbox" }),
+      ).toBeNull();
+      expect(
+        within(dialog).queryByRole("button", { name: "Cancel" }),
+      ).toBeNull();
+      expect(
+        within(dialog).getByRole("button", { name: "Close" }),
+      ).toBeEnabled();
+      await waitFor(() => expect(api.sandboxes).toHaveBeenCalledTimes(2));
+      await waitFor(() =>
+        expect(
+          within(
+            screen.getByRole("table", { name: "Running sandboxes" }),
+          ).getAllByRole("row")[3],
+        ).toHaveTextContent("Working"),
+      );
+    },
+  );
 
   it("shows a failed request's own words", async () => {
     const stop = vi.fn<SandboxesApi["stop"]>(() =>
