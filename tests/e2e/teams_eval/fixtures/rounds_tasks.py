@@ -61,11 +61,15 @@ run(check)
         id="x1-region-shares", title="Region totals, then each region's share on a follow-up", kind="report",
         statement="""
 The file `sales.csv` lists sales by region (columns `region` and `amount`, in euros). Write `regions.md` with a markdown
-table: one row per region, with its total amount to the cent.
+table: one row per region, with its total amount to the cent. Use two helpers for this: one named `totals` that sums
+each region's amounts, and one named `checker` that checks those sums against the file.
 """,
         follow_up=("Thank you. Now add a third column to the table in regions.md with each region's share of the "
-                   "overall total, as a whole percent. If a helper worked out the totals, bring that same helper back "
-                   "for this."),
+                   "overall total, as a whole percent. Bring back totals and checker, with what they already know, "
+                   "and add one new helper named shares to work out the percentages."),
+        between={"helper": "totals", "text": "For the next round: the shares must add up to 100, so round them with "
+                                             "care and say if one has to move by a point."},
+        rounds_roles={"round1": ["totals", "checker"], "new": "shares"},
         seed={"sales.csv": buffer.getvalue()},
         check=check,
         expected={"totals": {region: float(totals[region]) for region in REGIONS}, "shares": shares},

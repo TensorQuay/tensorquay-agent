@@ -177,6 +177,10 @@ class Task:
     # A person's follow-up, sent once the first ask has ended (ADR-0034's rounds amendment: a team's next round). A
     # task with one is a rounds task: tagged teams-rounds, never teams-eval, and its team session runs two rounds.
     follow_up: str = None
+    # A rounds task's message to one helper between the rounds ({"helper", "text"}), and its helpers by round: the
+    # roles round 1 starts and the one round 2 adds ({"round1": [...], "new": ...}), for the scripted session.
+    between: dict = None
+    rounds_roles: dict = None
 
 
 def text_or_bytes(path, content):
@@ -205,6 +209,8 @@ def write(task, root):
     text_or_bytes(directory / "task.md", task.statement.strip() + "\n")
     if task.follow_up:
         text_or_bytes(directory / "follow_up.md", task.follow_up.strip() + "\n")
+    if task.between:
+        text_or_bytes(directory / "between.json", json.dumps(task.between, indent=1, ensure_ascii=False) + "\n")
     text_or_bytes(directory / "key_facts.json", json.dumps(task.key_facts, indent=1, ensure_ascii=False) + "\n")
     for path, content in sorted(task.seed.items()):
         text_or_bytes(directory / "seed" / path, content)

@@ -218,6 +218,26 @@ class Following(unittest.TestCase):
         self.assertEqual((followed.runs, followed.followed_up), (2, True))
         self.assertEqual(runner.answer(api.log), "Round two's report.")
 
+    def test_the_person_writes_to_a_helper_between_the_rounds_before_the_follow_up(self):
+        """Plan 18.1 item E: between the rounds the person writes to one helper by its name, and the follow-up waits
+        for that helper's own run to end."""
+        first = run_frames(1, run="r1")
+        second = run_frames(len(first) + 1, run="r2")
+        record = dict(team_record(), helpers=[{"name": "totals", "conversation": "h1", "tokens": 0}])
+        api = FakeApi([first, second], teams=[record])
+        api.helper_logs = {"h1": [
+            {"seq": 1, "event": {"type": "message.user", "text": "Round them with care."}},
+            {"seq": 2, "event": {"type": "run.started", "run_id": "h-1"}},
+            {"seq": 3, "event": {"type": "run.completed", "run_id": "h-1"}},
+        ]}
+        rounds = task(".")._replace(follow_up="Count them once more.",
+                                    between={"helper": "totals", "text": "Round them with care."})
+        followed = runner.follow(rounds, "team", settings(api), "w1")
+        self.assertIsNone(followed.problem)
+        sent = [call[1] for call in api.calls if call[0] == "send_message"]
+        self.assertEqual(sent[1:], ["Round them with care.", "Count them once more."])
+        self.assertEqual(followed.between, "h1")
+
     def test_a_follow_up_is_never_sent_after_the_deadline(self):
         api = FakeApi([run_frames(1, ending="run.cancelled")], teams=[team_record(state="running")])
         rounds = task(".", wall=10)._replace(follow_up="Count them once more.")

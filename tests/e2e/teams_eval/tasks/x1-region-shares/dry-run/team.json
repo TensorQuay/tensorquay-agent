@@ -9,11 +9,36 @@
      "type": "tool_call",
      "name": "start_member",
      "arguments": {
-      "role": "scout",
+      "role": "totals",
       "workspace": "own_copy",
       "profile": null,
       "brief": {
-       "objective": "Read the data for x1-region-shares and report what you find.",
+       "objective": "Work on x1-region-shares as the totals.",
+       "output": "One line to the lead.",
+       "sources": null,
+       "boundaries": "Don't edit the lead's files."
+      }
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The file `sales.csv` lists sales by region (columns `region` and `amount`, in euros). Write `regions.md` with a markdown",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "start_member",
+     "arguments": {
+      "role": "checker",
+      "workspace": "own_copy",
+      "profile": null,
+      "brief": {
+       "objective": "Work on x1-region-shares as the checker.",
        "output": "One line to the lead.",
        "sources": null,
        "boundaries": "Don't edit the lead's files."
@@ -32,7 +57,25 @@
    "events": [
     {
      "type": "text",
-     "text": "I started a helper; I'll continue when it reports."
+     "text": "I started the helpers; I'll read their reports."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The file `sales.csv` lists sales by region (columns `region` and `amount`, in euros). Write `regions.md` with a markdown",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_reports",
+     "arguments": {
+      "wait": 30,
+      "limit": null
+     },
+     "split_into": 2
     }
    ],
    "usage": {
@@ -114,12 +157,63 @@
      "type": "tool_call",
      "name": "start_member",
      "arguments": {
-      "role": "scout",
+      "role": "totals",
       "workspace": "own_copy",
       "profile": null,
-      "files": "keep",
       "brief": {
-       "objective": "Check the data for x1-region-shares again for the follow-up.",
+       "objective": "Pick up x1-region-shares again as the totals.",
+       "output": "One line to the lead.",
+       "sources": null,
+       "boundaries": "Don't edit the lead's files."
+      },
+      "files": "keep"
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The file `sales.csv` lists sales by region (columns `region` and `amount`, in euros). Write `regions.md` with a markdown",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "start_member",
+     "arguments": {
+      "role": "checker",
+      "workspace": "own_copy",
+      "profile": null,
+      "brief": {
+       "objective": "Pick up x1-region-shares again as the checker.",
+       "output": "One line to the lead.",
+       "sources": null,
+       "boundaries": "Don't edit the lead's files."
+      },
+      "files": "keep"
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The file `sales.csv` lists sales by region (columns `region` and `amount`, in euros). Write `regions.md` with a markdown",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "start_member",
+     "arguments": {
+      "role": "shares",
+      "workspace": "own_copy",
+      "profile": null,
+      "brief": {
+       "objective": "Join x1-region-shares as the shares.",
        "output": "One line to the lead.",
        "sources": null,
        "boundaries": "Don't edit the lead's files."
@@ -138,7 +232,43 @@
    "events": [
     {
      "type": "text",
-     "text": "I brought the helper back; I'll continue when it reports."
+     "text": "Two helpers are back and one is new; I'll read their reports."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The file `sales.csv` lists sales by region (columns `region` and `amount`, in euros). Write `regions.md` with a markdown",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_reports",
+     "arguments": {
+      "wait": 30,
+      "limit": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "The file `sales.csv` lists sales by region (columns `region` and `amount`, in euros). Write `regions.md` with a markdown",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "read_reports",
+     "arguments": {
+      "wait": 30,
+      "limit": null
+     },
+     "split_into": 2
     }
    ],
    "usage": {
@@ -214,14 +344,14 @@
    }
   },
   {
-   "when": "You are scout",
+   "when": "totals, a helper",
    "events": [
     {
      "type": "tool_call",
      "name": "send_to_lead",
      "arguments": {
       "type": "report",
-      "text": "I read the data.",
+      "text": "The totals reports.",
       "question_seq": null,
       "files": null
      },
@@ -234,7 +364,7 @@
    }
   },
   {
-   "when": "You are scout",
+   "when": "totals, a helper",
    "events": [
     {
      "type": "text",
@@ -247,14 +377,27 @@
    }
   },
   {
-   "when": "You are scout",
+   "when": "totals, a helper",
+   "events": [
+    {
+     "type": "text",
+     "text": "Noted; I'll use that when my lead brings me back."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "totals, a helper",
    "events": [
     {
      "type": "tool_call",
      "name": "send_to_lead",
      "arguments": {
       "type": "report",
-      "text": "I checked the data again.",
+      "text": "The totals reports again.",
       "question_seq": null,
       "files": null
      },
@@ -267,11 +410,110 @@
    }
   },
   {
-   "when": "You are scout",
+   "when": "totals, a helper",
    "events": [
     {
      "type": "text",
      "text": "I reported to my lead again."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "checker, a helper",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "send_to_lead",
+     "arguments": {
+      "type": "report",
+      "text": "The checker reports.",
+      "question_seq": null,
+      "files": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "checker, a helper",
+   "events": [
+    {
+     "type": "text",
+     "text": "I reported to my lead."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "checker, a helper",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "send_to_lead",
+     "arguments": {
+      "type": "report",
+      "text": "The checker reports again.",
+      "question_seq": null,
+      "files": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "checker, a helper",
+   "events": [
+    {
+     "type": "text",
+     "text": "I reported to my lead again."
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "shares, a helper",
+   "events": [
+    {
+     "type": "tool_call",
+     "name": "send_to_lead",
+     "arguments": {
+      "type": "report",
+      "text": "The shares reports.",
+      "question_seq": null,
+      "files": null
+     },
+     "split_into": 2
+    }
+   ],
+   "usage": {
+    "prompt_tokens": 900,
+    "completion_tokens": 60
+   }
+  },
+  {
+   "when": "shares, a helper",
+   "events": [
+    {
+     "type": "text",
+     "text": "I reported to my lead."
     }
    ],
    "usage": {

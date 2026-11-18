@@ -92,6 +92,9 @@ class Task(NamedTuple):
     # A person's follow-up, sent once the first ask has ended (ADR-0034's rounds amendment: it opens a team's next
     # round); none for the evaluation's tasks.
     follow_up: Optional[str] = None
+    # Between the rounds, a person's message to one helper by its name ({"helper": ..., "text": ...}, between.json):
+    # part of that helper's task when it is brought back (ADR-0034's rounds amendment, A3).
+    between: Optional[dict] = None
 
 
 class Settings(NamedTuple):
@@ -108,6 +111,12 @@ class Settings(NamedTuple):
     now: Callable = time.time
     # Before each attempt and rerun: (task, side, number). The stack dry run serves the scripted model's session here.
     prepare: Callable = lambda task, side, number: None  # noqa: E731
+
+
+def between(directory):
+    """A rounds task's message to one helper between the rounds (`between.json`), or None."""
+    path = Path(directory) / "between.json"
+    return json.loads(path.read_text()) if path.is_file() else None
 
 
 def follow_up(directory):
@@ -138,7 +147,7 @@ def select_tasks(root, only=(), tag=TAG):
         budgets = manifest["budgets"]
         tasks.append(Task(manifest["id"], kinds[0], (directory / "task.md").read_text(), budgets["max_steps"],
                           budgets["wall_clock_secs"], budgets["max_tokens"], manifest.get("template"),
-                          tuple(facts), directory, follow_up(directory)))
+                          tuple(facts), directory, follow_up(directory), between(directory)))
     if only:
         missing = sorted(set(only) - {task.id for task in tasks})
         if missing:
@@ -202,6 +211,7 @@ class Followed:
         self.team = None
         self.wall_secs = 0.0
         self.followed_up = False  # the task's follow-up was sent (a rounds task)
+        self.between = None  # the helper written to between the rounds, or why not
 
     def fail(self, step, error):
         if self.problem is None:
@@ -346,6 +356,8 @@ def follow(task, side, settings, workspace):
                 and not followed.deadline_passed):
             break
         try:
+            if task.between:
+                write_between(api, followed, task.between, settings, deadline)
             api.send_message(followed.conversation, follow_up)
         except ApiError as error:
             followed.fail(error.step, error)
@@ -355,6 +367,27 @@ def follow(task, side, settings, workspace):
         followed.followed_up = True
     followed.wall_secs = clock() - started
     return followed
+
+
+def write_between(api, followed, message, settings, deadline):
+    """Writes the person's message to the helper `message` names, as a person writes to a helper's task between the
+    rounds, and waits for the helper's run it starts to end (or the deadline), so the follow-up comes after it."""
+    team = api.team(followed.conversation) or {}
+    helper = next((each for each in team.get("helpers", []) if each.get("name") == message["helper"]), None)
+    if helper is None:
+        followed.between = f"no helper named {message['helper']}"
+        return
+    api.send_message(helper["conversation"], message["text"])
+    followed.between = helper["conversation"]
+    started = False
+    while settings.clock() < deadline:
+        kinds = [frame.get("event", {}).get("type") for frame in api.events(helper["conversation"])]
+        sent = len(kinds) - 1 - kinds[::-1].index("message.user") if "message.user" in kinds else len(kinds)
+        after = kinds[sent + 1:]
+        started = started or "run.started" in after
+        if started and any(kind in TERMINAL for kind in after):
+            return
+        settings.sleep(TEAM_POLL_SECS)
 
 
 def walk(api, conversation, directory=""):
