@@ -122,10 +122,13 @@ pub(crate) async fn record(
     .await?;
     let item = Item {
         kind: notice.kind(),
-        by: ScreenPerson {
-            id: user.id.to_string(),
-            name: user.email.clone(),
-        },
+        by: super::notices::named(
+            notice.kind(),
+            ScreenPerson {
+                id: user.id.to_string(),
+                name: user.email.clone(),
+            },
+        ),
         at,
         after_seq: u64::try_from(after).map_err(|_| GatewayError::StoreUnavailable)?,
         seconds: seconds.and_then(|value| u64::try_from(value).ok()),

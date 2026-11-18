@@ -379,9 +379,11 @@ async fn an_administrators_stop_retires_an_idle_sandbox_refuses_a_working_one_an
         let items = notices["items"].as_array().ok_or("items")?;
         assert_eq!(items.len(), 1, "{notices}");
         assert_eq!(items[0]["kind"], "sandbox.stopped");
-        assert_eq!(items[0]["by"]["id"], admin.id.to_string());
+        // The owner isn't told who: no `by`, and nothing of the administrator in any answer the owner reads.
+        assert!(items[0].get("by").is_none(), "{notices}");
         assert!(items[0]["at"].is_string() && items[0]["after_seq"].is_u64());
         assert!(!notices.to_string().contains("ACME-7731"));
+        assert!(!notices.to_string().contains(&admin.email) && !notices.to_string().contains(&admin.id.to_string()), "{notices}");
         let (_, other) = call(
             f,
             Method::GET,

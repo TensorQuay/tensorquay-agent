@@ -213,10 +213,10 @@ fn screen_frames() -> Vec<ServerFrame> {
     vec![
         ServerFrame::ScreenNotice {
             kind: tqa_types::ScreenNoticeKind::HandedBack,
-            by: tqa_types::ScreenPerson {
+            by: Some(tqa_types::ScreenPerson {
                 id: "0192b3a4-5c6d-7e8f-9a0b-1c2d3e4f5a6c".to_owned(),
                 name: "Ada".to_owned(),
-            },
+            }),
             at: "2026-10-05T12:00:00Z".to_owned(),
             after_seq: 41,
             seconds: Some(95),

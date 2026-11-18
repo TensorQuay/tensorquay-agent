@@ -28293,7 +28293,6 @@
         "description": "One of the gateway's screen notices (ADR-0039): never sequenced into the runtime's log, never what was typed or pasted. A sandbox.stopped notice says an administrator stopped the task's sandbox from the Sandboxes page; the task keeps its files and its next message starts a new one.",
         "required": [
           "kind",
-          "by",
           "at",
           "after_seq"
         ],
@@ -28330,7 +28329,7 @@
                 "description": "The person's sign-in address, the gateway's name for a person."
               }
             },
-            "description": "The person who took over, handed back or signed out."
+            "description": "The person who took over, handed back or signed out. Absent on sandbox.stopped: an administrator's stop never names the administrator to the task's owner (PROTO-U-047)."
           },
           "at": {
             "type": "string",

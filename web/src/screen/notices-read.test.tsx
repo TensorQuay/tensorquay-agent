@@ -19,8 +19,8 @@ function wrapper() {
 }
 
 const stopped = {
+  // An administrator's stop names nobody (PROTO-U-047).
   kind: "sandbox.stopped",
-  by: { id: "admin-1", role: "administrator" },
   at: "2026-11-18T10:00:00Z",
   after_seq: 4,
 } as const;
@@ -51,7 +51,7 @@ describe("WEB-U-496 the task page reads its notices only when there is one", () 
   it("reads them once on a task whose read says it has one, and shows the stop", async () => {
     const read = vi
       .spyOn(api, "screenNotices")
-      .mockResolvedValue({ items: [stopped] } as never);
+      .mockResolvedValue({ items: [stopped] });
     const { result } = renderHook(
       () =>
         useScreenLines({

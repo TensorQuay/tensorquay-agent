@@ -83,15 +83,8 @@ pub struct ScreenPerson {
 /// The longest name a notice carries, in bytes: a sign-in address's bound.
 const MAX_NAME_BYTES: usize = 254;
 
-/// Whether a notice's fields agree: a person's id and name as above, `ended` on a hand-back only and always there,
-/// `seconds` on a hand-back only and always there but for one ended by a `restart`, and `reason` on a failed sign-out
-/// only.
-fn check(
-    kind: ScreenNoticeKind,
-    by: &ScreenPerson,
-    (seconds, ended): (Option<u64>, Option<ScreenEnded>),
-    reason: Option<ScreenNoticeReason>,
-) -> Result<(), &'static str> {
+/// Whether a named person's id and name are as above.
+fn check_person(by: &ScreenPerson) -> Result<(), &'static str> {
     if !crate::server::is_team_id(&by.id) {
         return Err("by.id: expected the person's id, a lower-case UUID");
     }
@@ -100,6 +93,29 @@ fn check(
         || by.name.chars().any(char::is_control)
     {
         return Err("by.name: expected 1 to 254 bytes on one line");
+    }
+    Ok(())
+}
+
+/// Whether a notice's fields agree: a person's id and name as above, `ended` on a hand-back only and always there,
+/// `seconds` on a hand-back only and always there but for one ended by a `restart`, and `reason` on a failed sign-out
+/// only.
+fn check(
+    kind: ScreenNoticeKind,
+    by: Option<&ScreenPerson>,
+    (seconds, ended): (Option<u64>, Option<ScreenEnded>),
+    reason: Option<ScreenNoticeReason>,
+) -> Result<(), &'static str> {
+    let by = match (kind, by) {
+        (ScreenNoticeKind::SandboxStopped, None) => None,
+        (ScreenNoticeKind::SandboxStopped, Some(_)) => {
+            return Err("by: sandbox.stopped names nobody");
+        }
+        (_, None) => return Err("by: expected the person"),
+        (_, Some(by)) => Some(by),
+    };
+    if let Some(by) = by {
+        check_person(by)?;
     }
     let hand_back = kind == ScreenNoticeKind::HandedBack;
     if hand_back != ended.is_some() {
@@ -125,7 +141,7 @@ pub(crate) fn check_frame(frame: &ServerFrame) -> Result<(), FrameError> {
             ended,
             reason,
             ..
-        } => check(*kind, by, (*seconds, *ended), *reason).err(),
+        } => check(*kind, by.as_ref(), (*seconds, *ended), *reason).err(),
         ServerFrame::ScreenSignOutDone { ok, reason, .. } => (*ok == reason.is_some())
             .then_some("reason comes with ok: false only, and always with it"),
         ServerFrame::ScreenReset {

@@ -163,8 +163,10 @@ pub enum ServerFrame {
     ScreenNotice {
         /// What happened.
         kind: crate::ScreenNoticeKind,
-        /// Who took over, handed back or signed out.
-        by: crate::ScreenPerson,
+        /// Who took over, handed back or signed out; absent on `sandbox.stopped`, which never names the administrator
+        /// to the task's owner (the audit row says who).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        by: Option<crate::ScreenPerson>,
         /// When, RFC 3339.
         #[serde(deserialize_with = "crate::validation::notice_at")]
         at: String,

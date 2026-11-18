@@ -4061,7 +4061,6 @@
       "type": "object",
       "required": [
         "kind",
-        "by",
         "at",
         "after_seq"
       ],

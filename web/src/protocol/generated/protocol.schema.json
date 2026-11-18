@@ -2904,9 +2904,12 @@
               "type": "string"
             },
             "by": {
-              "allOf": [
+              "anyOf": [
                 {
                   "$ref": "#/definitions/ScreenPerson"
+                },
+                {
+                  "type": "null"
                 }
               ]
             },
@@ -2953,7 +2956,6 @@
           "required": [
             "type",
             "kind",
-            "by",
             "at",
             "after_seq"
           ],

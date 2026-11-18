@@ -4327,7 +4327,7 @@
         },
         {
           "const": "sandbox.stopped",
-          "description": "An administrator stopped the task's sandbox from the Sandboxes page (18.1): the task keeps its files and history, and its next message starts a new sandbox.",
+          "description": "An administrator stopped the task's sandbox from the Sandboxes page (18.1): the task keeps its files and\nhistory, and its next message starts a new sandbox.",
           "type": "string"
         }
       ]
@@ -4868,12 +4868,15 @@
               "type": "string"
             },
             "by": {
-              "allOf": [
+              "anyOf": [
                 {
                   "$ref": "#/definitions/ScreenPerson"
+                },
+                {
+                  "type": "null"
                 }
               ],
-              "description": "Who took over, handed back or signed out."
+              "description": "Who took over, handed back or signed out; absent on `sandbox.stopped`, which never names the administrator\nto the task's owner (the audit row says who)."
             },
             "ended": {
               "anyOf": [
@@ -4922,7 +4925,6 @@
           "required": [
             "type",
             "kind",
-            "by",
             "at",
             "after_seq"
           ],
