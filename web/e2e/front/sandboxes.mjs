@@ -98,7 +98,7 @@ const LEFT_BEHIND = {
   kind: "network",
   name: "tqa-sbx-18e7c62210a67d70",
   age_seconds: 660,
-  reason: "engine_timeout",
+  reason: "timeout",
   remove: "docker network rm tqa-sbx-18e7c62210a67d70",
 };
 
@@ -178,7 +178,7 @@ export function sandboxesReadiness(request) {
       containers: 0,
       networks: amber ? 1 : 0,
       oldest_seconds: amber ? 660 : null,
-      reason: amber ? "engine_timeout" : null,
+      reason: amber ? "timeout" : null,
     },
     swept_at: "2026-11-10T08:55:00Z",
   };

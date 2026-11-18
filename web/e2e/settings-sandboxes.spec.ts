@@ -140,7 +140,7 @@ test("WEB-E2E-129 Status reads amber and opens the page's Left behind section", 
   await page.goto("/settings/status");
   const section = page.getByRole("region", { name: "Sandboxes" });
   await expect(section).toContainText(
-    "Left behind after the last sweep: 1 network (engine_timeout). The gateway tries again every 5 minutes.",
+    "Left behind after the last sweep: 1 network (the engine timed out). The gateway tries again every 5 minutes.",
   );
   await expect(section).not.toContainText("tqa-sbx");
   await axe(page);
@@ -148,7 +148,7 @@ test("WEB-E2E-129 Status reads amber and opens the page's Left behind section", 
   await section.getByRole("link", { name: "Open Sandboxes" }).click();
   const left = page.getByRole("region", { name: "Left behind" });
   await expect(left).toContainText(
-    "A network tqa-sbx-18e7c62210a67d70, 11 minutes old: engine_timeout",
+    "A network tqa-sbx-18e7c62210a67d70, 11 minutes old: the engine timed out",
   );
   await expect(
     left.getByText("docker network rm tqa-sbx-18e7c62210a67d70"),
