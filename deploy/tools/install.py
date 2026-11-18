@@ -38,7 +38,7 @@ DEFAULT_POOL = ipaddress.ip_network("10.213.0.0/16")
 ADDRESS_HELP = ("Use http://localhost:8080 (this computer; any free port from 1024) or the https:// address your TLS "
                 "proxy serves, such as https://agent.example.org.")
 UPGRADE = ("The installer doesn't upgrade an installation: an upgrade moves the database and the images at once, so "
-           "follow the install guide's Upgrading steps, which take a backup first.")
+           "follow \"Upgrading to a new release\" in deploy/README.md, which backs up the database first.")
 STRICT_FIX = ("  With strict tools the server dropped the line break from a tool's text. Fix: in Settings › Models, "
               "set Strict tool schemas to Never on the route local, then check again.")
 
@@ -298,8 +298,9 @@ class Installer:
                 port = int(match[1])
             raise Refused(
                 "There is already an installation in {dir}, at http://localhost:{port}. The installer never changes "
-                "one. To upgrade it, follow the install guide's Upgrading steps: deploy/pull-images.sh for the new "
-                "release, then its up line with the new images. To remove the stack and keep its files: {down}".format(
+                "one. To upgrade it, follow \"Upgrading to a new release\" in deploy/README.md: a backup, "
+                "deploy/pull-images.sh for the new release, then the same up line. To remove the stack and keep its "
+                "files: {down}".format(
                     dir=self.install_dir, port=port, down=" ".join(self.compose("down"))))
         if self.install_dir.exists():
             empty = not any(self.install_dir.iterdir())

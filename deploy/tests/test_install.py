@@ -352,6 +352,8 @@ class Yes(Case):
         code, out, system = self.run_installer(["--upgrade"])
         self.assertEqual(code, 2)
         self.assertIn("doesn't upgrade", out.text)
+        # The guide's section that has the steps (deploy/README.md), by its name.
+        self.assertIn('"Upgrading to a new release" in deploy/README.md', out.text)
         self.assertEqual(system.commands, [])
 
 
@@ -365,6 +367,7 @@ class ExistingInstall(Case):
         code, out, system = self.run_installer(self.yes())
         self.assertEqual(code, 2)
         self.assertEqual(env.read_bytes(), before)
+        self.assertIn('"Upgrading to a new release" in deploy/README.md', out.text)
         self.assertEqual(sorted(path.name for path in self.install_dir.iterdir()), ["compose.env"])
         self.assertEqual(system.commands, [])
         self.assertIn("There is already an installation in " + str(self.install_dir), out.text)
