@@ -68,8 +68,11 @@ def last_turn(events):
     return events[last + 1:]
 
 
-def one_run(stack, index, output):
+def one_run(stack, index, output, detail="word"):
     word = "ORCHID-{}".format(100 + secrets.randbelow(900))
+    if detail == "incidental":
+        # A detail said in passing inside a work message, which a summary tends to drop (the harder case).
+        word = "{}-K".format(10000 + secrets.randbelow(90000))
     conversation = stack.request("/api/v1/conversations", {"title": "Recall {}".format(index),
                                                            "model_route": "local"})["id"]
     record = {"run": index, "conversation": conversation, "word": word, "turns": 0}
@@ -78,16 +81,24 @@ def one_run(stack, index, output):
                                   "files under report/. First, say in one sentence how you'll lay it out.")
         send(stack, conversation, "Write section 1 ({}) to report/section-1.md with write_file: about 300 words. "
                                   "Then reply with one sentence.".format(TOPICS[0]))
-        send(stack, conversation, "By the way, keep this for later: the release code word is {}. Reply only "
-                                  "'noted'.".format(word))
-        for turn, topic in enumerate(TOPICS[1:MAX_WORK_TURNS], start=2):
+        if detail == "incidental":
+            send(stack, conversation, "Write section 2 ({}) to report/section-2.md with write_file: about 300 words. "
+                                      "Unrelated: the print shop's order number for this report is {}. Then reply "
+                                      "with one sentence.".format(TOPICS[1], word))
+        else:
+            send(stack, conversation, "By the way, keep this for later: the release code word is {}. Reply only "
+                                      "'noted'.".format(word))
+        first = 2 if detail == "word" else 3
+        for turn, topic in enumerate(TOPICS[first - 1:MAX_WORK_TURNS], start=first):
             events = send(stack, conversation, "Write section {} ({}) to report/section-{}.md with write_file: about "
                                                "300 words. Then reply with one sentence.".format(turn, topic, turn))
             record["turns"] = turn
             if len(kinds(events, "compaction")) >= 2:
                 break
-        events = send(stack, conversation, "What was the release code word I gave you earlier? Reply with only the "
-                                           "word.")
+        question = ("What was the print shop's order number I mentioned earlier? Reply with only the number."
+                    if detail == "incidental" else
+                    "What was the release code word I gave you earlier? Reply with only the word.")
+        events = send(stack, conversation, question)
         turn_events = last_turn(events)
         answer = "".join(event.get("text", "") for event in turn_events if event.get("type") == "text.delta")
         calls = [json.dumps(event.get("arguments")) for event in turn_events if event.get("type") == "tool.call"]
@@ -97,7 +108,7 @@ def one_run(stack, index, output):
             searched_history=any("history.md" in call for call in calls),
             tool_calls=len(calls),
             right=word in answer,
-            other_word=bool(re.search(r"ORCHID-\d{3}", answer.replace(word, ""))),
+            other_word=bool(re.search(r"ORCHID-\d{3}|\d{5}-K", answer.replace(word, ""))),
         )
         record["passed"] = record["compactions"] >= 2 and record["right"] and not record["other_word"]
         (output / "run-{}.json".format(index)).write_text(json.dumps(events, indent=1) + "\n")
@@ -114,6 +125,8 @@ def main(argv=None):
     parser.add_argument("--output", required=True)
     parser.add_argument("--runs", type=int, default=10)
     parser.add_argument("--parallel", type=int, default=4)
+    parser.add_argument("--detail", choices=("word", "incidental"), default="word",
+                        help="word: a code word to keep; incidental: an order number said in passing (harder)")
     options = parser.parse_args(argv)
     if os.environ.get("TQA_DOCKER_TESTS") != "1":
         raise SystemExit("E2E-RECALL-001 needs Docker: set TQA_DOCKER_TESTS=1")
@@ -129,7 +142,8 @@ def main(argv=None):
     try:
         stack.prepare(rehearsal=True)
         with concurrent.futures.ThreadPoolExecutor(max_workers=options.parallel) as pool:
-            records = list(pool.map(lambda index: one_run(stack, index, output), range(1, options.runs + 1)))
+            records = list(pool.map(lambda index: one_run(stack, index, output, options.detail),
+                                    range(1, options.runs + 1)))
     except BaseException as error:
         failure = error
     finally:
@@ -137,7 +151,7 @@ def main(argv=None):
         failure = compose.retire(env, failure, configuration=stack.configuration)
         compose.cleanup(directory, env, temporary, failure, compose=stack.configuration)
     passed = sum(1 for record in records if record.get("passed"))
-    result = {"id": "E2E-RECALL-001", "runs": len(records), "passed": passed, "pass_at": PASS_AT,
+    result = {"id": "E2E-RECALL-001", "detail": options.detail, "runs": len(records), "passed": passed, "pass_at": PASS_AT,
               "searched_history": sum(1 for record in records if record.get("searched_history")),
               "context_window": int(env["TQA_SOAK_MODEL_CONTEXT"]), "model": env.get("TQA_SOAK_MODEL_NAME"),
               "status": "passed" if failure is None and passed >= PASS_AT else "failed",
