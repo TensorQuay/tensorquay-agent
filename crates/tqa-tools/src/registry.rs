@@ -145,6 +145,7 @@ impl ToolRegistry {
             .get(name)
             .filter(|entry| entry.tool.null_means_absent())
         {
+            literal_scalars(&entry.spec.parameters, args);
             drop_null_optionals(&entry.spec.parameters, args);
         }
     }
@@ -274,6 +275,59 @@ fn fill_nulls(schema: &Value, value: &mut Value) {
                 for value in items {
                     fill_nulls(item, value);
                 }
+            }
+        }
+        _ => {}
+    }
+}
+
+/// A scalar a model wrote as a string, taken as the value it spells where the property's schema takes no string: a
+/// model server that types a call's arguments by the schema may leave a value as text where the `type` is a list
+/// (`"30000"` for `["integer", "null"]`; TOOL-U-146). Only an exact JSON literal of a type the property takes: a near
+/// one (`" 30000"`, `"3e4"` for an integer, `"True"`) stays as sent, and so does anything that isn't a scalar.
+fn literal_scalars(schema: &Value, value: &mut Value) {
+    match value {
+        Value::Object(members) => {
+            let Some(properties) = schema.get("properties").and_then(Value::as_object) else {
+                return;
+            };
+            for (key, member) in members.iter_mut() {
+                if let Some(property) = properties.get(key) {
+                    literal_scalars(property, member);
+                }
+            }
+        }
+        Value::Array(items) => {
+            if let Some(item) = schema.get("items") {
+                for value in items {
+                    literal_scalars(item, value);
+                }
+            }
+        }
+        Value::String(text) => {
+            let types = json_types(schema);
+            if types.is_empty() || types.contains(&JsonType::String) {
+                return;
+            }
+            // The literal exactly, with nothing around it: serde takes surrounding blanks.
+            if text.trim() != text.as_str() {
+                return;
+            }
+            let Ok(literal) = serde_json::from_str::<Value>(text) else {
+                return;
+            };
+            let taken = match &literal {
+                Value::Null => types.contains(&JsonType::Null),
+                Value::Bool(_) => types.contains(&JsonType::Boolean),
+                Value::Number(number) => {
+                    types.contains(&JsonType::Number)
+                        || (types.contains(&JsonType::Integer)
+                            && (number.is_i64() || number.is_u64()))
+                }
+                _ => false,
+            };
+            if taken {
+                *value = literal;
             }
         }
         _ => {}
@@ -508,7 +562,21 @@ fn pointer(path: &str) -> String {
 }
 fn error_detail(error: &jsonschema::ValidationError<'_>, first_path: &str) -> String {
     let current = pointer(&error.instance_path().to_string());
-    let detail = schema_detail(error.kind());
+    let mut detail = schema_detail(error.kind());
+    // A wrong type says what was sent, so a model can see "30000" was a string (TOOL-U-146).
+    if matches!(
+        error.kind(),
+        jsonschema::error::ValidationErrorKind::Type { .. }
+    ) {
+        detail.push_str(match error.instance().as_ref() {
+            Value::Null => ", got null",
+            Value::Bool(_) => ", got a boolean",
+            Value::Number(_) => ", got a number",
+            Value::String(_) => ", got a string",
+            Value::Array(_) => ", got an array",
+            Value::Object(_) => ", got an object",
+        });
+    }
     if current == first_path {
         detail
     } else {
@@ -709,8 +777,8 @@ mod tests {
             return Err("both properties have the wrong type".into());
         };
         let expected = match path.as_str() {
-            "/a" => "expected string; /b: expected integer",
-            "/b" => "expected integer; /a: expected string",
+            "/a" => "expected string, got a number; /b: expected integer, got a string",
+            "/b" => "expected integer, got a string; /a: expected string, got a number",
             other => return Err(format!("unexpected first path {other}").into()),
         };
         assert_eq!(detail, expected);
