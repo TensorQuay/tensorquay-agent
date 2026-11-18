@@ -110,6 +110,12 @@ class Settings(NamedTuple):
     prepare: Callable = lambda task, side, number: None  # noqa: E731
 
 
+def follow_up(directory):
+    """A rounds task's follow-up (`follow_up.md` beside task.md: tqa-e2e's task.toml takes no unknown field); None."""
+    path = Path(directory) / "follow_up.md"
+    return path.read_text().strip() if path.is_file() else None
+
+
 def select_tasks(root, only=(), tag=TAG):
     """The tasks tagged `tag` (`teams-eval`, or `teams-rounds` for the rounds run), in id order, each with its kind (a `teams-<kind>` tag) and its key facts
     (`key_facts.json`, a list of strings); `only` narrows them to those ids."""
@@ -132,7 +138,7 @@ def select_tasks(root, only=(), tag=TAG):
         budgets = manifest["budgets"]
         tasks.append(Task(manifest["id"], kinds[0], (directory / "task.md").read_text(), budgets["max_steps"],
                           budgets["wall_clock_secs"], budgets["max_tokens"], manifest.get("template"),
-                          tuple(facts), directory, manifest.get("follow_up")))
+                          tuple(facts), directory, follow_up(directory)))
     if only:
         missing = sorted(set(only) - {task.id for task in tasks})
         if missing:

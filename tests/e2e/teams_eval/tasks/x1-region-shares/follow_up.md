@@ -1,0 +1,1 @@
+Thank you. Now add a third column to the table in regions.md with each region's share of the overall total, as a whole percent. If a helper worked out the totals, bring that same helper back for this.

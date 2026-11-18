@@ -82,7 +82,7 @@ class Tasks(unittest.TestCase):
                     names = [event["name"] for event in calls]
                     # A rounds task's team runs two rounds: a start, a read and done each, the second bringing the
                     # scout back (ADR-0034's rounds amendment); it takes no file.
-                    rounds = "follow_up" in (task_dir / "task.toml").read_text()
+                    rounds = (task_dir / "follow_up.md").is_file()
                     if side == "team" and rounds:
                         self.assertEqual([n for n in names if n not in ("write_file", "shell")],
                                          ["start_member", "read_reports", "done"] * 2)

@@ -200,10 +200,11 @@ def write(task, root):
              f'check = {{ image = "runtime", timeout_secs = {task.check_timeout} }}']
     if task.template:
         lines.append(f'template = "{task.template}"')
-    if task.follow_up:
-        lines.append(f"follow_up = {json.dumps(task.follow_up)}")
+    # tqa-e2e's task.toml takes no unknown field, so the follow-up is a file of its own beside task.md.
     text_or_bytes(directory / "task.toml", "\n".join(lines) + "\n")
     text_or_bytes(directory / "task.md", task.statement.strip() + "\n")
+    if task.follow_up:
+        text_or_bytes(directory / "follow_up.md", task.follow_up.strip() + "\n")
     text_or_bytes(directory / "key_facts.json", json.dumps(task.key_facts, indent=1, ensure_ascii=False) + "\n")
     for path, content in sorted(task.seed.items()):
         text_or_bytes(directory / "seed" / path, content)
