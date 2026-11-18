@@ -1,7 +1,6 @@
 //! The leak verdict (the Sandboxes page design note, §3.6) from the last two sweeps, scripted: nothing unowned; a stray
 //! removed in the pass; a network that fails once then goes; one that fails in two consecutive passes; a stray found
-//! again after a pass tried it; bind mode and volume mode. Pure: the passes are built by hand. The row's id is claimed
-//! after v18.0.0.
+//! again after a pass tried it; bind mode and volume mode (GW-U-219). Pure: the passes are built by hand.
 use super::verdict::{Finding, Kind, Pass, Tone, Verdict, verdict};
 use time::{Duration, OffsetDateTime, macros::datetime};
 

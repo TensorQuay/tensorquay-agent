@@ -20,7 +20,7 @@ import type {
 import { SandboxesSettings } from "./SandboxesSettings";
 
 // The Sandboxes page (the Sandboxes page design note, §4): its states, each row's resources, Stop now and its results,
-// and the privacy rule (nothing of a task but its id reaches the page). The rows' ids are claimed after v18.0.0.
+// and the privacy rule (nothing of a task but its id reaches the page): WEB-U-486, 487 and 488.
 
 const NOW = Date.parse("2026-11-17T01:26:00Z");
 const admin: User = {
@@ -159,7 +159,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("the Sandboxes page's states", () => {
+describe("WEB-U-486 the Sandboxes page's states", () => {
   it("shows the headline, the lines under it, and every row in order with its resources", async () => {
     show(fake([listing()]));
     expect(await screen.findByText("4 of 6 running")).toBeVisible();
@@ -323,7 +323,7 @@ describe("the Sandboxes page's states", () => {
   });
 });
 
-describe("Stop now: the menu, the confirm and every result's words", () => {
+describe("WEB-U-487 Stop now: the menu, the confirm and every result's words", () => {
   // ben@ owns the working and the idle sandbox: `which` is the row among his, in the listing's order.
   async function openStop(name: string, which = 0) {
     const menus = await screen.findAllByRole("button", {
@@ -432,7 +432,7 @@ describe("Stop now: the menu, the confirm and every result's words", () => {
   });
 });
 
-describe("the page never renders a task's title, link or count", () => {
+describe("WEB-U-488 the page never renders a task's title, link or count", () => {
   it("shows the owner's email and the environment, and no planted string nor any link on a row", async () => {
     const planted = "Quarterly figures for ACME-7731";
     const data = listing();

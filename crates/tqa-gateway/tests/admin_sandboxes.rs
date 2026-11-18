@@ -1,7 +1,7 @@
 //! The administrator's Sandboxes page (the Sandboxes page design note, §2): the listing of every running sandbox with
 //! its owner, environment, state and size and the install's limits; Stop, which goes through the retire path and
 //! refuses a working sandbox; the audit row, the counter and the owner's notice; and the privacy rule, that nothing of
-//! a task but its id reaches the answer. On the fixture's engine. The rows' ids are claimed after v18.0.0.
+//! a task but its id reaches the answer. On the fixture's engine. GW-U-216 to GW-U-220 and SEC-066.
 #[path = "support/fixture.rs"]
 mod support;
 use reqwest::Method;
@@ -58,7 +58,8 @@ async fn metrics(f: &Fixture) -> Result<String> {
     )?)
 }
 
-// The listing: states, totals, limits, order, the privacy rule and the member's refusal.
+// GW-U-216, GW-U-220 and SEC-066: the listing's states, totals, limits and order, the privacy rule and the member's
+// refusal.
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
 async fn the_listing_names_every_running_sandbox_by_owner_state_and_size_and_nothing_of_its_task(
@@ -160,7 +161,8 @@ async fn the_listing_names_every_running_sandbox_by_owner_state_and_size_and_not
     .await
 }
 
-// Stop: the retire path, the refusals, the replayed key, the audit row, the counter and the owner's notice.
+// GW-U-217 and GW-U-218: Stop's retire path, the refusals, the replayed key, the audit row, the counter and the owner's
+// notice.
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
 async fn an_administrators_stop_retires_an_idle_sandbox_refuses_a_working_one_and_is_audited(
@@ -286,7 +288,7 @@ async fn an_administrators_stop_retires_an_idle_sandbox_refuses_a_working_one_an
     .await
 }
 
-// The readiness detail and the metrics carry the running count and the verdict's counts.
+// GW-U-219: the readiness detail and the metrics carry the running count and the verdict's counts.
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
 async fn the_readiness_detail_and_the_metrics_carry_the_sandbox_counts(pool: PgPool) -> TestResult {

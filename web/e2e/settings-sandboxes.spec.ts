@@ -2,18 +2,19 @@ import { signIn } from "./session";
 import { axe, capture, pinTime, rowMenu } from "./settings-page";
 import { expect, test } from "./test";
 
-// The Sandboxes page and the Status line on the fake front, in the browser (the Sandboxes page design note, §4): the
+// WEB-E2E-129: the Sandboxes page and the Status line on the fake front, in the browser (the Sandboxes page design note, §4): the
 // screens at 1280 and 390 in both themes; stopping an idle sandbox from the row's ⋯ and its confirm; the busy refusal;
 // the empty state; the amber Status line that opens the page's Left behind section; axe at each state; and the
-// summary at 390 px in Thai and Tamil, whose column headers must not wrap into a second line. The row's id is claimed
-// after v18.0.0.
+// summary at 390 px in Thai and Tamil, whose column headers must not wrap into a second line.
 
 for (const [width, name] of [
   [1280, "sandboxes-1280"],
   [390, "sandboxes-390"],
 ] as const)
   for (const colorScheme of ["light", "dark"] as const)
-    test(`the Sandboxes page at ${width} ${colorScheme}`, async ({ page }) => {
+    test(`WEB-E2E-129 the Sandboxes page at ${width} ${colorScheme}`, async ({
+      page,
+    }) => {
       await page.setViewportSize({ width, height: 900 });
       await page.emulateMedia({ colorScheme });
       await signIn(page);
@@ -47,7 +48,7 @@ for (const [width, name] of [
       await capture(page, `${name}-${colorScheme}`, { fullPage: true });
     });
 
-test("stops an idle sandbox from its row, and a working one is refused with its reason", async ({
+test("WEB-E2E-129 stops an idle sandbox from its row, and a working one is refused with its reason", async ({
   page,
 }) => {
   await signIn(page);
@@ -94,7 +95,7 @@ test("stops an idle sandbox from its row, and a working one is refused with its 
   });
 });
 
-test("the kept-on Desktop of your own warns about the kept sign-in", async ({
+test("WEB-E2E-129 the kept-on Desktop of your own warns about the kept sign-in", async ({
   page,
 }) => {
   await signIn(page);
@@ -112,7 +113,7 @@ test("the kept-on Desktop of your own warns about the kept sign-in", async ({
   await expect(dialog).toBeHidden();
 });
 
-test("the empty state", async ({ page, context }) => {
+test("WEB-E2E-129 the empty state", async ({ page, context }) => {
   await signIn(page);
   await context.addCookies([
     { name: "fixture_sandboxes", value: "empty", url: "http://localhost:3100" },
@@ -128,7 +129,7 @@ test("the empty state", async ({ page, context }) => {
   await capture(page, "sandboxes-empty");
 });
 
-test("Status reads amber and opens the page's Left behind section", async ({
+test("WEB-E2E-129 Status reads amber and opens the page's Left behind section", async ({
   page,
   context,
 }) => {
@@ -161,7 +162,7 @@ for (const [language, headers] of [
   ["th", ["เจ้าของ", "สถานะ", "สภาพแวดล้อม"]],
   ["ta", ["உரிமையாளர்", "நிலை", "சூழல்"]],
 ] as const)
-  test(`the summary and the headers at 390 in ${language}`, async ({
+  test(`WEB-E2E-129 the summary and the headers at 390 in ${language}`, async ({
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });

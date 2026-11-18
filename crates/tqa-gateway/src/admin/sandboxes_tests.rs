@@ -1,6 +1,6 @@
-//! The administrator's sandbox listing (the Sandboxes page design note, §2.1 and §3.1): each row's state from the record
-//! and the run activity, when it stops, whether an administrator may stop it, the page's order and its paging. Pure:
-//! the rows are built by hand, as a scripted store would hand them over. The rows' ids are claimed after v18.0.0.
+//! GW-U-216: the administrator's sandbox listing (the Sandboxes page design note, §2.1 and §3.1): each row's state from
+//! the record and the run activity, when it stops, whether an administrator may stop it (GW-U-217's refusals), the
+//! page's order and its paging. Pure: the rows are built by hand, as a scripted store would hand them over.
 use super::{Item, Order, Page, Refusal, State, item_state, page, refusal, sort, stops_at};
 use time::{Duration, OffsetDateTime, macros::datetime};
 

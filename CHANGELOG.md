@@ -3,6 +3,19 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
+## Unreleased
+
+### Added
+
+- **Administrators see every running sandbox, and can stop an idle one (Settings › Operations › Sandboxes;
+  GW-U-216 to 220, SEC-066, WEB-U-486 to 489, WEB-E2E-129).** Each row names its owner, environment, state and when it
+  stops, with its CPU and memory against its size; the page shows the slots in use and anyone waiting. Stop now retires
+  an idle sandbox the same way its idle window would: the task and its files stay, its next message starts a new one,
+  and its owner reads a notice saying an administrator stopped it. A working sandbox is never stopped. Each stop is
+  audited. The page shows nothing of a task but its owner and environment. Settings › Status now says whether a sweep
+  left anything behind (a container, a network, or a volume in volume mode) and why, and the page's Left behind section
+  gives each one's remove command. One database migration.
+
 ## 18.0.0 (17 November 2026)
 
 A feature release: the agent reads PDFs and pictures, a desktop sign-in can be kept for a whole task, a folder

@@ -587,8 +587,8 @@ describe("WEB-U-299 Status's sections and verdict", () => {
 });
 
 // The leak verdict on Status (the Sandboxes page design note, §4.4): green names nothing; amber names what, why, the
-// retry and the page. The row's id is claimed after v18.0.0.
-describe("Status says whether anything was left behind after a sweep", () => {
+// retry and the page.
+describe("WEB-U-489 Status says whether anything was left behind after a sweep", () => {
   it("reads green with the running count and the oldest age, and that volumes aren't counted in bind mode", async () => {
     fetch.mockImplementationOnce(() => json(ready));
     show();
