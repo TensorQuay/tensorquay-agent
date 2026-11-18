@@ -299,6 +299,8 @@
     "tool.read": "已读取 {path}",
     "tool.readLine": "，第 {first} 行",
     "tool.readLines": "，第 {first}–{last} 行",
+    "tool.readPage": "，第 {first} 页",
+    "tool.readPages": "，第 {first}–{last} 页",
     "tool.count": " · {count, plural, other {# {unit, select, file {个文件} other {处匹配}}}}",
     "tool.lookedFor": "在 {path} 中查找了“{text}”",
     "tool.lookedForPattern": "在 {path} 中按模式查找",

@@ -87,6 +87,11 @@
 .action-menu-item[role="menuitemcheckbox"] .action-menu-word {
   flex: 1;
 }
+/* Its note, and its reason when it can't run, wrap at 24ch (about 27 characters of prose in this face), so a menu with
+   a long note stays near the standard width wherever it opens (18.0.1, WEB-U-490). */
+.action-menu-word > .type-small {
+  max-inline-size: 24ch;
+}
 .action-menu-item[aria-disabled="true"] > * {
   opacity: 0.5;
 }
