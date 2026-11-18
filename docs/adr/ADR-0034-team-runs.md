@@ -588,8 +588,8 @@ stop and the 100 % stop are the round's; the relay meters the round; an ended ro
 **A5. What people see** (the S6 contract). `GET …/team` gains `round`, `rounds: [{round, started_at, ended_at,
 stop_reason, budget: {tokens, spent}}]` (newest last) and `tokens_all_rounds`; `Conversation.team` gains `round`;
 `version` rises when a round opens. A new stored message type, `round_started` (gateway to the team: `round`,
-`brought_back`, `started`), which the page words as a quiet line ("Round 2 started: brought back researcher and
-writer, and started reviewer") and `read_reports` never returns. The strip names the round from round 2 on; All
+`brought_back`, `started`), which the page words as a quiet line ("Round 2 started"; the message is stored as the
+round opens, when only its first helper is known, and each helper's own lines say who joined; decided on 19 Nov 2026) and `read_reports` never returns. The strip names the round from round 2 on; All
 helpers marks a helper not in this round "Not in this round".
 
 **A6. A task that may not lead is told so in words, never "unknown tool".** A task with `none`, or `ended`, still has
