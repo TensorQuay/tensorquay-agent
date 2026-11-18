@@ -1,5 +1,5 @@
 // @vitest-environment node
-// WEB-U-495 (18.1; the owner, 17 Nov: "not as elegant", "why make it bold"): the task header is one quiet line, the
+// WEB-U-495 (18.1, decided on 17 Nov 2026): the task header is one quiet line, the
 // title at body size in regular weight, then its profile and workspace muted on the same line; the origin gives way
 // first, the title last.
 import { readFileSync } from "node:fs";

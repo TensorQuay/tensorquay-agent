@@ -18,9 +18,9 @@ import type { Transcript } from "./types";
 
 /** Updates elapsed time once per second while work is active; recorded completion never uses a clock. */
 /**
- * How the header shows a finished run's "Done" (18.1, WEB-U-495): the owner asked for no "Done" there, as the
+ * How the header shows a finished run's "Done" (18.1, WEB-U-495): the header shows no "Done" (decided on 17 Nov 2026), as the
  * transcript's end and the sidebar say it; "hidden" takes the word off the screen and keeps it read, "muted" shows it
- * grey. Hidden or grey is the owner's call: this one constant, its own test either way.
+ * grey. Hidden or grey is the Product Owner's choice: this one constant, its own test either way.
  */
 export const DONE_IN_HEADER: "hidden" | "muted" = "hidden";
 

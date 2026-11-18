@@ -23,9 +23,9 @@ const failed = [
 /** The status word's own element: the one the screen shows unless it is off the screen. */
 const word = () => screen.getByRole("status");
 
-// WEB-U-495 (18.1; the owner, 17 Nov): the task header says no "Done" (the transcript's end and the sidebar say it);
+// WEB-U-495 (18.1, decided on 17 Nov 2026): the task header says no "Done" (the transcript's end and the sidebar say it);
 // every other status stays on the title's line. The word is still read: it leaves the screen, not the status line.
-// Hidden or grey is the owner's call, one constant (DONE_IN_HEADER): grey shows it muted.
+// Hidden or grey is the Product Owner's choice, one constant (DONE_IN_HEADER): grey shows it muted.
 describe("WEB-U-495 the header's Done", () => {
   it("is hidden by default, and still read", () => {
     expect(DONE_IN_HEADER).toBe("hidden");
@@ -37,7 +37,7 @@ describe("WEB-U-495 the header's Done", () => {
     );
   });
 
-  it("shows muted when the owner chooses grey", () => {
+  it("shows muted when the constant says grey", () => {
     render(<RunStatus transcript={done} done="muted" />);
     expect(word()).toHaveTextContent("Done");
     expect(word()).not.toHaveClass("sr-only");

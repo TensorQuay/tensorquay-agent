@@ -7,7 +7,7 @@ import { settled } from "./motion";
 import { signIn } from "./session";
 import { expect, test, type Page } from "./test";
 
-// WEB-E2E-135 (18.1; the owner, 17 Nov): the task header is one quiet line: the title at body size in regular weight,
+// WEB-E2E-135 (18.1, decided on 17 Nov 2026): the task header is one quiet line: the title at body size in regular weight,
 // "· In <workspace>" muted after it, both cut with "…" when short of room, the workspace first; no "Done" (still read,
 // off the screen), every other status on the line. At 1280, 1440 and 390, light and dark, a long title in a workspace
 // with a long name; and at 1280 in the split (WEB-E2E-134), where the chat's header is narrow.
