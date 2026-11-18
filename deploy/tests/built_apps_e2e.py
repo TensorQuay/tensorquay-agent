@@ -158,9 +158,11 @@ def workspace_files(stack, conversation, root=APP, depth=4):
         folder, level = folders.pop()
         for item in listing(stack, conversation, folder):
             path = posixpath.join(folder, item["name"])
-            if item.get("kind") == "directory":
+            if item.get("kind") == "dir":
                 if item["name"] != "node_modules" and level < depth:
                     folders.append((path, level + 1))
+                continue
+            if item.get("kind") != "file":  # a link is listed, never followed; "other" has no text
                 continue
             content = stack.request("/api/v1/conversations/{}/files/content?path={}".format(
                 conversation, urllib.parse.quote(path)))
