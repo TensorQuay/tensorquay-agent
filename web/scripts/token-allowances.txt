@@ -1,0 +1,7 @@
+# Styles allowed off the tokens (WEB-U-509): "path:rule", sorted. Each has a comment beside it in the source:
+# token-lint: allow <rule> (<reason>). A new line here is reviewed with the PR that adds it.
+src/app/files.css:font-size
+src/app/files.css:line-height
+src/app/settings.css:line-height
+src/app/settings.css:radius
+src/design/TypeAndSpace.tsx:radius

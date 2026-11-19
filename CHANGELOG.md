@@ -64,6 +64,12 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   Files panel's edge when it is open). Keys, focus and screen readers use the transcript as before. With forced
   colours the system's scrollbar stays.
 
+- **For contributors: the web style check keeps type and radii to the tokens (WEB-U-509).** `pnpm tokens` (part of
+  `pnpm check`) now also refuses a font size, weight, line height, letter spacing or radius that isn't one of the
+  design tokens, and named colours, in CSS, style objects and class names. A style that must stay off the scale says
+  why on its line (`token-lint: allow <rule> (<reason>)`) and is listed in `web/scripts/token-allowances.txt`; five
+  are, today. Nothing on screen changes.
+
 ### Fixed
 
 - **A tool call whose number or true/false arrives as text still runs (TOOL-U-146).** One model server sends an
