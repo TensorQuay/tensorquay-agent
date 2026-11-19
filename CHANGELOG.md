@@ -86,6 +86,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **A long owner address on the Sandboxes page stays in its column (WEB-U-486, WEB-E2E-129).** An address such as
+  member@example.invalid ran under the State column with its pill over it; it now wraps after its @ or a dot, as
+  People's addresses do.
 - **A built web app that keeps its data in the browser previews (GW-U-224, WEB-E2E-140).** The preview runs a
   page in a sandbox without same-origin access, where reading `localStorage` or `sessionStorage` throws, so an app
   that keeps its data there (a to-do list, most small apps) stopped before drawing and the panel told you to use a
