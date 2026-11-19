@@ -40,6 +40,7 @@ export function TypeAndSpace() {
             <span
               key={radius}
               className="radius-specimen type-label"
+              // token-lint: allow radius (the reference draws each radius token by its name)
               style={{ borderRadius: `var(--${radius}-radius)` }}
             >
               {radius}
