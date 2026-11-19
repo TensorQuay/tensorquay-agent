@@ -86,6 +86,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **A long owner address on the Sandboxes page stays in its column (WEB-U-486, WEB-E2E-129).** An address such as
+  member@example.invalid ran under the State column with its pill over it; it now wraps after its @ or a dot, as
+  People's addresses do.
 - **Status says a sandbox's age in days from two days on (WEB-U-489).** The Sandboxes line said "the oldest for
   224 h"; it now says "9 days". Under two days it still says hours, and under an hour minutes.
 

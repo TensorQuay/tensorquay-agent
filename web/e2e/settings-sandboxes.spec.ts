@@ -267,3 +267,52 @@ test("WEB-E2E-129 the phone cards read in three lines, without field labels", as
   }
   await capture(page, "sandboxes-cards-390", { fullPage: true });
 });
+
+// A guard for the 18.1 first-hour finding ("member@example.invalid" ran under the State column on a real stack, its
+// pill drawn over it): long owner addresses stay in their cells at every width the table or its cards show. The fake
+// front's columns leave the owner room, so this passes without the fix too; WEB-U-486's <wbr> case is the red test,
+// and the real stack showed the fix (the first-hour notes).
+for (const width of [1440, 1280, 1024, 768, 390])
+  test(`WEB-E2E-129 a long owner address stays in its cell at ${width}`, async ({
+    page,
+    context,
+  }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await signIn(page);
+    await context.addCookies([
+      {
+        name: "fixture_sandboxes",
+        value: "long",
+        url: "http://localhost:3100",
+      },
+    ]);
+    await page.goto("/settings/sandboxes");
+    const table = page.getByRole("table", { name: "Running sandboxes" });
+    await expect(table).toContainText("operations.team@tensorquay-example.org");
+    const spills = await table.evaluate((element) =>
+      [...element.querySelectorAll("tbody tr")].flatMap((row) => {
+        const owner = row.querySelector("td");
+        const name = owner?.querySelector(".cell-whole");
+        if (!owner || !name) return [];
+        const cell = owner.getBoundingClientRect();
+        const text = name.getBoundingClientRect();
+        // The address's own box, and the state pill beside it: neither may cross the other.
+        const pill = row.querySelector(".status-pill")?.getBoundingClientRect();
+        const crossed =
+          pill &&
+          text.right > pill.left + 0.5 &&
+          text.left < pill.right &&
+          text.bottom > pill.top + 0.5 &&
+          text.top < pill.bottom;
+        return text.right > cell.right + 0.5 ||
+          owner.scrollWidth > owner.clientWidth + 1 ||
+          crossed
+          ? [
+              `${name.textContent} (${Math.round(text.right)} past ${Math.round(cell.right)})`,
+            ]
+          : [];
+      }),
+    );
+    expect(spills).toEqual([]);
+    await capture(page, `sandboxes-long-owners-${width}`);
+  });
