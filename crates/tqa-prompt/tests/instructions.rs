@@ -113,7 +113,7 @@ fn prompt_u_003_system_is_versioned_short_and_deterministic()
     // Python-libraries line of version 8 (PROMPT-U-017) and the documents line of version 12 (PROMPT-U-020); version
     // 10's golden has the open web. Version 13's search line needs a browser and the open web, which none of these has
     // together, so they hold too; its own golden is in PROMPT-U-021.
-    assert_eq!(PROMPT_VERSION, 14);
+    assert_eq!(PROMPT_VERSION, 15);
     assert!(prompt.split_whitespace().count() < 400);
     assert_eq!(prompt, include_str!("fixtures/system-v9.txt"));
     let open_web = tqa_types::NetworkSnapshot {
@@ -439,7 +439,8 @@ fn prompt_u_021_a_browser_on_the_web_says_how_to_search() -> Result<(), Box<dyn 
 #[test]
 fn prompt_u_021_the_workstation_on_the_open_web() -> Result<(), Box<dyn std::error::Error>> {
     use tqa_types::Capability;
-    // The Workstation on the open web: its golden, a little over the 400 words it keeps offline.
+    // The Workstation on the open web: its golden, a little over the 400 words it keeps offline. Version 15 adds the
+    // web-apps line (33 words, PROMPT-U-028), since the open web reaches the npm registry: under 485 words.
     let environment = tqa_types::Environment::new(
         "workstation".into(),
         format!("sha256:{}", "a".repeat(64)),
@@ -467,10 +468,10 @@ fn prompt_u_021_the_workstation_on_the_open_web() -> Result<(), Box<dyn std::err
         commands: &["python3", "python", "node", "npm", "go", "git"],
         host_keys: &[],
     });
-    assert!(workstation.split_whitespace().count() < 450);
+    assert!(workstation.split_whitespace().count() < 485);
     assert_eq!(
         workstation,
-        include_str!("fixtures/system-v14-workstation-open-web.txt")
+        include_str!("fixtures/system-v15-workstation-open-web.txt")
     );
     Ok(())
 }

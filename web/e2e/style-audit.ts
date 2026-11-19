@@ -87,3 +87,51 @@ export async function styleAudit(page: Page, root = "body"): Promise<string[]> {
     },
   );
 }
+
+/**
+ * Text squeezed into a column too narrow for it: an element holding a sentence of four words or more whose lines
+ * average under two words each (a notice beside its buttons at a phone's width, wrapped a word at a time). One line per
+ * finding, "selector: "words" in N lines". Languages written without spaces are counted by their spaces too, so they
+ * never trip it.
+ */
+export async function squeezedText(
+  page: Page,
+  root = "body",
+): Promise<string[]> {
+  return page.evaluate((root) => {
+    const found: string[] = [];
+    const scope = document.querySelector(root);
+    if (!scope) return [`${root}: not on the page`];
+    for (const element of scope.querySelectorAll("*")) {
+      if (element.closest("svg, iframe, script, style, template, pre, code"))
+        continue;
+      const texts = [...element.childNodes].filter(
+        (node) =>
+          node.nodeType === Node.TEXT_NODE && (node.textContent ?? "").trim(),
+      );
+      if (!texts.length) continue;
+      const words = texts
+        .map((node) => node.textContent ?? "")
+        .join(" ")
+        .trim()
+        .split(/\s+/);
+      if (words.length < 4) continue;
+      const style = getComputedStyle(element);
+      if (style.display === "none" || style.visibility === "hidden") continue;
+      const tops = new Set<number>();
+      for (const node of texts) {
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        for (const rect of range.getClientRects())
+          if (rect.width > 0) tops.add(Math.round(rect.top));
+      }
+      if (tops.size > 1 && words.length / tops.size < 2) {
+        const classes = [...element.classList].slice(0, 2).join(".");
+        found.push(
+          `${element.tagName.toLowerCase()}${classes ? `.${classes}` : ""}: "${words.slice(0, 6).join(" ")}" in ${tops.size} lines`,
+        );
+      }
+    }
+    return found;
+  }, root);
+}
