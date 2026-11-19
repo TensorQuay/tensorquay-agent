@@ -181,6 +181,8 @@
 .data-table td .button {
   height: var(--table-control-height);
   min-height: var(--table-control-height);
+  /* A table's control stays on one line: a table that can't hold it becomes cards (§7 Table), never a wrapped Edit. */
+  white-space: nowrap;
 }
 .data-table td .icon-button {
   width: var(--table-control-height);

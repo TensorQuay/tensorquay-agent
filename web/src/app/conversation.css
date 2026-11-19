@@ -1033,6 +1033,7 @@ textarea.composer-input {
 /* §5b's small button: 32 px tall, 12 px each side. */
 .start-notice .start-notice-action {
   height: var(--min-control-height);
+  min-height: var(--min-control-height);
   padding: 0 var(--space-3);
 }
 /* Under the composer, the notice and the suggestions start where its card does: the form keeps 8 px around the card

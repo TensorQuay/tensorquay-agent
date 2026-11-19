@@ -70,6 +70,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **A button's label is never cut (WEB-U-511, WEB-E2E-141).** A label longer than the room it has, such as a long
+  translation in a narrow dialog, now wraps onto a second line inside its button instead of running past its edges.
+  Checked in all ten languages at a phone's and a desktop's width.
+
 - **A tool call whose number or true/false arrives as text still runs (TOOL-U-146).** One model server sends an
   optional number, such as the shell's time limit, as `"30000"` instead of `30000`. The tools refused it, and a model
   that couldn't see why sent it again until the run stopped. The agent's own tools now take an exact number, `true`,
