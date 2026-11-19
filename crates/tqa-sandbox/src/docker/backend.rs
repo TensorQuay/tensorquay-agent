@@ -26,6 +26,8 @@ pub struct DockerBackend {
     pub(super) allocator: std::sync::Mutex<super::pool::Allocator>,
     /// How a sandbox's container create is retried while the daemon is too busy to answer (SBX-U-014).
     pub(super) retry: crate::retry::Retry,
+    /// The containers the last listing couldn't read (SBX-U-022).
+    pub(super) unreadable: std::sync::Mutex<Vec<String>>,
 }
 
 impl DockerBackend {
@@ -54,6 +56,7 @@ impl DockerBackend {
             admission: Semaphore::new(1),
             allocator: std::sync::Mutex::new(allocator),
             retry: crate::retry::Retry::default(),
+            unreadable: std::sync::Mutex::new(Vec::new()),
         };
         backend.preflight().await?;
         if backend.config.network == super::NetworkMode::Internal {
@@ -72,6 +75,7 @@ impl DockerBackend {
             admission: Semaphore::new(1),
             allocator: std::sync::Mutex::new(allocator),
             retry: crate::retry::Retry::default(),
+            unreadable: std::sync::Mutex::new(Vec::new()),
         }
     }
 
@@ -242,7 +246,18 @@ impl SandboxBackend for DockerBackend {
                 "container listing exceeded configured bound".into(),
             ));
         }
-        containers.into_iter().map(records::handle).collect()
+        let (handles, unreadable) = records::listing(containers);
+        if let Ok(mut last) = self.unreadable.lock() {
+            *last = unreadable;
+        }
+        Ok(handles)
+    }
+
+    fn unreadable(&self) -> Vec<String> {
+        self.unreadable
+            .lock()
+            .map(|last| last.clone())
+            .unwrap_or_default()
     }
 
     async fn engine_networks(&self) -> Result<crate::EngineNetworks, SandboxError> {

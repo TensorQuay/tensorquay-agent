@@ -2,6 +2,26 @@ use crate::{BackendKind, SandboxError, SandboxHandle, SandboxStats};
 use bollard::models::{ContainerStatsResponse, ContainerSummary};
 use std::time::{Duration, SystemTime};
 
+/// This instance's containers as the engine listed them: each readable one as a handle, and the engine id of each whose
+/// labels can't be read, left out so one bad neighbour never fails the whole listing (SBX-U-022), each logged.
+pub(super) fn listing(containers: Vec<ContainerSummary>) -> (Vec<SandboxHandle>, Vec<String>) {
+    let mut handles = Vec::new();
+    let mut unreadable = Vec::new();
+    for container in containers {
+        let id = container.id.clone().unwrap_or_default();
+        if let Ok(found) = handle(container) {
+            handles.push(found);
+        } else {
+            tracing::warn!(
+                container = %id.chars().take(12).collect::<String>(),
+                "a container with this instance's labels couldn't be read; left out of the listing"
+            );
+            unreadable.push(id);
+        }
+    }
+    (handles, unreadable)
+}
+
 pub(super) fn handle(container: ContainerSummary) -> Result<SandboxHandle, SandboxError> {
     let invalid = || SandboxError::Backend("invalid sandbox labels in container listing".into());
     let labels = container.labels.ok_or_else(invalid)?;

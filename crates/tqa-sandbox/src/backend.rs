@@ -90,7 +90,8 @@ pub trait SandboxBackend: Send + Sync {
     /// Lists the labelled sandbox inventory for this gateway instance.
     ///
     /// # Errors
-    /// Returns timeout or backend errors, including malformed managed labels.
+    /// Returns timeout or backend errors. A container whose managed labels are malformed is left out, never an error
+    /// (see [`unreadable`](Self::unreadable)).
     async fn list(&self) -> Result<Vec<SandboxHandle>, SandboxError>;
     /// The engine ids of the containers the last [`list`](Self::list) found with this instance's labels but couldn't
     /// read (a label missing or malformed): left out of the listing, so one bad neighbour never fails it, and counted by

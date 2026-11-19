@@ -34,6 +34,17 @@ impl SandboxManager {
             .bounded(async { self.backend.engine.list().await.map_err(failure("list")) })
             .await?;
         let mut sweep = ContainerSweep::default();
+        // A container the listing couldn't read (its labels malformed) can't be checked against a record: it is counted
+        // as a stray that couldn't be removed, so the verdict says so, and the sweep goes on (GW-I-342).
+        for id in self.backend.engine.unreadable() {
+            sweep.failed += 1;
+            sweep.findings.push(super::verdict::Finding {
+                kind: super::verdict::Kind::Container,
+                name: id.chars().take(12).collect(),
+                age_seconds: 0,
+                outcome: Err("invalid_labels"),
+            });
+        }
         for handle in listed {
             if now
                 .duration_since(handle.created_at)

@@ -84,6 +84,13 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   check. `pnpm ux:compare` lists the screens that changed since the last release for the release review
   (`docs/release.md`).
 
+### Fixed
+
+- **One unreadable container no longer stops the sandbox cleanup (SBX-U-022, GW-I-342).** A container carrying this
+  installation's labels with one of them malformed made the whole container listing fail, so the sweep removed
+  nothing and a task's teardown kept retrying. It is now left out of the listing, logged, and counted on Status as
+  something the sweep couldn't remove; the rest are listed and swept as before.
+
 ## 18.0.2 (19 November 2026)
 
 A fix release: a tool call whose number or true/false a model sent as text runs instead of being refused until
