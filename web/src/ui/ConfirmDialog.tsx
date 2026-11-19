@@ -22,6 +22,7 @@ export function ConfirmDialog({
   onConfirm,
   onClose,
   children,
+  preview = false,
 }: {
   title: string;
   confirm: string;
@@ -35,6 +36,8 @@ export function ConfirmDialog({
   final?: (error: Error) => boolean;
   onConfirm: () => void;
   onClose: () => void;
+  /** Drawn in place, never modal: the design reference's specimen (WEB-U-510), as Dialog's own preview. */
+  preview?: boolean;
   children: ReactNode;
 }) {
   const t = useT();
@@ -42,6 +45,7 @@ export function ConfirmDialog({
   return (
     <Dialog
       open
+      preview={preview}
       title={title}
       onClose={() => {
         if (!pending) onClose();

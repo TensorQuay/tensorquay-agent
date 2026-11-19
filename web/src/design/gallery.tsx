@@ -14,4 +14,7 @@ export const EXEMPT: Readonly<Record<string, string>> = {
   ActionMenuSurface: "the open ActionMenu, loaded when it opens",
   PickerSurface: "the open MenuButton list, loaded when it opens",
   PanelBoundary: "an error boundary: what it draws is PanelFailure",
+  Menu: "the open list ActionMenu and MenuButton show: open them here",
+  Popover:
+    "an open surface anchored to its trigger: MenuButton's list opens one",
 };

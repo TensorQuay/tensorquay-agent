@@ -1,14 +1,19 @@
 "use client";
 
-import { ArrowUp, Plus, Search } from "lucide-react";
-import { useId } from "react";
+import { ArrowUp, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { useId, useState } from "react";
 
+import { ActionMenu } from "../ui/ActionMenu";
 import { Button, type ButtonVariant } from "../ui/Button";
 import { CheckRow } from "../ui/CheckRow";
+import { Field } from "../ui/Field";
 import { Icon } from "../ui/Icon";
 import { IconAction } from "../ui/IconAction";
+import { InlineEdit } from "../ui/InlineEdit";
 import { Input } from "../ui/Input";
+import { MenuButton } from "../ui/MenuButton";
 import { Select } from "../ui/Select";
+import { TabList, tabPanelIds } from "../ui/Tabs";
 import { Textarea } from "../ui/Textarea";
 
 import type { GallerySection } from "./gallery-types";
@@ -56,7 +61,96 @@ function Radios() {
   );
 }
 
-/** Buttons, icon buttons and form fields (UI-GUIDELINES §7). */
+/** A field around its own control; ids per drawing, since the gallery draws every state in both themes. */
+function KeyField({ error }: { error?: string }) {
+  const id = useId();
+  return (
+    <Field id={id} label="Shared key" error={error}>
+      <input
+        id={id}
+        className="form-control"
+        defaultValue={error ? "search key" : "SEARCH_API_KEY"}
+        aria-invalid={error ? true : undefined}
+      />
+    </Field>
+  );
+}
+
+/** A name edited in place opens from Rename, as in the app: editing takes the focus, which the page must keep. */
+function Rename() {
+  const [name, setName] = useState("Quarterly review");
+  const [editing, setEditing] = useState(false);
+  return editing ? (
+    <InlineEdit
+      value={name}
+      label="Workspace name"
+      onCommit={(value) => {
+        setName(value);
+        setEditing(false);
+        return true;
+      }}
+      onCancel={() => setEditing(false)}
+    />
+  ) : (
+    <Button variant="ghost" onClick={() => setEditing(true)}>
+      {name}: Rename
+    </Button>
+  );
+}
+
+/** A picker that keeps its choice, so the open list shows it checked. */
+function Picker({ disabled = false }: { disabled?: boolean }) {
+  const [value, setValue] = useState("small");
+  return (
+    <MenuButton
+      label="Environment size"
+      options={[
+        { id: "small", label: "Small", detail: "2 CPUs, 4 GB" },
+        { id: "large", label: "Large", detail: "8 CPUs, 16 GB" },
+        {
+          id: "gpu",
+          label: "GPU",
+          detail: "Not on this installation",
+          disabled: "No GPU here",
+        },
+      ]}
+      value={value}
+      onChange={setValue}
+      disabled={disabled}
+      disabledReason={
+        disabled ? "Only an administrator changes this" : undefined
+      }
+    />
+  );
+}
+
+/** Tabs that switch, with the chosen view's panel, as the channel's side panel has them. */
+function Tabs() {
+  const [current, setCurrent] = useState<"files" | "preview" | "notes">(
+    "files",
+  );
+  const id = useId();
+  return (
+    <div className="stack">
+      <TabList
+        id={id}
+        label="Panel"
+        views={[
+          { value: "files", label: "Files" },
+          { value: "preview", label: "Preview" },
+          { value: "notes", label: "Notes" },
+        ]}
+        current={current}
+        onChoose={setCurrent}
+      />
+      <div role="tabpanel" {...tabPanelIds(id, current)}>
+        <p className="type-small muted">The {current} view.</p>
+      </div>
+    </div>
+  );
+}
+
+/** Buttons, icon buttons, menus, tabs and form fields (UI-GUIDELINES §7). */
 export const CONTROLS: GallerySection = {
   Button: {
     ...buttons("primary"),
@@ -155,6 +249,44 @@ export const CONTROLS: GallerySection = {
         <option>Default workspace</option>
       </Select>
     ),
+  },
+  Field: {
+    "with a control": () => <KeyField />,
+    error: () => <KeyField error="Use capital letters, digits and _." />,
+  },
+  InlineEdit: {
+    "Rename opens it": () => <Rename />,
+  },
+  MenuButton: {
+    closed: () => <Picker />,
+    disabled: () => <Picker disabled />,
+  },
+  ActionMenu: {
+    "the ⋯ trigger": () => (
+      <ActionMenu
+        label="More actions for Quarterly review"
+        actions={[
+          { id: "rename", label: "Rename", icon: Pencil, onSelect: none },
+          {
+            id: "delete",
+            label: "Delete",
+            icon: Trash2,
+            onSelect: none,
+            danger: true,
+          },
+          {
+            id: "share",
+            label: "Share",
+            icon: Search,
+            unavailable: "Only its owner can share it",
+            onSelect: none,
+          },
+        ]}
+      />
+    ),
+  },
+  TabList: {
+    "three views": () => <Tabs />,
   },
   CheckRow: {
     unchecked: () => (

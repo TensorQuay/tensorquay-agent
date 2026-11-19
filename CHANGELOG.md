@@ -64,6 +64,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   Files panel's edge when it is open). Keys, focus and screen readers use the transcript as before. With forced
   colours the system's scrollbar stays.
 
+- **For contributors: every shared component is in the design reference, with its states (WEB-U-510).** `/design`
+  (development and test builds) now draws each component in `web/src/ui` from one registry, in both themes, and
+  `pnpm check` fails for a new component that has no entry there. Nothing in the product changes.
+
 ### Fixed
 
 - **A tool call whose number or true/false arrives as text still runs (TOOL-U-146).** One model server sends an

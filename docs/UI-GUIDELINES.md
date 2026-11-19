@@ -438,7 +438,10 @@ drawings except the brand mark.
   `globals.css`.
 - `brand/` is copied into `web/public/brand/` by the build; the app never holds a second copy of an asset.
 - A `/design` page renders every token and every component in every state, in light and dark. It is the living
-  reference and the target of the visual regression test (Playwright screenshots compared per component). It is a
+  reference and the target of the visual regression test (Playwright screenshots compared per component). Its
+  components come from one registry, `web/src/design/gallery.tsx`: each component in `web/src/ui` has an entry
+  naming its states, or an exemption that says why (an open surface drawn by its trigger), and a unit test fails for
+  a component with neither, so a new component arrives with its states shown. It is a
   developer tool, not a product page: it is never linked from the navigation, and a production build does not serve it
   (404); development and test builds do.
 - Component files stay under 400 lines; one exported component per file; variants through props, not new files.

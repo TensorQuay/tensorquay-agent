@@ -4,8 +4,13 @@ import { Folders } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "../ui/Button";
+import { ConfirmDialog } from "../ui/ConfirmDialog";
 import { Dialog } from "../ui/Dialog";
 import { EmptyState } from "../ui/EmptyState";
+import { ErrorMessage } from "../ui/ErrorMessage";
+import { FormRefusal } from "../ui/FormRefusal";
+import { Input } from "../ui/Input";
+import { PanelFailure } from "../ui/PanelBoundary";
 import { Skeleton } from "../ui/Skeleton";
 import { StatusPill, type Status } from "../ui/StatusPill";
 import { Toast } from "../ui/Toast";
@@ -45,7 +50,44 @@ function Toasts({ tone }: { tone: "info" | "success" | "error" }) {
   return <Toast store={store} preview />;
 }
 
-/** Statuses, notifications, loading and empty views, dialogs (UI-GUIDELINES §7 and §8). */
+/** A form whose Save was refused: its line counts the fields left to fix (WEB-U-110). */
+function RefusedForm() {
+  return (
+    <form
+      className="stack"
+      noValidate
+      onSubmit={(event) => event.preventDefault()}
+    >
+      <Input
+        label="Workspace name"
+        error="Enter a workspace name."
+        aria-invalid="true"
+      />
+      <div className="row">
+        <Button type="submit">Save</Button>
+        <FormRefusal />
+      </div>
+    </form>
+  );
+}
+
+function confirmDialog(pending: boolean, error: Error | null) {
+  return (
+    <ConfirmDialog
+      preview
+      title="Delete Quarterly review?"
+      confirm="Delete"
+      pending={pending}
+      error={error}
+      onConfirm={none}
+      onClose={none}
+    >
+      <p>Its tasks and their files are deleted too.</p>
+    </ConfirmDialog>
+  );
+}
+
+/** Statuses, notifications, errors, loading and empty views, dialogs (UI-GUIDELINES §7 and §8). */
 export const FEEDBACK: GallerySection = {
   StatusPill: Object.fromEntries(
     STATUSES.map((status) => [status, () => <StatusPill status={status} />]),
@@ -66,6 +108,27 @@ export const FEEDBACK: GallerySection = {
         action={<Button onClick={none}>New workspace</Button>}
       />
     ),
+  },
+  ConfirmDialog: {
+    asking: () => confirmDialog(false, null),
+    deleting: () => confirmDialog(true, null),
+    "refused, can try again": () =>
+      confirmDialog(
+        false,
+        new Error("The workspace is in use by a running task."),
+      ),
+  },
+  ErrorMessage: {
+    "a sentence": () => <ErrorMessage error="The workspace name is taken." />,
+    "an error": () => (
+      <ErrorMessage error={new Error("Couldn't reach the server.")} />
+    ),
+  },
+  FormRefusal: {
+    "a refused save": () => <RefusedForm />,
+  },
+  PanelFailure: {
+    "with try again": () => <PanelFailure onRetry={none} />,
   },
   Dialog: {
     "with actions": () => (

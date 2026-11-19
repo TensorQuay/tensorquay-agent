@@ -1424,6 +1424,20 @@ textarea.form-control {
   align-items: flex-start;
   gap: var(--space-4) var(--space-6);
 }
+/* The overlay scrollbar's specimen: a short scroller in its positioned frame. */
+.gallery-wide {
+  inline-size: var(--field-width);
+  max-inline-size: 100%;
+}
+.gallery-scroll-frame {
+  position: relative;
+  inline-size: var(--field-width);
+  max-inline-size: 100%;
+}
+.gallery-scroll {
+  block-size: var(--space-16);
+  overflow: auto;
+}
 .gallery-state {
   display: flex;
   flex-direction: column;
