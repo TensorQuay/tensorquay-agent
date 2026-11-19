@@ -321,6 +321,71 @@ the gateway that hides client addresses (SEC-009).
 
 ## Settings and operations
 
+### Upgrading to a new release
+
+Read the release's notes in the [changelog](../CHANGELOG.md) first: a fix or minor release upgrades in place; a major
+one names any further steps under [Upgrade notes](#upgrade-notes). From the new release's checkout, with
+`TQA_INSTALL_DIR` set as in step 1:
+
+0. **Check that what runs is what `compose.env` names**, so the backup and the way back start from the truth. Each
+   container's image should match its line; if one doesn't (a hand-started image, a tag that moved), set the line to
+   what runs, or start the installation once from `compose.env`, before going on:
+
+   ```sh
+   grep -E '^TQA_(GATEWAY|WEB)_IMAGE=' "$TQA_INSTALL_DIR/compose.env"
+   docker compose --env-file "$TQA_INSTALL_DIR/compose.env" -f deploy/compose/docker.yml images gateway web
+   ```
+
+1. **Back up the database, and keep a copy of the two files you are about to change:**
+
+   ```sh
+   docker compose --env-file "$TQA_INSTALL_DIR/compose.env" -f deploy/compose/docker.yml exec -T postgres \
+     pg_dump -U tqa -d gateway --format=custom > "tensorquay-$(date +%Y%m%d-%H%M).dump"
+   cp "$TQA_INSTALL_DIR/compose.env" compose.env.before
+   cp "$TQA_INSTALL_DIR/gateway.toml" gateway.toml.before
+   ```
+
+   `compose.env` holds the database password and the bootstrap token: keep its copy as private as the original.
+2. **Check out the release and get its images:** `git fetch --tags && git checkout v<version>`, then
+   `deploy/pull-images.sh` (or `deploy/build-images.sh`), which prints the three `export` lines.
+3. **Point the installation at them:** in `$TQA_INSTALL_DIR/compose.env`, replace the `TQA_GATEWAY_IMAGE` and
+   `TQA_WEB_IMAGE` lines with the new values; in `$TQA_INSTALL_DIR/gateway.toml`, set `image` under `[runtime]` to the
+   new `TQA_RUNTIME_IMAGE`. Check the file with the new gateway, as the admin guide's
+   [Upgrading](../docs/admin-guide/README.md#upgrading) shows.
+4. **Start it again** with step 3's last three lines: the `pull` (for registry images), the `up`, and the `readyz`
+   check. The check's port is the installation's: if `compose.env` sets `TQA_HTTP_PORT`, export it first, so the
+   `curl` asks the right port:
+
+   ```sh
+   export TQA_HTTP_PORT="$(sed -n 's/^TQA_HTTP_PORT=//p' "$TQA_INSTALL_DIR/compose.env")"
+   ```
+
+**To go back,** to the release you upgraded from:
+
+1. Stop the new gateway and web app, so nothing writes to the database while it is restored:
+
+   ```sh
+   docker compose --env-file "$TQA_INSTALL_DIR/compose.env" -f deploy/compose/docker.yml stop gateway web
+   ```
+
+2. Put step 1's copies of `compose.env` and `gateway.toml` back (the image lines and the runtime image together).
+3. Restore the dump into an empty database. A newer gateway may have stored settings an earlier one can't read, so
+   the restore comes before the earlier version starts; and a newer release's migrations add tables the dump doesn't
+   know, which a restore over them (`pg_restore --clean`) can't drop, leaving the table they hang from as the newer
+   gateway left it. So drop the database and create it again first (the gateway is stopped, so nothing is connected).
+   Everything since the backup is undone: tasks, messages, sign-ins and passwords changed since then are gone.
+
+   ```sh
+   compose() { docker compose --env-file "$TQA_INSTALL_DIR/compose.env" -f deploy/compose/docker.yml "$@"; }
+   compose exec -T postgres dropdb -U tqa gateway
+   compose exec -T postgres createdb -U tqa -O tqa gateway
+   compose exec -T postgres pg_restore -U tqa -d gateway < tensorquay-<date>.dump
+   ```
+
+   `pg_restore` should end with no errors; any error means the database isn't as it was, so stop and restore again.
+
+4. From the earlier release's checkout (`git checkout v<earlier version>`), start it with step 4's lines.
+
 ### Two or more installations on one host
 
 Each installation needs its own directory, Compose project, gateway container name, sandbox network, port and
