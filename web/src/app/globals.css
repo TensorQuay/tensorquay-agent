@@ -242,7 +242,8 @@
   );
   /* The Settings menu, as wide as its widest label needs (17.4.1, WEB-U-465): an item gives its label its width less
      12 px of padding at each side, the 16 px icon and the 12 px gap, so 132 px here. That is the widest label we ship,
-     "Decision engines" at 124 px in 15 px Space Grotesk, and 8 px for a rendering that runs a little wider. */
+     "Decision engines" at 124 px in 15 px Space Grotesk, and 8 px for a rendering that runs a little wider. It is the
+     menu's least width: a language whose labels run longer widens the menu to them (settings.css). */
   --settings-nav-width: 184px;
   /* A field's starting width in a one-row settings form, before the row wraps. */
   --form-field-basis: 160px;
