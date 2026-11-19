@@ -79,6 +79,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   check. `pnpm ux:compare` lists the screens that changed since the last release for the release review
   (`docs/release.md`).
 
+## 18.0.2 (19 November 2026)
+
+A fix release: a tool call whose number or true/false a model sent as text runs instead of being refused until
+the run stopped. No migration, protocol or configuration change: upgrade in place.
+
 ### Fixed
 
 - **A page preview's note reads on one line (WEB-E2E-143).** In the Files panel, "Scripts are running in a sandbox"
