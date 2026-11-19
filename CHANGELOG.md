@@ -86,6 +86,9 @@ the run stopped. No migration, protocol or configuration change: upgrade in plac
 
 ### Fixed
 
+- **A page preview's note reads on one line (WEB-E2E-143).** In the Files panel, "Scripts are running in a sandbox"
+  was squeezed to a word or two a line beside Stop scripts and Reload; where the row is narrow, the two actions now
+  take a line of their own under it.
 - **A button's label is never cut (WEB-U-511, WEB-E2E-141).** A label longer than the room it has, such as a long
   translation in a narrow dialog, now wraps onto a second line inside its button instead of running past its edges.
   Checked in all ten languages at a phone's and a desktop's width.
