@@ -34,3 +34,33 @@ async fn sbx_u_022_an_unreadable_container_is_left_out_of_the_listing_and_noted(
     );
     Ok(())
 }
+
+// TEST: SBX-U-023
+/// Each listing answers its own unreadable containers with its handles, as a value: the first listing's bad containers
+/// are its own, and a second listing without them leaves the first's answer as it was.
+#[tokio::test]
+async fn sbx_u_023_each_listing_answers_its_own_unreadable_containers() -> TestResult {
+    let (backend, listener, _storage) = scripted_backend(None).await?;
+    let only_good = r#"[{"Id":"good1","Labels":{"tqa.instance":"tqa-unit","tqa.conversation":"conversation_a","tqa.created_at":"1"}}]"#;
+    let ((first, second), _) = scripted(
+        listener,
+        vec![
+            step("GET /containers/json", "200 OK", CONTAINERS),
+            step("GET /containers/json", "200 OK", only_good),
+        ],
+        Box::pin(async {
+            let first = backend.listing().await;
+            let second = backend.listing().await;
+            (first, second)
+        }),
+    )
+    .await?;
+    let (first, second) = (first?, second?);
+    assert_eq!(
+        first.unreadable,
+        vec!["badtime".to_owned(), "badtask".to_owned()]
+    );
+    assert_eq!(first.handles.len(), 1);
+    assert_eq!((second.unreadable.len(), second.handles.len()), (0, 1));
+    Ok(())
+}
