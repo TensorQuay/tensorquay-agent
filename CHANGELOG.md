@@ -73,6 +73,17 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   (development and test builds) now draws each component in `web/src/ui` from one registry, in both themes, and
   `pnpm check` fails for a new component that has no entry there. Nothing in the product changes.
 
+- **For contributors: a UX pass on every pull request, and a review of what changed at each release (WEB-E2E-142,
+  WEB-E2E-143).** Thirty screens at a desktop's and a phone's width, light and dark, must not scroll sideways, must
+  draw with the design tokens' sizes, weights and radii (checked in the page itself) and must pass the accessibility
+  check. `pnpm ux:compare` lists the screens that changed since the last release for the release review
+  (`docs/release.md`).
+
+## 18.0.2 (19 November 2026)
+
+A fix release: a tool call whose number or true/false a model sent as text runs instead of being refused until
+the run stopped. No migration, protocol or configuration change: upgrade in place.
+
 ### Fixed
 
 - **A button's label is never cut (WEB-U-511, WEB-E2E-141).** A label longer than the room it has, such as a long

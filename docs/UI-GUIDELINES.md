@@ -638,5 +638,8 @@ A web change is done when, in addition to ENGINEERING-GUARDRAILS §9:
 3. loading, empty, error and partial states are shown in those screenshots or in tests;
 4. keyboard-only use of the changed flow has been walked through, and the automated accessibility checks pass;
 5. the flow was tried from a non-secure origin when it touches browser APIs;
-6. every phase demo includes a hands-on session by the Product Owner; what they find is fixed or scheduled before the
+6. every release candidate passes the UX review: the UX pass's 120 pictures (thirty screens at 1280 and 390 px, light and
+   dark) compared with the last release's, every changed screen seen by the reviewer and shown to the Product Owner
+   (`docs/release.md`, The UX review);
+7. every phase demo includes a hands-on session by the Product Owner; what they find is fixed or scheduled before the
    next gate, and recorded in DEV-PLAN.

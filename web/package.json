@@ -19,6 +19,7 @@
     "typecheck": "tsc --noEmit && tsc --noEmit -p e2e",
     "e2e:list": "node scripts/e2e-list.mjs",
     "tokens": "node scripts/check-tokens.mjs --self-test && node scripts/check-tokens.mjs",
+    "ux:compare": "node scripts/ux-pass-compare.mjs",
     "copy": "node scripts/check-copy.mjs --self-test && node scripts/check-copy.mjs",
     "i18n:gen": "node scripts/i18n.mjs",
     "i18n:check": "node scripts/i18n.mjs --check",
