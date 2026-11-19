@@ -5,6 +5,13 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ## Unreleased
 
+## 18.1.0 (19 November 2026)
+
+A feature release: administrators see every running sandbox and can stop an idle one, agent teams work in rounds,
+a long task can look back past its summary, a built web app previews as it is, `edit_file` says what it found, eight
+draft languages have nearly all of the app's words, and the deploy guide gives measured reference hardware. Two database migrations
+(0106 and 0107), applied in place; no configuration key changes.
+
 ### Added
 
 - **A built web app's own paths work in the preview (GW-U-223, GW-U-224, GW-I-321).** A default Vite or Create
@@ -30,6 +37,17 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   `.tqa/<id>/history.md`, and the summary tells the model to search it before answering about anything earlier. Ask
   about a detail from an hour ago and the agent looks it up with its usual file tools, instead of guessing. A task
   that is never summarised is unchanged.
+- **A team works in rounds (ADR-0034's rounds amendment; GW-I-330 to GW-I-342, E2E-AGENTS-040, E2E-AGENTS-041).**
+  When a lead task's team has stopped, a follow-up you send it can start the next round: the lead brings back helpers
+  by name, each with its history and its copy of the files (or a fresh copy), and adds new ones, and the round has a
+  fresh budget and time of its own. The page shows the round ("Round 2"), which helpers are "Not in this round", a
+  line where a round starts and each round's own summary. What you write to a helper between rounds is part of its
+  task when it comes back. One database migration (0107).
+- **Eight draft languages have about 99 % of the app's words (WEB-U-465).** Spanish, French, Japanese, Korean, Malay,
+  Tamil, Thai and Vietnamese had part of the app translated; each now has about 99 % of its words, with English where
+  a machine translation failed its checks. They stay drafts until a native speaker reviews them; English and
+  Simplified Chinese are complete. The Settings menu now widens to its longest label, so no section's name wraps in
+  any language.
 
 ### Changed
 
@@ -86,8 +104,28 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **A page preview's note reads on one line (WEB-E2E-143).** In the Files panel, "Scripts are running in a sandbox"
+  was squeezed to a word or two a line beside Stop scripts and Reload; where the row is narrow, the two actions now
+  take a line of their own under it.
+- **A button's label is never cut (WEB-U-511, WEB-E2E-141).** A label longer than the room it has, such as a long
+  translation in a narrow dialog, now wraps onto a second line inside its button instead of running past its edges.
+  Checked in all ten languages at a phone's and a desktop's width.
+- **A task that may not lead helpers is told why, never "unknown tool" (TOOL-U-147, RT-I-062, GW-I-329,
+  WEB-U-497).** A lead whose team had ended, asked to continue, called its old team tools and was answered three
+  times that no such tool exists, while the page said "Couldn't start a helper" each time. Now the gateway says why
+  a task may not lead (helpers switched off, the task was a helper, its environment too old, or its team has ended),
+  the task is answered in one plain sentence that tells it to do the work itself and say so, and the page reads
+  "Can't lead helpers here" with the reason.
+
 - **Status says a sandbox's age in days from two days on (WEB-U-489).** The Sandboxes line said "the oldest for
   224 h"; it now says "9 days". Under two days it still says hours, and under an hour minutes.
+
+### Upgrade notes
+
+- **Two migrations, applied by the gateway at its start, in place, with your data kept: back up the database
+  first.** 0106 records an administrator's stop on the Sandboxes page; 0107 adds agent-team rounds. Follow
+  [Upgrading to a new release](deploy/README.md#upgrading-to-a-new-release): it backs up with `pg_dump`, and its way
+  back restores the dump into an empty database, since a restore over 18.1's tables can't take them back to 18.0.
 
 ## 18.0.2 (19 November 2026)
 
@@ -96,19 +134,6 @@ the run stopped. No migration, protocol or configuration change: upgrade in plac
 
 ### Fixed
 
-- **A page preview's note reads on one line (WEB-E2E-143).** In the Files panel, "Scripts are running in a sandbox"
-  was squeezed to a word or two a line beside Stop scripts and Reload; where the row is narrow, the two actions now
-  take a line of their own under it.
-- **A button's label is never cut (WEB-U-511, WEB-E2E-141).** A label longer than the room it has, such as a long
-  translation in a narrow dialog, now wraps onto a second line inside its button instead of running past its edges.
-  Checked in all ten languages at a phone's and a desktop's width.
-
-- **A task that may not lead helpers is told why, never "unknown tool" (TOOL-U-147, RT-I-062, GW-I-329,
-  WEB-U-497).** A lead whose team had ended, asked to continue, called its old team tools and was answered three
-  times that no such tool exists, while the page said "Couldn't start a helper" each time. Now the gateway says why
-  a task may not lead (helpers switched off, the task was a helper, its environment too old, or its team has ended),
-  the task is answered in one plain sentence that tells it to do the work itself and say so, and the page reads
-  "Can't lead helpers here" with the reason.
 - **A tool call whose number or true/false arrives as text still runs (TOOL-U-146).** One model server sends an
   optional number, such as the shell's time limit, as `"30000"` instead of `30000`. The tools refused it, and a model
   that couldn't see why sent it again until the run stopped. The agent's own tools now take an exact number, `true`,
