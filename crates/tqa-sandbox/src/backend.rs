@@ -101,14 +101,8 @@ pub trait SandboxBackend: Send + Sync {
     ///
     /// # Errors
     /// Returns timeout or backend errors. A container whose managed labels are malformed is left out, never an error
-    /// (see [`unreadable`](Self::unreadable)).
+    /// (see [`listing`](Self::listing)).
     async fn list(&self) -> Result<Vec<SandboxHandle>, SandboxError>;
-    /// The engine ids of the containers the last [`list`](Self::list) found with this instance's labels but couldn't
-    /// read (a label missing or malformed): left out of the listing, so one bad neighbour never fails it, and counted by
-    /// the sweep as strays it couldn't remove (SBX-U-022, GW-I-342). A backend that reads no labels has none.
-    fn unreadable(&self) -> Vec<String> {
-        Vec::new()
-    }
     /// The inventory and, from the same listing, the containers it couldn't read: one call, so the sweep counts the
     /// unreadable ones of its own listing, never of another one running at the same time (SBX-U-023). A backend that
     /// reads no labels has none.

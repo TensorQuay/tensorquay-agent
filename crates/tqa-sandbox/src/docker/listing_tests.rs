@@ -17,19 +17,20 @@ async fn sbx_u_022_an_unreadable_container_is_left_out_of_the_listing_and_noted(
     let (listed, _) = scripted(
         listener,
         vec![step("GET /containers/json", "200 OK", CONTAINERS)],
-        Box::pin(backend.list()),
+        Box::pin(backend.listing()),
     )
     .await?;
     let listed = listed?;
     assert_eq!(
         listed
+            .handles
             .iter()
             .map(|handle| handle.id.as_str())
             .collect::<Vec<_>>(),
         vec!["good1"]
     );
     assert_eq!(
-        backend.unreadable(),
+        listed.unreadable,
         vec!["badtime".to_owned(), "badtask".to_owned()]
     );
     Ok(())

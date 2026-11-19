@@ -276,11 +276,15 @@ impl SandboxBackend for Backend {
     async fn list(&self) -> Result<Vec<SandboxHandle>, SandboxError> {
         self.inner.list().await
     }
-    fn unreadable(&self) -> Vec<String> {
-        self.unreadable
-            .lock()
-            .map(|ids| ids.clone())
-            .unwrap_or_default()
+    async fn listing(&self) -> Result<tqa_sandbox::Listing, SandboxError> {
+        Ok(tqa_sandbox::Listing {
+            handles: self.inner.list().await?,
+            unreadable: self
+                .unreadable
+                .lock()
+                .map(|ids| ids.clone())
+                .unwrap_or_default(),
+        })
     }
     async fn engine_networks(&self) -> Result<tqa_sandbox::EngineNetworks, SandboxError> {
         self.engine

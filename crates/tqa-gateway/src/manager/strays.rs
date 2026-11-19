@@ -31,12 +31,12 @@ impl SandboxManager {
     pub async fn sweep_containers(&self, now: SystemTime) -> Result<ContainerSweep, GatewayError> {
         let budget = self.config.sandbox.create_budget();
         let listed = self
-            .bounded(async { self.backend.engine.list().await.map_err(failure("list")) })
+            .bounded(async { self.backend.engine.listing().await.map_err(failure("list")) })
             .await?;
         let mut sweep = ContainerSweep::default();
         // A container the listing couldn't read (its labels malformed) can't be checked against a record: it is counted
         // as a stray that couldn't be removed, so the verdict says so, and the sweep goes on (GW-I-342).
-        for id in self.backend.engine.unreadable() {
+        for id in &listed.unreadable {
             sweep.failed += 1;
             sweep.findings.push(super::verdict::Finding {
                 kind: super::verdict::Kind::Container,
@@ -45,7 +45,7 @@ impl SandboxManager {
                 outcome: Err("invalid_labels"),
             });
         }
-        for handle in listed {
+        for handle in listed.handles {
             if now
                 .duration_since(handle.created_at)
                 .map_or(true, |age| age <= budget)
