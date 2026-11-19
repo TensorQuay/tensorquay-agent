@@ -224,7 +224,14 @@ fn is_name(byte: u8) -> bool {
 /// The reporter put first in each page's head: it tells the parent (the Files panel, at `origin`) what the page asked
 /// for and couldn't have. Root paths: a load the policy blocked on this gateway, outside the pass; missing files: a
 /// load under the pass that failed; drew nothing: 2 s after load, `#root` or `#app` with no element and nothing
-/// failed. At most one message per kind, ten paths of 120 characters each; it reads nothing else, sends nothing else.
+/// failed and no script stopped on an error (that page needs no router advice). At most one message per kind, ten
+/// paths of 120 characters each; it reads nothing else, sends nothing else. Before anything else it gives the page an
+/// in-memory `localStorage` and `sessionStorage` where the preview's sandbox refuses the real ones (it runs without
+/// same-origin access, so reading them throws and an app that keeps its data there stopped before drawing): the page
+/// runs, and what it stores lasts until the preview reloads. The sandbox also blocks form submission (no `allow-forms`,
+/// on purpose), so the browser never fires `submit` and an app that adds through a form's handler did nothing: a click
+/// on a submit button, or Enter in a form without one, that brought no `submit` event dispatches one, so the page's own
+/// handler runs; nothing is ever submitted (the sandbox and `form-action 'none'` still refuse it).
 #[must_use]
 pub(crate) fn reporter(root: &str, origin: &str) -> String {
     // JSON strings with `<` escaped, so nothing in them can close the script.
@@ -235,14 +242,17 @@ pub(crate) fn reporter(root: &str, origin: &str) -> String {
     };
     let (root, origin) = (literal(root), literal(origin));
     format!(
-        "<script>(()=>{{const B={root},O={origin},L={{root:[],missing:[]}},S={{}};let F=0,R=0;\
+        "<script>(()=>{{for(const n of[\"localStorage\",\"sessionStorage\"]){{try{{window[n].length}}catch(_){{const m=new Map(),s={{getItem:k=>m.has(String(k))?m.get(String(k)):null,setItem:(k,v)=>{{m.set(String(k),String(v))}},removeItem:k=>{{m.delete(String(k))}},clear:()=>{{m.clear()}},key:i=>[...m.keys()][i]??null,get length(){{return m.size}}}};try{{Object.defineProperty(window,n,{{value:s,configurable:true}})}}catch(_){{}}}}}}\
+let Q=0;addEventListener(\"submit\",()=>{{Q=1}},true);const Z=f=>{{if(f&&!Q)f.dispatchEvent(new Event(\"submit\",{{bubbles:true,cancelable:true}}));Q=0}};addEventListener(\"click\",e=>{{const b=e.target instanceof Element&&e.target.closest(\"button,input[type=submit],input[type=image]\");if(!b||!b.form||b.type!==\"submit\"&&b.type!==\"image\")return;Q=0;setTimeout(()=>{{if(!e.defaultPrevented)Z(b.form)}},0)}},true);addEventListener(\"keydown\",e=>{{const t=e.target;if(e.key!==\"Enter\"||e.isComposing||!(t instanceof HTMLInputElement)||!t.form||t.form.querySelector(\"button:not([type=button]):not([type=reset]),input[type=submit],input[type=image]\"))return;Q=0;setTimeout(()=>{{if(!e.defaultPrevented)Z(t.form)}},0)}},true);\
+const B={root},O={origin},L={{root:[],missing:[]}},S={{}};let F=0,R=0,E=0;\
 const P=k=>{{if(S[k])return;S[k]=1;try{{parent.postMessage({{type:\"tqa-site-report\",kind:k,paths:(L[k]||[]).slice(0,10).map(p=>String(p).slice(0,120)),more:Math.max(0,(L[k]||[]).length-10)}},O)}}catch(_){{}}}};\
 const A=(k,p)=>{{F=1;const l=L[k];if(p&&!l.includes(p))l.push(p);if(R)setTimeout(()=>P(k),500)}};\
 const U=s=>{{try{{return new URL(s,location.href)}}catch(_){{return null}}}};\
 document.addEventListener(\"securitypolicyviolation\",e=>{{const u=U(e.blockedURI);if(u&&u.origin===O&&!u.pathname.startsWith(B))A(\"root\",u.pathname===\"/\"?\"\":u.pathname)}},true);\
-addEventListener(\"error\",e=>{{const t=e.target;if(!t||t===window)return;const u=U(t.src||t.href||\"\");if(u&&u.origin===O&&u.pathname.startsWith(B))A(\"missing\",decodeURIComponent(u.pathname.slice(B.length)))}},true);\
+addEventListener(\"unhandledrejection\",()=>{{E=1}});\
+addEventListener(\"error\",e=>{{const t=e.target;if(!t||t===window){{E=1;return}}const u=U(t.src||t.href||\"\");if(u&&u.origin===O&&u.pathname.startsWith(B))A(\"missing\",decodeURIComponent(u.pathname.slice(B.length)))}},true);\
 addEventListener(\"load\",()=>setTimeout(()=>{{R=1;if(L.root.length||F&&!L.missing.length)P(\"root\");if(L.missing.length)P(\"missing\");\
-const r=document.getElementById(\"root\")||document.getElementById(\"app\");if(r&&!r.firstElementChild&&!F)P(\"empty\")}},2000))}})()</script>"
+const r=document.getElementById(\"root\")||document.getElementById(\"app\");if(r&&!r.firstElementChild&&!F&&!E)P(\"empty\")}},2000))}})()</script>"
     )
 }
 

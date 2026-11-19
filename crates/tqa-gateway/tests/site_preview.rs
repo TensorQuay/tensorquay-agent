@@ -99,14 +99,17 @@ async fn gw_i_321_a_folder_is_served_as_a_site_by_its_pass(pool: PgPool) -> Test
                 .and_then(|v| v.to_str().ok()),
             Some("nosniff")
         );
-        // The page as it came, with the reporter first in its head (18.1, GW-U-224); its relative paths unchanged.
+        // The page as it came, with the reporter first in its head (18.1, GW-U-224): the storage it lends and the form
+        // submit it fires come before its pass and panel origin. The page's relative paths unchanged.
         let served = page.text().await?;
         let head = served.find("<head>").ok_or("head")? + "<head>".len();
         assert!(
-            served[head..].starts_with("<script>(()=>{const B="),
+            served[head..]
+                .starts_with(r#"<script>(()=>{for(const n of["localStorage","sessionStorage"])"#),
             "{served}"
         );
         let end = head + served[head..].find("</script>").ok_or("reporter")? + "</script>".len();
+        assert!(served[head..end].contains("const B="), "{served}");
         assert_eq!(
             format!("{}{}", &served[..head], &served[end..]).as_bytes(),
             PAGE
