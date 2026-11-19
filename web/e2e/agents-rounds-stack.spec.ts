@@ -125,7 +125,7 @@ test("E2E-AGENTS-040 a person's follow-up opens round 2, which brings a helper b
     [2, "person"],
   ]);
 
-  // What the run left, for a failure's reading: the team, its log, and each helper's events (types and runs).
+  // What the run left, for a failure's reading: the team, its log, and each helper's events by type.
   const directory = process.env.TQA_WEB_EVIDENCE_DIR;
   if (directory) {
     const helpers = await page.request.get(
@@ -136,17 +136,11 @@ test("E2E-AGENTS-040 a person's follow-up opens round 2, which brings a helper b
         helpers: { conversation: string; name: string }[];
       }
     ).helpers;
-    const journals: Record<string, [number, string | undefined][]> = {};
-    for (const helper of each) {
-      const frames = (await events(page, helper.conversation)) as {
-        seq: number;
-        event?: { type: string };
-      }[];
-      journals[helper.name] = frames.map((frame) => [
-        frame.seq,
-        frame.event?.type,
-      ]);
-    }
+    const journals: Record<string, string[]> = {};
+    for (const helper of each)
+      journals[helper.name] = (await events(page, helper.conversation)).map(
+        (event) => event.type,
+      );
     await mkdir(directory, { recursive: true });
     await writeFile(
       join(directory, "rounds-diagnostics.json"),
