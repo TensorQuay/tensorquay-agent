@@ -698,6 +698,10 @@
     "team.linePersonToLead": "{name} memberitahu ketua: {text}",
     "team.lineDone": "Selesai: {text}",
     "team.noticeIdle": "{member} berhenti tanpa melaporkan.",
+    "team.round": "Pusingan {round}",
+    "team.notInRound": "Tidak dalam pusingan ini",
+    "team.lineRoundStarted": "Pusingan {round} bermula",
+    "team.endRound": "Pusingan {round}: {reason}",
     "team.noticeStuck": "{member} kelihatan tersekat.",
     "team.noticeFailed": "{member} gagal.",
     "team.noticeStopped": "{member} dihentikan.",
@@ -2675,6 +2679,11 @@
     "activity.teamNoProfile": "Tiada profil ejen bernama “{name}”.",
     "activity.teamMemberLimit": "Pasukan sudah mempunyai pembantu sebanyak had. Pembantu yang selesai dikira sehingga dihentikan.",
     "activity.teamEnded": "Pasukan sudah berakhir.",
+    "activity.teamsOff": "Pembantu dimatikan untuk pemasangan ini.",
+    "activity.teamWasMember": "Tugasan yang merupakan pembantu tidak boleh memimpin pasukan.",
+    "activity.teamRuntimeOld": "Persekitaran tugasan ini terlalu lama untuk memimpin pembantu.",
+    "activity.teamEndedForGood": "Pasukannya telah berakhir untuk selama-lamanya.",
+    "activity.teamBetweenRounds": "Pusingan pasukannya telah berakhir.",
     "activity.pushOutcomeUnknown": "Tidak jelas sama ada perubahan disimpan. Semak projek sebelum mencuba lagi.",
     "activity.pushExpired": "Penyimpanan mengambil masa terlalu lama untuk dibenarkan, jadi tiada yang disimpan. Cuba lagi.",
     "activity.pushInvalid": "Ejen meminta perubahan disimpan dengan cara yang tidak mungkin. Cuba lagi, atau nyatakan di mana untuk menyimpannya.",
@@ -2862,6 +2871,7 @@
     "tool.aHelper": "seorang pembantu",
     "tool.startedHelper": "Memulakan pembantu: {name}",
     "tool.startHelperFailed": "Tidak dapat memulakan pembantu: {name}",
+    "tool.cantLeadHere": "Tidak boleh memimpin pembantu di sini",
     "tool.gaveWork": "Memberi {name} lebih banyak kerja",
     "tool.askedAllHelpers": "Tanya semua pembantu",
     "tool.toldDecision": "Beritahu semua pembantu tentang keputusan",
@@ -2973,6 +2983,7 @@
     "health.sandboxesNoVolumes": "Volum tidak dikira: ruang kerja ialah folder pada hos, bukan volum.",
     "health.openSandboxes": "Buka Kotak pasir",
     "health.hours": "{count, plural, one {# j} other {# j}}",
+    "health.minutes": "{count, plural, other {# min}}",
     "screen.noticeSandboxStopped": "Pentadbir menghentikan kotak pasir tugas ini. Ia bermula semula apabila anda menghantar mesej."
   }
 }
