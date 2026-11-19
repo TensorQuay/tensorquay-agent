@@ -1,7 +1,7 @@
 //! Docker sandboxes' own networks (ADR-0021 amendment): reconciled at start (the gateway rejoins live sandboxes'
 //! networks, orphans are removed, sandboxes left on the former shared network are retired and resume in isolated
 //! ones), swept periodically and at once when the subnet pool runs out.
-use super::{SandboxManager, failure};
+use super::{SandboxManager, failure, verdict};
 use crate::GatewayError;
 use std::{
     sync::{
@@ -121,38 +121,151 @@ impl SandboxManager {
                     () = manager.networks.wake.notified() => {}
                     _ = timer.tick() => {}
                 }
-                manager.sweep_strays().await;
-                manager.sweep_networks().await;
+                let mut findings = manager.sweep_strays().await;
+                findings.extend(manager.sweep_networks().await);
+                manager.record_sweep(findings).await;
             }
         });
     }
 
-    async fn sweep_strays(&self) {
-        match self.sweep_containers(std::time::SystemTime::now()).await {
-            Ok(sweep) if sweep.removed > 0 || sweep.failed > 0 => tracing::warn!(
-                removed = sweep.removed,
-                failed = sweep.failed,
-                "stray sandbox containers swept"
-            ),
-            Ok(_) => {}
-            Err(error) => tracing::warn!(code = error.code(), "sandbox container sweep failed"),
+    /// Keeps the pass for the leak verdict (the Sandboxes page design note, §3.6), with what runs now.
+    async fn record_sweep(&self, findings: Vec<verdict::Finding>) {
+        let (running, oldest_seconds) = self.running_count().await.unwrap_or((0, 0));
+        if let Ok(mut sweeps) = self.sweeps.lock() {
+            sweeps.record(verdict::Pass {
+                at: time::OffsetDateTime::now_utc(),
+                running,
+                oldest_seconds,
+                // No volume is created or labelled by the gateway today, so none is looked at (see the note's §3.6).
+                volumes: false,
+                findings,
+            });
         }
     }
 
-    async fn sweep_networks(&self) {
-        let Some(docker) = &self.backend.docker else {
-            return;
-        };
-        match docker.reconcile_networks(false).await {
-            Ok(sweep) if sweep.removed > 0 || sweep.failed > 0 => tracing::warn!(
-                removed = sweep.removed,
-                failed = sweep.failed,
-                "orphaned sandbox networks swept"
-            ),
-            Ok(_) => {}
-            Err(error) => tracing::warn!(code = error.code(), "sandbox network sweep failed"),
+    /// How many sandboxes have a record, and the oldest one's age in seconds.
+    pub(crate) async fn running_count(&self) -> Result<(u64, u64), GatewayError> {
+        let row = self
+            .bounded(async {
+                Ok(sqlx::query!(
+                    "SELECT count(*) AS \"running!\", COALESCE(EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - MIN(created_at))), 0)::bigint AS \"oldest!\" FROM sandbox_instances"
+                )
+                .fetch_one(&self.services.pool)
+                .await?)
+            })
+            .await?;
+        Ok((
+            u64::try_from(row.running).unwrap_or(0),
+            u64::try_from(row.oldest).unwrap_or(0),
+        ))
+    }
+
+    /// The leak verdict as of the last sweep.
+    pub(crate) fn leak_verdict(&self) -> verdict::Verdict {
+        self.sweeps
+            .lock()
+            .map_or_else(|_| verdict::Verdict::default(), |sweeps| sweeps.verdict())
+    }
+
+    /// The readiness detail's `sandboxes` object, with the live running count, and the gauges set from it.
+    pub(crate) async fn sandboxes_readiness(&self) -> serde_json::Value {
+        let (running, oldest) = self.running_count().await.unwrap_or((0, 0));
+        let verdict = self.leak_verdict().with_running(running, oldest);
+        let states = self.state_counts().await.unwrap_or_default();
+        self.services
+            .telemetry
+            .sandboxes(self.config.backend_name(), &states, &verdict);
+        verdict.readiness()
+    }
+
+    /// How many sandboxes are starting, working, idle and stopping, for the `tqa_sandboxes` gauge.
+    async fn state_counts(&self) -> Result<Vec<(&'static str, u64)>, GatewayError> {
+        let rows = self
+            .bounded(async {
+                Ok(sqlx::query!(
+                    "SELECT s.phase, COALESCE((SELECT e.lifecycle FROM events e WHERE e.conversation_id=s.conversation_id AND e.lifecycle IS NOT NULL ORDER BY e.seq DESC LIMIT 1) IN ('run.started','run.resumed'), false) AS \"working!\" FROM sandbox_instances s"
+                )
+                .fetch_all(&self.services.pool)
+                .await?)
+            })
+            .await?;
+        let mut counts = [
+            ("starting", 0u64),
+            ("working", 0),
+            ("idle", 0),
+            ("stopping", 0),
+        ];
+        for row in rows {
+            let index = match row.phase.as_str() {
+                "starting" => 0,
+                "destroying" => 3,
+                _ if row.working => 1,
+                _ => 2,
+            };
+            counts[index].1 += 1;
         }
+        Ok(counts.to_vec())
+    }
+
+    async fn sweep_strays(&self) -> Vec<verdict::Finding> {
+        match self.sweep_containers(std::time::SystemTime::now()).await {
+            Ok(sweep) => {
+                if sweep.removed > 0 || sweep.failed > 0 {
+                    tracing::warn!(
+                        removed = sweep.removed,
+                        failed = sweep.failed,
+                        "stray sandbox containers swept"
+                    );
+                }
+                sweep.findings
+            }
+            Err(error) => {
+                tracing::warn!(code = error.code(), "sandbox container sweep failed");
+                Vec::new()
+            }
+        }
+    }
+
+    async fn sweep_networks(&self) -> Vec<verdict::Finding> {
+        let Some(docker) = &self.backend.docker else {
+            return Vec::new();
+        };
+        let findings =
+            match docker.reconcile_networks(false).await {
+                Ok(sweep) => {
+                    if sweep.removed > 0 || sweep.failed > 0 {
+                        tracing::warn!(
+                            removed = sweep.removed,
+                            failed = sweep.failed,
+                            "orphaned sandbox networks swept"
+                        );
+                    }
+                    sweep
+                        .removed_names
+                        .into_iter()
+                        .map(|name| verdict::Finding {
+                            kind: verdict::Kind::Network,
+                            name,
+                            age_seconds: 0,
+                            outcome: Ok(()),
+                        })
+                        .chain(sweep.failed_names.into_iter().map(|(name, reason)| {
+                            verdict::Finding {
+                                kind: verdict::Kind::Network,
+                                name,
+                                age_seconds: 0,
+                                outcome: Err(reason),
+                            }
+                        }))
+                        .collect()
+                }
+                Err(error) => {
+                    tracing::warn!(code = error.code(), "sandbox network sweep failed");
+                    Vec::new()
+                }
+            };
         self.report_pool();
+        findings
     }
 
     /// A create found no free subnet: the work stays queued, the episode is logged once, and a sweep runs now.

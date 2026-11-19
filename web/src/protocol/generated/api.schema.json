@@ -401,6 +401,9 @@
             "cancelled"
           ]
         },
+        "screen_notices": {
+          "type": "boolean"
+        },
         "title_source": {
           "type": "string",
           "enum": [
@@ -1662,6 +1665,93 @@
             "null"
           ],
           "minimum": 0
+        },
+        "sandboxes": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "running": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "oldest_seconds": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "unowned": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "containers": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "networks": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "volumes": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "containers",
+                "networks"
+              ]
+            },
+            "left_behind": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "containers": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "networks": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "volumes": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "oldest_seconds": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 0
+                },
+                "reason": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "containers",
+                "networks",
+                "oldest_seconds",
+                "reason"
+              ]
+            },
+            "swept_at": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "running",
+            "oldest_seconds",
+            "unowned",
+            "left_behind",
+            "swept_at"
+          ]
         }
       },
       "required": [
@@ -1670,7 +1760,8 @@
         "sandbox",
         "templates",
         "git_credentials_kept",
-        "runs_active"
+        "runs_active",
+        "sandboxes"
       ]
     },
     "UserConnector": {
@@ -3970,7 +4061,6 @@
       "type": "object",
       "required": [
         "kind",
-        "by",
         "at",
         "after_seq"
       ],
@@ -3984,7 +4074,8 @@
             "screen.signed_out",
             "screen.sign_out_failed",
             "screen.sign_in_kept",
-            "screen.sign_in_released"
+            "screen.sign_in_released",
+            "sandbox.stopped"
           ]
         },
         "by": {

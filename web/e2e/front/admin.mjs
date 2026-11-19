@@ -6,6 +6,7 @@ import { egressRoute } from "./egress.mjs";
 import { enginesRoute } from "./engines.mjs";
 import { limitsRoute } from "./limits.mjs";
 import { listed, routesRoute } from "./routes.mjs";
+import { sandboxesReadiness, sandboxesRoute } from "./sandboxes.mjs";
 import { seededMap } from "./state.mjs";
 import { agentTeamsRoute } from "./teams.mjs";
 import { templateDiagnostics, templatesRoute } from "./templates.mjs";
@@ -58,6 +59,8 @@ export function readinessRoute(
     runs_active: [...(sessions?.get(token)?.values() ?? [])].filter(
       (conversation) => conversation.running,
     ).length,
+    // The Sandboxes page's counts and the leak verdict (the design note of 17 Nov 2026).
+    sandboxes: sandboxesReadiness(request),
   });
   return true;
 }
@@ -416,6 +419,7 @@ export async function adminRoute(
   if (await connectorsRoute(url, method, read, key, answer)) return true;
   if (await enginesRoute(url, method, read, key, answer)) return true;
   if (await templatesRoute(url, method, read, key, answer)) return true;
+  if (await sandboxesRoute(url, method, key, request, answer)) return true;
   // The configured tool servers a shared profile may bring (WEB-U-059).
   if (url.pathname === "/api/v1/admin/mcp/servers" && method === "GET")
     json(response, 200, {

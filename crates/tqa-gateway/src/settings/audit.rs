@@ -6,13 +6,13 @@ use sqlx::PgConnection;
 
 /// One change to record.
 pub(crate) struct Change<'a> {
-    /// `secrets`, `routes`, `egress` or `limits`.
+    /// `secrets`, `routes`, `egress`, `limits`, … or `sandboxes` (an administrator's stop).
     pub area: &'static str,
     /// The administrator (or, for `audit_user`, the user) who made it; `None` for a seed import.
     pub actor: Option<uuid::Uuid>,
     /// The item's key within its area, for example a secret reference or a route name.
     pub item: &'a str,
-    /// `create`, `replace` or `delete`.
+    /// `create`, `replace`, `delete`, … or `stop` (a sandbox).
     pub action: &'static str,
     pub before: Option<i64>,
     pub after: Option<i64>,

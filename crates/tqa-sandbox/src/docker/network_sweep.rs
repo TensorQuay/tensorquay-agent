@@ -29,6 +29,10 @@ pub struct NetworkSweep {
     pub failed: u32,
     /// Sandboxes still on the former shared network, for the caller to retire (they resume in a new sandbox).
     pub legacy: Vec<SandboxHandle>,
+    /// The orphans removed, by name, for the gateway's leak verdict.
+    pub removed_names: Vec<String>,
+    /// The orphans that could not be removed, by name, with the engine error's code.
+    pub failed_names: Vec<(String, &'static str)>,
 }
 
 impl DockerBackend {
@@ -54,8 +58,14 @@ impl DockerBackend {
         for name in networks.into_iter().take(MAX_SWEEP_NETWORKS) {
             match self.sweep_one(&name, used.contains(&name), reattach).await {
                 Swept::Reattached => sweep.reattached += 1,
-                Swept::Removed => sweep.removed += 1,
-                Swept::Failed => sweep.failed += 1,
+                Swept::Removed => {
+                    sweep.removed += 1;
+                    sweep.removed_names.push(name);
+                }
+                Swept::Failed(code) => {
+                    sweep.failed += 1;
+                    sweep.failed_names.push((name, code));
+                }
                 Swept::Untouched => {}
             }
         }
@@ -81,7 +91,7 @@ impl DockerBackend {
             Ok(()) => done,
             Err(error) => {
                 tracing::warn!(code = error.code(), "{what}");
-                Swept::Failed
+                Swept::Failed(error.code())
             }
         }
     }
@@ -207,6 +217,7 @@ fn already_attached(error: &bollard::errors::Error) -> bool {
 enum Swept {
     Reattached,
     Removed,
-    Failed,
+    /// With the engine error's code.
+    Failed(&'static str),
     Untouched,
 }

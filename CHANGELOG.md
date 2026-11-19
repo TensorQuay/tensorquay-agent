@@ -12,6 +12,14 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   so the page stayed blank. The preview now moves those paths under its own address in the page's HTML and in its
   stylesheets; scripts are never changed. A static export's own pages open by their links (`/about` answers
   `about.html`). Each previewed page carries a small reporter that tells the Files panel what it couldn't load.
+- **Administrators see every running sandbox, and can stop an idle one (Settings › Operations › Sandboxes;
+  GW-U-216 to 220, SEC-066, WEB-U-486 to 489, WEB-E2E-129).** Each row names its owner, environment, state and when it
+  stops, with its CPU and memory against its size; the page shows the slots in use and anyone waiting. Stop now retires
+  an idle sandbox the same way its idle window would: the task and its files stay, its next message starts a new one,
+  and its owner reads a notice saying an administrator stopped it. A working sandbox is never stopped. Each stop is
+  audited. The page shows nothing of a task but its owner and environment. Settings › Status now says whether a sweep
+  left anything behind (a container, a network, or a volume in volume mode) and why, and the page's Left behind section
+  gives each one's remove command. One database migration.
 - **The agent builds web apps that preview (PROMPT-U-028).** Where a web app can be built (Node, with the npm
   registry among the allowed sites), the instructions say the Files panel previews a built folder under a
   sub-path: build with relative paths (Vite `base: './'`, Create React App `"homepage": "."`) and a hash router,
@@ -60,6 +68,20 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   centred column: a wheel or trackpad over the side margins scrolls it, and the bar sits at the area's right edge (the
   Files panel's edge when it is open). Keys, focus and screen readers use the transcript as before. With forced
   colours the system's scrollbar stays.
+
+- **For contributors: the web style check keeps type and radii to the tokens (WEB-U-509).** `pnpm tokens` (part of
+  `pnpm check`) now also refuses a font size, weight, line height, letter spacing or radius that isn't one of the
+  design tokens, and named colours, in CSS, style objects and class names. A style that must stay off the scale says
+  why on its line (`token-lint: allow <rule> (<reason>)`) and is listed in `web/scripts/token-allowances.txt`; five
+  are, today. Nothing on screen changes.
+- **For contributors: every shared component is in the design reference, with its states (WEB-U-510).** `/design`
+  (development and test builds) now draws each component in `web/src/ui` from one registry, in both themes, and
+  `pnpm check` fails for a new component that has no entry there. Nothing in the product changes.
+
+## 18.0.2 (19 November 2026)
+
+A fix release: a tool call whose number or true/false a model sent as text runs instead of being refused until
+the run stopped. No migration, protocol or configuration change: upgrade in place.
 
 ### Fixed
 

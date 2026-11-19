@@ -147,7 +147,7 @@
   top: 0;
   right: calc(var(--space-1) / 2);
   width: calc(var(--space-1) * 1.5);
-  border-radius: var(--radius-pill);
+  border-radius: var(--pill-radius);
   background: var(--muted);
   touch-action: none;
 }

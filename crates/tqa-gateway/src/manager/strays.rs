@@ -8,12 +8,15 @@ use std::time::SystemTime;
 use tqa_sandbox::SandboxHandle;
 
 /// What one sweep did: strays removed, and strays it failed to remove (left for the next sweep).
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct ContainerSweep {
     /// Strays removed, their runtime credentials revoked.
     pub removed: usize,
     /// Strays that could not be checked or removed this time.
     pub failed: usize,
+    /// Each stray by its short id and age, with the engine's error code when it could not be removed, for the leak
+    /// verdict (the Sandboxes page design note, §3.6).
+    pub(crate) findings: Vec<super::verdict::Finding>,
 }
 
 impl SandboxManager {
@@ -38,11 +41,23 @@ impl SandboxManager {
             {
                 continue;
             }
+            let finding = |outcome| super::verdict::Finding {
+                kind: super::verdict::Kind::Container,
+                name: handle.id.chars().take(12).collect(),
+                age_seconds: now
+                    .duration_since(handle.created_at)
+                    .map_or(0, |age| age.as_secs()),
+                outcome,
+            };
             match self.sweep_container(&handle).await {
-                Ok(true) => sweep.removed += 1,
+                Ok(true) => {
+                    sweep.removed += 1;
+                    sweep.findings.push(finding(Ok(())));
+                }
                 Ok(false) => {}
                 Err(error) => {
                     sweep.failed += 1;
+                    sweep.findings.push(finding(Err(error.code())));
                     tracing::warn!(
                         conversation_id = %handle.conversation_id,
                         code = error.code(),

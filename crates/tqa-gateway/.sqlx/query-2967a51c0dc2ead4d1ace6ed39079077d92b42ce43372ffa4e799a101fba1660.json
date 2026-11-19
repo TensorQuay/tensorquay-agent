@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(DISTINCT i.conversation_id) AS \"waiting!\" FROM idempotency i WHERE i.execution_status='queued' AND NOT EXISTS (SELECT 1 FROM sandbox_instances s WHERE s.conversation_id=i.conversation_id)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "waiting!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "2967a51c0dc2ead4d1ace6ed39079077d92b42ce43372ffa4e799a101fba1660"
+}

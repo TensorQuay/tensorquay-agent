@@ -12,6 +12,7 @@ pub(crate) use route_input::display_name_clean as route_display_name_clean;
 pub(crate) use route_input::name_valid as route_name_valid;
 mod environment_images;
 mod routes;
+mod sandboxes;
 mod secrets;
 mod templates;
 mod usage;
@@ -32,6 +33,7 @@ pub(crate) use mcp_servers::list as mcp_servers;
 pub(crate) use routes::{
     export as routes_export, list as routes, put as route_put, remove as route_remove,
 };
+pub(crate) use sandboxes::{list as sandboxes, stop as sandbox_stop};
 pub(crate) use secrets::{
     bind as secret_bind, list as secrets, put as secret_put, reads as secret_reads,
     remind as secret_remind, remove as secret_remove,

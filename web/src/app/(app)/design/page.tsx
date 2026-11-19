@@ -4,6 +4,7 @@ import { AccountPatterns } from "../../../design/AccountPatterns";
 import { ChannelPatterns } from "../../../design/ChannelPatterns";
 import { ConversationPatterns } from "../../../design/ConversationPatterns";
 import { DesignPanel } from "../../../design/DesignPanel";
+import { GalleryPanel } from "../../../design/GalleryPanel";
 
 export const metadata = { title: "Design reference · TensorQuay Agent" };
 
@@ -28,6 +29,8 @@ export default function Design() {
         <AccountPatterns theme="dark" />
         <ChannelPatterns theme="light" />
         <ChannelPatterns theme="dark" />
+        <GalleryPanel theme="light" />
+        <GalleryPanel theme="dark" />
       </div>
     </>
   );

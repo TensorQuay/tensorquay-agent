@@ -83,7 +83,7 @@
   left: 50%;
   width: var(--space-1);
   height: var(--space-8);
-  border-radius: var(--radius-pill);
+  border-radius: var(--pill-radius);
   background: var(--line);
   transform: translate(-50%, -50%);
 }
@@ -321,6 +321,7 @@ button.file-open:hover {
   position: absolute;
   inset: 0;
   overflow: clip;
+  /* token-lint: allow line-height (the PDF text layer matches pdf.js's glyph boxes, so selection lands on the drawn text) */
   line-height: 1;
   text-align: initial;
   letter-spacing: normal;
@@ -347,6 +348,7 @@ button.file-open:hover {
   --scale-x: 1;
   --rotate: 0deg;
   z-index: 1;
+  /* token-lint: allow font-size (pdf.js sizes each text run to the page's own glyphs and scale) */
   font-size: calc(var(--text-scale-factor) * var(--font-height));
   transform: rotate(var(--rotate)) scaleX(var(--scale-x))
     scale(var(--min-font-size-inv));
@@ -569,7 +571,7 @@ button.sent-picture {
   width: var(--space-6);
   height: var(--space-6);
   object-fit: cover;
-  border-radius: var(--space-1);
+  border-radius: var(--thumbnail-radius);
   background: var(--line);
 }
 .attachment-name {

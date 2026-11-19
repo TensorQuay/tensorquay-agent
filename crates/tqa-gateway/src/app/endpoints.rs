@@ -38,7 +38,7 @@ pub(super) async fn ready(
     let ready = checks
         .as_object()
         .is_some_and(|checks| checks.values().all(|value| value == true));
-    let body = serde_json::json!({"ready":ready,"checks":checks,"sandbox":{"backend":state.config.backend_name(),"network_mode":state.config.sandbox.network_mode},"templates":templates(&state).await,"git_credentials_kept":git_credentials_kept(&state).await,"runs_active":runs_active(&state).await});
+    let body = serde_json::json!({"ready":ready,"checks":checks,"sandbox":{"backend":state.config.backend_name(),"network_mode":state.config.sandbox.network_mode},"templates":templates(&state).await,"git_credentials_kept":git_credentials_kept(&state).await,"runs_active":runs_active(&state).await,"sandboxes":state.manager.sandboxes_readiness().await});
     let status = if ready {
         StatusCode::OK
     } else {
