@@ -32,6 +32,27 @@ def kinds(frames):
     return [(frame.get("ts"), (frame.get("event") or {}).get("type"), frame.get("event") or {}) for frame in frames]
 
 
+def bring_backs(frames, follow_up):
+    """What the lead asked for in round 2, from its own start_member calls after the person's follow-up, and what came
+    back: a call naming `files` asks for a helper back (A3); one without starts a new one. `not_brought_back` is each
+    helper asked back whose answer didn't say "Brought back": the gateway's failure, never the model's (found on
+    19 Nov 2026, when "Started helper totals-2" answered a bring-back)."""
+    after = next((index for index, (_, kind, event) in enumerate(frames)
+                  if kind == "message.user" and event.get("text", "").strip() == (follow_up or "").strip()), None)
+    if after is None:
+        return {"back": [], "new": [], "not_brought_back": []}
+    calls, answers = {}, {}
+    for _, kind, event in frames[after:]:
+        if kind == "tool.call" and event.get("name") == "start_member":
+            calls[event.get("call_id")] = event.get("arguments") or {}
+        elif kind == "tool.result":
+            answers[event.get("call_id")] = str(event.get("content") or "")
+    back = {call: (arguments.get("role") or "").lower() for call, arguments in calls.items() if arguments.get("files")}
+    new = sorted({(arguments.get("role") or "").lower() for arguments in calls.values() if not arguments.get("files")})
+    missed = sorted({role for call, role in back.items() if not answers.get(call, "").startswith("Brought back")})
+    return {"back": sorted(set(back.values())), "new": new, "not_brought_back": missed}
+
+
 def attempt(directory, task_dir):
     record = json.loads((directory / "team.json").read_text())
     team, log = record["team"], record["messages"]
@@ -79,9 +100,14 @@ def attempt(directory, task_dir):
     refused = [event for _, kind, event in lead if kind == "tool.result"
                and calls.get(event.get("call_id")) == "start_member" and event.get("status") != "ok"]
     need(not refused, f"no start_member refused ({len(refused)})")
+    model = bring_backs(lead, follow_up)
+    need(not model["not_brought_back"],
+         f"every helper asked back was brought back (not: {model['not_brought_back']})")
+    # The model's choice is what it asked for; whether the gateway honoured it is the check above.
     asked = {"back": ["checker", "totals"], "new": ["shares"]} if task_dir.name == "x1-region-shares" else None
-    chose = bool(asked) and back == asked["back"] and new == asked["new"]
+    chose = bool(asked) and model["back"] == asked["back"] and model["new"] == asked["new"]
     notes.append(f"round 1 started {first}; round 2 brought back {back} and added {new}")
+    notes.append(f"the lead asked back {model['back']} and new {model['new']}")
     return gateway, chose, notes
 
 

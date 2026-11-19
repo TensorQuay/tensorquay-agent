@@ -19,8 +19,11 @@ pub(crate) struct Finished {
     copy_ready: bool,
 }
 
-/// The lead's finished helper named `role`, in any letter case: `done`, `stopped`, `waiting`, or failed with its task
-/// still running; a live or gone one is no match (a new helper then).
+/// The lead's helper named `role`, in any letter case, to bring back: one finished in this round (`done`, `stopped`,
+/// `waiting`, or failed with its task still running), or one of an earlier round whatever it is doing, busy too (the
+/// team between rounds, or the helper's round behind the team's): a name from an earlier round always means bringing
+/// that helper back, never a new `<role>-2` (decided on 19 Nov 2026, GW-I-339). A live helper of this round, or a gone
+/// one, is no match (a new helper then, `-2` beside a live one, GW-I-341).
 ///
 /// # Errors
 /// Storage failure.
@@ -35,8 +38,9 @@ pub(crate) async fn find(
            FROM agent_team_members m JOIN agent_teams t ON t.id = m.team_id
            JOIN conversations c ON c.id = m.conversation_id LEFT JOIN workspaces w ON w.id = c.workspace_id
            WHERE t.lead_conversation = $1 AND t.state <> 'stopping' AND lower(m.name) = lower($2)
-             AND c.state = 'active'
-             AND (m.state IN ('done', 'stopped', 'waiting') OR (m.state = 'failed' AND m.failed_run))
+             AND c.state = 'active' AND NOT (m.state = 'failed' AND NOT m.failed_run)
+             AND (m.state IN ('done', 'stopped', 'waiting') OR m.state = 'failed'
+                  OR t.state = 'ended' OR m.round < t.round)
            ORDER BY t.created_at DESC LIMIT 1"#,
         lead,
         role

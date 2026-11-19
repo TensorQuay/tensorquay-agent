@@ -554,15 +554,20 @@ runtime turns into its refusal sentence (A6).
 or not. The role is answered before a run has an id, so it can't know what started the run: `start_member` decides
 whether this run may open a round (A1), and refuses in words when it may not. The first `start_member` of a run that started as `ended` adds the other lead tools from the next model call,
 as the first `start_member` of a `may_lead` run does (one change of the request's prefix), with `lead_tools: true`
-in its answer.
+in its answer. Only the current round's helpers are woken by the team's messages: a helper not brought back is never
+woken by the round it isn't in, so it stays idle and comes back as itself if named (amended on 19 Nov 2026, after the
+real-model run woke `checker` while the lead was bringing it back; GW-I-340).
 
 **A3. Bringing a finished helper back is `start_member`'s** (decided 17 Nov 2026: no new tool, since today's waves
 showed a local model losing its way among many tools: Workstation 17 of 20 against Minimal 19 of 20; a lead keeps ten
 tools, a lead between rounds two).
 - **The match:** `role` is compared with the team's helper names in any letter case. It brings that helper back when
-  the helper has finished (`done`, `stopped`, `waiting`, or `failed` with `failed_run`). It starts a new helper,
-  named as today (`-2`, `-3`), when no helper has that name, when the named one is live in this round, or when it is
-  gone. So an unmatched name is a new helper, never an error, and the answer's first words say which happened
+  the helper has finished in this round (`done`, `stopped`, `waiting`, or `failed` with `failed_run`), and always
+  when the helper is from an earlier round (the team between rounds, or the helper's round behind the team's),
+  whatever it is doing: busy on a person's message between rounds too (amended on 19 Nov 2026, after the real-model
+  run started `totals-2` where the lead asked for `totals` back; GW-I-339). It starts a new helper, named as today
+  (`-2`, `-3`), when no helper has that name, when the named one is live in this round (GW-I-341), or when it is
+  gone; never where a bring-back was asked. So an unmatched name is a new helper, never an error, and the answer's first words say which happened
   ("Brought back researcher", "Started helper researcher-2"). The tool's description says the rule: "Name a helper
   that has finished to bring it back with its history and its files. For a new helper on the same job, use a new
   role word."
@@ -574,7 +579,8 @@ tools, a lead between rounds two).
   `parameter_invalid` naming the helper's values.
 - **The same task:** its history, brief, reports and anything a person wrote to it between rounds are its context.
   Its turn goes as a first turn does, one key per helper per round (`team-round:<helper>:<round>`), so a restart
-  never sends it twice; behind a run a person started, it is queued and the answer says `queued`. It is told the
+  never sends it twice; behind a run a person started, it is queued and the answer says `queued`. A busy helper
+  brought back joins the round at once (its round set, shown as `queued`), its round brief behind its current run. It is told the
   gateway's fixed frame (the round, its last report's seq, the decisions since its last read) and the lead's new
   brief, untrusted, with `brief`'s three required parts.
 - **The answer** gains `brought_back: true`, `files` and `round`. **Seats** are per round: a brought-back helper takes
