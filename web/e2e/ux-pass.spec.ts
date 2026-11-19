@@ -5,7 +5,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { openCard } from "./cards";
 import { openFilesPanel } from "./files-panel";
 import { createConversation, signIn } from "./session";
-import { styleAudit } from "./style-audit";
+import { squeezedText, styleAudit } from "./style-audit";
 import { expect, resetFront, test, type Page } from "./test";
 
 // WEB-E2E-143 (18.2, UI guardrails): the UX pass. Thirty screens, each at 1280 and 390 px in light and dark (120
@@ -166,6 +166,8 @@ for (const screen of SCREENS)
         failures.push(`${where}: scrolls sideways by ${sideways} px`);
       for (const problem of await styleAudit(page))
         failures.push(`${where}: ${problem}`);
+      for (const problem of await squeezedText(page))
+        failures.push(`${where}: squeezed ${problem}`);
       const axe = await new AxeBuilder({ page }).exclude("iframe").analyze();
       for (const violation of axe.violations)
         if (violation.impact === "serious" || violation.impact === "critical")

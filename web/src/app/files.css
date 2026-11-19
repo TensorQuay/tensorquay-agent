@@ -230,8 +230,11 @@ button.file-open:hover {
   gap: var(--space-2);
   min-width: 0;
 }
+/* A preview's bar: its note, then its actions. Where the row can't hold both, the actions take a line of their own
+   under the note, never squeezing it to a word a line (WEB-E2E-143). */
 .file-kind-bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
