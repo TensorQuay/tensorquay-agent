@@ -47,11 +47,14 @@ for (const width of [1024, 1440])
         .filter({ hasText: /pasted-image-1\.png/ });
       await expect(chip).toBeVisible();
       await expect(chip.locator("img")).toBeVisible();
-      expect(
-        await chip
-          .locator("img")
-          .evaluate((image: HTMLImageElement) => image.naturalWidth),
-      ).toBeGreaterThan(0);
+      // The preview is visible before its picture has decoded: wait for the picture, never read it once.
+      await expect
+        .poll(() =>
+          chip
+            .locator("img")
+            .evaluate((image: HTMLImageElement) => image.naturalWidth),
+        )
+        .toBeGreaterThan(0);
       // The name is one the gateway keeps, so the chip reads the same once uploaded.
       await expect(chip).toHaveAttribute("data-status", "done");
       await expect(chip).toHaveText(/pasted-image-1\.png/);
