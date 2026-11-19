@@ -73,6 +73,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   (development and test builds) now draws each component in `web/src/ui` from one registry, in both themes, and
   `pnpm check` fails for a new component that has no entry there. Nothing in the product changes.
 
+## 18.0.2 (19 November 2026)
+
+A fix release: a tool call whose number or true/false a model sent as text runs instead of being refused until
+the run stopped. No migration, protocol or configuration change: upgrade in place.
+
 ### Fixed
 
 - **A tool call whose number or true/false arrives as text still runs (TOOL-U-146).** One model server sends an
