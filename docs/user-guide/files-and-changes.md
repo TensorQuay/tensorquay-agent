@@ -84,6 +84,34 @@ served as a small site, so all of that loads as the page expects:
   takes a new one when it needs it, and a restart of the gateway forgets them all; a task has at most 8 live passes at a
   time.
 
+### Previewing a web app
+<!-- Tests: GW-U-223, GW-U-224, GW-I-321, WEB-U-500, WEB-E2E-140. -->
+An app the agent builds (with Vite, Create React App, or a static site generator) previews from its build: open
+the `index.html` in the build's folder, usually `dist/` or `build/`, not the one beside the source. The source's
+`index.html` names files the build hasn't made yet, so it shows little or nothing. Open the build's own top
+`index.html`, not one in a folder under it: the preview serves the folder of the page you open, and a page deeper in
+the build can't reach the build's shared files.
+
+Most builds name their files from the server's root (`/assets/app.js`) by default. The preview moves those addresses
+under its own wherever the page's HTML or a style sheet names them, so a default build's page, its styles and its
+pictures load as they are. A static site's own pages open by their links: a link to `/about` opens `about.html`, or
+`about/index.html`. Scripts are never changed, because an address written inside a script can't be told apart from
+data, so what a script itself builds from the server's root still can't load here.
+
+When something can't load, a line above the page says why, instead of an empty frame:
+- "This page asks for files at the server's root (…), which a preview can't serve. Ask the agent to build it with
+  relative paths." A script asked for files from the server's root. Ask the agent to build with relative paths (for
+  Vite, `base: './'`; for Create React App, `"homepage": "."`) and to open the build again.
+- "This page asks for files its folder doesn't have: …" The page names files that aren't in the folder you
+  opened: often it is a page below the build's top, or the build is incomplete. Open the build's top `index.html`, or
+  ask the agent to build again.
+- "This page drew nothing. An app with routes previews with a hash router: ask the agent to use one." The app ran
+  but drew nothing, which is how an app with routes behaves under a preview's address: its router finds no page to
+  show. Ask the agent to use a hash router (`createHashRouter` or `HashRouter`), whose routes work under any address.
+
+These lines need the page's scripts: with **Stop scripts** nothing runs, and no line shows. The preview stays
+offline apart from the network setting above, whatever the app asks for.
+
 If the folder can't be served, for example at that limit, the page is shown on its own and offline, as earlier
 versions showed every page: a page that loads from elsewhere then says "Previews run offline: what this page loads from
 … won't show here. Download it to see it all.", and a link in it doesn't open ("Links in a preview don't open here.
