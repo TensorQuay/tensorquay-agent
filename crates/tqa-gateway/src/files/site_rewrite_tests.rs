@@ -197,6 +197,13 @@ fn gw_u_224_the_reporter_names_the_pass_and_the_panel_origin() {
         "{script}"
     );
     assert!(script.contains("tqa-site-report"));
+    // An app that keeps its data in storage runs: the sandbox's refused storage is lent an in-memory one, first.
+    assert!(
+        script.starts_with(r#"<script>(()=>{for(const n of["localStorage","sessionStorage"])"#)
+    );
+    assert!(script.contains("Object.defineProperty(window,n,{value:s,configurable:true})"));
+    // A page that stopped on an error is given no router advice.
+    assert!(script.contains("t===window){E=1;return}") && script.contains(r#"&&!E)P("empty")"#));
     // A pass root can't close the script early.
     assert!(!reporter("/x</script>/", "https://a").contains("x</script>/"));
 }

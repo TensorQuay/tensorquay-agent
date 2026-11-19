@@ -86,6 +86,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **A built web app that keeps its data in the browser previews (GW-U-224, WEB-E2E-140).** The preview runs a
+  page in a sandbox without same-origin access, where reading `localStorage` or `sessionStorage` throws, so an app
+  that keeps its data there (a to-do list, most small apps) stopped before drawing and the panel told you to use a
+  hash router. The page is now lent an in-memory storage that lasts until the preview reloads, and a page that stops
+  on an error gets no router advice.
 - **Status says a sandbox's age in days from two days on (WEB-U-489).** The Sandboxes line said "the oldest for
   224 h"; it now says "9 days". Under two days it still says hours, and under an hour minutes.
 

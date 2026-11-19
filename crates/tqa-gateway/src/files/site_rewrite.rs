@@ -224,7 +224,11 @@ fn is_name(byte: u8) -> bool {
 /// The reporter put first in each page's head: it tells the parent (the Files panel, at `origin`) what the page asked
 /// for and couldn't have. Root paths: a load the policy blocked on this gateway, outside the pass; missing files: a
 /// load under the pass that failed; drew nothing: 2 s after load, `#root` or `#app` with no element and nothing
-/// failed. At most one message per kind, ten paths of 120 characters each; it reads nothing else, sends nothing else.
+/// failed and no script stopped on an error (that page needs no router advice). At most one message per kind, ten
+/// paths of 120 characters each; it reads nothing else, sends nothing else. Before anything else it gives the page an
+/// in-memory `localStorage` and `sessionStorage` where the preview's sandbox refuses the real ones (it runs without
+/// same-origin access, so reading them throws and an app that keeps its data there stopped before drawing): the page
+/// runs, and what it stores lasts until the preview reloads.
 #[must_use]
 pub(crate) fn reporter(root: &str, origin: &str) -> String {
     // JSON strings with `<` escaped, so nothing in them can close the script.
@@ -235,14 +239,16 @@ pub(crate) fn reporter(root: &str, origin: &str) -> String {
     };
     let (root, origin) = (literal(root), literal(origin));
     format!(
-        "<script>(()=>{{const B={root},O={origin},L={{root:[],missing:[]}},S={{}};let F=0,R=0;\
+        "<script>(()=>{{for(const n of[\"localStorage\",\"sessionStorage\"]){{try{{window[n].length}}catch(_){{const m=new Map(),s={{getItem:k=>m.has(String(k))?m.get(String(k)):null,setItem:(k,v)=>{{m.set(String(k),String(v))}},removeItem:k=>{{m.delete(String(k))}},clear:()=>{{m.clear()}},key:i=>[...m.keys()][i]??null,get length(){{return m.size}}}};try{{Object.defineProperty(window,n,{{value:s,configurable:true}})}}catch(_){{}}}}}}\
+const B={root},O={origin},L={{root:[],missing:[]}},S={{}};let F=0,R=0,E=0;\
 const P=k=>{{if(S[k])return;S[k]=1;try{{parent.postMessage({{type:\"tqa-site-report\",kind:k,paths:(L[k]||[]).slice(0,10).map(p=>String(p).slice(0,120)),more:Math.max(0,(L[k]||[]).length-10)}},O)}}catch(_){{}}}};\
 const A=(k,p)=>{{F=1;const l=L[k];if(p&&!l.includes(p))l.push(p);if(R)setTimeout(()=>P(k),500)}};\
 const U=s=>{{try{{return new URL(s,location.href)}}catch(_){{return null}}}};\
 document.addEventListener(\"securitypolicyviolation\",e=>{{const u=U(e.blockedURI);if(u&&u.origin===O&&!u.pathname.startsWith(B))A(\"root\",u.pathname===\"/\"?\"\":u.pathname)}},true);\
-addEventListener(\"error\",e=>{{const t=e.target;if(!t||t===window)return;const u=U(t.src||t.href||\"\");if(u&&u.origin===O&&u.pathname.startsWith(B))A(\"missing\",decodeURIComponent(u.pathname.slice(B.length)))}},true);\
+addEventListener(\"unhandledrejection\",()=>{{E=1}});\
+addEventListener(\"error\",e=>{{const t=e.target;if(!t||t===window){{E=1;return}}const u=U(t.src||t.href||\"\");if(u&&u.origin===O&&u.pathname.startsWith(B))A(\"missing\",decodeURIComponent(u.pathname.slice(B.length)))}},true);\
 addEventListener(\"load\",()=>setTimeout(()=>{{R=1;if(L.root.length||F&&!L.missing.length)P(\"root\");if(L.missing.length)P(\"missing\");\
-const r=document.getElementById(\"root\")||document.getElementById(\"app\");if(r&&!r.firstElementChild&&!F)P(\"empty\")}},2000))}})()</script>"
+const r=document.getElementById(\"root\")||document.getElementById(\"app\");if(r&&!r.firstElementChild&&!F&&!E)P(\"empty\")}},2000))}})()</script>"
     )
 }
 
