@@ -69,6 +69,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   design tokens, and named colours, in CSS, style objects and class names. A style that must stay off the scale says
   why on its line (`token-lint: allow <rule> (<reason>)`) and is listed in `web/scripts/token-allowances.txt`; five
   are, today. Nothing on screen changes.
+- **For contributors: every shared component is in the design reference, with its states (WEB-U-510).** `/design`
+  (development and test builds) now draws each component in `web/src/ui` from one registry, in both themes, and
+  `pnpm check` fails for a new component that has no entry there. Nothing in the product changes.
 
 ### Fixed
 
