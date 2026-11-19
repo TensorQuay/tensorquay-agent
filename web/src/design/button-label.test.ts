@@ -2,6 +2,7 @@
 // WEB-U-511 (18.2): a text button's label wraps inside the button, centred, the button growing from the control height,
 // and never ends in an ellipsis that would hide the action's name; an icon-only button keeps its fixed square.
 import { readFileSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
 
 const globals = readFileSync("src/app/globals.css", "utf8").replace(
