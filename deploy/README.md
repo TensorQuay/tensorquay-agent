@@ -27,6 +27,11 @@ hardware. Every figure below was measured on 19 Nov 2026 on the reference workst
 - **Reference workstation:** Intel Core Ultra 7 270K Plus (24 cores), 64 GB of RAM, one NVIDIA GeForce RTX 5090
   (32 GB), Ubuntu 24.04, Docker Engine 29.8. The GPU serves the engine-backed models; the CPU-only figures below
   were taken on the same machine with the model's container capped to fewer cores.
+- **On the GPU, the reference:** Qwen3.8 27B (FP8 key-value cache) on the RTX 5090, served by an inference
+  engine on the same machine, measured with the CPU runs' three prompts (2,055 prompt tokens by its own count, 200
+  out, temperature 0, one request at a time, nothing else on the GPU): the first token after 1.05 s, the prompt at
+  about 1,960 tokens/s and the answer at 61 tokens/s, the three runs within 0.5 % of each other. The engine reports
+  token counts but no timings, so the prompt's rate is its tokens over the time to the first token.
 - **CPU only, the minimum that works:** a small local model, qwen3:4b in Ollama 0.34.4, on CPU alone. Over a
   2,013-token prompt answered with 200 tokens (three runs per cap, Ollama's own counts):
 
