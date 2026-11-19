@@ -34,24 +34,33 @@ def kinds(frames):
 
 def bring_backs(frames, follow_up):
     """What the lead asked for in round 2, from its own start_member calls after the person's follow-up, and what came
-    back: a call naming `files` asks for a helper back (A3); one without starts a new one. `not_brought_back` is each
-    helper asked back whose answer didn't say "Brought back": the gateway's failure, never the model's (found on
-    19 Nov 2026, when "Started helper totals-2" answered a bring-back)."""
+    back. A call naming a helper round 1 started, or naming `files`, asks for that helper back (A3: `files` is optional,
+    keep by default, and an earlier round's name always brings it back); any other starts a new one. `not_brought_back`
+    is each helper asked back whose answer didn't say "Brought back": the gateway's failure, never the model's (found on
+    19 Nov 2026, when "Started helper totals-2" answered a bring-back). `refused` lists every refused start as (round,
+    role, code), round 1's included (a malformed call of the model's, such as a brief without its objective)."""
     after = next((index for index, (_, kind, event) in enumerate(frames)
                   if kind == "message.user" and event.get("text", "").strip() == (follow_up or "").strip()), None)
-    if after is None:
-        return {"back": [], "new": [], "not_brought_back": []}
-    calls, answers = {}, {}
-    for _, kind, event in frames[after:]:
+    calls, answers, refused = {}, {}, []
+    for index, (_, kind, event) in enumerate(frames):
         if kind == "tool.call" and event.get("name") == "start_member":
-            calls[event.get("call_id")] = event.get("arguments") or {}
-        elif kind == "tool.result":
-            answers[event.get("call_id")] = str(event.get("content") or "")
-    back = {call: (arguments.get("role") or "").lower() for call, arguments in calls.items() if arguments.get("files")}
-    new = sorted({(arguments.get("role") or "").lower() for arguments in calls.values() if not arguments.get("files")})
-    missed = sorted({role for call, role in back.items() if not answers.get(call, "").startswith("Brought back")})
-    return {"back": sorted(set(back.values())), "new": new, "not_brought_back": missed}
-
+            calls[event.get("call_id")] = (index, event.get("arguments") or {})
+        elif kind == "tool.result" and event.get("call_id") in calls:
+            answers[event.get("call_id")] = (str(event.get("content") or ""), event.get("status"))
+    for call, (index, arguments) in calls.items():
+        text, status = answers.get(call, ("", None))
+        if status not in (None, "ok"):
+            round_ = 2 if after is not None and index > after else 1
+            refused.append((round_, (arguments.get("role") or "").lower(), text.split(":", 1)[0].strip()))
+    if after is None:
+        return {"back": [], "new": [], "not_brought_back": [], "refused": refused}
+    first = {(arguments.get("role") or "").lower() for call, (index, arguments) in calls.items()
+             if index < after and answers.get(call, ("", None))[1] == "ok"}
+    second = {call: (arguments.get("role") or "").lower() for call, (index, arguments) in calls.items() if index > after}
+    back = {call: role for call, role in second.items() if role in first or calls[call][1].get("files")}
+    new = sorted({role for call, role in second.items() if call not in back})
+    missed = sorted({role for call, role in back.items() if not answers.get(call, ("", None))[0].startswith("Brought back")})
+    return {"back": sorted(set(back.values())), "new": new, "not_brought_back": missed, "refused": refused}
 
 def attempt(directory, task_dir):
     record = json.loads((directory / "team.json").read_text())
@@ -96,11 +105,10 @@ def attempt(directory, task_dir):
         if between["helper"] in back and written:
             later = [ts for ts, kind, _ in helper if kind == "run.started" and when(ts) > when(written[0])]
             need(bool(later), f"{between['helper']}'s round 2 came after the person's message")
-    calls = {event.get("call_id"): event.get("name") for _, kind, event in lead if kind == "tool.call"}
-    refused = [event for _, kind, event in lead if kind == "tool.result"
-               and calls.get(event.get("call_id")) == "start_member" and event.get("status") != "ok"]
-    need(not refused, f"no start_member refused ({len(refused)})")
     model = bring_backs(lead, follow_up)
+    # Round 2's starts are the gateway's to honour; a refused one there is its failure. Every refusal is listed below.
+    in_round_two = [each for each in model["refused"] if each[0] == 2]
+    need(not in_round_two, f"no round-2 start_member refused ({len(in_round_two)})")
     need(not model["not_brought_back"],
          f"every helper asked back was brought back (not: {model['not_brought_back']})")
     # The model's choice is what it asked for; whether the gateway honoured it is the check above.
@@ -108,6 +116,8 @@ def attempt(directory, task_dir):
     chose = bool(asked) and model["back"] == asked["back"] and model["new"] == asked["new"]
     notes.append(f"round 1 started {first}; round 2 brought back {back} and added {new}")
     notes.append(f"the lead asked back {model['back']} and new {model['new']}")
+    for round_, role, code in model["refused"]:
+        notes.append(f"a start_member refused in round {round_}: {role}, {code}")
     return gateway, chose, notes
 
 

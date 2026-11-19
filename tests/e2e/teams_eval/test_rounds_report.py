@@ -40,6 +40,22 @@ class BringBacks(unittest.TestCase):
         asked = rounds_report.bring_backs(lead, FOLLOW_UP[2]["text"])
         self.assertEqual((asked["back"], asked["new"], asked["not_brought_back"]), (["checker", "totals"], [], []))
 
+    def test_a_round_one_name_is_asked_back_with_or_without_files(self):
+        # A3: files is optional (keep by default), and naming an earlier round's helper always brings it back.
+        lead = ROUND_ONE + [FOLLOW_UP, call("c", "totals"), result("c", "Brought back totals for round 2."),
+                            call("d", "checker"), result("d", "Brought back checker for round 2."),
+                            call("e", "shares"), result("e", "Started helper shares (own copy).")]
+        asked = rounds_report.bring_backs(lead, FOLLOW_UP[2]["text"])
+        self.assertEqual((asked["back"], asked["new"], asked["not_brought_back"]),
+                         (["checker", "totals"], ["shares"], []))
+
+    def test_refusals_say_their_round_and_code(self):
+        lead = [call("a", "totals"), result("a", "Started helper totals (own copy)."), call("b", "checker"),
+                result("b", 'invalid_args: /brief: missing required property "objective"', "error"),
+                call("b2", "checker"), result("b2", "Started helper checker (own copy)."), FOLLOW_UP]
+        asked = rounds_report.bring_backs(lead, FOLLOW_UP[2]["text"])
+        self.assertEqual(asked["refused"], [(1, "checker", "invalid_args")])
+
     def test_round_one_starts_are_not_counted(self):
         asked = rounds_report.bring_backs(ROUND_ONE, FOLLOW_UP[2]["text"])
         self.assertEqual((asked["back"], asked["new"]), ([], []))
