@@ -139,8 +139,9 @@ WEB-E2E-142) or a serious accessibility violation. Its 120 pictures land in `web
 
 A release candidate also gets a person's review of what changed on screen:
 
-1. Run the pass on the candidate's commit and on the last release's tag (`pnpm exec playwright test e2e/ux-pass.spec.ts`
-   in each), and keep each run's `test-results/ux-pass/` folder.
+1. Get the pictures of the candidate's commit and of the last release's tag. CI keeps each Web run's pictures for 7
+   days as the `ux-pass` artifact (the run's summary page, under Artifacts); past that, or for a commit CI didn't run,
+   run the pass locally (`pnpm exec playwright test e2e/ux-pass.spec.ts`) and keep its `test-results/ux-pass/` folder.
 2. `pnpm ux:compare <last release's folder> <candidate's folder> <out.html>` writes one page of the screens that
    changed, the old beside the new, the most changed first, with any new screen and any screen no longer in the pass.
    Two runs of the same commit compare as unchanged.
