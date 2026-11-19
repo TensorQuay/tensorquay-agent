@@ -32,6 +32,7 @@ bytes = "~1.12"
 hyper = { version = "~1.11", features = ["client", "http1"] }
 hyper-util = { version = "~0.1", features = ["tokio"] }
 http-body-util = "~0.1"
+flate2 = { version = "=1.1.10", default-features = false, features = ["rust_backend"] }
 tokio-rustls = { version = "~0.26", default-features = false, features = ["ring", "tls12"] }
 webpki-roots = "~1.0"
 url = "~2.5"

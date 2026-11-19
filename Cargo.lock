@@ -4640,6 +4640,7 @@ dependencies = [
  "async-trait",
  "base64 0.22.1",
  "bytes",
+ "flate2",
  "futures",
  "globset",
  "grep-matcher",
