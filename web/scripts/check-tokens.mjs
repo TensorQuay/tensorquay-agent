@@ -89,6 +89,7 @@ const RADIUS_TOKENS = [
   "dialog-radius",
   "composer-radius",
   "row-action-radius",
+  "thumbnail-radius",
 ];
 const SIZE_TOKENS = [
   "display-size",
@@ -171,7 +172,7 @@ const RULES = [
     css: /(?<![\w-])border(?:-[a-z]+)*-radius\s*:\s*([^;}]*)/gi,
     script: /\bborder(?:[A-Z][a-z]+)*Radius\s*:\s*([^,}\n]*)/g,
     tailwind:
-      /(?:^|[\s"'`])rounded(?:-(?:none|sm|md|lg|[2-3]?xl|full|[trblse]{1,2}(?:-[a-z0-9]+)?|\[[^\]]*\]))?(?=["'`]|\s+[\w:[-]+["'`\s])/gm,
+      /(?:^|[\s"'`])rounded(?:-(?:none|sm|md|lg|[2-3]?xl|full|[trblse]{1,2}(?:-(?!control|pill|dialog)[a-z0-9]+)?|\[[^\]]*\]))?(?=["'`]|\s+[\w:[-]+["'`\s])/gm,
     allowed: each(
       (part) =>
         token(RADIUS_TOKENS).test(part) || keywords("0", "inherit")(part),

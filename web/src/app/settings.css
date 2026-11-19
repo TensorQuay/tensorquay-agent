@@ -316,6 +316,7 @@
   flex: none;
   overflow: visible;
   min-height: var(--min-control-height);
+  /* token-lint: allow line-height (a one-line link fills its 32 px target this way; as a flex box it grew phone cards, WEB-E2E-111) */
   line-height: var(--min-control-height);
   color: var(--ink);
   text-decoration: underline;
@@ -1228,6 +1229,7 @@ button.model-option:focus-visible {
   min-width: var(--border-width);
   height: calc(var(--share, 0) * 100%);
   background: var(--ink);
+  /* token-lint: allow radius (a chart bar is a data mark, not a surface: its top is rounded 2 px) */
   border-radius: calc(2 * var(--border-width)) calc(2 * var(--border-width)) 0 0;
 }
 /* The bars with their scale at the right: the busiest day's tokens level with the bars' top, 0 at the baseline. */

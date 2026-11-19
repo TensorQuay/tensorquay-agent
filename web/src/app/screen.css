@@ -10,7 +10,7 @@
   width: 100%;
   aspect-ratio: 16 / 10;
   overflow: hidden;
-  border-radius: var(--radius-control);
+  border-radius: var(--control-radius);
   background: var(--surface);
   outline: var(--border-width) solid var(--line);
 }
@@ -94,13 +94,13 @@
   display: block;
   max-width: 100%;
   height: auto;
-  border-radius: var(--radius-control);
+  border-radius: var(--control-radius);
   outline: var(--border-width) solid var(--line);
 }
 .screen-missing {
   margin: 0;
   padding: var(--space-3);
-  border-radius: var(--radius-control);
+  border-radius: var(--control-radius);
   background: var(--surface);
 }
 /* The replay's Previous or Next at an end: unavailable, still focusable (WEB-U-272). */
@@ -119,6 +119,6 @@
   inset-inline-end: var(--space-1);
   inline-size: 6px;
   block-size: 6px;
-  border-radius: 50%;
+  border-radius: var(--pill-radius);
   background: var(--accent);
 }

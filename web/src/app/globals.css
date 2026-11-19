@@ -206,6 +206,8 @@
   --row-inset: var(--space-half);
   --row-action-size: calc(var(--row-height-nav) - 2 * var(--row-inset));
   --row-action-radius: calc(var(--control-radius) - var(--row-inset));
+  /* §5: an image's 24 px thumbnail sits 4 px inside its 32 px attachment chip, so its corners are the chip's less 4 px. */
+  --thumbnail-radius: calc(var(--control-radius) - var(--space-1));
   --row-action-reach: calc(
     var(--row-action-size) + var(--row-inset) - var(--nav-pad-inline)
   );
