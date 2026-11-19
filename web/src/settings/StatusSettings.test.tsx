@@ -1,5 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { User } from "../protocol/generated/api";
@@ -625,6 +631,25 @@ describe("WEB-U-489 Status says whether anything was left behind after a sweep",
       "Sandboxes: 1 running, the oldest for 40 min. Nothing left behind.",
     );
     expect(section).not.toHaveTextContent("Volumes are not counted");
+  });
+
+  it("says the oldest age in days from two days on, never hundreds of hours", async () => {
+    for (const [seconds, words] of [
+      [47 * 3600, "the oldest for 47 h."],
+      [48 * 3600, "the oldest for 2 days."],
+      [224 * 3600, "the oldest for 9 days."],
+    ] as const) {
+      fetch.mockImplementationOnce(() =>
+        json({
+          ...ready,
+          sandboxes: { ...ready.sandboxes, oldest_seconds: seconds },
+        }),
+      );
+      show();
+      const section = await screen.findByRole("region", { name: "Sandboxes" });
+      expect(section).toHaveTextContent(words);
+      cleanup();
+    }
   });
 
   it("reads amber naming what was left behind, why, the retry, and opens the page's Left behind section", async () => {
