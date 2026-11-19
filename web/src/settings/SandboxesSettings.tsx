@@ -24,6 +24,7 @@ import type {
   SandboxRow,
   SandboxesApi,
 } from "./admin/sandboxes";
+import { breakable } from "./breakable-email";
 import { LoadFailure } from "./LoadFailure";
 import { RowMenu } from "./RowMenu";
 import { reasonWords } from "./sandbox-reason";
@@ -386,7 +387,7 @@ function Row({
     <tr>
       <td>
         <div className="data-name data-name-wrap" title={row.owner.email}>
-          <span className="cell-whole">{email}</span>
+          <span className="cell-whole">{own ? email : breakable(email)}</span>
         </div>
       </td>
       <td>

@@ -25,6 +25,7 @@ import { Skeleton } from "../ui/Skeleton";
 import { TableScroll } from "../ui/TableScroll";
 
 import { accountError } from "./account-errors";
+import { breakable } from "./breakable-email";
 import { DateLabel } from "./DateLabel";
 import { settingsApi } from "./requests";
 import { SecretDialog } from "./SecretDialog";
@@ -41,18 +42,6 @@ const INVITATION_TONES = {
   expired: "muted",
   revoked: "muted",
 } as const;
-
-/**
- * An email that may break only after its @ or a dot, never inside a word (WEB-U-117, a first-hour check): read whole,
- * on one line wherever the table has room.
- */
-function breakable(email: string) {
-  return email
-    .split(/(?<=[@.])/)
-    .flatMap((part, index) =>
-      index === 0 ? [part] : [<wbr key={index} />, part],
-    );
-}
 
 /** User administration (GW-I-046): invite by email, see invitations, change roles, disable or enable accounts. */
 export function UsersSettings({

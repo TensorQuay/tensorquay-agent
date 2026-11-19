@@ -5,12 +5,12 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ## Unreleased
 
-## 18.1.0 (19 November 2026)
+## 18.1.0 (20 November 2026)
 
 A feature release: administrators see every running sandbox and can stop an idle one, agent teams work in rounds,
 a long task can look back past its summary, a built web app previews as it is, `edit_file` says what it found, eight
-draft languages have nearly all of the app's words, and the deploy guide gives measured reference hardware. Two database migrations
-(0106 and 0107), applied in place; no configuration key changes.
+draft languages have nearly all of the app's words, and the deploy guide gives measured reference hardware. Two
+database migrations (0106 and 0107), applied in place; no configuration key changes.
 
 ### Added
 
@@ -104,6 +104,16 @@ draft languages have nearly all of the app's words, and the deploy guide gives m
 
 ### Fixed
 
+- **A long owner address on the Sandboxes page stays in its column (WEB-U-486, WEB-E2E-129).** An address such as
+  member@example.invalid ran under the State column with its pill over it; it now wraps after its @ or a dot, as
+  People's addresses do.
+- **A built web app that keeps its data in the browser previews (GW-U-224, WEB-E2E-140).** The preview runs a
+  page in a sandbox without same-origin access, where reading `localStorage` or `sessionStorage` throws, so an app
+  that keeps its data there (a to-do list, most small apps) stopped before drawing and the panel told you to use a
+  hash router. The page is now lent an in-memory storage that lasts until the preview reloads, and a page that stops
+  on an error gets no router advice. The sandbox also blocks forms, so the browser never told an app its form was sent
+  and an Add button did nothing: a click on a submit button, or Enter in a form without one, now runs the page's own
+  form handler. Nothing is ever submitted: the sandbox still refuses it.
 - **A page preview's note reads on one line (WEB-E2E-143).** In the Files panel, "Scripts are running in a sandbox"
   was squeezed to a word or two a line beside Stop scripts and Reload; where the row is narrow, the two actions now
   take a line of their own under it.

@@ -1,7 +1,8 @@
 // The Sandboxes page's gateway operations for the fake front (the Sandboxes page design note, §2): the listing of the
 // running sandboxes with their owners, states, sizes and measured use, Stop (202, or a 409 for a working one), and the
 // readiness detail's leak verdict. A seeded store: each test starts from the four sandboxes below. The scenario cookie
-// fixture_sandboxes=empty answers no sandbox; =amber adds a network the sweeps left behind.
+// fixture_sandboxes=empty answers no sandbox; =amber adds a network the sweeps left behind; =long gives the other
+// owners long addresses.
 import { seededMap } from "./state.mjs";
 
 const GIB = 2 ** 30;
@@ -102,6 +103,12 @@ const LEFT_BEHIND = {
   remove: "docker network rm tqa-sbx-18e7c62210a67d70",
 };
 
+/** Ordinary long addresses (=long): the owner column must wrap them between their parts, never run under the state. */
+const LONG_EMAILS = [
+  "member@example.invalid",
+  "operations.team@tensorquay-example.org",
+];
+
 function scenario(request) {
   const cookie = request?.headers?.cookie ?? "";
   return /(?:^|;\s*)fixture_sandboxes=([a-z]+)(?:;|$)/.exec(cookie)?.[1] ?? "";
@@ -109,7 +116,22 @@ function scenario(request) {
 
 function listing(request) {
   const which = scenario(request);
-  const items = which === "empty" ? [] : [...rows.values()];
+  const items =
+    which === "empty"
+      ? []
+      : which === "long"
+        ? [...rows.values()].map((row, index) =>
+            row.owner.id === ADMIN.id
+              ? row
+              : {
+                  ...row,
+                  owner: {
+                    ...row.owner,
+                    email: LONG_EMAILS[index % LONG_EMAILS.length],
+                  },
+                },
+          )
+        : [...rows.values()];
   const measured = items.filter((row) => row.usage);
   const desktops = items.filter((row) => row.environment.desktop).length;
   return {

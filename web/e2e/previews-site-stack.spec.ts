@@ -291,6 +291,31 @@ test("WEB-E2E-140 a built web app previews as it is, and the panel says what it 
   ).toBeVisible({ timeout: 15_000 });
   await capture(page, "previews-built-empty");
 
+  await step(
+    "an app that keeps its data in localStorage draws and adds through its form (the sandbox refuses both; the preview stands in)",
+  );
+  const stored = await openSite(panel, ["site", "storage-app"], "index.html");
+  await expect(stored.frameLocator("iframe").locator("#todos li")).toHaveText(
+    ["Buy coffee beans"],
+    { timeout: 15_000 },
+  );
+  await expect(stored.getByText(/^This page /)).toHaveCount(0);
+  // Its form adds an item: the sandbox blocks forms, so the browser never fires submit; the preview fires it.
+  const app = stored.frameLocator("iframe");
+  await app.locator("#item").fill("Water the plants");
+  await app.getByRole("button", { name: "Add" }).click();
+  await expect(app.locator("#todos li")).toHaveText([
+    "Buy coffee beans",
+    "Water the plants",
+  ]);
+  await capture(page, "previews-built-storage");
+
+  await step("an app that stops on an error gets no router advice");
+  const stopped = await openSite(panel, ["site", "error-app"], "index.html");
+  // The reporter waits 2 s after load before it judges an empty page; give it that and more.
+  await page.waitForTimeout(3_500);
+  await expect(stopped.getByText(/^This page drew nothing/)).toHaveCount(0);
+
   await step("a static export follows its link to its second page");
   const exported = await openSite(panel, ["site", "export"], "index.html");
   const pages = exported.frameLocator("iframe");
