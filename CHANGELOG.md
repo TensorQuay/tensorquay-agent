@@ -84,6 +84,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   check. `pnpm ux:compare` lists the screens that changed since the last release for the release review
   (`docs/release.md`).
 
+### Fixed
+
+- **Status says a sandbox's age in days from two days on (WEB-U-489).** The Sandboxes line said "the oldest for
+  224 h"; it now says "9 days". Under two days it still says hours, and under an hour minutes.
+
 ## 18.0.2 (19 November 2026)
 
 A fix release: a tool call whose number or true/false a model sent as text runs instead of being refused until
