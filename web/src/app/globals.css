@@ -1417,6 +1417,21 @@ textarea.form-control {
 .design-dialog-trigger {
   align-self: flex-start;
 }
+/* The component gallery (WEB-U-510): a component's states side by side, each captioned under it. */
+.gallery-states {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-4) var(--space-6);
+}
+.gallery-state {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+}
 @container (max-width: 420px) {
   .token-list,
   .specimen-grid {
