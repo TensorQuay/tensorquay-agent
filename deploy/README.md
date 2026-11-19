@@ -337,14 +337,20 @@ one names any further steps under [Upgrade notes](#upgrade-notes). From the new 
    ```
 
 2. Put step 1's copies of `compose.env` and `gateway.toml` back (the image lines and the runtime image together).
-3. Restore the dump. A newer gateway may have stored settings an earlier one can't read, so the restore comes before
-   the earlier version starts. Everything since the backup is undone: tasks, messages, sign-ins and passwords changed
-   since then are gone.
+3. Restore the dump into an empty database. A newer gateway may have stored settings an earlier one can't read, so
+   the restore comes before the earlier version starts; and a newer release's migrations add tables the dump doesn't
+   know, which a restore over them (`pg_restore --clean`) can't drop, leaving the table they hang from as the newer
+   gateway left it. So drop the database and create it again first (the gateway is stopped, so nothing is connected).
+   Everything since the backup is undone: tasks, messages, sign-ins and passwords changed since then are gone.
 
    ```sh
-   docker compose --env-file "$TQA_INSTALL_DIR/compose.env" -f deploy/compose/docker.yml exec -T postgres \
-     pg_restore -U tqa -d gateway --clean --if-exists < tensorquay-<date>.dump
+   compose() { docker compose --env-file "$TQA_INSTALL_DIR/compose.env" -f deploy/compose/docker.yml "$@"; }
+   compose exec -T postgres dropdb -U tqa gateway
+   compose exec -T postgres createdb -U tqa -O tqa gateway
+   compose exec -T postgres pg_restore -U tqa -d gateway < tensorquay-<date>.dump
    ```
+
+   `pg_restore` should end with no errors; any error means the database isn't as it was, so stop and restore again.
 
 4. From the earlier release's checkout (`git checkout v<earlier version>`), start it with step 4's lines.
 
