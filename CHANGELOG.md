@@ -20,6 +20,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   audited. The page shows nothing of a task but its owner and environment. Settings › Status now says whether a sweep
   left anything behind (a container, a network, or a volume in volume mode) and why, and the page's Left behind section
   gives each one's remove command. One database migration.
+- **The agent builds web apps that preview (PROMPT-U-028).** Where a web app can be built (Node, with the npm
+  registry among the allowed sites), the instructions say the Files panel previews a built folder under a
+  sub-path: build with relative paths (Vite `base: './'`, Create React App `"homepage": "."`) and a hash router,
+  and say which `index.html` to open. A default build's root paths and a browser-history router show a blank
+  frame in the preview. Instruction version 15; anywhere else the instructions are unchanged.
 - **A long task can look back past its summary (CTX-U-023, CORE-E-043, E2E-RECALL-001).** When a long task is
   summarised to fit the model's window, the summarised turns are now kept as text in the task's
   `.tqa/<id>/history.md`, and the summary tells the model to search it before answering about anything earlier. Ask
@@ -69,8 +74,26 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   design tokens, and named colours, in CSS, style objects and class names. A style that must stay off the scale says
   why on its line (`token-lint: allow <rule> (<reason>)`) and is listed in `web/scripts/token-allowances.txt`; five
   are, today. Nothing on screen changes.
+- **For contributors: every shared component is in the design reference, with its states (WEB-U-510).** `/design`
+  (development and test builds) now draws each component in `web/src/ui` from one registry, in both themes, and
+  `pnpm check` fails for a new component that has no entry there. Nothing in the product changes.
+
+- **For contributors: a UX pass on every pull request, and a review of what changed at each release (WEB-E2E-142,
+  WEB-E2E-143).** Thirty screens at a desktop's and a phone's width, light and dark, must not scroll sideways, must
+  draw with the design tokens' sizes, weights and radii (checked in the page itself) and must pass the accessibility
+  check. `pnpm ux:compare` lists the screens that changed since the last release for the release review
+  (`docs/release.md`).
+
+## 18.0.2 (19 November 2026)
+
+A fix release: a tool call whose number or true/false a model sent as text runs instead of being refused until
+the run stopped. No migration, protocol or configuration change: upgrade in place.
 
 ### Fixed
+
+- **A page preview's note reads on one line (WEB-E2E-143).** In the Files panel, "Scripts are running in a sandbox"
+  was squeezed to a word or two a line beside Stop scripts and Reload; where the row is narrow, the two actions now
+  take a line of their own under it.
 
 - **A task that may not lead helpers is told why, never "unknown tool" (TOOL-U-147, RT-I-062, GW-I-329,
   WEB-U-497).** A lead whose team had ended, asked to continue, called its old team tools and was answered three

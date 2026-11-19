@@ -131,6 +131,23 @@ enter the release. The pipeline refuses `docker push`, `docker login`, `git tag`
 images, creating the tag and publishing the directory are the owner's steps. Run it through the stack queue; it builds
 every image.
 
+## The UX review (release gate)
+
+Every pull request runs the UX pass (WEB-E2E-143, `web/e2e/ux-pass.spec.ts`): thirty screens at 1280 and 390 px in
+light and dark on the fake front, each failing on a sideways scroll, a style off the tokens (the runtime style audit,
+WEB-E2E-142) or a serious accessibility violation. Its 120 pictures land in `web/test-results/ux-pass/`.
+
+A release candidate also gets a person's review of what changed on screen:
+
+1. Get the pictures of the candidate's commit and of the last release's tag. CI keeps each Web run's pictures for 7
+   days as the `ux-pass` artifact (the run's summary page, under Artifacts); past that, or for a commit CI didn't run,
+   run the pass locally (`pnpm exec playwright test e2e/ux-pass.spec.ts`) and keep its `test-results/ux-pass/` folder.
+2. `pnpm ux:compare <last release's folder> <candidate's folder> <out.html>` writes one page of the screens that
+   changed, the old beside the new, the most changed first, with any new screen and any screen no longer in the pass.
+   Two runs of the same commit compare as unchanged.
+3. The reviewer walks UI-GUIDELINES §17 on every changed screen and flags what needs a fix; the Product Owner gets the
+   page with the flagged screens first. Findings are fixed or scheduled before the tag.
+
 ## Updating main
 The public `main` receives one squashed commit per update: its tree is exactly a verified development commit's tree
 and its parent is the current `main`. `tools/release/squash-import.py` builds it and never pushes:

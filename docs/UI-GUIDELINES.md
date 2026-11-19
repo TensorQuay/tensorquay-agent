@@ -441,7 +441,10 @@ drawings except the brand mark.
   `token-lint: allow <rule> (<reason>)`, and is listed in `web/scripts/token-allowances.txt`, so each one is reviewed.
 - `brand/` is copied into `web/public/brand/` by the build; the app never holds a second copy of an asset.
 - A `/design` page renders every token and every component in every state, in light and dark. It is the living
-  reference and the target of the visual regression test (Playwright screenshots compared per component). It is a
+  reference and the target of the visual regression test (Playwright screenshots compared per component). Its
+  components come from one registry, `web/src/design/gallery.tsx`: each component in `web/src/ui` has an entry
+  naming its states, or an exemption that says why (an open surface drawn by its trigger), and a unit test fails for
+  a component with neither, so a new component arrives with its states shown. It is a
   developer tool, not a product page: it is never linked from the navigation, and a production build does not serve it
   (404); development and test builds do.
 - Component files stay under 400 lines; one exported component per file; variants through props, not new files.
@@ -635,5 +638,8 @@ A web change is done when, in addition to ENGINEERING-GUARDRAILS §9:
 3. loading, empty, error and partial states are shown in those screenshots or in tests;
 4. keyboard-only use of the changed flow has been walked through, and the automated accessibility checks pass;
 5. the flow was tried from a non-secure origin when it touches browser APIs;
-6. every phase demo includes a hands-on session by the Product Owner; what they find is fixed or scheduled before the
+6. every release candidate passes the UX review: the UX pass's 120 pictures (thirty screens at 1280 and 390 px, light and
+   dark) compared with the last release's, every changed screen seen by the reviewer and shown to the Product Owner
+   (`docs/release.md`, The UX review);
+7. every phase demo includes a hands-on session by the Product Owner; what they find is fixed or scheduled before the
    next gate, and recorded in DEV-PLAN.
