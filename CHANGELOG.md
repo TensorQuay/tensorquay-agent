@@ -20,6 +20,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   audited. The page shows nothing of a task but its owner and environment. Settings › Status now says whether a sweep
   left anything behind (a container, a network, or a volume in volume mode) and why, and the page's Left behind section
   gives each one's remove command. One database migration.
+- **The agent builds web apps that preview (PROMPT-U-028).** Where a web app can be built (Node, with the npm
+  registry among the allowed sites), the instructions say the Files panel previews a built folder under a
+  sub-path: build with relative paths (Vite `base: './'`, Create React App `"homepage": "."`) and a hash router,
+  and say which `index.html` to open. A default build's root paths and a browser-history router show a blank
+  frame in the preview. Instruction version 15; anywhere else the instructions are unchanged.
 - **A long task can look back past its summary (CTX-U-023, CORE-E-043, E2E-RECALL-001).** When a long task is
   summarised to fit the model's window, the summarised turns are now kept as text in the task's
   `.tqa/<id>/history.md`, and the summary tells the model to search it before answering about anything earlier. Ask
