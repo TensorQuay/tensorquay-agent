@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH started AS (\n               SELECT seq, created_at FROM events\n               WHERE conversation_id = $1 AND run_id = $3 AND lifecycle = 'run.started'\n               ORDER BY seq LIMIT 1),\n           turn AS (\n               SELECT e.frame FROM events e, started s\n               WHERE e.conversation_id = $1 AND e.seq < s.seq\n                 AND (e.frame IS NULL OR e.frame->'event'->>'type' = 'message.user')\n               ORDER BY e.seq DESC LIMIT 1)\n           SELECT COALESCE((\n               SELECT (t.frame IS NULL\n                       OR (t.frame->'event'->'team_wake' IS NULL AND t.frame->'event'->'lead_brief' IS NULL))\n                  AND a.ended_at <= s.created_at\n                  AND NOT EXISTS (SELECT 1 FROM agent_team_rounds r WHERE r.team_id = $2 AND r.opened_by_run = $3)\n               FROM started s, turn t, agent_teams a WHERE a.id = $2), false) AS \"may!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "may!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "8592a09c47256ae65dbf94a3cce887e100ebe66c28a5eb041ebefc08855cedce"
+}

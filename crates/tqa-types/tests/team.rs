@@ -50,6 +50,10 @@ fn bodies() -> Vec<Value> {
                "text": "The agent team ended: the lead said it was done."}),
         json!({"type": "ended", "reason": "deadline", "tokens": {"total": 0, "members": []}, "reports": [], "files": [],
                "text": "The agent team ended: its deadline passed."}),
+        // A round's end note (ADR-0034's rounds amendment, A1 and A4), and the next round's start (A5).
+        json!({"type": "ended", "reason": "budget", "tokens": {"total": 250, "members": []}, "round": 2,
+               "tokens_all_rounds": 1250, "reports": [], "files": [], "text": "The agent team ended: its budget ran out."}),
+        json!({"type": "round_started", "round": 2, "text": "Round 2 of this team started."}),
     ]
 }
 
@@ -65,7 +69,7 @@ fn proto_u_023_every_stored_type_round_trips_exactly() -> TestResult {
     for kind in TeamMessageType::ALL {
         assert!(seen.contains(&kind), "{kind:?} has no case");
     }
-    assert_eq!(TeamMessageType::ALL.len(), 12);
+    assert_eq!(TeamMessageType::ALL.len(), 13);
     Ok(())
 }
 

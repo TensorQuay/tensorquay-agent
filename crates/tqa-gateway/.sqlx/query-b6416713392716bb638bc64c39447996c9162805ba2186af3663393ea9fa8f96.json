@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT m.conversation_id, m.name, t.channel_id, m.created_at < CURRENT_TIMESTAMP - make_interval(mins => $1) AS \"overdue!\" FROM agent_team_members m JOIN agent_teams t ON t.id = m.team_id WHERE m.state = 'starting' AND NOT EXISTS (SELECT 1 FROM idempotency i WHERE i.conversation_id = m.conversation_id AND i.key = 'team-start:' || m.conversation_id::text)",
+  "query": "SELECT m.conversation_id, m.name, t.channel_id, COALESCE((SELECT r.started_at FROM agent_team_rounds r WHERE r.team_id = m.team_id AND r.round = m.round AND m.round > 1), m.created_at) < CURRENT_TIMESTAMP - make_interval(mins => $1) AS \"overdue!\" FROM agent_team_members m JOIN agent_teams t ON t.id = m.team_id WHERE m.state = 'starting' AND NOT EXISTS (SELECT 1 FROM idempotency i WHERE i.conversation_id = m.conversation_id AND i.key = CASE WHEN m.round > 1 THEN 'team-round:' || m.conversation_id::text || ':' || m.round ELSE 'team-start:' || m.conversation_id::text END)",
   "describe": {
     "columns": [
       {
@@ -55,5 +55,5 @@
       null
     ]
   },
-  "hash": "d0d864245e34a400757bb7c424d6a75a3b5ba488c311f7de07296089b054e685"
+  "hash": "b6416713392716bb638bc64c39447996c9162805ba2186af3663393ea9fa8f96"
 }

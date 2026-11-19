@@ -1,0 +1,6 @@
+id = "x1-region-shares"
+title = "Region totals, then each region's share on a follow-up"
+tags = ["teams-rounds", "teams-report"]
+budgets = { max_steps = 80, wall_clock_secs = 1800, max_tokens = 1000000 }
+protected = []
+check = { image = "runtime", timeout_secs = 180 }

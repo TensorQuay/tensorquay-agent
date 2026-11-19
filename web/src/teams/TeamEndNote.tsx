@@ -45,7 +45,13 @@ export function TeamEndNote({ note }: { note: TeamEndView }) {
   return (
     <section className="team-end" aria-labelledby={id}>
       <p id={id} className="type-body-strong">
-        {t(REASONS[note.reason] ?? "team.endOther")}
+        {/* From round 2 on the note names its round (ADR-0034's rounds amendment A4, A5). */}
+        {note.round !== undefined && note.round > 1
+          ? t("team.endRound", {
+              round: note.round,
+              reason: t(REASONS[note.reason] ?? "team.endOther"),
+            })
+          : t(REASONS[note.reason] ?? "team.endOther")}
       </p>
       {note.reason === "budget" && (
         // The goal may not be met: the next step, in words (WEB-U-394, real-world use before 17.0).

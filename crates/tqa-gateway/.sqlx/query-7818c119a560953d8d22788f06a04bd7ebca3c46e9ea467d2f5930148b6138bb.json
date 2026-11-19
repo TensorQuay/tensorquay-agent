@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT m.conversation_id, m.name, m.role, m.workspace, m.state, m.failed_run, (SELECT COALESCE(sum(COALESCE(u.prompt_tokens, 0) + COALESCE(u.completion_tokens, 0)), 0) FROM usage u WHERE u.conversation_id = m.conversation_id AND u.created_at >= $2)::bigint AS \"tokens!\", EXISTS (SELECT 1 FROM usage u WHERE u.conversation_id = m.conversation_id AND u.created_at >= $2 AND u.estimated) AS \"tokens_estimated!\" FROM agent_team_members m JOIN conversations c ON c.id = m.conversation_id WHERE m.team_id = $1 AND c.state <> 'deleted' ORDER BY m.created_at",
+  "query": "SELECT m.conversation_id, m.name, m.role, m.workspace, m.state, m.failed_run, m.round, (SELECT COALESCE(sum(COALESCE(u.prompt_tokens, 0) + COALESCE(u.completion_tokens, 0)), 0) FROM usage u WHERE u.conversation_id = m.conversation_id AND u.created_at >= $2)::bigint AS \"tokens!\", EXISTS (SELECT 1 FROM usage u WHERE u.conversation_id = m.conversation_id AND u.created_at >= $2 AND u.estimated) AS \"tokens_estimated!\" FROM agent_team_members m JOIN conversations c ON c.id = m.conversation_id WHERE m.team_id = $1 AND c.state <> 'deleted' ORDER BY m.created_at",
   "describe": {
     "columns": [
       {
@@ -71,12 +71,23 @@
       },
       {
         "ordinal": 6,
+        "name": "round",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "agent_team_members",
+            "name": "round"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
         "name": "tokens!",
         "type_info": "Int8",
         "origin": "Expression"
       },
       {
-        "ordinal": 7,
+        "ordinal": 8,
         "name": "tokens_estimated!",
         "type_info": "Bool",
         "origin": "Expression"
@@ -95,9 +106,10 @@
       false,
       false,
       false,
+      false,
       null,
       null
     ]
   },
-  "hash": "dddbe4113ccabf414c118b06d8e5e191e1b12d0146639b07aa630b632c7e9746"
+  "hash": "7818c119a560953d8d22788f06a04bd7ebca3c46e9ea467d2f5930148b6138bb"
 }

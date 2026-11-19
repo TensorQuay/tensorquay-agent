@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE conversations SET profile_id = $2, profile_version = $3, profile = $4 WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Int8",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "91e9357d6d3066cd2c6cf86ac1fa141331485efa712596a7ad1f72f222d79e15"
+}

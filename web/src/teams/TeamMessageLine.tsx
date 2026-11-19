@@ -78,6 +78,9 @@ export function teamMessageWords(message: TeamMessageView, t: Translate) {
       });
     case "done":
       return t("team.lineDone", { text });
+    // The gateway's start of a new round, for the person (ADR-0034's rounds amendment A5): the round, in words.
+    case "round_started":
+      return t("team.lineRoundStarted", { round: message.round ?? 2 });
     case "notice": {
       const notice = message.notice;
       const key = (notice && NOTICES[notice.kind]) ?? "team.noticeOther";

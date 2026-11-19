@@ -9,9 +9,36 @@ use tqa_types::{
 };
 use uuid::Uuid;
 
-/// The idempotency key of `member`'s first turn.
-fn key(member: &ConversationId) -> String {
-    format!("team-start:{member}")
+/// The idempotency key of `member`'s first turn, or of its turn in round `round` once brought back (ADR-0034's
+/// rounds amendment, A3): one per helper per round, so a restart never sends it twice.
+fn key(member: &ConversationId, round: i32) -> String {
+    if round > 1 {
+        format!("team-round:{member}:{round}")
+    } else {
+        format!("team-start:{member}")
+    }
+}
+
+/// A brought-back helper's fixed frame: its round, its earlier work, and the new brief that follows (A3).
+fn round_frame(
+    name: &str,
+    round: i32,
+    workspace: WorkspaceMode,
+    last_report: Option<i64>,
+) -> String {
+    let place = match workspace {
+        WorkspaceMode::OwnCopy => "your own copy of the lead's files",
+        WorkspaceMode::MyFiles => "the lead's own files, taking turns with the lead",
+    };
+    let report = last_report.map_or_else(String::new, |seq| {
+        format!(" Your last report was message {seq}.")
+    });
+    format!(
+        "This is round {round} of your team. You are still {name}, a helper of the task that leads it, in {place}. \
+         Your earlier work stands.{report} Messages a person sent you between rounds are part of your task. Your \
+         lead's new brief follows; it is the lead's words, not the person's. Report to your lead with send_to_lead, \
+         and wait for its next message with wait_for_lead."
+    )
 }
 
 /// The fixed frame: who the member is, where it works, and how it reports. It names no title, so the gateway's own
@@ -39,7 +66,7 @@ fn frame(name: &str, workspace: WorkspaceMode, consistent: bool) -> String {
 /// Storage failure, or the message route's refusals.
 pub(crate) async fn send(state: &State, member: Uuid) -> Result<(), GatewayError> {
     let Some(row) = sqlx::query!(
-        "SELECT m.name, m.role, m.workspace, m.state, t.channel_id, t.owner_id, w.state AS workspace_state, \
+        "SELECT m.name, m.role, m.workspace, m.state, m.round, t.channel_id, t.owner_id, w.state AS workspace_state, \
          w.fork_consistent FROM agent_team_members m JOIN agent_teams t ON t.id = m.team_id \
          JOIN conversations c ON c.id = m.conversation_id JOIN workspaces w ON w.id = c.workspace_id \
          WHERE m.conversation_id = $1",
@@ -57,11 +84,13 @@ pub(crate) async fn send(state: &State, member: Uuid) -> Result<(), GatewayError
         let why = "the copy of the lead task's files couldn't be made";
         return failed(state, (member, row.channel_id), (&row.name, why)).await;
     }
+    // Its round's brief: the first assign in round 1, the latest once brought back.
     let assigned = sqlx::query!(
         "SELECT seq, body FROM channel_messages WHERE channel_id = $1 AND to_conversation = $2 AND type = 'assign' \
-         ORDER BY seq LIMIT 1",
+         ORDER BY CASE WHEN $3 > 1 THEN -seq ELSE seq END LIMIT 1",
         row.channel_id,
-        member
+        member,
+        row.round
     )
     .fetch_one(&state.pool)
     .await?;
@@ -81,14 +110,26 @@ pub(crate) async fn send(state: &State, member: Uuid) -> Result<(), GatewayError
         .to_string()
         .parse()
         .map_err(|_| GatewayError::StoreUnavailable)?;
+    let text = if row.round > 1 {
+        let last_report = sqlx::query_scalar!(
+            "SELECT max(seq) FROM channel_messages WHERE channel_id = $1 AND author_id = $2::text AND type = 'report'",
+            row.channel_id,
+            member.to_string()
+        )
+        .fetch_one(&state.pool)
+        .await?;
+        round_frame(&row.name, row.round, workspace, last_report)
+    } else {
+        frame(&row.name, workspace, row.fork_consistent.unwrap_or(true))
+    };
     let turn = ClientFrame::UserMessage {
-        text: frame(&row.name, workspace, row.fork_consistent.unwrap_or(true)),
+        text,
         attachments: Vec::new(),
         host_keys: Vec::new(),
         lead_brief: Some(lead_brief(&row.role, workspace, brief)),
         team_wake: None,
     };
-    crate::actions::send_turn(state, &user, &id, (&key(&id), turn)).await?;
+    crate::actions::send_turn(state, &user, &id, (&key(&id, row.round), turn)).await?;
     // Its brief is stored, so it's no longer starting: `queued` while the turn waits (for a slot, the lead's files or
     // its copy), else `working`; its run's start makes it `working` either way. And the brief is read: the turn carries
     // it, so it isn't work waiting for the member (a helper that ends without a read call is still told idle,
@@ -100,7 +141,7 @@ pub(crate) async fn send(state: &State, member: Uuid) -> Result<(), GatewayError
          ELSE 'working' END, last_read_seq = GREATEST(last_read_seq, $3) \
          WHERE conversation_id = $1 AND state = 'starting'",
         member,
-        key(&id),
+        key(&id, row.round),
         assigned.seq
     )
     .execute(&state.pool)
@@ -190,26 +231,36 @@ const START_LIMIT_MINUTES: i32 = 10;
 ///
 /// # Errors
 /// Storage failure.
+///
+/// A brought-back helper's round turn goes the same way, under its round's key and timed from the round's start
+/// (ADR-0034's rounds amendment, A3).
 pub(crate) async fn sweep(state: &State) -> Result<(), GatewayError> {
     if !state.config.agent_teams.enabled {
         return Ok(());
     }
     sqlx::query!(
         "UPDATE agent_team_members m SET state = CASE WHEN i.execution_status = 'queued' THEN 'queued' \
-         ELSE 'working' END, last_read_seq = GREATEST(m.last_read_seq, COALESCE((SELECT MIN(a.seq) \
+         ELSE 'working' END, last_read_seq = GREATEST(m.last_read_seq, COALESCE((SELECT CASE WHEN m.round > 1 \
+         THEN MAX(a.seq) ELSE MIN(a.seq) END \
          FROM channel_messages a JOIN agent_teams t ON t.channel_id = a.channel_id WHERE t.id = m.team_id \
          AND a.to_conversation = m.conversation_id AND a.type = 'assign'), 0)) \
          FROM idempotency i WHERE m.state = 'starting' \
-         AND i.conversation_id = m.conversation_id AND i.key = 'team-start:' || m.conversation_id::text"
+         AND i.conversation_id = m.conversation_id AND i.key = CASE WHEN m.round > 1 \
+         THEN 'team-round:' || m.conversation_id::text || ':' || m.round \
+         ELSE 'team-start:' || m.conversation_id::text END"
     )
     .execute(&state.pool)
     .await?;
     let due = sqlx::query!(
         "SELECT m.conversation_id, m.name, t.channel_id, \
-         m.created_at < CURRENT_TIMESTAMP - make_interval(mins => $1) AS \"overdue!\" \
+         COALESCE((SELECT r.started_at FROM agent_team_rounds r WHERE r.team_id = m.team_id \
+         AND r.round = m.round AND m.round > 1), m.created_at) \
+         < CURRENT_TIMESTAMP - make_interval(mins => $1) AS \"overdue!\" \
          FROM agent_team_members m JOIN agent_teams t ON t.id = m.team_id \
          WHERE m.state = 'starting' AND NOT EXISTS (SELECT 1 FROM idempotency i \
-         WHERE i.conversation_id = m.conversation_id AND i.key = 'team-start:' || m.conversation_id::text)",
+         WHERE i.conversation_id = m.conversation_id AND i.key = CASE WHEN m.round > 1 \
+         THEN 'team-round:' || m.conversation_id::text || ':' || m.round \
+         ELSE 'team-start:' || m.conversation_id::text END)",
         START_LIMIT_MINUTES
     )
     .fetch_all(&state.pool)
