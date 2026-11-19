@@ -1279,6 +1279,10 @@ button.model-option:focus-visible {
 .status-verdict-line[data-tone="danger"] {
   color: var(--danger);
 }
+/* The leak verdict's line (the Sandboxes page design note, §3.6): amber in the warn colour while something survived. */
+.status-sandboxes-line[data-tone="warn"] {
+  color: var(--warn);
+}
 .status-problem {
   padding: var(--space-3) var(--space-4);
   border-left: calc(2 * var(--border-width)) solid var(--danger);
@@ -1366,4 +1370,168 @@ tr[data-expired] td:not(.data-cell-action) {
 }
 .page-section-list {
   min-width: 0;
+}
+
+/* The Sandboxes page (the design note, §4.1; five columns from 18 Nov 2026): a row's Use is CPU over memory, one line
+   each; a left-behind thing's remove command sits beside its Copy with the standard gap, wrapping under it when short
+   of room. */
+.sandboxes-use {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+/* So the table fits a 600 px area (UI-GUIDELINES §7 Table): the state's detail ("Stops in about 10 min") wraps whole
+   under its pill instead of keeping a note column's share, and Last activity wraps too; its start is in the tooltip. */
+.data-table td .cell-note.sandboxes-detail {
+  min-width: 0;
+  contain: none;
+  overflow: visible;
+  white-space: normal;
+}
+:where(.data-table-scroll:not([data-cards])) .data-table .sandboxes-activity,
+:where(.data-table-scroll:not([data-cards]))
+  .data-table
+  .sandboxes-activity
+  time {
+  white-space: normal;
+}
+/* From a 740 px area the five columns fit with these on one line (about 720 px at their widest on touch), so the 600
+   to 739 px band wraps them (1024 px with its 700 px area among them). */
+@container data-table (width >= 740px) {
+  .data-table td .cell-note.sandboxes-detail,
+  .data-table .sandboxes-activity,
+  .data-table .sandboxes-activity time {
+    white-space: nowrap;
+  }
+}
+/* The summary's clauses stay whole: a narrow line wraps only at a " · " between them. */
+.sandboxes-clause {
+  white-space: nowrap;
+}
+/* Full: the summary line says so in the warn colour. */
+.sandboxes-headline[data-tone="warn"] {
+  color: var(--warn);
+}
+/* The phone cards (reviewed on 18 Nov 2026): the owner and the state pill with the ⋯ at the line's end; then the
+   environment and the last activity, muted, on one line; then the use on one line. All left-aligned, no field labels:
+   each line says what it is. Two zero-height breaks (the row's ::after, then its ::before) end the first two lines. */
+:where(.data-table-scroll[data-cards]) .data-table.sandboxes-table tbody tr {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  column-gap: var(--space-2);
+  row-gap: var(--space-1);
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  tbody
+  tr::after,
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  tbody
+  tr::before {
+  content: "";
+  flex-basis: 100%;
+  height: 0;
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  tbody
+  tr::after {
+  order: 2;
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  tbody
+  tr::before {
+  order: 4;
+}
+:where(.data-table-scroll[data-cards]) .data-table.sandboxes-table td {
+  order: 1;
+  /* Not the table form's full-width first cell: the owner shares its line with the pill and the ⋯. */
+  width: auto;
+  min-width: 0;
+  flex: 0 1 auto;
+  padding: 0;
+  text-align: start;
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  td[data-label]::before {
+  content: none;
+}
+/* The owner keeps its width (a full line at most); the state takes what's left of the line, its note ("Stops in about
+   2 min", "Kept on") wrapping under the pill inside it, so the ⋯ stays at the line's end. */
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  td:first-child {
+  flex: 0 0 auto;
+  max-width: 100%;
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  td:nth-child(2) {
+  flex: 1 1 0;
+}
+/* The table form's name takes the room the other columns leave (contained, 12ch at least); a card's owner is as wide as
+   its address instead. */
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  td:first-child
+  .data-name {
+  contain: none;
+  min-width: 0;
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  td.data-cell-action {
+  margin-inline-start: auto;
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  td:nth-child(3),
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  td:nth-child(5) {
+  order: 3;
+  color: var(--muted);
+  font-size: var(--small-size);
+  line-height: var(--small-leading);
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  td:nth-child(3)::after {
+  content: " ·";
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  td:nth-child(4) {
+  order: 5;
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  .sandboxes-detail {
+  display: inline;
+  margin-inline-start: var(--space-2);
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  .sandboxes-use {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--space-1);
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  .sandboxes-use
+  > *
+  + *::before {
+  content: "· ";
+}
+.sandboxes-remove {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
 }

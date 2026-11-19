@@ -801,6 +801,14 @@ textarea.form-control {
   min-width: 0;
   overflow-wrap: anywhere;
 }
+/* A confirm the gateway refused because the thing changed (ConfirmDialog's final): why, as its own notice in body
+   ink with space above, not a small red error under the text. */
+.dialog .confirm-notice {
+  margin-top: var(--space-4);
+  padding: var(--space-3);
+  border-radius: var(--control-radius);
+  background: var(--surface);
+}
 .dialog-actions {
   display: flex;
   justify-content: flex-end;

@@ -9,7 +9,22 @@ const HOUR_MINUTES = 60;
 const DAY_MINUTES = 1440;
 
 /** Refreshes relative activity time each minute in the reader's language and shows the absolute time on hover. */
-export function RelativeTime({ value }: { value: string }) {
+/** A moment as the locale writes a date and time ("Nov 17, 2026, 8:12 AM"), for tooltips. */
+export function absoluteTime(value: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
+}
+
+/** How long ago `value` was, kept fresh each minute; its tooltip is the exact time, or `title` when given. */
+export function RelativeTime({
+  value,
+  title,
+}: {
+  value: string;
+  title?: string;
+}) {
   const t = useT();
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
@@ -37,10 +52,7 @@ export function RelativeTime({ value }: { value: string }) {
         : minutes < DAY_MINUTES
           ? relative.format(-Math.floor(minutes / HOUR_MINUTES), "hour")
           : relative.format(-Math.floor(minutes / DAY_MINUTES), "day");
-  const absolute = new Intl.DateTimeFormat(t.locale, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
+  const absolute = title ?? absoluteTime(value, t.locale);
   return (
     <time dateTime={value} title={absolute}>
       {now === null ? "…" : label}

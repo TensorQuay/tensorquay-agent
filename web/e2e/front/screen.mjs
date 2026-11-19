@@ -263,6 +263,11 @@ export function screenSignOutRoute(suffix, method, id, answer, send) {
   return true;
 }
 
+/** Whether the task has notices to read, as its own read says (`screen_notices`, WEB-U-496). */
+export function hasScreenNotices(id) {
+  return (screens.get(id)?.notices.length ?? 0) > 0;
+}
+
 /** GET …/screen/notices: the task's notices, oldest first. */
 export function screenNoticesRoute(suffix, method, id, answer) {
   if (suffix !== "/screen/notices" || method !== "GET") return false;

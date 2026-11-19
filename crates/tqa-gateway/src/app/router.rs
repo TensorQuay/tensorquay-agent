@@ -263,6 +263,8 @@ fn method_router(handler: Handler) -> MethodRouter<Arc<AppState>> {
 fn admin_method_router(handler: Handler) -> MethodRouter<Arc<AppState>> {
     match handler {
         Handler::AdminUsage => get(crate::admin::usage),
+        Handler::AdminSandboxes => get(crate::admin::sandboxes),
+        Handler::AdminSandboxStop => post(crate::admin::sandbox_stop),
         Handler::AdminSecrets => get(crate::admin::secrets),
         Handler::AdminSecretPut => put(crate::admin::secret_put),
         Handler::AdminSecretReminder => put(crate::admin::secret_remind),

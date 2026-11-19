@@ -17,11 +17,19 @@ pub(crate) struct Notices {
     items: Vec<Item>,
 }
 
+/// The person a notice of `kind` names: nobody on an administrator's stop, whose owner learns only that an
+/// administrator stopped it (the audit row keeps who).
+pub(super) fn named(kind: ScreenNoticeKind, person: ScreenPerson) -> Option<ScreenPerson> {
+    (kind != ScreenNoticeKind::SandboxStopped).then_some(person)
+}
+
 /// One notice as the route and the frame give it.
 #[derive(Debug, Serialize)]
 pub(super) struct Item {
     pub(super) kind: ScreenNoticeKind,
-    pub(super) by: ScreenPerson,
+    /// Who did it; never on an administrator's stop, which isn't told to the owner by name (PROTO-U-047).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(super) by: Option<ScreenPerson>,
     #[serde(with = "time::serde::rfc3339")]
     pub(super) at: OffsetDateTime,
     pub(super) after_seq: u64,
@@ -31,6 +39,23 @@ pub(super) struct Item {
     pub(super) ended: Option<ScreenEnded>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(super) reason: Option<ScreenNoticeReason>,
+}
+
+/// Whether the task has any notice to read, for its own read's `screen_notices` (GW-U-218): its page asks for them only
+/// then, not on every task.
+///
+/// # Errors
+/// A store failure or the IO bound.
+pub(crate) async fn any(state: &State, conversation: uuid::Uuid) -> Result<bool, GatewayError> {
+    crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
+        Ok(sqlx::query_scalar!(
+            r#"SELECT EXISTS (SELECT 1 FROM screen_notices WHERE conversation_id=$1) AS "any!""#,
+            conversation
+        )
+        .fetch_one(&state.pool)
+        .await?)
+    })
+    .await
 }
 
 /// `GET /api/v1/conversations/{id}/screen/notices`: the task's newest 100 screen notices, oldest first.
@@ -58,12 +83,16 @@ pub(crate) async fn list(
     let items = rows
         .into_iter()
         .map(|row| {
+            let kind = parse_kind(&row.kind)?;
             Ok(Item {
-                kind: parse_kind(&row.kind)?,
-                by: ScreenPerson {
-                    id: row.by_user.to_string(),
-                    name: row.by_name,
-                },
+                kind,
+                by: named(
+                    kind,
+                    ScreenPerson {
+                        id: row.by_user.to_string(),
+                        name: row.by_name,
+                    },
+                ),
                 at: row.at,
                 after_seq: u64::try_from(row.after_seq)
                     .map_err(|_| GatewayError::StoreUnavailable)?,
@@ -88,6 +117,7 @@ fn parse_kind(kind: &str) -> Result<ScreenNoticeKind, GatewayError> {
         "screen.sign_out_failed" => Ok(ScreenNoticeKind::SignOutFailed),
         "screen.sign_in_kept" => Ok(ScreenNoticeKind::SignInKept),
         "screen.sign_in_released" => Ok(ScreenNoticeKind::SignInReleased),
+        "sandbox.stopped" => Ok(ScreenNoticeKind::SandboxStopped),
         _ => Err(GatewayError::StoreUnavailable),
     }
 }

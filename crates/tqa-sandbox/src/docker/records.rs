@@ -15,8 +15,14 @@ pub(super) fn handle(container: ContainerSummary) -> Result<SandboxHandle, Sandb
         .ok_or_else(invalid)?
         .parse::<u64>()
         .map_err(|_| invalid())?;
+    // The engine's own creation time decides the age (SBX-U-021): the label, which anyone who can label a container
+    // sets, is still required and checked, and stands in only where the engine gives no time.
+    let seconds = container
+        .created
+        .and_then(|created| u64::try_from(created).ok())
+        .unwrap_or(timestamp);
     let created_at = SystemTime::UNIX_EPOCH
-        .checked_add(Duration::from_secs(timestamp))
+        .checked_add(Duration::from_secs(seconds))
         .ok_or_else(invalid)?;
     let id = container
         .id

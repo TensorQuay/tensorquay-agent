@@ -106,6 +106,13 @@ export const SECTIONS = [
     admin: true,
   },
   {
+    id: "sandboxes",
+    group: "operations",
+    label: "settings.sandboxes",
+    href: "/settings/sandboxes",
+    admin: true,
+  },
+  {
     id: "status",
     group: "operations",
     label: "settings.status",

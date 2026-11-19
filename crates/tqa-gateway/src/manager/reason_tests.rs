@@ -9,6 +9,7 @@ fn teardowns() -> Vec<(Teardown, &'static str)> {
     let rows = vec![
         (Teardown::HandOver, "hand_over"),
         (Teardown::Eviction, "eviction"),
+        (Teardown::Administrator, "administrator"),
         (Teardown::EnvironmentSwitch, "environment_switch"),
         (Teardown::WorkspaceDeleted, "workspace_deleted"),
         (Teardown::TeamStopped, "team_stopped"),
@@ -30,6 +31,7 @@ fn teardowns() -> Vec<(Teardown, &'static str)> {
         match reason {
             Teardown::HandOver
             | Teardown::Eviction
+            | Teardown::Administrator
             | Teardown::EnvironmentSwitch
             | Teardown::WorkspaceDeleted
             | Teardown::TeamStopped
@@ -70,7 +72,7 @@ fn creates() -> Vec<(Create, &'static str)> {
 fn gw_u_167_each_reason_logs_its_own_fixed_value() {
     let teardowns = teardowns();
     let creates = creates();
-    assert_eq!(teardowns.len(), 18);
+    assert_eq!(teardowns.len(), 19);
     assert_eq!(creates.len(), 3);
     let mut seen = std::collections::HashSet::new();
     for (reason, value) in &teardowns {

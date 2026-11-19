@@ -480,3 +480,5 @@ async fn sbx_u_005_a_network_that_could_not_be_removed_keeps_its_subnet_for_the_
 #[cfg(test)]
 #[path = "create_tests.rs"]
 mod create;
+#[path = "destroy_tests.rs"]
+mod destroy;

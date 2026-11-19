@@ -5,6 +5,7 @@ import {
   BarChart3,
   Bot,
   Box,
+  Boxes,
   Gauge,
   Globe,
   KeyRound,
@@ -53,6 +54,7 @@ const ICONS: Readonly<Record<SettingsSection, LucideIcon>> = {
   internetAccess: Globe,
   limits: Gauge,
   usage: BarChart3,
+  sandboxes: Boxes,
   status: Activity,
 };
 

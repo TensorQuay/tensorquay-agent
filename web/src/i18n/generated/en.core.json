@@ -399,6 +399,7 @@
     "tool.checkedLead": "Checked for messages from the lead",
     "tool.checkedReports": "Checked for reports",
     "tool.wrappedUpTeam": "Wrapped up the team's work",
-    "workspaces.helperCopyName": "{name} (helper copy)"
+    "workspaces.helperCopyName": "{name} (helper copy)",
+    "screen.noticeSandboxStopped": "An administrator stopped this task's sandbox. It starts again when you send a message."
   }
 }

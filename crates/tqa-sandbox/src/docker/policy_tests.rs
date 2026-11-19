@@ -285,6 +285,22 @@ fn sbx_c_008_container_records_reject_missing_or_malformed_identity() -> TestRes
     Ok(())
 }
 
+// TEST: SBX-U-021
+// A container's age is the engine's own creation time: a `tqa.created_at` label set an hour back (the real-stack run's
+// planted stray, 18 Nov 2026) neither ages it nor takes it past the create budget. The label stands in only where the
+// engine gives no time.
+#[test]
+fn sbx_u_021_a_containers_age_is_the_engines_not_its_label() -> TestResult {
+    let value = json!({"Id":"sandbox-id", "Created": 2000,
+        "Labels":{"tqa.conversation":"conversation_record", "tqa.created_at":"123"}});
+    let handle = records::handle(serde_json::from_value(value)?)?;
+    assert_eq!(
+        handle.created_at,
+        SystemTime::UNIX_EPOCH + Duration::from_secs(2000)
+    );
+    Ok(())
+}
+
 #[test]
 fn sbx_c_003_stats_require_resource_samples_and_convert_cpu_units() -> TestResult {
     let value = json!({"cpu_stats":{"cpu_usage":{"total_usage":12_345_678}}, "memory_stats":{"usage":1234}, "pids_stats":{"current":2}});

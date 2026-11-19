@@ -10,3 +10,4 @@ the reason.
 | [Take over and the agent's last page](take-over-last-page.md) | Should Take over bring back the page the agent stopped on, signed out? | Proposed, 18 Oct 2026 |
 | [Turns on the lead's files](my-files-turns.md) | When one `my_files` helper holds the lead's files for a long run, should it yield, or should the lead be told? | Proposed, 18 Oct 2026 |
 | [Refs from an earlier run](stale-refs-across-runs.md) | How should a run stop the model reusing element refs from an earlier run's snapshots? | Proposed, 18 Oct 2026 |
+| [The administrator's Sandboxes page and the leak verdict](sandboxes-page.md) | How does an administrator see every running environment across people, stop one, and know nothing unowned survived a sweep? | Accepted by the technical lead with changes, 17 Nov 2026; built on `feat/sandboxes-page` |

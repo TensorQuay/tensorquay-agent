@@ -23,10 +23,10 @@ fn proto_u_038_a_screen_notice_round_trips_without_a_sequence()
         frame,
         ServerFrame::ScreenNotice {
             kind: ScreenNoticeKind::HandedBack,
-            by: ScreenPerson {
+            by: Some(ScreenPerson {
                 id: PERSON.to_owned(),
                 name: "Ada".to_owned()
-            },
+            }),
             at: "2026-10-05T12:00:00Z".to_owned(),
             after_seq: 41,
             seconds: Some(95),
@@ -225,6 +225,37 @@ fn proto_u_041_the_runtime_says_when_a_run_end_reset_is_over()
         assert!(
             ServerFrame::parse(bad.to_string().as_bytes()).is_err(),
             "{bad}"
+        );
+    }
+    Ok(())
+}
+
+// TEST: PROTO-U-047
+// An administrator's stop of a task's sandbox is told to the task's owner without naming the administrator: the
+// notice carries no `by` (the audit row says who). Every other kind still names its person.
+#[test]
+fn proto_u_047_an_administrators_stop_names_nobody() -> Result<(), Box<dyn std::error::Error>> {
+    let mut wire = notice("sandbox.stopped");
+    wire.as_object_mut().ok_or("object")?.remove("by");
+    let frame = ServerFrame::parse(wire.to_string().as_bytes())?;
+    assert_eq!(serde_json::to_value(&frame)?, wire, "no by on the wire");
+    // Naming the administrator is refused.
+    let named = notice("sandbox.stopped");
+    let error = ServerFrame::parse(named.to_string().as_bytes())
+        .err()
+        .ok_or("a named stop parsed")?;
+    assert_eq!(error.code, ErrorCode::InvalidFrame);
+    // Every other kind still names its person.
+    for kind in [
+        "screen.taken_over",
+        "screen.signed_out",
+        "screen.sign_in_kept",
+    ] {
+        let mut wire = notice(kind);
+        wire.as_object_mut().ok_or("object")?.remove("by");
+        assert!(
+            ServerFrame::parse(wire.to_string().as_bytes()).is_err(),
+            "{kind} without by"
         );
     }
     Ok(())

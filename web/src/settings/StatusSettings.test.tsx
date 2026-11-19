@@ -35,6 +35,18 @@ const ready = {
   },
   git_credentials_kept: { not_web_address: 0, waiting: 0 },
   runs_active: 0,
+  sandboxes: {
+    running: 3,
+    oldest_seconds: 25_200,
+    unowned: { containers: 0, networks: 0 },
+    left_behind: {
+      containers: 0,
+      networks: 0,
+      oldest_seconds: null,
+      reason: null,
+    },
+    swept_at: "2026-11-17T01:25:00Z",
+  },
 };
 const fetch = vi.fn<typeof globalThis.fetch>();
 beforeEach(() => {
@@ -133,6 +145,7 @@ describe("WEB-U-033 status", () => {
       "Agent image",
       "Default environment",
       "Before a restart",
+      "Sandboxes",
     ]);
     expect(
       screen.getByRole("region", { name: "Environment engine" }),
@@ -570,6 +583,84 @@ describe("WEB-U-299 Status's sections and verdict", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+});
+
+// The leak verdict on Status (the Sandboxes page design note, §4.4): green names nothing; amber names what, why, the
+// retry and the page.
+describe("WEB-U-489 Status says whether anything was left behind after a sweep", () => {
+  it("reads green with the running count and the oldest age, and that volumes aren't counted in bind mode", async () => {
+    fetch.mockImplementationOnce(() => json(ready));
+    show();
+    const section = await screen.findByRole("region", { name: "Sandboxes" });
+    expect(section).toHaveTextContent(
+      "Sandboxes: 3 running, the oldest for 7 h. Nothing left behind.",
+    );
+    expect(within(section).getByRole("status")).toHaveAttribute(
+      "data-tone",
+      "ok",
+    );
+    expect(section).toHaveTextContent(
+      "Volumes are not counted: workspaces are folders on the host, not volumes.",
+    );
+    expect(within(section).queryByRole("link")).toBeNull();
+  });
+
+  it("counts volumes in volume mode, and says none is running in minutes when young", async () => {
+    fetch.mockImplementationOnce(() =>
+      json({
+        ...ready,
+        sandboxes: {
+          ...ready.sandboxes,
+          running: 1,
+          oldest_seconds: 2_400,
+          unowned: { containers: 0, networks: 0, volumes: 0 },
+          left_behind: { ...ready.sandboxes.left_behind, volumes: 0 },
+        },
+      }),
+    );
+    show();
+    const section = await screen.findByRole("region", { name: "Sandboxes" });
+    expect(section).toHaveTextContent(
+      "Sandboxes: 1 running, the oldest for 40 min. Nothing left behind.",
+    );
+    expect(section).not.toHaveTextContent("Volumes are not counted");
+  });
+
+  it("reads amber naming what was left behind, why, the retry, and opens the page's Left behind section", async () => {
+    fetch.mockImplementationOnce(() =>
+      json({
+        ...ready,
+        sandboxes: {
+          ...ready.sandboxes,
+          unowned: { containers: 0, networks: 1 },
+          left_behind: {
+            containers: 0,
+            networks: 1,
+            oldest_seconds: 660,
+            reason: "timeout",
+          },
+        },
+      }),
+    );
+    show();
+    const section = await screen.findByRole("region", { name: "Sandboxes" });
+    expect(section).toHaveTextContent(
+      "Sandboxes: 3 running, the oldest for 7 h. Left behind after the last sweep: 1 network (the engine timed out). The gateway tries again every 5 minutes.",
+    );
+    expect(within(section).getByRole("status")).toHaveAttribute(
+      "data-tone",
+      "warn",
+    );
+    // Drawn in the warn colour, not the plain text's (the real-stack run, 18 Nov 2026).
+    expect(within(section).getByRole("status")).toHaveClass(
+      "status-sandboxes-line",
+    );
+    expect(
+      within(section).getByRole("link", { name: "Open Sandboxes" }),
+    ).toHaveAttribute("href", "/settings/sandboxes#left-behind");
+    // Never a name: the page lists those.
+    expect(section).not.toHaveTextContent("tqa-sbx");
   });
 });
 

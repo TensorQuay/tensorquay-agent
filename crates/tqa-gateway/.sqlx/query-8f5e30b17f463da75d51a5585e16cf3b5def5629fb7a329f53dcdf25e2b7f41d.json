@@ -1,0 +1,33 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.phase, COALESCE((SELECT e.lifecycle FROM events e WHERE e.conversation_id=s.conversation_id AND e.lifecycle IS NOT NULL ORDER BY e.seq DESC LIMIT 1) IN ('run.started','run.resumed'), false) AS \"working!\" FROM sandbox_instances s",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "phase",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "sandbox_instances",
+            "name": "phase"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "working!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "8f5e30b17f463da75d51a5585e16cf3b5def5629fb7a329f53dcdf25e2b7f41d"
+}
