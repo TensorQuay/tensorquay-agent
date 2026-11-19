@@ -92,6 +92,12 @@ pub trait SandboxBackend: Send + Sync {
     /// # Errors
     /// Returns timeout or backend errors, including malformed managed labels.
     async fn list(&self) -> Result<Vec<SandboxHandle>, SandboxError>;
+    /// The engine ids of the containers the last [`list`](Self::list) found with this instance's labels but couldn't
+    /// read (a label missing or malformed): left out of the listing, so one bad neighbour never fails it, and counted by
+    /// the sweep as strays it couldn't remove (SBX-U-022, GW-I-342). A backend that reads no labels has none.
+    fn unreadable(&self) -> Vec<String> {
+        Vec::new()
+    }
     /// The container engine's own networks: every network's subnets, and its gateway addresses (the host's address on
     /// each bridge). An internal egress rule never reaches them (ADR-0035 amendment). A backend without an engine has
     /// none.

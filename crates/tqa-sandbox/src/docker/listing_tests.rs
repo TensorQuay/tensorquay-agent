@@ -1,0 +1,36 @@
+//! SBX-U-022 (18.1.1): one container carrying this instance's labels that can't be read (a label malformed) never fails
+//! the listing: the readable ones are listed, and the unreadable one is left out and noted for the sweep to count.
+use super::sandbox_network_tests::{TestResult, scripted, scripted_backend, step};
+use crate::SandboxBackend;
+
+/// One readable sandbox and two that aren't: a creation time that isn't a number, and a task id that isn't one.
+const CONTAINERS: &str = r#"[
+    {"Id":"good1","Labels":{"tqa.instance":"tqa-unit","tqa.conversation":"conversation_a","tqa.created_at":"1"}},
+    {"Id":"badtime","Labels":{"tqa.instance":"tqa-unit","tqa.conversation":"conversation_b","tqa.created_at":"soon"}},
+    {"Id":"badtask","Labels":{"tqa.instance":"tqa-unit","tqa.conversation":"not a task id!","tqa.created_at":"2"}}
+]"#;
+
+// TEST: SBX-U-022
+#[tokio::test]
+async fn sbx_u_022_an_unreadable_container_is_left_out_of_the_listing_and_noted() -> TestResult {
+    let (backend, listener, _storage) = scripted_backend(None).await?;
+    let (listed, _) = scripted(
+        listener,
+        vec![step("GET /containers/json", "200 OK", CONTAINERS)],
+        Box::pin(backend.list()),
+    )
+    .await?;
+    let listed = listed?;
+    assert_eq!(
+        listed
+            .iter()
+            .map(|handle| handle.id.as_str())
+            .collect::<Vec<_>>(),
+        vec!["good1"]
+    );
+    assert_eq!(
+        backend.unreadable(),
+        vec!["badtime".to_owned(), "badtask".to_owned()]
+    );
+    Ok(())
+}
