@@ -20,12 +20,13 @@ export default defineConfig({
       ? // WEB-E2E-071..077: the Desktop environment on the desktop suite's stack.
         "desktop-stack.spec.ts"
       : process.env.TQA_STACK_SUITE === "agents"
-        ? // One worker runs files in name order: the edge cases (026..030), an ended team (WEB-E2E-062), then 021..025,
-          // and 020 last.
+        ? // One worker runs files in name order: the edge cases (026..030), an ended team (WEB-E2E-062), a team in two
+          // rounds (E2E-AGENTS-040), then 021..025, and 020 last.
           [
             "agents-edges-stack.spec.ts",
             "agents-ended-stack.spec.ts",
             "agents-lead-unread-stack.spec.ts",
+            "agents-rounds-stack.spec.ts",
             "agents-stack.spec.ts",
           ]
         : process.env.TQA_STACK_SUITE === "ux"

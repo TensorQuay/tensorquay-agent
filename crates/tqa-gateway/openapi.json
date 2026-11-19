@@ -16951,6 +16951,14 @@
                   },
                   "profile": {
                     "type": "string"
+                  },
+                  "files": {
+                    "type": "string",
+                    "enum": [
+                      "keep",
+                      "fresh_copy"
+                    ],
+                    "description": "A helper brought back by naming it (ADR-0034's rounds amendment, A3): keep its copy as it is (the default) or take a fresh copy of the lead's files; ignored for a new helper."
                   }
                 }
               }
@@ -17107,7 +17115,18 @@
                         "none",
                         "ended"
                       ],
-                      "description": "member or lead in a running agent team; may_lead when the task may start one; ended for a lead whose agent team has ended while its end note is unread (read_reports alone), then none; none otherwise."
+                      "description": "member or lead in a running agent team; may_lead when the task may start one; ended for a lead between rounds (read_reports, and start_member, which opens the next round on a person's follow-up); none otherwise. With ended and none, reason says why (ADR-0034's rounds amendment, A2)."
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "teams_disabled",
+                        "was_member",
+                        "runtime_too_old",
+                        "team_ended",
+                        "between_rounds"
+                      ],
+                      "description": "Why the run may not lead, on ended (between_rounds) and none: the runtime answers a team tool's call with this reason's sentence (ADR-0034's rounds amendment, A6)."
                     }
                   }
                 }
@@ -27521,7 +27540,8 @@
         "required": [
           "role",
           "id",
-          "state"
+          "state",
+          "round"
         ],
         "properties": {
           "role": {
@@ -27610,6 +27630,11 @@
           "can_stop": {
             "type": "boolean",
             "description": "Whether its person's Stop helper would stop it now: while the team runs, any helper but a stopped one or one that couldn't start (a member's own person only)."
+          },
+          "round": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "The team's current round (ADR-0034's rounds amendment, A5): 1, then one more each time a person's follow-up opens a new round."
           }
         }
       },
@@ -27655,7 +27680,8 @@
               "person_message",
               "notice",
               "done",
-              "ended"
+              "ended",
+              "round_started"
             ]
           },
           "from": {
@@ -27850,6 +27876,16 @@
                 }
               }
             }
+          },
+          "round": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "round_started: the round that started; ended: the round that ended (ADR-0034's rounds amendment, A5)."
+          },
+          "tokens_all_rounds": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "ended: the tokens every round spent, this one's included."
           }
         }
       },
@@ -27889,7 +27925,8 @@
           "tokens",
           "tokens_estimated",
           "activity",
-          "last_message"
+          "last_message",
+          "round"
         ],
         "properties": {
           "conversation": {
@@ -28007,6 +28044,11 @@
                 "type": "null"
               }
             ]
+          },
+          "round": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "The round it last joined: below the team's round, it is not in this round."
           }
         }
       },
@@ -28022,7 +28064,10 @@
           "budget",
           "waiting_for_you",
           "helpers",
-          "version"
+          "version",
+          "round",
+          "rounds",
+          "tokens_all_rounds"
         ],
         "properties": {
           "id": {
@@ -28137,6 +28182,80 @@
             "type": "integer",
             "minimum": 0,
             "description": "Rises with every change; team.changed names it."
+          },
+          "round": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "The team's current round (ADR-0034's rounds amendment, A5): 1, then one more each time a person's follow-up opens a new round."
+          },
+          "rounds": {
+            "type": "array",
+            "description": "Every round so far, newest last: the current one from the team itself, live.",
+            "items": {
+              "type": "object",
+              "required": [
+                "round",
+                "started_at",
+                "ended_at",
+                "stop_reason",
+                "budget"
+              ],
+              "properties": {
+                "round": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "started_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "ended_at": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Null while the round runs."
+                },
+                "stop_reason": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "description": "As the team's stop_reason."
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "budget": {
+                  "type": "object",
+                  "required": [
+                    "tokens",
+                    "spent"
+                  ],
+                  "properties": {
+                    "tokens": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "spent": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tokens_all_rounds": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "The tokens every round spent, this one's included."
           }
         }
       },

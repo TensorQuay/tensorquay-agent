@@ -89,6 +89,12 @@ class Task(NamedTuple):
     template: Optional[str]
     key_facts: tuple
     directory: Path
+    # A person's follow-up, sent once the first ask has ended (ADR-0034's rounds amendment: it opens a team's next
+    # round); none for the evaluation's tasks.
+    follow_up: Optional[str] = None
+    # Between the rounds, a person's message to one helper by its name ({"helper": ..., "text": ...}, between.json):
+    # part of that helper's task when it is brought back (ADR-0034's rounds amendment, A3).
+    between: Optional[dict] = None
 
 
 class Settings(NamedTuple):
@@ -107,8 +113,20 @@ class Settings(NamedTuple):
     prepare: Callable = lambda task, side, number: None  # noqa: E731
 
 
-def select_tasks(root, only=()):
-    """The tasks tagged `teams-eval`, in id order, each with its kind (a `teams-<kind>` tag) and its key facts
+def between(directory):
+    """A rounds task's message to one helper between the rounds (`between.json`), or None."""
+    path = Path(directory) / "between.json"
+    return json.loads(path.read_text()) if path.is_file() else None
+
+
+def follow_up(directory):
+    """A rounds task's follow-up (`follow_up.md` beside task.md: tqa-e2e's task.toml takes no unknown field); None."""
+    path = Path(directory) / "follow_up.md"
+    return path.read_text().strip() if path.is_file() else None
+
+
+def select_tasks(root, only=(), tag=TAG):
+    """The tasks tagged `tag` (`teams-eval`, or `teams-rounds` for the rounds run), in id order, each with its kind (a `teams-<kind>` tag) and its key facts
     (`key_facts.json`, a list of strings); `only` narrows them to those ids."""
     tasks = []
     for directory in sorted(Path(root).iterdir()):
@@ -117,7 +135,7 @@ def select_tasks(root, only=()):
             continue
         manifest = tomllib.loads(manifest_path.read_text())
         tags = manifest.get("tags", [])
-        if TAG not in tags:
+        if tag not in tags:
             continue
         kinds = [tag[len(KIND_TAG):] for tag in tags if tag.startswith(KIND_TAG) and tag[len(KIND_TAG):] in KINDS]
         if len(kinds) != 1:
@@ -129,11 +147,11 @@ def select_tasks(root, only=()):
         budgets = manifest["budgets"]
         tasks.append(Task(manifest["id"], kinds[0], (directory / "task.md").read_text(), budgets["max_steps"],
                           budgets["wall_clock_secs"], budgets["max_tokens"], manifest.get("template"),
-                          tuple(facts), directory))
+                          tuple(facts), directory, follow_up(directory), between(directory)))
     if only:
         missing = sorted(set(only) - {task.id for task in tasks})
         if missing:
-            raise SystemExit(f"--only names tasks not tagged {TAG}: {', '.join(missing)}")
+            raise SystemExit(f"--only names tasks not tagged {tag}: {', '.join(missing)}")
         tasks = [task for task in tasks if task.id in only]
     return tasks
 
@@ -192,6 +210,8 @@ class Followed:
         self.runs = 0
         self.team = None
         self.wall_secs = 0.0
+        self.followed_up = False  # the task's follow-up was sent (a rounds task)
+        self.between = None  # the helper written to between the rounds, or why not
 
     def fail(self, step, error):
         if self.problem is None:
@@ -276,55 +296,98 @@ def follow(task, side, settings, workspace):
             stop("stop over budget")
         return False
 
-    reconnects = 0
-    ended = False
-    while not ended:
-        now = clock()
-        if now >= deadline:
-            followed.deadline_passed = True
-            stop("stop at the deadline")
-            break
-        try:
-            with api.stream(followed.conversation, state["last"], min(STREAM_READ_SECS, deadline - now)) as response:
-                for frame in sse_frames(response):
-                    if frame is not None and observe(frame):
-                        ended = True
-                        break
-                    if clock() >= deadline:
-                        break
-                    if side == "team" and clock() >= state["next_poll"]:
-                        if team_over() and state["run"] is not None:
+    def until_end():
+        """Follows the stream until the attempt (or, after a follow-up, its next run) ends; whether it did."""
+        reconnects = 0
+        ended = False
+        while not ended:
+            now = clock()
+            if now >= deadline:
+                followed.deadline_passed = True
+                stop("stop at the deadline")
+                break
+            try:
+                with api.stream(followed.conversation, state["last"], min(STREAM_READ_SECS, deadline - now)) as response:
+                    for frame in sse_frames(response):
+                        if frame is not None and observe(frame):
                             ended = True
                             break
-                        if over_budget() and not followed.over_budget:
-                            followed.over_budget = True
-                            stop("stop over budget")
-        except ApiError as error:
-            if error.status is not None:
-                followed.fail(error.step, error)
-                break
-            reconnects += 1
-            if reconnects > RECONNECTS:
-                followed.fail(error.step, error)
-                break
-            settings.sleep(1)
-        except (TimeoutError, socket.timeout, OSError):
-            # A quiet stream past its read bound: reopened from the last frame.
-            pass
-        except ValueError as error:
-            followed.fail("read the event stream", f"undecodable frame: {error}")
-            break
-        if not ended and side == "team" and state["run"] is not None and not state["active"]:
-            try:
-                ended = team_over()
-                if not ended and over_budget() and not followed.over_budget:
-                    followed.over_budget = True
-                    stop("stop over budget")
+                        if clock() >= deadline:
+                            break
+                        if side == "team" and clock() >= state["next_poll"]:
+                            if team_over() and state["run"] is not None:
+                                ended = True
+                                break
+                            if over_budget() and not followed.over_budget:
+                                followed.over_budget = True
+                                stop("stop over budget")
             except ApiError as error:
-                followed.fail(error.step, error)
+                if error.status is not None:
+                    followed.fail(error.step, error)
+                    break
+                reconnects += 1
+                if reconnects > RECONNECTS:
+                    followed.fail(error.step, error)
+                    break
+                settings.sleep(1)
+            except (TimeoutError, socket.timeout, OSError):
+                # A quiet stream past its read bound: reopened from the last frame.
+                pass
+            except ValueError as error:
+                followed.fail("read the event stream", f"undecodable frame: {error}")
                 break
+            if not ended and side == "team" and state["run"] is not None and not state["active"]:
+                try:
+                    ended = team_over()
+                    if not ended and over_budget() and not followed.over_budget:
+                        followed.over_budget = True
+                        stop("stop over budget")
+                except ApiError as error:
+                    followed.fail(error.step, error)
+                    break
+        return ended
+
+    follow_up = task.follow_up
+    while True:
+        ended = until_end()
+        # The first ask has ended: the person's follow-up goes once, and the attempt follows its run to its end (a
+        # team's next round). A failure, a stop or the deadline ends the attempt as it is.
+        if not (ended and follow_up and followed.problem is None and not followed.over_budget
+                and not followed.deadline_passed):
+            break
+        try:
+            if task.between:
+                write_between(api, followed, task.between, settings, deadline)
+            api.send_message(followed.conversation, follow_up)
+        except ApiError as error:
+            followed.fail(error.step, error)
+            break
+        follow_up = None
+        state["run"], state["active"] = None, False
+        followed.followed_up = True
     followed.wall_secs = clock() - started
     return followed
+
+
+def write_between(api, followed, message, settings, deadline):
+    """Writes the person's message to the helper `message` names, as a person writes to a helper's task between the
+    rounds, and waits for the helper's run it starts to end (or the deadline), so the follow-up comes after it."""
+    team = api.team(followed.conversation) or {}
+    helper = next((each for each in team.get("helpers", []) if each.get("name") == message["helper"]), None)
+    if helper is None:
+        followed.between = f"no helper named {message['helper']}"
+        return
+    api.send_message(helper["conversation"], message["text"])
+    followed.between = helper["conversation"]
+    started = False
+    while settings.clock() < deadline:
+        kinds = [frame.get("event", {}).get("type") for frame in api.events(helper["conversation"])]
+        sent = len(kinds) - 1 - kinds[::-1].index("message.user") if "message.user" in kinds else len(kinds)
+        after = kinds[sent + 1:]
+        started = started or "run.started" in after
+        if started and any(kind in TERMINAL for kind in after):
+            return
+        settings.sleep(TEAM_POLL_SECS)
 
 
 def walk(api, conversation, directory=""):
@@ -740,6 +803,8 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--tasks", type=Path, default=Path(__file__).resolve().parent / "tasks")
     parser.add_argument("--only", action="append", default=[], help="run only this tagged task (repeatable)")
+    parser.add_argument("--tag", default=TAG, help=f"run the tasks with this tag (default {TAG}; teams-rounds for the "
+                        "rounds run, whose tasks carry a follow-up)")
     parser.add_argument("--repeat", type=int, default=REPEAT)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--base-url", required=True)
@@ -769,12 +834,14 @@ def main(argv=None):
             stored = json.loads((args.out / "run.json").read_text())
         except (OSError, ValueError) as error:
             raise SystemExit(f"{args.out} has no run to resume: {error}") from None
+        # A run from before --tag ran the evaluation's tasks: it resumes under the default tag.
+        stored.setdefault("tag", TAG)
         changed = sorted(key for key in set(stored) | set(environment) if stored.get(key) != environment.get(key))
         if changed:
             raise SystemExit(f"the run in {args.out} had other settings: {', '.join(changed)}")
     elif args.out.exists():
         raise SystemExit(f"{args.out} exists; a run is never overwritten (--resume goes on with a stopped one)")
-    tasks = select_tasks(args.tasks, args.only)
+    tasks = select_tasks(args.tasks, args.only, args.tag)
     binary = str(Path(args.tqa_e2e).resolve())
     storage = Path(args.storage_root).absolute()
 

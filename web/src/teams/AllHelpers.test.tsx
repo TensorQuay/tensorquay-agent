@@ -237,3 +237,27 @@ describe("WEB-U-221 what each helper is doing", () => {
     expect(row).not.toHaveTextContent(/team's work/);
   });
 });
+
+// WEB-U-506 (18.1, ADR-0034's rounds amendment A5): a helper not brought back into this round says so in its row,
+// muted; one in this round says nothing of rounds.
+describe("WEB-U-506 All helpers marks a helper not in this round", () => {
+  it("says Not in this round for that helper only", () => {
+    render(
+      <AllHelpers
+        helpers={[
+          { ...helpers[0]!, inRound: true },
+          { ...helpers[1]!, state: "done", inRound: false, canStop: false },
+        ]}
+        onClose={vi.fn()}
+        onStop={vi.fn()}
+      />,
+    );
+    const rows = screen.getAllByRole("listitem");
+    const row = (name: string) =>
+      rows.find((each) => each.textContent?.includes(name))!;
+    expect(within(row("Reviewer")).getByText("Not in this round")).toHaveClass(
+      "muted",
+    );
+    expect(row("Researcher")).not.toHaveTextContent("Not in this round");
+  });
+});

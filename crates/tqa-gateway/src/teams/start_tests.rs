@@ -61,6 +61,7 @@ async fn joined(
             member,
             role,
             workspace: WorkspaceMode::OwnCopy,
+            run: None,
         },
         cap,
         &AgentTeams::default(),
@@ -169,6 +170,7 @@ async fn sec_037_a_member_never_leads_and_a_lead_leads_one_team(pool: PgPool) ->
             member,
             role: "helper",
             workspace: WorkspaceMode::MyFiles,
+            run: None,
         },
         CAP,
         &AgentTeams::default(),
@@ -183,6 +185,7 @@ async fn sec_037_a_member_never_leads_and_a_lead_leads_one_team(pool: PgPool) ->
             member: conversation(&pool, owner).await?,
             role: "x",
             workspace: WorkspaceMode::OwnCopy,
+            run: None,
         },
         CAP,
         &AgentTeams::default(),
@@ -200,11 +203,25 @@ async fn sec_037_a_member_never_leads_and_a_lead_leads_one_team(pool: PgPool) ->
         code(&joined(&pool, owner, member, "x", CAP).await?),
         Some("not_lead")
     );
-    // One team per lead: the ended team's lead doesn't lead again, and no second team is made (ADR-0034 point 10).
+    // One team per lead, in rounds (ADR-0034's rounds amendment, A1): without a person's run the ended team's lead
+    // opens no round, and no second team is made; ended for good, it answers team_ended.
+    assert_eq!(
+        code(&joined(&pool, owner, lead, "helper", CAP).await?),
+        Some("round_needs_person")
+    );
+    sqlx::query("UPDATE agent_teams SET stop_reason = 'person_disabled' WHERE id = $1")
+        .bind(team.team)
+        .execute(&pool)
+        .await?;
     assert_eq!(
         code(&joined(&pool, owner, lead, "helper", CAP).await?),
         Some("team_ended")
     );
+    let rounds: i32 = sqlx::query_scalar("SELECT round FROM agent_teams WHERE id = $1")
+        .bind(team.team)
+        .fetch_one(&pool)
+        .await?;
+    assert_eq!(rounds, 1, "no round opened");
     let leader = lead;
     let teams: i64 =
         sqlx::query_scalar("SELECT count(*) FROM agent_teams WHERE lead_conversation = $1")

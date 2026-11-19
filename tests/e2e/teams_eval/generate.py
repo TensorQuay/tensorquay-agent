@@ -23,7 +23,7 @@ import research  # noqa: E402
 
 TASKS_DIR = HERE / "tasks"
 MODULES = [research]
-for name in ("reports", "code_tasks", "mixed", "dependent", "long_tasks"):
+for name in ("reports", "code_tasks", "mixed", "dependent", "long_tasks", "rounds_tasks"):
     if (HERE / "fixtures" / f"{name}.py").is_file():
         MODULES.append(__import__(name))
 

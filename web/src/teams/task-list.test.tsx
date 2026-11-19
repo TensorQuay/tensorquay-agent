@@ -46,6 +46,7 @@ const lead = (extra: Partial<NonNullable<Conversation["team"]>> = {}) =>
     last_activity_at: new Date().toISOString(),
     team: {
       role: "lead",
+      round: 1,
       id: teamId,
       state: "running",
       helpers: 2,

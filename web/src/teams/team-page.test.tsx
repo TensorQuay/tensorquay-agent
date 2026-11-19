@@ -83,6 +83,7 @@ vi.mock("../auth/use-session", () => ({
       id: "0195d8c0-0000-7000-8000-000000000009",
       email: "me@example.invalid",
       role: "member",
+      round: 1,
       internet: "none",
       limits: {
         upload_bytes: 1,
@@ -140,6 +141,7 @@ const task = (id: string, extra: Partial<Conversation>): Conversation => ({
 const leadTask = task(leadId, {
   team: {
     role: "lead",
+    round: 1,
     id: teamId,
     state: "running",
     helpers: 2,
@@ -253,6 +255,7 @@ describe("WEB-U-221/222/224 a lead task's page", () => {
         task(leadId, {
           team: {
             role: "lead",
+            round: 1,
             id: teamId,
             state,
             helpers: 2,
@@ -542,6 +545,7 @@ describe("WEB-U-223 a helper's page", () => {
         title: "researcher",
         team: {
           role: "member",
+          round: 1,
           id: teamId,
           state: "running",
           lead: { id: leadId, title: "Report on Q3" },
@@ -569,6 +573,7 @@ describe("WEB-U-223 a helper's page", () => {
         title: "researcher",
         team: {
           role: "member",
+          round: 1,
           id: teamId,
           state: "ended",
           lead: { id: leadId, title: "Report on Q3" },
@@ -608,6 +613,7 @@ describe("WEB-U-225, WEB-U-308 Stop helper on a helper's page", () => {
           title: "researcher",
           team: {
             role: "member",
+            round: 1,
             id: teamId,
             state: "running",
             lead: { id: leadId, title: "Report on Q3" },
@@ -664,6 +670,7 @@ describe("WEB-U-239 a helper's header says each thing once", () => {
       workspace_id: workspaceId,
       team: {
         role: "member",
+        round: 1,
         id: teamId,
         state: "running",
         lead: { id: leadId, title },
@@ -703,6 +710,7 @@ describe("WEB-U-388 a helper's first turn waiting to go", () => {
     title: "researcher",
     team: {
       role: "member",
+      round: 1,
       id: teamId,
       state: "running",
       lead: { id: leadId, title: "Report on Q3" },

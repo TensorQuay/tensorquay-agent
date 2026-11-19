@@ -392,20 +392,30 @@ pub(crate) async fn start(
             &request,
         )?;
         if let Some((status, body)) = keyed.begin(&state, &mut transaction).await? {
-            return Ok(((status, Json(body)), None));
+            return Ok(((status, Json(body)), (None, None)));
         }
         let started =
-            super::start::start_member(&mut transaction, &state, (leader, owner), &request).await?;
-        let body = json!({ "member": started.member, "seq": started.seq, "lead_tools": true });
+            super::start::start_member(&mut transaction, &state, (leader, owner), &request, &run)
+                .await?;
+        let mut body = json!({ "member": started.member, "seq": started.seq, "lead_tools": true });
+        // A helper brought back says so (ADR-0034's rounds amendment, A3).
+        if let Some((files, round)) = started.brought_back {
+            body["brought_back"] = json!(true);
+            body["files"] = json!(files);
+            body["round"] = json!(round);
+        }
         keyed
             .record(&mut transaction, StatusCode::CREATED, &body)
             .await?;
         transaction.commit().await?;
         state.channels.published(started.channel, started.seq);
-        Ok(((StatusCode::CREATED, Json(body)), started.fork))
+        Ok((
+            (StatusCode::CREATED, Json(body)),
+            (started.fork, started.replaced),
+        ))
     })
     .await;
-    let (answer, fork) = match started {
+    let (answer, (fork, replaced)) = match started {
         Err(GatewayError::TeamEnded(None)) => {
             let refused = Err(GatewayError::TeamEnded(None));
             return ended(&state, leader, (&key, &run), refused).await;
@@ -426,17 +436,27 @@ pub(crate) async fn start(
         if !state.config.uses_block_images() {
             state.storage.workspace(copy).await?;
         }
+        // A helper brought back with a fresh copy lets go of the old one first (ADR-0034's rounds amendment, A3).
+        if let Some((helper, _)) = replaced
+            && let Ok(helper) = helper.to_string().parse()
+        {
+            state
+                .manager
+                .retire_for_switch(&helper, crate::manager::Teardown::WorkspaceDeleted)?;
+        }
         crate::workspaces::fork::copy(&state, (source, copy), quota).await?;
+        if let Some((_, old)) = replaced {
+            super::bring_back::delete_old_copy(&state, old).await?;
+        }
     }
     Ok(answer)
 }
 
-/// `GET /runtime/teams/role` (slice 3): which team tools the run gets, asked by the runtime at run start, as it asks
-/// for its channels. `member` (its two tools), `lead` (the ten), `may_lead` (a task in no team: `start_member` alone),
-/// `ended` (a lead whose team has ended and who hasn't read its end note: `read_reports` alone, which delivers it) or
-/// `none` (agent teams are off, the conversation was ever a member, which never leads: depth 1, or it led a team that
-/// has ended and has read its end: one team per lead). An older runtime never asks and gets no team tools. It takes
-/// no `X-TQA-Run-ID`: the runtime asks before the run has an id.
+/// `GET /runtime/teams/role` (slice 3; ADR-0034's rounds amendment, A2 and A7): which team tools the run gets, asked
+/// by the runtime at run start, as it asks for its channels: `member`, `lead`, `may_lead`, `ended` (between rounds) or
+/// `none`, with a `reason` on `ended` and `none` that the runtime turns into its refusal sentence (`role::answer`). An
+/// older runtime never asks and gets no team tools. It takes no `X-TQA-Run-ID`: the runtime asks before the run has
+/// an id.
 ///
 /// # Errors
 /// `401` without the run's token, storage failure.
@@ -446,9 +466,7 @@ pub(crate) async fn role(
     headers: HeaderMap,
 ) -> Result<Json<Value>, GatewayError> {
     let conversation = conversation(&state, &headers, peer).await?;
-    if !state.config.agent_teams.enabled {
-        return Ok(Json(json!({ "role": "none" })));
-    }
+    let teams_on = state.config.agent_teams.enabled;
     // A runtime below the wake's revision can't read a wake (revision 13): its task never becomes a lead, since a
     // lead's later wakes would reach it. The link refuses it once a team exists; this covers a task in none yet (GW-I-214).
     let id: tqa_types::ConversationId = conversation
@@ -459,24 +477,55 @@ pub(crate) async fn role(
         .links
         .sandbox(&id)
         .is_some_and(|(_, revision)| revision >= tqa_types::TEAM_WAKE_REVISION);
-    let role = crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
-        let mut connection = state.pool.acquire().await?;
-        Ok(match store::caller(&mut connection, conversation).await? {
-            Some(caller) if caller.role == roles::Role::Lead => "lead",
-            Some(_) => "member",
-            // Depth 1: a member never leads.
-            None if store::was_member(&mut connection, conversation).await? => "none",
-            // One team per lead: once it has ended, `read_reports` alone while its end note is unread, then nothing.
-            None => match store::ended(&mut connection, conversation).await? {
-                Some(ended) if store::end_unread(&mut connection, ended.team).await? => "ended",
-                None if wakeable => "may_lead",
-                // An ended team whose note is read, or a runtime too old for a wake.
-                Some(_) | None => "none",
-            },
+    let facts = if teams_on {
+        crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
+            let mut connection = state.pool.acquire().await?;
+            let place = match store::caller(&mut connection, conversation).await? {
+                Some(caller) if caller.role == roles::Role::Lead => super::role::Place::Lead,
+                Some(_) => super::role::Place::Member,
+                None => super::role::Place::None,
+            };
+            let was_member = place == super::role::Place::None
+                && store::was_member(&mut connection, conversation).await?;
+            let ended = match (place, was_member) {
+                (super::role::Place::None, false) => {
+                    match store::ended(&mut connection, conversation).await? {
+                        Some(ended) => Some(super::role::Ended {
+                            for_good: super::rounds_store::ended_for_good(
+                                &mut connection,
+                                ended.team,
+                            )
+                            .await?,
+                            note_unread: store::end_unread(&mut connection, ended.team).await?,
+                        }),
+                        None => None,
+                    }
+                }
+                _ => None,
+            };
+            Ok(super::role::Facts {
+                teams_on,
+                place,
+                was_member,
+                ended,
+                wakeable,
+            })
         })
-    })
-    .await?;
-    Ok(Json(json!({ "role": role })))
+        .await?
+    } else {
+        super::role::Facts {
+            teams_on,
+            place: super::role::Place::None,
+            was_member: false,
+            ended: None,
+            wakeable,
+        }
+    };
+    let answer = super::role::answer(facts);
+    Ok(Json(match answer.reason {
+        Some(reason) => json!({ "role": answer.role, "reason": reason }),
+        None => json!({ "role": answer.role }),
+    }))
 }
 
 /// `GET /runtime/teams/acceptance`: the administrator's acceptance check, which the lead's `done` runs first

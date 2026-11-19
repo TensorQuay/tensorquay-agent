@@ -61,6 +61,10 @@ export function AllHelpers({
                 <p className="type-small" data-tone={state.tone}>
                   {state.words}
                 </p>
+                {/* Not brought back into this round (ADR-0034's rounds amendment A5): it holds no seat in it. */}
+                {helper.inRound === false && (
+                  <p className="type-small muted">{t("team.notInRound")}</p>
+                )}
                 {doing && <p className="type-small">{doing}</p>}
                 {last && (
                   <>

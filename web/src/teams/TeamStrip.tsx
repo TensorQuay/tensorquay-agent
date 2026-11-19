@@ -30,6 +30,11 @@ export function TeamStrip({
   const budget = budgetLine(team, now, t);
   // An ended team says how it ended, with no time left to count and no meter (a UX review before 17.0).
   const ended = endedLine(team, t);
+  // From round 2 on the strip names the round (ADR-0034's rounds amendment A5); the first says nothing of rounds.
+  const round =
+    team.round !== undefined && team.round > 1
+      ? t("team.round", { round: team.round })
+      : null;
   const shown = team.helpers.slice(0, CHIPS);
   const more = team.helpers.length - shown.length;
   return (
@@ -38,6 +43,7 @@ export function TeamStrip({
       aria-label={t("team.helpers")}
     >
       <div className="helpers-strip-wide">
+        {round && <span className="helpers-round muted">{round}</span>}
         <ul className="helpers-chips">
           {shown.map((helper) => {
             const state = helperStateWords(helper, t);
@@ -100,6 +106,7 @@ export function TeamStrip({
         onClick={onAll}
       >
         <span>
+          {round && `${round} · `}
           {t("team.narrow", {
             count: team.helpers.length,
             budget:

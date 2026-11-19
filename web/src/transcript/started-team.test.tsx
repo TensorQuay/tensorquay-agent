@@ -133,7 +133,7 @@ describe("WEB-U-416 the sign of a started team, and its guard", () => {
     expect(failing.result.current.joining).toBe(true);
     vi.spyOn(api, "conversation").mockResolvedValue({
       ...record,
-      team: { role: "lead", id: "team-1", state: "running" },
+      team: { role: "lead", round: 1, id: "team-1", state: "running" },
     });
     const found = slot(runId);
     await new Promise((resolve) => setTimeout(resolve, 50));

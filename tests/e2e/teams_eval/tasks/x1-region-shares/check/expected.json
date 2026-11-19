@@ -1,0 +1,16 @@
+{
+ "shares": {
+  "central": 17,
+  "east": 38,
+  "north": 20,
+  "south": 6,
+  "west": 20
+ },
+ "totals": {
+  "central": 3012.7,
+  "east": 6672.79,
+  "north": 3551.49,
+  "south": 997.72,
+  "west": 3509.02
+ }
+}

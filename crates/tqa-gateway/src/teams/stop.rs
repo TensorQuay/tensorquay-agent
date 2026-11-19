@@ -81,33 +81,7 @@ pub(crate) async fn finish(state: &State, team: Uuid) -> Result<bool, GatewayErr
     })
     .await?;
     // `None` when another pass ended it first (its note is the one that stays); else the note's seq, if it was stored.
-    let ended = step(state, async {
-        let mut transaction = state.pool.begin().await?;
-        end_members(&mut transaction, team).await?;
-        let seq = match super::store::end_note(&mut transaction, row.channel_id, &body).await {
-            Ok(seq) => Some(seq),
-            // A stop always finishes: a log over its day's messages ends without the note rather than stay stopping.
-            Err(GatewayError::ChannelRate(_)) => {
-                tracing::warn!(team = %team, "the agent team's end note wasn't stored: its log is over its day's messages");
-                None
-            }
-            Err(error) => return Err(error),
-        };
-        let changed = sqlx::query!(
-            "UPDATE agent_teams SET state = 'ended', ended_at = CURRENT_TIMESTAMP WHERE id = $1 AND state = 'stopping'",
-            team
-        )
-        .execute(&mut *transaction)
-        .await?
-        .rows_affected();
-        if changed != 1 {
-            transaction.rollback().await?;
-            return Ok(None);
-        }
-        transaction.commit().await?;
-        Ok(Some(seq))
-    })
-    .await?;
+    let ended = store_end(state, team, row.channel_id, &body).await?;
     let Some(seq) = ended else {
         return Ok(false);
     };
@@ -337,6 +311,49 @@ fn reason(stored: Option<&str>) -> EndReason {
     }
 }
 
+/// Stores the end note, sets `ended` and closes the round's record (ADR-0034's rounds amendment, A1), in one
+/// transaction: `None` when another pass ended the team first, else the note's seq if it was stored.
+async fn store_end(
+    state: &State,
+    team: Uuid,
+    channel: Uuid,
+    body: &TeamMessageBody,
+) -> Result<Option<Option<u64>>, GatewayError> {
+    step(state, async {
+        let mut transaction = state.pool.begin().await?;
+        end_members(&mut transaction, team).await?;
+        let seq = match super::store::end_note(&mut transaction, channel, body).await {
+            Ok(seq) => Some(seq),
+            // A stop always finishes: a log over its day's messages ends without the note rather than stay stopping.
+            Err(GatewayError::ChannelRate(_)) => {
+                tracing::warn!(team = %team, "the agent team's end note wasn't stored: its log is over its day's messages");
+                None
+            }
+            Err(error) => return Err(error),
+        };
+        let changed = sqlx::query!(
+            "UPDATE agent_teams SET state = 'ended', ended_at = CURRENT_TIMESTAMP WHERE id = $1 AND state = 'stopping'",
+            team
+        )
+        .execute(&mut *transaction)
+        .await?
+        .rows_affected();
+        if changed != 1 {
+            transaction.rollback().await?;
+            return Ok(None);
+        }
+        super::rounds_store::close(
+            &mut transaction,
+            team,
+            seq.and_then(|seq| i64::try_from(seq).ok()),
+        )
+        .await?;
+        transaction.commit().await?;
+        Ok(Some(seq))
+    })
+    .await
+}
+
 /// The end note's parts, read from the team's log and the relay's usage, and its sentences.
 async fn note(
     connection: &mut PgConnection,
@@ -346,7 +363,8 @@ async fn note(
     idle_minutes: u32,
 ) -> Result<TeamMessageBody, GatewayError> {
     let tokens = tokens(connection, team).await?;
-    let (reports, files) = reports(connection, channel).await?;
+    let (round, tokens_all_rounds) = super::rounds_store::totals(connection, team).await?;
+    let (reports, files) = reports(connection, team, channel).await?;
     let summary = if reason == EndReason::Done {
         sqlx::query_scalar!(
             "SELECT body->>'text' FROM channel_messages WHERE channel_id = $1 AND type = 'done' ORDER BY seq DESC LIMIT 1",
@@ -369,13 +387,16 @@ async fn note(
         reason,
         summary,
         tokens,
+        round: Some(round),
+        tokens_all_rounds: Some(tokens_all_rounds),
         reports,
         files,
         text,
     })
 }
 
-/// The team's tokens: the budget's total, and each member's from the relay's usage since the team started.
+/// The round's tokens (ADR-0034's rounds amendment, A4): the budget's total, which a round starts afresh, and each of
+/// this round's members' from the relay's usage since the round started; a helper not in this round isn't named.
 async fn tokens(connection: &mut PgConnection, team: Uuid) -> Result<EndTokens, GatewayError> {
     let total = sqlx::query_scalar!("SELECT spent_tokens FROM agent_teams WHERE id = $1", team)
         .fetch_one(&mut *connection)
@@ -383,8 +404,9 @@ async fn tokens(connection: &mut PgConnection, team: Uuid) -> Result<EndTokens, 
     let members = sqlx::query!(
         "SELECT m.name, COALESCE(SUM(COALESCE(u.prompt_tokens, 0) + COALESCE(u.completion_tokens, 0)), 0)::bigint \
          AS \"tokens!\" FROM agent_team_members m JOIN agent_teams t ON t.id = m.team_id \
-         LEFT JOIN usage u ON u.conversation_id = m.conversation_id AND u.created_at >= t.created_at \
-         WHERE m.team_id = $1 GROUP BY m.name, m.created_at ORDER BY m.created_at",
+         LEFT JOIN usage u ON u.conversation_id = m.conversation_id AND u.created_at >= COALESCE((SELECT r.started_at \
+         FROM agent_team_rounds r WHERE r.team_id = t.id AND r.round = t.round), t.created_at) \
+         WHERE m.team_id = $1 AND m.round = t.round GROUP BY m.name, m.created_at ORDER BY m.created_at",
         team
     )
     .fetch_all(&mut *connection)
@@ -401,15 +423,21 @@ async fn tokens(connection: &mut PgConnection, team: Uuid) -> Result<EndTokens, 
     })
 }
 
-/// Every report in the team's log, and the files each handed back (what slice 5 records: name and size).
+/// The round's reports, the files each handed back (what slice 5 records: name and size): those after the previous
+/// round's end note and this round's `round_started`, so a round's note never counts an earlier round's (A4).
 async fn reports(
     connection: &mut PgConnection,
+    team: Uuid,
     channel: Uuid,
 ) -> Result<(Vec<EndReport>, Vec<EndFile>), GatewayError> {
     let rows = sqlx::query!(
         "SELECT seq, author_name, body->'files' AS files FROM channel_messages \
-         WHERE channel_id = $1 AND type = 'report' ORDER BY seq",
-        channel
+         WHERE channel_id = $1 AND type = 'report' AND seq > GREATEST(COALESCE((SELECT MAX(r.end_seq) \
+         FROM agent_team_rounds r JOIN agent_teams t ON t.id = r.team_id WHERE r.team_id = $2 AND r.round < t.round), 0), \
+         COALESCE((SELECT MAX(s.seq) FROM channel_messages s WHERE s.channel_id = $1 AND s.type = 'round_started'), 0)) \
+         ORDER BY seq",
+        channel,
+        team
     )
     .fetch_all(&mut *connection)
     .await?;

@@ -127,11 +127,11 @@ pub use server::{SandboxBackend, SandboxRecovery, SandboxSummary, ServerFrame};
 pub use session::{CacheHint, ReasoningSnapshot, RouteSnapshot, WireProtocol, WorkspaceSnapshot};
 pub use strict_schema::strict_compatible;
 pub use team::{
-    Brief, CheckReport, EndFile, EndReason, EndReport, EndTokens, FilesTaken, FromKind, HandedFile,
-    LeadBrief, MAX_BRIEF_BYTES, MAX_BRIEF_PART_BYTES, MAX_CHECK_OUTPUT_BYTES, MAX_ROLE_BYTES,
-    MAX_TEAM_REQUEST_BYTES, MemberTokens, NoticeKind, PlacedFile, StartMember, TakeFiles, TeamFrom,
-    TeamMessage, TeamMessageBody, TeamMessageType, TeamPost, TeamTo, TeamWake, ToKind,
-    WorkspaceMode, last_bytes,
+    Brief, BroughtBackFiles, CheckReport, EndFile, EndReason, EndReport, EndTokens, FilesTaken,
+    FromKind, HandedFile, LeadBrief, MAX_BRIEF_BYTES, MAX_BRIEF_PART_BYTES, MAX_CHECK_OUTPUT_BYTES,
+    MAX_ROLE_BYTES, MAX_TEAM_REQUEST_BYTES, MemberTokens, NoticeKind, PlacedFile, StartMember,
+    TakeFiles, TeamFrom, TeamMessage, TeamMessageBody, TeamMessageType, TeamPost, TeamTo, TeamWake,
+    ToKind, WorkspaceMode, last_bytes,
 };
 pub use time::{Clock, Sleeper};
 pub use tool_failure::ToolFailure;

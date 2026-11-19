@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE agent_team_members m SET state = CASE WHEN i.execution_status = 'queued' THEN 'queued' ELSE 'working' END, last_read_seq = GREATEST(m.last_read_seq, COALESCE((SELECT CASE WHEN m.round > 1 THEN MAX(a.seq) ELSE MIN(a.seq) END FROM channel_messages a JOIN agent_teams t ON t.channel_id = a.channel_id WHERE t.id = m.team_id AND a.to_conversation = m.conversation_id AND a.type = 'assign'), 0)) FROM idempotency i WHERE m.state = 'starting' AND i.conversation_id = m.conversation_id AND i.key = CASE WHEN m.round > 1 THEN 'team-round:' || m.conversation_id::text || ':' || m.round ELSE 'team-start:' || m.conversation_id::text END",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "f6e98f3375c98e3f555905b34e1ebd74072044f25aa4099aa72121fc1f643700"
+}

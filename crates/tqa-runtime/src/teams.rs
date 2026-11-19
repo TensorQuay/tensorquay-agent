@@ -9,7 +9,7 @@ use reqwest::{Method, header::HeaderValue};
 use secrecy::{ExposeSecret, SecretString};
 use serde_json::Value;
 use tokio_util::sync::CancellationToken;
-use tqa_tools::builtin::team::{ReadAnswer, TeamClient, TeamFailure, TeamRole};
+use tqa_tools::builtin::team::{ReadAnswer, RoleAnswer, TeamClient, TeamFailure};
 use url::Url;
 
 use crate::RuntimeError;
@@ -76,20 +76,23 @@ impl GatewayTeams {
         }
     }
 
-    /// The run's role, which decides its team tools; `None` when the gateway has no such route (an older one) or
-    /// can't say.
-    pub async fn role(&self, cancel: &CancellationToken) -> TeamRole {
+    /// The run's role and why it may not lead, which decide its team tools; `None` when the gateway has no such route
+    /// (an older one) or can't say, and the run then gets no team tool at all.
+    pub async fn role(&self, cancel: &CancellationToken) -> Option<RoleAnswer> {
         let request = self.request(Method::GET, "/runtime/teams/role", ("", ""), CALL_TIMEOUT);
         match send(request, cancel)
             .await
             .and_then(|(_, body)| parse::<Value>(&body))
         {
-            Ok(answer) => TeamRole::parse(answer["role"].as_str().unwrap_or_default()),
+            Ok(answer) => Some(RoleAnswer::parse(
+                answer["role"].as_str().unwrap_or_default(),
+                answer["reason"].as_str(),
+            )),
             Err(failure) => {
                 if failure.code != "not_found" {
                     tracing::warn!(code = %failure.code, "agent-team role unavailable; the team tools are left out of this run");
                 }
-                TeamRole::None
+                None
             }
         }
     }

@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(stop_reason IN ('lead_deleted', 'person_disabled'), false) AS \"for_good!\" FROM agent_teams WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "for_good!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "74068fe0b0fac17383a9bde5b025684f06bb93244bbd2104a17b80e938e38dc0"
+}
