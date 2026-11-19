@@ -316,8 +316,10 @@ with slots, queue, eviction, parking and pin (ADR-0016).
    on 11 Oct 2026), and release 17.0 carries the microVM backend.
 4. **Public repository name** and when to open the repository: **Done (PO): `TensorQuay/tensorquay-agent`, public
    since 8 Nov 2026.**
-5. **Reference hardware for the published numbers:** the TensorQuay box (2 × RTX PRO 6000) for E2E and a
-   4-vCPU Linux KVM VM for Firecracker PERF.
+5. **Reference hardware for the published numbers:** **Decided on 15 Nov 2026:** one RTX 5090 workstation (Intel
+   Core Ultra 7 270K Plus, 24 cores, 64 GB) for the engine-backed models and E2E, and a CPU-only minimum measured on
+   it: qwen3:4b in Ollama on 4, 8 and 16 cores (measured 19 Nov 2026; deploy/README.md, "Hardware"). A 4-vCPU Linux
+   KVM VM remains the reference for Firecracker PERF.
 6. **Crate and image prefix:** **As built: `tqa`.**
 7. **Secret store:** **Decided (PO, 27 Sep 2026): the built-in store is the only secret store** (ADR-0033). No
    external vault backend is built, bundled or connected.
