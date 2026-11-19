@@ -197,8 +197,8 @@ and IBM Plex Mono at 400, and every style below is one of those weights: a 500 o
 
 The scale is one step bigger since 9 Nov 2026, the Product Owner's ask after comparing the sidebar with a familiar
 assistant app's at the same zoom ("seems ours is smaller ... can we adjust all system wide ... bigger"): body 15 to
-16, small 13 to 14, the navigation 14 to 15, labels 12 to 13, headings 20 to 22, display 28 to 30, a task's title
-16 to 18; controls at least 32 px, list and menu rows 36 px. Icons stay 16 px (20 px in controls and the sidebar's
+16, small 13 to 14, the navigation 14 to 15, labels 12 to 13, headings 20 to 22, display 28 to 30; a task's title is
+the body size, 16, in its one quiet header line; controls at least 32 px, list and menu rows 36 px. Icons stay 16 px (20 px in controls and the sidebar's
 navigation). Every size is a token, so the whole app follows.
 
 Transcript text wraps at a measure of 72 characters; code blocks scroll horizontally rather than wrap unless the
@@ -208,8 +208,8 @@ user toggles wrapping.
 - Spacing scale in px: 4, 8, 12, 16, 24, 32, 48, 64. Nothing else, except the one role value in §5b: 20 px horizontal padding of large buttons.
 - Radius: 8 px for controls, cards and dialogs (the standard), 16 px for the composer, 999 px for pills and round icon
   buttons. A control set inside a rounded box at an even inset takes the box's radius less the inset, so their
-  corners are concentric: a task row's ⋯ is 6 px, 2 px inside its 8 px row (§7 Conversation list item). No other
-  radii.
+  corners are concentric: a task row's ⋯ is 6 px, 2 px inside its 8 px row (§7 Conversation list item), and an
+  image's thumbnail is 4 px, 4 px inside its 8 px attachment chip. No other radii.
 - Elevation: none by default; dialogs and menus use `--surface-raised` plus a 1 px `--line` border and a soft shadow
   `0 8px 24px rgb(0 0 0 / 0.08)` (dark: `/ 0.4`). Cards are flat with a border.
 - Borders: 1 px `--line` everywhere; 2 px `--ink` for the focus ring with 3 px offset.
@@ -434,8 +434,11 @@ drawings except the brand mark.
 
 ## 11. Implementation rules
 - `web/src/app/globals.css` defines the tokens; Tailwind's theme maps to them; components use Tailwind classes that
-  resolve to tokens or the CSS variables directly. A lint rule rejects hex, rgb and hsl literals outside
-  `globals.css`.
+  resolve to tokens or the CSS variables directly. `pnpm tokens` (a step of `pnpm check`) refuses, outside the token
+  definitions: colour literals (hex, rgb, hsl, oklch) and named colours; a `font-family`; spacing off `--space-*`; and
+  a font size, weight (400 or 700), line height, letter spacing or radius that isn't one of the tokens, in CSS, style
+  objects and class names alike. A style that must be off the scale says why on its line or the line before,
+  `token-lint: allow <rule> (<reason>)`, and is listed in `web/scripts/token-allowances.txt`, so each one is reviewed.
 - `brand/` is copied into `web/public/brand/` by the build; the app never holds a second copy of an asset.
 - A `/design` page renders every token and every component in every state, in light and dark. It is the living
   reference and the target of the visual regression test (Playwright screenshots compared per component). It is a

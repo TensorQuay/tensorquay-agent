@@ -173,9 +173,12 @@ function problems(names: string[]): string[] {
       );
   }
   // A place that shows no long name at all is a hole in the test, never a pass.
-  if (seen === 0) found.push("no long name is shown here");
+  if (seen === 0) found.push("no long name is shown here"); // HOLE below repeats these words
   return [...new Set(found)];
 }
+
+/** What problems() says of a place that shows no long name (it runs in the page, so it repeats the words). */
+const HOLE = "no long name is shown here";
 
 const WIDTHS = [390, 1280] as const;
 const THEMES = ["light", "dark"] as const;
@@ -372,13 +375,23 @@ for (const width of WIDTHS)
           continue;
         }
         await page.evaluate(() => document.fonts.ready);
-        const found = await page.evaluate(problems, [
+        const names = [
           WORD,
           SENTENCE,
           // A model's display name is bounded at 64 characters (lengthen).
           WORD.slice(0, 64),
           SENTENCE.slice(0, 64).trimEnd(),
-        ]);
+        ];
+        let found = await page.evaluate(problems, names);
+        // A place whose only long names are in a list still loading (the sidebar's tasks) shows none yet: give it up to
+        // 10 s before calling it a hole, so a slow answer isn't one and a real hole still fails.
+        if (found.length === 1 && found[0] === HOLE)
+          await expect
+            .poll(async () => (found = await page.evaluate(problems, names)), {
+              timeout: 10_000,
+            })
+            .not.toEqual([HOLE])
+            .catch(() => undefined);
         if (found.length)
           failures.push(
             `${place.name} at ${width} px (${theme}): ${found.join("; ")}`,
