@@ -90,7 +90,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   page in a sandbox without same-origin access, where reading `localStorage` or `sessionStorage` throws, so an app
   that keeps its data there (a to-do list, most small apps) stopped before drawing and the panel told you to use a
   hash router. The page is now lent an in-memory storage that lasts until the preview reloads, and a page that stops
-  on an error gets no router advice.
+  on an error gets no router advice. The sandbox also blocks forms, so the browser never told an app its form was sent
+  and an Add button did nothing: a click on a submit button, or Enter in a form without one, now runs the page's own
+  form handler. Nothing is ever submitted: the sandbox still refuses it.
 - **Status says a sandbox's age in days from two days on (WEB-U-489).** The Sandboxes line said "the oldest for
   224 h"; it now says "9 days". Under two days it still says hours, and under an hour minutes.
 

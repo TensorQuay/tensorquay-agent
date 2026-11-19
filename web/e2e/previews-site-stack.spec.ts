@@ -292,7 +292,7 @@ test("WEB-E2E-140 a built web app previews as it is, and the panel says what it 
   await capture(page, "previews-built-empty");
 
   await step(
-    "an app that keeps its data in localStorage draws (the sandbox refuses the real one; the preview lends one)",
+    "an app that keeps its data in localStorage draws and adds through its form (the sandbox refuses both; the preview stands in)",
   );
   const stored = await openSite(panel, ["site", "storage-app"], "index.html");
   await expect(stored.frameLocator("iframe").locator("#todos li")).toHaveText(
@@ -300,6 +300,14 @@ test("WEB-E2E-140 a built web app previews as it is, and the panel says what it 
     { timeout: 15_000 },
   );
   await expect(stored.getByText(/^This page /)).toHaveCount(0);
+  // Its form adds an item: the sandbox blocks forms, so the browser never fires submit; the preview fires it.
+  const app = stored.frameLocator("iframe");
+  await app.locator("#item").fill("Water the plants");
+  await app.getByRole("button", { name: "Add" }).click();
+  await expect(app.locator("#todos li")).toHaveText([
+    "Buy coffee beans",
+    "Water the plants",
+  ]);
   await capture(page, "previews-built-storage");
 
   await step("an app that stops on an error gets no router advice");
