@@ -5,10 +5,12 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { english } from "../i18n/translate";
+import { teamMessage } from "../test/teams";
 
 import type { TeamEndView, TeamMessageView } from "./team-view";
 import { TeamEndNote } from "./TeamEndNote";
 import { teamMessageWords } from "./TeamMessageLine";
+import { teamLines } from "./TeamOnPage";
 
 const note = (extra: Partial<TeamEndView> = {}): TeamEndView => ({
   reason: "done",
@@ -168,5 +170,66 @@ describe("WEB-U-394 a budget end and the budget notices say what happens next", 
     expect(line("budget_helpers_stopped")).toBe(
       "The helpers stop at their next step: the rest of the budget is the lead's, to write up.",
     );
+  });
+});
+
+// WEB-U-508 (18.1, ADR-0034's rounds amendment A4 and A5): from round 2 on, a round's end note names its round; the
+// first round's note reads as before.
+describe("WEB-U-508 a round's end note names its round", () => {
+  it("says which round ended from round 2 on", () => {
+    render(<TeamEndNote note={note({ round: 2 })} />);
+    expect(screen.getByRole("region", { name: /^Round 2: / })).toBeVisible();
+  });
+
+  it("reads as before in the first round", () => {
+    render(<TeamEndNote note={note({ round: 1 })} />);
+    expect(screen.queryByText(/^Round /)).toBeNull();
+  });
+});
+
+// WEB-U-508: with a round's end note per round, the page reads why from the newest: a question the lead asked in round
+// 2, closed when the person stopped that round, says so, though round 1 ended at done.
+describe("WEB-U-508 the newest round's end is the one the page reads", () => {
+  it("says a closed question's why from the newest end", () => {
+    const lines = teamLines(
+      [
+        teamMessage(1, "ended", {
+          reason: "done",
+          round: 1,
+          from: { kind: "gateway" },
+          to: { kind: "lead" },
+        }),
+        teamMessage(2, "round_started", {
+          round: 2,
+          from: { kind: "gateway" },
+          to: { kind: "person" },
+        }),
+        teamMessage(3, "person_question", {
+          text: "Which quarter?",
+          from: { kind: "lead" },
+          to: { kind: "person" },
+        }),
+        teamMessage(4, "ended", {
+          reason: "stopped",
+          round: 2,
+          from: { kind: "gateway" },
+          to: { kind: "lead" },
+        }),
+      ],
+      null,
+      null,
+      "ended",
+    );
+    render(
+      <>
+        {lines.map((line) => (
+          <div key={line.key}>{line.node}</div>
+        ))}
+      </>,
+    );
+    expect(
+      screen.getByText("No longer needed: you stopped the team"),
+    ).toBeVisible();
+    expect(screen.getByText("Round 2 started")).toBeVisible();
   });
 });

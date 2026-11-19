@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT seq, author_name, body->'files' AS files FROM channel_messages WHERE channel_id = $1 AND type = 'report' ORDER BY seq",
+  "query": "SELECT seq, body FROM channel_messages WHERE channel_id = $1 AND to_conversation = $2 AND type = 'assign' ORDER BY CASE WHEN $3 > 1 THEN -seq ELSE seq END LIMIT 1",
   "describe": {
     "columns": [
       {
@@ -16,32 +16,27 @@
       },
       {
         "ordinal": 1,
-        "name": "author_name",
-        "type_info": "Text",
+        "name": "body",
+        "type_info": "Jsonb",
         "origin": {
           "Table": {
             "table": "channel_messages",
-            "name": "author_name"
+            "name": "body"
           }
         }
-      },
-      {
-        "ordinal": 2,
-        "name": "files",
-        "type_info": "Jsonb",
-        "origin": "Expression"
       }
     ],
     "parameters": {
       "Left": [
-        "Uuid"
+        "Uuid",
+        "Uuid",
+        "Int4"
       ]
     },
     "nullable": [
       false,
-      true,
-      null
+      false
     ]
   },
-  "hash": "3cac16ae55d9f4b85de289748f8480fc3457731c527eb58e98b4f7aaba992132"
+  "hash": "8ee1b930e430980f31353b8429ae4d618246c35a20001abf956b01fa16d3d1cb"
 }

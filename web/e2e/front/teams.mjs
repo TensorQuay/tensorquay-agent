@@ -272,6 +272,7 @@ export function teamOf(conversation) {
         failed: helpers.filter((each) => each.state === "failed").length,
       },
       waiting_for_you: question(team) !== null,
+      round: team.round ?? 1,
     };
   }
   return {
@@ -282,6 +283,7 @@ export function teamOf(conversation) {
     name: place.helper.name,
     helper_state: place.helper.state,
     can_stop: canStop(team, place.helper),
+    round: team.round ?? 1,
   };
 }
 
@@ -320,9 +322,34 @@ function view(team) {
     helpers: live(team).map(({ conversation, failed_run, ...helper }) => ({
       conversation: conversation.id,
       ...helper,
+      round: helper.round ?? 1,
       can_stop: canStop(team, { ...helper, failed_run }),
     })),
     version: team.version,
+    ...rounds(team),
+  };
+}
+
+/**
+ * The team's rounds as the gateway answers them (ADR-0034's rounds amendment, A5): those before the current from the
+ * team's `past` records, then the current from the team itself, and every round's tokens.
+ */
+function rounds(team) {
+  const round = team.round ?? 1;
+  const all = [
+    ...(team.past ?? []),
+    {
+      round,
+      started_at: team.round_started_at ?? team.started_at,
+      ended_at: team.state === "ended" ? (team.ended_at ?? at(0)) : null,
+      stop_reason: team.stop_reason,
+      budget: team.budget,
+    },
+  ];
+  return {
+    round,
+    rounds: all,
+    tokens_all_rounds: all.reduce((sum, each) => sum + each.budget.spent, 0),
   };
 }
 

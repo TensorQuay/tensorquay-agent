@@ -1,0 +1,77 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT l.profile_id AS lead_id, l.profile_version AS lead_version, l.profile AS lead_profile, h.profile_id AS own_id, h.profile AS own_profile FROM conversations l, conversations h WHERE l.id = $1 AND h.id = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "lead_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "profile_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "lead_version",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "profile_version"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "lead_profile",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "profile"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "own_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "profile_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "own_profile",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "profile"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "3b793c874c881a0b01c84d83978874df4784ec8bb00ef1a59b135759de214fe5"
+}

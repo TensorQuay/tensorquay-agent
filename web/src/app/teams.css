@@ -13,6 +13,11 @@
 }
 /* The chips give way: the row shrinks and clips, each name is cut with "…" (whole in its tooltip and name), and the
    budget and All helpers keep their one line (WEB-U-369; three long names overlapped the budget at 1280). */
+/* From round 2 on, the round before the chips (ADR-0034's rounds amendment A5): one line, never squeezed. */
+.helpers-round {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
 .helpers-chips {
   display: flex;
   flex: 0 1 auto;

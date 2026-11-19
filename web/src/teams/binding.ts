@@ -36,10 +36,12 @@ export function teamView(team: Team): TeamView {
       tokens: helper.tokens,
       tokensEstimated: helper.tokens_estimated,
       canStop: helper.can_stop,
+      inRound: helper.round >= team.round,
     })),
     waitingForYou: team.waiting_for_you
       ? { seq: team.waiting_for_you.seq, text: team.waiting_for_you.text }
       : null,
+    round: team.round,
   };
 }
 
@@ -84,6 +86,7 @@ export function messageView(
               : {}),
           }
         : undefined,
+    round: message.type === "round_started" ? message.round : undefined,
   };
 }
 
@@ -97,6 +100,7 @@ export function endView(
   handedBack: ReadonlySet<number> = new Set(),
 ): TeamEndView {
   return {
+    round: message.round,
     reason: message.reason ?? "",
     summary: message.summary ?? null,
     tokens: {

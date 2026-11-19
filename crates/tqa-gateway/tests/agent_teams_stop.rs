@@ -156,7 +156,10 @@ async fn gw_i_108_each_stop_reason_ends_the_team_with_one_end_note_to_the_lead(
             .await?;
         assert_eq!(first_turn, "cancelled", "a helper stopped before its first turn never gets it");
         // The lead's next run is offered the read that delivers its note.
-        assert_eq!(role(f, &by_done.lead.1).await?, json!({"role": "ended"}));
+        assert_eq!(
+            role(f, &by_done.lead.1).await?,
+            json!({"role": "ended", "reason": "between_rounds"})
+        );
         Ok(())
     })
     .await

@@ -29,6 +29,9 @@ pub(super) struct Found {
     deadline_at: OffsetDateTime,
     token_budget: i64,
     spent_tokens: i64,
+    /// The team's current round (ADR-0034's rounds amendment), and when it ended, if it has.
+    round: i32,
+    ended_at: Option<OffsetDateTime>,
     /// The lead's read place, as its wake reads from it: its finished runs' place, or what a run still going read.
     /// The same SQL as `wake::team`'s `placed.after` for the lead: a change to one is a change to both (GW-I-319).
     lead_read_seq: i64,
@@ -54,7 +57,7 @@ pub(super) async fn found(
         Ok(sqlx::query_as!(
             Found,
             "SELECT t.id, t.channel_id AS channel, t.lead_conversation AS lead, t.state, t.stop_reason, \
-             t.created_at AS started_at, t.deadline_at, t.token_budget, t.spent_tokens, \
+             t.created_at AS started_at, t.deadline_at, t.token_budget, t.spent_tokens, t.round, t.ended_at, \
              r.place AS \"lead_read_seq!\", \
              (SELECT count(*) FROM channel_messages c WHERE c.channel_id = t.channel_id AND c.seq > r.place \
               AND c.to_kind IN ('lead', 'team') \
@@ -90,6 +93,20 @@ pub(super) struct Team {
     waiting_for_you: Option<Question>,
     helpers: Vec<Helper>,
     version: u64,
+    /// The current round, every round's record (newest last), and the tokens of them all (A5).
+    round: u32,
+    rounds: Vec<RoundRecord>,
+    tokens_all_rounds: i64,
+}
+
+/// One round as the person reads it: when it started and ended, why, and its budget and spend.
+#[derive(Serialize)]
+struct RoundRecord {
+    round: u32,
+    started_at: String,
+    ended_at: Option<String>,
+    stop_reason: Option<String>,
+    budget: Budget,
 }
 
 #[derive(Serialize)]
@@ -129,6 +146,8 @@ struct Helper {
     tokens_estimated: bool,
     activity: Option<Activity>,
     last_message: Option<LastMessage>,
+    /// The round it last joined: below the team's, it isn't in this round (A5).
+    round: u32,
 }
 
 /// A helper's current step and its open tool call; the transcript route (`read_helper`) reads it too.
@@ -171,11 +190,13 @@ pub(super) async fn team(
     id: &ConversationId,
 ) -> Result<Team, GatewayError> {
     let found = found(state, user, id).await?;
-    let (question, rows) = crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
-        let mut connection = state.pool.acquire().await?;
-        read_team(&mut connection, &found).await
-    })
-    .await?;
+    let (question, rows, rounds) =
+        crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
+            let mut connection = state.pool.acquire().await?;
+            let (question, rows) = read_team(&mut connection, &found).await?;
+            Ok((question, rows, rounds(&mut connection, &found).await?))
+        })
+        .await?;
     let running = found.state == "running";
     let mut helpers = Vec::with_capacity(rows.len());
     for row in rows {
@@ -197,6 +218,7 @@ pub(super) async fn team(
             tokens_estimated: row.tokens_estimated,
             activity: row.activity,
             last_message: row.last_message,
+            round: round_number(row.round),
         });
     }
     Ok(Team {
@@ -218,7 +240,58 @@ pub(super) async fn team(
         waiting_for_you: question.filter(|_| running),
         helpers,
         version: state.team_changes.version(found.id),
+        round: round_number(found.round),
+        tokens_all_rounds: rounds.iter().map(|round| round.budget.spent).sum(),
+        rounds,
     })
+}
+
+fn round_number(round: i32) -> u32 {
+    u32::try_from(round).unwrap_or(1)
+}
+
+/// The team's rounds: those before the current from their records, then the current from the team row, live.
+async fn rounds(
+    connection: &mut PgConnection,
+    found: &Found,
+) -> Result<Vec<RoundRecord>, GatewayError> {
+    let rows = sqlx::query!(
+        "SELECT round, started_at, ended_at, stop_reason, token_budget, spent_tokens FROM agent_team_rounds \
+         WHERE team_id = $1 AND round <= $2 ORDER BY round",
+        found.id,
+        found.round
+    )
+    .fetch_all(&mut *connection)
+    .await?;
+    let mut rounds = Vec::with_capacity(rows.len() + 1);
+    let mut current_start = found.started_at;
+    for row in rows {
+        if row.round == found.round {
+            current_start = row.started_at;
+            continue;
+        }
+        rounds.push(RoundRecord {
+            round: round_number(row.round),
+            started_at: rfc3339(row.started_at)?,
+            ended_at: row.ended_at.map(rfc3339).transpose()?,
+            stop_reason: row.stop_reason,
+            budget: Budget {
+                tokens: row.token_budget,
+                spent: row.spent_tokens,
+            },
+        });
+    }
+    rounds.push(RoundRecord {
+        round: round_number(found.round),
+        started_at: rfc3339(current_start)?,
+        ended_at: found.ended_at.map(rfc3339).transpose()?,
+        stop_reason: found.stop_reason.clone(),
+        budget: Budget {
+            tokens: found.token_budget,
+            spent: found.spent_tokens,
+        },
+    });
+    Ok(rounds)
 }
 
 /// A helper as stored, with its activity and last message.
@@ -233,6 +306,7 @@ struct Stored {
     tokens_estimated: bool,
     activity: Option<Activity>,
     last_message: Option<LastMessage>,
+    round: i32,
 }
 
 /// The open question and the helpers, deleted ones left out, in the order they joined.
@@ -250,7 +324,7 @@ async fn read_team(
         .fetch_optional(&mut *connection)
         .await?;
     let rows = sqlx::query!(
-            "SELECT m.conversation_id, m.name, m.role, m.workspace, m.state, m.failed_run, \
+            "SELECT m.conversation_id, m.name, m.role, m.workspace, m.state, m.failed_run, m.round, \
              (SELECT COALESCE(sum(COALESCE(u.prompt_tokens, 0) + COALESCE(u.completion_tokens, 0)), 0) FROM usage u \
               WHERE u.conversation_id = m.conversation_id AND u.created_at >= $2)::bigint AS \"tokens!\", \
              EXISTS (SELECT 1 FROM usage u WHERE u.conversation_id = m.conversation_id AND u.created_at >= $2 \
@@ -275,6 +349,7 @@ async fn read_team(
             failed_run: row.failed_run,
             tokens: row.tokens,
             tokens_estimated: row.tokens_estimated,
+            round: row.round,
         });
     }
     let question = question

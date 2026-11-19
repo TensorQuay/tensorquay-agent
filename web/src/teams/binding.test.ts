@@ -52,6 +52,7 @@ describe("WEB-U-221/222 the team's binding", () => {
           tokens: 120_400,
           tokensEstimated: false,
           canStop: true,
+          inRound: true,
         },
         {
           conversation: helper(2, "writer").conversation,
@@ -64,9 +65,11 @@ describe("WEB-U-221/222 the team's binding", () => {
           tokens: 120_400,
           tokensEstimated: false,
           canStop: true,
+          inRound: true,
         },
       ],
       waitingForYou: { seq: 14, text: "Which quarter?" },
+      round: 1,
     });
   });
 
@@ -199,5 +202,25 @@ describe("WEB-U-222 a page of the team's log as the gateway sends it", () => {
     expect(
       parseApi(page, "TeamMessagePage").items.map((m) => m.to.kind),
     ).toEqual(["member", "members", "lead", "team", "person"]);
+  });
+});
+
+// WEB-U-506 (18.1, ADR-0034's rounds amendment A5): a helper whose round is below its team's is not in this round.
+describe("WEB-U-506 the binding marks a helper not in this round", () => {
+  it("is in the round when brought back into it, not when left in an earlier one", () => {
+    const view = teamView(
+      team({
+        round: 2,
+        helpers: [
+          helper(1, "researcher", { round: 2 }),
+          helper(2, "writer", { round: 1, state: "done" }),
+        ],
+      }),
+    );
+    expect(view.round).toBe(2);
+    expect(view.helpers.map((each) => [each.name, each.inRound])).toEqual([
+      ["researcher", true],
+      ["writer", false],
+    ]);
   });
 });

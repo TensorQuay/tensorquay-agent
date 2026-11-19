@@ -253,7 +253,8 @@ export function useTeamPage({
   );
   // A lead whose team its person stopped (WEB-U-413): when, from the team's end in its log; null while still stopping.
   const stopReason = team.data?.stop_reason;
-  const endedAt = (messages.data ?? []).find(
+  // The newest round's end: a team that ran in rounds has an end note per round.
+  const endedAt = (messages.data ?? []).findLast(
     (message) => message.type === "ended",
   )?.at;
   const stoppedByPerson = useMemo(

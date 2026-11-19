@@ -87,3 +87,29 @@ fn tk_u_050_a_tool_call_without_split_into_is_refused() -> Result<(), Box<dyn Er
     );
     Ok(())
 }
+
+// TEST: TK-U-053
+/// A scenario holds up to 256 replies (the agents stack suite's script grew past 128 with ADR-0034's rounds); 257 is
+/// refused, and the 1 MiB bound on the file stays.
+#[test]
+fn tk_u_053_a_scenario_holds_up_to_256_replies() -> Result<(), Box<dyn Error>> {
+    let dir = std::env::temp_dir().join(format!("tk-u-053-{}", std::process::id()));
+    fs::create_dir_all(&dir)?;
+    let path = dir.join("scenario.json");
+    let scenario = |replies: usize| {
+        let reply = r#"{"events": [{"type": "text", "text": "ok"}], "usage": {"prompt_tokens": 1, "completion_tokens": 1}}"#;
+        format!(
+            r#"{{"model": "fixture", "responses": [{}]}}"#,
+            vec![reply; replies].join(", ")
+        )
+    };
+    fs::write(&path, scenario(256))?;
+    let kept = Scenario::load(&path).map(|_| ());
+    fs::write(&path, scenario(257))?;
+    let refused = Scenario::load(&path).map(|_| ());
+    fs::remove_dir_all(&dir)?;
+    kept?;
+    let error = refused.err().ok_or("257 replies loaded")?;
+    assert!(error.to_string().contains("1–256 responses"), "{error}");
+    Ok(())
+}

@@ -30,6 +30,8 @@ export type HelperView = {
   tokensEstimated?: boolean;
   /** Whether Stop helper would stop it now, as the gateway decides (`can_stop`; a failed one may still hold its seat). */
   canStop?: boolean;
+  /** False for a helper not brought back into the team's current round (ADR-0034's rounds amendment, A5). */
+  inRound?: boolean;
 };
 
 export type TeamView = {
@@ -42,6 +44,8 @@ export type TeamView = {
   helpers: HelperView[];
   /** The lead's open question to its person; null when none waits. */
   waitingForYou: { seq: number; text: string } | null;
+  /** The team's current round: named from round 2 on (A5). */
+  round?: number;
 };
 
 /** Who wrote or receives a team message, as the page names them. */
@@ -68,7 +72,8 @@ export type TeamMessageView = {
     | "person_message"
     | "notice"
     | "done"
-    | "ended";
+    | "ended"
+    | "round_started";
   from: Party;
   to: Party;
   text: string;
@@ -78,10 +83,14 @@ export type TeamMessageView = {
   member?: string | undefined;
   /** A gateway notice's kind and its helper (`notice`). */
   notice?: { kind: string; member?: string; position?: number } | undefined;
+  /** The round that started (`round_started`). */
+  round?: number | undefined;
 };
 
 /** The team's end note (`ended` in ADR-0034's S6 contract, from the one stop path). */
 export type TeamEndView = {
+  /** The round that ended: named from round 2 on (A4, A5). */
+  round?: number | undefined;
   reason: string;
   /** The lead's own summary, when it said it was done. */
   summary: string | null;

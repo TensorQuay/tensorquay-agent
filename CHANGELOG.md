@@ -84,6 +84,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   check. `pnpm ux:compare` lists the screens that changed since the last release for the release review
   (`docs/release.md`).
 
+### Fixed
+
+- **Status says a sandbox's age in days from two days on (WEB-U-489).** The Sandboxes line said "the oldest for
+  224 h"; it now says "9 days". Under two days it still says hours, and under an hour minutes.
+
 ## 18.0.2 (19 November 2026)
 
 A fix release: a tool call whose number or true/false a model sent as text runs instead of being refused until
@@ -98,6 +103,12 @@ the run stopped. No migration, protocol or configuration change: upgrade in plac
   translation in a narrow dialog, now wraps onto a second line inside its button instead of running past its edges.
   Checked in all ten languages at a phone's and a desktop's width.
 
+- **A task that may not lead helpers is told why, never "unknown tool" (TOOL-U-147, RT-I-062, GW-I-329,
+  WEB-U-497).** A lead whose team had ended, asked to continue, called its old team tools and was answered three
+  times that no such tool exists, while the page said "Couldn't start a helper" each time. Now the gateway says why
+  a task may not lead (helpers switched off, the task was a helper, its environment too old, or its team has ended),
+  the task is answered in one plain sentence that tells it to do the work itself and say so, and the page reads
+  "Can't lead helpers here" with the reason.
 - **A tool call whose number or true/false arrives as text still runs (TOOL-U-146).** One model server sends an
   optional number, such as the shell's time limit, as `"30000"` instead of `30000`. The tools refused it, and a model
   that couldn't see why sent it again until the run stopped. The agent's own tools now take an exact number, `true`,

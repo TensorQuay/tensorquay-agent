@@ -22,6 +22,8 @@ pub enum TeamPlace {
         /// A `person_question` is unanswered (its own person only).
         #[serde(skip_serializing_if = "Option::is_none")]
         waiting_for_you: Option<bool>,
+        /// The team's current round (ADR-0034's rounds amendment, A5).
+        round: u32,
     },
     /// The task is a helper of the team's lead.
     Member {
@@ -40,6 +42,8 @@ pub enum TeamPlace {
         /// Whether its person's Stop helper would stop it now (its own person only; [`can_stop`]).
         #[serde(skip_serializing_if = "Option::is_none")]
         can_stop: Option<bool>,
+        /// The team's current round (A5).
+        round: u32,
     },
 }
 
@@ -81,6 +85,7 @@ impl TeamPlace {
                 state,
                 helpers,
                 attention,
+                round,
                 ..
             } => Self::Lead {
                 id,
@@ -88,9 +93,14 @@ impl TeamPlace {
                 helpers,
                 attention,
                 waiting_for_you: None,
+                round,
             },
             Self::Member {
-                id, state, lead, ..
+                id,
+                state,
+                lead,
+                round,
+                ..
             } => Self::Member {
                 id,
                 state,
@@ -101,6 +111,7 @@ impl TeamPlace {
                 name: None,
                 helper_state: None,
                 can_stop: None,
+                round,
             },
         }
     }
