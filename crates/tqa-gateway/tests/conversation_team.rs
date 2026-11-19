@@ -103,9 +103,9 @@ async fn gw_i_205_a_tasks_team_for_its_person_and_the_top_level_list(pool: PgPoo
     support::run_configured(pool, None, ON, async |f| {
         let t = team(f).await?;
         let (id, lead) = (t.id.to_string(), t.lead.clone());
-        let lead_team = json!({"role": "lead", "id": id, "state": "running", "helpers": 1,
+        let lead_team = json!({"role": "lead", "id": id, "state": "running", "round": 1, "helpers": 1,
                                "attention": {"stuck": 0, "failed": 0}, "waiting_for_you": false});
-        let member_team = json!({"role": "member", "id": id, "state": "running",
+        let member_team = json!({"role": "member", "id": id, "state": "running", "round": 1,
                                  "lead": {"id": lead, "title": "Report on Q3"},
                                  "name": "researcher", "helper_state": "working", "can_stop": true});
         assert_eq!(json(f, &format!("/api/v1/conversations/{}", t.lead), &t.cookie).await?["team"], lead_team);
@@ -160,13 +160,13 @@ async fn gw_i_205_an_administrator_sees_counts_and_ids_never_names_or_titles(
             if task == t.lead {
                 assert_eq!(
                     team,
-                    json!({"role": "lead", "id": id, "state": "running", "helpers": 1,
+                    json!({"role": "lead", "id": id, "state": "running", "round": 1, "helpers": 1,
                                         "attention": {"stuck": 0, "failed": 0}})
                 );
             } else if task == t.member {
                 assert_eq!(
                     team,
-                    json!({"role": "member", "id": id, "state": "running", "lead": {"id": t.lead}})
+                    json!({"role": "member", "id": id, "state": "running", "round": 1, "lead": {"id": t.lead}})
                 );
             }
         }
