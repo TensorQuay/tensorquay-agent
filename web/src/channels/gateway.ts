@@ -1,5 +1,4 @@
 import { api, type ApiClient } from "../api/client";
-import { failure } from "../api/error";
 import { pathFor } from "../api/operations";
 import { openEventStream } from "../api/stream";
 import { parseApi } from "../protocol/validate";
@@ -9,6 +8,9 @@ import type { ChannelsApi } from "./contract";
 import "../protocol/generated/validators.channels";
 
 /** The channel pages' API on one client (the gateway's human channels API; ADR-0014). */
+/** How long a channel upload may take to send and be answered (a file up to the upload limit). */
+const UPLOAD_TIMEOUT_MS = 120_000;
+
 export function gatewayChannelsFor(client: ApiClient): ChannelsApi {
   return {
     channels: (signal) =>
@@ -84,28 +86,18 @@ export function gatewayChannelsFor(client: ApiClient): ChannelsApi {
         },
       ),
     // The file is the raw body, as a task's upload is; the gateway sanitises its name (A9).
-    upload: async (id, file) => {
-      const response = await fetch(
-        pathFor(
-          settingsEndpoint("channelUpload"),
-          { id },
-          new URLSearchParams({ name: file.name }),
-        ),
+    upload: (id, file) =>
+      client.request(
+        settingsEndpoint("channelUpload"),
+        (value) => parseApi(value, "ChannelUpload"),
         {
-          method: "POST",
+          parameters: { id },
+          query: new URLSearchParams({ name: file.name }),
           body: file,
-          credentials: "same-origin",
-          headers: {
-            accept: "application/json",
-            "content-type": "application/octet-stream",
-          },
+          // A file can take longer than a JSON request to send.
+          timeoutMs: UPLOAD_TIMEOUT_MS,
         },
-      );
-      const value: unknown = await response.json().catch(() => null);
-      if (response.status !== 201)
-        throw await failure(response.status, response.headers, value);
-      return parseApi(value, "ChannelUpload");
-    },
+      ),
     removeUpload: (id, upload) =>
       client.request(settingsEndpoint("channelUploadDelete"), () => undefined, {
         parameters: { id, upload },

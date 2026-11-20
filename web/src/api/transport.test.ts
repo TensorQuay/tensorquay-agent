@@ -158,3 +158,21 @@ describe("WEB-U-138 a request that names its own timeout", () => {
     await expect(answer).resolves.toEqual({ ok: true });
   });
 });
+
+// WEB-U-524 (18.2, a channel's files): a file is sent as the raw body, as bytes, never as JSON.
+describe("WEB-U-524 a file as a request's raw body", () => {
+  it("sends a file's bytes as application/octet-stream, and text as JSON", async () => {
+    const { client, fetch } = transport(() =>
+      Promise.resolve(Response.json({ ok: true }, { headers: json })),
+    );
+    const file = new Blob(["%PDF-1.7"], { type: "application/pdf" });
+    await client.request("me", (value) => value, { body: file });
+    await client.request("me", (value) => value, { body: "{}" });
+    const [first, second] = fetch.mock.calls.map(
+      ([, init]) => new Headers(init?.headers),
+    );
+    expect(first?.get("content-type")).toBe("application/octet-stream");
+    expect(fetch.mock.calls[0]?.[1]?.body).toBe(file);
+    expect(second?.get("content-type")).toBe("application/json");
+  });
+});
