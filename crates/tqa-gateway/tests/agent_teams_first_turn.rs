@@ -574,6 +574,7 @@ async fn gw_i_211_a_member_whose_run_ended_is_woken_by_its_leads_message(
             text,
             lead_brief: None,
             team_wake: Some(_),
+            channel_wake: None,
             ..
         } = runtime.action().await?
         else {

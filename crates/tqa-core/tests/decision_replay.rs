@@ -258,6 +258,7 @@ async fn core_u_058_a_journaled_act_is_issued_without_asking_again() -> TestResu
         Event::MessageUser {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: "question".into(),
             attachments: vec![],
         },

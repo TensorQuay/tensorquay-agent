@@ -77,12 +77,14 @@ fn part(bytes: Option<&[u8]>) -> Result<held::Part, GatewayError> {
             attachments,
             lead_brief,
             team_wake,
+            channel_wake,
             ..
         } => Ok(held::Part {
             text,
             attachments,
             lead_brief,
             team_wake,
+            channel_wake,
         }),
         _ => Err(GatewayError::StoreUnavailable),
     }

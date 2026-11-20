@@ -32,6 +32,7 @@ fn turn(attachments: &[&str]) -> UserTurn {
     UserTurn {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: "look at these".into(),
         attachments: attachments
             .iter()
@@ -175,6 +176,7 @@ async fn core_u_039_images_of_earlier_runs_are_not_sent_again() -> TestResult {
     let second = UserTurn {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: "and now?".into(),
         attachments: vec![],
     };
@@ -345,6 +347,7 @@ fn runs_answering(padding: usize) -> Result<Vec<ServerFrame>, Box<dyn Error>> {
             Event::MessageUser {
                 lead_brief: None,
                 team_wake: None,
+                channel_wake: None,
                 text: format!("request {index}"),
                 attachments: vec![],
             },

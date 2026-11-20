@@ -247,6 +247,7 @@ fn core_u_022_the_retry_prompt_names_the_instructions_label() -> TestResult {
             Event::MessageUser {
                 lead_brief: None,
                 team_wake: None,
+                channel_wake: None,
                 text: "task".into(),
                 attachments: vec![],
             },

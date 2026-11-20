@@ -13,6 +13,7 @@ fn user(text: &str) -> Event {
     Event::MessageUser {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: text.into(),
         attachments: vec![],
     }

@@ -168,6 +168,10 @@ pub enum ClientFrame {
         /// not written, on every other message.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         team_wake: Option<crate::TeamWake>,
+        /// On the gateway's wake of a channel member, whose messages wait (revision 16, ADR-0014's amendment of 20 Nov
+        /// 2026); absent, and not written, on every other message.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        channel_wake: Option<crate::ChannelWake>,
     },
     /// Request cooperative cancellation of a run.
     #[serde(rename = "run.cancel")]

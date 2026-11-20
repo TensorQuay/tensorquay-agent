@@ -35,6 +35,7 @@ fn turn(text: &str) -> UserTurn {
     UserTurn {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: text.into(),
         attachments: vec![],
     }

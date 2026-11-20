@@ -40,12 +40,14 @@ pub(crate) struct Part {
     /// The gateway's wake of a team reader (revision 13): it too goes as a turn of its own, so its marker never covers
     /// a person's words.
     pub team_wake: Option<tqa_types::TeamWake>,
+    /// The gateway's wake of a channel member (revision 16): a turn of its own too.
+    pub channel_wake: Option<tqa_types::ChannelWake>,
 }
 
 impl Part {
     /// Whether this part is a turn of its own: a brief or a wake.
     const fn alone(&self) -> bool {
-        self.lead_brief.is_some() || self.team_wake.is_some()
+        self.lead_brief.is_some() || self.team_wake.is_some() || self.channel_wake.is_some()
     }
 }
 
@@ -59,6 +61,7 @@ pub(crate) fn join(parts: &[Part]) -> (usize, ClientFrame) {
             ClientFrame::UserMessage {
                 lead_brief: first.lead_brief.clone(),
                 team_wake: first.team_wake,
+                channel_wake: first.channel_wake.clone(),
                 text: first.text.clone(),
                 attachments: first.attachments.clone(),
                 host_keys: Vec::new(),
@@ -98,6 +101,7 @@ pub(crate) fn join(parts: &[Part]) -> (usize, ClientFrame) {
         ClientFrame::UserMessage {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text,
             attachments,
             host_keys: Vec::new(),
@@ -181,6 +185,9 @@ pub(crate) struct Item {
     /// The gateway's wake of a team reader (GW-I-298): a client shows its notice, never the person's message.
     #[serde(skip_serializing_if = "Option::is_none")]
     team_wake: Option<tqa_types::TeamWake>,
+    /// The gateway's wake of a channel member (revision 16): a client shows its notice, never the person's message.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    channel_wake: Option<tqa_types::ChannelWake>,
     /// A team member's first turn, with its lead's brief (GW-I-300): a client shows its notice, not the frame.
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     lead_brief: bool,
@@ -231,6 +238,7 @@ pub(crate) async fn list(
                 text,
                 attachments,
                 team_wake,
+                channel_wake,
                 lead_brief,
                 ..
             }) = ClientFrame::parse(row.queued_frame.as_deref()?)
@@ -258,6 +266,7 @@ pub(crate) async fn list(
                     .flatten(),
                 sent_at,
                 team_wake,
+                channel_wake,
                 lead_brief: lead_brief.is_some(),
             })
         })
@@ -352,13 +361,16 @@ async fn cancel_row(
     .await
 }
 
-/// Whether a queued frame is the gateway's turn for an agent team's reader, not a person's message: its wake, or a
-/// member's first turn with its lead's brief.
+/// Whether a queued frame is the gateway's turn, not a person's message: an agent team reader's wake, a member's first
+/// turn with its lead's brief, or a channel member's wake (revision 16), whose key would replay as cancelled too.
 fn team_turn(frame: Option<&[u8]>) -> bool {
     matches!(
         frame.map(ClientFrame::parse),
         Some(Ok(ClientFrame::UserMessage {
             team_wake: Some(_),
+            ..
+        } | ClientFrame::UserMessage {
+            channel_wake: Some(_),
             ..
         } | ClientFrame::UserMessage {
             lead_brief: Some(_),

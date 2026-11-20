@@ -6,7 +6,7 @@ use tqa_types::{
 };
 
 #[test]
-fn proto_u_008_the_floor_stays_10_under_revision_15() {
+fn proto_u_008_the_floor_stays_10_under_revision_16() {
     // ADR-0035 raised the floor to 9 (a revision-8 runtime can't read a session.config without the policy). Revision
     // 10 adds the reply_cut error code, which a revision-9 runtime can't read in a history it resumes, so the gateway
     // refuses it as too old (decided on 29 Sep 2026); an upgrade rebuilds every environment anyway. Revision
@@ -16,9 +16,11 @@ fn proto_u_008_the_floor_stays_10_under_revision_15() {
     // team reader; a team's lead or member is refused at the link below 13, and the floor stays 10 (decided on 5 Oct
     // 2026). Revision 14 brings the Desktop; a conversation whose environment declares it is refused at the link
     // below 14, and the floor stays 10 (ADR-0039). Revision 15 keeps a desktop sign-in for a task only for a runtime
-    // announcing it (decided on 15 Nov 2026); the floor stays 10.
+    // announcing it (decided on 15 Nov 2026); the floor stays 10. Revision 16 marks the gateway's wake of a channel
+    // member; a member below 16 isn't woken, and the floor stays 10 (ADR-0014's amendment of 20 Nov 2026).
     assert_eq!(MIN_RUNTIME_REVISION, 10);
-    assert_eq!(PROTOCOL_REVISION, 15);
+    assert_eq!(PROTOCOL_REVISION, 16);
+    assert_eq!(tqa_types::CHANNEL_WAKE_REVISION, 16);
     assert_eq!(tqa_types::KEEP_SIGN_IN_REVISION, 15);
     assert_eq!(tqa_types::DESKTOP_REVISION, 14);
     assert_eq!(tqa_types::TEAM_WAKE_REVISION, 13);

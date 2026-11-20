@@ -393,6 +393,7 @@ async fn as_wake(f: &Fixture, key: &str, after: u64) -> TestResult {
         host_keys: Vec::new(),
         lead_brief: None,
         team_wake: Some(tqa_types::TeamWake { after }),
+        channel_wake: None,
     };
     sqlx::query("UPDATE idempotency SET queued_frame=$1 WHERE key=$2")
         .bind(serde_json::to_vec(&wake)?)

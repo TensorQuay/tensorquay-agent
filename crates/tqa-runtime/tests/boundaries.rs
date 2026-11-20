@@ -142,6 +142,7 @@ async fn rt_i_001_history_gap_is_fatal_and_never_calls_the_model() -> TestResult
         event: Event::MessageUser {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: "question".into(),
             attachments: vec![],
         },
@@ -242,6 +243,7 @@ async fn rt_i_001_history_memory_cap_stops_before_a_partial_run_can_start() -> T
         event: Event::MessageUser {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: "question".repeat(64),
             attachments: vec![],
         },

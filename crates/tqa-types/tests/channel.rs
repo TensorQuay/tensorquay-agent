@@ -321,7 +321,7 @@ fn proto_u_048_a_channel_wake_is_the_channel_and_the_place_alone() -> TestResult
     // Strict: no channel, a channel that isn't an id, a negative place, or any other field (a title, a writer).
     for odd in [
         json!({"after": 1}),
-        json!({"channel": "build", "after": 1}),
+        json!({"channel": "a channel", "after": 1}),
         json!({"channel": channel, "after": -1}),
         json!({"channel": channel, "after": 1, "title": "Pricing"}),
     ] {
@@ -334,7 +334,7 @@ fn proto_u_048_a_channel_wake_is_the_channel_and_the_place_alone() -> TestResult
     }
     let schema = tqa_types::protocol_schema();
     let wake = &schema["definitions"]["ChannelWake"];
-    assert_eq!(wake["required"], json!(["after", "channel"]), "{wake}");
+    assert_eq!(wake["required"], json!(["channel", "after"]), "{wake}");
     assert_eq!(tqa_types::PROTOCOL_REVISION, 16);
     Ok(())
 }

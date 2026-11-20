@@ -279,6 +279,7 @@ async fn gw_i_254_a_helper_whose_sandbox_keeps_stopping_is_told_to_the_lead_as_f
                 runtime.action().await?,
                 tqa_types::ClientFrame::UserMessage {
                     team_wake: Some(_),
+                    channel_wake: None,
                     ..
                 }
             ),

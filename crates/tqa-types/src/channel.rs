@@ -426,6 +426,18 @@ impl MessageBody {
     }
 }
 
+/// The gateway's wake of a channel member (revision 16, ADR-0014's amendment of 20 Nov 2026, A4): the channel and the
+/// member's place, after which messages wait for it. Nothing written by anyone else: those reach the model only through
+/// `channel_read`'s marked block.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ChannelWake {
+    /// The channel's id.
+    pub channel: crate::ChannelId,
+    /// The member's place in the channel's log: the waiting messages come after it.
+    pub after: u64,
+}
+
 /// A message in a channel's log.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]

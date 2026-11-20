@@ -15,6 +15,7 @@ fn frame(seq: u64) -> ServerFrame {
         event: Event::MessageUser {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: format!("message {seq}"),
             attachments: vec![],
         },

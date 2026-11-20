@@ -54,6 +54,7 @@ fn history(reads: u32) -> Result<Vec<Event>, Box<dyn Error>> {
         Event::MessageUser {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: "task".into(),
             attachments: vec![],
         },
@@ -151,6 +152,7 @@ fn ctx_u_014_no_notes_means_no_notes_message() -> TestResult {
         Event::MessageUser {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: "task".into(),
             attachments: vec![],
         },

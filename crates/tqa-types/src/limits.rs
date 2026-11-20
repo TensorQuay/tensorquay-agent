@@ -3,7 +3,7 @@
 /// The protocol version implemented by these types.
 pub const PROTOCOL_VERSION: u16 = 1;
 /// The revision of protocol 1 these types implement; see [`crate::PROTOCOL_REVISIONS`] (ADR-0026).
-pub const PROTOCOL_REVISION: u16 = 15;
+pub const PROTOCOL_REVISION: u16 = 16;
 /// The lowest runtime revision a gateway built from these types accepts; keep every check a `<` comparison against
 /// it. ADR-0035 raised it to 9: a revision-8 runtime can't read a `session.config` without the policy. Revision 10
 /// raised it to 10: an older runtime can't read a history that holds a `reply_cut` failure. Revision 11 leaves it at
@@ -19,6 +19,9 @@ pub const LEAD_BRIEF_REVISION: u16 = 12;
 /// The revision that marks the gateway's wake of an agent team reader (ADR-0034): a team's lead or member below it is
 /// refused at the link, so a wake never reaches a page as the person's words.
 pub const TEAM_WAKE_REVISION: u16 = 13;
+/// The revision that marks the gateway's wake of a channel member (ADR-0014's amendment of 20 Nov 2026, A4): a member
+/// whose runtime announces less isn't woken, so a wake never reaches a page as the person's words.
+pub const CHANNEL_WAKE_REVISION: u16 = 16;
 /// The revision that brought the Desktop (ADR-0039): a conversation whose environment declares `desktop` is refused at
 /// the link below it, so its runtime always has the `computer` tool the environment was chosen for.
 pub const DESKTOP_REVISION: u16 = 14;

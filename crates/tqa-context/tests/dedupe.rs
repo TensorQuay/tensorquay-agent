@@ -47,6 +47,7 @@ fn run(steps: Vec<Vec<Event>>) -> Result<Vec<Event>, Box<dyn Error>> {
         Event::MessageUser {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: "task".into(),
             attachments: vec![],
         },

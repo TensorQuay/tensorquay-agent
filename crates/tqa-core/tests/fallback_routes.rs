@@ -118,6 +118,7 @@ async fn core_u_041_exhausted_retries_switch_once_and_the_run_stays_there() -> T
     let second = UserTurn {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: "again".into(),
         attachments: vec![],
     };
@@ -259,6 +260,7 @@ fn long_history() -> Result<Vec<ServerFrame>, Box<dyn Error>> {
             Event::MessageUser {
                 lead_brief: None,
                 team_wake: None,
+                channel_wake: None,
                 text: format!("request {index} {}", "x".repeat(1100)),
                 attachments: vec![],
             },
@@ -358,6 +360,7 @@ async fn core_u_043_a_fallback_without_vision_sends_the_image_notice() -> TestRe
     let turn = UserTurn {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: "look".into(),
         attachments: vec!["uploads/a.png".into()],
     };
@@ -404,6 +407,7 @@ fn switched_history(to: &str) -> Result<Vec<ServerFrame>, Box<dyn Error>> {
         Event::MessageUser {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: "task".into(),
             attachments: vec![],
         },

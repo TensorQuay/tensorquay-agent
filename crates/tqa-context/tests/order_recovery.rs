@@ -58,6 +58,7 @@ fn core_u_038_unanswered_message_starts_its_deterministic_run() -> Result<(), Bo
     let mut history = frames(vec![Event::MessageUser {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: "question".into(),
         attachments: vec![],
     }]);

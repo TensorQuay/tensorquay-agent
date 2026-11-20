@@ -40,6 +40,7 @@ async fn turn(f: &Fixture, t: &Team, seq: u64, run: &str, person: bool) -> Resul
             attachments: Vec::new(),
             lead_brief: None,
             team_wake: (!person).then_some(TeamWake { after: 1 }),
+            channel_wake: None,
         },
     };
     f.gateway.events().append(&t.lead.0, message).await?;

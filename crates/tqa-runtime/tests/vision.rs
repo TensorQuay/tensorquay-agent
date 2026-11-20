@@ -27,6 +27,7 @@ async fn turn_bodies(vision: bool) -> Result<Vec<Value>, Box<dyn std::error::Err
         .send(ClientFrame::UserMessage {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: "what is in this picture?".into(),
             attachments: vec!["uploads/a.png".into()],
             host_keys: Vec::new(),

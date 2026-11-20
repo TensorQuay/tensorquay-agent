@@ -145,7 +145,7 @@ fn proto_u_045_the_notices_say_who_turned_the_switch_on_or_off() -> TestResult {
 
 #[test]
 fn proto_u_045_revision_15_names_the_switch_and_the_floor_stays_10() {
-    assert_eq!(PROTOCOL_REVISION, 15);
+    assert!(PROTOCOL_REVISION >= 15, "revision 15 stays in the table");
     assert_eq!(tqa_types::MIN_RUNTIME_REVISION, 10);
     assert_eq!(tqa_types::KEEP_SIGN_IN_REVISION, 15);
     let row = &PROTOCOL_REVISIONS[14];

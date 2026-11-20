@@ -128,6 +128,7 @@ pub(crate) async fn send(state: &State, member: Uuid) -> Result<(), GatewayError
         host_keys: Vec::new(),
         lead_brief: Some(lead_brief(&row.role, workspace, brief)),
         team_wake: None,
+        channel_wake: None,
     };
     crate::actions::send_turn(state, &user, &id, (&key(&id, row.round), turn)).await?;
     // Its brief is stored, so it's no longer starting: `queued` while the turn waits (for a slot, the lead's files or

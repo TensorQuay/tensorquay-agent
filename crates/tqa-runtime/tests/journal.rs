@@ -33,6 +33,7 @@ async fn rt_i_005_acknowledged_frame_is_durable_before_it_is_visible() -> TestRe
             Event::MessageUser {
                 lead_brief: None,
                 team_wake: None,
+                channel_wake: None,
                 text: "question".into(),
                 attachments: vec![],
             },
@@ -60,6 +61,7 @@ async fn rt_i_005_acknowledged_frame_is_durable_before_it_is_visible() -> TestRe
                 Event::MessageUser {
                     lead_brief: None,
                     team_wake: None,
+                    channel_wake: None,
                     text: "next".into(),
                     attachments: vec![]
                 },
@@ -204,6 +206,7 @@ async fn rt_i_024_the_workspace_is_flushed_before_a_tool_result_is_journaled() -
     let message = Event::MessageUser {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: "go".into(),
         attachments: vec![],
     };
@@ -328,6 +331,7 @@ async fn rt_i_024_a_flush_beyond_its_bound_fails_the_result_and_never_journals_i
     let message = Event::MessageUser {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: "next".into(),
         attachments: vec![],
     };
