@@ -671,7 +671,7 @@ describe("WEB-U-489 Status says whether anything was left behind after a sweep",
     show();
     const section = await screen.findByRole("region", { name: "Sandboxes" });
     expect(section).toHaveTextContent(
-      "Sandboxes: 3 running, the oldest for 7 h. Left behind after the last sweep: 1 network (the engine timed out). The gateway tries again every 5 minutes.",
+      "Sandboxes: 3 running, the oldest for 7 h. Left behind: 1 network (the engine timed out). The gateway keeps trying to remove what's left.",
     );
     expect(within(section).getByRole("status")).toHaveAttribute(
       "data-tone",

@@ -5,6 +5,13 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ## Unreleased
 
+### Added
+
+- **An administrator can shorten the stray sweep (GW-U-233).** `[sandbox] sweep_seconds` in `gateway.toml` (default
+  300, 10 through 3600) sets how often the gateway looks for containers and networks of its own that no task accounts
+  for, and so how soon Status reports one it could not remove. Unset, nothing changes. The real-engine tests use it to
+  run a sweep in seconds.
+
 ### Fixed
 
 - **The gateway logs why it ended a model's response early (GW-U-226).** When the relay stops a response before

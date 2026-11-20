@@ -3,18 +3,11 @@
 //! ones), swept periodically and at once when the subnet pool runs out.
 use super::{SandboxManager, failure, verdict};
 use crate::GatewayError;
-use std::{
-    sync::{
-        Arc,
-        atomic::{AtomicBool, Ordering},
-    },
-    time::Duration,
+use std::sync::{
+    Arc,
+    atomic::{AtomicBool, Ordering},
 };
 use tokio::sync::Notify;
-
-/// How often orphaned sandbox networks and stray sandbox containers (GW-I-191) are looked for, besides at start and,
-/// for networks, on exhaustion.
-const NETWORK_SWEEP: Duration = Duration::from_mins(5);
 
 #[derive(Default)]
 pub(super) struct Sweeper {
@@ -112,7 +105,9 @@ impl SandboxManager {
     pub(crate) fn start_network_sweep(self: &Arc<Self>) {
         let manager = self.clone();
         self.services.tasks.spawn(async move {
-            let mut timer = tokio::time::interval(NETWORK_SWEEP);
+            // Orphaned sandbox networks and stray sandbox containers (GW-I-191) are looked for every `[sandbox]
+            // sweep_seconds` (GW-U-233; 5 minutes by default), besides at start and, for networks, on exhaustion.
+            let mut timer = tokio::time::interval(manager.config.sandbox.sweep_period());
             timer.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
             timer.tick().await; // the start-up reconciliation has just run
             loop {
