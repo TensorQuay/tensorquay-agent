@@ -128,6 +128,10 @@ image `tqa-env:<name>` for the Environments page (the admin guide's Environments
 
 ### 1. Choose the settings
 
+**Is there an installation on this host already?** Then set this one's own names first, before step 2: see
+[Two or more installations on one host](#two-or-more-installations-on-one-host). Without them the new one's `up`
+replaces or collides with the first.
+
 Keep the provider key in a private, mode 0600 UTF-8 file outside this repository. Set these values in the shell; the
 model URL and model name are placeholders for the operator's actual model server, and the image lines take the images
 from step 0:
@@ -301,7 +305,8 @@ single-disk Mac, a separate filesystem for storage isn't practical; for trying t
    `$TQA_INSTALL_DIR/compose.env`, 8080 if it isn't there), and create the first administrator with the bootstrap token: `TQA_BOOTSTRAP_TOKEN` in `$TQA_INSTALL_DIR/compose.env`. Creating it signs you in and opens
    **New task**. Only the gateway publishes a port; the page server is reachable only on its internal network.
 2. **First route.** Open the menu under your name at the bottom left and choose **Settings**, then **Models** (under
-   Administration). It lists `local`, the route seeded from `models.toml`, with its key from `secrets.toml`. Choose
+   Administration). It lists the route seeded from `models.toml`: its name is `local`, the page shows it by a display
+   name made from its model (for example "Qwen3.8 27b"), and its key is `local` from `secrets.toml`. Choose
    **⋯** on the route's row, then **Check**, then **Run check**, to confirm the gateway reaches the model with that key: it
    sends one short request (a few tokens, up to a minute), and a failing check names the reason. To add another route, choose **Add route**; **Paste key** stores its key as a secret.
    The [administrator's guide](../docs/admin-guide/web-settings.md#models) describes every field.
