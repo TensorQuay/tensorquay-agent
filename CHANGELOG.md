@@ -17,6 +17,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **The gateway logs why it ended a model's response early (GW-U-226).** When the relay stops a response before
+  its end (the model server silent past the idle limit, the response deadline, the byte limit, the upstream
+  breaking), a warning names the reason, the route, the bytes carried and the seconds it ran. Before, the task
+  only said the model's answer was cut off, and nothing said why.
 - **A previewed page with no scripts says nothing about scripts (WEB-U-513).** A page of text, pictures and tables no
   longer shows "Scripts are running in a sandbox" or Stop scripts; only Reload.
 - **A model's id on Settings > Models is never cut (WEB-E2E-144).** It has its own line, wrapping whole if it must,
@@ -25,6 +29,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   installation's labels with one of them malformed made the whole container listing fail, so the sweep removed
   nothing and a task's teardown kept retrying. It is now left out of the listing, logged, and counted on Status as
   something the sweep couldn't remove; the rest are listed and swept as before.
+- **A shell command no longer fails when another process ends during its cleanup (RT-I-064).** After each command the
+  runtime looks through every process for escaped background children; one that ended between being listed and being
+  read (a browser's or an MCP server's child, for example) made that cleanup fail, and the command with it, with
+  "escaped process cleanup failed". A process that has ended is now skipped; the runtime's log names the step of any
+  other cleanup failure.
 ### Changed
 
 - **A helper's failed run says why on the lead's page (GW-I-343, WEB-U-512).** The lead task's line read only

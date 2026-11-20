@@ -218,18 +218,12 @@ fn children(limit: usize) -> Result<Vec<Child>, RuntimeError> {
         if inspected > limit {
             return Err(RuntimeError::Limit);
         }
-        let file = match std::fs::File::open(entry.path().join("stat")) {
-            Ok(file) => file,
-            Err(e) if e.kind() == std::io::ErrorKind::NotFound => continue,
-            Err(_) => return Err(RuntimeError::io("proc stat open")),
+        let Some(file) = open_stat(&entry.path())? else {
+            continue;
         };
-        let mut bytes = Vec::new();
-        file.take(STAT_BYTES + 1)
-            .read_to_end(&mut bytes)
-            .map_err(|_| RuntimeError::io("proc stat read"))?;
-        if bytes.len() as u64 > STAT_BYTES {
-            return Err(RuntimeError::Limit);
-        }
+        let Some(bytes) = read_stat(file)? else {
+            continue;
+        };
         let line = std::str::from_utf8(&bytes).map_err(|_| RuntimeError::io("proc stat parse"))?;
         let (parent, start) = parent_and_start(line).ok_or(RuntimeError::io("proc stat parse"))?;
         if parent == own {
@@ -237,6 +231,37 @@ fn children(limit: usize) -> Result<Vec<Child>, RuntimeError> {
         }
     }
     Ok(children)
+}
+
+/// Opens a process's `/proc/<pid>/stat`, or `None` when the process is gone: any process may end between the listing
+/// of `/proc` and this open (RT-I-064).
+pub(super) fn open_stat(process: &std::path::Path) -> Result<Option<std::fs::File>, RuntimeError> {
+    match std::fs::File::open(process.join("stat")) {
+        Ok(file) => Ok(Some(file)),
+        Err(e) if gone(&e) => Ok(None),
+        Err(_) => Err(RuntimeError::io("proc stat open")),
+    }
+}
+
+/// Reads an opened `stat` file, bounded, or `None` when its process ended after the open: the read then fails with
+/// ESRCH (RT-I-064).
+pub(super) fn read_stat(file: std::fs::File) -> Result<Option<Vec<u8>>, RuntimeError> {
+    let mut bytes = Vec::new();
+    match file.take(STAT_BYTES + 1).read_to_end(&mut bytes) {
+        Ok(_) => {}
+        Err(e) if gone(&e) => return Ok(None),
+        Err(_) => return Err(RuntimeError::io("proc stat read")),
+    }
+    if bytes.len() as u64 > STAT_BYTES {
+        return Err(RuntimeError::Limit);
+    }
+    Ok(Some(bytes))
+}
+
+/// Whether a `/proc/<pid>` file's error says its process is gone (ENOENT or ESRCH), not that the reaper failed.
+fn gone(error: &std::io::Error) -> bool {
+    error.kind() == std::io::ErrorKind::NotFound
+        || error.raw_os_error() == Some(Errno::SRCH.raw_os_error())
 }
 
 /// `/proc/<pid>/stat`'s parent pid and starttime: the 4th and 22nd fields, counted after the command's closing

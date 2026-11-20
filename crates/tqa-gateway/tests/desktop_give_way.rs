@@ -122,6 +122,16 @@ async fn message(f: &Fixture, id: &ConversationId, cookie: &str, key: &str) -> T
     Ok(())
 }
 
+/// Pins or unpins `conversation`, as its person does.
+async fn pin(f: &Fixture, conversation: &ConversationId, pinned: bool) -> TestResult {
+    sqlx::query("UPDATE conversations SET pinned=$2 WHERE id=$1")
+        .bind(Uuid::parse_str(conversation.as_str())?)
+        .bind(pinned)
+        .execute(&f.pool)
+        .await?;
+    Ok(())
+}
+
 /// Admission passes until `second` has a sandbox: the idle desktop gave way.
 async fn gives_way(f: &Fixture, second: &ConversationId) -> TestResult {
     tokio::time::timeout(DEADLINE * 4, async {
@@ -205,7 +215,11 @@ async fn gw_i_305_a_running_or_pinned_desktop_or_a_failed_reset_keeps_its_place(
         ran_and_reset(f, &mut runtime, &first, (1, "r-1"), false).await?;
         message(f, &second, &cookie, "second").await?;
         keeps_its_place(f, &second, "a failed reset leaves the profile unknown").await?;
-        // A clean one, then a run that hasn't ended.
+        // From a clean reset on, the profile is known empty until a Take over, and a run doesn't change that: whenever
+        // no run is active, the gateway's own admission pass (every second) may retire the desktop. So it is pinned
+        // whenever it is idle until the end. Loaded CI runners hit both moments it wasn't (from 14 Nov 2026).
+        pin(f, &first, true).await?;
+        // A clean reset, then a run that hasn't ended: unpinned only while that run is active.
         ran_and_reset(f, &mut runtime, &first, (3, "r-2"), true).await?;
         event(
             f,
@@ -217,7 +231,10 @@ async fn gw_i_305_a_running_or_pinned_desktop_or_a_failed_reset_keeps_its_place(
             },
         )
         .await?;
+        pin(f, &first, false).await?;
         keeps_its_place(f, &second, "a run is active").await?;
+        // Pinned by its person before that run ends, then a clean reset: it keeps its place.
+        pin(f, &first, true).await?;
         event(
             f,
             &mut runtime,
@@ -228,12 +245,6 @@ async fn gw_i_305_a_running_or_pinned_desktop_or_a_failed_reset_keeps_its_place(
             },
         )
         .await?;
-        // Pinned by its person, before its reset ends: otherwise the gateway's own admission pass can retire it in the
-        // moment between the reset and the pin, which a loaded CI runner hit (14 Nov 2026).
-        sqlx::query("UPDATE conversations SET pinned=true WHERE id=$1")
-            .bind(Uuid::parse_str(first.as_str())?)
-            .execute(&f.pool)
-            .await?;
         runtime
             .send(&ServerFrame::ScreenReset {
                 ok: true,
@@ -242,10 +253,7 @@ async fn gw_i_305_a_running_or_pinned_desktop_or_a_failed_reset_keeps_its_place(
             })
             .await?;
         keeps_its_place(f, &second, "pinned").await?;
-        sqlx::query("UPDATE conversations SET pinned=false WHERE id=$1")
-            .bind(Uuid::parse_str(first.as_str())?)
-            .execute(&f.pool)
-            .await?;
+        pin(f, &first, false).await?;
         gives_way(f, &second).await
     })
     .await

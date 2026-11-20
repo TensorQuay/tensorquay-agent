@@ -39,10 +39,11 @@ impl<T: Tool> Tool for ReapingTool<T> {
 }
 impl<T: Tool> ReapingTool<T> {
     async fn reaped(&self, result: Result<ToolOutput, ToolError>) -> Result<ToolOutput, ToolError> {
-        self.cleanup
-            .reap()
-            .await
-            .map_err(|_| ToolError::Io("escaped process cleanup failed".into()))?;
+        self.cleanup.reap().await.map_err(|error| {
+            // The model reads the short sentence; the log keeps which step failed, so a failure can be told apart.
+            tracing::warn!(error = %error, "escaped process cleanup failed");
+            ToolError::Io("escaped process cleanup failed".into())
+        })?;
         result
     }
 }
