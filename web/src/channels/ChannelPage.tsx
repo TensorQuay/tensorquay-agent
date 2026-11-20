@@ -143,9 +143,10 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
     queryKey: ["channel-members", id],
     queryFn: ({ signal }) => api.members(id, signal),
     retry: false,
-    // No members hint on the stream yet (the channels API contract): again on focus and every 15 s while shown.
+    // Each agent's live state (working, waiting, idle; WEB-U-519) comes with the members: again on focus and every 5 s
+    // while shown, so the header's "N working" follows the runs.
     refetchOnWindowFocus: true,
-    refetchInterval: 15_000,
+    refetchInterval: 5_000,
   });
   const cache = useQueryClient();
   // An ended channel reads only: its state comes again from the gateway (the stream's channel.state).
