@@ -8,13 +8,20 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 ## 18.1.1 (20 November 2026)
 
 A fix release: a shell command no longer fails when another process ends during its cleanup, a previewed page
-without scripts says nothing about scripts, a model's id is never cut on Settings › Models, and the install guide
+without scripts says nothing about scripts, a picture too large to preview no longer offers Expand, a route check's
+long answer can be read with the keyboard, a model's id is never cut on Settings › Models, and the install guide
 names a second installation's settings first. No migration, protocol or configuration change: upgrade in place.
 
 ### Fixed
 
 - **A previewed page with no scripts says nothing about scripts (WEB-U-513).** A page of text, pictures and tables no
   longer shows "Scripts are running in a sandbox" or Stop scripts; only Reload.
+- **A picture too large to preview no longer offers Expand (WEB-U-517).** In the Files panel, an image over the
+  preview's limit (10 MiB) showed its note, "Too large to preview", with an Expand that had nothing to show; it now
+  offers only Download, as a page, spreadsheet or PDF over its limit does.
+- **A route check's long answer can be read with the keyboard (WEB-U-518).** The server's answer under a failed check
+  scrolls when it is long; it could be scrolled only with a mouse. It is now a named area that Tab reaches, in the check
+  and in the Models list.
 - **A model's id on Settings > Models is never cut (WEB-E2E-144).** It has its own line, wrapping whole if it must,
   with its Verified pill under it, so a long language's wider menu no longer cuts it.
 - **A shell command no longer fails when another process ends during its cleanup (RT-I-064).** After each command the
