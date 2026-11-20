@@ -68,23 +68,9 @@ impl EventStore {
             }
             (Some(ended @ ("run.completed" | "run.failed" | "run.cancelled")), Some(run)) => {
                 crate::host_keys::end_run(&mut transaction, id, run).await?;
-                // A woken run that failed or was stopped is said in its channel (C-6), with the code the task page words.
-                let badly = match (ended, frame) {
-                    (
-                        "run.failed",
-                        ServerFrame::Event {
-                            event: tqa_types::Event::RunFailed { code, .. },
-                            ..
-                        },
-                    ) => Some(
-                        serde_json::to_value(code)
-                            .ok()
-                            .and_then(|code| code.as_str().map(str::to_owned)),
-                    ),
-                    ("run.cancelled", _) => Some(None),
-                    _ => None,
-                };
-                said = crate::channels::wake::run_ended(&mut transaction, id, badly).await?;
+                // A woken run that failed or was stopped is said in its channel (C-6).
+                let ending = crate::channels::wake::Ending::of(ended, frame);
+                said = crate::channels::wake::run_ended(&mut transaction, id, ending).await?;
             }
             _ => {}
         }
