@@ -1,5 +1,6 @@
-"""GW-I-326, GW-I-327 and GW-I-328: the administrator's Sandboxes page on a real Docker engine with the testkit's fake model
-(the Sandboxes page design note; GW-U-216 to GW-U-218 on the fixture's engine are the same rules without one).
+"""GW-I-326, GW-I-327, GW-I-328 and E2E-OPS-001: the administrator's Sandboxes page on a real Docker engine with the
+testkit's fake model (the Sandboxes page design note; GW-U-216 to GW-U-218 on the fixture's engine are the same rules
+without one).
 
 Each case starts its own stack (robustness.Stack: its own name, pool, port and installation), with a fake-model
 scenario that answers each task by a phrase of its first message (prompt selection), so tasks of two people run their
