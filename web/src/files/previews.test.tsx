@@ -117,7 +117,11 @@ const error = (status: number, code: string): Answer => ({
 // Scripts run, in a sandbox that keeps them from the app.
 describe("WEB-U-087 a web page in the Files panel", () => {
   it("frames the page from the sandboxed view, with only allow-scripts, the note, Reload and Download", async () => {
-    files["out/report.html"] = content("out/report.html", 900, "<p>hi</p>");
+    files["out/report.html"] = content(
+      "out/report.html",
+      900,
+      "<p>hi</p><script>document.title = 'hi'</script>",
+    );
     show("out/report.html");
     const frame = await screen.findByTitle("Preview of report.html");
     const src = new URL(frame.getAttribute("src") ?? "", "http://localhost");
@@ -175,7 +179,11 @@ describe("WEB-U-087 a web page in the Files panel", () => {
   // WEB-U-494: Expand opens the page as a split beside the chat: the same frame, never a second one, so its scripts
   // run once; Close brings the panel back with that frame still.
   it("Expand opens the page as a split, its one frame kept, and Close brings it back", async () => {
-    files["out/report.html"] = content("out/report.html", 900, "<p>hi</p>");
+    files["out/report.html"] = content(
+      "out/report.html",
+      900,
+      "<p>hi</p><script>document.title = 'hi'</script>",
+    );
     show("out/report.html");
     const frame = await screen.findByTitle("Preview of report.html");
     fireEvent.click(screen.getByRole("button", { name: "Expand" }));
@@ -249,7 +257,8 @@ describe("WEB-U-467 a page that loads from the internet", () => {
   });
 
   it("shows the bar alone for a self-contained page", async () => {
-    const html = '<p>hi</p><a href="https://example.org/">More</a>';
+    const html =
+      '<p>hi</p><a href="https://example.org/">More</a><script>document.title = "hi"</script>';
     files["report.html"] = content("report.html", html.length, html);
     show("report.html");
     await screen.findByTitle("Preview of report.html");

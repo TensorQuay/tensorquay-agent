@@ -117,7 +117,10 @@ describe("WEB-U-470 a web page is previewed with its folder's files", () => {
   });
 
   it("Stop scripts reloads the page without them, and Run scripts brings them back", async () => {
-    files["site/index.html"] = page("site/index.html", "<p>hi</p>");
+    files["site/index.html"] = page(
+      "site/index.html",
+      "<p>hi</p><script>document.title = 'hi'</script>",
+    );
     show("site/index.html");
     await screen.findByTitle("Preview of index.html");
     fireEvent.click(screen.getByRole("button", { name: "Stop scripts" }));

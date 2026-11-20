@@ -315,7 +315,10 @@ describe("WEB-U-467 the internet hosts a page loads from", () => {
 // with none says nothing about scripts.
 describe("WEB-U-513 a page's scripts", () => {
   it.each([
-    ["<h1>Q3</h1><img src='chart.png'><table><tr><td>1</td></tr></table>", false],
+    [
+      "<h1>Q3</h1><img src='chart.png'><table><tr><td>1</td></tr></table>",
+      false,
+    ],
     ["<p>No code here, only the word script in prose.</p>", false],
     ['<script type="application/json">{"a":1}</script><p>data only</p>', false],
     ["<script>document.title = 'x'</script>", true],
