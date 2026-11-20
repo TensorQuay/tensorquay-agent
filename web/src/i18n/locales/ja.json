@@ -2386,6 +2386,7 @@
     "models.checkName": "ルート {name} を確認",
     "models.checkTitle": "ルート {name} を確認",
     "models.checkIntro": "タスクと同様に、このルートを通じて 1 つのツール呼び出しを含む短いリクエストを送信し、数トークンを使用します。最大で 1 分かかる場合があります。",
+    "models.checkExcerpt": "サーバーの応答",
     "models.checkIntroLocal": "タスクと同様に、このルートを通じて 1 つのツール呼び出しを含む短いリクエストを送信し、数トークンを使用します。ローカルモデルでは 1〜2 分かかる場合があります。",
     "models.runCheck": "確認を実行",
     "models.checkDetails": "詳細",

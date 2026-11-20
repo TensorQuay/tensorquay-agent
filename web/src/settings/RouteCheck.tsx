@@ -330,7 +330,14 @@ function CheckResult({
             </p>
           )}
           {failure.excerpt && (
-            <pre className="type-code check-excerpt">{failure.excerpt}</pre>
+            <pre
+              className="type-code check-excerpt"
+              role="group"
+              tabIndex={0}
+              aria-label={t("models.checkExcerpt")}
+            >
+              {failure.excerpt}
+            </pre>
           )}
         </div>
       )}
