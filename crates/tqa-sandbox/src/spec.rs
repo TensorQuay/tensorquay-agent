@@ -125,6 +125,9 @@ pub struct SandboxSpec {
     /// An environment declaring `desktop` (ADR-0039 section 10): a 1 GiB `/dev/shm`, the browser's own tmpfs at
     /// `/run/tqa-browser` and the display's framebuffer file at `/run/tqa-display`. The microVM backend refuses it until its rootfs has the Desktop.
     pub desktop: bool,
+    /// Long-term memory (ADR-0041): the runtime builds the workspace's memory index into each run's instructions
+    /// (`TQA_MEMORY=1`). Off, a run sends exactly what a run without memory sends.
+    pub long_term_memory: bool,
 }
 
 impl SandboxSpec {

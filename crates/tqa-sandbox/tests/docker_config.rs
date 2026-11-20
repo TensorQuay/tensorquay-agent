@@ -233,3 +233,36 @@ fn sbx_u_018_loopback_never_goes_through_the_proxy() -> Result<(), Box<dyn Error
     }
     Ok(())
 }
+
+// TEST: SBX-U-024
+#[test]
+fn sbx_u_024_long_term_memory_is_told_to_the_runtime_only_when_on() -> Result<(), Box<dyn Error>> {
+    let mut spec = support::spec()?;
+    let off = container_config(
+        &spec,
+        "sandbox-internal",
+        SystemTime::UNIX_EPOCH,
+        token_file(),
+    )?;
+    assert!(
+        !off.env
+            .iter()
+            .flatten()
+            .any(|entry| entry.starts_with("TQA_MEMORY"))
+    );
+    spec.long_term_memory = true;
+    let on = container_config(
+        &spec,
+        "sandbox-internal",
+        SystemTime::UNIX_EPOCH,
+        token_file(),
+    )?;
+    let set: Vec<_> = on
+        .env
+        .iter()
+        .flatten()
+        .filter(|entry| entry.starts_with("TQA_MEMORY"))
+        .collect();
+    assert_eq!(set, ["TQA_MEMORY=1"]);
+    Ok(())
+}

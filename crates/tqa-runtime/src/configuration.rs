@@ -23,6 +23,20 @@ pub struct RuntimeInputs {
     /// The backend property `sync_before_result` (`TQA_SYNC_BEFORE_RESULT`): flush the workspace before journaling
     /// each tool result. The microVM backend sets it; Docker does not.
     pub sync_before_result: bool,
+    /// Long-term memory (`TQA_MEMORY`, ADR-0041): build the workspace's memory index into each run's instructions.
+    pub memory: bool,
+}
+
+/// Parses `TQA_MEMORY`: absent is false, exactly `1` is true, anything else is refused (fail closed).
+///
+/// # Errors
+/// `Configuration("TQA_MEMORY")` for any other value.
+pub fn memory(value: Option<&str>) -> Result<bool, RuntimeError> {
+    match value {
+        None => Ok(false),
+        Some("1") => Ok(true),
+        Some(_) => Err(RuntimeError::Configuration("TQA_MEMORY")),
+    }
 }
 
 /// Parses `TQA_SYNC_BEFORE_RESULT`: absent is false, exactly `1` is true, anything else is refused (fail closed).
@@ -62,6 +76,14 @@ impl RuntimeInputs {
                 }
                 .as_deref(),
             )?,
+            memory: memory(
+                match std::env::var("TQA_MEMORY") {
+                    Ok(value) => Some(value),
+                    Err(std::env::VarError::NotPresent) => None,
+                    Err(_) => return Err(RuntimeError::Configuration("TQA_MEMORY")),
+                }
+                .as_deref(),
+            )?,
         })
     }
 }
@@ -76,6 +98,8 @@ pub struct RuntimeConfig {
     pub(crate) workspace: PathBuf,
     pub(crate) skills: PathBuf,
     pub(crate) sync_before_result: bool,
+    /// Build the workspace's memory index into each run's instructions (ADR-0041).
+    pub(crate) memory: bool,
 }
 impl RuntimeConfig {
     /// Validates paths and origin, then reads the credential once. Call from a blocking worker.
@@ -112,6 +136,7 @@ impl RuntimeConfig {
             workspace,
             skills: inputs.skills,
             sync_before_result: inputs.sync_before_result,
+            memory: inputs.memory,
         })
     }
     /// Returns the derived WebSocket registration endpoint on the configured origin.

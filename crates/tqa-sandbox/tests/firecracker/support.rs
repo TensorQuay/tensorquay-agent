@@ -498,6 +498,7 @@ impl Host {
                 .collect::<BTreeMap<_, _>>(),
             skills: tqa_sandbox::SkillsMounts::default(),
             desktop: false,
+            long_term_memory: false,
         })
     }
 

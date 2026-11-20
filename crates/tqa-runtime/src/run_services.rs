@@ -574,6 +574,13 @@ fn instruction_slot(
     });
     instructions.push_str(&tqa_prompt::render(&files));
     instructions.push_str(&tqa_prompt::render_skill_index(&skills));
+    // Long-term memory (ADR-0041): the index the runtime generates from the workspace's notes and digests, pinned
+    // with the instructions so it survives compaction; nothing at all when memory is off.
+    if config.memory {
+        instructions.push_str(&tqa_prompt::render_memory_index(
+            &tqa_prompt::discover_memory(workspace),
+        ));
+    }
     let loaded = ContextLoaded {
         instructions: files
             .iter()

@@ -41,6 +41,8 @@ pub struct Fixture {
     pub gateway: FakeGateway,
     pub clock: FakeClock,
     pub sleeper: Arc<FakeSleeper>,
+    /// Long-term memory for the runs this fixture launches (`TQA_MEMORY`); off unless a test turns it on.
+    pub memory: std::sync::atomic::AtomicBool,
 }
 /// Where a fixture keeps the runtime's state, journal included.
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -111,6 +113,7 @@ impl Fixture {
             gateway,
             clock,
             sleeper,
+            memory: std::sync::atomic::AtomicBool::new(false),
         })
     }
     pub fn deps(&self) -> Result<RuntimeDeps, Box<dyn std::error::Error>> {
@@ -128,6 +131,7 @@ impl Fixture {
             workspace: self.directory.path().join("workspace"),
             skills: self.directory.path().join("skills"),
             sync_before_result: false,
+            memory: self.memory.load(std::sync::atomic::Ordering::Relaxed),
         })?;
         Ok(RuntimeDeps {
             config,

@@ -300,6 +300,8 @@ impl SandboxManager {
             desktop: binding
                 .capabilities
                 .contains(&tqa_types::Capability::Desktop),
+            // Long-term memory (ADR-0041): the install switch; a person's own comes with Settings › Memory.
+            long_term_memory: self.config.memory.enabled,
         })
     }
 
