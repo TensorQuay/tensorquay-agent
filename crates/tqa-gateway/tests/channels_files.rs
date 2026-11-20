@@ -376,7 +376,7 @@ async fn sec_069_a_channel_files_name_cant_leave_uploads(pool: PgPool) -> TestRe
         let workspace = f.backend.mounted(&analyst.id).ok_or("workspace")?;
         let uploads = workspace.join("uploads");
         let placed: Vec<String> = std::fs::read_dir(&uploads)?
-            .filter_map(|entry| entry.ok())
+            .filter_map(std::result::Result::ok)
             .map(|entry| entry.file_name().to_string_lossy().into_owned())
             .collect();
         assert_eq!(placed.len(), 3, "{placed:?}");

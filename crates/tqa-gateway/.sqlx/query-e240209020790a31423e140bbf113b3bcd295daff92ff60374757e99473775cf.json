@@ -1,11 +1,11 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT COALESCE(sum(size), 0)::bigint AS \"used!\" FROM channel_uploads WHERE channel_id = $1",
+  "query": "SELECT COALESCE(sum(size), 0)::bigint AS \"kept!\" FROM channel_uploads WHERE channel_id = $1",
   "describe": {
     "columns": [
       {
         "ordinal": 0,
-        "name": "used!",
+        "name": "kept!",
         "type_info": "Int8",
         "origin": "Expression"
       }
@@ -19,5 +19,5 @@
       null
     ]
   },
-  "hash": "2a18d7378660d91c5f59fb2e349c7e93db985f583302cd0f187ab2dd40cd455a"
+  "hash": "e240209020790a31423e140bbf113b3bcd295daff92ff60374757e99473775cf"
 }

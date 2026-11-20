@@ -97,13 +97,13 @@ pub(crate) async fn upload(
     sqlx::query!("SELECT id FROM channels WHERE id = $1 FOR UPDATE", id)
         .fetch_one(&mut *transaction)
         .await?;
-    let used = sqlx::query_scalar!(
-        "SELECT COALESCE(sum(size), 0)::bigint AS \"used!\" FROM channel_uploads WHERE channel_id = $1",
+    let kept_bytes = sqlx::query_scalar!(
+        "SELECT COALESCE(sum(size), 0)::bigint AS \"kept!\" FROM channel_uploads WHERE channel_id = $1",
         id
     )
     .fetch_one(&mut *transaction)
     .await?;
-    if used.saturating_add(i64::try_from(size).unwrap_or(i64::MAX)) > total {
+    if kept_bytes.saturating_add(i64::try_from(size).unwrap_or(i64::MAX)) > total {
         return Err(GatewayError::Conflict("uploads_full"));
     }
     sqlx::query!(
@@ -317,37 +317,16 @@ pub(crate) async fn place(
     .fetch_all(&state.pool)
     .await?;
     if !missing.is_empty() {
+        let missing: Vec<Missing> = missing
+            .into_iter()
+            .map(|file| Missing {
+                seq: file.seq,
+                index: file.index,
+                name: format!("{}-{}-{}", file.channel_name, file.seq, file.name),
+            })
+            .collect();
         match handed::workspace(state, member).await {
-            Ok(workspace) => {
-                let stored = state.storage.channel_files(channel);
-                for file in missing {
-                    let name = format!("{}-{}-{}", file.channel_name, file.seq, file.name);
-                    let from = stored
-                        .join(file.seq.to_string())
-                        .join(file.index.to_string());
-                    match handed::place(state, &workspace, &name, &from).await {
-                        Ok((path, _)) => {
-                            sqlx::query!(
-                                "INSERT INTO channel_file_placements (channel_id, seq, index, conversation_id, path) \
-                                 VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING",
-                                channel,
-                                file.seq,
-                                file.index,
-                                member,
-                                path
-                            )
-                            .execute(&state.pool)
-                            .await?;
-                        }
-                        Err(error) => {
-                            tracing::warn!(
-                                code = error.code(),
-                                "a channel file wasn't placed in a member's workspace"
-                            );
-                        }
-                    }
-                }
-            }
+            Ok(workspace) => place_each(state, &workspace, (channel, member), &missing).await?,
             Err(GatewayError::FilesUnavailable) => {}
             Err(error) => return Err(error),
         }
@@ -365,4 +344,48 @@ pub(crate) async fn place(
     .into_iter()
     .map(|row| (row.seq, row.index, row.path))
     .collect())
+}
+
+/// A file not yet in a member's workspace: its message, its place in it, and the name it gets there.
+struct Missing {
+    seq: i64,
+    index: i16,
+    name: String,
+}
+
+/// Places each missing file in `workspace` and records where; one that doesn't fit is logged and left out.
+async fn place_each(
+    state: &State,
+    workspace: &handed::Workspace,
+    (channel, member): (Uuid, Uuid),
+    missing: &[Missing],
+) -> Result<(), GatewayError> {
+    let stored = state.storage.channel_files(channel);
+    for file in missing {
+        let from = stored
+            .join(file.seq.to_string())
+            .join(file.index.to_string());
+        let path = match handed::place(state, workspace, &file.name, &from).await {
+            Ok((path, _)) => path,
+            Err(error) => {
+                tracing::warn!(
+                    code = error.code(),
+                    "a channel file wasn't placed in a member's workspace"
+                );
+                continue;
+            }
+        };
+        sqlx::query!(
+            "INSERT INTO channel_file_placements (channel_id, seq, index, conversation_id, path) \
+             VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING",
+            channel,
+            file.seq,
+            file.index,
+            member,
+            path
+        )
+        .execute(&state.pool)
+        .await?;
+    }
+    Ok(())
 }

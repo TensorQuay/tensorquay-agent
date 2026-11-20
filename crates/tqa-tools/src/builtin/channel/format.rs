@@ -88,15 +88,15 @@ fn block(channel: &str, message: &ChannelMessage) -> Result<String, ToolError> {
     if !message.files.is_empty() {
         body.push_str("\n\nFiles:");
         for file in &message.files {
-            match &file.path {
-                Some(path) => {
-                    body.push_str(&format!("\n- {path} ({}, {} bytes)", file.name, file.size))
-                }
-                None => body.push_str(&format!(
+            // Writing to a String can't fail.
+            let _ = match &file.path {
+                Some(path) => write!(body, "\n- {path} ({}, {} bytes)", file.name, file.size),
+                None => write!(
+                    body,
                     "\n- {} ({} bytes): not in your workspace yet",
                     file.name, file.size
-                )),
-            }
+                ),
+            };
         }
     }
     untrusted::wrap("channel", &attributes, &body)
