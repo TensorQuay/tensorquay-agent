@@ -26,8 +26,18 @@ pub enum BackendKind {
 pub struct Listing {
     /// The sandboxes the listing could read.
     pub handles: Vec<SandboxHandle>,
-    /// The engine ids of the containers with this instance's labels that it couldn't read.
-    pub unreadable: Vec<String>,
+    /// The containers with this instance's labels that it couldn't read.
+    pub unreadable: Vec<Unreadable>,
+}
+
+/// A container with this instance's labels that a listing couldn't read: its engine id, and the engine's own creation
+/// time when the engine gave one, so the sweep says its true age (SBX-U-025).
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Unreadable {
+    /// The engine id.
+    pub id: String,
+    /// When the engine created it.
+    pub created_at: Option<std::time::SystemTime>,
 }
 
 /// A backend identity and the immutable conversation binding used for reconciliation.

@@ -19,7 +19,7 @@ pub mod template;
 
 pub use backend::{
     BackendKind, EngineNetworks, Listing, Reconciliation, SandboxBackend, SandboxHandle,
-    SandboxStats, reconcile,
+    SandboxStats, Unreadable, reconcile,
 };
 pub use egress::{EgressMode, EgressPolicy, HostRule};
 pub use error::{ENVIRONMENT_FAILED_EXIT, SandboxError};

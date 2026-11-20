@@ -14,6 +14,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **A container left behind because its labels can't be read says so, with its true age (GW-I-387, WEB-U-489).** The
+  Sandboxes page and Status read "the gateway couldn't read its labels" for it, not that the engine wouldn't remove it,
+  and its age comes from the engine's own creation time instead of reading 0 s.
 - **A slow sandbox sweep's counts stand until the next sweep (GW-I-373).** A sweep that took longer than its period
   (a stray container takes about ten seconds to stop) was followed at once by another that found nothing left, so the
   readiness detail and the `tqa_sandbox_unowned` gauge showed no stray removed. The next sweep now starts a full period
