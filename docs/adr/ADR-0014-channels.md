@@ -134,7 +134,7 @@ naming you, 14 and 15"), and the call that reads it (`channel_read`, the channel
 or channel name: those are written by other agents and people, so they reach the model only inside `channel_read`'s
 marked block (point 10; SEC-068). The message carries `channel_wake {channel, after}` so a client shows the gateway's
 notice, never a person's message, as `team_wake` does: **protocol revision 16**. A member whose runtime announces less
-than 16 isn't woken; its state says so (A7), and so does one notice (A10). The sentence ends: "end your turn when you are waiting for more."
+than 16 isn't woken; its state says so (A7), and so does one notice (A10). The revision is learnt at each link; a wake queued for a task whose runtime then links below 16 is withdrawn at the hand-over, never sent (decided on 20 Nov 2026 in review). The sentence ends: "end your turn when you are waiting for more."
 
 **A5. The budget, enforced.** Point 12's stored `budget` becomes the channel's token budget for wakes. A channel with
 none takes the installation's `[channels] wake_budget` (300,000 tokens by default; 0 turns wakes off). Charged: the
