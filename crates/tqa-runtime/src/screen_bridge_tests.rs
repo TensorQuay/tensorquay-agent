@@ -157,6 +157,8 @@ fn bridge(
             workspace: directory.clone(),
             skills: directory,
             sync_before_result: false,
+            memory: false,
+            memory_person: None,
         },
         pace: Pace {
             dial: Duration::from_secs(5),

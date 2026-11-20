@@ -102,6 +102,23 @@ pub(crate) async fn latest(pool: &PgPool, workspace: Uuid) -> Result<Option<Uuid
     .await?)
 }
 
+/// The earliest snapshot still kept of `conversation`: the workspace as it was before the task's first recorded
+/// message (older ones are pruned with the workspace's oldest).
+///
+/// # Errors
+/// Database failures.
+pub(crate) async fn first_of(
+    pool: &PgPool,
+    conversation: Uuid,
+) -> Result<Option<Uuid>, GatewayError> {
+    Ok(sqlx::query_scalar!(
+        "SELECT id FROM workspace_snapshots WHERE conversation_id=$1 ORDER BY after_seq ASC, taken_at ASC LIMIT 1",
+        conversation
+    )
+    .fetch_optional(pool)
+    .await?)
+}
+
 /// The delivering conversation's last event seq.
 ///
 /// # Errors

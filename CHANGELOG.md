@@ -11,6 +11,16 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   people will open TensorQuay Agent, which model server to use (or none, for a first try with the test model) and who
   the first administrator is. It then pulls the release, writes what the guide's steps make by hand, starts it, and
   creates that administrator. It never changes an existing installation. The guide's steps by hand stay as they are.
+- **Long-term memory, first part (ADR-0041; off by default until it is complete).** With `[memory] enabled = true`
+  a task's runs are told how to keep notes across tasks in `.memory/` (one fact per file) and get an index of the
+  workspace's notes and of their person's finished tasks, generated at every run and pinned so it survives a
+  summary. A note may not hold a key: the file tools refuse one, and a note that got one another way is left out of
+  the index. Each change to a note keeps its previous version for one Undo, and a person can write, remove and undo
+  a note over the API (`/conversations/{id}/memory/{name}`, with a write share). When a person's run completes, the
+  gateway writes the task's digest (its title, the day, the files it changed, the first lines of the answer; no
+  model call) into that person's private folder of the workspace, which the Files panel does not show and no other
+  person's run lists. Off, a run sends exactly what it sends today. Still to come before it is turned on:
+  "Remembered" with Undo on the page, personal notes with Settings › Memory, and history.
 
 ### Fixed
 
@@ -26,6 +36,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   installation's labels with one of them malformed made the whole container listing fail, so the sweep removed
   nothing and a task's teardown kept retrying. It is now left out of the listing, logged, and counted on Status as
   something the sweep couldn't remove; the rest are listed and swept as before.
+- **A shell command no longer fails when another process ends during its cleanup (RT-I-064).** After each command the
+  runtime looks through every process for escaped background children; one that ended between being listed and being
+  read (a browser's or an MCP server's child, for example) made that cleanup fail, and the command with it, with
+  "escaped process cleanup failed". A process that has ended is now skipped; the runtime's log names the step of any
+  other cleanup failure.
 ### Changed
 
 - **A helper's failed run says why on the lead's page (GW-I-343, WEB-U-512).** The lead task's line read only
