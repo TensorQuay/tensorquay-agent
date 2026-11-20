@@ -85,7 +85,9 @@ describe("WEB-U-519 the channel's header", () => {
       }),
     ).toBeVisible();
     expect(within(header).getByText("2 working")).toBeVisible();
-    expect(within(header).getByText("Budget 38 % used today")).toHaveClass("muted");
+    expect(within(header).getByText("Budget 38 % used today")).toHaveClass(
+      "muted",
+    );
     const faces = within(header).getByRole("list", { name: "Who's here" });
     expect(within(faces).getAllByRole("listitem")).toHaveLength(4);
     expect(within(faces).getByTitle("Pricing analyst, working")).toBeVisible();

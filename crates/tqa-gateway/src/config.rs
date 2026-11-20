@@ -433,7 +433,7 @@ impl GatewayConfig {
             agent_teams: agent_teams::agent_teams(input.agent_teams)?,
             memory: memory::memory(&input.memory),
             desktop: desktop::desktop(&input.desktop)?,
-            channels: channels::channels(&input.channels),
+            channels: channels::channels(&input.channels)?,
             computer: computer::computer(&input.computer)?,
             tasks: input.tasks,
             sandbox: input.sandbox,

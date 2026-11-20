@@ -13103,7 +13103,7 @@
                   "wake_budget": {
                     "type": "integer",
                     "minimum": 0,
-                    "description": "Tokens; 0 turns waking off for this channel."
+                    "description": "Tokens a day; 0 turns waking off for this channel."
                   }
                 }
               }
@@ -26081,12 +26081,20 @@
           "wake_budget": {
             "type": "integer",
             "minimum": 0,
-            "description": "The tokens woken runs may spend here: its own budget, or the installation's [channels] wake_budget (ADR-0014's amendment of 20 Nov 2026, A5); on one channel's read only."
+            "description": "The tokens woken runs may spend here a day: its own budget, or the installation's [channels] wake_budget (ADR-0014's amendment of 20 Nov 2026, A5; a daily allowance, decided on 21 Nov 2026); on one channel's read only."
           },
           "spent_tokens": {
             "type": "integer",
             "minimum": 0,
-            "description": "What woken runs have spent here; on one channel's read only."
+            "description": "What woken runs have spent here today, in the open budget window (0 when none is open); on one channel's read only."
+          },
+          "budget_resets_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "When the open budget window ends and spent is 0 again: a day after its first charge (decided on 21 Nov 2026); null while none is open; on one channel's read only."
           }
         }
       },
@@ -26490,6 +26498,11 @@
               "code": {
                 "type": "string",
                 "description": "For woken_run_failed: the run's failure code, so a page words it as the task page does (decided on 20 Nov 2026)."
+              },
+              "resets_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "For wake_budget_spent: when the channel's daily budget renews, so a page says when agents are woken again in the reader's own time (decided on 21 Nov 2026)."
               }
             },
             "description": "Written only by the gateway, for people (ADR-0014's amendment of 20 Nov 2026): a line about the channel itself, in the gateway's fixed words. Never in an agent's reads; posting one is refused. A client shows it as one muted line, and an unknown kind by its text."

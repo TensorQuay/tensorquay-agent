@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "UPDATE channels c SET spent_tokens = c.spent_tokens + $2 FROM channel_charges g WHERE g.conversation_id = $1 AND c.id = g.channel_id RETURNING c.id, c.spent_tokens, c.budget",
+  "query": "UPDATE channels c SET spent_tokens = CASE WHEN c.budget_window_start IS NULL OR c.budget_window_start + make_interval(secs => $3) <= CURRENT_TIMESTAMP THEN $2 ELSE c.spent_tokens + $2 END, budget_window_start = CASE WHEN c.budget_window_start IS NULL OR c.budget_window_start + make_interval(secs => $3) <= CURRENT_TIMESTAMP THEN CURRENT_TIMESTAMP ELSE c.budget_window_start END FROM channel_charges g WHERE g.conversation_id = $1 AND c.id = g.channel_id RETURNING c.id, c.spent_tokens, c.budget, c.budget_window_start + make_interval(secs => $3) AS \"resets!\"",
   "describe": {
     "columns": [
       {
@@ -35,19 +35,27 @@
             "name": "budget"
           }
         }
+      },
+      {
+        "ordinal": 3,
+        "name": "resets!",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
       }
     ],
     "parameters": {
       "Left": [
         "Uuid",
-        "Int8"
+        "Int8",
+        "Float8"
       ]
     },
     "nullable": [
       false,
       false,
-      true
+      true,
+      null
     ]
   },
-  "hash": "2ac67841b2661221e2036a72104d2fc9978d7ff9f5fa0b873a0201c8e8e9ef61"
+  "hash": "9a99015971083d965b0243385b1a65c981f0f5b68568874a4940d9b72731e3b5"
 }

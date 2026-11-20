@@ -119,7 +119,7 @@ async fn persist(
         };
         // A run a channel's wake started spends that channel's budget too (ADR-0014's amendment, A5).
         let said = match conversation {
-            Some(conversation) => crate::channels::wake::spend(&mut transaction, conversation, tokens, state.config.channels.wake_budget).await?,
+            Some(conversation) => crate::channels::wake::spend(&mut transaction, conversation, tokens, (state.config.channels.wake_budget, state.config.channels.budget_window)).await?,
             None => Vec::new(),
         };
         transaction.commit().await?;

@@ -46,9 +46,13 @@ pub(crate) struct ChannelView {
     /// 2026, A5); on one channel's read only.
     #[serde(skip_serializing_if = "Option::is_none")]
     wake_budget: Option<i64>,
-    /// What woken runs have spent here; on one channel's read only.
+    /// What woken runs have spent here today (in the open window); on one channel's read only.
     #[serde(skip_serializing_if = "Option::is_none")]
     spent_tokens: Option<i64>,
+    /// When the open budget window ends and spent is 0 again (RFC 3339; decided on 21 Nov 2026, C-3); null while none
+    /// is open; on one channel's read only.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    budget_resets_at: Option<serde_json::Value>,
 }
 
 #[derive(Serialize)]
@@ -77,6 +81,7 @@ impl From<Listed> for ChannelView {
             last_seq: channel.last_seq,
             wake_budget: None,
             spent_tokens: None,
+            budget_resets_at: None,
         }
     }
 }
@@ -252,16 +257,30 @@ pub(crate) async fn get(
         let mut view: ChannelView = store::visible(&mut connection, caller(&user), id)
             .await?
             .into();
-        // Its wake budget and spend, for the page's header (ADR-0014's amendment of 20 Nov 2026, A5).
+        // Its wake budget and today's spend, for the page's header (ADR-0014's amendment of 20 Nov 2026, A5): a window
+        // that has ended reads as none, spent 0, even before the sweep renews it (C-3).
         let spend = sqlx::query!(
-            "SELECT budget, spent_tokens FROM channels WHERE id = $1",
-            id
+            "SELECT budget, \
+                    CASE WHEN budget_window_start + make_interval(secs => $2) > CURRENT_TIMESTAMP \
+                         THEN spent_tokens ELSE 0 END AS \"spent!\", \
+                    CASE WHEN budget_window_start + make_interval(secs => $2) > CURRENT_TIMESTAMP \
+                         THEN budget_window_start + make_interval(secs => $2) END AS resets \
+             FROM channels WHERE id = $1",
+            id,
+            state.config.channels.budget_window.as_secs_f64()
         )
         .fetch_one(&mut *connection)
         .await?;
         let installation = i64::try_from(state.config.channels.wake_budget).unwrap_or(i64::MAX);
         view.wake_budget = Some(spend.budget.unwrap_or(installation));
-        view.spent_tokens = Some(spend.spent_tokens);
+        view.spent_tokens = Some(spend.spent);
+        view.budget_resets_at = Some(match spend.resets {
+            Some(at) => serde_json::Value::String(
+                at.format(&time::format_description::well_known::Rfc3339)
+                    .map_err(|_| GatewayError::StoreUnavailable)?,
+            ),
+            None => serde_json::Value::Null,
+        });
         Ok(Json(view))
     })
     .await
@@ -917,6 +936,8 @@ pub(crate) async fn sweep(state: &State) -> Result<usize, GatewayError> {
             decided += 1;
         }
     }
+    // Budget windows that ended start again at 0 (C-3), so the wakes they held go out below with no new post.
+    super::wake::renew(state).await?;
     // The wakes that are due, the decisions' among them, and any a restart lost or a run held back (A3).
     super::wake::send(state, None).await?;
     Ok(decided)

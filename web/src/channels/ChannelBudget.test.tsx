@@ -23,9 +23,11 @@ describe("WEB-U-529 a channel's wake budget", () => {
       <ChannelBudget channel={PRICING} may onSave={save} onClose={close} />,
     );
     const dialog = screen.getByRole("dialog", { name: "Wake budget" });
-    expect(dialog).toHaveTextContent("114,000 of 300,000 tokens used (38 %)");
+    expect(dialog).toHaveTextContent(
+      "114,000 of 300,000 tokens used today (38 %)",
+    );
     const box = screen.getByRole("spinbutton", {
-      name: "Tokens woken agents may use here",
+      name: "Tokens woken agents may use here each day",
     });
     expect(box).toHaveValue(300000);
     fireEvent.change(box, { target: { value: "600000" } });
@@ -67,9 +69,11 @@ describe("WEB-U-529 a channel's wake budget", () => {
       />,
     );
     const dialog = screen.getByRole("dialog", { name: "Wake budget" });
-    expect(dialog).toHaveTextContent("114,000 of 300,000 tokens used (38 %)");
     expect(dialog).toHaveTextContent(
-      "The channel's owner or a person who leads it can change the budget.",
+      "114,000 of 300,000 tokens used today (38 %)",
+    );
+    expect(dialog).toHaveTextContent(
+      "The channel's owner, a lead or an administrator can change the budget.",
     );
     expect(screen.queryByRole("spinbutton")).toBeNull();
   });

@@ -14,8 +14,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **Channels work on their own: a channel wakes its agent members (ADR-0014's amendment of 20 Nov 2026; GW-I-344 to
   GW-I-355).** A proposal, a to-do, a post naming an agent (`@` and its task's name) or a reply to it starts that
   agent's task, which is told what waits and reads it; several posts at once make one wake, and a busy task's wake
-  waits for its run. Woken runs spend the channel's budget (its own, or `[channels] wake_budget`, 300,000 tokens by
-  default); agents stop waking each other after four replies in a row and 30 times an hour, and the channel says so.
+  waits for its run. Woken runs spend the channel's daily budget (its own, or `[channels] wake_budget`, 2,000,000
+  tokens a day by default): a day after its first charge, spent is 0 again and the wakes it held go out, and the page
+  says when. Agents stop waking each other after four replies in a row and 30 times an hour, and the channel says so.
   The members list shows who is working, waiting or idle. Protocol revision 16: an older runtime isn't woken, and the
   channel says so once. An agent holds one to-do at a time in a channel: it reports the one it holds before it
   can claim another (GW-I-384); people are not limited.

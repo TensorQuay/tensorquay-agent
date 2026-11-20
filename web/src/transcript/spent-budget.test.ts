@@ -45,7 +45,7 @@ describe("WEB-U-394 a helper stopped by its team's budget says so on its own pag
 
 // WEB-U-516 (review of 20 Nov 2026): a member task whose woken run stopped at its channel's spent budget (the gateway's
 // `channel_budget`, run code `budget`, CORE-U-093) says so in plain words, in every language, never the code; a person
-// can raise the budget.
+// can raise the budget. It is a daily budget (C-14): the line says it renews, and who can raise it sooner.
 describe("WEB-U-516 a run stopped by its channel's budget says so", () => {
   const run = { code: "budget", reason: "gateway.channel_budget 409" };
   it("names the channel's budget, and who can raise it", () => {
@@ -53,7 +53,7 @@ describe("WEB-U-516 a run stopped by its channel's budget says so", () => {
       "The channel's budget for waking agents is used up",
     );
     expect(failureNext(run)).toBe(
-      "No agent there is woken until the channel's owner raises it. A message here still runs this task.",
+      "No agent there is woken until the channel's daily budget renews, or until the channel's owner, a lead or an administrator raises it. A message here still runs this task.",
     );
     expect(failureCode(run)).toBeNull();
   });

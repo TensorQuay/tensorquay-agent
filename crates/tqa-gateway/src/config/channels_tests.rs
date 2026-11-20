@@ -17,14 +17,14 @@ fn gw_u_238_the_wake_budget_is_two_million_tokens_a_day_by_default() -> Result<(
     let parsed = GatewayConfig::from_toml(&config(""))?;
     assert_eq!(parsed.channels.wake_budget, 2_000_000);
     assert_eq!(parsed.channels.max_wake_budget, 10_000_000);
-    assert_eq!(parsed.channels.budget_window, Duration::from_secs(86_400));
+    assert_eq!(parsed.channels.budget_window, Duration::from_hours(24));
     let parsed = GatewayConfig::from_toml(&config(
         "[channels]\nwake_budget=100\nbudget_window_seconds=1\n",
     ))?;
     assert_eq!(parsed.channels.wake_budget, 100);
     assert_eq!(parsed.channels.budget_window, Duration::from_secs(1));
     let parsed = GatewayConfig::from_toml(&config("[channels]\nbudget_window_seconds=604800\n"))?;
-    assert_eq!(parsed.channels.budget_window, Duration::from_secs(604_800));
+    assert_eq!(parsed.channels.budget_window, Duration::from_hours(168));
     Ok(())
 }
 

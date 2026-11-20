@@ -316,6 +316,7 @@ pub(crate) async fn notice(
                 member,
                 member_id,
                 code: None,
+                resets_at: None,
                 text,
             },
         ),
@@ -745,7 +746,9 @@ fn crossed(before: i64, after: i64, budget: i64, percent: i64) -> bool {
 }
 
 /// Adds `tokens` to the channel a charged run of `conversation` spends for, in the meter's transaction (A5): 80 % and
-/// 100 % are each said once, by the spend that crosses them. Answers the notices to publish after the commit.
+/// 100 % are each said once, by the spend that crosses them. The budget is a daily allowance (decided on 21 Nov 2026,
+/// C-3): a charge with no window open, or after it ended, opens a new one at 0, which lasts `budget_window`. Answers the
+/// notices to publish after the commit.
 ///
 /// # Errors
 /// Storage failure.
@@ -753,16 +756,25 @@ pub(crate) async fn spend(
     connection: &mut PgConnection,
     conversation: Uuid,
     tokens: i64,
-    default_budget: u64,
+    (default_budget, window): (u64, std::time::Duration),
 ) -> Result<Vec<(Uuid, u64)>, GatewayError> {
     if tokens <= 0 {
         return Ok(Vec::new());
     }
+    let window = window.as_secs_f64();
     let Some(channel) = sqlx::query!(
-        "UPDATE channels c SET spent_tokens = c.spent_tokens + $2 FROM channel_charges g \
-         WHERE g.conversation_id = $1 AND c.id = g.channel_id RETURNING c.id, c.spent_tokens, c.budget",
+        "UPDATE channels c SET \
+           spent_tokens = CASE WHEN c.budget_window_start IS NULL \
+             OR c.budget_window_start + make_interval(secs => $3) <= CURRENT_TIMESTAMP THEN $2 \
+             ELSE c.spent_tokens + $2 END, \
+           budget_window_start = CASE WHEN c.budget_window_start IS NULL \
+             OR c.budget_window_start + make_interval(secs => $3) <= CURRENT_TIMESTAMP THEN CURRENT_TIMESTAMP \
+             ELSE c.budget_window_start END \
+         FROM channel_charges g WHERE g.conversation_id = $1 AND c.id = g.channel_id \
+         RETURNING c.id, c.spent_tokens, c.budget, c.budget_window_start + make_interval(secs => $3) AS \"resets!\"",
         conversation,
-        tokens
+        tokens,
+        window
     )
     .fetch_optional(&mut *connection)
     .await?
@@ -775,7 +787,7 @@ pub(crate) async fn spend(
     let before = channel.spent_tokens - tokens;
     let mut published = Vec::new();
     if budget > 0 && crossed(before, channel.spent_tokens, budget, 80) {
-        let text = "Woken agents have used 80 % of this channel's budget.".to_owned();
+        let text = "Woken agents have used 80 % of this channel's budget for today.".to_owned();
         published.push((
             channel.id,
             notice(
@@ -788,19 +800,74 @@ pub(crate) async fn spend(
         ));
     }
     if budget > 0 && crossed(before, channel.spent_tokens, budget, 100) {
-        let text = "Woken agents have used this channel's budget: no agent is woken here until it is raised.".to_owned();
         published.push((
             channel.id,
-            notice(
-                connection,
-                channel.id,
-                (ChannelNoticeKind::WakeBudgetSpent, None),
-                text,
-            )
-            .await?,
+            spent_notice(connection, channel.id, channel.resets).await?,
         ));
     }
     Ok(published)
+}
+
+/// The channel's notice that its budget for today is used up (A5, C-14): when it renews, in UTC for whoever reads the
+/// text and as `resets_at` for a page to say in its reader's own time, and who can raise it sooner.
+async fn spent_notice(
+    connection: &mut PgConnection,
+    channel: Uuid,
+    resets: time::OffsetDateTime,
+) -> Result<u64, GatewayError> {
+    let at = resets.to_offset(time::UtcOffset::UTC);
+    let clock = format!(
+        "{:02}:{:02} UTC on {} {} {}",
+        at.hour(),
+        at.minute(),
+        at.day(),
+        at.month(),
+        at.year()
+    );
+    let stamp = at
+        .format(&time::format_description::well_known::Rfc3339)
+        .map_err(|_| GatewayError::StoreUnavailable)?;
+    let message = super::store::append_body(
+        connection,
+        channel,
+        &super::store::gateway_author(),
+        (
+            None,
+            &MessageBody::Notice {
+                kind: ChannelNoticeKind::WakeBudgetSpent,
+                member: None,
+                member_id: None,
+                code: None,
+                resets_at: Some(stamp),
+                text: format!(
+                    "Woken agents have used this channel's budget for today: no agent is woken here until it renews at \
+                     {clock}, or until the channel's owner, a lead or an administrator raises it."
+                ),
+            },
+        ),
+    )
+    .await?;
+    Ok(message.seq)
+}
+
+/// Starts again at 0 every channel whose budget window has ended (decided on 21 Nov 2026, C-3); the sweep runs it
+/// before it sends what is due, so the wakes the spent budget held go out without a new post. Answers how many.
+///
+/// # Errors
+/// Storage failure.
+pub(crate) async fn renew(state: &State) -> Result<u64, GatewayError> {
+    let renewed = sqlx::query!(
+        "UPDATE channels SET spent_tokens = 0, budget_window_start = NULL WHERE budget_window_start IS NOT NULL \
+         AND budget_window_start + make_interval(secs => $1) <= CURRENT_TIMESTAMP",
+        state.config.channels.budget_window.as_secs_f64()
+    )
+    .execute(&state.pool)
+    .await?
+    .rows_affected();
+    if renewed > 0 {
+        tracing::info!(renewed, "channel budget windows renewed");
+    }
+    Ok(renewed)
 }
 
 /// Refuses a model call from a run charged to a channel whose budget is spent: `409 channel_budget` (A5).
@@ -809,12 +876,16 @@ pub(crate) async fn spend(
 /// `409 channel_budget`, a store failure.
 pub(crate) async fn check(state: &State, conversation: Uuid) -> Result<(), GatewayError> {
     let default = i64::try_from(state.config.channels.wake_budget).unwrap_or(i64::MAX);
+    let window = state.config.channels.budget_window.as_secs_f64();
     let spent = crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
+        // Today's spend only: a window that ended counts 0 even before the sweep renews it (C-3).
         Ok(sqlx::query_scalar!(
-            "SELECT COALESCE(c.budget, $2) > 0 AND c.spent_tokens >= COALESCE(c.budget, $2) AS \"spent!\" \
+            "SELECT COALESCE(c.budget, $2) > 0 AND CASE WHEN c.budget_window_start + make_interval(secs => $3) \
+                    > CURRENT_TIMESTAMP THEN c.spent_tokens ELSE 0 END >= COALESCE(c.budget, $2) AS \"spent!\" \
              FROM channel_charges g JOIN channels c ON c.id = g.channel_id WHERE g.conversation_id = $1",
             conversation,
-            default
+            default,
+            window
         )
         .fetch_optional(&state.pool)
         .await?)

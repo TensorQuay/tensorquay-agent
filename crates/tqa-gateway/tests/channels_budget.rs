@@ -180,6 +180,13 @@ async fn gw_i_385_the_budget_renews_a_day_after_its_first_charge(pool: PgPool) -
             assert!(analyst.next(f, WAKE + WAKE).await?.is_some(), "the held wake after the reset");
             let renewed = read(f, &cookie, &id).await?;
             assert_eq!((&renewed["spent_tokens"], &renewed["budget_resets_at"]), (&json!(0), &Value::Null), "{renewed}");
+            // The woken run's charge opens a new window, from 0, ending later than the first.
+            analyst.start(f).await?;
+            assert_eq!(model_call(f, &analyst).await?.0, 200);
+            assert_eq!(spent(f, &id, 40).await?, 40);
+            let next = read(f, &cookie, &id).await?;
+            let next_resets = next["budget_resets_at"].as_str().ok_or("a new window")?;
+            assert!(Some(next_resets) > opened.as_deref(), "{next}");
             Ok(())
         },
     ))

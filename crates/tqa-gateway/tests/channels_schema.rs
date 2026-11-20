@@ -69,6 +69,7 @@ fn gw_u_235_every_notice_kind_and_field_is_in_the_api_document()
         member: Some("Ana".into()),
         member_id: Some("01a1f9c4-dba5-75a5-829d-7447f02597c7".into()),
         code: Some("budget".into()),
+        resets_at: Some("2026-11-22T03:00:00Z".into()),
         text: "Ana changed this channel's budget.".into(),
     };
     let MessageBody::Notice { .. } = &notice else {

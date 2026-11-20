@@ -37,7 +37,7 @@ describe("WEB-U-533 a channel's daily budget on the page", () => {
       "2,000,000 of 2,000,000 tokens used today (100 %)",
     );
     expect(dialog).toHaveTextContent(
-      `The budget renews ${local}: agents are woken again then. The channel's owner, a lead or an administrator can raise it sooner.`,
+      `The budget renews on ${local}: agents are woken again then. The channel's owner, a lead or an administrator can raise it sooner.`,
     );
   });
 
@@ -83,7 +83,7 @@ describe("WEB-U-533 a channel's daily budget on the page", () => {
     );
     const log = screen.getByRole("list", { name: "Channel log" });
     expect(log).toHaveTextContent(
-      `Woken agents have used this channel's budget for today: agents are woken here again ${local}, or sooner if the channel's owner, a lead or an administrator raises it.`,
+      `Woken agents have used this channel's budget for today: agents are woken here again on ${local}, or sooner if the channel's owner, a lead or an administrator raises it.`,
     );
     expect(log).toHaveTextContent(
       "Woken agents have used this channel's budget for today. The channel's owner, a lead or an administrator can raise it.",

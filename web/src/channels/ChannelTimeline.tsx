@@ -18,6 +18,7 @@ import { knownFailure } from "../transcript/failure-keys";
 import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
 
+import { resetTime } from "./budget-time";
 import { initials } from "./ChannelHeader";
 import type {
   Author,
@@ -565,6 +566,15 @@ function Body({
                 knownFailure(body.code ?? "", "")?.reason ??
                   "run.stoppedUnknown",
               ),
+            })}
+          </p>
+        );
+      // A used-up daily budget says when agents are woken again, in the reader's own time (C-14).
+      if (body.kind === "wake_budget_spent" && body.resets_at)
+        return (
+          <p className="type-small muted">
+            {t("channels.noticeBudgetSpentUntil", {
+              time: resetTime(body.resets_at, t.locale),
             })}
           </p>
         );

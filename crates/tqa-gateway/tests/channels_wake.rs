@@ -605,7 +605,7 @@ async fn gw_i_362_the_channel_answer_carries_its_budget_and_a_notice_its_member(
             let (owner, cookie) = f.admin().await?;
             let gone = Agent::new(f, owner.id, "Gone").await?;
             let id = channel(f, &cookie, "pricing", &[(&gone, "member")]).await?;
-            sqlx::query("UPDATE channels SET spent_tokens = 250 WHERE id = $1")
+            sqlx::query("UPDATE channels SET spent_tokens = 250, budget_window_start = CURRENT_TIMESTAMP WHERE id = $1")
                 .bind(Uuid::parse_str(&id)?)
                 .execute(&f.pool)
                 .await?;

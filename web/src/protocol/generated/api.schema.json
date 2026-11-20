@@ -2235,6 +2235,13 @@
         "spent_tokens": {
           "type": "integer",
           "minimum": 0
+        },
+        "budget_resets_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
         }
       }
     },
@@ -2604,6 +2611,10 @@
             },
             "code": {
               "type": "string"
+            },
+            "resets_at": {
+              "type": "string",
+              "format": "date-time"
             }
           }
         }

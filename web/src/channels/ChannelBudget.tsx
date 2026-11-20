@@ -9,12 +9,15 @@ import { Button } from "../ui/Button";
 import { Dialog } from "../ui/Dialog";
 import { Input } from "../ui/Input";
 
+import { resetTime } from "./budget-time";
+
 import type { Channel } from "./contract";
 
 /**
- * A channel's wake budget (ADR-0014's amendment, A5; decided on 20 Nov 2026, C-1; WEB-U-529): what it is and what woken
- * runs spent; its owner, a person who leads it, or an administrator (`may`) sets the number, and everyone else reads
- * who can.
+ * A channel's wake budget (ADR-0014's amendment, A5; decided on 20 Nov 2026, C-1; WEB-U-529): what it is a day and what
+ * woken runs spent today, and, while a window is open, when it renews in the viewer's time and who can raise it sooner
+ * (C-14, WEB-U-533); its owner, a person who leads it, or an administrator (`may`) sets the number, and everyone else
+ * reads who can.
  */
 export function ChannelBudget({
   channel,
@@ -89,6 +92,13 @@ export function ChannelBudget({
             ),
           })}
         </p>
+        {channel.budget_resets_at && (
+          <p>
+            {t("channels.budgetResets", {
+              time: resetTime(channel.budget_resets_at, t.locale),
+            })}
+          </p>
+        )}
         {may ? (
           <>
             <Input

@@ -5,7 +5,7 @@
     "fail.teamBudgetHelper": "This helper stopped: its team's budget is nearly spent",
     "fail.teamBudgetHelperNext": "Its lead writes up what the team has. Open the lead task to see it.",
     "fail.teamBudgetNext": "Its helpers have stopped. Send a message to carry on without them.",
-    "fail.channelBudgetNext": "No agent there is woken until the channel's owner raises it. A message here still runs this task.",
+    "fail.channelBudgetNext": "No agent there is woken until the channel's daily budget renews, or until the channel's owner, a lead or an administrator raises it. A message here still runs this task.",
     "fail.emptyReplyNext": "Send the message again: an empty answer is often a one-off. If it keeps happening, an administrator can check the model route.",
     "fail.continueNext": "Send a message to continue where it stopped.",
     "fail.replyCutNext": "Raise Max output on the route, or the model server's context or max tokens.",

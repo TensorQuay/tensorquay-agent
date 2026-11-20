@@ -1,0 +1,43 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT budget, CASE WHEN budget_window_start + make_interval(secs => $2) > CURRENT_TIMESTAMP THEN spent_tokens ELSE 0 END AS \"spent!\", CASE WHEN budget_window_start + make_interval(secs => $2) > CURRENT_TIMESTAMP THEN budget_window_start + make_interval(secs => $2) END AS resets FROM channels WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "budget",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "channels",
+            "name": "budget"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "spent!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "resets",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Float8"
+      ]
+    },
+    "nullable": [
+      true,
+      null,
+      null
+    ]
+  },
+  "hash": "06cbe25899a80388c929c13a182b40a73f7d4f0eab7c2be28ae7385617fd75c3"
+}

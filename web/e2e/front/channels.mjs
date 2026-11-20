@@ -45,6 +45,28 @@ const channels = seededMap([
       viewers: null,
     },
   ],
+  // A channel whose budget for today is used up (C-3, C-14; WEB-E2E-148): the header, the dialog and the notice say
+  // when agents are woken again, in the viewer's own time.
+  [
+    "0195d8c0-0000-7000-8000-00000000c4a3",
+    {
+      id: "0195d8c0-0000-7000-8000-00000000c4a3",
+      name: "Used up today",
+      purpose: "",
+      rule: "human",
+      state: "open",
+      owner: { id: "0195d8c0-0000-7000-8000-00000000a0a0", name: "Ana" },
+      created_at: "2026-11-21T01:00:00Z",
+      ended_at: null,
+      role: "member",
+      member_count: 1,
+      last_seq: 1,
+      wake_budget: 2000000,
+      spent_tokens: 2000000,
+      budget_resets_at: "2026-11-22T03:00:00Z",
+      viewers: null,
+    },
+  ],
 ]);
 const replies = seededMap();
 /** Each channel's open streams (ADR-0014 point 11): a new message goes to every one. */
@@ -330,7 +352,23 @@ const logs = seededMap([
         body: {
           type: "notice",
           kind: "wake_budget_80",
-          text: "Woken agents have used 80 % of this channel's budget.",
+          text: "Woken agents have used 80 % of this channel's budget for today.",
+        },
+      },
+    ],
+  ],
+  [
+    "0195d8c0-0000-7000-8000-00000000c4a3",
+    [
+      {
+        seq: 1,
+        ts: "2026-11-21T03:00:00Z",
+        author: { kind: "gateway", id: "gateway", name: "gateway" },
+        body: {
+          type: "notice",
+          kind: "wake_budget_spent",
+          resets_at: "2026-11-22T03:00:00Z",
+          text: "Woken agents have used this channel's budget for today: no agent is woken here until it renews at 03:00 UTC on 22 November 2026, or until the channel's owner, a lead or an administrator raises it.",
         },
       },
     ],

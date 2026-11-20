@@ -36,8 +36,8 @@ pub struct ChannelPage {
 #[derive(Clone, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 #[serde(untagged)]
 pub enum PageMessage {
-    /// A message this runtime reads.
-    Known(ChannelMessage),
+    /// A message this runtime reads (boxed: a message is far larger than the JSON value beside it).
+    Known(Box<ChannelMessage>),
     /// Any other message, as the gateway sent it.
     Unrecognised(serde_json::Value),
 }
@@ -55,6 +55,6 @@ impl PageMessage {
 
 impl From<ChannelMessage> for PageMessage {
     fn from(message: ChannelMessage) -> Self {
-        Self::Known(message)
+        Self::Known(Box::new(message))
     }
 }
