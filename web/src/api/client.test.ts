@@ -85,7 +85,7 @@ describe("GW-U-022 browser API contract", () => {
     // added a channel post's file download there, and the composer's upload and its remove (ADR-0014's amendment of 20
     // Nov 2026, A9).
     expect(Object.keys(operations)).toHaveLength(50);
-    expect(Object.keys(settingsOperations)).toHaveLength(85);
+    expect(Object.keys(settingsOperations)).toHaveLength(86);
     expect(
       Object.keys(operations).filter((name) => name in settingsOperations),
     ).toEqual([]);
