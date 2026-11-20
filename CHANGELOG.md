@@ -8,7 +8,7 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 ### Added
 
 - **Long-term memory, first part (ADR-0041; off by default until it is complete).** With `[memory] enabled = true`
-  a task's runs are told how to keep notes across tasks in `.tqa/memory/` (one fact per file) and get an index of
+  a task's runs are told how to keep notes across tasks in `.memory/` (one fact per file) and get an index of
   the workspace's notes and finished tasks, generated at every run and pinned so it survives a summary. Off, a run
   sends exactly what it sends today. The rest (notes in the Files panel, a secret scan on saves, "Remembered" with
   Undo, task digests, personal notes) comes before it's turned on.

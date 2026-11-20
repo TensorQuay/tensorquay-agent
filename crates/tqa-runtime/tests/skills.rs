@@ -313,7 +313,7 @@ async fn rt_i_028_an_allow_list_without_the_skill_tool_indexes_no_skill() -> Tes
 #[tokio::test]
 async fn rt_i_063_with_memory_on_the_index_is_pinned_with_the_instructions() -> TestResult {
     let f = Fixture::in_memory(vec![answer()]).await?;
-    let notes = f.directory.path().join("workspace/.tqa/memory");
+    let notes = f.directory.path().join("workspace/.memory");
     fs::create_dir_all(notes.join("tasks"))?;
     fs::write(
         notes.join("pnpm.md"),
@@ -328,7 +328,7 @@ async fn rt_i_063_with_memory_on_the_index_is_pinned_with_the_instructions() -> 
     let system = system_text(&bodies[0]);
     assert!(system.contains("# Memory"), "{system}");
     assert!(
-        system.contains("- .tqa/memory/pnpm.md: The project uses pnpm, never npm"),
+        system.contains("- .memory/pnpm.md: The project uses pnpm, never npm"),
         "{system}"
     );
     assert!(system.contains("Summarise sales by region"), "{system}");
@@ -346,11 +346,63 @@ async fn rt_i_063_with_memory_off_the_notes_are_never_read() -> TestResult {
     let without = Fixture::in_memory(vec![answer()]).await?;
     let (_, plain) = run(&without).await?;
     let with_notes = Fixture::in_memory(vec![answer()]).await?;
-    let notes = with_notes.directory.path().join("workspace/.tqa/memory");
+    let notes = with_notes.directory.path().join("workspace/.memory");
     fs::create_dir_all(&notes)?;
     fs::write(notes.join("pnpm.md"), "about: The project uses pnpm\n")?;
     let (_, off) = run(&with_notes).await?;
     assert_eq!(system_text(&off[0]), system_text(&plain[0]));
     assert!(!system_text(&off[0]).contains("# Memory"));
+    Ok(())
+}
+
+// TEST: RT-I-063
+#[tokio::test]
+async fn rt_i_063_a_note_the_agent_writes_is_in_the_next_runs_index() -> TestResult {
+    // The agent's own path: its write_file creates .memory/ (no folder before), and the next run's index lists it.
+    let f = Fixture::in_memory(vec![
+        Script::new(vec![Scripted::ToolCall {
+            name: "write_file".into(),
+            arguments_json: r#"{"path":".memory/build.md","create_parents":true,"content":"about: The build command is make release\nkind: convention\n\nRun make release, never make all.\n"}"#.into(),
+            split_into: 1,
+        }]),
+        answer(),
+        answer(),
+    ])
+    .await?;
+    f.memory.store(true, std::sync::atomic::Ordering::Relaxed);
+    f.gateway.set_bound(true);
+    let (shutdown, task) = f.launch()?;
+    f.gateway.wait_for_registrations(1).await?;
+    let completed = |f: &Fixture| {
+        f.gateway
+            .frames()
+            .iter()
+            .filter(|frame| matches!(frame, ServerFrame::Event { event, .. } if event_name(event) == "run.completed"))
+            .count()
+    };
+    f.gateway.send(user()).await?;
+    wait_for(|| completed(&f) == 1).await?;
+    assert!(
+        f.directory
+            .path()
+            .join("workspace/.memory/build.md")
+            .is_file()
+    );
+    f.gateway.send(user()).await?;
+    wait_for(|| completed(&f) == 2).await?;
+    stop(shutdown, task).await?;
+    let bodies: Vec<Value> = f
+        .gateway
+        .model_requests()
+        .into_iter()
+        .map(|request| request.body)
+        .collect();
+    let first = system_text(&bodies[0]);
+    let last = system_text(bodies.last().ok_or("a request")?);
+    assert!(!first.contains(".memory/build.md"), "{first}");
+    assert!(
+        last.contains("- .memory/build.md: The build command is make release"),
+        "{last}"
+    );
     Ok(())
 }

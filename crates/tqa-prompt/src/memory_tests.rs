@@ -34,10 +34,11 @@ fn prompt_u_029_before_the_first_note_only_the_rules_are_shown() -> TestResult {
     let text = render_memory_index(&discover_memory(&root));
     assert!(text.starts_with("\n# Memory\n"), "{text}");
     assert!(
-        text.contains("save it with write_file as .tqa/memory/<short-name>.md"),
+        text.contains("save it with write_file as .memory/<short-name>.md"),
         "{text}"
     );
     assert!(text.contains("Never save a secret"), "{text}");
+    assert!(text.contains("create_parents: true"), "{text}");
     assert!(
         !text.contains("Notes:") && !text.contains("Finished tasks"),
         "{text}"
@@ -78,7 +79,7 @@ fn prompt_u_029_notes_by_name_then_the_newest_tasks() -> TestResult {
             .iter()
             .map(|line| line.path.as_str())
             .collect::<Vec<_>>(),
-        [".tqa/memory/colours.md", ".tqa/memory/pnpm.md"]
+        [".memory/colours.md", ".memory/pnpm.md"]
     );
     assert_eq!(index.notes[1].about, "The project uses pnpm, never npm");
     assert_eq!(
@@ -95,7 +96,7 @@ fn prompt_u_029_notes_by_name_then_the_newest_tasks() -> TestResult {
     let tasks_at = text.find("Finished tasks").ok_or("tasks")?;
     assert!(notes_at < tasks_at, "{text}");
     assert!(
-        text.contains("- .tqa/memory/pnpm.md: The project uses pnpm, never npm\n"),
+        text.contains("- .memory/pnpm.md: The project uses pnpm, never npm\n"),
         "{text}"
     );
     Ok(())
@@ -152,7 +153,6 @@ fn prompt_u_029_a_memory_directory_that_is_a_link_is_not_followed() -> TestResul
     let directory = tempfile::tempdir()?;
     let outside = tempfile::tempdir()?;
     fs::write(outside.path().join("planted.md"), "about: planted\n")?;
-    fs::create_dir_all(directory.path().join(".tqa"))?;
     std::os::unix::fs::symlink(outside.path(), directory.path().join(MEMORY_DIRECTORY))?;
     let root = WorkspaceRoot::open(directory.path())?;
     assert_eq!(discover_memory(&root), MemoryIndex::default());
@@ -183,12 +183,12 @@ fn prompt_u_029_the_line_cap_keeps_notes_first_and_says_what_is_left() -> TestRe
         MAX_INDEX_LINES
     );
     assert_eq!(
-        text.matches("- .tqa/memory/n").count(),
+        text.matches("- .memory/n").count(),
         30,
         "every note fits first"
     );
     assert!(
-        text.contains("(10 older tasks in .tqa/memory/tasks: search them with grep.)"),
+        text.contains("(10 older tasks in .memory/tasks: search them with grep.)"),
         "{text}"
     );
     // The newest digests are the ones shown.
@@ -206,7 +206,7 @@ fn prompt_u_029_the_line_cap_keeps_notes_first_and_says_what_is_left() -> TestRe
     }
     let text = render_memory_index(&discover_memory(&root));
     assert!(
-        text.contains("(10 more notes in .tqa/memory: list it to see them.)"),
+        text.contains("(10 more notes in .memory: list it to see them.)"),
         "{text}"
     );
     Ok(())
@@ -227,15 +227,12 @@ fn prompt_u_029_the_byte_cap_holds_and_long_or_marked_up_lines_are_flattened() -
     assert!(text.len() <= MAX_INDEX_BYTES, "{} bytes", text.len());
     let line = text
         .lines()
-        .find(|line| line.starts_with("- .tqa/memory/n00"))
+        .find(|line| line.starts_with("- .memory/n00"))
         .ok_or("line")?;
     assert!(
         line.ends_with('…') && !line.contains('#') && !line.contains('\u{7}'),
         "{line}"
     );
-    assert!(
-        text.contains("more notes in .tqa/memory"),
-        "the cut says so"
-    );
+    assert!(text.contains("more notes in .memory"), "the cut says so");
     Ok(())
 }
