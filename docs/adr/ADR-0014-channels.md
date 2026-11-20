@@ -161,16 +161,17 @@ max_wake_budget` (10,000,000 by default); the channel gets a notice naming the p
 out at once, without a new post. Every member reads the budget and the spend from the page's "Wake budget…"; the
 used-up notice offers the change to those who may make it.
 
-**A5a. A daily allowance (decided on 21 Nov 2026).** The budget is per day. A channel's window opens at its first
-charge and lasts 24 hours (`[channels] budget_window_seconds`, 86,400; tests shorten it); after it, spent is 0 again,
-the next charge opens a new window, and the wakes the spent budget held go out without a new post (the sweep renews an
-ended window within seconds, before it sends what is due). A budget someone set keeps its number; one nobody set
-follows the installation's default, now 2,000,000 tokens a day; the ceiling stays 10,000,000. A channel's read gives
-`budget_resets_at` (null while no window is open). The header says "Budget N % used today"; the budget dialog and the
-used-up notice say when agents are woken again, in the reader's own time (the notice carries `resets_at`), and that the
-channel's owner, a lead or an administrator can raise it sooner. A stopped task's own line says the same without the
-time, which its failure doesn't carry. Migration 0111 starts every channel at 0 with no window open: no release had
-wakes, and the runs' metering keeps what was spent. Test rows: GW-U-238, GW-I-385, GW-I-386, WEB-U-533, WEB-E2E-148.
+**A5a. A daily allowance (decided on 21 Nov 2026).** The budget is per day. A channel's window opens at its first charge
+and lasts 24 hours (`[channels] budget_window_seconds`, 86,400; tests shorten it); after it, spent is 0 again, the next
+charge opens a new window, and the wakes the spent budget held go out without a new post (the sweep renews an ended
+window within seconds, before it sends what is due). A budget someone set keeps its number; one nobody set follows the
+installation's default, now 2,000,000 tokens a day; the ceiling stays 10,000,000. A channel's read gives
+`budget_resets_at` (null while no window is open). The header says "Budget N % used today"; the budget dialog says when
+it starts again at 0, and the used-up notice when agents are woken again and that the channel's owner, a lead or an
+administrator can raise it sooner, both in the reader's own time (the notice carries `resets_at`). A stopped task's own
+line says the same without the time, which its failure doesn't carry. Migration 0111 starts every channel at 0 with no
+window open: no release had wakes, and the runs' metering keeps what was spent. Test rows: GW-U-238, GW-I-385, GW-I-386,
+WEB-U-533, WEB-E2E-148.
 
 **A6. No ping-pong: N = 4 hops, and 30 agent wakes an hour.** Each message has a hop, stored beside it: a person's post
 is 0; an agent's post is one more than the hop of the wake that started its run (1 in a run a person started); a

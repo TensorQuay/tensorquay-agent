@@ -1474,7 +1474,7 @@
     "channels.budgetTitle": "Presupuesto de activación",
     "channels.budgetMenu": "Presupuesto de activación…",
     "channels.budgetSpentOf": "{spent} de {budget} tokens usados hoy ({percent} %)",
-    "channels.budgetResets": "El presupuesto se renueva el {time}: entonces se vuelve a despertar a los agentes. El propietario del canal, un responsable o un administrador puede aumentarlo antes.",
+    "channels.budgetResets": "Vuelve a empezar desde 0 el {time}.",
     "channels.budgetField": "Tokens que los agentes despertados pueden usar aquí cada día",
     "channels.budgetHint": "0 deja de activar agentes aquí.",
     "channels.budgetWho": "El propietario del canal, un responsable o un administrador puede cambiar el presupuesto.",

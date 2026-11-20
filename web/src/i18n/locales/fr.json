@@ -1471,7 +1471,7 @@
     "channels.budgetTitle": "Budget de réveil",
     "channels.budgetMenu": "Budget de réveil…",
     "channels.budgetSpentOf": "{spent} jetons utilisés aujourd’hui sur {budget} ({percent} %)",
-    "channels.budgetResets": "Le budget se renouvelle le {time} : les agents sont alors de nouveau réveillés. Le propriétaire du canal, un responsable ou un administrateur peut l’augmenter plus tôt.",
+    "channels.budgetResets": "Il repart de 0 le {time}.",
     "channels.budgetField": "Jetons que les agents réveillés peuvent utiliser ici chaque jour",
     "channels.budgetHint": "0 arrête de réveiller les agents ici.",
     "channels.budgetWho": "Le propriétaire du canal, un responsable ou un administrateur peut changer le budget.",

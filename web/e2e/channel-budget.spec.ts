@@ -43,8 +43,8 @@ test("WEB-E2E-147 the wake budget is set from the page and the log still loads",
 });
 
 // WEB-E2E-148 (decided on 21 Nov 2026, C-3 and C-14): the budget is per day. A channel whose budget for today is used
-// up says so in the header, its dialog says when it renews in the viewer's own time and who can raise it sooner, and
-// the used-up notice says when agents are woken here again; the API answers with the renewal validate.
+// up says so in the header, its dialog says when it starts again at 0 in the viewer's own time, and the used-up notice
+// says when agents are woken here again and who can raise it sooner; the API answers with the renewal validate.
 test("WEB-E2E-148 a used-up daily budget says when agents are woken again", async ({
   page,
 }) => {
@@ -71,9 +71,7 @@ test("WEB-E2E-148 a used-up daily budget says when agents are woken again", asyn
   await expect(dialog).toContainText(
     "2,000,000 of 2,000,000 tokens used today (100 %)",
   );
-  await expect(dialog).toContainText(
-    `The budget renews on ${local}: agents are woken again then. The channel's owner, a lead or an administrator can raise it sooner.`,
-  );
+  await expect(dialog).toContainText(`It starts again at 0 on ${local}.`);
   await expect(page.getByRole("alert").filter({ hasText: /\S/ })).toHaveCount(
     0,
   );

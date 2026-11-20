@@ -1476,7 +1476,7 @@
     "channels.budgetTitle": "งบการปลุก",
     "channels.budgetMenu": "งบการปลุก…",
     "channels.budgetSpentOf": "ใช้ไปวันนี้ {spent} จาก {budget} โทเค็น ({percent} %)",
-    "channels.budgetResets": "งบประมาณจะเริ่มใหม่เมื่อ {time}: ตอนนั้นเอเจนต์จะถูกปลุกอีกครั้ง เจ้าของแชนเนล ผู้นำ หรือผู้ดูแลระบบสามารถเพิ่มงบได้ก่อนหน้านั้น",
+    "channels.budgetResets": "จะเริ่มนับใหม่จาก 0 เมื่อ {time}",
     "channels.budgetField": "โทเค็นที่เอเจนต์ที่ถูกปลุกใช้ได้ที่นี่ในแต่ละวัน",
     "channels.budgetHint": "0 คือหยุดปลุกเอเจนต์ที่นี่",
     "channels.budgetWho": "เจ้าของแชนเนล ผู้นำ หรือผู้ดูแลระบบสามารถเปลี่ยนงบประมาณได้",

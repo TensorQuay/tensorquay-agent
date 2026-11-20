@@ -179,7 +179,7 @@
     "channels.budgetTitle": "Wake budget",
     "channels.budgetMenu": "Wake budget…",
     "channels.budgetSpentOf": "{spent} of {budget} tokens used today ({percent} %)",
-    "channels.budgetResets": "The budget renews on {time}: agents are woken again then. The channel's owner, a lead or an administrator can raise it sooner.",
+    "channels.budgetResets": "It starts again at 0 on {time}.",
     "channels.budgetField": "Tokens woken agents may use here each day",
     "channels.budgetHint": "0 stops waking agents here.",
     "channels.budgetWho": "The channel's owner, a lead or an administrator can change the budget.",

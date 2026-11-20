@@ -1475,7 +1475,7 @@
     "channels.budgetTitle": "Bajet bangun",
     "channels.budgetMenu": "Bajet bangun…",
     "channels.budgetSpentOf": "{spent} daripada {budget} token digunakan hari ini ({percent} %)",
-    "channels.budgetResets": "Bajet diperbaharui pada {time}: ejen dikejutkan semula ketika itu. Pemilik saluran, ketua atau pentadbir boleh menaikkannya lebih awal.",
+    "channels.budgetResets": "Ia bermula semula dari 0 pada {time}.",
     "channels.budgetField": "Token yang boleh digunakan oleh ejen yang dikejutkan di sini setiap hari",
     "channels.budgetHint": "0 menghentikan ejen dibangunkan di sini.",
     "channels.budgetWho": "Pemilik saluran, ketua atau pentadbir boleh menukar bajet.",

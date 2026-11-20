@@ -15,11 +15,11 @@ const local = new Intl.DateTimeFormat("en", {
   minute: "2-digit",
 }).format(new Date(RESETS));
 
-// WEB-U-533 (decided on 21 Nov 2026, C-3 and C-14): the budget is per day. The dialog says what is used today, when it
-// renews in the viewer's own time, and who can raise it sooner; the used-up notice says when agents are woken again and
-// who can raise it; a notice from before (no time) still says who can.
+// WEB-U-533 (decided on 21 Nov 2026, C-3 and C-14): the budget is per day. The dialog says what is used today and, in
+// neutral words, when it starts again at 0 in the viewer's own time; the used-up notice says when agents are woken
+// again and who can raise it sooner; a notice from before (no time) still says who can.
 describe("WEB-U-533 a channel's daily budget on the page", () => {
-  it("says in the dialog what is used today, when it renews and who can raise it sooner", () => {
+  it("says in the dialog what is used today and when it starts again at 0", () => {
     render(
       <ChannelBudget
         channel={channel("pricing", {
@@ -36,9 +36,7 @@ describe("WEB-U-533 a channel's daily budget on the page", () => {
     expect(dialog).toHaveTextContent(
       "2,000,000 of 2,000,000 tokens used today (100 %)",
     );
-    expect(dialog).toHaveTextContent(
-      `The budget renews on ${local}: agents are woken again then. The channel's owner, a lead or an administrator can raise it sooner.`,
-    );
+    expect(dialog).toHaveTextContent(`It starts again at 0 on ${local}.`);
   });
 
   it("says nothing of a renewal while no window is open", () => {
@@ -55,7 +53,7 @@ describe("WEB-U-533 a channel's daily budget on the page", () => {
     );
     const dialog = screen.getByRole("dialog", { name: "Wake budget" });
     expect(dialog).toHaveTextContent("0 of 2,000,000 tokens used today (0 %)");
-    expect(dialog).not.toHaveTextContent("renews");
+    expect(dialog).not.toHaveTextContent("starts again");
     expect(
       screen.getByRole("spinbutton", {
         name: "Tokens woken agents may use here each day",

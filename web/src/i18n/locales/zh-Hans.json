@@ -1482,7 +1482,7 @@
     "channels.budgetTitle": "唤醒预算",
     "channels.budgetMenu": "唤醒预算…",
     "channels.budgetSpentOf": "今天已用 {spent} / {budget} 个 token（{percent}%）",
-    "channels.budgetResets": "预算将在 {time} 更新，届时会再次唤醒智能体。频道所有者、负责人或管理员可以提前提高预算。",
+    "channels.budgetResets": "将于 {time} 从 0 重新开始。",
     "channels.budgetField": "被唤醒的智能体每天在此可用的 token",
     "channels.budgetHint": "设为 0 则不再唤醒此处的智能体。",
     "channels.budgetWho": "频道所有者、负责人或管理员可以修改预算。",

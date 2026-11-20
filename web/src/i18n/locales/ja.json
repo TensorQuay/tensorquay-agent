@@ -1476,7 +1476,7 @@
     "channels.budgetTitle": "起動予算",
     "channels.budgetMenu": "起動予算…",
     "channels.budgetSpentOf": "今日 {budget} トークン中 {spent} 使用（{percent}%）",
-    "channels.budgetResets": "予算は {time} に更新され、そのときエージェントが再び起こされます。チャンネルのオーナー、リード、または管理者は、それより早く予算を増やせます。",
+    "channels.budgetResets": "{time} に 0 から再開します。",
     "channels.budgetField": "起こされたエージェントがここで 1 日に使えるトークン",
     "channels.budgetHint": "0 にするとここでエージェントを起動しません。",
     "channels.budgetWho": "チャンネルのオーナー、リード、または管理者が予算を変更できます。",

@@ -1476,7 +1476,7 @@
     "channels.budgetTitle": "Ngân sách đánh thức",
     "channels.budgetMenu": "Ngân sách đánh thức…",
     "channels.budgetSpentOf": "Đã dùng hôm nay {spent} trên {budget} token ({percent} %)",
-    "channels.budgetResets": "Ngân sách được làm mới vào {time}: khi đó tác tử được đánh thức lại. Chủ kênh, một người dẫn dắt hoặc quản trị viên có thể tăng ngân sách sớm hơn.",
+    "channels.budgetResets": "Ngân sách bắt đầu lại từ 0 vào {time}.",
     "channels.budgetField": "Số token tác tử được đánh thức có thể dùng ở đây mỗi ngày",
     "channels.budgetHint": "0 là ngừng đánh thức tác tử ở đây.",
     "channels.budgetWho": "Chủ kênh, một người dẫn dắt hoặc quản trị viên có thể thay đổi ngân sách.",
