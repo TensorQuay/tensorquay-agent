@@ -323,6 +323,11 @@ class Yes(Case):
         self.assertFalse(any(url.endswith("/probe") for _, url, _, _ in system.requests), "the test model is probed")
         self.assertIn("The test model needs no check.", out.lines)
         self.assertEqual(out.lines[-1], "Ready. Open http://localhost:8080 and sign in as ana@example.org.")
+        # The stack's start is said as such, and "Ready" only once the administrator exists (it read "Ready in 0 s."
+        # first, a person's test run of 20 Nov 2026).
+        self.assertIn("Started.", out.lines)
+        self.assertLess(out.lines.index("Started."), len(out.lines) - 1)
+        self.assertEqual([line for line in out.lines if line.startswith("Ready")], [out.lines[-1]])
         models = (self.install_dir / "models.toml").read_text()
         self.assertIn('base_url="http://tqa-fake-model:8080/v1"\nmodel="fixture"\n', models)
 

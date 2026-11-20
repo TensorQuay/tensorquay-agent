@@ -491,7 +491,9 @@ class Installer:
                     " ".join(self.compose("logs", "gateway"))))
             self.system.sleep(2)
             waited += 2
-        self.io.say("Ready in {} s.".format(waited))
+        # Started, not yet ready for a person: "Ready" is said once the administrator exists, and this wait is only
+        # what was left after the start's own (it read "Ready in 0 s." then "Ready. Open …").
+        self.io.say("Started.")
         status, _ = self.system.http("POST", base + "/api/v1/auth/bootstrap", body=json.dumps(
             {"email": self.email, "password": self.password, "token": self.secrets_env["TQA_BOOTSTRAP_TOKEN"]}),
             headers={"Origin": self.address.origin, "Content-Type": "application/json"}, timeout=30)
