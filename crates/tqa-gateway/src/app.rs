@@ -673,6 +673,12 @@ impl Gateway {
         self.state.reconciler.hold(held);
     }
 
+    /// How many tasks the gateway's shutdown would join now. Only with the `testing` feature.
+    #[cfg(feature = "testing")]
+    pub fn tracked_tasks(&self) -> usize {
+        self.state.tasks.len()
+    }
+
     /// Holds channel wakes (`true`): nothing is sent after a commit or by the sweep, as if the gateway had stopped
     /// first; [`Gateway::channel_wakes_now`] still sends. Only with the `testing` feature.
     #[cfg(feature = "testing")]

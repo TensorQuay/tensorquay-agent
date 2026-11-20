@@ -895,3 +895,31 @@ async fn gw_i_355_a_member_that_cant_be_woken_gets_one_notice_not_one_per_messag
     }))
     .await
 }
+
+// TEST: GW-I-360
+// A wake's send belongs to the gateway's shutdown (review of 20 Nov 2026): it is one of the gateway's tracked tasks,
+// and cancelled before the wake gathers its burst, the gateway queues no wake at all.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_360_a_cancelled_gateway_sends_no_wake(pool: PgPool) -> TestResult {
+    Box::pin(support::run(pool, async |f| {
+        let (owner, cookie) = f.admin().await?;
+        let analyst = Agent::new(f, owner.id, "Pricing analyst").await?;
+        let id = channel(f, &cookie, "pricing", &[(&analyst, "member")]).await?;
+        // The wake gathering its burst is the gateway's own task, which its shutdown joins.
+        let before = f.gateway.tracked_tasks();
+        post(f, &cookie, &id, text("@pricing analyst look"), None).await?;
+        assert_eq!(f.gateway.tracked_tasks(), before + 1, "the wake is a tracked task");
+        f.gateway.cancel();
+        tokio::time::sleep(Duration::from_millis(2500)).await;
+        let queued: i64 = sqlx::query_scalar(
+            "SELECT count(*) FROM idempotency WHERE conversation_id = $1 AND key LIKE 'channel-wake:%'",
+        )
+        .bind(analyst.uuid)
+        .fetch_one(&f.pool)
+        .await?;
+        assert_eq!(queued, 0, "a cancelled gateway queued a wake");
+        Ok(())
+    }))
+    .await
+}
