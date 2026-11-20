@@ -186,6 +186,11 @@ pub(crate) const ROUTES: &[Route] = &[
         handler: Handler::Channels(ChannelRoute::Delete),
     },
     Route {
+        method: "PATCH",
+        path: "/api/v1/channels/{id}",
+        handler: Handler::Channels(ChannelRoute::SetBudget),
+    },
+    Route {
         method: "POST",
         path: "/api/v1/channels/{id}/end",
         handler: Handler::Channels(ChannelRoute::End),

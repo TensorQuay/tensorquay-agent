@@ -155,6 +155,7 @@ export function fakeChannels({
     | "myTasks"
     | "endChannel"
     | "deleteChannel"
+    | "setBudget"
   > &
     Partial<ChannelsApi> = {
     channels: () => Promise.resolve({ items: [...store], next_cursor: null }),
@@ -423,6 +424,13 @@ export function fakeChannels({
     if (!owns(id) && !admin)
       throw new ApiError(403, "not_owner", "fixture refusal");
   };
+  api.setBudget = (id, budget) =>
+    settle(() => {
+      const found = store.find((item) => item.id === id);
+      if (!found) throw new ApiError(404, "not_found", "fixture refusal");
+      found.wake_budget = budget;
+      return { ...found };
+    });
   api.endChannel = (id) =>
     settle(() => {
       endable(id);

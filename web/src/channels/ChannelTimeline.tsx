@@ -51,6 +51,7 @@ const NOTICES: Readonly<Record<string, MessageKey>> = {
   wakes_bounded: "channels.noticeBounded",
   unreachable_runtime: "channels.noticeUnreachable",
   member_deleted: "channels.noticeDeleted",
+  wake_budget_set: "channels.noticeBudgetSet",
 };
 
 export function authorName(author: Author, members: readonly Member[]) {

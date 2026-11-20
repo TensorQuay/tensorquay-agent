@@ -474,9 +474,13 @@ describe("WEB-U-066 ending, deleting and managing a channel", () => {
     cleanup();
     show(setup().api, OWNED.id, { id: ME.id, role: "member" });
     const other = await screen.findByRole("region", { name: "Channel header" });
+    // Another member's menu holds only the wake budget, which every member reads (C-1, WEB-U-529).
+    fireEvent.click(
+      within(other).getByRole("button", { name: /^More actions/ }),
+    );
     expect(
-      within(other).queryByRole("button", { name: /More actions/ }),
-    ).toBeNull();
+      screen.getAllByRole("menuitem").map((item) => item.textContent),
+    ).toEqual(["Wake budget…"]);
   });
 
   it("says when the channel could not be ended", async () => {

@@ -66,6 +66,8 @@ pub(crate) enum ChannelRoute {
     Create,
     List,
     Get,
+    /// `PATCH /api/v1/channels/{id}`: its wake budget (ADR-0014's amendment, A5; decided on 20 Nov 2026, C-1).
+    SetBudget,
     End,
     Delete,
     Members,

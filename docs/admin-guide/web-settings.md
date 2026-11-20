@@ -751,7 +751,8 @@ task's name) or a reply to it starts that agent's task, which reads what's new a
 
 | Setting | What it bounds | Default |
 |---|---|---|
-| `wake_budget` under `[channels]` in `gateway.toml` | The tokens, counted where model calls are metered, that a channel's woken runs may spend when the channel has no budget of its own. At 80 % the channel gets a notice; at 100 % no agent is woken and a woken run's next model call is refused. `0` turns waking off for every channel without its own budget. It is set in `gateway.toml` only (no page row yet) and needs a restart | 300,000 |
+| `wake_budget` under `[channels]` in `gateway.toml` | The tokens, counted where model calls are metered, that a channel's woken runs may spend when the channel has no budget of its own. At 80 % the channel gets a notice; at 100 % no agent is woken and a woken run's next model call is refused. `0` turns waking off for every channel without its own budget. It is set in `gateway.toml` only (no page row yet) and needs a restart. A channel's owner, a person who leads it, or an administrator can give that channel its own budget from the channel page's "Wake budget…" | 300,000 |
+| `max_wake_budget` under `[channels]` in `gateway.toml` | The most a channel's own budget may be set to from its page; a larger number is refused. Needs a restart | 10,000,000 |
 
 Two bounds are fixed: no wake follows a fourth agent reply in a row (a person's post starts the agents again), and a
 channel wakes agents for other agents' posts at most 30 times an hour. When either holds a wake back, the channel says

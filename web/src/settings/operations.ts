@@ -72,6 +72,7 @@ export const settingsOperations = {
     path: "/api/v1/channels/{id}/members/{kind}/{member}",
   },
   channelEnd: { method: "POST", path: "/api/v1/channels/{id}/end" },
+  channelBudget: { method: "PATCH", path: "/api/v1/channels/{id}" },
   channelDelete: { method: "DELETE", path: "/api/v1/channels/{id}" },
   adminMcpServers: { method: "GET", path: "/api/v1/admin/mcp/servers" },
   adminEgress: { method: "GET", path: "/api/v1/admin/egress" },

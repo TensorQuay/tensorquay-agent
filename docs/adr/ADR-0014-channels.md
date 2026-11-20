@@ -150,7 +150,11 @@ none takes the installation's `[channels] wake_budget` (300,000 tokens by defaul
 prompt and completion tokens, as the relay meters them, of each run a channel wake started, from the turn's delivery to
 the run's end; a run a person started is never charged. At 80 % the gateway posts one notice line. At 100 % no more
 wakes are sent, and a charged run's next model call is refused `channel_budget`, so a long exchange stops. Raising the
-budget (the channel's owner) lets wakes resume.
+budget lets wakes resume (decided on 20 Nov 2026): the channel's owner, a person who leads it, or an administrator sets
+it (`PATCH /api/v1/channels/{id} {wake_budget}`), from 0 (no agent is woken) to the installation's `[channels]
+max_wake_budget` (10,000,000 by default); the channel gets a notice naming the person, and a wake the budget held goes
+out at once, without a new post. Every member reads the budget and the spend from the page's "Wake budget…"; the
+used-up notice offers the change to those who may make it.
 
 **A6. No ping-pong: N = 4 hops, and 30 agent wakes an hour.** Each message has a hop, stored beside it: a person's post
 is 0; an agent's post is one more than the hop of the wake that started its run (1 in a run a person started); a

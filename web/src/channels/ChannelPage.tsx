@@ -13,9 +13,11 @@ import { APP_NAME } from "../lib/app";
 import { parseApi } from "../protocol/validate";
 import { settingsEndpoint } from "../settings/operations";
 import { TabTitle } from "../shell/TabTitle";
+import { Button } from "../ui/Button";
 import { Skeleton } from "../ui/Skeleton";
 
 import { ChannelActions } from "./ChannelActions";
+import { ChannelBudget } from "./ChannelBudget";
 import { ChannelComposer } from "./ChannelComposer";
 import { ChannelFirstStep } from "./ChannelFirstStep";
 import { ChannelHeader, type HeaderPanel } from "./ChannelHeader";
@@ -154,6 +156,7 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
     void cache.invalidateQueries({ queryKey: ["channel", id] });
   });
   /** The panel open beside the log: the to-dos or the members (WEB-U-519), a post's thread (WEB-U-523), or none. */
+  const [budgetOpen, setBudgetOpen] = useState(false);
   const [panel, setPanel] = useState<HeaderPanel | { thread: number } | null>(
     null,
   );
@@ -203,6 +206,10 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
   async function claim(seq: number) {
     log.add([await api.claim(id, seq, newActionKey())]);
   }
+  /** Sets the wake budget and shows the channel as the gateway answers it (C-1, WEB-U-529). */
+  async function setBudget(budget: number) {
+    cache.setQueryData(["channel", id], await api.setBudget(id, budget));
+  }
   async function end() {
     cache.setQueryData(["channel", id], await api.endChannel(id));
   }
@@ -219,6 +226,8 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
     });
   // ADR-0014 point 13: its owner or an administrator ends or deletes a channel (WEB-U-066).
   const administers = item.owner.id === me || viewer?.role === "admin";
+  /** Who sets the wake budget: the owner, an administrator, or a person who leads the channel (C-1). */
+  const budgets = administers || item.role === "lead";
   const posts =
     item.state === "open" && item.role !== null && item.role !== "observer";
   // WEB-U-063: a new channel's empty log gives a first step, and the box has the focus.
@@ -248,11 +257,23 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
         onPanel={setPanel}
         purpose={beyond || null}
         actions={
-          administers && (
-            <ChannelActions channel={item} onEnd={end} onDelete={remove} />
-          )
+          <ChannelActions
+            channel={item}
+            manage={administers}
+            onBudget={() => setBudgetOpen(true)}
+            onEnd={end}
+            onDelete={remove}
+          />
         }
       />
+      {budgetOpen && (
+        <ChannelBudget
+          channel={item}
+          may={budgets && item.state === "open"}
+          onSave={setBudget}
+          onClose={() => setBudgetOpen(false)}
+        />
+      )}
       <ChannelTimeline
         messages={log.messages}
         members={members.data?.items ?? []}
@@ -272,6 +293,14 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
             />
           ) : message.body.type === "task" ? (
             <TaskClaims api={api} id={id} seq={message.seq} />
+          ) : message.body.type === "notice" &&
+            message.body.kind === "wake_budget_spent" &&
+            budgets &&
+            item.state === "open" ? (
+            // What the used-up notice says to do can be done here (C-1): for those who may.
+            <Button variant="secondary" onClick={() => setBudgetOpen(true)}>
+              {t("channels.budgetRaise")}
+            </Button>
           ) : null
         }
         {...(item.state === "open" &&

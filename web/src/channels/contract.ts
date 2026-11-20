@@ -109,6 +109,8 @@ export type ChannelsApi = {
     /** An agent's name in the channel, its owner's to give (A12). */
     name?: string,
   ): Promise<Member>;
+  /** Sets the channel's wake budget: its owner, a person who leads it, or an administrator (C-1, WEB-U-529). */
+  setBudget(id: string, budget: number): Promise<Channel>;
   /** Removes a member; a person may remove themselves, which is leaving. */
   removeMember(id: string, kind: MemberKind, member: string): Promise<void>;
   /**

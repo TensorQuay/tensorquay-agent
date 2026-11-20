@@ -39,6 +39,7 @@
     "controls.reloadEnvironments": "Reload environments",
     "common.tryAgain": "Try again",
     "common.cancel": "Cancel",
+    "page.save": "Save",
     "page.fixFields": "{count, plural, one {Fix # field above.} other {Fix # fields above.}}",
     "tab.task": "{title} · {product}",
     "tab.taskWorking": "● {title} · {product}",

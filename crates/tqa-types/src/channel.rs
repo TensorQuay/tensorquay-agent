@@ -353,6 +353,9 @@ pub enum ChannelNoticeKind {
     /// A member can't be woken: its task was deleted (A10).
     #[serde(rename = "member_deleted")]
     MemberDeleted,
+    /// A person set the channel's wake budget; `member` names them (A5, decided on 20 Nov 2026).
+    #[serde(rename = "wake_budget_set")]
+    WakeBudgetSet,
 }
 
 impl MessageBody {

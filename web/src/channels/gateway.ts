@@ -111,6 +111,12 @@ export function gatewayChannelsFor(client: ApiClient): ChannelsApi {
           body: JSON.stringify(name === undefined ? { role } : { role, name }),
         },
       ),
+    setBudget: (id, budget) =>
+      client.request(
+        settingsEndpoint("channelBudget"),
+        (value) => parseApi(value, "Channel"),
+        { parameters: { id }, body: JSON.stringify({ wake_budget: budget }) },
+      ),
     removeMember: (id, kind, member) =>
       client.request(settingsEndpoint("channelMemberDelete"), () => undefined, {
         parameters: { id, kind, member },
