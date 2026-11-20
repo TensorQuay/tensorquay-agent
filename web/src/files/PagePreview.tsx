@@ -12,7 +12,7 @@ import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
 
 import "./changes-catalogue";
-import { blockedHosts, pageHosts, runsScripts } from "./page-hosts";
+import { blockedHosts, readPage } from "./page-hosts";
 import { type SiteReport, siteReportLine, siteReportPart } from "./site-report";
 
 /** The hosts the offline line names before it counts the rest. */
@@ -64,7 +64,7 @@ export function PagePreview({
         text ??
         (await (await api.fileBlob(conversationId, path, signal)).text());
       // Its hosts, and whether it runs any script of its own: a page with none says nothing about scripts (WEB-U-513).
-      return { hosts: pageHosts(html), scripts: runsScripts(html) };
+      return readPage(html);
     },
     enabled: framed,
     staleTime: Infinity,

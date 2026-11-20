@@ -312,9 +312,11 @@ describe("WEB-U-467 a page that loads from the internet", () => {
     longPage();
     const reads = failingDownload(1);
     show("long.html");
+    // The second read comes after the query's backoff, and a 600 KB page is parsed in between: a loaded runner
+    // took 4.6 s (CI, 20 Nov 2026). The line only has to come; the next case checks no third read is made.
     expect(
       await screen.findByText(offline("cdn.example.org"), undefined, {
-        timeout: 4000,
+        timeout: 10_000,
       }),
     ).toBeTruthy();
     expect(reads()).toBe(2);
