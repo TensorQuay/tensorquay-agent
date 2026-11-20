@@ -37,26 +37,39 @@ pub fn refusal(root: &Path, path: &Path, content: &str) -> Option<&'static str> 
 pub const UNDO_DIRECTORY: &str = ".memory/.undo";
 
 /// Before a note directly under `.memory/` is replaced: its current content is copied to [`UNDO_DIRECTORY`] under the
-/// same name, so one Undo can put it back; a note about to be created gets any stale copy removed, so its Undo
-/// removes it. Other paths (elsewhere in the workspace, digests under `.memory/tasks/`) are left alone.
+/// same name, so one Undo can put it back; a note about to be created gets any stale copy removed and a mark that it
+/// is new (`<name>.new`), so its Undo removes it. Without a copy or a mark there is nothing to undo. Other paths
+/// (elsewhere in the workspace, digests under `.memory/tasks/`) are left alone.
 ///
 /// # Errors
-/// The copy's I/O failure: a note isn't replaced when its previous version couldn't be kept.
+/// The copy's or the mark's I/O failure: a note isn't replaced when its previous version couldn't be kept.
 pub fn keep_previous(root: &Path, path: &Path) -> std::io::Result<()> {
     let Some(name) = note_name(root, path) else {
         return Ok(());
     };
     let undo = root.join(UNDO_DIRECTORY);
     let kept = undo.join(name);
+    let mut mark = name.to_os_string();
+    mark.push(crate::workspace_tree::memory::NEW_SUFFIX);
+    let mark = undo.join(mark);
+    std::fs::create_dir_all(&undo)?;
     match std::fs::symlink_metadata(path) {
         Ok(metadata) if metadata.is_file() => {
-            std::fs::create_dir_all(&undo)?;
+            forget(&mark)?;
             std::fs::copy(path, &kept).map(|_| ())
         }
-        _ => match std::fs::remove_file(&kept) {
-            Err(error) if error.kind() != std::io::ErrorKind::NotFound => Err(error),
-            _ => Ok(()),
-        },
+        _ => {
+            forget(&kept)?;
+            std::fs::write(&mark, b"")
+        }
+    }
+}
+
+/// Removes a file when it is there.
+fn forget(path: &Path) -> std::io::Result<()> {
+    match std::fs::remove_file(path) {
+        Err(error) if error.kind() != std::io::ErrorKind::NotFound => Err(error),
+        _ => Ok(()),
     }
 }
 

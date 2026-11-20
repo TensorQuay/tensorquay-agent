@@ -66,6 +66,15 @@ fn tool_u_152_write_then_undo_removes_a_new_note_and_restores_an_edited_one() ->
         read(memory.as_fd(), "build.md")?.as_deref(),
         Some("about: make all\n")
     );
+    // A second Undo (a retried request) has nothing kept: it changes nothing, and the restored note stays.
+    assert!(matches!(
+        undo(memory.as_fd(), "build.md"),
+        Err(TreeError::NotFound)
+    ));
+    assert_eq!(
+        read(memory.as_fd(), "build.md")?.as_deref(),
+        Some("about: make all\n")
+    );
     // Removing keeps the note for an Undo.
     remove(memory.as_fd(), "build.md")?;
     assert_eq!(read(memory.as_fd(), "build.md")?, None);
@@ -73,6 +82,25 @@ fn tool_u_152_write_then_undo_removes_a_new_note_and_restores_an_edited_one() ->
     assert_eq!(
         read(memory.as_fd(), "build.md")?.as_deref(),
         Some("about: make all\n")
+    );
+    // A second Undo (a retried request) has nothing kept: it changes nothing, and the restored note stays.
+    assert!(matches!(
+        undo(memory.as_fd(), "build.md"),
+        Err(TreeError::NotFound)
+    ));
+    assert_eq!(
+        read(memory.as_fd(), "build.md")?.as_deref(),
+        Some("about: make all\n")
+    );
+    // A note that was there before any change was kept (written some other way) has nothing to undo.
+    fs::write(at.join("old.md"), "about: old\n")?;
+    assert!(matches!(
+        undo(memory.as_fd(), "old.md"),
+        Err(TreeError::NotFound)
+    ));
+    assert_eq!(
+        read(memory.as_fd(), "old.md")?.as_deref(),
+        Some("about: old\n")
     );
     assert!(matches!(
         remove(memory.as_fd(), "none.md"),
@@ -153,7 +181,7 @@ fn tool_u_152_nothing_goes_through_a_link() -> TestResult {
     let (directory, root) = workspace()?;
     let memory = super::directory(root.as_fd())?;
     write(memory.as_fd(), "a.md", "one")?;
-    fs::remove_dir(directory.path().join(DIRECTORY).join(UNDO))?;
+    fs::remove_dir_all(directory.path().join(DIRECTORY).join(UNDO))?;
     symlink(outside.path(), directory.path().join(DIRECTORY).join(UNDO))?;
     assert!(write(memory.as_fd(), "a.md", "two").is_err());
     assert_eq!(

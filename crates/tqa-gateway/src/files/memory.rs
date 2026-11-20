@@ -72,11 +72,12 @@ pub(crate) async fn delete_note(
     Ok(StatusCode::NO_CONTENT)
 }
 
-/// `POST /conversations/{id}/memory/{name}/undo`: undoes the last change to the note, the agent's or a person's: its
-/// kept previous version comes back, or a new note is removed.
+/// `POST /conversations/{id}/memory/{name}/undo`: undoes the last change to the note, the agent's or a person's, once:
+/// its kept previous version comes back, or a note that was new at that change is removed.
 ///
 /// # Errors
-/// `404` when there is neither a kept version nor a note; otherwise as [`put_note`].
+/// `404` when there is nothing to undo (no kept version, and the note was not new at its last change), so an Undo
+/// sent twice changes nothing the second time; otherwise as [`put_note`].
 pub(crate) async fn undo_note(
     AppState(state): AppState<Arc<State>>,
     Authz(user): Authz,

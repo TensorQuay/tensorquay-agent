@@ -7230,7 +7230,7 @@
       "post": {
         "operationId": "undoMemoryNote",
         "summary": "Undo the last change to a memory note",
-        "description": "Undoes the last change to .memory/<name>, the agent's or a person's: its kept previous version comes back (outcome restored), or, with none kept, the note was new and is removed (outcome removed). 404 when there is neither. Authorization is workspace access with a write share, as for uploads; the administrator role grants no content. Cookie requests need the exact Origin. Directory workspaces only: a Firecracker installation answers 409 files_unavailable until its workspace link gains the operation. A link in the way (the memory folder, its undo folder or the note) is 400 path_invalid. Listing and reading notes use the files operations on .memory/.",
+        "description": "Undoes the last change to .memory/<name>, the agent's or a person's: its kept previous version comes back (outcome restored), or, a note that was new at that change is removed (outcome removed). Once: 404 when there is nothing to undo, so the same Undo sent again changes nothing. Authorization is workspace access with a write share, as for uploads; the administrator role grants no content. Cookie requests need the exact Origin. Directory workspaces only: a Firecracker installation answers 409 files_unavailable until its workspace link gains the operation. A link in the way (the memory folder, its undo folder or the note) is 400 path_invalid. Listing and reading notes use the files operations on .memory/.",
         "parameters": [
           {
             "name": "id",

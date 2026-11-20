@@ -22,6 +22,9 @@ pub const MAX_NAME_BYTES: usize = 128;
 /// The largest note, in bytes.
 pub const MAX_NOTE_BYTES: usize = 64 * 1024;
 const TEMPORARY: &str = ".note-part";
+/// The suffix of the mark in `.undo/` that says a note was new at its last change. No note can have such a name (a
+/// note ends `.md`), so the mark never collides with a kept version. The file tools write the same mark.
+pub const NEW_SUFFIX: &str = ".new";
 
 /// What an Undo did.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -104,16 +107,33 @@ pub fn read(memory: BorrowedFd<'_>, name: &str) -> Result<Option<String>, TreeEr
 }
 
 /// Keeps `name`'s current version in `.undo/` (replacing an older kept one); with no current version, drops any
-/// kept one, so an Undo of the note about to be written removes it.
+/// kept one and marks the note as new, so an Undo of the note about to be written removes it.
 fn keep(memory: BorrowedFd<'_>, name: &str) -> Result<(), TreeError> {
     let undo = child(memory, UNDO)?;
+    let mark = new_mark(name);
     if is_note(memory, name)? {
+        forget(undo.as_fd(), &mark)?;
         sys::renameat(memory, name, &undo, name).map_err(|_| TreeError::Io)
     } else {
-        match sys::unlinkat(&undo, name, AtFlags::empty()) {
-            Ok(()) | Err(Errno::NOENT) => Ok(()),
-            Err(_) => Err(TreeError::Io),
-        }
+        forget(undo.as_fd(), name)?;
+        let flags = OFlags::WRONLY | OFlags::CREATE | OFlags::NOFOLLOW | OFlags::CLOEXEC;
+        sys::openat(&undo, mark.as_str(), flags, Mode::from_raw_mode(0o644))
+            .map(drop)
+            .map_err(|_| TreeError::Io)
+    }
+}
+
+/// The mark in `.undo/` that says `name` was new at its last change: an Undo then removes it. Without the mark and
+/// without a kept version there is nothing to undo, so a second Undo never removes a restored note.
+fn new_mark(name: &str) -> String {
+    format!("{name}{NEW_SUFFIX}")
+}
+
+/// Removes `name` from `directory` when it is there.
+fn forget(directory: BorrowedFd<'_>, name: &str) -> Result<(), TreeError> {
+    match sys::unlinkat(directory, name, AtFlags::empty()) {
+        Ok(()) | Err(Errno::NOENT) => Ok(()),
+        Err(_) => Err(TreeError::Io),
     }
 }
 
@@ -164,12 +184,12 @@ pub fn remove(memory: BorrowedFd<'_>, name: &str) -> Result<(), TreeError> {
     keep(memory, name)
 }
 
-/// Undoes the last change to a note: its kept previous version comes back, or, with none kept, the note (a new one)
-/// is removed.
+/// Undoes the last change to a note, once: its kept previous version comes back, or a note that was new at that
+/// change is removed. A second Undo finds nothing kept and changes nothing.
 ///
 /// # Errors
-/// `NotFound` when there is neither a kept version nor a note; `PathInvalid` for a name that can't be a note or a
-/// link in the way; host I/O failures.
+/// `NotFound` when there is nothing to undo (no kept version, and the note is not marked new); `PathInvalid` for a
+/// name that can't be a note or a link in the way; host I/O failures.
 pub fn undo(memory: BorrowedFd<'_>, name: &str) -> Result<Undone, TreeError> {
     if !valid_name(name) {
         return Err(TreeError::PathInvalid);
@@ -179,8 +199,10 @@ pub fn undo(memory: BorrowedFd<'_>, name: &str) -> Result<Undone, TreeError> {
         sys::renameat(&undo, name, memory, name).map_err(|_| TreeError::Io)?;
         return Ok(Undone::Restored);
     }
-    if is_note(memory, name)? {
+    let mark = new_mark(name);
+    if is_note(undo.as_fd(), &mark)? && is_note(memory, name)? {
         sys::unlinkat(memory, name, AtFlags::empty()).map_err(|_| TreeError::Io)?;
+        forget(undo.as_fd(), &mark)?;
         return Ok(Undone::Removed);
     }
     Err(TreeError::NotFound)

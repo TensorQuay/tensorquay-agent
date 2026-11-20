@@ -123,6 +123,14 @@ async fn gw_i_356_a_note_is_written_listed_edited_undone_and_removed(pool: PgPoo
         let (status, undone) = body(undo(f, &cookie, &id, "build.md").send().await?).await?;
         assert_eq!((status, &undone), (200, &json!({"outcome": "restored"})));
         assert_eq!(read(f, &cookie, &id, "build.md").await?.1, first);
+        // The same Undo sent again (a retried request) finds nothing kept: 404, and the restored note stays.
+        assert_eq!(
+            code(undo(f, &cookie, &id, "build.md").send().await?)
+                .await?
+                .0,
+            404
+        );
+        assert_eq!(read(f, &cookie, &id, "build.md").await?.1, first);
         // Removed, and brought back by an Undo.
         assert_eq!(
             note(f, &cookie, Method::DELETE, &id, "build.md")

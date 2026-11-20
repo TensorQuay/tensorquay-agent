@@ -777,11 +777,15 @@ async fn tool_u_151_a_replaced_note_keeps_its_previous_version_for_one_undo() ->
         )
         .await?;
     assert!(!kept.exists(), "a new note has no previous version");
+    // A new note is marked new, so its Undo removes it; an edit drops the mark, so an Undo then restores.
+    let mark = fixture.root().join(".memory/.undo/build.md.new");
+    assert!(mark.exists(), "a new note is marked new");
     // An edit keeps the version before it; a second edit keeps the one before that edit (one level).
     EditFile::new()
         .call(request(".memory/build.md", "make all", "make release"), &cx)
         .await?;
     assert_eq!(fs::read_to_string(&kept)?, first);
+    assert!(!mark.exists(), "an edited note is no longer new");
     let second = fs::read_to_string(fixture.root().join(".memory/build.md"))?;
     WriteFile::new()
         .call(
