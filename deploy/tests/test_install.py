@@ -238,7 +238,7 @@ class Questions(Case):
     def test_a_local_model_server_is_told_apart_as_the_gateway_tells_it(self):
         for url in ("http://localhost:11434/v1", "http://127.0.0.1:8000/v1", "http://host.docker.internal:8000/v1",
                     "http://ollama:11434/v1", "http://box.local:8000/v1", "http://gpu.internal/v1",
-                    "http://192.168.1.1:8000/v1", "http://10.0.0.5/v1", "http://100.64.0.1/v1",
+                    "http://172.16.0.1:8000/v1", "http://10.0.0.5/v1", "http://100.64.0.1/v1",
                     "http://[fd00::1]:8000/v1"):
             with self.subTest(url):
                 self.assertTrue(install.is_local(url))
@@ -295,7 +295,7 @@ class Questions(Case):
         self.assertEqual(sum("12 characters" in line for line in out.lines), 1)
 
     def test_a_local_model_server_is_asked_its_context(self):
-        answers = ["", "http://192.168.1.1:8000/v1", "qwen", "", "65536", "ana@example.org"]
+        answers = ["", "http://172.16.0.1:8000/v1", "qwen", "", "65536", "ana@example.org"]
         code, out, _ = self.run_installer([], FakeIO(answers, [ADMIN_PASSWORD]), FakeSystem(probe=probe()))
         self.assertEqual(code, 0, out.text)
         self.assertIn("  Context window in tokens [32768]:", out.prompts)
