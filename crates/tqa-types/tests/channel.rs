@@ -338,3 +338,42 @@ fn proto_u_048_a_channel_wake_is_the_channel_and_the_place_alone() -> TestResult
     assert_eq!(tqa_types::PROTOCOL_REVISION, 16);
     Ok(())
 }
+
+// TEST: PROTO-U-049
+// A channel message's files (ADR-0014's amendment of 20 Nov 2026, A9; revision 16): each one's name and size, and for
+// an agent member that has it, its exact path in the member's workspace; none written when a message has none.
+#[test]
+fn proto_u_049_a_channel_message_carries_its_files() -> TestResult {
+    let message = json!({"seq": 12, "ts": "2026-11-20T10:00:00Z",
+        "author": {"kind": "user", "id": "u-1", "name": "Mei Lin"},
+        "body": {"type": "text", "text": "The price list"},
+        "files": [{"name": "q3.pdf", "size": 1200, "path": "uploads/pricing-12-q3.pdf"}, {"name": "notes.txt", "size": 3}]});
+    let parsed: tqa_types::ChannelMessage = serde_json::from_value(message.clone())?;
+    assert_eq!(serde_json::to_value(&parsed)?, message);
+    assert_eq!(
+        parsed.files[0].path.as_deref(),
+        Some("uploads/pricing-12-q3.pdf")
+    );
+    let plain = json!({"seq": 1, "ts": "2026-11-20T10:00:00Z",
+        "author": {"kind": "user", "id": "u-1"}, "body": {"type": "text", "text": "hi"}});
+    let parsed: tqa_types::ChannelMessage = serde_json::from_value(plain.clone())?;
+    assert!(parsed.files.is_empty());
+    assert_eq!(
+        serde_json::to_value(&parsed)?,
+        plain,
+        "no files written when there are none"
+    );
+    for odd in [
+        json!({"name": "a.pdf"}),
+        json!({"name": "a.pdf", "size": -1}),
+        json!({"name": "a.pdf", "size": 1, "url": "x"}),
+    ] {
+        let mut message = message.clone();
+        message["files"] = json!([odd.clone()]);
+        assert!(
+            serde_json::from_value::<tqa_types::ChannelMessage>(message).is_err(),
+            "{odd}"
+        );
+    }
+    Ok(())
+}

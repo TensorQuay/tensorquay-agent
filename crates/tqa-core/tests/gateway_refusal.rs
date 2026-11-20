@@ -181,3 +181,26 @@ async fn core_u_079_a_team_budget_refusal_fails_the_run_as_budget_without_retryi
     );
     Ok(())
 }
+
+// TEST: CORE-U-093
+/// A run a channel's wake started, stopped when that channel's budget is spent (the gateway's `channel_budget`,
+/// ADR-0014's amendment of 20 Nov 2026, A5), ends as a budget stop, final, never a provider error: its page says why.
+#[tokio::test]
+async fn core_u_093_a_spent_channel_budget_ends_the_run_as_budget() -> TestResult {
+    let h = Harness::new(vec![refused("channel_budget", 409)], ToolRegistry::new())?;
+    let (outcome, events) = run_once(h).await?;
+    assert!(
+        matches!(
+            outcome,
+            RunOutcome::Failed { code: ErrorCode::Budget, ref reason } if reason == "gateway.channel_budget 409"
+        ),
+        "{outcome:?}"
+    );
+    assert!(
+        !events
+            .iter()
+            .any(|event| matches!(event, Event::ProviderRetry { .. })),
+        "never retried"
+    );
+    Ok(())
+}

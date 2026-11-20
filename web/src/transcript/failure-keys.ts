@@ -96,6 +96,16 @@ const TEAM_BUDGET_HELPER: Failure = {
   next: "fail.teamBudgetHelperNext",
 };
 
+/**
+ * A member task's woken run stopped at its channel's spent budget (the gateway's `channel_budget`, which the runtime
+ * ends as `budget`, CORE-U-093): the channel's budget, and who can raise it (WEB-U-516, ADR-0014's amendment of 20 Nov
+ * 2026).
+ */
+const CHANNEL_BUDGET: Failure = {
+  reason: "run.channelBudget",
+  next: "fail.channelBudgetNext",
+};
+
 const EMPTY_REPLY: Failure = {
   reason: "run.emptyReply",
   next: "fail.emptyReplyNext",
@@ -189,6 +199,8 @@ export function knownFailure(
     return TEAM_BUDGET;
   if (code === "budget" && gatewayCode(reason) === "team_budget_helpers")
     return TEAM_BUDGET_HELPER;
+  if (code === "budget" && gatewayCode(reason) === "channel_budget")
+    return CHANNEL_BUDGET;
   if (code === "budget")
     return BUDGET_COPY[reason] ?? FAILURE_COPY.budget ?? null;
   if (code === "reply_cut" && reason.startsWith(THINKING_CUT)) return THINKING;

@@ -1,0 +1,212 @@
+name: Web on the real stack
+
+# The real-stack browser suites that the gateway-stack job doesn't run (it runs demo.py's basic, ux and environment
+# suites). 18.1.0 shipped two defects a person could see that only these suites catch (WEB-E2E-056, WEB-E2E-060), so a
+# pull request that touches the web app, the gateway or the deploy harness runs the short ones; the long ones run nightly
+# and on demand. Not a required check until it has run green on ten pull requests in a row.
+
+on:
+  pull_request:
+    paths:
+      - web/**
+      - crates/tqa-gateway/**
+      - crates/tqa-types/**
+      - deploy/**
+      - images/gateway/**
+      - images/web/**
+      - images/fake-model/**
+      - .github/workflows/web-stack.yml
+  schedule:
+    - cron: "40 18 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-stack-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  short:
+    # Every pull request in the paths above, and on demand.
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      TQA_DOCKER_TESTS: "1"
+      # A 2-core runner is slower than a workstation: the harness scales its deadlines, as tools/check.sh does.
+      TQA_TEST_DEADLINE_SCALE: "4"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Free the runner's disk for the images
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache \
+            /usr/share/swift /usr/local/share/boost /usr/local/share/powershell /usr/lib/jvm /opt/az
+          docker image prune --all --force > /dev/null
+          df -h / /mnt 2>/dev/null || df -h /
+      - name: Build the gateway, web, runtime and scripted model images
+        run: |
+          set -euo pipefail
+          docker build -f images/gateway/Dockerfile -t tqa-gateway:local .
+          docker build -f images/web/Dockerfile -t tqa-web:local .
+          docker build --target base -f images/runtime/Dockerfile -t tqa-runtime:base .
+          docker build --target workstation -f images/runtime/Dockerfile -t tqa-runtime:workstation .
+          docker build -f images/fake-model/Dockerfile -t tqa-fake-model:local .
+          df -h / /mnt 2>/dev/null || df -h /
+      - name: Name the images under test by their IDs
+        # The stack harness refuses bare tags (deploy/tests/compose.py): a tag may name another build.
+        run: |
+          set -euo pipefail
+          image() { docker image inspect --format '{{.Id}}' "$1"; }
+          {
+            printf 'TQA_GATEWAY_IMAGE=%s\n' "$(image tqa-gateway:local)"
+            printf 'TQA_WEB_IMAGE=%s\n' "$(image tqa-web:local)"
+            printf 'TQA_RUNTIME_IMAGE=%s\n' "$(image tqa-runtime:base)"
+            printf 'TQA_WORKSTATION_IMAGE=%s\n' "$(image tqa-runtime:workstation)"
+            printf 'TQA_FAKE_MODEL_IMAGE=%s\n' "$(image tqa-fake-model:local)"
+            printf 'TQA_DOCKER_GID=%s\n' "$(stat -c '%g' /var/run/docker.sock)"
+          } >> "$GITHUB_ENV"
+      - name: Install the pinned browser test tools
+        working-directory: web
+        run: |
+          set -euo pipefail
+          npm install --global corepack@0.36.0
+          corepack pnpm install --frozen-lockfile
+          corepack pnpm exec playwright install --with-deps chromium
+      # One step per suite, so a failure names its suite and the rest still run.
+      - name: Files (WEB-E2E-056 and the Files panel on the real stack)
+        if: ${{ !cancelled() }}
+        env: { TQA_WEB_EVIDENCE_DIR: "${{ runner.temp }}/evidence/files" }
+        run: python3 deploy/tests/demo.py --suite files
+      - name: Settings (WEB-E2E-060 and the settings pages)
+        if: ${{ !cancelled() }}
+        env: { TQA_WEB_EVIDENCE_DIR: "${{ runner.temp }}/evidence/settings" }
+        run: python3 deploy/tests/demo.py --suite settings
+      - name: Task page (WEB-E2E-092 and the task page)
+        if: ${{ !cancelled() }}
+        env: { TQA_WEB_EVIDENCE_DIR: "${{ runner.temp }}/evidence/task-page" }
+        run: python3 deploy/tests/demo.py --suite task-page
+      - name: Previews
+        if: ${{ !cancelled() }}
+        env: { TQA_WEB_EVIDENCE_DIR: "${{ runner.temp }}/evidence/previews" }
+        run: python3 deploy/tests/demo.py --suite previews
+      - name: Accounts, people and models
+        if: ${{ !cancelled() }}
+        env: { TQA_WEB_EVIDENCE_DIR: "${{ runner.temp }}/evidence/people" }
+        run: |
+          set -euo pipefail
+          python3 deploy/tests/demo.py --suite accounts
+          python3 deploy/tests/demo.py --suite models-people
+          python3 deploy/tests/demo.py --suite key-use
+      - name: Workspaces and channel members
+        if: ${{ !cancelled() }}
+        env: { TQA_WEB_EVIDENCE_DIR: "${{ runner.temp }}/evidence/workspaces" }
+        run: |
+          set -euo pipefail
+          python3 deploy/tests/demo.py --suite workspaces
+          python3 deploy/tests/demo.py --suite channel-members
+      - name: Queue, titles and a cut-off reply
+        if: ${{ !cancelled() }}
+        env: { TQA_WEB_EVIDENCE_DIR: "${{ runner.temp }}/evidence/runs" }
+        run: |
+          set -euo pipefail
+          python3 deploy/tests/demo.py --suite queue
+          python3 deploy/tests/demo.py --suite titles
+          python3 deploy/tests/demo.py --suite reply-cut
+      - name: Egress pages
+        if: ${{ !cancelled() }}
+        env: { TQA_WEB_EVIDENCE_DIR: "${{ runner.temp }}/evidence/egress" }
+        run: |
+          set -euo pipefail
+          python3 deploy/tests/demo.py --suite egress
+          for module in web_admin web_key_use web_connector web_host_keys; do
+            PYTHONPATH=crates/tqa-sandbox/tests python3 -m "egress.$module"
+          done
+          PYTHONPATH=crates/tqa-sandbox/tests python3 -m egress.web_connector --profile
+      - name: Keep the suites' evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: web-stack-evidence
+          path: ${{ runner.temp }}/evidence
+          if-no-files-found: ignore
+          retention-days: 14
+
+  long:
+    # Nightly on main and on demand: the suites that take minutes each, or need the public network.
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      TQA_DOCKER_TESTS: "1"
+      TQA_TEST_DEADLINE_SCALE: "4"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Free the runner's disk for the images
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache \
+            /usr/share/swift /usr/local/share/boost /usr/local/share/powershell /usr/lib/jvm /opt/az
+          docker image prune --all --force > /dev/null
+      - name: Build the gateway, web, runtime and scripted model images
+        run: |
+          set -euo pipefail
+          docker build -f images/gateway/Dockerfile -t tqa-gateway:local .
+          docker build -f images/web/Dockerfile -t tqa-web:local .
+          docker build --target base -f images/runtime/Dockerfile -t tqa-runtime:base .
+          docker build --target workstation -f images/runtime/Dockerfile -t tqa-runtime:workstation .
+          docker build -f images/fake-model/Dockerfile -t tqa-fake-model:local .
+      - name: Name the images under test by their IDs
+        run: |
+          set -euo pipefail
+          image() { docker image inspect --format '{{.Id}}' "$1"; }
+          {
+            printf 'TQA_GATEWAY_IMAGE=%s\n' "$(image tqa-gateway:local)"
+            printf 'TQA_WEB_IMAGE=%s\n' "$(image tqa-web:local)"
+            printf 'TQA_RUNTIME_IMAGE=%s\n' "$(image tqa-runtime:base)"
+            printf 'TQA_WORKSTATION_IMAGE=%s\n' "$(image tqa-runtime:workstation)"
+            printf 'TQA_FAKE_MODEL_IMAGE=%s\n' "$(image tqa-fake-model:local)"
+            printf 'TQA_DOCKER_GID=%s\n' "$(stat -c '%g' /var/run/docker.sock)"
+          } >> "$GITHUB_ENV"
+      - name: Install the pinned browser test tools
+        working-directory: web
+        run: |
+          set -euo pipefail
+          npm install --global corepack@0.36.0
+          corepack pnpm install --frozen-lockfile
+          corepack pnpm exec playwright install --with-deps chromium webkit
+      - name: Agent teams
+        if: ${{ !cancelled() }}
+        env: { TQA_WEB_EVIDENCE_DIR: "${{ runner.temp }}/evidence/agents" }
+        run: python3 deploy/tests/demo.py --suite agents
+      - name: Previews in WebKit
+        if: ${{ !cancelled() }}
+        env: { TQA_WEB_EVIDENCE_DIR: "${{ runner.temp }}/evidence/previews-webkit", TQA_STACK_BROWSER: webkit }
+        run: python3 deploy/tests/demo.py --suite previews
+      - name: Catching up after a gap
+        if: ${{ !cancelled() }}
+        env: { TQA_WEB_EVIDENCE_DIR: "${{ runner.temp }}/evidence/catch-up" }
+        run: python3 deploy/tests/demo.py --suite catch-up
+      - name: Web search (public network)
+        if: ${{ !cancelled() }}
+        run: PYTHONPATH=crates/tqa-sandbox/tests python3 -m egress.web_search
+      - name: Gate demos without KVM (gates 4, 6 and 7)
+        if: ${{ !cancelled() }}
+        run: |
+          set -euo pipefail
+          python3 tests/e2e/gate4.py
+          python3 tests/e2e/gate6.py
+          python3 tests/e2e/gate7.py --person page
+          python3 tests/e2e/gate7.py --person api
+      - name: Keep the suites' evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: web-stack-long-evidence
+          path: ${{ runner.temp }}/evidence
+          if-no-files-found: ignore
+          retention-days: 14

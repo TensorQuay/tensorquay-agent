@@ -1,0 +1,67 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT seq, index, path, not_placed FROM channel_file_placements WHERE channel_id = $1 AND conversation_id = $2 AND seq > $3 AND ($4::bigint IS NULL OR seq <= $4) ORDER BY seq, index",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "seq",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "channel_file_placements",
+            "name": "seq"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "index",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "channel_file_placements",
+            "name": "index"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "path",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_file_placements",
+            "name": "path"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "not_placed",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_file_placements",
+            "name": "not_placed"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "9592d43ba61d10dd4ab1abece79477e2b4d6d68d60da0970a20f1627331cf87c"
+}

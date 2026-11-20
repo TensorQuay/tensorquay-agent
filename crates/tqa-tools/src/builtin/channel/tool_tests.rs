@@ -35,6 +35,7 @@ fn stored(seq: u64, body: MessageBody) -> ChannelMessage {
         },
         parent: None,
         body,
+        files: Vec::new(),
     }
 }
 

@@ -30,7 +30,10 @@ pub(super) fn build(state: Arc<AppState>) -> Router {
             Handler::McpProxy => crate::mcp_proxy::jsonrpc::MAX_MESSAGE_BYTES,
             Handler::RelayDecision => tqa_types::decision_v1::MAX_REQUEST_BYTES,
             // The upload handler refuses over its own limit first; this outer bound only stops a runaway body.
-            Handler::Upload => crate::files::upload_body_limit(&state.config.files),
+            // A channel's upload is an upload too (ADR-0014's amendment of 20 Nov 2026, A9).
+            Handler::Upload | Handler::Channels(ChannelRoute::Upload) => {
+                crate::files::upload_body_limit(&state.config.files)
+            }
             _ => state.config.limits.body_bytes,
         };
         router = router.route(
@@ -135,6 +138,9 @@ fn channels_router(route: ChannelRoute) -> MethodRouter<Arc<AppState>> {
         ChannelRoute::Events => get(crate::channels::stream::events),
         ChannelRoute::PutMemberByEmail => put(api::put_member_by_email),
         ChannelRoute::Candidates => get(crate::channels::candidates::candidates),
+        ChannelRoute::Upload => post(crate::channels::files::upload),
+        ChannelRoute::FileDownload => get(crate::channels::files::download),
+        ChannelRoute::DeleteUpload => delete(crate::channels::files::delete_upload),
         ChannelRoute::RuntimeClaim => post(crate::channels::runtime::claim),
     }
 }

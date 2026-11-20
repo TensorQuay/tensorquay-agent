@@ -180,6 +180,18 @@ impl SandboxManager {
             let Some(queued) = queued else {
                 return Ok(delivered);
             };
+            if queued.route == messages
+                && self
+                    .withhold_wake(
+                        id,
+                        conversation,
+                        (&queued.key, queued.user_id),
+                        queued.queued_frame.as_deref(),
+                    )
+                    .await?
+            {
+                continue;
+            }
             if queued.route == messages {
                 let lifecycle = latest.as_ref().map_or(0, |latest| latest.seq);
                 // Boxed: minting the turn's host keys enlarges its future (clippy::large_futures).
@@ -194,6 +206,63 @@ impl SandboxManager {
             }
             delivered = true;
         }
+    }
+
+    /// A channel's wake about to go to a runtime below revision 16, which couldn't parse it (ADR-0014's amendment of 20
+    /// Nov 2026, A4, A10): it is withdrawn instead of handed over, and the channel says once that the member can't be
+    /// woken. The link recorded the revision, so the wake pass sends it no other. `false` for anything else.
+    async fn withhold_wake(
+        &self,
+        id: &ConversationId,
+        conversation: uuid::Uuid,
+        (key, user): (&str, uuid::Uuid),
+        frame: Option<&[u8]>,
+    ) -> Result<bool, GatewayError> {
+        let Some((_, revision)) = self.services.links.sandbox(id) else {
+            return Ok(false);
+        };
+        if revision >= tqa_types::CHANNEL_WAKE_REVISION {
+            return Ok(false);
+        }
+        let Some(Ok(ClientFrame::UserMessage {
+            channel_wake: Some(wake),
+            ..
+        })) = frame.map(ClientFrame::parse)
+        else {
+            return Ok(false);
+        };
+        let channel = uuid::Uuid::parse_str(wake.channel.as_str())
+            .map_err(|_| GatewayError::StoreUnavailable)?;
+        let said = self
+            .bounded(async {
+                let mut transaction = self.services.pool.begin().await?;
+                sqlx::query!(
+                    "DELETE FROM idempotency WHERE key = $1 AND user_id = $2 AND execution_status = 'queued'",
+                    key,
+                    user
+                )
+                .execute(&mut *transaction)
+                .await?;
+                let title =
+                    sqlx::query_scalar!("SELECT title FROM conversations WHERE id = $1", conversation)
+                        .fetch_one(&mut *transaction)
+                        .await?;
+                let said = crate::channels::wake::unreachable(
+                    &mut transaction,
+                    (channel, conversation),
+                    &title,
+                    "runtime",
+                )
+                .await?;
+                transaction.commit().await?;
+                Ok(said)
+            })
+            .await?;
+        if let Some(seq) = said {
+            self.services.channels.published(channel, seq);
+        }
+        tracing::info!(conversation_id = %id, revision, "a channel wake was withheld from a runtime too old to read it");
+        Ok(true)
     }
 
     async fn deliver_one(

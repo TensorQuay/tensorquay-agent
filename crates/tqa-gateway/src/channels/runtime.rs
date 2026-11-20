@@ -139,8 +139,9 @@ pub(crate) async fn read(
         })
         .await?;
         if !page.messages.is_empty() || query.wait.is_none() {
+            let messages = with_paths(&state, (id, conversation), page.messages).await?;
             return Ok(Json(Page {
-                messages: page.messages,
+                messages,
                 next_since: page.next_since,
                 more: page.more,
             }));
@@ -158,6 +159,50 @@ pub(crate) async fn read(
             }
         }
     }
+}
+
+/// The member's view of its read's files (ADR-0014's amendment of 20 Nov 2026, A9): each one's path in its workspace,
+/// placing those not there yet; none at all for a runtime below 16, which can't parse them.
+async fn with_paths(
+    state: &State,
+    (channel, member): (Uuid, Uuid),
+    mut messages: Vec<tqa_types::ChannelMessage>,
+) -> Result<Vec<tqa_types::ChannelMessage>, GatewayError> {
+    let revision = sqlx::query_scalar!(
+        "SELECT runtime_revision FROM conversations WHERE id = $1",
+        member
+    )
+    .fetch_one(&state.pool)
+    .await?;
+    if revision.is_some_and(|revision| revision < i32::from(tqa_types::CHANNEL_WAKE_REVISION)) {
+        for message in &mut messages {
+            message.files.clear();
+        }
+        return Ok(messages);
+    }
+    let with_files: Vec<i64> = messages
+        .iter()
+        .filter(|message| !message.files.is_empty())
+        .filter_map(|message| i64::try_from(message.seq).ok())
+        .collect();
+    let (Some(first), Some(last)) = (with_files.first(), with_files.last()) else {
+        return Ok(messages);
+    };
+    let placed = super::files::place(state, (channel, member), (first - 1, Some(*last))).await?;
+    for message in &mut messages {
+        let Ok(seq) = i64::try_from(message.seq) else {
+            continue;
+        };
+        for (index, file) in message.files.iter_mut().enumerate() {
+            if let Some(placed) = placed.iter().find(|placed| {
+                placed.seq == seq && usize::try_from(placed.index).ok() == Some(index)
+            }) {
+                file.path.clone_from(&placed.path);
+                file.not_placed.clone_from(&placed.why_not);
+            }
+        }
+    }
+    Ok(messages)
 }
 
 /// `POST /runtime/channels/{id}/messages`: the run posts as its conversation. An `Idempotency-Key` is optional here;

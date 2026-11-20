@@ -342,6 +342,7 @@ impl Gateway {
             &config, &secrets, &pool, &cancel, registry,
         ))
         .await?;
+        let channels = Arc::new(crate::channels::Hub::default());
         let (manager, own_backend) = Box::pin(build_manager(
             &config,
             backend,
@@ -357,6 +358,7 @@ impl Gateway {
                 cancel: cancel.clone(),
                 tasks: tasks.clone(),
                 idle_clock,
+                channels: channels.clone(),
             },
         ))
         .await?;
@@ -390,7 +392,7 @@ impl Gateway {
             relay,
             mcp: crate::mcp_proxy::McpProxy::default(),
             web,
-            channels: crate::channels::Hub::default(),
+            channels,
             team_changes: crate::teams::changed::Changes::default(),
             telemetry,
             environment_images: crate::environments::Images::default(),
@@ -687,6 +689,18 @@ impl Gateway {
         self.state.channels.hold(held);
     }
 
+    /// Sweeps channel uploads no post took within a day, as the hourly sweep does (ADR-0014's amendment of 20 Nov
+    /// 2026, A9). Only with the `testing` feature.
+    ///
+    /// # Errors
+    /// Storage failure.
+    #[cfg(feature = "testing")]
+    pub async fn channel_uploads_sweep_now(&self) -> Result<(), GatewayError> {
+        crate::channels::files::sweep_uploads(&self.state)
+            .await
+            .map(|_| ())
+    }
+
     /// Sends every channel wake that is due now, as the sweep does (ADR-0014's amendment of 20 Nov 2026, A3). Only
     /// with the `testing` feature.
     ///
@@ -907,6 +921,7 @@ fn start_sweeps(state: &Arc<State>) {
     crate::secrets::rotation::start(state);
     crate::secrets::reads::start(state);
     crate::channels::api::start(state);
+    crate::channels::files::start(state);
     crate::purge::start(state);
     crate::teams::changed::start(state);
 }
