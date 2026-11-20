@@ -112,20 +112,21 @@ fn gw_u_230_hops_start_at_a_persons_post_and_stop_at_four() {
 }
 
 // TEST: GW-U-231
+// SEC-068 (review of 20 Nov 2026): the wake says how many files wait and from which messages, never a path (a channel's
+// or a file's name is someone's words); channel_read's result lists the paths.
 #[test]
-fn gw_u_231_the_wake_names_each_placed_files_exact_path() {
+fn gw_u_231_the_wake_counts_the_files_and_names_their_messages_only() {
     assert_eq!(super::files_sentence(&[]), "");
     assert_eq!(
-        super::files_sentence(&[(12, "uploads/pricing-12-q3.pdf".into())]),
-        " The file of message 12 is in your workspace: uploads/pricing-12-q3.pdf."
+        super::files_sentence(&[12]),
+        " 1 file waits in your workspace, from message 12; channel_read lists its path."
     );
     assert_eq!(
-        super::files_sentence(&[
-            (12, "uploads/pricing-12-q3.pdf".into()),
-            (12, "uploads/pricing-12-notes.txt".into()),
-            (14, "uploads/pricing-14-chart.png".into()),
-        ]),
-        " Files of these messages are in your workspace: uploads/pricing-12-q3.pdf (message 12), \
-         uploads/pricing-12-notes.txt (message 12), uploads/pricing-14-chart.png (message 14)."
+        super::files_sentence(&[12, 12, 14]),
+        " 3 files wait in your workspace, from messages 12 and 14; channel_read lists their paths."
+    );
+    assert_eq!(
+        super::files_sentence(&[12, 14, 16]),
+        " 3 files wait in your workspace, from messages 12, 14 and 16; channel_read lists their paths."
     );
 }

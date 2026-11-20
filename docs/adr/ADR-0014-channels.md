@@ -163,15 +163,21 @@ it (`member_state` events); it isn't a message in the log.
 as it likes); a member with no run costs nothing, and the next wake starts it.
 
 **A9. Attachments (amended on 20 Nov 2026 in review: flat in `uploads/`).** A post, proposal or to-do may carry files,
-with the composer's limits: a voting member uploads each to the channel first (an attachment's size each, a
-workspace's uploads for the channel's files together) and posts up to 32 by upload id. People download each from its
-post. An agent member gets the files of the messages it hasn't read in its own workspace, flat in `uploads/` through
-the same placing as a team's handed-back files, so no new workspace operation and no protocol revision is needed:
+with the composer's limits: a voting member uploads each to the channel first and posts up to 32 by upload id. A file
+over an attachment's size is refused (`413 upload_too_large`); so is an upload once the channel's files, posted ones and
+uploads waiting for a post together, reach a workspace's uploads total (`409 uploads_full`), which the composer says in
+plain words (the page, next slice). An upload no post takes can be removed by its uploader, and goes by itself after 24
+hours. People download each posted file from its post. An agent member gets the files of the messages it hasn't read in
+its own workspace, flat in `uploads/` through the same placing as a team's handed-back files, so no new workspace
+operation and no protocol revision is needed:
 - the name is the channel's name, the message's seq and the file's name, `<channel>-<seq>-<file>`, sanitised as any
   upload is, and a name already taken gets `-2` (and so on): nothing in a workspace is ever overwritten;
-- they are placed before the wake's turn goes, and the turn names each one's exact workspace path, so the agent never
-  guesses; a workspace that can't take files at that moment (a sandbox not linked) gets them at the member's next
-  read, whose answer names each placed path (`channel_read` shows it inside the message's marked block);
+- they are placed before the wake's turn goes; the turn says how many files wait and from which messages, never a
+  name or a path (a channel's or a file's name is someone's words, A4), and `channel_read` gives each one's exact path
+  inside the message's marked block; a workspace that can't take files at that moment (a sandbox not linked) gets them
+  at the member's next read;
+- a file that doesn't fit the member's workspace (its uploads full, or the file too large) is recorded so, and its read
+  says so and why, so the agent never assumes it has it;
 - each file is placed once per member and remembered: renaming the channel later moves nothing already placed;
 - a runtime below revision 16 is sent no files in its reads, which it couldn't parse.
 A deleted channel's files go with it.
@@ -194,7 +200,7 @@ task: the wake waits for the run's end, never a second run, never lost), GW-I-34
 GW-I-349 (the sweep sends a wake lost to a restart), GW-I-350 (the budget charged, the 80 % notice, a person's run
 uncharged), GW-I-351 (the budget stops a long exchange), GW-I-352 (the four-hop bound and its notice; a person's own
 agent, A11), GW-I-353 (the hourly bound), GW-I-354 (the members' live state), GW-I-355 (a deleted task or a runtime
-below 16: not woken, one notice, A10). Attachments (A9): GW-U-231 (the wake names each path), GW-I-356 (the composer's limits), GW-I-357 (a post's files and their download), GW-I-358 (placed where the wake says, never over a file, not moved by a rename), GW-I-359 (the member's read names the paths), SEC-069 (a name can't leave `uploads/`), TOOL-U-149 (the read shows each path) and PROTO-U-049 (a message's files).
+below 16: not woken, one notice, A10). Attachments (A9): GW-U-231 (the wake counts the files, never names them), GW-I-356 (the composer's limits), GW-I-357 (a post's files and their download), GW-I-358 (placed before the wake, never over a file, not moved by a rename), GW-I-359 (the member's read names the paths), GW-I-363 (an upload's body limit), GW-I-364 (the uploader removes an unposted upload), GW-I-365 (unposted uploads swept after a day), GW-I-366 (a file that didn't fit is said so), SEC-069 (a name can't leave `uploads/`), TOOL-U-149 (the read shows each path), TOOL-U-150 (and says why one didn't fit) and PROTO-U-049 (a message's files).
 
 ## Consequences
 

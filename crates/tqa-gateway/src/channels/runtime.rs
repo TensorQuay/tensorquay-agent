@@ -194,12 +194,12 @@ async fn with_paths(
             continue;
         };
         for (index, file) in message.files.iter_mut().enumerate() {
-            file.path = placed
-                .iter()
-                .find(|(at, position, _)| {
-                    *at == seq && usize::try_from(*position).ok() == Some(index)
-                })
-                .map(|(_, _, path)| path.clone());
+            if let Some(placed) = placed.iter().find(|placed| {
+                placed.seq == seq && usize::try_from(placed.index).ok() == Some(index)
+            }) {
+                file.path.clone_from(&placed.path);
+                file.not_placed.clone_from(&placed.not_placed);
+            }
         }
     }
     Ok(messages)

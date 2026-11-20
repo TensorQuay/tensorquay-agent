@@ -85,6 +85,7 @@ pub(crate) enum ChannelRoute {
     Candidates,
     Upload,
     FileDownload,
+    DeleteUpload,
 }
 
 #[derive(Clone, Copy)]

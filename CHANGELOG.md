@@ -16,7 +16,8 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   channel says so once.
 - **Files on a channel's posts (GW-I-356 to GW-I-359).** A post, proposal or to-do can carry up to 32 files, with
   the same limits as a task's uploads; people download each from its post. A woken agent finds them in its own
-  workspace's `uploads/`, named after the channel and the message, and its wake says exactly where.
+  workspace's `uploads/`, named after the channel and the message, and its read of the channel lists each one's
+  place (or says why a file didn't fit). An upload never posted can be removed, and goes by itself after a day.
 
 ### Fixed
 

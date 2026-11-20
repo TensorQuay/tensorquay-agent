@@ -27,7 +27,10 @@ CREATE TABLE channel_file_placements (
     seq bigint NOT NULL,
     index smallint NOT NULL,
     conversation_id uuid NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
-    path text NOT NULL,
+    -- Where it was placed, or why it couldn't be (the workspace's uploads full, the file too large): one or the other.
+    path text,
+    not_placed text CHECK (not_placed IN ('uploads_full', 'upload_too_large')),
+    CHECK ((path IS NULL) <> (not_placed IS NULL)),
     PRIMARY KEY (channel_id, seq, index, conversation_id),
     FOREIGN KEY (channel_id, seq, index) REFERENCES channel_files(channel_id, seq, index) ON DELETE CASCADE
 );

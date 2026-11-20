@@ -128,6 +128,83 @@ pub(crate) async fn upload(
     ))
 }
 
+/// `DELETE /api/v1/channels/{id}/uploads/{upload}`: the composer's remove: the caller's own upload that no post took
+/// goes, bytes and row, and its room in the channel's total comes back.
+///
+/// # Errors
+/// `404` for a channel the caller can't see, or an upload that isn't theirs, unposted, in this channel; storage failure.
+pub(crate) async fn delete_upload(
+    AppState(state): AppState<Arc<State>>,
+    Authz(user): Authz,
+    Path((raw_id, upload)): Path<(String, Uuid)>,
+) -> Result<StatusCode, GatewayError> {
+    let id = super::api::channel_id(&raw_id)?;
+    let mut connection = state.pool.acquire().await?;
+    store::visible(&mut connection, caller(&user), id).await?;
+    sqlx::query_scalar!(
+        "DELETE FROM channel_uploads WHERE id = $1 AND channel_id = $2 AND user_id = $3 AND posted_seq IS NULL \
+         RETURNING id",
+        upload,
+        id,
+        user.id
+    )
+    .fetch_optional(&mut *connection)
+    .await?
+    .ok_or(GatewayError::NotFound)?;
+    state.storage.remove_channel_upload(id, upload).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+/// How long an upload no post took is kept.
+const UNPOSTED_FOR: &str = "24 hours";
+
+/// Removes the uploads no post took within [`UNPOSTED_FOR`], rows then bytes; answers how many went.
+///
+/// # Errors
+/// Storage failure.
+pub(crate) async fn sweep_uploads(state: &State) -> Result<usize, GatewayError> {
+    let gone = sqlx::query!(
+        "DELETE FROM channel_uploads WHERE posted_seq IS NULL \
+         AND created_at < CURRENT_TIMESTAMP - $1::text::interval RETURNING id, channel_id",
+        UNPOSTED_FOR
+    )
+    .fetch_all(&state.pool)
+    .await?;
+    for row in &gone {
+        if let Err(error) = state
+            .storage
+            .remove_channel_upload(row.channel_id, row.id)
+            .await
+        {
+            tracing::warn!(
+                code = error.code(),
+                "an unposted channel upload's bytes weren't removed"
+            );
+        }
+    }
+    Ok(gone.len())
+}
+
+/// How often unposted uploads are swept.
+const SWEEP_EVERY: std::time::Duration = std::time::Duration::from_secs(3600);
+
+/// Starts the hourly sweep of unposted uploads, on the gateway's task tracker, stopped by its cancel.
+pub(crate) fn start(state: &Arc<State>) {
+    let owned = state.clone();
+    state.tasks.spawn(async move {
+        let mut interval = tokio::time::interval(SWEEP_EVERY);
+        interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
+        loop {
+            tokio::select! {biased;
+                () = owned.cancel.cancelled() => break,
+                _ = interval.tick() => if let Err(error) = sweep_uploads(&owned).await {
+                    tracing::warn!(code = error.code(), "the channel uploads sweep failed");
+                },
+            }
+        }
+    });
+}
+
 /// The upload ids a post names, from its request body's `files` (taken out of it, so the rest is the post).
 ///
 /// # Errors
@@ -205,6 +282,7 @@ pub(crate) async fn attach(
             name: taken.name,
             size: u64::try_from(taken.size).unwrap_or(0),
             path: None,
+            not_placed: None,
         });
     }
     Ok(files)
@@ -235,6 +313,7 @@ pub(crate) async fn of_messages(
             name: row.name,
             size: u64::try_from(row.size).unwrap_or(0),
             path: None,
+            not_placed: None,
         });
     }
     Ok(found)
@@ -301,7 +380,7 @@ pub(crate) async fn place(
     state: &State,
     (channel, member): (Uuid, Uuid),
     (after, through): (i64, Option<i64>),
-) -> Result<Vec<(i64, i16, String)>, GatewayError> {
+) -> Result<Vec<Placed>, GatewayError> {
     let missing = sqlx::query!(
         "SELECT f.seq, f.index, f.name, ch.name AS channel_name FROM channel_files f \
          JOIN channels ch ON ch.id = f.channel_id \
@@ -332,7 +411,7 @@ pub(crate) async fn place(
         }
     }
     Ok(sqlx::query!(
-        "SELECT seq, index, path FROM channel_file_placements WHERE channel_id = $1 AND conversation_id = $2 \
+        "SELECT seq, index, path, not_placed FROM channel_file_placements WHERE channel_id = $1 AND conversation_id = $2 \
          AND seq > $3 AND ($4::bigint IS NULL OR seq <= $4) ORDER BY seq, index",
         channel,
         member,
@@ -342,8 +421,21 @@ pub(crate) async fn place(
     .fetch_all(&state.pool)
     .await?
     .into_iter()
-    .map(|row| (row.seq, row.index, row.path))
+    .map(|row| Placed {
+        seq: row.seq,
+        index: row.index,
+        path: row.path,
+        not_placed: row.not_placed,
+    })
     .collect())
+}
+
+/// Where a file went for a member: its path, or why it didn't fit.
+pub(crate) struct Placed {
+    pub(crate) seq: i64,
+    pub(crate) index: i16,
+    pub(crate) path: Option<String>,
+    pub(crate) not_placed: Option<String>,
 }
 
 /// A file not yet in a member's workspace: its message, its place in it, and the name it gets there.
@@ -365,8 +457,12 @@ async fn place_each(
         let from = stored
             .join(file.seq.to_string())
             .join(file.index.to_string());
-        let path = match handed::place(state, workspace, &file.name, &from).await {
-            Ok((path, _)) => path,
+        // Placed, or recorded as not fitting (the member's read says why); any other failure is tried again later.
+        let (path, not_placed) = match handed::place(state, workspace, &file.name, &from).await {
+            Ok((path, _)) => (Some(path), None),
+            Err(error) if matches!(error.code(), "uploads_full" | "upload_too_large") => {
+                (None, Some(error.code()))
+            }
             Err(error) => {
                 tracing::warn!(
                     code = error.code(),
@@ -376,13 +472,14 @@ async fn place_each(
             }
         };
         sqlx::query!(
-            "INSERT INTO channel_file_placements (channel_id, seq, index, conversation_id, path) \
-             VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING",
+            "INSERT INTO channel_file_placements (channel_id, seq, index, conversation_id, path, not_placed) \
+             VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING",
             channel,
             file.seq,
             file.index,
             member,
-            path
+            path,
+            not_placed
         )
         .execute(&state.pool)
         .await?;

@@ -19626,6 +19626,136 @@
           }
         }
       }
+    },
+    "/api/v1/channels/{id}/uploads/{upload}": {
+      "delete": {
+        "operationId": "deleteChannelUpload",
+        "summary": "Remove an upload no post took",
+        "description": "The composer's remove (ADR-0014's amendment of 20 Nov 2026, A9): the caller's own upload to this channel that no post took goes, bytes and row, and its room in the channel's total comes back. 404 for a channel the caller can't see, or an upload that isn't the caller's, unposted, in this channel. Uploads no post takes are swept after 24 hours.",
+        "security": [
+          {
+            "sessionCookie": []
+          },
+          {
+            "personalToken": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid request or unsupported protocol",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origin, ownership or role denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Record not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Bootstrap closed, idempotency route conflict or deleted conversation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate or capacity limit reached",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable or gateway restarting",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "I/O deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "Successful operation"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "upload",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -29003,6 +29133,14 @@
           "path": {
             "type": "string",
             "description": "Where it is in the reading agent member's workspace (uploads/<channel>-<seq>-<file>); only in an agent's own read, never in a person's."
+          },
+          "not_placed": {
+            "type": "string",
+            "enum": [
+              "uploads_full",
+              "upload_too_large"
+            ],
+            "description": "Why it isn't in the reading agent member's workspace and won't be; only in an agent's own read."
           }
         },
         "description": "A file posted with a channel message (ADR-0014's amendment of 20 Nov 2026, A9)."

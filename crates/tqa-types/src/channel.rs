@@ -503,6 +503,10 @@ pub struct ChannelFile {
     /// Where it is in the reading agent member's workspace, once placed there; absent for people and before then.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub path: Option<String>,
+    /// Why it isn't in the reading agent member's workspace and won't be (`uploads_full`, `upload_too_large`); absent
+    /// when it is, or may still be, placed.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub not_placed: Option<String>,
 }
 
 /// What a member posts: a body and an optional parent. An `author` in the request is accepted and dropped: the
