@@ -64,6 +64,7 @@ async fn rt_i_039_a_members_first_turn_keeps_the_lead_as_its_source() -> TestRes
         host_keys: vec![],
         lead_brief: Some(lead()),
         team_wake: None,
+        channel_wake: None,
     })
     .await?;
     let Event::MessageUser {
@@ -100,6 +101,7 @@ async fn rt_i_039_a_persons_message_has_no_lead_and_no_block() -> TestResult {
         host_keys: vec![],
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
     })
     .await?;
     assert!(matches!(
@@ -122,20 +124,22 @@ async fn rt_i_044_a_wake_is_journalled_with_its_marker_and_the_model_reads_its_s
         host_keys: vec![],
         lead_brief: None,
         team_wake: Some(wake),
+        channel_wake: None,
     })
     .await?;
     let Event::MessageUser {
         text,
         lead_brief,
         team_wake,
+        channel_wake,
         ..
     } = journalled
     else {
         return Err("not a message".into());
     };
     assert_eq!(
-        team_wake,
-        Some(wake),
+        (team_wake, channel_wake),
+        (Some(wake), None),
         "the stored event marks the gateway's wake"
     );
     assert_eq!((text.as_str(), lead_brief), (sentence, None));

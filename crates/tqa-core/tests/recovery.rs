@@ -107,6 +107,7 @@ async fn core_u_038_unanswered_message_is_busy_then_starts_its_deterministic_run
     let history = history(vec![Event::MessageUser {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: "question".into(),
         attachments: vec![],
     }])?;

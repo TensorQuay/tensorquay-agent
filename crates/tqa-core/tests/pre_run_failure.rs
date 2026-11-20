@@ -30,7 +30,7 @@ async fn rt_i_015_pre_run_failure_records_the_message_and_one_failed_run() -> Te
     ));
     assert_eq!(sink.types(), ["message.user", "run.started", "run.failed"]);
     assert!(
-        matches!(&sink.events()[0], Event::MessageUser { lead_brief: _, team_wake: _, text, attachments }
+        matches!(&sink.events()[0], Event::MessageUser { lead_brief: _, team_wake: _, channel_wake: _, text, attachments }
         if *text == turn().text && *attachments == turn().attachments)
     );
     assert!(matches!(&sink.frames()[2], ServerFrame::Event {
@@ -103,6 +103,7 @@ async fn rt_i_015_pre_run_failure_leaves_idle_history_unchanged_and_validates_in
     input.message = Some(tqa_core::UserTurn {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: String::new(),
         attachments: vec![],
     });

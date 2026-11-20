@@ -108,6 +108,7 @@ pub(crate) async fn decision(
     // An agent team's budget, then the engine's, before its key is read or any call leaves the gateway (ADR-0034
     // point 8; ADR-0013, the adapter amendment).
     crate::teams::budget::check(&state, &conversation).await?;
+    crate::channels::wake::check(&state, crate::conversations::uuid(&conversation)?).await?;
     super::budget::check(&state, &document, &conversation).await?;
     let credential = credential(&state, &document, &context).await?;
     // A usage row per consultation about to be sent, recorded before forwarding, so it counts requests, failed ones

@@ -62,9 +62,12 @@ impl EventStore {
         match (context.lifecycle, context.run_id.as_deref()) {
             (Some("run.started"), Some(run)) => {
                 crate::host_keys::bind_run(&mut transaction, id, run).await?;
+                // A run a channel's wake started is charged to that channel (ADR-0014's amendment, A5).
+                crate::channels::wake::run_started(&mut transaction, id).await?;
             }
             (Some("run.completed" | "run.failed" | "run.cancelled"), Some(run)) => {
                 crate::host_keys::end_run(&mut transaction, id, run).await?;
+                crate::channels::wake::run_ended(&mut transaction, id).await?;
             }
             _ => {}
         }

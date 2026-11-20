@@ -329,6 +329,11 @@ export function LiveConversation({
           {t("notice.wakeTeam")}
         </p>
       )}
+      {held.channelWakeWaiting && (
+        <p className="transcript-notice type-small muted">
+          {t("notice.wakeChannel")}
+        </p>
+      )}
     </>
   );
   return (
@@ -550,7 +555,9 @@ export function LiveConversation({
                       id: item.runId,
                       label: item.wake
                         ? t("notice.wakeTeam")
-                        : (item.text.split("\n")[0] ?? ""),
+                        : item.channelWake
+                          ? t("notice.wakeChannel")
+                          : (item.text.split("\n")[0] ?? ""),
                       startedAt: transcript.runs[item.runId]?.startedAt ?? null,
                     },
                   ]

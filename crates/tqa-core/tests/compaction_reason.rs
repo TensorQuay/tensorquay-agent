@@ -60,6 +60,7 @@ fn long_history() -> Result<Vec<tqa_types::ServerFrame>, Box<dyn std::error::Err
             Event::MessageUser {
                 lead_brief: None,
                 team_wake: None,
+                channel_wake: None,
                 text: format!("request {turn}"),
                 attachments: vec![],
             },

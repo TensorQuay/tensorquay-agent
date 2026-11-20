@@ -32,6 +32,15 @@ pub(crate) async fn upgrade(
         state.manager.refuse(&conversation, Refused::TooOld)?;
         return Err(GatewayError::RuntimeTooOld(too_old));
     }
+    // The revision this task's runtime announced, kept for its channels: a member below 16 isn't woken (ADR-0014's
+    // amendment of 20 Nov 2026, A4).
+    sqlx::query!(
+        "UPDATE conversations SET runtime_revision = $2 WHERE id = $1 AND runtime_revision IS DISTINCT FROM $2",
+        crate::conversations::uuid(&conversation)?,
+        i32::from(has)
+    )
+    .execute(&state.pool)
+    .await?;
     // An agent team's journals hold the lead's brief (a member's, revision 12) and the gateway's wakes (the lead's and
     // members', revision 13): an older runtime is refused, never run with either as a person's words or unable to read
     // its own history (ADR-0026's notes of 2 and 5 Oct 2026).

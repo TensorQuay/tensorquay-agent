@@ -8,6 +8,7 @@ fn gw_s_021_action_keys_and_bodies_are_exact_and_bounded() -> Result<(), Box<dyn
     let frame = || ClientFrame::UserMessage {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: "hello".into(),
         attachments: vec![],
         host_keys: Vec::new(),
@@ -27,6 +28,7 @@ fn gw_s_021_action_keys_and_bodies_are_exact_and_bounded() -> Result<(), Box<dyn
             ClientFrame::UserMessage {
                 lead_brief: None,
                 team_wake: None,
+                channel_wake: None,
                 text: String::new(),
                 attachments: vec![],
                 host_keys: Vec::new(),

@@ -128,6 +128,7 @@ async fn core_u_084_a_stale_count_is_ignored() -> TestResult {
         Event::MessageUser {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: "one more request".into(),
             attachments: vec![],
         },
@@ -400,6 +401,7 @@ async fn largest_request(tenths: u64, padding: usize) -> Result<(u64, usize), Bo
     let turn = UserTurn {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: "audit the ledger parts".into(),
         attachments: vec![],
     };

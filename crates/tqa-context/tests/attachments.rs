@@ -12,6 +12,7 @@ fn history(text: &str, attachments: Vec<String>) -> Vec<ServerFrame> {
         event: Event::MessageUser {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: text.into(),
             attachments,
         },

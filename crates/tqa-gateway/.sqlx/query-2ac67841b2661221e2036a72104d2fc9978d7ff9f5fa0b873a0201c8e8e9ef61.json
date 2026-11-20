@@ -1,0 +1,53 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE channels c SET spent_tokens = c.spent_tokens + $2 FROM channel_charges g WHERE g.conversation_id = $1 AND c.id = g.channel_id RETURNING c.id, c.spent_tokens, c.budget",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "channels",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "spent_tokens",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "channels",
+            "name": "spent_tokens"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "budget",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "channels",
+            "name": "budget"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "2ac67841b2661221e2036a72104d2fc9978d7ff9f5fa0b873a0201c8e8e9ef61"
+}

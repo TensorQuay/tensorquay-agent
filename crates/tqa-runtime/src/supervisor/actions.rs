@@ -34,6 +34,7 @@ impl Supervisor {
             LinkEvent::Action(ClientFrame::UserMessage {
                 lead_brief,
                 team_wake,
+                channel_wake,
                 text,
                 attachments,
                 host_keys,
@@ -43,6 +44,7 @@ impl Supervisor {
                     attachments,
                     lead_brief: lead_brief.map(Box::new),
                     team_wake,
+                    channel_wake,
                 };
                 // The run's host keys go only to that run's processes and prompt (ADR-0037 §3).
                 if self.bootstrap_idle && self.pending_message.is_none() {

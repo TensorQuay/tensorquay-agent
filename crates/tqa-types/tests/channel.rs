@@ -299,3 +299,42 @@ fn proto_u_020_a_task_takes_one_claimant_by_default_a_number_or_all() -> TestRes
     }
     Ok(())
 }
+
+// TEST: PROTO-U-048
+// The gateway's wake of a channel member (ADR-0014's amendment of 20 Nov 2026, A4; revision 16): user.message and its
+// journaled message.user carry the channel and the member's place, nothing else, so a client shows the gateway's
+// notice and never a person's message; a person's message has none.
+#[test]
+fn proto_u_048_a_channel_wake_is_the_channel_and_the_place_alone() -> TestResult {
+    let channel = "0194f0a2-7c3e-7d1a-9b2c-3d4e5f607182";
+    let frame = json!({"type": "user.message", "text": "New in channel", "attachments": [],
+        "channel_wake": {"channel": channel, "after": 11}});
+    let parsed: tqa_types::ClientFrame = serde_json::from_value(frame.clone())?;
+    assert_eq!(serde_json::to_value(&parsed)?, frame);
+    let event = json!({"type": "message.user", "text": "New in channel", "attachments": [],
+        "channel_wake": {"channel": channel, "after": 0}});
+    let parsed: tqa_types::Event = serde_json::from_value(event.clone())?;
+    assert_eq!(serde_json::to_value(&parsed)?, event);
+    let plain: tqa_types::ClientFrame =
+        serde_json::from_value(json!({"type": "user.message", "text": "hi", "attachments": []}))?;
+    assert!(serde_json::to_value(&plain)?.get("channel_wake").is_none());
+    // Strict: no channel, a channel that isn't an id, a negative place, or any other field (a title, a writer).
+    for odd in [
+        json!({"after": 1}),
+        json!({"channel": "a channel", "after": 1}),
+        json!({"channel": channel, "after": -1}),
+        json!({"channel": channel, "after": 1, "title": "Pricing"}),
+    ] {
+        let mut frame = frame.clone();
+        frame["channel_wake"] = odd.clone();
+        assert!(
+            serde_json::from_value::<tqa_types::ClientFrame>(frame).is_err(),
+            "{odd}"
+        );
+    }
+    let schema = tqa_types::protocol_schema();
+    let wake = &schema["definitions"]["ChannelWake"];
+    assert_eq!(wake["required"], json!(["channel", "after"]), "{wake}");
+    assert_eq!(tqa_types::PROTOCOL_REVISION, 16);
+    Ok(())
+}

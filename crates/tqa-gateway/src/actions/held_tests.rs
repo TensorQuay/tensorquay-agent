@@ -8,6 +8,7 @@ fn part(text: &str, attachments: &[&str]) -> Part {
         attachments: attachments.iter().map(|a| (*a).to_owned()).collect(),
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
     }
 }
 
@@ -27,6 +28,7 @@ fn gw_u_078_held_messages_join_in_order_with_a_blank_line_and_each_attachment_on
         ClientFrame::UserMessage {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: "also check the tests\n\nand update the changelog".into(),
             attachments: vec!["uploads/a.png".into(), "uploads/b.log".into()],
             host_keys: Vec::new(),
@@ -40,6 +42,7 @@ fn gw_u_078_held_messages_join_in_order_with_a_blank_line_and_each_attachment_on
         ClientFrame::UserMessage {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: "only this".into(),
             attachments: vec![],
             host_keys: Vec::new(),
@@ -85,6 +88,7 @@ fn gw_u_145_a_wake_is_a_turn_of_its_own_with_its_marker() {
     let wake = tqa_types::TeamWake { after: 4 };
     let woken = Part {
         team_wake: Some(wake),
+        channel_wake: None,
         ..part("New messages from your lead since message 4.", &[])
     };
     // The wake goes alone, marked, even with a person's message waiting behind it: joined, the person's words would
@@ -96,6 +100,7 @@ fn gw_u_145_a_wake_is_a_turn_of_its_own_with_its_marker() {
         ClientFrame::UserMessage {
             lead_brief: None,
             team_wake: Some(wake),
+            channel_wake: None,
             text: "New messages from your lead since message 4.".into(),
             attachments: Vec::new(),
             host_keys: Vec::new(),
@@ -108,6 +113,7 @@ fn gw_u_145_a_wake_is_a_turn_of_its_own_with_its_marker() {
         turn,
         ClientFrame::UserMessage {
             team_wake: None,
+            channel_wake: None,
             ..
         }
     ));
@@ -138,6 +144,7 @@ fn gw_u_078_a_members_first_turn_is_a_turn_of_its_own_with_its_brief() {
         ClientFrame::UserMessage {
             lead_brief: Some(brief),
             team_wake: None,
+            channel_wake: None,
             text: "the frame".into(),
             attachments: Vec::new(),
             host_keys: Vec::new(),
@@ -151,6 +158,7 @@ fn gw_u_078_a_members_first_turn_is_a_turn_of_its_own_with_its_brief() {
         ClientFrame::UserMessage {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             ..
         }
     ));

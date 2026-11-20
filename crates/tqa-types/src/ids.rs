@@ -92,6 +92,10 @@ identifier!(
     "A validated tool-call identifier, encoded as a JSON string."
 );
 identifier!(
+    ChannelId,
+    "A validated channel identifier, encoded as a JSON string."
+);
+identifier!(
     WorkspaceId,
     "A validated workspace identifier, encoded as a JSON string."
 );

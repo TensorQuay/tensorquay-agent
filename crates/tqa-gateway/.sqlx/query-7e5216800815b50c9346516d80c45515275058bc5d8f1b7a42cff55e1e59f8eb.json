@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE channel_wakes SET handed = $3 WHERE conversation_id = $1 AND key = ANY($2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "TextArray",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7e5216800815b50c9346516d80c45515275058bc5d8f1b7a42cff55e1e59f8eb"
+}

@@ -68,6 +68,34 @@
         }
       ]
     },
+    "ChannelId": {
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "type": "string"
+    },
+    "ChannelWake": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "channel": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/ChannelId"
+            }
+          ]
+        }
+      },
+      "required": [
+        "channel",
+        "after"
+      ],
+      "type": "object"
+    },
     "CompactionSource": {
       "oneOf": [
         {
@@ -628,6 +656,16 @@
               "maxItems": 32,
               "type": "array",
               "uniqueItems": true
+            },
+            "channel_wake": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/ChannelWake"
+                },
+                {
+                  "type": "null"
+                }
+              ]
             },
             "lead_brief": {
               "anyOf": [

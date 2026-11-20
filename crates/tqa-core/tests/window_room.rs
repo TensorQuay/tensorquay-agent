@@ -56,6 +56,7 @@ fn earlier(runs: usize, result_bytes: usize) -> Result<Vec<ServerFrame>, Box<dyn
             Event::MessageUser {
                 lead_brief: None,
                 team_wake: None,
+                channel_wake: None,
                 text: format!("request {index}"),
                 attachments: vec![],
             },
@@ -170,6 +171,7 @@ fn with_state(route: &str, model: &str, bytes: usize) -> Result<Vec<ServerFrame>
         Event::MessageUser {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: "request 1".into(),
             attachments: vec![],
         },

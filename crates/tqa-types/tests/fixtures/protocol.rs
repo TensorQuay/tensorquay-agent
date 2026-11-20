@@ -18,6 +18,7 @@ pub fn clients() -> Result<Vec<ClientFrame>, Box<dyn Error>> {
         ClientFrame::UserMessage {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: "hello".to_owned(),
             attachments: vec!["uploads/attachment_1".to_owned()],
             host_keys: Vec::new(),
@@ -25,6 +26,7 @@ pub fn clients() -> Result<Vec<ClientFrame>, Box<dyn Error>> {
         ClientFrame::UserMessage {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: "x".repeat(MAX_USER_MESSAGE_BYTES),
             attachments: vec![],
             host_keys: Vec::new(),
@@ -268,6 +270,7 @@ fn context_events() -> Result<Vec<Event>, Box<dyn Error>> {
         Event::MessageUser {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: "hello".into(),
             attachments: vec!["uploads/attachment_1".into()],
         },

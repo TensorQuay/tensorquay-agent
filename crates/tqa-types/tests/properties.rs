@@ -100,6 +100,7 @@ fn events() -> impl Strategy<Value = Event> {
                 14 => Event::MessageUser {
                     lead_brief: None,
                     team_wake: None,
+                    channel_wake: None,
                     text: format!("message{text}"),
                     attachments: vec![],
                 },
@@ -151,6 +152,7 @@ fn clients() -> impl Strategy<Value = ClientFrame> {
                 1 => ClientFrame::UserMessage {
                     lead_brief: None,
                     team_wake: None,
+                    channel_wake: None,
                     text,
                     attachments,
                     host_keys: Vec::new(),

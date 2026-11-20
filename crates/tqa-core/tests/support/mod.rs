@@ -207,6 +207,7 @@ pub fn turn() -> UserTurn {
     UserTurn {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: "inspect files".into(),
         attachments: vec!["uploads/attachment".into()],
     }
@@ -441,6 +442,7 @@ pub fn initial() -> Result<Vec<Event>, Box<dyn Error>> {
         Event::MessageUser {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: "question".into(),
             attachments: vec![],
         },

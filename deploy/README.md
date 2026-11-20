@@ -1,7 +1,7 @@
 # One-box Docker deployment
 
 The stack runs PostgreSQL, the gateway and the web application. Supply a content-pinned runtime image that
-implements the TQA protocol (v1, revision 10 or newer; this version's runtime is revision 15). The gateway image contains only a static binary and runs as UID/GID 1000; its health check
+implements the TQA protocol (v1, revision 10 or newer; this version's runtime is revision 16). The gateway image contains only a static binary and runs as UID/GID 1000; its health check
 uses that binary's `healthcheck` command. The integration suite uses Toybox only to test image presence, not to run
 an agent.
 

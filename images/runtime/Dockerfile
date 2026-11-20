@@ -50,7 +50,7 @@ FROM runtime-base AS clone-probe
 # This explicit test target is never selected by either production runtime target.
 COPY --from=clone-probe-build /probe/workspace-clone-probe /usr/local/bin/workspace-clone-probe
 # Must equal tqa_types::PROTOCOL_REVISION in every stage that copies the binary; SBX-U-001 fails when one differs.
-LABEL org.tensorquay.protocol-revision="15"
+LABEL org.tensorquay.protocol-revision="16"
 COPY --from=build /build/target/release/tqa-runtime /usr/local/bin/tqa-runtime
 ENTRYPOINT ["/usr/local/bin/workspace-clone-probe"]
 
@@ -179,7 +179,7 @@ FROM workstation-os AS workstation
 LABEL org.tensorquay.environment="workstation" \
       org.tensorquay.environment.name="Workstation" \
       org.tensorquay.environment.capabilities="shell,python,node,build,browser,data"
-LABEL org.tensorquay.protocol-revision="15"
+LABEL org.tensorquay.protocol-revision="16"
 COPY --from=build /build/target/release/tqa-runtime /usr/local/bin/tqa-runtime
 
 # ADR-0039 slice 1, the computer-use spike: the Workstation with a virtual display, for RT-I-046's browser cases. A
@@ -197,7 +197,7 @@ USER 1000:1000
 ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/tqa-desktop-init"]
 
 FROM desktop-spike-os AS desktop-spike
-LABEL org.tensorquay.protocol-revision="15"
+LABEL org.tensorquay.protocol-revision="16"
 COPY --from=build /build/target/release/tqa-runtime /usr/local/bin/tqa-runtime
 
 # ADR-0039 slice 2: the Desktop template, the built-in environment with a desktop the agent sees and operates. On the
@@ -231,7 +231,7 @@ FROM desktop-os AS desktop
 LABEL org.tensorquay.environment="desktop" \
       org.tensorquay.environment.name="Desktop" \
       org.tensorquay.environment.capabilities="shell,python,node,build,browser,data,desktop"
-LABEL org.tensorquay.protocol-revision="15"
+LABEL org.tensorquay.protocol-revision="16"
 COPY --from=build /build/target/release/tqa-runtime /usr/local/bin/tqa-runtime
 
 # RT-I-046 (ADR-0039 slices 1 and 2): the computer tool's two probes, built as clone-probe is and run on the Desktop
@@ -267,5 +267,5 @@ FROM runtime-base AS base
 LABEL org.tensorquay.environment="minimal" \
       org.tensorquay.environment.name="Minimal" \
       org.tensorquay.environment.capabilities="shell,python"
-LABEL org.tensorquay.protocol-revision="15"
+LABEL org.tensorquay.protocol-revision="16"
 COPY --from=build /build/target/release/tqa-runtime /usr/local/bin/tqa-runtime

@@ -601,6 +601,7 @@ async fn gw_i_309_a_holder_whose_turn_was_taken_keeps_its_sandbox_until_its_run_
                     attachments: Vec::new(),
                     lead_brief: None,
                     team_wake: None,
+                    channel_wake: None,
                 },
             ))
             .await?;

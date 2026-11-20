@@ -174,6 +174,7 @@ async fn gw_i_309_a_sandbox_whose_turn_was_taken_isnt_evicted_until_its_run_ends
                     attachments: Vec::new(),
                     lead_brief: None,
                     team_wake: None,
+                    channel_wake: None,
                 },
             ))
             .await?;

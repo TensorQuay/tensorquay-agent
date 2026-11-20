@@ -673,6 +673,30 @@ impl Gateway {
         self.state.reconciler.hold(held);
     }
 
+    /// How many tasks the gateway's shutdown would join now. Only with the `testing` feature.
+    #[cfg(feature = "testing")]
+    #[must_use]
+    pub fn tracked_tasks(&self) -> usize {
+        self.state.tasks.len()
+    }
+
+    /// Holds channel wakes (`true`): nothing is sent after a commit or by the sweep, as if the gateway had stopped
+    /// first; [`Gateway::channel_wakes_now`] still sends. Only with the `testing` feature.
+    #[cfg(feature = "testing")]
+    pub fn channel_wakes_hold(&self, held: bool) {
+        self.state.channels.hold(held);
+    }
+
+    /// Sends every channel wake that is due now, as the sweep does (ADR-0014's amendment of 20 Nov 2026, A3). Only
+    /// with the `testing` feature.
+    ///
+    /// # Errors
+    /// Storage failure.
+    #[cfg(feature = "testing")]
+    pub async fn channel_wakes_now(&self) -> Result<(), GatewayError> {
+        crate::channels::wake::send(&self.state, None).await
+    }
+
     /// Trusts `certificate` (DER) as an upstream root for keyed hosts, beside the public ones: for tests whose keyed
     /// host is a local server. Only with the `testing` feature, never in a release build (REL-U-009).
     ///

@@ -29,6 +29,7 @@ pub(super) fn message_event(turn: UserTurn) -> Result<Event, CoreError> {
         attachments: turn.attachments,
         lead_brief: turn.lead_brief.map(|brief| *brief),
         team_wake: turn.team_wake,
+        channel_wake: turn.channel_wake,
     })
 }
 
@@ -70,6 +71,7 @@ mod tests {
             attachments: Vec::new(),
             lead_brief,
             team_wake: None,
+            channel_wake: None,
         }
     }
 
@@ -116,6 +118,7 @@ mod tests {
             attachments: Vec::new(),
             lead_brief: None,
             team_wake: Some(wake),
+            channel_wake: None,
         })?;
         assert_eq!(
             event,
@@ -124,6 +127,7 @@ mod tests {
                 attachments: Vec::new(),
                 lead_brief: None,
                 team_wake: Some(wake),
+                channel_wake: None,
             },
             "the marker beside the text, the text untouched for the model"
         );
@@ -131,12 +135,13 @@ mod tests {
         let Event::MessageUser {
             lead_brief,
             team_wake,
+            channel_wake,
             ..
         } = message_event(turn(None))?
         else {
             return Err(crate::CoreError::Internal("not a message"));
         };
-        assert_eq!((lead_brief, team_wake), (None, None));
+        assert_eq!((lead_brief, team_wake, channel_wake), (None, None, None));
         Ok(())
     }
 

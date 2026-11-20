@@ -337,6 +337,8 @@ function applyEvent(state: Transcript, frame: EventFrame): Transcript {
               : {}),
             // The gateway's wake (revision 13): its notice, not the person's message.
             ...(event.team_wake ? { wake: true as const } : {}),
+            // A channel's wake (revision 16): its notice too.
+            ...(event.channel_wake ? { channelWake: true as const } : {}),
           },
         ],
       };

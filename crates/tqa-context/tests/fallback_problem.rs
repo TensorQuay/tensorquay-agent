@@ -20,6 +20,7 @@ fn history(reason: &str, problem: Option<FallbackProblem>) -> Result<Vec<Event>,
         Event::MessageUser {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: "task".into(),
             attachments: vec![],
         },

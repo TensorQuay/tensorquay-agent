@@ -34,6 +34,7 @@ pub(crate) async fn message(
         ClientFrame::UserMessage {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: body.text,
             attachments: body.attachments,
             host_keys: Vec::new(),
