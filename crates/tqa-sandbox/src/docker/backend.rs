@@ -221,6 +221,10 @@ impl SandboxBackend for DockerBackend {
 
     #[tracing::instrument(skip_all)]
     async fn list(&self) -> Result<Vec<SandboxHandle>, SandboxError> {
+        Ok(self.listing().await?.handles)
+    }
+
+    async fn listing(&self) -> Result<crate::Listing, SandboxError> {
         let filters = HashMap::from([(
             "label".into(),
             vec![
@@ -242,7 +246,11 @@ impl SandboxBackend for DockerBackend {
                 "container listing exceeded configured bound".into(),
             ));
         }
-        containers.into_iter().map(records::handle).collect()
+        let (handles, unreadable) = records::listing(containers);
+        Ok(crate::Listing {
+            handles,
+            unreadable,
+        })
     }
 
     async fn engine_networks(&self) -> Result<crate::EngineNetworks, SandboxError> {
