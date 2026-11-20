@@ -57,7 +57,7 @@ pub(crate) struct State {
     pub mcp: crate::mcp_proxy::McpProxy,
     pub web: crate::web::Web,
     /// Wakes channel readers on a new message (ADR-0014).
-    pub channels: crate::channels::Hub,
+    pub channels: Arc<crate::channels::Hub>,
     /// Each agent team's version and its `team.changed` frames (ADR-0034, S6).
     pub team_changes: crate::teams::changed::Changes,
     pub telemetry: Arc<Telemetry>,

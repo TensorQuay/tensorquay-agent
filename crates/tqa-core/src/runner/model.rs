@@ -609,13 +609,17 @@ pub(super) fn provider_reason(error: &LlmError) -> String {
     }
 }
 
-/// A model failure's run code: an agent team's spent budget (the gateway's `team_budget`, ADR-0034 point 8) ends the run
-/// as `budget`, as a run past its own limits does; every other model failure is the provider's.
+/// A model failure's run code: an agent team's or a channel's spent budget (the gateway's `team_budget`, ADR-0034 point
+/// 8; `channel_budget`, ADR-0014's amendment of 20 Nov 2026) ends the run as `budget`, as a run past its own limits
+/// does; every other model failure is the provider's.
 fn failure_code(error: &LlmError) -> ErrorCode {
     match error {
-        // A helper stopped at its team's helpers' share is a budget stop too (GW-I-304).
+        // A helper stopped at its team's helpers' share is a budget stop too (GW-I-304), as is a woken run whose channel
+        // spent its budget (ADR-0014's amendment of 20 Nov 2026, A5).
         LlmError::GatewayRefused { code, .. }
-            if code == "team_budget" || code == "team_budget_helpers" =>
+            if code == "team_budget"
+                || code == "team_budget_helpers"
+                || code == "channel_budget" =>
         {
             ErrorCode::Budget
         }

@@ -77,6 +77,29 @@ describe("WEB-U-039 checking a route", () => {
     expect(fake.writes[0]?.key).toMatch(/.+/);
   });
 
+  // WEB-U-518 (WEB-E2E-060's axe finding on the real stack, scrollable-region-focusable): the server's answer wraps,
+  // and where it is taller than its box it scrolls, so it is a named group the keyboard can reach and scroll.
+  it("lets the keyboard reach and scroll the server's answer", async () => {
+    const excerpt = Array.from(
+      { length: 40 },
+      (_, line) => `line ${line} of a long answer`,
+    ).join("\n");
+    const failed = probeResult("failed", {
+      ok: false,
+      tool_call: "not_run",
+      round_trip: "not_run",
+      failure: { code: "auth_rejected", status: 401, excerpt },
+      warnings: [],
+    });
+    const { dialog } = show({ local: failed });
+    run(dialog);
+    const answer = await within(dialog).findByRole("group", {
+      name: "The server’s answer",
+    });
+    expect(answer).toHaveAttribute("tabindex", "0");
+    expect(answer).toHaveTextContent("line 39 of a long answer");
+  });
+
   it("explains a failed check with the server's answer as plain text, and its warnings", async () => {
     const excerpt = '<img src=x onerror=alert(1)> {"error":"invalid key"}';
     const failed = probeResult("failed", {

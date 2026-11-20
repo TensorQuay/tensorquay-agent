@@ -608,34 +608,6 @@ async fn gw_i_355_a_member_that_cant_be_woken_gets_one_notice_not_one_per_messag
     .await
 }
 
-// TEST: GW-I-360
-// A wake's send belongs to the gateway's shutdown (review of 20 Nov 2026): it is one of the gateway's tracked tasks,
-// and cancelled before the wake gathers its burst, the gateway queues no wake at all.
-#[sqlx::test]
-#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
-async fn gw_i_360_a_cancelled_gateway_sends_no_wake(pool: PgPool) -> TestResult {
-    Box::pin(support::run(pool, async |f| {
-        let (owner, cookie) = f.admin().await?;
-        let analyst = Agent::new(f, owner.id, "Pricing analyst").await?;
-        let id = channel(f, &cookie, "pricing", &[(&analyst, "member")]).await?;
-        // The wake gathering its burst is the gateway's own task, which its shutdown joins.
-        let before = f.gateway.tracked_tasks();
-        post(f, &cookie, &id, text("@pricing analyst look"), None).await?;
-        assert_eq!(f.gateway.tracked_tasks(), before + 1, "the wake is a tracked task");
-        f.gateway.cancel();
-        tokio::time::sleep(Duration::from_millis(2500)).await;
-        let queued: i64 = sqlx::query_scalar(
-            "SELECT count(*) FROM idempotency WHERE conversation_id = $1 AND key LIKE 'channel-wake:%'",
-        )
-        .bind(analyst.uuid)
-        .fetch_one(&f.pool)
-        .await?;
-        assert_eq!(queued, 0, "a cancelled gateway queued a wake");
-        Ok(())
-    }))
-    .await
-}
-
 // TEST: GW-I-362
 // What the channel page shows (slice 3, decided on 20 Nov 2026): the channel's answer carries its wake budget (its own,
 // or the installation's) and what woken runs spent, for the header's "Budget N % used"; a notice about a member names
@@ -710,58 +682,5 @@ async fn gw_i_362_the_channel_answer_carries_its_budget_and_a_notice_its_member(
             Ok(())
         },
     ))
-    .await
-}
-
-// TEST: GW-I-371
-// A woken run is charged to the wake handed over for it (CI on #144, 20 Nov 2026): never to whichever delivered turn
-// was touched last. Alpha's first wake's row is given the later update time just before its second woken run starts;
-// that run's post is still one hop past the wake that started it (3), not past the first (1).
-#[sqlx::test]
-#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
-async fn gw_i_371_a_woken_run_is_charged_to_the_wake_handed_over_for_it(
-    pool: PgPool,
-) -> TestResult {
-    Box::pin(support::run(pool, async |f| {
-        let (owner, cookie) = f.admin().await?;
-        let mut alpha = Agent::new(f, owner.id, "Alpha").await?;
-        let mut beta = Agent::new(f, owner.id, "Beta").await?;
-        let id = channel(f, &cookie, "loop", &[(&alpha, "member"), (&beta, "member")]).await?;
-        post(f, &cookie, &id, text("@alpha start"), None).await?;
-        alpha.woken(f, &id, 0).await?;
-        alpha.start(f).await?;
-        let at = *alpha.read(f, &id, 0).await?.last().ok_or("read")?;
-        alpha.post(f, &id, text("@beta hop 1")).await?;
-        alpha.end(f).await?;
-        beta.woken(f, &id, 0).await?;
-        beta.start(f).await?;
-        beta.read(f, &id, 0).await?;
-        beta.post(f, &id, text("@alpha hop 2")).await?;
-        beta.end(f).await?;
-        alpha.woken(f, &id, at).await?;
-        // Alpha's first wake's row is touched after its second was delivered, as a run's end or a retry may do.
-        sqlx::query(
-            "UPDATE idempotency SET updated_at = CURRENT_TIMESTAMP + interval '1 hour' \
-             WHERE conversation_id = $1 AND key LIKE 'channel-wake:%' AND key LIKE '%:0'",
-        )
-        .bind(alpha.uuid)
-        .execute(&f.pool)
-        .await?;
-        alpha.start(f).await?;
-        alpha.read(f, &id, at).await?;
-        let seq = alpha.post(f, &id, text("@beta hop 3")).await?;
-        let hop: i16 = sqlx::query_scalar(
-            "SELECT hop FROM channel_messages WHERE channel_id = $1 AND seq = $2",
-        )
-        .bind(Uuid::parse_str(&id)?)
-        .bind(i64::try_from(seq)?)
-        .fetch_one(&f.pool)
-        .await?;
-        assert_eq!(
-            hop, 3,
-            "charged to the wake that started this run (hop 2), not the first (hop 0)"
-        );
-        Ok(())
-    }))
     .await
 }

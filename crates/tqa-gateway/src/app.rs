@@ -342,6 +342,7 @@ impl Gateway {
             &config, &secrets, &pool, &cancel, registry,
         ))
         .await?;
+        let channels = Arc::new(crate::channels::Hub::default());
         let (manager, own_backend) = Box::pin(build_manager(
             &config,
             backend,
@@ -357,6 +358,7 @@ impl Gateway {
                 cancel: cancel.clone(),
                 tasks: tasks.clone(),
                 idle_clock,
+                channels: channels.clone(),
             },
         ))
         .await?;
@@ -390,7 +392,7 @@ impl Gateway {
             relay,
             mcp: crate::mcp_proxy::McpProxy::default(),
             web,
-            channels: crate::channels::Hub::default(),
+            channels,
             team_changes: crate::teams::changed::Changes::default(),
             telemetry,
             environment_images: crate::environments::Images::default(),
