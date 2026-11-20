@@ -2378,6 +2378,7 @@
     "models.checkName": "Vérifier l’itinéraire {name}",
     "models.checkTitle": "Vérifier l’itinéraire {name}",
     "models.checkIntro": "Envoie une demande courte avec un appel d’outil via cet itinéraire, comme le ferait une tâche, et utilise quelques jetons. Cela peut prendre jusqu’à une minute.",
+    "models.checkExcerpt": "La réponse du serveur",
     "models.checkIntroLocal": "Envoie une demande courte avec un appel d’outil via cet itinéraire, comme le ferait une tâche, et utilise quelques jetons. Les modèles locaux peuvent prendre une ou deux minutes.",
     "models.runCheck": "Lancer la vérification",
     "models.checkDetails": "Détails",

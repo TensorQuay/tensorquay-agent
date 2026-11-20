@@ -2383,6 +2383,7 @@
     "models.checkName": "Comprobar ruta {name}",
     "models.checkTitle": "Comprobar ruta {name}",
     "models.checkIntro": "Envía una solicitud corta con una llamada a una herramienta a través de esta ruta, como lo haría una tarea, y usa unos pocos tokens. Puede tardar hasta un minuto.",
+    "models.checkExcerpt": "La respuesta del servidor",
     "models.checkIntroLocal": "Envía una solicitud corta con una llamada a una herramienta a través de esta ruta, como lo haría una tarea, y usa unos pocos tokens. Los modelos locales pueden tardar uno o dos minutos.",
     "models.runCheck": "Ejecutar comprobación",
     "models.checkDetails": "Detalles",

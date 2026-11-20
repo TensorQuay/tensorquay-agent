@@ -6,7 +6,6 @@ import os
 from pathlib import Path
 import re
 import secrets
-import shlex
 import signal
 import subprocess
 import sys
@@ -17,6 +16,10 @@ import urllib.request
 
 import readings
 
+# The redaction and the failed command's report are the installer's too (deploy/tools/shell.py).
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
+from shell import STDERR_TAIL_LINES, command_failure, redact  # noqa: E402,F401
+
 TOYBOX = "tianon/toybox:0.8.14@sha256:8fe8776eca4b6dabdee10f3522ae0ab9c51dbac70aaff9dfd377eac548f8e7f7"
 COMPOSE = ["docker", "compose", "-f", "deploy/compose/docker.yml", "-f", "deploy/compose/test.yml"]
 # These are the versions verified by the Compose readiness contract.
@@ -24,32 +27,6 @@ MINIMUM_ENGINE = "27.4.0"
 MINIMUM_COMPOSE = "2.31.0"
 REQUIREMENTS = ("Docker Engine {} or newer and Docker Compose {} or newer are required "
                 "(minimum tested versions).").format(MINIMUM_ENGINE, MINIMUM_COMPOSE)
-STDERR_TAIL_LINES = 40
-
-
-def redact(text, env):
-    """Remove the generated database password and bootstrap token from diagnostics."""
-    for name in ("TQA_POSTGRES_PASSWORD", "TQA_BOOTSTRAP_TOKEN", "TQA_STACK_PASSWORD"):
-        if env.get(name):
-            text = text.replace(env[name], "[REDACTED]")
-    return text
-
-
-def command_failure(args, env, error):
-    """Name the failing command and print at most forty redacted stderr lines."""
-    if isinstance(error, subprocess.CalledProcessError):
-        reason = "exit {}".format(error.returncode)
-    elif isinstance(error, subprocess.TimeoutExpired):
-        reason = "timeout after {} s".format(error.timeout)
-    else:
-        reason = "could not start"
-    display = " ".join(shlex.quote(str(argument)) for argument in args)
-    print("Command failed ({}): {}".format(reason, redact(display, env)), file=sys.stderr)
-    detail = str(error) if isinstance(error, OSError) else error.stderr
-    if isinstance(detail, bytes):
-        detail = detail.decode("utf-8", errors="replace")
-    if detail:
-        print("\n".join(redact(detail, env).splitlines()[-STDERR_TAIL_LINES:]), file=sys.stderr)
 
 
 def command(args, env, *, capture=False, cwd=None, timeout=90):

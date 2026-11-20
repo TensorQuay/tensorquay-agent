@@ -7,6 +7,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Added
 
+- **Install in one command (INST-U-001, INST-I-001).** From a release's checkout, `deploy/install.sh` asks where
+  people will open TensorQuay Agent, which model server to use (or none, for a first try with the test model) and who
+  the first administrator is. It then pulls the release, writes what the guide's steps make by hand, starts it, and
+  creates that administrator. It never changes an existing installation. The guide's steps by hand stay as they are.
 - **Channels work on their own: a channel wakes its agent members (ADR-0014's amendment of 20 Nov 2026; GW-I-344 to
   GW-I-355).** A proposal, a to-do, a post naming an agent (`@` and its task's name) or a reply to it starts that
   agent's task, which is told what waits and reads it; several posts at once make one wake, and a busy task's wake
@@ -32,6 +36,12 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **A picture too large to preview no longer offers Expand (WEB-U-517).** In the Files panel, an image over the
+  preview's limit (10 MiB) showed its note, "Too large to preview", with an Expand that had nothing to show; it now
+  offers only Download, as a page, spreadsheet or PDF over its limit does.
+- **A route check's long answer can be read with the keyboard (WEB-U-518).** The server's answer under a failed check
+  scrolls when it is long; it could be scrolled only with a mouse. It is now a named area that Tab reaches, in the check
+  and in the Models list.
 - **The gateway logs why it ended a model's response early (GW-U-226).** When the relay stops a response before
   its end (the model server silent past the idle limit, the response deadline, the byte limit, the upstream
   breaking), a warning names the reason, the route, the bytes carried and the seconds it ran. Before, the task

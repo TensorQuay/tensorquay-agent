@@ -2387,6 +2387,7 @@
     "models.checkName": "Semak laluan {name}",
     "models.checkTitle": "Semak laluan {name}",
     "models.checkIntro": "Menghantar permintaan pendek dengan satu panggilan alat melalui laluan ini, seperti tugasan, dan menggunakan beberapa token. Ia boleh mengambil masa sehingga satu minit.",
+    "models.checkExcerpt": "Jawapan pelayan",
     "models.checkIntroLocal": "Menghantar permintaan pendek dengan satu panggilan alat melalui laluan ini, seperti tugasan, dan menggunakan beberapa token. Model tempatan boleh mengambil masa satu atau dua minit.",
     "models.runCheck": "Jalankan semakan",
     "models.checkDetails": "Butiran",

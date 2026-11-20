@@ -1094,6 +1094,7 @@
     "models.checkName": "Check route {name}",
     "models.checkTitle": "Check route {name}",
     "models.checkIntro": "Sends a short request with one tool call through this route, as a task would, and uses a few tokens. It can take up to a minute.",
+    "models.checkExcerpt": "The server’s answer",
     "models.checkIntroLocal": "Sends a short request with one tool call through this route, as a task would, and uses a few tokens. Local models can take a minute or two.",
     "models.runCheck": "Run check",
     "models.checkDetails": "Details",

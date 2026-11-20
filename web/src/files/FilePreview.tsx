@@ -15,6 +15,7 @@ import { Skeleton } from "../ui/Skeleton";
 
 import { filesFailure } from "./file-errors";
 import { previewKind } from "./file-kind";
+import { MAX_IMAGE_BYTES } from "./image-bytes";
 import { PagePreview } from "./PagePreview";
 import { PdfPreview } from "./PdfPreview";
 import {
@@ -99,23 +100,24 @@ export function FilePreview({
   }
   const file = content.data;
   const kind = previewKind(name);
-  // A page, PDF or sheet over its preview limit shows only a note, so it has nothing to expand (a pass
-  // over the pages before 17.0; WEB-U-255).
+  // A page, PDF, sheet or image over its preview limit shows only a note, so it has nothing to expand (a pass
+  // over the pages before 17.0; WEB-U-255, and for an image WEB-U-517).
   const previewLimit =
-    kind === "page"
-      ? limits.preview_html_bytes
-      : kind === "pdf"
-        ? limits.preview_pdf_bytes
-        : kind === "sheet"
-          ? limits.preview_sheet_bytes
-          : null;
+    kind === "image"
+      ? MAX_IMAGE_BYTES
+      : kind === "page"
+        ? limits.preview_html_bytes
+        : kind === "pdf"
+          ? limits.preview_pdf_bytes
+          : kind === "sheet"
+            ? limits.preview_sheet_bytes
+            : null;
   // Every kind that previews opens wide, where the layout has room for the split; a note has nothing to widen.
   const wide =
     split.docks &&
     (previewLimit !== null
       ? file.size <= previewLimit
-      : kind === "image" ||
-        (!file.binary && file.text !== null && file.text !== ""));
+      : !file.binary && file.text !== null && file.text !== "");
   const view =
     kind === "image" ? (
       <ImagePreview
