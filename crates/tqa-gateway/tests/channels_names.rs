@@ -5,7 +5,7 @@
 mod channel_agent;
 #[path = "support/fixture.rs"]
 mod support;
-use channel_agent::{Agent, WAKE, channel, post, text};
+use channel_agent::{Agent, WAKE, channel, post, runtime_call, text};
 use reqwest::Method;
 use serde_json::{Value, json};
 use sqlx::PgPool;
@@ -328,6 +328,66 @@ async fn gw_i_378_an_unnamed_member_is_woken_by_everything_but_at(pool: PgPool) 
         .fetch_one(&f.pool)
         .await?;
         assert_eq!(wakes, [old.uuid]);
+        Ok(())
+    }))
+    .await
+}
+
+// TEST: GW-I-381
+// A claim carries its author's name as a post does (C-12, found by S2 on 20 Nov 2026): an agent that claims a to-do is
+// named on the claim in the log and on the to-do board, by its name in the channel.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_381_an_agents_claim_carries_its_name(pool: PgPool) -> TestResult {
+    Box::pin(support::run(pool, async |f| {
+        let (ana, cookie) = f.admin().await?;
+        let mut dev = Agent::new(f, ana.id, "Dev").await?;
+        let id = channel(f, &cookie, "triage", &[(&dev, "member")]).await?;
+        let task = post(
+            f,
+            &cookie,
+            &id,
+            json!({"type": "task", "title": "Fix the due-date bug", "spec": "See the report."}),
+            None,
+        )
+        .await?;
+        assert!(dev.next(f, WAKE).await?.is_some(), "the to-do's wake");
+        let (status, claimed) = runtime_call(
+            f,
+            Method::POST,
+            &format!("/runtime/channels/{id}/tasks/{task}/claim"),
+            &dev.token(f)?,
+            None,
+        )
+        .await?;
+        assert!(status == 200 || status == 201, "{status} {claimed}");
+        let (status, page) = call(
+            f,
+            Method::GET,
+            &format!("/api/v1/channels/{id}/messages?since={task}"),
+            &cookie,
+            (None, None),
+        )
+        .await?;
+        assert_eq!(status, 200);
+        let claim = page["messages"]
+            .as_array()
+            .ok_or("messages")?
+            .iter()
+            .find(|message| message["body"]["type"] == "claim")
+            .cloned()
+            .ok_or_else(|| format!("no claim in {page}"))?;
+        assert_eq!(claim["author"]["name"], "Dev", "{claim}");
+        let (status, board) = call(
+            f,
+            Method::GET,
+            &format!("/api/v1/channels/{id}/tasks"),
+            &cookie,
+            (None, None),
+        )
+        .await?;
+        assert_eq!(status, 200);
+        assert!(board.to_string().contains("\"name\":\"Dev\""), "{board}");
         Ok(())
     }))
     .await

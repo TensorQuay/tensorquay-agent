@@ -324,9 +324,13 @@ pub(crate) async fn claim(
         {
             return Err(GatewayError::Denied("observer"));
         }
-        let (_, name) = store::conversation_author(&mut transaction, conversation)
+        let (_, profile_name) = store::conversation_author(&mut transaction, conversation)
             .await?
             .ok_or(GatewayError::Unauthorized)?;
+        // A claim carries the member's name in the channel, as its posts do (C-12).
+        let name = store::name_in(&mut transaction, id, conversation)
+            .await?
+            .or(profile_name);
         let author = Author {
             kind: AuthorKind::Conversation,
             id: conversation.to_string(),
