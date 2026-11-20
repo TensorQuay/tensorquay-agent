@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { pageHosts } from "./page-hosts";
+import { pageHosts, runsScripts } from "./page-hosts";
 
 const page = (head: string, body = "") =>
   `<!doctype html><html><head>${head}</head><body>${body}</body></html>`;
@@ -308,5 +308,22 @@ describe("WEB-U-467 the internet hosts a page loads from", () => {
         ),
       ).toEqual(["cdn.example.org", "static.example.net"]);
     });
+  });
+});
+
+// WEB-U-513 (18.1.1, the first hour's finding 3): whether a page runs scripts at all, read from its text, so a page
+// with none says nothing about scripts.
+describe("WEB-U-513 a page's scripts", () => {
+  it.each([
+    ["<h1>Q3</h1><img src='chart.png'><table><tr><td>1</td></tr></table>", false],
+    ["<p>No code here, only the word script in prose.</p>", false],
+    ['<script type="application/json">{"a":1}</script><p>data only</p>', false],
+    ["<script>document.title = 'x'</script>", true],
+    ['<script src="app.js"></script>', true],
+    ['<button onclick="go()">Go</button>', true],
+    ['<a href="javascript:void(0)">x</a>', true],
+    ['<script type="module" src="main.js"></script>', true],
+  ])("%s runs scripts: %s", (html, expected) => {
+    expect(runsScripts(html)).toBe(expected);
   });
 });

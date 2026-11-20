@@ -12,7 +12,7 @@ import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
 
 import "./changes-catalogue";
-import { blockedHosts, pageHosts } from "./page-hosts";
+import { blockedHosts, pageHosts, runsScripts } from "./page-hosts";
 import { type SiteReport, siteReportLine, siteReportPart } from "./site-report";
 
 /** The hosts the offline line names before it counts the rest. */
@@ -57,18 +57,23 @@ export function PagePreview({
   const t = useT();
   const framed = size <= limit;
   // Nothing to say while it's read, or if it can't be: the sandbox note stands.
-  const hosts = useQuery({
-    queryKey: ["pageHosts", conversationId, path, etag],
-    queryFn: async ({ signal }) =>
-      pageHosts(
+  const read = useQuery({
+    queryKey: ["pageRead", conversationId, path, etag],
+    queryFn: async ({ signal }) => {
+      const html =
         text ??
-          (await (await api.fileBlob(conversationId, path, signal)).text()),
-      ),
+        (await (await api.fileBlob(conversationId, path, signal)).text());
+      // Its hosts, and whether it runs any script of its own: a page with none says nothing about scripts (WEB-U-513).
+      return { hosts: pageHosts(html), scripts: runsScripts(html) };
+    },
     enabled: framed,
     staleTime: Infinity,
     // One more read after a failure (a dropped connection), so one bad moment doesn't hide the line for this version.
     retry: 1,
   }).data;
+  const hosts = read?.hosts;
+  // Unknown until the page is read: the sandbox note stands meanwhile.
+  const scriptless = read?.scripts === false;
   // The page's folder as a site; until it answers, nothing is framed (no flash of the offline view). The pass lives 15
   // minutes from its last use; it's minted again after 10.
   const slash = path.lastIndexOf("/");
@@ -145,12 +150,16 @@ export function PagePreview({
   return (
     <div className="file-kind stack">
       <div className="file-kind-bar">
-        <span className="type-small muted">
-          {t(scripts ? "files.pageSandboxed" : "files.pageScriptsStopped")}
-        </span>
-        <Button variant="ghost" onClick={() => setScripts(!scripts)}>
-          {t(scripts ? "files.stopScripts" : "files.runScripts")}
-        </Button>
+        {!scriptless && (
+          <>
+            <span className="type-small muted">
+              {t(scripts ? "files.pageSandboxed" : "files.pageScriptsStopped")}
+            </span>
+            <Button variant="ghost" onClick={() => setScripts(!scripts)}>
+              {t(scripts ? "files.stopScripts" : "files.runScripts")}
+            </Button>
+          </>
+        )}
         <Button variant="ghost" onClick={() => setLoad(load + 1)}>
           <Icon glyph={RotateCw} size={16} />
           {t("files.reload")}
