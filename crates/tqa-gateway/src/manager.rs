@@ -51,6 +51,8 @@ pub(crate) struct Services {
     pub events: EventStore,
     pub cancel: CancellationToken,
     pub tasks: TaskTracker,
+    /// The channels' hub, to publish a notice the hand-over posts (ADR-0014's amendment of 20 Nov 2026, A10).
+    pub channels: Arc<crate::channels::Hub>,
     pub idle_clock: Arc<dyn IdleClock>,
 }
 
