@@ -5,7 +5,7 @@ Each case starts its own stack (robustness.Stack: its own name, pool, port and i
 scenario that answers each task by a phrase of its first message (prompt selection), so tasks of two people run their
 own scripts side by side. The cases read only the public API, the engine and the stack's own database.
 
-Usage: TQA_DOCKER_TESTS=1 python3 deploy/tests/sandboxes_stack.py listing|stop|verdict
+Usage: TQA_DOCKER_TESTS=1 python3 deploy/tests/sandboxes_stack.py listing|stop|verdict|page
 """
 import argparse
 import http.cookiejar
@@ -17,6 +17,7 @@ import time
 import urllib.error
 import urllib.request
 import uuid
+from pathlib import Path
 
 import compose
 import demo
@@ -51,6 +52,11 @@ SCENARIO = {"model": "fixture", "select": "prompt", "responses": (
     scripted("Busy for a while", [
         shell("timeout {} sh -c 'while :; do :; done'; echo busy-done".format(BUSY_SECONDS)),
         reply("The busy call ended.")])
+    # E2E-OPS-001: two calls in a row, so the page is read while it works and every row is measured.
+    + scripted("Busy twice", [
+        shell("timeout {} sh -c 'while :; do :; done'; echo busy-done".format(BUSY_SECONDS)),
+        shell("timeout {} sh -c 'while :; do :; done'; echo busy-done".format(BUSY_SECONDS)),
+        reply("Both busy calls ended.")])
     + scripted("Quiet task", [reply("Nothing to do.")])
     + scripted("Write the note", [
         shell("printf kept > note.txt && echo written"),
@@ -380,7 +386,124 @@ def verdict_case(stack):
             stack.command(["docker", "network", "rm", network])
 
 
-CASES = {"listing": listing_case, "stop": stop_case, "verdict": verdict_case}
+# E2E-OPS-001: the Sandboxes page and the leak verdict as an administrator reads them. Titles nobody may see there.
+TITLES = ["Ledger-{}".format(secrets.token_hex(4)) for _ in range(3)]
+PAGE = "/settings/sandboxes"
+
+
+def cookies(person):
+    jar = next(handler.cookiejar for handler in person.client.handlers
+               if isinstance(handler, urllib.request.HTTPCookieProcessor))
+    return [{"name": cookie.name, "value": cookie.value} for cookie in jar]
+
+
+def browse(person, out, step, **fields):
+    """One step of sandboxes_page.mjs as `person`; its JSON answer. A console error or a failed request fails it."""
+    argument = json.dumps(dict(fields, origin=person.stack.origin, cookies=cookies(person), out=str(out), step=step))
+    answer = json.loads(person.stack.command(["node", "deploy/tests/sandboxes_page.mjs", argument]).splitlines()[-1])
+    assert not answer["problems"], "{}: {}".format(step, answer["problems"])
+    return answer
+
+
+def untitled(what, text):
+    """Nothing of any task's title in `text` (the page and its API answer show owners, never titles)."""
+    for title in TITLES:
+        assert title not in text, "{} shows a task's title".format(what)
+
+
+def page_case(stack):
+    """E2E-OPS-001: three sandboxes of two people (one working, two idle) on the page with their owners, states and
+    use; the administrator stops one idle sandbox from the page, its owner's next message runs in a new sandbox on its
+    files with the notice on the task page, and the stop has its audit row; a planted container the sweep can't read
+    turns Status amber and the page's Left behind lists it with its command, which removes it; both green again.
+    Screenshots at 1280 and 390 px in the evidence folder; no task's title on a page or in the API's answers."""
+    out = Path(stack.env.get("TQA_ROBUSTNESS_EVIDENCE_DIR") or tempfile.mkdtemp(prefix="e2e-ops-001-")) / "e2e-ops-001"
+    out.mkdir(parents=True, exist_ok=True)
+    admin = administrator(stack)
+    other = member(stack, admin)
+    owner = "robustness@example.invalid"
+    quiet = admin.task(TITLES[0], "Quiet task, the first")
+    note = other.task(TITLES[1], "Write the note")
+    wait(lambda: ended(admin, quiet), 180, "the quiet task's run ended")
+    wait(lambda: ended(other, note), 180, "the note's first run ended")
+    wait(lambda: all((row(listing(admin), task) or {}).get("usage") for task in (quiet, note)), PASSES_WITHIN,
+         "both idle sandboxes measured")
+    busy = admin.task(TITLES[2], "Busy twice")
+    # Read while the busy one works and every row is measured (its calls keep it working for twice BUSY_SECONDS).
+    answer = wait(lambda: (lambda a: a if (row(a, busy) or {}).get("state") == "working"
+                           and all((row(a, task) or {}).get("usage") for task in (busy, quiet, note)) else None)(listing(admin)),
+                  PASSES_WITHIN, "the busy sandbox working and measured")
+    read = browse(admin, out, "read", path=PAGE, name="1-three-sandboxes")
+    (out / "1-listing.json").write_text(json.dumps(answer, indent=1))
+    untitled("the listing's answer", json.dumps(answer))
+    for width, text in read["texts"].items():
+        untitled("the page at " + width, text)
+        assert other_email_and_states(text, owner), "the page at {} lists the three: {}".format(width, text[:600])
+        assert "Measuring" not in text, "every row measured at {}: {}".format(width, text[:600])
+    print("E2E-OPS-001: three listed with owners, states and use at 1280 and 390", flush=True)
+    # The administrator stops the member's idle sandbox from the page.
+    before = containers(stack, note)
+    stopped = browse(admin, out, "stop", email=MEMBER)
+    assert "The task keeps its files and history." in stopped["asked"], stopped["asked"]
+    wait(lambda: not containers(stack, note), GONE_WITHIN, "the stopped container gone")
+    assert audit_rows(stack, note) == ["sandboxes|stop|{}|admin".format(note)], audit_rows(stack, note)
+    wait(lambda: not row(listing(admin), note), 30, "its row gone from the listing")
+    after_stop = browse(admin, out, "read", path=PAGE, name="2-after-stop")
+    for width, text in after_stop["texts"].items():
+        assert MEMBER not in text, "the stopped row is gone at {}: {}".format(width, text[:600])
+    other.ok("/api/v1/conversations/{}/messages".format(note), {"text": "Read the note", "attachments": []})
+    wait(lambda: ended(other, note, 2), 180, "the note's second run ended")
+    again = containers(stack, note)
+    assert len(again) == 1 and again != before, (before, again)
+    results = [frame["event"] for frame in other.events(note) if frame["event"]["type"] == "tool.result"]
+    assert "kept" in json.dumps(results[-1]), "the task's file is intact: {}".format(results[-1])
+    task_page = browse(other, out, "read", path="/c/" + note, name="3-task-notice", widths=[1280])
+    assert "An administrator stopped this task's sandbox." in task_page["texts"]["1280"], task_page["texts"]["1280"][:800]
+    print("E2E-OPS-001: stopped from the page; the next message ran in a new sandbox on its file; the notice and the "
+          "audit row", flush=True)
+    # A container of this installation the sweep can't read: Status amber and the page's Left behind, then removed.
+    prefix, image = stack.env["TQA_SANDBOX_NETWORK"], demo.runtime_image(stack.env)
+    name = "tqa-stray-unreadable-" + secrets.token_hex(4)
+    planted = stack.command(["docker", "run", "-d", "--name", name, "--network", "none", "--label",
+                             "tqa.instance=" + prefix, "--label", "tqa.conversation=not a task!", "--label",
+                             "tqa.created_at=1", "--entrypoint", "sleep", image, "3600"])
+    try:
+        first = next_pass(admin, detail(admin)["swept_at"] or "")
+        amber = next_pass(admin, first["swept_at"])
+        assert amber["left_behind"]["containers"] == 1, amber
+        status = browse(admin, out, "read", path="/settings/status", name="4-status-amber")
+        left = browse(admin, out, "read", path=PAGE, name="5-left-behind")
+        command = "docker rm -f " + planted[:12]
+        for width in status["texts"]:
+            assert "Left behind: 1 container" in status["texts"][width], status["texts"][width][:800]
+            assert command in left["texts"][width] and "Left behind" in left["texts"][width], left["texts"][width][:800]
+        (out / "5-listing.json").write_text(json.dumps(listing(admin), indent=1))
+        print("E2E-OPS-001: Status amber, and the page lists {} with its command".format(planted[:12]), flush=True)
+        # The command as the page shows it, run on the engine host.
+        stack.command(command.split())
+        green = next_pass(admin, amber["swept_at"])
+        assert green["left_behind"]["containers"] == 0, green
+        status = browse(admin, out, "read", path="/settings/status", name="6-status-green")
+        left = browse(admin, out, "read", path=PAGE, name="7-page-green")
+        for width in status["texts"]:
+            assert "Nothing left behind." in status["texts"][width], status["texts"][width][:800]
+            assert "Left behind" not in left["texts"][width], left["texts"][width][:800]
+        print("E2E-OPS-001: removed by the page's command; Status and the page green again", flush=True)
+    finally:
+        if not gone(stack, "container", name):
+            stack.command(["docker", "rm", "-f", name])
+    for path in out.glob("*"):
+        if path.suffix in (".json",):
+            untitled(path.name, path.read_text())
+    print("E2E-OPS-001: evidence in " + str(out), flush=True)
+
+
+def other_email_and_states(text, owner):
+    """The page lists the administrator's two (as "You") and the member's one, one working and two idle."""
+    return MEMBER in text and text.count("Working") >= 1 and text.count("Idle") >= 2
+
+
+CASES = {"listing": listing_case, "stop": stop_case, "verdict": verdict_case, "page": page_case}
 
 
 def main():
@@ -397,7 +520,7 @@ def main():
     directory = compose.installation(temporary)
     stack, failure = robustness.Stack(directory, env), None
     try:
-        stack.prepare(args.case, scenario=SCENARIO, settings=SWEEP if args.case == "verdict" else None, **METRICS)
+        stack.prepare(args.case, scenario=SCENARIO, settings=SWEEP if args.case in ("verdict", "page") else None, **METRICS)
         CASES[args.case](stack)
     except BaseException as error:
         failure = error
