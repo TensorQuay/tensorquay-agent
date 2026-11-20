@@ -676,10 +676,18 @@ const GATHER: std::time::Duration = std::time::Duration::from_secs(1);
 /// [`send`] in the background, after a commit that may have made a wake due, a moment later so a burst is told in one
 /// sentence; a failure is logged and the sweep sends it later.
 pub(crate) fn soon(state: &std::sync::Arc<State>, channel: Option<Uuid>) {
+    // The gateway's own task: its shutdown joins it, and its cancel stops it before anything is sent.
+    let tasks = state.tasks.clone();
     let state = state.clone();
-    tokio::spawn(async move {
-        tokio::time::sleep(GATHER).await;
-        if let Err(error) = send(&state, channel).await {
+    tasks.spawn(async move {
+        let sent = tokio::select! {biased;
+            () = state.cancel.cancelled() => Ok(()),
+            sent = async {
+                tokio::time::sleep(GATHER).await;
+                send(&state, channel).await
+            } => sent,
+        };
+        if let Err(error) = sent {
             tracing::warn!(code = error.code(), "a channel's wake wasn't sent");
         }
     });
