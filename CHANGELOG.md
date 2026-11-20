@@ -36,35 +36,45 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
-- **A picture too large to preview no longer offers Expand (WEB-U-517).** In the Files panel, an image over the
-  preview's limit (10 MiB) showed its note, "Too large to preview", with an Expand that had nothing to show; it now
-  offers only Download, as a page, spreadsheet or PDF over its limit does.
-- **A route check's long answer can be read with the keyboard (WEB-U-518).** The server's answer under a failed check
-  scrolls when it is long; it could be scrolled only with a mouse. It is now a named area that Tab reaches, in the check
-  and in the Models list.
 - **The gateway logs why it ended a model's response early (GW-U-226).** When the relay stops a response before
   its end (the model server silent past the idle limit, the response deadline, the byte limit, the upstream
   breaking), a warning names the reason, the route, the bytes carried and the seconds it ran. Before, the task
   only said the model's answer was cut off, and nothing said why.
-- **A previewed page with no scripts says nothing about scripts (WEB-U-513).** A page of text, pictures and tables no
-  longer shows "Scripts are running in a sandbox" or Stop scripts; only Reload.
-- **A model's id on Settings > Models is never cut (WEB-E2E-144).** It has its own line, wrapping whole if it must,
-  with its Verified pill under it, so a long language's wider menu no longer cuts it.
 - **One unreadable container no longer stops the sandbox cleanup (SBX-U-022, GW-I-342).** A container carrying this
   installation's labels with one of them malformed made the whole container listing fail, so the sweep removed
   nothing and a task's teardown kept retrying. It is now left out of the listing, logged, and counted on Status as
   something the sweep couldn't remove; the rest are listed and swept as before.
-- **A shell command no longer fails when another process ends during its cleanup (RT-I-064).** After each command the
-  runtime looks through every process for escaped background children; one that ended between being listed and being
-  read (a browser's or an MCP server's child, for example) made that cleanup fail, and the command with it, with
-  "escaped process cleanup failed". A process that has ended is now skipped; the runtime's log names the step of any
-  other cleanup failure.
 ### Changed
 
 - **A helper's failed run says why on the lead's page (GW-I-343, WEB-U-512).** The lead task's line read only
   "places failed."; it now names the reason in plain words ("The model's reply was cut off at its output limit"),
   links to the helper's task, and while the helper works again says so instead of "failed". A team's
   `member_failed` notice carries the run's failure code in a new optional `code` field.
+
+## 18.1.1 (20 November 2026)
+
+A fix release: a shell command no longer fails when another process ends during its cleanup, a previewed page
+without scripts says nothing about scripts, a picture too large to preview no longer offers Expand, a route check's
+long answer can be read with the keyboard, a model's id is never cut on Settings › Models, and the install guide
+names a second installation's settings first. No migration, protocol or configuration change: upgrade in place.
+
+### Fixed
+
+- **A previewed page with no scripts says nothing about scripts (WEB-U-513).** A page of text, pictures and tables no
+  longer shows "Scripts are running in a sandbox" or Stop scripts; only Reload.
+- **A picture too large to preview no longer offers Expand (WEB-U-517).** In the Files panel, an image over the
+  preview's limit (10 MiB) showed its note, "Too large to preview", with an Expand that had nothing to show; it now
+  offers only Download, as a page, spreadsheet or PDF over its limit does.
+- **A route check's long answer can be read with the keyboard (WEB-U-518).** The server's answer under a failed check
+  scrolls when it is long; it could be scrolled only with a mouse. It is now a named area that Tab reaches, in the check
+  and in the Models list.
+- **A model's id on Settings > Models is never cut (WEB-E2E-144).** It has its own line, wrapping whole if it must,
+  with its Verified pill under it, so a long language's wider menu no longer cuts it.
+- **A shell command no longer fails when another process ends during its cleanup (RT-I-064).** After each command the
+  runtime looks through every process for escaped background children; one that ended between being listed and being
+  read (a browser's or an MCP server's child, for example) made that cleanup fail, and the command with it, with
+  "escaped process cleanup failed". A process that has ended is now skipped; the runtime's log names the step of any
+  other cleanup failure.
 
 ## 18.1.0 (20 November 2026)
 
