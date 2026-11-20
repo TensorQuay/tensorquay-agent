@@ -7,6 +7,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **A previewed page with no scripts says nothing about scripts (WEB-U-513).** A page of text, pictures and tables no
+  longer shows "Scripts are running in a sandbox" or Stop scripts; only Reload.
+- **A model's id on Settings > Models is never cut (WEB-E2E-144).** It has its own line, wrapping whole if it must,
+  with its Verified pill under it, so a long language's wider menu no longer cuts it.
 - **One unreadable container no longer stops the sandbox cleanup (SBX-U-022, GW-I-342).** A container carrying this
   installation's labels with one of them malformed made the whole container listing fail, so the sweep removed
   nothing and a task's teardown kept retrying. It is now left out of the listing, logged, and counted on Status as
