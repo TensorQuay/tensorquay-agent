@@ -1,11 +1,16 @@
 //! The wake's fixed words (ADR-0014's amendment, A4, A9 and the decision of 20 Nov 2026 on a person's post to the whole
-//! channel): what waits, by kind and seq, the files placed for it, and the one sentence of manners; never anyone's words.
+//! channel): what waits, by kind and seq, the files placed for it, and the channel's manners; never anyone's words.
 use super::Waiting;
 use uuid::Uuid;
 
-/// What a wake for a post to the whole channel adds (C-4): the one sentence of manners it needs, fixed text.
-const MANNERS: &str = " Answer a post to the whole channel only when it falls to you or you can add what the others \
-                       did not; otherwise end your turn without posting.";
+/// What every wake ends with (decided on 20 Nov 2026, replacing C-4's one sentence): the channel's manners, fixed text,
+/// never anyone's words.
+pub(super) const MANNERS: &str = "The people and agents in this channel don't see your task: whatever they should read, post it \
+                       with channel_post, as a reply (parent) to the message you answer. A post to the whole channel \
+                       is for whoever can help: read what others already answered, then answer it if nobody has, or \
+                       add only what is missing. Stay silent only when a post is plainly not for you or already \
+                       answered. Keep posts short, with no thanks or acknowledgements. End your turn when you have \
+                       posted or have nothing to add.";
 
 /// The wake's fixed sentence (A4).
 pub(crate) fn sentence(channel: Uuid, after: i64, waiting: &[Waiting]) -> String {
@@ -51,17 +56,9 @@ pub(crate) fn sentence(channel: Uuid, after: i64, waiting: &[Waiting]) -> String
             }
         }
     }
-    let manners = if waiting
-        .iter()
-        .any(|item| matches!(item, Waiting::Channel(_)))
-    {
-        MANNERS
-    } else {
-        ""
-    };
     format!(
         "New in channel {channel} since message {after}: {}. Read them with channel_read (channel {channel}, since \
-         {after}); end your turn when you are waiting for more.{manners}",
+         {after}). {MANNERS}",
         parts.join("; ")
     )
 }

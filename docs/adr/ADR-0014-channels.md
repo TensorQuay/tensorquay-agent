@@ -140,10 +140,15 @@ naming you, 14 and 15"), and the call that reads it (`channel_read`, the channel
 or channel name: those are written by other agents and people, so they reach the model only inside `channel_read`'s
 marked block (point 10; SEC-068). The message carries `channel_wake {channel, after}` so a client shows the gateway's
 notice, never a person's message, as `team_wake` does: **protocol revision 16**. A member whose runtime announces less
-than 16 isn't woken; its state says so (A7), and so does one notice (A10). The revision is learnt at each link; a wake queued for a task whose runtime then links below 16 is withdrawn at the hand-over, never sent (decided on 20 Nov 2026 in review). The sentence ends: "end your turn when you are waiting for more." A person's post to the whole channel
-(A1) is its own kind ("a post to the channel, message 16"), so an agent tells it from a post naming it, and its wake
-adds one fixed sentence of manners: "Answer a post to the whole channel only when it falls to you or you can add what
-the others did not; otherwise end your turn without posting."
+than 16 isn't woken; its state says so (A7), and so does one notice (A10). The revision is learnt at each link; a wake queued for a task whose runtime then links below 16 is withdrawn at the hand-over, never sent (decided on 20 Nov 2026 in review). A person's post to the whole channel (A1) is its own kind ("a post to the channel, message 16"), so an agent tells
+it from a post naming it. Every wake ends with the channel's manners, fixed words (decided on 20 Nov 2026, replacing
+the one sentence C-4 added for a post to the channel; the upgrade run showed agents answering in their own tasks):
+"The people and agents in this channel don't see your task: whatever they should read, post it with channel_post, as
+a reply (parent) to the message you answer. A post to the whole channel is for whoever can help: read what others
+already answered, then answer it if nobody has, or add only what is missing. Stay silent only when a post is plainly
+not for you or already answered. Keep posts short, with no thanks or acknowledgements. End your turn when you have
+posted or have nothing to add." They lean towards answering: two agents each deciding a post isn't theirs is the
+worst outcome.
 
 **A5. The budget, enforced.** Point 12's stored `budget` becomes the channel's token budget for wakes. A channel with
 none takes the installation's `[channels] wake_budget` (300,000 tokens by default; 0 turns wakes off). Charged: the
@@ -219,7 +224,7 @@ these names, for every member, and never a title. SEC-044 stays true for titles:
 and the name is what its owner chose to show. A member added before 18.2 has no name and shows by its profile's name,
 as before, until its owner names it; everything but `@` wakes it as it wakes any agent voting member. The "can't be woken" notices (A10) say the name.
 
-**Test rows:** GW-I-375 (a member's name, A12); GW-I-377 (a person's post to the whole channel, A1, A4); GW-U-227 (the wake key), GW-U-228 (the sentence carries no content), GW-U-229 (naming: the longest
+**Test rows:** GW-I-375 (a member's name, A12); GW-I-377 (a person's post to the whole channel, A1, A4); GW-U-236 (every wake's manners, A4); GW-U-227 (the wake key), GW-U-228 (the sentence carries no content), GW-U-229 (naming: the longest
 name, no case), GW-U-230 (the hop rule); PROTO-U-048 (`channel_wake`, revision 16); SEC-068 (no channel content in a
 wake); GW-I-344 (who is woken, A1), GW-I-345 (a burst
 is one wake; a woken run that doesn't read isn't woken again), GW-I-346 (a failed run is woken again), GW-I-347 (a busy

@@ -36,10 +36,12 @@ async fn gw_i_344_a_message_wakes_whom_it_concerns_and_the_wake_carries_no_ones_
         let proposal = post(f, &cookie, &id, json!({"type": "proposal", "title": "Raise the Q3 price list", "text": words}), None).await?;
         for agent in [&mut analyst, &mut checker] {
             let sentence = agent.woken(f, &id, 0).await?;
-            assert_eq!(
-                sentence,
-                format!("New in channel {id} since message 0: a proposal for your vote (message {proposal}). Read them with channel_read (channel {id}, since 0); end your turn when you are waiting for more.")
+            // The kinds and the call, then the channel's manners (GW-U-236 pins their words).
+            assert!(
+                sentence.starts_with(&format!("New in channel {id} since message 0: a proposal for your vote (message {proposal}). Read them with channel_read (channel {id}, since 0). The people and agents")),
+                "{sentence}"
             );
+            assert!(sentence.ends_with("End your turn when you have posted or have nothing to add."), "{sentence}");
             for theirs in [words, "Raise the Q3", "pricing"] {
                 assert!(!sentence.contains(theirs), "{theirs} in {sentence}");
             }
@@ -712,15 +714,15 @@ async fn gw_i_377_a_persons_post_to_the_channel_wakes_every_voting_agent(
         let asked = post(f, &cookie, &id, text("The Q3 numbers are in; what stands out?"), None).await?;
         for agent in [&mut analyst, &mut checker] {
             let sentence = agent.woken(f, &id, 0).await?;
-            assert_eq!(
-                sentence,
-                format!(
+            // Its own kind, then the channel's manners every wake ends with (GW-U-236 pins their words).
+            assert!(
+                sentence.starts_with(&format!(
                     "New in channel {id} since message 0: a post to the channel (message {asked}). Read them with \
-                     channel_read (channel {id}, since 0); end your turn when you are waiting for more. Answer a post \
-                     to the whole channel only when it falls to you or you can add what the others did not; otherwise \
-                     end your turn without posting."
-                )
+                     channel_read (channel {id}, since 0). The people and agents in this channel don't see your task"
+                )),
+                "{sentence}"
             );
+            assert!(sentence.contains("A post to the whole channel is for whoever can help"), "{sentence}");
             agent.start(f).await?;
             assert_eq!(agent.read(f, &id, 0).await?, vec![asked]);
             agent.end(f).await?;
@@ -746,7 +748,7 @@ async fn gw_i_377_a_persons_post_to_the_channel_wakes_every_voting_agent(
         let named = post(f, &cookie, &id, text("@Data checker please verify the EU rows"), None).await?;
         let sentence = checker.woken(f, &id, asked).await?;
         assert!(sentence.contains(&format!("a post naming you (message {named})")), "{sentence}");
-        assert!(!sentence.contains("Answer a post to the whole channel"), "{sentence}");
+        assert!(!sentence.contains("a post to the channel"), "{sentence}");
         analyst.quiet(f).await?;
         Ok(())
     }))

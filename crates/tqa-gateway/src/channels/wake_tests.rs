@@ -31,6 +31,8 @@ fn gw_u_227_a_wake_is_keyed_by_the_members_place_and_its_failures() {
 // TEST: GW-U-228
 #[test]
 fn gw_u_228_the_wake_names_kinds_and_seqs_and_the_call_that_reads_them() {
+    // It ends with the manners (GW-U-236 pins their words; decided on 20 Nov 2026).
+    use super::sentence::MANNERS;
     let channel = Uuid::from_u128(9);
     assert_eq!(
         sentence(
@@ -50,16 +52,46 @@ fn gw_u_228_the_wake_names_kinds_and_seqs_and_the_call_that_reads_them() {
             "New in channel {channel} since message 11: a proposal for your vote (message 12); a to-do you may \
              take on (message 13); 2 posts naming you (messages 14, 15); a reply to your post (message 16); the \
              decision on your proposal (message 17); a report on your to-do (message 18). Read them with \
-             channel_read (channel {channel}, since 11); end your turn when you are waiting for more."
+             channel_read (channel {channel}, since 11). {MANNERS}"
         )
     );
     assert_eq!(
         sentence(channel, 0, &[Waiting::Proposal(3), Waiting::Proposal(5)]),
         format!(
             "New in channel {channel} since message 0: 2 proposals for your vote (messages 3, 5). Read them with \
-             channel_read (channel {channel}, since 0); end your turn when you are waiting for more."
+             channel_read (channel {channel}, since 0). {MANNERS}"
         )
     );
+}
+
+// TEST: GW-U-236
+// Every wake ends with the channel's manners, fixed words (decided on 20 Nov 2026, replacing C-4's one sentence): the
+// channel can't see the task, so an answer is posted, as a reply; a post to everyone is answered by whoever can help;
+// silence only when plainly not for it or already answered; short posts, no thanks; the turn ends after posting.
+#[test]
+fn gw_u_236_every_wake_ends_with_the_channels_manners() {
+    let channel = Uuid::from_u128(9);
+    let manners = "The people and agents in this channel don't see your task: whatever they should read, post it \
+                   with channel_post, as a reply (parent) to the message you answer. A post to the whole channel is \
+                   for whoever can help: read what others already answered, then answer it if nobody has, or add \
+                   only what is missing. Stay silent only when a post is plainly not for you or already answered. \
+                   Keep posts short, with no thanks or acknowledgements. End your turn when you have posted or have \
+                   nothing to add.";
+    for waiting in [
+        vec![Waiting::Channel(4)],
+        vec![Waiting::Named(4)],
+        vec![Waiting::Proposal(4), Waiting::Reply(5)],
+    ] {
+        let said = sentence(channel, 3, &waiting);
+        assert!(said.ends_with(manners), "{said}");
+        assert!(
+            said.contains(&format!(
+                " Read them with channel_read (channel {channel}, since 3). The people"
+            )),
+            "{said}"
+        );
+        assert!(!said.contains("waiting for more"), "{said}");
+    }
 }
 
 // TEST: GW-U-229
