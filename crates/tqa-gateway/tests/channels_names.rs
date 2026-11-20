@@ -188,7 +188,9 @@ async fn gw_i_375_a_member_has_a_name_in_the_channel(pool: PgPool) -> TestResult
             &ana_cookie,
             &id,
             text("@Data checker for Q4 (private) are you there"),
-            None,
+            // In Ana's own thread, where only a name could wake anyone (a top-level post naming no one goes to the
+            // whole channel, C-4).
+            Some(named),
         )
         .await?;
         assert!(woke(f, &id, titled).await?.is_empty());

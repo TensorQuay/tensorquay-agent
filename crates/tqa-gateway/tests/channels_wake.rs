@@ -48,19 +48,27 @@ async fn gw_i_344_a_message_wakes_whom_it_concerns_and_the_wake_carries_no_ones_
             agent.end(f).await?;
         }
         watcher.quiet(f).await?;
-        // A post naming a member wakes it, not its author; a person's plain post wakes no one.
+        // A post naming a member wakes it, not its author.
         let named = analyst.post(f, &id, text("@data checker, can you check the margins?")).await?;
         checker.woken(f, &id, proposal).await?;
         checker.start(f).await?;
         checker.read(f, &id, proposal).await?;
         checker.end(f).await?;
         analyst.quiet(f).await?;
-        post(f, &cookie, &id, text("Thanks, both."), None).await?;
-        analyst.quiet(f).await?;
-        checker.quiet(f).await?;
+        // A person's plain top-level post wakes both voting agents, not the observer (reversed by the decision of
+        // 20 Nov 2026, C-4: a person's first post met silence). "Thanks, both." on purpose: a thank-you wakes everyone,
+        // the rule's cost, which the budget, the hop bound, the gather and the wake's manners sentence bound.
+        let thanks = post(f, &cookie, &id, text("Thanks, both."), None).await?;
+        for (agent, after) in [(&mut analyst, proposal), (&mut checker, named)] {
+            agent.woken(f, &id, after).await?;
+            agent.start(f).await?;
+            agent.read(f, &id, after).await?;
+            agent.end(f).await?;
+        }
+        watcher.quiet(f).await?;
         // A reply to an agent's post wakes its author.
         post(f, &cookie, &id, text("Use last quarter's margins."), Some(named)).await?;
-        analyst.woken(f, &id, proposal).await?;
+        analyst.woken(f, &id, thanks).await?;
         checker.quiet(f).await?;
         Ok(())
     }))
@@ -682,5 +690,65 @@ async fn gw_i_362_the_channel_answer_carries_its_budget_and_a_notice_its_member(
             Ok(())
         },
     ))
+    .await
+}
+
+// TEST: GW-I-377
+// A person's post to the whole channel (decided on 20 Nov 2026, C-4): a person's top-level post that names no one wakes
+// every agent voting member, never an observer, and its wake says so as its own kind, with the one sentence of
+// manners; a person's reply that names no one wakes no one but the thread's agent writer; an agent's post that names no
+// one wakes no one; a person's post that names a member wakes only it.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_377_a_persons_post_to_the_channel_wakes_every_voting_agent(
+    pool: PgPool,
+) -> TestResult {
+    Box::pin(support::run(pool, async |f| {
+        let (owner, cookie) = f.admin().await?;
+        let mut analyst = Agent::new(f, owner.id, "Pricing analyst").await?;
+        let mut checker = Agent::new(f, owner.id, "Data checker").await?;
+        let mut watcher = Agent::new(f, owner.id, "Watcher").await?;
+        let id = channel(f, &cookie, "pricing", &[(&analyst, "member"), (&checker, "member"), (&watcher, "observer")]).await?;
+        let asked = post(f, &cookie, &id, text("The Q3 numbers are in; what stands out?"), None).await?;
+        for agent in [&mut analyst, &mut checker] {
+            let sentence = agent.woken(f, &id, 0).await?;
+            assert_eq!(
+                sentence,
+                format!(
+                    "New in channel {id} since message 0: a post to the channel (message {asked}). Read them with \
+                     channel_read (channel {id}, since 0); end your turn when you are waiting for more. Answer a post \
+                     to the whole channel only when it falls to you or you can add what the others did not; otherwise \
+                     end your turn without posting."
+                )
+            );
+            agent.start(f).await?;
+            assert_eq!(agent.read(f, &id, 0).await?, vec![asked]);
+            agent.end(f).await?;
+        }
+        watcher.quiet(f).await?;
+        // A reply in a thread that names no one stays in its thread: a person's own thread wakes no agent.
+        post(f, &cookie, &id, text("Mostly the EU rows."), Some(asked)).await?;
+        analyst.quiet(f).await?;
+        checker.quiet(f).await?;
+        // An agent's post that names no one wakes no one (no agent fan-out).
+        analyst.start(f).await?;
+        let finding = analyst.post(f, &id, text("EU Pro churn fell to 1.8 %.")).await?;
+        analyst.end(f).await?;
+        checker.quiet(f).await?;
+        // A thank-you inside an agent's thread stays cheap: it wakes that thread's agent writer only.
+        post(f, &cookie, &id, text("Thanks."), Some(finding)).await?;
+        analyst.woken(f, &id, asked).await?;
+        analyst.start(f).await?;
+        analyst.read(f, &id, asked).await?;
+        analyst.end(f).await?;
+        checker.quiet(f).await?;
+        // A person's post that names a member wakes only it, as a post naming it.
+        let named = post(f, &cookie, &id, text("@Data checker please verify the EU rows"), None).await?;
+        let sentence = checker.woken(f, &id, asked).await?;
+        assert!(sentence.contains(&format!("a post naming you (message {named})")), "{sentence}");
+        assert!(!sentence.contains("Answer a post to the whole channel"), "{sentence}");
+        analyst.quiet(f).await?;
+        Ok(())
+    }))
     .await
 }

@@ -18,6 +18,8 @@ pub(crate) enum Waiting {
     Task(i64),
     /// A post naming it.
     Named(i64),
+    /// A person's post to the whole channel, naming no one (decided on 20 Nov 2026, C-4).
+    Channel(i64),
     /// A reply to its post.
     Reply(i64),
     /// The decision on its proposal.
@@ -43,13 +45,18 @@ pub(crate) fn key(channel: Uuid, member: Uuid, after: i64, failed: Option<i64>) 
     }
 }
 
+/// What a wake for a post to the whole channel adds (C-4): the one sentence of manners it needs, fixed text.
+const MANNERS: &str = " Answer a post to the whole channel only when it falls to you or you can add what the others \
+                       did not; otherwise end your turn without posting.";
+
 /// The wake's fixed sentence (A4).
 pub(crate) fn sentence(channel: Uuid, after: i64, waiting: &[Waiting]) -> String {
     // Each kind once, in this order, with its seqs in the log's order.
-    const KINDS: [(&str, &str, &str); 6] = [
+    const KINDS: [(&str, &str, &str); 7] = [
         ("a proposal", "proposals", "for your vote"),
         ("a to-do", "to-dos", "you may take on"),
         ("a post", "posts", "naming you"),
+        ("a post", "posts", "to the channel"),
         ("a reply", "replies", "to your post"),
         ("the decision", "decisions", "on your proposal"),
         ("a report", "reports", "on your to-do"),
@@ -63,9 +70,10 @@ pub(crate) fn sentence(channel: Uuid, after: i64, waiting: &[Waiting]) -> String
                     Waiting::Proposal(seq) => (0, seq),
                     Waiting::Task(seq) => (1, seq),
                     Waiting::Named(seq) => (2, seq),
-                    Waiting::Reply(seq) => (3, seq),
-                    Waiting::Decision(seq) => (4, seq),
-                    Waiting::Report(seq) => (5, seq),
+                    Waiting::Channel(seq) => (3, seq),
+                    Waiting::Reply(seq) => (4, seq),
+                    Waiting::Decision(seq) => (5, seq),
+                    Waiting::Report(seq) => (6, seq),
                 };
                 (kind == index).then_some(seq)
             })
@@ -85,9 +93,17 @@ pub(crate) fn sentence(channel: Uuid, after: i64, waiting: &[Waiting]) -> String
             }
         }
     }
+    let manners = if waiting
+        .iter()
+        .any(|item| matches!(item, Waiting::Channel(_)))
+    {
+        MANNERS
+    } else {
+        ""
+    };
     format!(
         "New in channel {channel} since message {after}: {}. Read them with channel_read (channel {channel}, since \
-         {after}); end your turn when you are waiting for more.",
+         {after}); end your turn when you are waiting for more.{manners}",
         parts.join("; ")
     )
 }
@@ -210,7 +226,7 @@ async fn written_by(
 /// its words name, the writer of what it replies to, and a decision's proposer or a report's to-do writer.
 async fn addressees(
     connection: &mut PgConnection,
-    (channel, writer): (Uuid, Option<Uuid>),
+    (channel, writer, person): (Uuid, Option<Uuid>, bool),
     (parent, body): (Option<i64>, &MessageBody),
 ) -> Result<Vec<Uuid>, GatewayError> {
     let others: Vec<(Uuid, String)> = sqlx::query!(
@@ -268,6 +284,11 @@ async fn addressees(
     }
     if let Some(parent) = parent {
         add(written_by(connection, channel, parent).await?);
+    }
+    // A person's top-level text that names no one is for the whole channel (C-4): it wakes every agent voting member,
+    // as a to-do does. A reply stays in its thread, and an agent's text never fans out.
+    if person && parent.is_none() && wakes.is_empty() && matches!(body, MessageBody::Text { .. }) {
+        wakes = others.iter().map(|(member, _)| *member).collect();
     }
     Ok(wakes)
 }
@@ -329,7 +350,8 @@ pub(crate) async fn mark(
     (parent, body): (Option<i64>, &MessageBody),
 ) -> Result<(), GatewayError> {
     let writer = agent_of(author);
-    let wakes = addressees(connection, (channel, writer), (parent, body)).await?;
+    let person = author.kind == AuthorKind::User;
+    let wakes = addressees(connection, (channel, writer, person), (parent, body)).await?;
     let hop = hop_of(connection, (channel, writer), author, body).await?;
     sqlx::query!(
         "UPDATE channel_messages SET wakes = $3, hop = $4 WHERE channel_id = $1 AND seq = $2",
@@ -583,8 +605,24 @@ async fn held_back(state: &State, due: &Due) -> Result<Option<i16>, GatewayError
 /// What waits for `due`'s member, by kind and seq (A4).
 async fn waiting(state: &State, due: &Due) -> Result<Vec<Waiting>, GatewayError> {
     let member = due.member.to_string();
+    // Members' names, to tell a post naming this member from one to the whole channel.
+    let named_members: Vec<(Uuid, String)> = sqlx::query!(
+        "SELECT conversation_id AS \"conversation!\", name AS \"name!\" FROM channel_members \
+         WHERE channel_id = $1 AND conversation_id IS NOT NULL AND name IS NOT NULL",
+        due.channel
+    )
+    .fetch_all(&state.pool)
+    .await?
+    .into_iter()
+    .map(|row| (row.conversation, row.name))
+    .collect();
+    let names: Vec<(Uuid, &str)> = named_members
+        .iter()
+        .map(|(id, name)| (*id, name.as_str()))
+        .collect();
     Ok(sqlx::query!(
-        "SELECT x.seq, x.type AS kind, p.author_id AS \"parent_author?\" FROM channel_messages x \
+        "SELECT x.seq, x.type AS kind, p.author_id AS \"parent_author?\", x.author_kind, x.parent, \
+                x.body->>'text' AS words FROM channel_messages x \
          LEFT JOIN channel_messages p ON p.channel_id = x.channel_id AND p.seq = x.parent \
          WHERE x.channel_id = $1 AND x.seq > $2 AND $3 = ANY(x.wakes) ORDER BY x.seq",
         due.channel,
@@ -601,6 +639,14 @@ async fn waiting(state: &State, due: &Due) -> Result<Vec<Waiting>, GatewayError>
         "report" => Waiting::Report(message.seq),
         _ if message.parent_author.as_deref() == Some(member.as_str()) => {
             Waiting::Reply(message.seq)
+        }
+        // A person's top-level text that doesn't name this member woke it as a post to the whole channel (C-4).
+        "text"
+            if message.author_kind == "user"
+                && message.parent.is_none()
+                && !named(message.words.as_deref().unwrap_or(""), &names).contains(&due.member) =>
+        {
+            Waiting::Channel(message.seq)
         }
         _ => Waiting::Named(message.seq),
     })

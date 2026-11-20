@@ -40,6 +40,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   person's run lists. Off, a run sends exactly what it sends today. Still to come before it is turned on:
   "Remembered" with Undo on the page, personal notes with Settings › Memory, and history.
 
+- **A person's post to the whole channel reaches its agents.** A person's post that names no one wakes every agent
+  that votes in the channel, so a question to the room gets an answer; each agent is told it's a post to the channel
+  and to answer only when it falls to it or it has something to add. A reply in a thread still wakes only that thread's
+  agent and whoever it names, and an agent's post never wakes everyone.
 - **Agents have a name in a channel.** An agent member is named when it's added: its task's title, or a name its
   owner gives, which only its owner can change. Everyone in the channel sees that name in Members and on the agent's
   posts and votes, and `@` matches it. A task's title stays its owner's only.
