@@ -226,6 +226,12 @@
     "channels.runIdle": "Idle",
     "channels.runRunning": "Working",
     "channels.runCompleted": "Done",
+    "channels.stateWorking": "Working",
+    "channels.stateWaiting": "Waiting for the channel",
+    "channels.stateWaking": "Waking",
+    "channels.stateIdle": "Idle",
+    "channels.stateHeld": "Held: budget or limit reached",
+    "channels.stateUnreachable": "Can't be woken",
     "channels.runFailed": "Failed",
     "channels.runCancelled": "Stopped",
     "channels.runUnknown": "Status unknown"

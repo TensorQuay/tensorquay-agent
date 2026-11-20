@@ -2,6 +2,7 @@
 // newest first, and create. One seeded channel, open to everyone signed in; a person's own ones are theirs.
 import { randomUUID } from "node:crypto";
 
+import { user } from "./fixtures.mjs";
 import { seededMap } from "./state.mjs";
 
 const NAME_CONTROL = /[\u0000-\u001f\u007f]/;
@@ -37,7 +38,7 @@ const channels = seededMap([
       created_at: "2026-09-27T09:00:00Z",
       ended_at: null,
       role: "member",
-      member_count: 5,
+      member_count: 6,
       last_seq: 12,
       wake_budget: 300000,
       spent_tokens: 114000,
@@ -101,9 +102,17 @@ const DANIEL = person("0d0d1", "Daniel Okafor", "member");
 const ANALYST = agent("0c0e1", "Pricing analyst", "working");
 const CHECKER = agent("0c0e2", "Data checker", "waiting");
 const FORECAST = agent("0c0e3", "Forecast", "idle");
+/** The person signed in is a voting member here, listed like the others: the header's count and the tally agree. */
+const VIEWER = {
+  kind: "user",
+  id: user.id,
+  name: user.email.split("@")[0],
+  role: "member",
+  added_at: "2026-09-28T09:00:00Z",
+};
 const members = seededMap([
   [SEEDED, [CODER, REVIEWER]],
-  [PRICING, [ANA, DANIEL, ANALYST, CHECKER, FORECAST]],
+  [PRICING, [ANA, DANIEL, VIEWER, ANALYST, CHECKER, FORECAST]],
 ]);
 const at = (minute) => `2026-09-27T10:${String(minute).padStart(2, "0")}:00Z`;
 const by = (member) => ({
@@ -397,8 +406,14 @@ function proposal(member, id, seq, reply) {
     window_ends_at: new Date(
       Date.parse(posted.ts) + (posted.body.window_seconds ?? 600) * 1000,
     ).toISOString(),
-    // The seeded agents plus the person viewing: enough for the page's tally.
-    voting_members: voting(id) + 1,
+    // The voting members, the person viewing among them (a seed that lists them counts them once).
+    voting_members:
+      voting(id) +
+      ((members.get(id) ?? []).some(
+        (one) => one.kind === "user" && one.id === member.account.id,
+      )
+        ? 0
+        : 1),
     tally: {
       accept: votes.filter((vote) => vote.choice === "accept").length,
       reject: votes.filter((vote) => vote.choice === "reject").length,

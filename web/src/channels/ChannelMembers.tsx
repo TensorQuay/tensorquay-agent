@@ -51,6 +51,15 @@ const RUN: Readonly<Record<string, [MessageKey, string]>> = {
   failed: ["channels.runFailed", "danger"],
   cancelled: ["channels.runCancelled", "muted"],
 };
+/** An agent's live state in the channel (ADR-0014's amendment, A7), as the header counts it; it wins over the run. */
+const STATE: Readonly<Record<string, [MessageKey, string]>> = {
+  working: ["channels.stateWorking", "info"],
+  waiting: ["channels.stateWaiting", "info"],
+  waking: ["channels.stateWaking", "info"],
+  idle: ["channels.stateIdle", "muted"],
+  held: ["channels.stateHeld", "warn"],
+  unreachable: ["channels.stateUnreachable", "danger"],
+};
 const run = (status: string): [MessageKey, string] =>
   Object.hasOwn(RUN, status)
     ? (RUN[status] as [MessageKey, string])
@@ -97,9 +106,12 @@ export function MemberList({
           item.kind === "user" && item.id === me
             ? t("channels.you", { name: agent })
             : (item.title ?? agent);
-        const [words, tone] = item.run_status
-          ? run(item.run_status)
-          : [null, null];
+        const live =
+          item.state && Object.hasOwn(STATE, item.state)
+            ? STATE[item.state]
+            : undefined;
+        const [words, tone] =
+          live ?? (item.run_status ? run(item.run_status) : [null, null]);
         const detail =
           item.kind === "conversation"
             ? [

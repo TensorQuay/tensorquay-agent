@@ -146,8 +146,8 @@ export function ChannelHeader({
           </span>{" "}
           <span className="channel-count">{channel.member_count}</span>
         </button>
+        {actions}
       </div>
-      {actions}
     </section>
   );
 }

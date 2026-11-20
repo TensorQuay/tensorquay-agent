@@ -1,36 +1,6 @@
-import AxeBuilder from "@axe-core/playwright";
-
+import { PRICING, pageProblems } from "./channel-page";
 import { signIn } from "./session";
-import { squeezedText, styleAudit } from "./style-audit";
-import { expect, test, type Page } from "./test";
-
-/** The channel the fake front seeds as the mock of 17 Nov 2026 drew it. */
-export const PRICING = "/channels/0195d8c0-0000-7000-8000-00000000c4a2";
-
-/** What a screen of the page breaks: sideways scroll, the style audit, squeezed text, serious axe findings. */
-export async function pageProblems(
-  page: Page,
-  where: string,
-): Promise<string[]> {
-  await page.evaluate(() => document.fonts.ready);
-  const failures: string[] = [];
-  const sideways = await page.evaluate(
-    () =>
-      document.documentElement.scrollWidth -
-      document.documentElement.clientWidth,
-  );
-  if (sideways > 0)
-    failures.push(`${where}: scrolls sideways by ${sideways} px`);
-  for (const problem of await styleAudit(page))
-    failures.push(`${where}: ${problem}`);
-  for (const problem of await squeezedText(page))
-    failures.push(`${where}: squeezed ${problem}`);
-  const axe = await new AxeBuilder({ page }).exclude("iframe").analyze();
-  for (const violation of axe.violations)
-    if (violation.impact === "serious" || violation.impact === "critical")
-      failures.push(`${where}: ${violation.id} (${violation.nodes.length})`);
-  return failures;
-}
+import { expect, test } from "./test";
 
 // WEB-E2E-145 (18.2 slice 3, the mock of 17 Nov 2026 and its defaults decided on 20 Nov 2026): the chat page at 1440 and
 // 390 px, light and dark. The header (who is working, the budget, To-dos and Members), the grouped log with the PDF, the
@@ -52,6 +22,12 @@ for (const width of [1440, 390] as const)
       await expect(header.getByText("2 working")).toBeVisible();
       await expect(header.getByText("Budget 38 % used")).toBeVisible();
       const log = page.getByRole("list", { name: "Channel log" });
+      await expect(
+        log.getByText("The Q3 numbers are in.", { exact: false }),
+      ).toBeVisible();
+      await expect(
+        log.getByText("Pro churn in the EU was 1.8 %", { exact: false }),
+      ).toBeVisible();
       await expect(
         log.getByRole("link", { name: /q3-revenue-by-region\.pdf/ }),
       ).toBeVisible();

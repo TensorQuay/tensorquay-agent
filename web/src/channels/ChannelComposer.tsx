@@ -182,6 +182,16 @@ export function ChannelComposer({
       setPending(false);
     }
   }
+  /** The box says what it holds, as its placeholder; its label stays for readers (the mock's compact composer). */
+  const boxLabel = t(
+    thread
+      ? "channels.replyInThread"
+      : kind === "text"
+        ? "channels.messageText"
+        : kind === "proposal"
+          ? "channels.proposalFirstLine"
+          : "channels.todoFirstLine",
+  );
   const modes: readonly [Kind, MessageKey][] = [
     ["text", "channels.modeMessage"],
     ["proposal", "channels.modePropose"],
@@ -221,17 +231,11 @@ export function ChannelComposer({
         </div>
       )}
       <Textarea
-        label={t(
-          thread
-            ? "channels.replyInThread"
-            : kind === "text"
-              ? "channels.messageText"
-              : kind === "proposal"
-                ? "channels.proposalFirstLine"
-                : "channels.todoFirstLine",
-        )}
+        label={boxLabel}
+        labelHidden
+        placeholder={boxLabel}
         value={text}
-        rows={3}
+        rows={2}
         // Only a new channel's first step or its suggested message asks for the focus.
         // eslint-disable-next-line jsx-a11y/no-autofocus
         autoFocus={focusBox}

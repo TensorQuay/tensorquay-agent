@@ -358,3 +358,55 @@ describe("WEB-U-066 channel membership", () => {
     }
   });
 });
+
+// WEB-U-525 (ADR-0014's amendment of 20 Nov 2026, A7): an agent's row says its live state in the channel, as the
+// header counts it: a waiting agent reads Waiting, not its task's run; a gateway without the state keeps the run's words.
+describe("WEB-U-525 a member's live state", () => {
+  it("names each live state with its tone, and falls back to the run", () => {
+    const states = [
+      ["working", "Working", "info"],
+      ["waiting", "Waiting for the channel", "info"],
+      ["waking", "Waking", "info"],
+      ["idle", "Idle", "muted"],
+      ["held", "Held: budget or limit reached", "warn"],
+      ["unreachable", "Can't be woken", "danger"],
+    ] as const;
+    const agents = states.map(([state], index) =>
+      member("conversation", `Agent ${index + 1}`, {
+        title: `Task ${state}`,
+        owner_name: "Ana",
+        run_status: "running",
+        state,
+      }),
+    );
+    const older = member("conversation", "Older", {
+      title: "Task older",
+      owner_name: "Ana",
+      run_status: "completed",
+    });
+    render(
+      <ChannelMembers
+        channel={RELEASE}
+        members={[OWNER, ...agents, older]}
+        me={OWNER.id}
+        tasks={[]}
+        onSet={() => Promise.resolve()}
+        onRemove={() => Promise.resolve()}
+      />,
+    );
+    for (const [state, words, tone] of states) {
+      const one = row(`Task ${state}`);
+      expect(one).toHaveTextContent(words);
+      expect(one.querySelector(".member-dot")).toHaveAttribute(
+        "data-tone",
+        tone,
+      );
+    }
+    expect(row("Task waiting")).not.toHaveTextContent("Working");
+    expect(row("Task older")).toHaveTextContent("Done");
+    expect(row("Task older").querySelector(".member-dot")).toHaveAttribute(
+      "data-tone",
+      "ok",
+    );
+  });
+});

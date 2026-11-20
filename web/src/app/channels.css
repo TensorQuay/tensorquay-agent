@@ -89,7 +89,7 @@
 .channel-post {
   padding-inline-start: calc(var(--avatar-size) + var(--space-3) * 2);
 }
-.channel-post-avatar {
+.channel-post > .channel-post-avatar {
   position: absolute;
   inset-inline-start: var(--space-3);
   inset-block-start: var(--space-2);
@@ -360,12 +360,14 @@
   padding-block: var(--space-2);
   border-bottom: var(--border-width) solid var(--line);
 }
+/* The pinned composer reaches the window's bottom edge: the content area's end padding would leave a strip where the
+   log shows through, so the dock sticks that far lower and fills it. */
 .channel-page > .channel-composer-dock {
   position: sticky;
-  bottom: 0;
+  bottom: calc(-1 * var(--content-end));
   z-index: 2;
   background: var(--paper);
-  padding-block: var(--space-2);
+  padding-block: var(--space-2) calc(var(--space-2) + var(--content-end));
 }
 .channel-facts {
   display: flex;
@@ -384,7 +386,8 @@
   width: var(--dot-size);
   height: var(--dot-size);
   border-radius: var(--pill-radius);
-  background: var(--ok);
+  /* Working is the info tone, as in the Members panel and a task's state; green means done. */
+  background: var(--info);
 }
 .channel-faces {
   display: flex;
@@ -400,9 +403,9 @@
   width: var(--avatar-size);
   height: var(--avatar-size);
   margin-inline-start: calc(var(--space-1) * -1);
-  border: var(--border-width) solid var(--paper);
+  border: var(--border-width) solid var(--line);
   border-radius: var(--pill-radius);
-  background: var(--surface-raised);
+  background: var(--surface);
   color: var(--ink);
   font-size: var(--label-size);
   font-weight: 700;
