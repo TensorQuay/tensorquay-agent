@@ -635,3 +635,80 @@ async fn gw_i_360_a_cancelled_gateway_sends_no_wake(pool: PgPool) -> TestResult 
     }))
     .await
 }
+
+// TEST: GW-I-362
+// What the channel page shows (slice 3, decided on 20 Nov 2026): the channel's answer carries its wake budget (its own,
+// or the installation's) and what woken runs spent, for the header's "Budget N % used"; a notice about a member names
+// it as a field of its own, so a page words it in the reader's language.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_362_the_channel_answer_carries_its_budget_and_a_notice_its_member(
+    pool: PgPool,
+) -> TestResult {
+    Box::pin(support::run_configured(
+        pool,
+        None,
+        "\n[channels]\nwake_budget = 1000\n",
+        async |f| {
+            let (owner, cookie) = f.admin().await?;
+            let gone = Agent::new(f, owner.id, "Gone").await?;
+            let id = channel(f, &cookie, "pricing", &[(&gone, "member")]).await?;
+            sqlx::query("UPDATE channels SET spent_tokens = 250 WHERE id = $1")
+                .bind(Uuid::parse_str(&id)?)
+                .execute(&f.pool)
+                .await?;
+            let (status, answer) = call(
+                f,
+                Method::GET,
+                &format!("/api/v1/channels/{id}"),
+                &cookie,
+                (None, None),
+            )
+            .await?;
+            assert_eq!(status, 200, "{answer}");
+            assert_eq!(
+                (&answer["wake_budget"], &answer["spent_tokens"]),
+                (&json!(1000), &json!(250)),
+                "{answer}"
+            );
+            sqlx::query("UPDATE channels SET budget = 4000 WHERE id = $1")
+                .bind(Uuid::parse_str(&id)?)
+                .execute(&f.pool)
+                .await?;
+            let (_, answer) = call(
+                f,
+                Method::GET,
+                &format!("/api/v1/channels/{id}"),
+                &cookie,
+                (None, None),
+            )
+            .await?;
+            assert_eq!(answer["wake_budget"], json!(4000), "its own budget wins");
+            let (status, _) = call(
+                f,
+                Method::DELETE,
+                &format!("/api/v1/conversations/{}", gone.id),
+                &cookie,
+                (None, None),
+            )
+            .await?;
+            assert!(status < 300, "{status}");
+            let (_, page) = call(
+                f,
+                Method::GET,
+                &format!("/api/v1/channels/{id}/messages?since=0"),
+                &cookie,
+                (None, None),
+            )
+            .await?;
+            let notice = &page["messages"][0]["body"];
+            assert_eq!(
+                (&notice["type"], &notice["kind"], &notice["member"]),
+                (&json!("notice"), &json!("member_deleted"), &json!("Gone")),
+                "{page}"
+            );
+            Ok(())
+        },
+    ))
+    .await
+}
