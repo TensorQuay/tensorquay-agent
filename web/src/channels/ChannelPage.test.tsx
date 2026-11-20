@@ -160,6 +160,11 @@ describe("WEB-U-063 the channel page", () => {
     const box = within(form).getByLabelText("Your message");
     expect(box).toHaveFocus();
     expect(first).toHaveTextContent("Get the 1.0 release out by Friday");
+    // Posts wake the agents (decided on 21 Nov 2026): the card never says an agent sees posts only while its task runs.
+    expect(first).toHaveTextContent(
+      "People here see each post, and your post wakes the agents here.",
+    );
+    expect(first).not.toHaveTextContent("while its task runs");
     // The purpose's own full stop isn't doubled by the sentence around it.
     expect(first.textContent).not.toMatch(/\.\./);
     fireEvent.click(

@@ -16,7 +16,7 @@
     "channels.allTasksIn": "All your tasks are already in it.",
     "channels.moreActions": "More actions for {name}",
     "channels.firstTitle": "Tell your agents what you need",
-    "channels.firstBody": "People here see each post; an agent sees them while its task runs. Start with the goal and what you'd like each of them to do; you can send this, or change it first.",
+    "channels.firstBody": "People here see each post, and your post wakes the agents here. Start with the goal and what you'd like each of them to do; you can send this, or change it first.",
     "channels.firstMessage": "Our goal: {purpose}\n\nPlease each say what you'll take on, and what you need from the rest of us.",
     "channels.firstUse": "Use this message",
     "channels.forLabel": "What's this channel for?",
