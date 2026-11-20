@@ -24,6 +24,28 @@ async function openFile(page: Page, folder: string, name: RegExp) {
 
 // WEB-U-087 and WEB-U-088 in the browser: the agent's page runs in its sandbox, out of the app's reach, and a
 // spreadsheet reads as a table; at 1280 px in both themes.
+// WEB-U-513 (18.1.1, the first hour's finding 3): a page with no script says nothing about scripts: no sandbox note and
+// no Stop scripts, only Reload.
+test("WEB-U-513 a page with no scripts says nothing about them", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await signIn(page);
+  await page.goto(await createConversation(page));
+  const panel = await openFile(page, "reports", /^summary\.html/);
+  const preview = panel.getByRole("region", { name: "summary.html" });
+  await expect(
+    preview.frameLocator("iframe").getByRole("heading", { name: "Q3 summary" }),
+  ).toBeVisible();
+  await expect(preview.getByRole("button", { name: "Reload" })).toBeVisible();
+  await expect(
+    preview.getByText("Scripts are running in a sandbox"),
+  ).toHaveCount(0);
+  await expect(
+    preview.getByRole("button", { name: "Stop scripts" }),
+  ).toHaveCount(0);
+});
+
 for (const theme of ["light", "dark"] as const) {
   test(`WEB-U-087 a web page in the Files panel 1280 ${theme}`, async ({
     page,

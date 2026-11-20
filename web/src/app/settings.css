@@ -1544,3 +1544,11 @@ tr[data-expired] td:not(.data-cell-action) {
   align-items: center;
   gap: var(--space-2);
 }
+
+/* A model's id on its own line, whole, and its check's pill under it (WEB-E2E-144). */
+.route-name .route-model {
+  overflow-wrap: anywhere;
+}
+.route-name > .status-pill {
+  align-self: flex-start;
+}
