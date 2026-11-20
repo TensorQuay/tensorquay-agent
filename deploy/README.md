@@ -53,7 +53,7 @@ hardware. Every figure below was measured on 19 Nov 2026 on the reference workst
 
 ## Install
 
-**In one command (from 18.1).** From a release's checkout, `deploy/install.sh` asks three things: where people will
+**In one command (from 18.2).** From a release's checkout, `deploy/install.sh` asks three things: where people will
 open TensorQuay Agent, which model server to use (or none, to try it with the test model), and who the first
 administrator is. It then pulls the release's images, writes what steps 1 and 2 below make by hand, starts the stack,
 waits until it is ready and creates that administrator. Most of its ten minutes or so is the pull. It never changes
