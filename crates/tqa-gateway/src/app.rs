@@ -687,6 +687,16 @@ impl Gateway {
         self.state.channels.hold(held);
     }
 
+    /// Sweeps channel uploads no post took within a day, as the hourly sweep does (ADR-0014's amendment of 20 Nov
+    /// 2026, A9). Only with the `testing` feature.
+    ///
+    /// # Errors
+    /// Storage failure.
+    #[cfg(feature = "testing")]
+    pub async fn channel_uploads_sweep_now(&self) -> Result<(), GatewayError> {
+        Ok(())
+    }
+
     /// Sends every channel wake that is due now, as the sweep does (ADR-0014's amendment of 20 Nov 2026, A3). Only
     /// with the `testing` feature.
     ///
