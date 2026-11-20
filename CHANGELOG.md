@@ -5,6 +5,13 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ## Unreleased
 
+### Fixed
+
+- **A previewed page with no scripts says nothing about scripts (WEB-U-513).** A page of text, pictures and tables no
+  longer shows "Scripts are running in a sandbox" or Stop scripts; only Reload.
+- **A model's id on Settings > Models is never cut (WEB-E2E-144).** It has its own line, wrapping whole if it must,
+  with its Verified pill under it, so a long language's wider menu no longer cuts it.
+
 ## 18.1.0 (20 November 2026)
 
 A feature release: administrators see every running sandbox and can stop an idle one, agent teams work in rounds,
