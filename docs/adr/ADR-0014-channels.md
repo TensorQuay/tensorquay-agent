@@ -93,6 +93,84 @@ Phase 7 can be built in small slices. PRD §12 decision 9 is decided: channels a
     a runtime without the channel tools stays compatible, and a gateway without the routes answers 404, which leaves a
     run with no channel tools. The message types are shared through `tqa-types` without a revision.
 
+## Amendment 2026-11-20: channels that work on their own (18.2)
+
+**Status: proposed on 20 Nov 2026, for review before any code.** Decided on 17 Nov 2026 by the Product Owner, after
+using channels: a proposal timed out and a to-do sat open because member agents read a channel only while their task
+runs (point 7), and posts carry text only. This amendment makes a channel wake its agent members, the way ADR-0034
+wakes a team's, and fixes where attachments land (built in the next slice). Points 1 to 14 stand except where it says.
+
+**A1. What wakes whom.** When the gateway appends a message it stores, beside it and outside the protocol, the agent
+members it wakes:
+- a `proposal`: each agent voting member (`lead` or `member`) but its author;
+- a `task` (a to-do): each agent voting member but its author;
+- a post naming a member: its text (a proposal's text, a task's spec, a report's summary) holds `@` and the member's
+  name, its task's title, matched without case, the longest name first; any role but `observer`;
+- a reply: a post whose `parent` an agent member wrote wakes that member;
+- a `decision` wakes its proposal's author, and a `report` its task's author, when that author is an agent member.
+
+Never woken: a message's own author, an `observer`, a person (people read the page), a member whose task is deleted or
+whose person is disabled, and anyone in an ended channel. A woken member that has already voted on a proposal, or
+claimed a task, is still told it is there; it is the model's to read and skip.
+
+**A2. A member's place in the log.** `channel_members.read_seq` is the highest seq the gateway has answered to that
+member's `channel_read` or `channel_wait` (for its own reads, not its posts). A member joins at the channel's last seq,
+so nothing posted before it joined wakes it. The place moves when the read is answered; a run that fails after reading
+is covered as in ADR-0034, by its failure in the wake's key (A3).
+
+**A3. One wake for a burst.** A member with an unread message that wakes it (A1), no active run and no turn queued
+gets one turn, keyed `channel-wake:<channel>:<member>:<read_seq>` (with `:failed-<n>` after a failed run, as a team's).
+So every message before it reads makes one wake, two posts at once make one, and a woken run that ends without reading
+isn't woken again for the same messages. A member of two channels gets one turn at a time: the second channel's wake
+comes after the first run ends. A wake is sent just after the commit that made it due, and the channel sweep (point 9's
+pass) sends it again from stored state, so a wake lost to a restart still comes.
+
+**A4. What the woken run is told.** The wake's `user.message` is the gateway's fixed sentence and nothing written by
+anyone else: the channel's id, the place, what waits by kind and seq ("a proposal for your vote, message 12; two posts
+naming you, 14 and 15"), and the call that reads it (`channel_read`, the channel, `since` the place). No title, body
+or channel name: those are written by other agents and people, so they reach the model only inside `channel_read`'s
+marked block (point 10; SEC-068). The message carries `channel_wake {channel, after}` so a client shows the gateway's
+notice, never a person's message, as `team_wake` does: **protocol revision 16**. A member whose runtime announces less
+than 16 isn't woken; its state says so (A7). The sentence ends: "end your turn when you are waiting for more."
+
+**A5. The budget, enforced.** Point 12's stored `budget` becomes the channel's token budget for wakes. A channel with
+none takes the installation's `[channels] wake_budget` (300,000 tokens by default; 0 turns wakes off). Charged: the
+prompt and completion tokens, as the relay meters them, of each run a channel wake started, from the turn's delivery to
+the run's end; a run a person started is never charged. At 80 % the gateway posts one notice line. At 100 % no more
+wakes are sent, and a charged run's next model call is refused `channel_budget`, so a long exchange stops. Raising the
+budget (the channel's owner) lets wakes resume.
+
+**A6. No ping-pong: N = 4 hops, and 30 agent wakes an hour.** Each message has a hop, stored beside it: a person's post
+is 0; an agent's post is one more than the hop of the wake that started its run (1 in a run a person started); a
+`decision` takes the hop of what decided it (the deciding vote, or the proposal on a timeout). A wake's hop is the
+smallest among the unread messages that wake it, so a person's post starts a fresh chain. No message with a hop of 4
+or more wakes anyone: a person's post, an agent's answer, a reply to it and the answer to that run, and a fourth agent
+reply is read only when its readers next run. Separately, a channel sends at most 30 wakes in any hour for messages
+with a hop of 1 or more (many agents fanning out). When either bound holds a wake back, the gateway posts one notice
+line ("Agents here stopped waking each other; a person's post starts them again"), once for each chain.
+Why 4: a proposal's work is the person's post, the agents' answers or votes, a reply to one, and its answer; a fourth
+agent-to-agent hop has been a loop more often than work.
+
+**A7. Live state on the page.** Each agent member is `working` (a run is active), `waiting` (that run is in
+`channel_wait` on this channel), `waking` (a wake is queued), `idle`, `held` (A5 or A6 holds its wake back) or
+`unreachable` (its runtime is below 16, or its task can't run). The members answer and the channel's event stream carry
+it (`member_state` events); it isn't a message in the log.
+
+**A8. Between runs nothing runs.** Point 7 stands: a running member waits with `channel_wait` (at most 300 s, looped
+as it likes); a member with no run costs nothing, and the next wake starts it.
+
+**A9. Attachments (the next slice).** A post, proposal or to-do may carry files, with the composer's limits (25 MiB a
+file, 32 a message, the installation's uploads total). They reach each agent member as the wake's turn attachments,
+placed before the run that reads the post, at `uploads/channels/<channel id>/<seq>-<file name>`; nothing in a
+workspace is overwritten. People download them from the post.
+
+**Test rows:** GW-U-227 (the wake key), GW-U-228 (the sentence carries no content), GW-U-229 (naming: the longest
+name, no case), GW-U-230 (the hop rule); PROTO-U-048 (`channel_wake`, revision 16); SEC-068 (no channel content in a
+wake); TOOL-U-149 (a read moves the place), TOOL-U-150 (a post's hop); GW-I-344 to GW-I-355 (who is woken, a burst is
+one wake, a woken run that doesn't read isn't woken again, a failed one is, two channels one turn, the sweep after a
+restart, the budget charged and stopping a long exchange, a person's run uncharged, the four-hop bound and its notice,
+the hourly bound, the members' live state, below revision 16 not woken).
+
 ## Consequences
 
 - One new resource, four tools, one message schema and one evaluator. Humans and agents use the same log.
