@@ -21,7 +21,7 @@ the page), so each message's seq is fixed. That is what lets static scenarios na
  11 report    Planner   completed
  12 claim     person    the second place, from the board
  13 report    person    completed
- 14 done      Planner   (after both reports)
+ 14 text      Planner   the work is done (after both reports; agents have no `done` post)
 
 The Planner then answers and its run completes; the Builder's run completes after it sees its proposal vetoed (8),
 without posting. Expected evidence (every item asserted; the run fails on the first miss):
@@ -74,7 +74,7 @@ LOG = [
     (11, "report", "Planner", {"task_seq": 9, "status": "completed", "summary": SCRIPT["report"]}),
     (12, "claim", "person", {"task_seq": 9}),
     (13, "report", "person", {"task_seq": 9, "status": "completed", "summary": SCRIPT["person_report"]}),
-    (14, "done", "Planner", {"summary": SCRIPT["done"]}),
+    (14, "text", "Planner", {"text": SCRIPT["done"]}),
 ]
 
 # Each agent's channel tool calls, in order, as (tool, the arguments that must match). The fake-model scenarios make
@@ -89,7 +89,7 @@ CALLS = {
         ("task_claim", {"task_seq": 9}),
         ("channel_post", {"type": "report"}),
         ("channel_wait", {"types": ["report"]}),
-        ("channel_post", {"type": "done"}),
+        ("channel_post", {"type": "text"}),
     ],
     "Builder": [
         ("channel_wait", {"types": ["proposal"]}),

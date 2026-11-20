@@ -11,7 +11,7 @@ import { env } from "./stack-watch";
 // reports on a task beside an agent, all from the page. The driver checks the database, events and logs against what it
 // writes. The log (tests/e2e/gate7_evidence.py): 1 text, 2–3 proposals, 4 the Builder's vote, 5 the person's vote,
 // 6 decision, 7 the person's veto, 8 decision, 9 task, 10–11 the Planner's claim and report, 12–13 the person's,
-// 14 done.
+// 14 the Planner's text: the work is done.
 test.skip(
   process.env.TQA_STACK_SUITE !== "channels",
   "Requires the Gate 7 demo driver",
@@ -140,8 +140,8 @@ test("WEB-E2E-012 two agents and a person decide, veto and share a task on a cha
   await expect(task.getByText("Completed")).toHaveCount(2);
   await expect(post(log, "report", script.person_report)).toBeVisible();
 
-  // 14: the Planner finishes; every post arrived live, in seq order.
-  await expect(post(log, "done", script.done)).toBeVisible({
+  // 14: the Planner finishes with a text post; every post arrived live, in seq order.
+  await expect(post(log, "text", script.done)).toBeVisible({
     timeout: AGENT_MS,
   });
   const order = await log
