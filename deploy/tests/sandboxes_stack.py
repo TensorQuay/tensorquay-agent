@@ -475,9 +475,15 @@ def page_case(stack):
         status = browse(admin, out, "read", path="/settings/status", name="4-status-amber")
         left = browse(admin, out, "read", path=PAGE, name="5-left-behind")
         command = "docker rm -f " + planted[:12]
+        # Its reason in the page's own words (fix-18): the gateway couldn't read its labels, never "the engine wouldn't
+        # remove it"; and its age from the engine's clock, never 0 s, by its second pass.
+        words = "the gateway couldn't read its labels"
         for width in status["texts"]:
-            assert "Left behind: 1 container" in status["texts"][width], status["texts"][width][:800]
+            assert "Left behind: 1 container ({})".format(words) in status["texts"][width], status["texts"][width][:800]
             assert command in left["texts"][width] and "Left behind" in left["texts"][width], left["texts"][width][:800]
+            assert words in left["texts"][width] and "wouldn't remove" not in left["texts"][width], left["texts"][width][:800]
+        survivor = listing(admin)["left_behind"][0]
+        assert survivor["age_seconds"] >= 10, "its engine age by its second pass: {}".format(survivor)
         (out / "5-listing.json").write_text(json.dumps(listing(admin), indent=1))
         print("E2E-OPS-001: Status amber, and the page lists {} with its command".format(planted[:12]), flush=True)
         # The command as the page shows it, run on the engine host.
