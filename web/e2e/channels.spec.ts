@@ -308,9 +308,14 @@ for (const [width, colorScheme] of [
     await expect(colleague).toHaveCount(0);
 
     const bar = page.getByRole("region", { name: "Channel header" });
-    // End and Delete sit in the header's "…" menu; the keyboard opens it and lands on its first item.
+    // End and Delete sit in the header's "…" menu; the keyboard opens it on its first item, the wake budget (C-1),
+    // and the arrow moves to End.
     await bar.getByRole("button", { name: `More actions for ${name}` }).focus();
     await page.keyboard.press("Enter");
+    await expect(
+      page.getByRole("menuitem", { name: "Wake budget…" }),
+    ).toBeFocused();
+    await page.keyboard.press("ArrowDown");
     await expect(
       page.getByRole("menuitem", { name: "End channel" }),
     ).toBeFocused();
