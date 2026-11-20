@@ -105,7 +105,8 @@ describe("WEB-U-066 channel membership", () => {
   it("lists agents by task title with their run, and a role only when it isn't a plain member", () => {
     show();
     const planner = row("Plan the release");
-    expect(planner).toHaveTextContent("Planner · Ana");
+    // Whose agent, in words (WEB-U-527): the viewer's own.
+    expect(planner).toHaveTextContent("Planner, your agent");
     expect(planner).toHaveTextContent("Working");
     expect(planner.querySelector(".member-dot")).toHaveAttribute(
       "data-tone",
@@ -408,5 +409,45 @@ describe("WEB-U-525 a member's live state", () => {
       "data-tone",
       "ok",
     );
+  });
+});
+
+// WEB-U-527 (the review of 20 Nov 2026): a titled agent's quiet line says whose agent it is in words, by the owner's
+// name as the list shows people, the viewer's own as theirs.
+describe("WEB-U-527 whose agent, in words", () => {
+  it("says the owner's agent, its own name first when it has one, and the viewer's as theirs", () => {
+    const mine = member("conversation", "Agent", {
+      owner_name: "Ana",
+      title: "Settle the prices",
+      run_status: "running",
+      state: "working",
+    });
+    const bens = member("conversation", "Reviewer", {
+      owner_name: "Ben",
+      title: "Review the prices",
+      run_status: "completed",
+      state: "idle",
+    });
+    const named = member("conversation", "Forecast", {
+      owner_name: "Ana",
+      title: "Forecast Q4",
+      run_status: "completed",
+    });
+    render(
+      <ChannelMembers
+        channel={RELEASE}
+        members={[OWNER, BEN, mine, bens, named]}
+        me={OWNER.id}
+        tasks={[]}
+        onSet={() => Promise.resolve()}
+        onRemove={() => Promise.resolve()}
+      />,
+    );
+    expect(row("Settle the prices")).toHaveTextContent("Working · Your agent");
+    expect(row("Review the prices")).toHaveTextContent(
+      "Idle · Reviewer, Ben's agent",
+    );
+    expect(row("Forecast Q4")).toHaveTextContent("Done · Forecast, your agent");
+    expect(row("Review the prices")).not.toHaveTextContent("· Ben ·");
   });
 });

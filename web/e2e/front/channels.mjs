@@ -83,7 +83,7 @@ const agent = (id, title, state) => ({
   id: `0195d8c0-0000-7000-8000-0000000${id}`,
   name: "Agent",
   title,
-  owner_name: "ana",
+  owner_name: "Ana",
   role: "member",
   run_status: state === "idle" ? "completed" : "running",
   state,

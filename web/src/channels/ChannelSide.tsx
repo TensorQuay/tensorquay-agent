@@ -115,9 +115,6 @@ export function ChannelSide({
     >
       <header className="channel-panel-head">
         <h2 className="type-body-strong">{title}</h2>
-        {tab === "members" && (
-          <p className="type-small muted">{t(RULES[channel.rule])}</p>
-        )}
         <Button
           variant="ghost"
           aria-label={t("channels.closePanel", { name: title })}
@@ -126,6 +123,12 @@ export function ChannelSide({
           <Icon glyph={X} size={16} />
         </Button>
       </header>
+      {/* The channel's rule, not the list's: its own line under the heading (the review of 20 Nov 2026). */}
+      {tab === "members" && (
+        <p className="type-small muted channel-rule">
+          {t(RULES[channel.rule])}
+        </p>
+      )}
       <div>
         {tab === "tasks" ? (
           tasks.data ? (

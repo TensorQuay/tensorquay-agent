@@ -97,6 +97,22 @@ export function MemberList({
   actions?: (member: Member, name: string) => ReactNode;
 }) {
   const t = useT();
+  /** The viewer's name as the list shows people, to know their own agents by. */
+  const myName = members.find(
+    (item) => item.kind === "user" && item.id === me,
+  )?.name;
+  /** Whose agent a titled agent is, in words (the review of 20 Nov 2026): its own name first unless the default. */
+  const whose = (item: Member) => {
+    const named = item.name && item.name !== "Agent" ? item.name : null;
+    if (!item.owner_name) return named ?? t("channels.kindAgent");
+    if (item.owner_name === myName)
+      return named
+        ? t("channels.namedYourAgent", { name: named })
+        : t("channels.yourAgent");
+    return named
+      ? t("channels.namedOwnersAgent", { name: named, owner: item.owner_name })
+      : t("channels.ownersAgent", { owner: item.owner_name });
+  };
   return (
     <ul className="member-list" aria-label={t("channels.membersTitle")}>
       {members.map((item) => {
@@ -116,7 +132,7 @@ export function MemberList({
           item.kind === "conversation"
             ? [
                 words ? t(words) : null,
-                item.title ? agent : t("channels.kindAgent"),
+                item.title ? whose(item) : t("channels.kindAgent"),
               ]
                 .filter(Boolean)
                 .join(" · ")

@@ -181,7 +181,14 @@ export function ProposalPanel({
       />
       <p className="type-small muted">
         {proposal.state === "open"
-          ? timeLeft(proposal.window_ends_at, t)
+          ? t("channels.closesAndRule", {
+              closes: timeLeft(proposal.window_ends_at, t),
+              rule: t(
+                proposal.rule === "human"
+                  ? "channels.ruleHumanInline"
+                  : "channels.ruleMajorityInline",
+              ),
+            })
           : null}
       </p>
       {proposal.votes.length > 0 && (
@@ -236,8 +243,7 @@ export function ProposalPanel({
             {t("channels.choiceReject")}
           </Button>
           <Button
-            variant="ghost"
-            className="danger-ghost"
+            variant="danger"
             disabled={pending}
             aria-label={t("channels.vetoName", { seq })}
             onClick={() => setVetoing(true)}
