@@ -175,6 +175,9 @@ pub(crate) fn environment(spec: &SandboxSpec) -> Vec<String> {
     env.push("TQA_STATE_DIR=/run/tqa/state".into());
     if spec.long_term_memory {
         env.push("TQA_MEMORY=1".into());
+        if let Some(person) = &spec.memory_person {
+            env.push(format!("TQA_MEMORY_PERSON={person}"));
+        }
     }
     if let (EgressMode::Proxy, Some(proxy)) = (spec.egress.mode, &spec.egress.proxy_url) {
         // The origin only (scheme, host, port), never a path: `Url` writes "/" for http, and Chromium refuses a proxy

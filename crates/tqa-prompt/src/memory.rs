@@ -1,7 +1,9 @@
 //! The memory index (ADR-0041): generated at every run start from the workspace's notes and task digests, never
 //! written by anyone, and put in the pinned instructions slot so it survives compaction. A note is one fact in one file
-//! under `.memory/`, whose header names what it is about; a digest is one finished task under
-//! `.memory/tasks/`, written by the gateway. The index lists notes first, then the newest digests, under a line and
+//! under `.memory/`, whose header names what it is about; a digest is one finished task of the run's own person,
+//! written by the gateway under `.tqa/memory/tasks/<person>/` (private, as all of `.tqa/` is: a digest holds a
+//! task's title and answer, which a shared workspace must not show to its other people). The index lists notes
+//! first, then the newest digests, under a line and
 //! a byte cap; what doesn't fit stays in its file, where `grep` finds it. It is presented as notes to read, not as
 //! instructions; with it come the rules for saving one, which an agent needs before the first note exists.
 use std::{
@@ -14,8 +16,9 @@ use tqa_tools::WorkspaceRoot;
 
 /// The workspace's notes, relative to its root.
 pub const MEMORY_DIRECTORY: &str = ".memory";
-/// The task digests, relative to the workspace root.
-pub const DIGEST_DIRECTORY: &str = ".memory/tasks";
+/// Where every person's task digests live, relative to the workspace root; a run reads only its own person's folder
+/// below it.
+pub const DIGEST_ROOT: &str = ".tqa/memory/tasks";
 /// At most this many lines in the index: notes first, then digests, newest first.
 pub const MAX_INDEX_LINES: usize = 40;
 /// At most this many bytes in the rendered index, header and markers included.
@@ -59,18 +62,28 @@ pub struct MemoryIndex {
     /// Notes left out because they hold what looks like a key (written some other way than the file tools, which
     /// refuse one): never listed, so the key isn't carried into later runs.
     pub withheld: usize,
+    /// The folder the digests were read from, relative to the workspace root; `None` when the run has no person's
+    /// folder to read.
+    pub tasks: Option<String>,
 }
 
-/// Reads the workspace's notes and digests. Missing directories mean no memory; a file that is a link, not a regular
-/// file, not UTF-8 or unreadable is skipped, never followed.
+/// Reads the workspace's notes, and the digests of `person` (the run's own person, as the gateway names their
+/// folder; `None` or a name that can't be a folder reads no digests). Missing directories mean no memory; a file
+/// that is a link, not a regular file, not UTF-8 or unreadable is skipped, never followed.
 #[must_use]
-pub fn discover_memory(workspace: &WorkspaceRoot) -> MemoryIndex {
+pub fn discover_memory(workspace: &WorkspaceRoot, person: Option<&str>) -> MemoryIndex {
     let (notes, withheld) = lines(workspace, MEMORY_DIRECTORY, false);
-    let (digests, _) = lines(workspace, DIGEST_DIRECTORY, true);
+    let tasks = person
+        .filter(|person| tqa_tools::workspace_tree::memory::valid_owner(person))
+        .map(|person| format!("{DIGEST_ROOT}/{person}"));
+    let digests = tasks
+        .as_deref()
+        .map_or_else(Vec::new, |tasks| lines(workspace, tasks, true).0);
     MemoryIndex {
         notes,
         digests,
         withheld,
+        tasks,
     }
 }
 
@@ -84,10 +97,15 @@ fn lines(
     let Ok(path) = workspace.resolve(directory) else {
         return none;
     };
-    // The directory itself must be a real directory inside the workspace, not a link to one elsewhere.
-    match fs::symlink_metadata(&path) {
-        Ok(metadata) if metadata.is_dir() => {}
-        _ => return none,
+    // The directory and each folder on the way to it must be a real directory inside the workspace, not a link to
+    // one elsewhere.
+    let mut step = workspace.path().to_path_buf();
+    for part in Path::new(directory).components() {
+        step.push(part);
+        match fs::symlink_metadata(&step) {
+            Ok(metadata) if metadata.is_dir() => {}
+            _ => return none,
+        }
     }
     let Ok(entries) = fs::read_dir(&path) else {
         return none;
@@ -216,10 +234,10 @@ pub fn render_memory_index(index: &MemoryIndex) -> String {
             }
         );
     }
-    if left_digests > 0 {
+    if let (true, Some(tasks)) = (left_digests > 0, index.tasks.as_deref()) {
         let _ = writeln!(
             out,
-            "({left_digests} older tasks in {DIGEST_DIRECTORY}: search them with grep.)"
+            "({left_digests} older tasks in {tasks}: search them with grep.)"
         );
     }
     out

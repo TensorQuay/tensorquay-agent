@@ -264,5 +264,39 @@ fn sbx_u_024_long_term_memory_is_told_to_the_runtime_only_when_on() -> Result<()
         .filter(|entry| entry.starts_with("TQA_MEMORY"))
         .collect();
     assert_eq!(set, ["TQA_MEMORY=1"]);
+    // The owner's digest folder is named only with memory on.
+    spec.memory_person = Some("0190f3a2-7c1e-7d55-9b0a-3f6c2d1e4a5b".into());
+    let named = container_config(
+        &spec,
+        "sandbox-internal",
+        SystemTime::UNIX_EPOCH,
+        token_file(),
+    )?;
+    let set: Vec<_> = named
+        .env
+        .iter()
+        .flatten()
+        .filter(|entry| entry.starts_with("TQA_MEMORY"))
+        .collect();
+    assert_eq!(
+        set,
+        [
+            "TQA_MEMORY=1",
+            "TQA_MEMORY_PERSON=0190f3a2-7c1e-7d55-9b0a-3f6c2d1e4a5b"
+        ]
+    );
+    spec.long_term_memory = false;
+    let off = container_config(
+        &spec,
+        "sandbox-internal",
+        SystemTime::UNIX_EPOCH,
+        token_file(),
+    )?;
+    assert!(
+        !off.env
+            .iter()
+            .flatten()
+            .any(|entry| entry.starts_with("TQA_MEMORY"))
+    );
     Ok(())
 }

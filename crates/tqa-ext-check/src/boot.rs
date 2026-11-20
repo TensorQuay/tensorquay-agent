@@ -372,6 +372,7 @@ impl Scratch {
             skills: SkillsMounts::default(),
             desktop: false,
             long_term_memory: false,
+            memory_person: None,
         })
     }
 

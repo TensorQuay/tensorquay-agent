@@ -25,6 +25,24 @@ pub struct RuntimeInputs {
     pub sync_before_result: bool,
     /// Long-term memory (`TQA_MEMORY`, ADR-0041): build the workspace's memory index into each run's instructions.
     pub memory: bool,
+    /// The run's own person, as the gateway names their folder of task digests (`TQA_MEMORY_PERSON`): the index
+    /// lists that folder's digests and nobody else's.
+    pub memory_person: Option<String>,
+}
+
+/// Parses `TQA_MEMORY_PERSON`: absent is none; a person's id as text (hex digits and dashes, 1 to 64 bytes) is that
+/// person; anything else is refused (fail closed: a run never reads a folder the gateway did not name).
+///
+/// # Errors
+/// `Configuration("TQA_MEMORY_PERSON")` for any other value.
+pub fn memory_person(value: Option<&str>) -> Result<Option<String>, RuntimeError> {
+    match value {
+        None => Ok(None),
+        Some(person) if tqa_tools::workspace_tree::memory::valid_owner(person) => {
+            Ok(Some(person.to_owned()))
+        }
+        Some(_) => Err(RuntimeError::Configuration("TQA_MEMORY_PERSON")),
+    }
 }
 
 /// Parses `TQA_MEMORY`: absent is false, exactly `1` is true, anything else is refused (fail closed).
@@ -84,6 +102,14 @@ impl RuntimeInputs {
                 }
                 .as_deref(),
             )?,
+            memory_person: memory_person(
+                match std::env::var("TQA_MEMORY_PERSON") {
+                    Ok(value) => Some(value),
+                    Err(std::env::VarError::NotPresent) => None,
+                    Err(_) => return Err(RuntimeError::Configuration("TQA_MEMORY_PERSON")),
+                }
+                .as_deref(),
+            )?,
         })
     }
 }
@@ -100,6 +126,8 @@ pub struct RuntimeConfig {
     pub(crate) sync_before_result: bool,
     /// Build the workspace's memory index into each run's instructions (ADR-0041).
     pub(crate) memory: bool,
+    /// The run's own person's digest folder name, when the gateway gave one.
+    pub(crate) memory_person: Option<String>,
 }
 impl RuntimeConfig {
     /// Validates paths and origin, then reads the credential once. Call from a blocking worker.
@@ -137,6 +165,7 @@ impl RuntimeConfig {
             skills: inputs.skills,
             sync_before_result: inputs.sync_before_result,
             memory: inputs.memory,
+            memory_person: inputs.memory_person,
         })
     }
     /// Returns the derived WebSocket registration endpoint on the configured origin.

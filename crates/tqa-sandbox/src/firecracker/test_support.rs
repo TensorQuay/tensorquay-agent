@@ -37,6 +37,7 @@ pub(crate) fn spec() -> Result<SandboxSpec, Box<dyn Error>> {
         skills: crate::SkillsMounts::default(),
         desktop: false,
         long_term_memory: false,
+        memory_person: None,
     })
 }
 

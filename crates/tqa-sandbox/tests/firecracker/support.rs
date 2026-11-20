@@ -499,6 +499,7 @@ impl Host {
             skills: tqa_sandbox::SkillsMounts::default(),
             desktop: false,
             long_term_memory: false,
+            memory_person: None,
         })
     }
 

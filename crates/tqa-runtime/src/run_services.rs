@@ -578,7 +578,7 @@ fn instruction_slot(
     // with the instructions so it survives compaction; nothing at all when memory is off.
     if config.memory {
         instructions.push_str(&tqa_prompt::render_memory_index(
-            &tqa_prompt::discover_memory(workspace),
+            &tqa_prompt::discover_memory(workspace, config.memory_person.as_deref()),
         ));
     }
     let loaded = ContextLoaded {

@@ -20,7 +20,7 @@ pub use instructions::{
     render_profile_instructions,
 };
 pub use memory::{
-    DIGEST_DIRECTORY, MAX_INDEX_BYTES, MAX_INDEX_LINES, MEMORY_DIRECTORY, MemoryIndex, MemoryLine,
+    DIGEST_ROOT, MAX_INDEX_BYTES, MAX_INDEX_LINES, MEMORY_DIRECTORY, MemoryIndex, MemoryLine,
     discover_memory, render_memory_index,
 };
 pub use skill_tool::{MAX_LISTED_SKILL_FILES, SkillTool};

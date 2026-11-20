@@ -31,7 +31,7 @@ mod workspace_service;
 #[cfg(feature = "testing")]
 pub mod testing;
 
-pub use configuration::{RuntimeConfig, RuntimeInputs, memory, sync_before_result};
+pub use configuration::{RuntimeConfig, RuntimeInputs, memory, memory_person, sync_before_result};
 pub use decision_relay::{RelayDecisionEngine, RelayEngineConfig};
 pub use error::{IoCause, RuntimeError};
 pub use history::merge_history;

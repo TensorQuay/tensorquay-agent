@@ -213,24 +213,28 @@ impl SandboxManager {
         ))
     }
 
+    /// The conversation's owner.
+    async fn owner(&self, conversation: uuid::Uuid) -> Result<uuid::Uuid, GatewayError> {
+        let pool = &self.services.pool;
+        self.bounded(async {
+            sqlx::query_scalar!(
+                "SELECT owner_id FROM conversations WHERE id=$1",
+                conversation
+            )
+            .fetch_optional(pool)
+            .await?
+            .ok_or(GatewayError::NotFound)
+        })
+        .await
+    }
+
     /// The read-only skills tiers: the install tier and the conversation owner's own tier, never a sharer's. The
     /// microVM backend mounts none until it has a block image of the trees.
     async fn skills(&self, conversation: uuid::Uuid) -> Result<SkillsMounts, GatewayError> {
         if self.config.uses_block_images() {
             return Ok(SkillsMounts::default());
         }
-        let pool = &self.services.pool;
-        let owner = self
-            .bounded(async {
-                sqlx::query_scalar!(
-                    "SELECT owner_id FROM conversations WHERE id=$1",
-                    conversation
-                )
-                .fetch_optional(pool)
-                .await?
-                .ok_or(GatewayError::NotFound)
-            })
-            .await?;
+        let owner = self.owner(conversation).await?;
         let storage = &self.services.storage;
         Ok(SkillsMounts {
             install: storage.skills_install(),
@@ -302,6 +306,13 @@ impl SandboxManager {
                 .contains(&tqa_types::Capability::Desktop),
             // Long-term memory (ADR-0041): the install switch; a person's own comes with Settings › Memory.
             long_term_memory: self.config.memory.enabled,
+            // The owner's private folder of task digests: a run lists its own person's finished tasks, never a
+            // sharer's (the same rule as the skills tier above).
+            memory_person: if self.config.memory.enabled {
+                Some(self.owner(uuid).await?.to_string())
+            } else {
+                None
+            },
         })
     }
 

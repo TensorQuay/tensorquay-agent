@@ -26,6 +26,14 @@ const TEMPORARY: &str = ".note-part";
 /// note ends `.md`), so the mark never collides with a kept version. The file tools write the same mark.
 pub const NEW_SUFFIX: &str = ".new";
 
+/// Where task digests live, from the workspace root: under `.tqa/`, which the file view, the change list and the
+/// runtime link keep private as a whole, then one folder per person (ADR-0041 section 3). A digest holds a task's
+/// title and the first lines of its answer, which belong to the person, not to everyone the workspace is shared with.
+pub const TASKS: [&str; 3] = [".tqa", "memory", "tasks"];
+/// The largest digest, in bytes.
+pub const MAX_DIGEST_BYTES: usize = 16 * 1024;
+const DIGEST_TEMPORARY: &str = ".digest-part";
+
 /// What an Undo did.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Undone {
@@ -206,4 +214,74 @@ pub fn undo(memory: BorrowedFd<'_>, name: &str) -> Result<Undone, TreeError> {
         return Ok(Undone::Removed);
     }
     Err(TreeError::NotFound)
+}
+
+/// Whether `owner` may name a person's digest folder: a person's id as text (hex digits and dashes, 1 to 64 bytes).
+#[must_use]
+pub fn valid_owner(owner: &str) -> bool {
+    (1..=64).contains(&owner.len())
+        && owner
+            .bytes()
+            .all(|byte| byte.is_ascii_hexdigit() || byte == b'-')
+}
+
+/// Opens one person's digest folder, `.tqa/memory/tasks/<owner>/`, creating what is missing; a link at any step is
+/// refused.
+///
+/// # Errors
+/// `PathInvalid` for an owner that can't name a folder or a link in the way; host I/O failures.
+pub fn tasks_directory(root: BorrowedFd<'_>, owner: &str) -> Result<OwnedFd, TreeError> {
+    if !valid_owner(owner) {
+        return Err(TreeError::PathInvalid);
+    }
+    let mut directory = child(root, TASKS[0])?;
+    for name in TASKS[1..].iter().copied().chain([owner]) {
+        directory = child(directory.as_fd(), name)?;
+    }
+    Ok(directory)
+}
+
+/// Writes a digest, replacing the task's earlier one: to a temporary file, then renamed into place.
+///
+/// # Errors
+/// `PathInvalid` for a name that can't be a note's, a text over [`MAX_DIGEST_BYTES`], or a link in the way; host I/O
+/// failures.
+pub fn write_digest(tasks: BorrowedFd<'_>, name: &str, text: &str) -> Result<(), TreeError> {
+    if !valid_name(name) || text.len() > MAX_DIGEST_BYTES {
+        return Err(TreeError::PathInvalid);
+    }
+    // A link where the digest goes is never written through: a rename replaces the link itself, and the read side
+    // refuses one; anything else there that isn't a regular file is refused here.
+    match sys::statat(tasks, name, AtFlags::SYMLINK_NOFOLLOW) {
+        Ok(stat) if FileType::from_raw_mode(stat.st_mode) != FileType::RegularFile => {
+            return Err(TreeError::PathInvalid);
+        }
+        Ok(_) | Err(Errno::NOENT) => {}
+        Err(_) => return Err(TreeError::Io),
+    }
+    let _ = sys::unlinkat(tasks, DIGEST_TEMPORARY, AtFlags::empty());
+    let flags = OFlags::WRONLY | OFlags::CREATE | OFlags::EXCL | OFlags::NOFOLLOW | OFlags::CLOEXEC;
+    let mut part = File::from(
+        sys::openat(tasks, DIGEST_TEMPORARY, flags, Mode::from_raw_mode(0o644))
+            .map_err(|_| TreeError::Io)?,
+    );
+    let placed = part
+        .write_all(text.as_bytes())
+        .and_then(|()| part.sync_all())
+        .map_err(|_| TreeError::Io)
+        .and_then(|()| {
+            sys::renameat(tasks, DIGEST_TEMPORARY, tasks, name).map_err(|_| TreeError::Io)
+        });
+    if placed.is_err() {
+        let _ = sys::unlinkat(tasks, DIGEST_TEMPORARY, AtFlags::empty());
+    }
+    placed
+}
+
+/// Reads a digest's text; `None` when the task has none yet.
+///
+/// # Errors
+/// As [`read`].
+pub fn read_digest(tasks: BorrowedFd<'_>, name: &str) -> Result<Option<String>, TreeError> {
+    read(tasks, name)
 }
