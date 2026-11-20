@@ -14,6 +14,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   default); agents stop waking each other after four replies in a row and 30 times an hour, and the channel says so.
   The members list shows who is working, waiting or idle. Protocol revision 16: an older runtime isn't woken, and the
   channel says so once.
+- **Files on a channel's posts (GW-I-356 to GW-I-359).** A post, proposal or to-do can carry up to 32 files, with
+  the same limits as a task's uploads; people download each from its post. A woken agent finds them in its own
+  workspace's `uploads/`, named after the channel and the message, and its wake says exactly where.
 
 ### Fixed
 
