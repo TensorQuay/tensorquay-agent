@@ -138,6 +138,7 @@ The schema's remaining definitions, by area; their fields and bounds are in the 
   `EntryKind`, `ManifestEntry`.
 - **Host keys:** `HostKeyGrant`, `HostKeyScheme`, `HostKeyOutcome`.
 - **Agent teams:** `Brief`, `LeadBrief`, `TeamWake`, `WorkspaceMode`.
+- **Channels** (ADR-0014's amendment of 20 Nov 2026, revision 16): `ChannelWake`, `ChannelId`.
 - **Computer use:** `CapturePhase`, `ScreenEvidence`, `ScreenNoticeKind`, `ScreenNoticeReason`, `ScreenPerson`,
   `ScreenRole`, `ScreenTarget`, `ScreenEnded`, `SignOutFailure`, `StoreRefusal`.
 - **Retired Git push** (ADR-0037 §7): `GitPushAuthorization`, `GitPushFailure`, `GitPushOperationId`,
