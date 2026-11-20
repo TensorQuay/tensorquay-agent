@@ -22,8 +22,10 @@ struct Forward {
     sniffer: super::stream_kind::Sniffer,
     /// The chunks forwarded while undecided, for the meter once the body is known to be a stream.
     undecided: Vec<Bytes>,
-    /// The route, for the one warning a mislabelled stream gets.
+    /// The route, for the one warning a mislabelled stream gets and the line an early end gets.
     route: String,
+    /// When the response began, for the line an early end gets.
+    started: tokio::time::Instant,
 }
 /// The upstream headers the runtime sees: an allowlist, so nothing else, including a forged
 /// [`super::throttle::HEADER`], passes through.
@@ -94,6 +96,7 @@ pub(super) async fn send(
         sniffer: super::stream_kind::Sniffer::default(),
         undecided: Vec::new(),
         route: route.name.clone(),
+        started: tokio::time::Instant::now(),
     };
     let body = Body::from_stream(futures::stream::unfold(pending, |mut pending| async move {
         let next = pending.next().await?;
@@ -122,13 +125,18 @@ impl Forward {
             }
             Ok(Some(Err(_))) => {
                 self.finished = true;
-                Some(Err(io::Error::other("upstream response interrupted")))
+                Some(Err(self.ended("upstream response interrupted")))
             }
             Err(error) => {
                 self.finished = true;
-                Some(Err(error))
+                Some(Err(self.ended(&error.to_string())))
             }
         }
+    }
+    /// Ends the response before its end: the error the runtime's read gets, and one line saying why.
+    fn ended(&self, reason: &str) -> io::Error {
+        ended(&self.route, reason, self.received, self.started.elapsed());
+        io::Error::other(reason.to_owned())
     }
     /// A text/plain body's start decided it: a stream is metered from its first byte, with one warning.
     fn decided(&mut self, kind: super::stream_kind::StreamKind) {
@@ -151,7 +159,7 @@ impl Forward {
         self.received = self.received.saturating_add(bytes.len());
         if self.received > self.state.config.relay.response_bytes {
             self.finished = true;
-            return Err(io::Error::other("relay response byte limit"));
+            return Err(self.ended("relay response byte limit"));
         }
         if self.is_sse.is_none() {
             self.undecided.push(bytes.clone());
@@ -170,3 +178,21 @@ impl Forward {
         Ok(bytes)
     }
 }
+
+/// The line a relayed response gets when the relay ends it before its end (a model server silent past the idle limit,
+/// the response deadline, the byte limit, the upstream breaking, or the gateway stopping). The runtime only sees its
+/// read fail (`stream_cut`), so this line is where the reason is kept (found on 19 Nov 2026: a server that held a long
+/// tool call back was cut at the idle limit with nothing in the log).
+pub(super) fn ended(route: &str, reason: &str, received: usize, elapsed: Duration) {
+    tracing::warn!(
+        route = %route,
+        reason,
+        received_bytes = received,
+        elapsed_seconds = elapsed.as_secs(),
+        "relayed response ended early"
+    );
+}
+
+#[cfg(test)]
+#[path = "forward_tests.rs"]
+mod tests;
