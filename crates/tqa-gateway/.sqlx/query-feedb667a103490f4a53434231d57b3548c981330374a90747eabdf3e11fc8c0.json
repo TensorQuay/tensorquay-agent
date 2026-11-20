@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE channel_wakes SET started = true WHERE conversation_id = $1 AND NOT started",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "feedb667a103490f4a53434231d57b3548c981330374a90747eabdf3e11fc8c0"
+}

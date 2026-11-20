@@ -50,6 +50,7 @@ fn turn(lead: bool, after: i64) -> Result<ClientFrame, GatewayError> {
         team_wake: Some(TeamWake {
             after: u64::try_from(after).map_err(|_| GatewayError::StoreUnavailable)?,
         }),
+        channel_wake: None,
     })
 }
 
@@ -165,6 +166,7 @@ mod tests {
                     host_keys: Vec::new(),
                     lead_brief: None,
                     team_wake: Some(TeamWake { after: 9 }),
+                    channel_wake: None,
                 },
                 "a lead: {is_lead}"
             );

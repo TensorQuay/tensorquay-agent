@@ -1,0 +1,126 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT m.channel_id AS \"channel!\", m.conversation_id AS \"conversation!\", m.read_seq, cv.owner_id, cv.runtime_revision, cv.title, ch.budget, ch.spent_tokens, (SELECT min(x.hop) FROM channel_messages x WHERE x.channel_id = m.channel_id AND x.seq > m.read_seq AND m.conversation_id = ANY(x.wakes)) AS \"hop!\", (SELECT CASE WHEN e.lifecycle = 'run.failed' THEN e.seq END FROM events e WHERE e.conversation_id = m.conversation_id AND e.lifecycle IS NOT NULL ORDER BY e.seq DESC LIMIT 1) AS failed FROM channel_members m JOIN channels ch ON ch.id = m.channel_id JOIN conversations cv ON cv.id = m.conversation_id WHERE ch.kind = 'channel' AND ch.state = 'open' AND m.role <> 'observer' AND cv.state = 'active' AND ($1::uuid IS NULL OR m.channel_id = $1) AND EXISTS (SELECT 1 FROM channel_messages x WHERE x.channel_id = m.channel_id AND x.seq > m.read_seq AND m.conversation_id = ANY(x.wakes)) ORDER BY m.channel_id, m.conversation_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "channel!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "channel_members",
+            "name": "channel_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "conversation!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "channel_members",
+            "name": "conversation_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "read_seq",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "channel_members",
+            "name": "read_seq"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "owner_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "owner_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "runtime_revision",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "runtime_revision"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "title",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "budget",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "channels",
+            "name": "budget"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "spent_tokens",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "channels",
+            "name": "spent_tokens"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "hop!",
+        "type_info": "Int2",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "failed",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      false,
+      true,
+      false,
+      true,
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "833c18a77c63297c71e5cf8e4af63d6d303a7b7c46d2837b3e1491a6c8c5c441"
+}

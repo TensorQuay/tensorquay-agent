@@ -238,6 +238,7 @@ pub fn user() -> ClientFrame {
     ClientFrame::UserMessage {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: "question".into(),
         attachments: vec![],
         host_keys: Vec::new(),

@@ -50,6 +50,8 @@ pub struct UserTurn {
     /// On the gateway's wake of an agent team reader (revision 13): journalled with the turn, whose text the model
     /// gets as it is.
     pub team_wake: Option<tqa_types::TeamWake>,
+    /// The gateway's wake of a channel member (revision 16), journaled beside the text as `team_wake` is.
+    pub channel_wake: Option<Box<tqa_types::ChannelWake>>,
 }
 /// Explicit dependencies; none of these services is discovered from the host by the loop.
 pub struct RunnerDeps {
@@ -204,6 +206,7 @@ fn validate_turn(message: &UserTurn) -> Result<(), CoreError> {
     let frame = tqa_types::ClientFrame::UserMessage {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: message.text.clone(),
         attachments: message.attachments.clone(),
         host_keys: Vec::new(),

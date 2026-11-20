@@ -27,7 +27,7 @@ export function usePrompt(
 ) {
   // The gateway's wake is a turn, but not the person's: it never confirms a message they sent (revision 13).
   const users = transcript.items.filter(
-    (item) => item.kind === "user" && !item.wake,
+    (item) => item.kind === "user" && !item.wake && !item.channelWake,
   ).length;
   const [draft, setDraft] = useState("");
   const [prompt, setPrompt] = useState<Prompt | null>(() =>

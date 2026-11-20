@@ -147,6 +147,7 @@ async fn core_e_041_a_resume_rebuilds_the_counts_from_the_journal() -> TestResul
         Event::MessageUser {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: "make the tests pass".into(),
             attachments: vec![],
         },

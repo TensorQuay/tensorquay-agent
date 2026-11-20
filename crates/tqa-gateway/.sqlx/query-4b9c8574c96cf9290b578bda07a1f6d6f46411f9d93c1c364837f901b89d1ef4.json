@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (SELECT 1 FROM idempotency WHERE conversation_id = $1 AND key = $2) AS \"sent!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "sent!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "4b9c8574c96cf9290b578bda07a1f6d6f46411f9d93c1c364837f901b89d1ef4"
+}

@@ -167,12 +167,16 @@ fn gw_u_232_the_answer_is_the_last_attempts_text_and_a_woken_run_is_no_task_end(
         attachments: vec![],
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
     });
     assert!(!woken(Some(&person)));
     assert!(!woken(None), "an unknown opener counts as the person's");
-    // The gateway's wake of a team reader, and a lead's brief to a helper, are not a person's words.
+    // The gateway's wake of a team reader or of a channel member (ADR-0014's amendment of 20 Nov 2026), and a lead's
+    // brief to a helper, are not a person's words.
     for opener in [
         serde_json::json!({"type":"message.user","text":"Messages wait.","attachments":[],"team_wake":{"after":3}}),
+        serde_json::json!({"type":"message.user","text":"New in channel.","attachments":[],
+            "channel_wake":{"channel":"0195d8c0-0000-7000-8000-00000000c4a2","after":3}}),
         serde_json::json!({"type":"message.user","text":"Find hotels.","attachments":[],
             "lead_brief":{"role":"researcher","workspace":"own_copy","brief":{"objective":"Find three hotels","output":"a list","boundaries":"no bookings"}}}),
     ] {

@@ -45,6 +45,7 @@ fn ctx_u_016_states_attach_in_order_to_the_authoritative_attempt() -> TestResult
         Event::MessageUser {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: "task".into(),
             attachments: vec![],
         },
@@ -98,6 +99,7 @@ fn stateful_run(steps: u32) -> Result<Vec<Event>, Box<dyn Error>> {
         Event::MessageUser {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: "the task statement".into(),
             attachments: vec![],
         },

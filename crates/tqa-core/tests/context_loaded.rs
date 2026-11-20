@@ -78,6 +78,7 @@ async fn core_u_045_context_loaded_follows_run_resumed() -> TestResult {
         Event::MessageUser {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: "question".into(),
             attachments: vec![],
         },
@@ -102,6 +103,7 @@ async fn core_u_045_context_loaded_follows_the_start_of_a_journalled_message() -
     let history = history(vec![Event::MessageUser {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: "question".into(),
         attachments: vec![],
     }])?;

@@ -117,9 +117,18 @@ async fn persist(
             Some(conversation) if state.config.agent_teams.enabled => crate::teams::budget::spend(&mut transaction, conversation, tokens, state.config.agent_teams.helpers_stop_percent).await?,
             _ => crate::teams::budget::Spent::default(),
         };
+        // A run a channel's wake started spends that channel's budget too (ADR-0014's amendment, A5).
+        let said = match conversation {
+            Some(conversation) => crate::channels::wake::spend(&mut transaction, conversation, tokens, state.config.channels.wake_budget).await?,
+            None => Vec::new(),
+        };
         transaction.commit().await?;
-        Ok(spent)
+        Ok((spent, said))
     }).await?;
+    let (spent, said) = spent;
+    for (channel, seq) in said {
+        state.channels.published(channel, seq);
+    }
     if let Some((channel, seq)) = spent.published {
         state.channels.published(channel, seq);
     }

@@ -113,6 +113,7 @@ impl Cursor {
                 &mut connection,
                 self.channel,
                 (self.since, &ChannelFilter::default(), REFILL),
+                true,
             )
             .await?;
             Ok((seen.channel.ended, page.messages))

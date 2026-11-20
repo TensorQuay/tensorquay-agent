@@ -259,6 +259,7 @@ async fn core_u_052_the_journal_and_a_later_run_hold_the_same_text() -> TestResu
     let again = UserTurn {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: "again".into(),
         attachments: vec![],
     };

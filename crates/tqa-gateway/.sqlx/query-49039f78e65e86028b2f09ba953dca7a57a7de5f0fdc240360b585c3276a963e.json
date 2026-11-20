@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT hop FROM channel_charges WHERE conversation_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "hop",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "channel_charges",
+            "name": "hop"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "49039f78e65e86028b2f09ba953dca7a57a7de5f0fdc240360b585c3276a963e"
+}

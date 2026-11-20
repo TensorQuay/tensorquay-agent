@@ -107,6 +107,7 @@ pub(crate) async fn message(
         connection,
         channel,
         (seq.saturating_sub(1), &ChannelFilter::default(), 1),
+        true,
     )
     .await?;
     page.messages

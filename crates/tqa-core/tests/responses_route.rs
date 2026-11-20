@@ -67,6 +67,7 @@ fn plain_turn() -> UserTurn {
     UserTurn {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: "read a.txt".into(),
         attachments: vec![],
     }

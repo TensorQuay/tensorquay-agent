@@ -83,6 +83,7 @@ async fn gw_i_197_the_lead_reads_its_helpers_transcript_in_pages(pool: PgPool) -
                     attachments: Vec::new(),
                     lead_brief: None,
                     team_wake: None,
+                    channel_wake: None,
                 },
             ),
             (
@@ -232,6 +233,7 @@ async fn gw_i_277_read_helper_says_where_the_helper_is_now(pool: PgPool) -> Test
                     attachments: Vec::new(),
                     lead_brief: None,
                     team_wake: None,
+                    channel_wake: None,
                 },
             ),
             (

@@ -22,6 +22,7 @@ async fn rt_i_015_a_new_turn_is_refused_while_a_run_is_active() -> TestResult {
         Event::MessageUser {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: "earlier".into(),
             attachments: vec![],
         },

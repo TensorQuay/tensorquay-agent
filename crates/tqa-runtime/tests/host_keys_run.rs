@@ -15,6 +15,7 @@ fn keyed() -> Result<ClientFrame, Box<dyn std::error::Error>> {
     Ok(ClientFrame::UserMessage {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: "question".into(),
         attachments: vec![],
         host_keys: vec![HostKeyGrant::new(

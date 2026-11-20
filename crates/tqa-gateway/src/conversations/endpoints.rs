@@ -114,7 +114,15 @@ pub(crate) async fn delete(
             service::remove(&state, &user, &helper).await?;
         }
     }
+    // Its channels are told it can't be woken any more (ADR-0014's amendment of 20 Nov 2026, A10).
+    let channels = match crate::conversations::uuid(&id) {
+        Ok(task) => crate::channels::wake::memberships(&state, task)
+            .await
+            .unwrap_or_default(),
+        Err(_) => Vec::new(),
+    };
     service::remove(&state, &user, &id).await?;
+    crate::channels::wake::deleted(&state, channels).await;
     Ok(StatusCode::NO_CONTENT)
 }
 

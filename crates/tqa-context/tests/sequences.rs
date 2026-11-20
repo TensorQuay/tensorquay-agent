@@ -13,6 +13,7 @@ fn ctx_u_010_core_u_038_gaps_fail_and_non_one_bases_are_allowed() -> Result<(), 
         event: Event::MessageUser {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: "request".into(),
             attachments: vec![],
         },

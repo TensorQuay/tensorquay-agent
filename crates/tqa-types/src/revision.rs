@@ -173,6 +173,17 @@ pub const PROTOCOL_REVISIONS: [ProtocolRevision; PROTOCOL_REVISION as usize] = [
         ],
         removes: &[],
     },
+    ProtocolRevision {
+        number: 16,
+        adds: "the gateway's wake of a channel member (ADR-0014's amendment of 20 Nov 2026, A4): user.message's channel_wake (the channel and the member's place), journaled on message.user, so a client shows the gateway's notice, never the person's message; a runtime below 16 isn't woken",
+        schema: &[
+            ("ClientFrame", "channel_wake"),
+            ("Event", "channel_wake"),
+            ("ChannelWake", "channel"),
+            ("ChannelWake", "after"),
+        ],
+        removes: &[],
+    },
 ];
 
 /// A revision header or label that is not a canonical decimal from 1 to 65535.

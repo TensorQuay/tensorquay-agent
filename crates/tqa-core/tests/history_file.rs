@@ -28,6 +28,7 @@ fn completed_run(index: usize, seq: usize) -> Result<Vec<Event>, Box<dyn Error>>
         Event::MessageUser {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text,
             attachments: vec![],
         },
@@ -123,6 +124,7 @@ async fn run(
     let turn = UserTurn {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: "what was the code word?".into(),
         attachments: vec![],
     };

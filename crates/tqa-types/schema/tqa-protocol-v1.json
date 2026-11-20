@@ -109,6 +109,38 @@
         }
       ]
     },
+    "ChannelId": {
+      "description": "A validated channel identifier, encoded as a JSON string.",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "type": "string"
+    },
+    "ChannelWake": {
+      "additionalProperties": false,
+      "description": "The gateway's wake of a channel member (revision 16, ADR-0014's amendment of 20 Nov 2026, A4): the channel and the\nmember's place, after which messages wait for it. Nothing written by anyone else: those reach the model only through\n`channel_read`'s marked block.",
+      "properties": {
+        "after": {
+          "description": "The member's place in the channel's log: the waiting messages come after it.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "channel": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/ChannelId"
+            }
+          ],
+          "description": "The channel's id."
+        }
+      },
+      "required": [
+        "channel",
+        "after"
+      ],
+      "type": "object"
+    },
     "ClientFrame": {
       "description": "Client inputs are exact: unknown fields and malformed bounded values are rejected.",
       "oneOf": [
@@ -408,6 +440,17 @@
               "maxItems": 32,
               "type": "array",
               "uniqueItems": true
+            },
+            "channel_wake": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/ChannelWake"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "On the gateway's wake of a channel member, whose messages wait (revision 16, ADR-0014's amendment of 20 Nov\n2026); absent, and not written, on every other message."
             },
             "host_keys": {
               "description": "The run's host keys, which only the gateway adds as it delivers the turn to the runtime (revision 11,\nADR-0037 §3); empty, and not written, everywhere else.",
@@ -1390,6 +1433,17 @@
               "maxItems": 32,
               "type": "array",
               "uniqueItems": true
+            },
+            "channel_wake": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/ChannelWake"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The gateway's wake of a channel member (revision 16, ADR-0014's amendment of 20 Nov 2026): shown as the\ngateway's notice of waiting messages, never as the person's words."
             },
             "lead_brief": {
               "anyOf": [

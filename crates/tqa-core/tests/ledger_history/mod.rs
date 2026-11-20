@@ -78,6 +78,7 @@ pub fn completed_run(
         Event::MessageUser {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: format!("request {index}"),
             attachments: vec![],
         },
@@ -275,6 +276,7 @@ pub async fn next_turn_journal(
     let turn = UserTurn {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: "the current request".into(),
         attachments: attachments.iter().map(|path| (*path).to_owned()).collect(),
     };

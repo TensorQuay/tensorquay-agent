@@ -42,6 +42,7 @@ fn transcript() -> Result<Vec<ServerFrame>, Box<dyn std::error::Error>> {
             Event::MessageUser {
                 lead_brief: None,
                 team_wake: None,
+                channel_wake: None,
                 text: format!("request {turn}"),
                 attachments: vec![],
             },
@@ -143,6 +144,7 @@ async fn sample(transcript: &[ServerFrame]) -> Result<Sample, Box<dyn std::error
     let turn = UserTurn {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: "continue".into(),
         attachments: vec![],
     };

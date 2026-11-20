@@ -321,6 +321,7 @@ async fn rt_i_014_changed_route_on_restart_preserves_retained_history_limits() -
             Event::MessageUser {
                 lead_brief: None,
                 team_wake: None,
+                channel_wake: None,
                 text: "question".into(),
                 attachments: vec![],
             },

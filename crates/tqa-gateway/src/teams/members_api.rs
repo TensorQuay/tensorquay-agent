@@ -467,6 +467,7 @@ mod tests {
                 attachments: Vec::new(),
                 lead_brief: None,
                 team_wake: None,
+                channel_wake: None,
             };
             if !take(&mut page, seq, frame(seq, call), 50) {
                 break;
@@ -486,6 +487,7 @@ mod tests {
                     attachments: Vec::new(),
                     lead_brief: None,
                     team_wake: None,
+                    channel_wake: None,
                 },
             )
         };
@@ -529,6 +531,7 @@ mod tests {
                         attachments: Vec::new(),
                         lead_brief: None,
                         team_wake,
+                        channel_wake: None,
                     }
                 ),
                 50

@@ -202,6 +202,7 @@ async fn gw_i_006_replacement_cancels_the_old_link_without_unregistering_the_new
     let frame = ClientFrame::UserMessage {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: "hello".into(),
         attachments: vec![],
         host_keys: Vec::new(),

@@ -1,0 +1,80 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (SELECT 1 FROM idempotency WHERE conversation_id = $2 AND execution_status = 'queued' AND key LIKE $3) AS \"waking!\", cv.runtime_revision, ch.budget, ch.spent_tokens, ch.wakes_bounded, EXISTS (SELECT 1 FROM channel_messages x JOIN channel_members m ON m.channel_id = x.channel_id AND m.conversation_id = $2 WHERE x.channel_id = $1 AND x.seq > m.read_seq AND $2 = ANY(x.wakes)) AS \"unread!\" FROM channels ch, conversations cv WHERE ch.id = $1 AND cv.id = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "waking!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "runtime_revision",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "runtime_revision"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "budget",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "channels",
+            "name": "budget"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "spent_tokens",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "channels",
+            "name": "spent_tokens"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "wakes_bounded",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "channels",
+            "name": "wakes_bounded"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "unread!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      true,
+      true,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "1efadeb9e16ca08bbc0205e01b7a1b11aa7774ccec949dcefedad5a00852650c"
+}

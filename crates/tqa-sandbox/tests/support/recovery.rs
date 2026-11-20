@@ -145,6 +145,7 @@ impl<'a> Harness<'a> {
             .send(ClientFrame::UserMessage {
                 lead_brief: None,
                 team_wake: None,
+                channel_wake: None,
                 text: "Implement the task, test it, fix it, and verify the result.".into(),
                 attachments: vec![],
                 host_keys: Vec::new(),

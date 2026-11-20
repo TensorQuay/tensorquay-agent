@@ -77,12 +77,14 @@ fn part(bytes: Option<&[u8]>) -> Result<held::Part, GatewayError> {
             attachments,
             lead_brief,
             team_wake,
+            channel_wake,
             ..
         } => Ok(held::Part {
             text,
             attachments,
             lead_brief,
             team_wake,
+            channel_wake,
         }),
         _ => Err(GatewayError::StoreUnavailable),
     }
@@ -213,6 +215,27 @@ impl SandboxManager {
     /// Every waiting message that fits, as one user turn, in order; the rest wait for the next turn. The messages are
     /// claimed (`sending`) in the transaction that decides they go out, so a cancel either wins before it (they never
     /// go out) or finds them sent (409): never "cancelled" for a message the agent got.
+    /// Marks (or unmarks) the channel wakes among `keys` as handed to `conversation`'s runtime.
+    async fn mark_handed(
+        &self,
+        conversation: uuid::Uuid,
+        keys: &[String],
+        handed: bool,
+    ) -> Result<(), GatewayError> {
+        self.bounded(async {
+            sqlx::query!(
+                "UPDATE channel_wakes SET handed = $3 WHERE conversation_id = $1 AND key = ANY($2)",
+                conversation,
+                keys,
+                handed
+            )
+            .execute(&self.services.pool)
+            .await?;
+            Ok(())
+        })
+        .await
+    }
+
     async fn deliver_turn(
         &self,
         id: &ConversationId,
@@ -233,6 +256,19 @@ impl SandboxManager {
             delivery,
         });
         crate::files::changes::before_delivery(&self.services, &self.config, id, &frame).await;
+        // A channel's wake in this turn is the one its run is charged to (ADR-0014's amendment of 20 Nov 2026, A5):
+        // marked before the hand-over, since the run may start before anything after it, and unmarked if it fails.
+        let conversation = crate::conversations::uuid(id)?;
+        let wakes = matches!(
+            &frame,
+            ClientFrame::UserMessage {
+                channel_wake: Some(_),
+                ..
+            }
+        );
+        if wakes {
+            self.mark_handed(conversation, &keys, true).await?;
+        }
         let delivered = self.bounded(self.services.links.deliver(id, frame)).await;
         let status = if delivered.is_ok() {
             "delivered"
@@ -242,6 +278,9 @@ impl SandboxManager {
         if delivered.is_err() {
             slot.turns.lock().turn = None;
             self.drop_host_keys(delivery).await;
+            if wakes {
+                self.mark_handed(conversation, &keys, false).await?;
+            }
         }
         self.bounded(async {
             sqlx::query!("UPDATE idempotency SET execution_status=$3,updated_at=CURRENT_TIMESTAMP WHERE (key,user_id) IN (SELECT * FROM unnest($1::text[],$2::uuid[])) AND execution_status='sending'", &keys, &users, status)

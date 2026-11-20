@@ -19,6 +19,7 @@ fn ctx_u_010_highest_attempt_results_attachments_and_multiple_runs() -> Result<(
         Event::MessageUser {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: "question".into(),
             attachments: vec!["uploads/one.txt".into(), "uploads/two.txt".into()],
         },
@@ -186,7 +187,7 @@ proptest! {
     #![proptest_config(ProptestConfig {cases:100,rng_seed:proptest::test_runner::RngSeed::Fixed(11),failure_persistence:None,..ProptestConfig::default()})]
     #[test]
     fn ctx_u_010_project_serialized_parsed_history_is_stable(user in ".{1,32}",first in ".{0,32}",second in ".{0,32}") {
-        let history=frames(vec![Event::MessageUser { lead_brief: None, team_wake: None,text:user,attachments:vec![]},start("run")?,step(1),text(&first),step(2),text(&second),model(2),Event::StepCompleted { step: 1, duration_ms: 0 }]);
+        let history=frames(vec![Event::MessageUser { lead_brief: None, team_wake: None, channel_wake: None,text:user,attachments:vec![]},start("run")?,step(1),text(&first),step(2),text(&second),model(2),Event::StepCompleted { step: 1, duration_ms: 0 }]);
         let mut decoded = Vec::new();
         for frame in &history { decoded.push(ServerFrame::parse(&serde_json::to_vec(frame)?)?); }
         prop_assert_eq!(project(&history)?,project(&decoded)?);

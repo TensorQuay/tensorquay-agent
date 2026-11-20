@@ -115,18 +115,27 @@ pub(crate) async fn read(
     let query = api::read_query(raw.as_deref())?;
     // Subscribed before the first read, so a post committed in between still wakes the wait.
     let mut woken = state.channels.subscribe(id);
+    // In `channel_wait`, the member's state is `waiting` for as long as the wait lasts (ADR-0014's amendment, A7).
+    let _waiting = query.wait.map(|_| state.channels.wait(id, conversation));
     let deadline = tokio::time::Instant::now()
         + std::time::Duration::from_secs(u64::from(query.wait.unwrap_or(0)));
     loop {
         let page = crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
             let mut connection = state.pool.acquire().await?;
             member_role(&mut connection, id, conversation).await?;
-            store::read(
+            let page = store::read(
                 &mut connection,
                 id,
                 (query.since, &query.filter, query.limit),
+                false,
             )
-            .await
+            .await?;
+            // What was answered is read: the member's place moves to it (A2).
+            if let Some(last) = page.messages.last() {
+                let seq = i64::try_from(last.seq).map_err(|_| GatewayError::StoreUnavailable)?;
+                super::wake::read_to(&mut connection, (id, conversation), seq).await?;
+            }
+            Ok(page)
         })
         .await?;
         if !page.messages.is_empty() || query.wait.is_none() {
@@ -212,6 +221,8 @@ pub(crate) async fn post(
         if let Some(last) = appended.last() {
             state.channels.published(id, last.seq);
         }
+        // Whom it wakes, just after the commit (ADR-0014's amendment of 20 Nov 2026, A3).
+        super::wake::soon(&state, Some(id));
         Ok((StatusCode::CREATED, Json(body)))
     })
     .await

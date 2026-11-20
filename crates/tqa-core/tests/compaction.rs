@@ -29,6 +29,7 @@ fn completed_run(index: usize, seq: usize) -> Result<Vec<Event>, Box<dyn Error>>
         Event::MessageUser {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: format!("request {index}"),
             attachments: vec![],
         },
@@ -158,6 +159,7 @@ async fn run_turn(h: Harness, history: &[ServerFrame]) -> Result<RunOutcome, Box
     let turn = UserTurn {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: "the current request".into(),
         attachments: vec![],
     };
@@ -314,6 +316,7 @@ async fn core_u_025_cancel_during_the_summary_call_writes_no_compaction() -> Tes
     let turn = UserTurn {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: "the current request".into(),
         attachments: vec![],
     };
@@ -332,6 +335,7 @@ async fn core_u_025_resume_after_a_crash_before_the_event_compacts_once() -> Tes
     events.push(Event::MessageUser {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: "the current request".into(),
         attachments: vec![],
     });
@@ -402,6 +406,7 @@ async fn core_u_025_summary_tokens_count_toward_the_run_output_budget() -> TestR
         Event::MessageUser {
             lead_brief: None,
             team_wake: None,
+            channel_wake: None,
             text: "the task".into(),
             attachments: vec![],
         },
@@ -519,6 +524,7 @@ async fn ctx_u_013_every_step_request_after_repeated_compactions_keeps_the_task_
     let turn = UserTurn {
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
         text: "continue the audit".into(),
         attachments: vec![],
     };
