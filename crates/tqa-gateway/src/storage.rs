@@ -219,6 +219,71 @@ impl Storage {
         crate::io::bounded(self.timeout, &self.cancel, remove_file(&path)).await
     }
 
+    /// Where a channel's files are stored, `channel-files/<channel>/` (ADR-0014's amendment of 20 Nov 2026, A9):
+    /// uploads waiting for a post under `uploads/<id>`, a posted message's under `<seq>/<index>`.
+    pub fn channel_files(&self, channel: uuid::Uuid) -> PathBuf {
+        self.root.join("channel-files").join(channel.to_string())
+    }
+
+    /// Keeps an upload's bytes until a post takes it.
+    ///
+    /// # Errors
+    /// A storage failure or the bound elapsing.
+    pub async fn channel_upload(
+        &self,
+        channel: uuid::Uuid,
+        id: uuid::Uuid,
+        bytes: Vec<u8>,
+    ) -> Result<(), GatewayError> {
+        let uploads = self.channel_files(channel).join("uploads");
+        let parent = self.channel_files(channel);
+        crate::io::bounded(self.timeout, &self.cancel, async {
+            create_private(&self.root.join("channel-files")).await?;
+            create_private(&parent).await?;
+            create_private(&uploads).await?;
+            tokio::fs::write(uploads.join(id.to_string()), bytes).await?;
+            Ok(())
+        })
+        .await
+    }
+
+    /// Moves an upload to its post, `<seq>/<index>`, in the post's transaction.
+    ///
+    /// # Errors
+    /// A storage failure or the bound elapsing.
+    pub async fn keep_channel_file(
+        &self,
+        channel: uuid::Uuid,
+        upload: uuid::Uuid,
+        (seq, index): (i64, usize),
+    ) -> Result<(), GatewayError> {
+        let root = self.channel_files(channel);
+        let folder = root.join(seq.to_string());
+        crate::io::bounded(self.timeout, &self.cancel, async {
+            create_private(&folder).await?;
+            tokio::fs::rename(
+                root.join("uploads").join(upload.to_string()),
+                folder.join(index.to_string()),
+            )
+            .await?;
+            Ok(())
+        })
+        .await
+    }
+
+    /// Removes a deleted channel's files; ones already gone are done.
+    ///
+    /// # Errors
+    /// A storage failure or the bound elapsing.
+    pub async fn remove_channel_files(&self, channel: uuid::Uuid) -> Result<(), GatewayError> {
+        crate::io::bounded(
+            self.timeout,
+            &self.cancel,
+            remove_tree(&self.channel_files(channel)),
+        )
+        .await
+    }
+
     /// Where a member task's handed-back files are stored, `handed/<member>/` (ADR-0034 point 6): one directory per
     /// report, by its seq. Removed with the task's other files at its purge.
     pub fn handed(&self, member: uuid::Uuid) -> PathBuf {

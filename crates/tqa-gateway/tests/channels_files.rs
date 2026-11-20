@@ -230,12 +230,13 @@ async fn gw_i_357_a_post_carries_its_files_and_people_download_them(pool: PgPool
     .await
 }
 
-/// The path the wake's sentence names for `name` (an `uploads/…` path ending in it).
-fn named_path(sentence: &str, name: &str) -> Option<String> {
+/// The path the wake's sentence names that starts with `start` (an `uploads/…` path).
+fn named_path(sentence: &str, start: &str) -> Option<String> {
     sentence
         .split([' ', ',', ';', '(', ')'])
-        .find(|word| word.starts_with("uploads/") && word.trim_end_matches('.').ends_with(name))
-        .map(|word| word.trim_end_matches('.').to_owned())
+        .map(|word| word.trim_end_matches('.'))
+        .find(|word| word.starts_with(start))
+        .map(str::to_owned)
 }
 
 // TEST: GW-I-358
@@ -263,8 +264,8 @@ async fn gw_i_358_359_a_woken_member_gets_the_files_where_its_wake_says(
         assert_eq!(status, 201, "{posted}");
         let seq = posted["seq"].as_u64().ok_or("seq")?;
         let sentence = analyst.woken(f, &id, 0).await?;
-        let path =
-            named_path(&sentence, "q3.pdf").ok_or_else(|| format!("no path in: {sentence}"))?;
+        let path = named_path(&sentence, "uploads/pricing-")
+            .ok_or_else(|| format!("no path in: {sentence}"))?;
         assert_eq!(path, format!("uploads/pricing-{seq}-q3.pdf"), "{sentence}");
         let workspace = f.backend.mounted(&analyst.id).ok_or("workspace")?;
         assert_eq!(std::fs::read(workspace.join(&path))?, pdf);
@@ -317,8 +318,8 @@ async fn gw_i_358_359_a_woken_member_gets_the_files_where_its_wake_says(
         let second = again["seq"].as_u64().ok_or("seq")?;
         assert_eq!(second, seq + 1);
         let sentence = analyst.woken(f, &id, seq).await?;
-        let placed =
-            named_path(&sentence, "q3.pdf").ok_or_else(|| format!("no path in: {sentence}"))?;
+        let placed = named_path(&sentence, "uploads/pricing-renamed-")
+            .ok_or_else(|| format!("no path in: {sentence}"))?;
         assert_ne!(
             placed,
             format!("uploads/pricing-renamed-{second}-q3.pdf"),

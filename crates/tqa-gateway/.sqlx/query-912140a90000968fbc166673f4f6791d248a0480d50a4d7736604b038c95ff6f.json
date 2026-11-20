@@ -1,0 +1,67 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT f.seq, f.index, f.name, ch.name AS channel_name FROM channel_files f JOIN channels ch ON ch.id = f.channel_id WHERE f.channel_id = $1 AND f.seq > $2 AND ($3::bigint IS NULL OR f.seq <= $3) AND NOT EXISTS (SELECT 1 FROM channel_file_placements p WHERE p.channel_id = f.channel_id AND p.seq = f.seq AND p.index = f.index AND p.conversation_id = $4) ORDER BY f.seq, f.index",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "seq",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "channel_files",
+            "name": "seq"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "index",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "channel_files",
+            "name": "index"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_files",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "channel_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channels",
+            "name": "name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8",
+        "Int8",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "912140a90000968fbc166673f4f6791d248a0480d50a4d7736604b038c95ff6f"
+}

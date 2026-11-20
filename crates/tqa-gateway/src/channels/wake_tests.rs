@@ -110,3 +110,22 @@ fn gw_u_230_hops_start_at_a_persons_post_and_stop_at_four() {
     assert_eq!(wake_hop(&[MAX_HOP, MAX_HOP - 1]), Some(MAX_HOP - 1));
     assert_eq!(wake_hop(&[]), None);
 }
+
+// TEST: GW-U-231
+#[test]
+fn gw_u_231_the_wake_names_each_placed_files_exact_path() {
+    assert_eq!(super::files_sentence(&[]), "");
+    assert_eq!(
+        super::files_sentence(&[(12, "uploads/pricing-12-q3.pdf".into())]),
+        " The file of message 12 is in your workspace: uploads/pricing-12-q3.pdf."
+    );
+    assert_eq!(
+        super::files_sentence(&[
+            (12, "uploads/pricing-12-q3.pdf".into()),
+            (12, "uploads/pricing-12-notes.txt".into()),
+            (14, "uploads/pricing-14-chart.png".into()),
+        ]),
+        " Files of these messages are in your workspace: uploads/pricing-12-q3.pdf (message 12), \
+         uploads/pricing-12-notes.txt (message 12), uploads/pricing-14-chart.png (message 14)."
+    );
+}

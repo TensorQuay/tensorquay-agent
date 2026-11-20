@@ -92,6 +92,22 @@ pub(crate) fn sentence(channel: Uuid, after: i64, waiting: &[Waiting]) -> String
     )
 }
 
+/// The sentence the wake adds for the files placed for it (A9): each exact path, so the agent never guesses.
+pub(crate) fn files_sentence(files: &[(i64, String)]) -> String {
+    match files {
+        [] => String::new(),
+        [(seq, path)] => format!(" The file of message {seq} is in your workspace: {path}."),
+        _ => format!(
+            " Files of these messages are in your workspace: {}.",
+            files
+                .iter()
+                .map(|(seq, path)| format!("{path} (message {seq})"))
+                .collect::<Vec<_>>()
+                .join(", ")
+        ),
+    }
+}
+
 /// The members a text names (A1): `@` and a member's name, matched without case, the longest name first; each once.
 pub(crate) fn named(text: &str, members: &[(Uuid, &str)]) -> Vec<Uuid> {
     let lower = text.to_lowercase();
@@ -590,6 +606,13 @@ async fn deliver(state: &State, due: &Due, hop: i16) -> Result<bool, GatewayErro
         return Ok(false);
     }
     let waiting = waiting(state, due).await?;
+    // The unread messages' files, in its workspace before the turn that names their paths (A9).
+    let placed: Vec<(i64, String)> =
+        super::files::place(state, (due.channel, due.member), (due.read_seq, None))
+            .await?
+            .into_iter()
+            .map(|(seq, _, path)| (seq, path))
+            .collect();
     let after = u64::try_from(due.read_seq).map_err(|_| GatewayError::StoreUnavailable)?;
     let channel: tqa_types::ChannelId = due
         .channel
@@ -597,7 +620,7 @@ async fn deliver(state: &State, due: &Due, hop: i16) -> Result<bool, GatewayErro
         .parse()
         .map_err(|_| GatewayError::StoreUnavailable)?;
     let turn = ClientFrame::UserMessage {
-        text: sentence(due.channel, due.read_seq, &waiting),
+        text: sentence(due.channel, due.read_seq, &waiting) + &files_sentence(&placed),
         attachments: Vec::new(),
         host_keys: Vec::new(),
         lead_brief: None,

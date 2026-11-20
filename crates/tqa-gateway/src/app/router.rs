@@ -135,6 +135,8 @@ fn channels_router(route: ChannelRoute) -> MethodRouter<Arc<AppState>> {
         ChannelRoute::Events => get(crate::channels::stream::events),
         ChannelRoute::PutMemberByEmail => put(api::put_member_by_email),
         ChannelRoute::Candidates => get(crate::channels::candidates::candidates),
+        ChannelRoute::Upload => post(crate::channels::files::upload),
+        ChannelRoute::FileDownload => get(crate::channels::files::download),
         ChannelRoute::RuntimeClaim => post(crate::channels::runtime::claim),
     }
 }

@@ -398,7 +398,7 @@ pub(crate) async fn read(
         i64::from(limit) + 1,
         people
     )
-    .fetch_all(connection)
+    .fetch_all(&mut *connection)
     .await?;
     let more = rows.len() > usize::try_from(limit).unwrap_or(usize::MAX);
     let mut messages = Vec::with_capacity(rows.len());
@@ -418,6 +418,20 @@ pub(crate) async fn read(
             body: serde_json::from_value(row.body).map_err(|_| GatewayError::StoreUnavailable)?,
             files: Vec::new(),
         });
+    }
+    // Each message's files (ADR-0014's amendment of 20 Nov 2026, A9).
+    let seqs: Vec<i64> = messages
+        .iter()
+        .filter_map(|message| i64::try_from(message.seq).ok())
+        .collect();
+    let mut files = super::files::of_messages(connection, channel, &seqs).await?;
+    for message in &mut messages {
+        if let Some(found) = i64::try_from(message.seq)
+            .ok()
+            .and_then(|seq| files.remove(&seq))
+        {
+            message.files = found;
+        }
     }
     let next_since = messages.last().map_or(since, |message| message.seq);
     Ok(Page {
