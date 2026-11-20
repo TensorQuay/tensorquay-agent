@@ -21,7 +21,7 @@ fn gw_u_022_openapi_and_registered_routes_have_identical_operations()
         "every planned operation is served now: {planned:?}"
     );
     assert_eq!(actual, documented);
-    assert_eq!(actual.len(), 165);
+    assert_eq!(actual.len(), 168);
     // The field-refusal reasons are one closed list: the documented enum is exactly the gateway's.
     let reasons: Vec<&str> = tqa_gateway::InvalidReason::ALL
         .iter()
