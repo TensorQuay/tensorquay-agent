@@ -215,15 +215,18 @@ describe("WEB-U-063 the channel page", () => {
     });
     show(fake.api);
     await settleLazy();
+    // Reply opens the post's thread beside the log (WEB-U-523); the reply joins the thread, not the log.
     fireEvent.click(await screen.findByRole("button", { name: "Reply to #1" }));
-    const form = screen.getByRole("form", { name: "Post to the channel" });
-    expect(within(form).getByText("Replying to #1")).toBeVisible();
-    fireEvent.change(within(form).getByLabelText("Your message"), {
+    const thread = screen.getByRole("complementary", { name: "Thread" });
+    const form = within(thread).getByRole("form", {
+      name: "Reply in the thread",
+    });
+    fireEvent.change(within(form).getByLabelText("Reply in the thread"), {
       target: { value: "On it." },
     });
-    fireEvent.click(within(form).getByRole("button", { name: "Post" }));
+    fireEvent.click(within(form).getByRole("button", { name: "Send" }));
     expect(
-      await screen.findByRole("article", { name: "#2 Ana" }),
+      await within(thread).findByRole("article", { name: "#2 Ana" }),
     ).toBeVisible();
     expect(fake.posts).toEqual([
       {
@@ -233,12 +236,11 @@ describe("WEB-U-063 the channel page", () => {
       },
     ]);
     expect(
-      within(screen.getByRole("list", { name: "Replies to #1" })).getByRole(
-        "article",
-        { name: "#2 Ana" },
+      within(screen.getByRole("list", { name: "Channel log" })).getByRole(
+        "button",
+        { name: "1 reply" },
       ),
     ).toBeVisible();
-    expect(within(form).queryByText("Replying to #1")).toBeNull();
   });
 
   it("says so for a channel that doesn't exist or can't be seen", async () => {

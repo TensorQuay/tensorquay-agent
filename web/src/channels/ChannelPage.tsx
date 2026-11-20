@@ -22,6 +22,7 @@ import { ChannelHeader, type HeaderPanel } from "./ChannelHeader";
 import { ChannelMissing } from "./ChannelMissing";
 import { ChannelProposal, proposalKey } from "./ChannelProposal";
 import { ChannelSide, TaskClaims, tasksKey } from "./ChannelSide";
+import { ChannelThread } from "./ChannelThread";
 import { ChannelTimeline } from "./ChannelTimeline";
 import type {
   ChannelMessage,
@@ -151,9 +152,10 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
   const log = useChannelLog(api, id, () => {
     void cache.invalidateQueries({ queryKey: ["channel", id] });
   });
-  const [replyTo, setReplyTo] = useState<number | null>(null);
-  /** The panel open beside the log (WEB-U-519): the to-dos or the members, or none. */
-  const [panel, setPanel] = useState<HeaderPanel | null>(null);
+  /** The panel open beside the log: the to-dos or the members (WEB-U-519), a post's thread (WEB-U-523), or none. */
+  const [panel, setPanel] = useState<HeaderPanel | { thread: number } | null>(
+    null,
+  );
   const board = useQuery({
     queryKey: tasksKey(id),
     queryFn: ({ signal }) => api.tasks(id, signal),
@@ -196,7 +198,6 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
   async function post(write: ChannelPost) {
     const stored = await api.post(id, write, newActionKey());
     log.add([stored]);
-    setReplyTo(null);
   }
   async function claim(seq: number) {
     log.add([await api.claim(id, seq, newActionKey())]);
@@ -209,6 +210,12 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
     void cache.invalidateQueries({ queryKey: ["channels"] });
     router.push("/channels");
   }
+  const fileHref = (seq: number, index: number) =>
+    pathFor(settingsEndpoint("channelFile"), {
+      id,
+      seq: String(seq),
+      index: String(index),
+    });
   // ADR-0014 point 13: its owner or an administrator ends or deletes a channel (WEB-U-066).
   const administers = item.owner.id === me || viewer?.role === "admin";
   const posts =
@@ -218,7 +225,7 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
   // WEB-U-250: the title is usually the purpose's start; the line under it says only what it adds.
   const beyond = purposeBeyond(item.purpose, item.name);
   return (
-    <div className="channel-page" data-panel={panel ?? undefined}>
+    <div className="channel-page" data-panel={panel ? "" : undefined}>
       <TabTitle>
         {t("channels.pageTab", { name: item.name, product: APP_NAME })}
       </TabTitle>
@@ -231,7 +238,7 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
                 .length
             : null
         }
-        panel={panel}
+        panel={typeof panel === "string" ? panel : null}
         onPanel={setPanel}
         purpose={beyond || null}
         actions={
@@ -243,13 +250,8 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
       <ChannelTimeline
         messages={log.messages}
         members={members.data?.items ?? []}
-        fileHref={(seq, index) =>
-          pathFor(settingsEndpoint("channelFile"), {
-            id,
-            seq: String(seq),
-            index: String(index),
-          })
-        }
+        fileHref={fileHref}
+        onThread={(seq) => setPanel({ thread: seq })}
         after={(message) =>
           message.body.type === "proposal" ? (
             <ChannelProposal
@@ -269,7 +271,7 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
         {...(item.state === "open" &&
         item.role !== null &&
         item.role !== "observer"
-          ? { onReply: setReplyTo }
+          ? { onReply: (seq: number) => setPanel({ thread: seq }) }
           : {})}
       />
       {firstStep && (
@@ -278,7 +280,18 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
           onUse={(text) => setDraft(({ n }) => ({ n: n + 1, text }))}
         />
       )}
-      {panel && (
+      {typeof panel === "object" && panel !== null && (
+        <ChannelThread
+          seq={panel.thread}
+          messages={log.messages}
+          members={members.data?.items ?? []}
+          fileHref={fileHref}
+          posts={posts}
+          onPost={post}
+          onClose={() => setPanel(null)}
+        />
+      )}
+      {typeof panel === "string" && (
         <ChannelSide
           view={panel}
           onClose={() => setPanel(null)}
@@ -300,8 +313,8 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
           focusBox={firstStep || draft.n > 0}
           memberRole={item.role}
           state={item.state}
-          replyTo={replyTo}
-          onCancelReply={() => setReplyTo(null)}
+          replyTo={null}
+          onCancelReply={() => undefined}
           onPost={post}
         />
       </div>

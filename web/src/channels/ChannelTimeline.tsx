@@ -1,7 +1,7 @@
 "use client";
 
 import "./catalogue";
-import { Bot, ChevronDown, ChevronUp } from "lucide-react";
+import { Bot, ChevronDown, ChevronUp, MessageSquare } from "lucide-react";
 import { type ReactNode, useState } from "react";
 
 import { useT } from "../i18n/I18nProvider";
@@ -120,10 +120,16 @@ export function ChannelTimeline({
   onReply,
   after,
   fileHref,
+  onThread,
+  label,
 }: {
   messages: readonly ChannelMessage[];
   members: readonly Member[];
   onReply?: (seq: number) => void;
+  /** Opens a post's thread (WEB-U-523): the log then shows "N replies" in place of the replies. */
+  onThread?: (seq: number) => void;
+  /** The list's name; the channel's log by default. */
+  label?: string;
   /** Where a post's file downloads from, by its seq and index (ADR-0014's amendment of 20 Nov 2026, A9). */
   fileHref?: (seq: number, index: number) => string;
   /** Extra content under a post, by seq: a proposal's tally and controls, a task's claim state. */
@@ -183,20 +189,30 @@ export function ChannelTimeline({
           {...(fileHref ? { fileHref } : {})}
           extra={after?.(message)}
         >
-          {thread.length > 0 && (
-            <ul
-              className="channel-replies"
-              aria-label={t("channels.repliesTo", { seq: message.seq })}
-            >
-              {thread.map(render)}
-            </ul>
-          )}
+          {thread.length > 0 &&
+            (onThread ? (
+              <button
+                type="button"
+                className="proposal-fold type-small"
+                onClick={() => onThread(message.seq)}
+              >
+                <Icon glyph={MessageSquare} size={16} />
+                {t("channels.repliesCount", { count: thread.length })}
+              </button>
+            ) : (
+              <ul
+                className="channel-replies"
+                aria-label={t("channels.repliesTo", { seq: message.seq })}
+              >
+                {thread.map(render)}
+              </ul>
+            ))}
         </Post>
       </li>
     );
   };
   return (
-    <ol className="channel-log" aria-label={t("channels.log")}>
+    <ol className="channel-log" aria-label={label ?? t("channels.log")}>
       {top.map(render)}
     </ol>
   );

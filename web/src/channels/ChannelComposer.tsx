@@ -47,6 +47,7 @@ export function ChannelComposer({
   replyTo,
   onCancelReply,
   onPost,
+  thread = false,
 }: {
   /** A message to start from (a new channel's first step). */
   initialText?: string;
@@ -58,6 +59,8 @@ export function ChannelComposer({
   replyTo: number | null;
   onCancelReply: () => void;
   onPost: (write: ChannelPost) => Promise<void>;
+  /** A thread panel's reply box (WEB-U-523): a reply to `replyTo` only, with no other kind of post. */
+  thread?: boolean;
 }) {
   const t = useT();
   const [kind, setKind] = useState<Kind>("text");
@@ -126,10 +129,10 @@ export function ChannelComposer({
   return (
     <form
       className="channel-composer stack"
-      aria-label={t("channels.postTo")}
+      aria-label={t(thread ? "channels.replyInThread" : "channels.postTo")}
       onSubmit={(event) => void submit(event)}
     >
-      {replyTo !== null && (
+      {replyTo !== null && !thread && (
         <p className="channel-replying type-small">
           {t("channels.replyingTo", { seq: replyTo })}{" "}
           <Button variant="ghost" type="button" onClick={onCancelReply}>
@@ -154,11 +157,13 @@ export function ChannelComposer({
       )}
       <Textarea
         label={t(
-          kind === "text"
-            ? "channels.messageText"
-            : kind === "proposal"
-              ? "channels.proposalText"
-              : "channels.taskSpec",
+          thread
+            ? "channels.replyInThread"
+            : kind === "text"
+              ? "channels.messageText"
+              : kind === "proposal"
+                ? "channels.proposalText"
+                : "channels.taskSpec",
         )}
         value={text}
         rows={3}
@@ -203,7 +208,9 @@ export function ChannelComposer({
       )}
       {failure && <p className="field-error">{t(failure)}</p>}
       <div className="channel-composer-actions">
-        {kind === "text" ? (
+        {thread ? (
+          <span />
+        ) : kind === "text" ? (
           <div className="channel-composer-kinds">
             <Button
               variant="ghost"
@@ -233,7 +240,7 @@ export function ChannelComposer({
           </Button>
         )}
         <Button type="submit" loading={pending}>
-          {t("channels.post")}
+          {t(thread ? "channels.send" : "channels.post")}
         </Button>
       </div>
     </form>

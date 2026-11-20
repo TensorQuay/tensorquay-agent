@@ -233,9 +233,9 @@ describe("WEB-U-521 a decided proposal folds to one line", () => {
     expect(screen.queryByRole("group", { name: "Votes on #2" })).toBeNull();
     fireEvent.click(fold);
     expect(fold).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByRole("group", { name: "Votes on #2" })).toHaveTextContent(
-      "Accept 2 · Reject 0",
-    );
+    expect(
+      screen.getByRole("group", { name: "Votes on #2" }),
+    ).toHaveTextContent("Accept 2 · Reject 0");
     fireEvent.click(fold);
     expect(screen.queryByRole("group", { name: "Votes on #2" })).toBeNull();
   });
