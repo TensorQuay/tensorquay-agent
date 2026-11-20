@@ -39,6 +39,8 @@ pub struct Backend {
     pub fail_destroys: AtomicUsize,
     /// A destroy that fails still removes the sandbox: the timeout lied (the removal completed after it).
     pub destroy_lies: AtomicBool,
+    /// Containers the listing found with this instance's labels but couldn't read (GW-I-342).
+    pub unreadable: Mutex<Vec<String>>,
     /// The engine's networks the backend reports (ADR-0035 amendment); `None` answers as an unreachable engine.
     pub engine: Mutex<Option<tqa_sandbox::EngineNetworks>>,
 }
@@ -65,6 +67,7 @@ impl Backend {
             release_destroy: tokio::sync::Notify::new(),
             fail_destroys: AtomicUsize::new(0),
             destroy_lies: AtomicBool::new(false),
+            unreadable: Mutex::new(Vec::new()),
             engine: Mutex::new(Some(tqa_sandbox::EngineNetworks::default())),
         }
     }
@@ -272,6 +275,16 @@ impl SandboxBackend for Backend {
     }
     async fn list(&self) -> Result<Vec<SandboxHandle>, SandboxError> {
         self.inner.list().await
+    }
+    async fn listing(&self) -> Result<tqa_sandbox::Listing, SandboxError> {
+        Ok(tqa_sandbox::Listing {
+            handles: self.inner.list().await?,
+            unreadable: self
+                .unreadable
+                .lock()
+                .map(|ids| ids.clone())
+                .unwrap_or_default(),
+        })
     }
     async fn engine_networks(&self) -> Result<tqa_sandbox::EngineNetworks, SandboxError> {
         self.engine

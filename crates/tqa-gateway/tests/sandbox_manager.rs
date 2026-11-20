@@ -481,6 +481,39 @@ async fn gw_i_191_a_stray_that_fails_to_go_is_counted_and_the_sweep_goes_on(
     .await
 }
 
+// TEST: GW-I-342
+/// A container with this instance's labels that the listing couldn't read is counted as a stray the sweep couldn't
+/// remove (so the verdict says so), and the sweep still removes the readable stray (18.1.1).
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_342_an_unreadable_container_is_counted_and_the_rest_are_swept(
+    pool: PgPool,
+) -> TestResult {
+    run(pool, async |fixture| {
+        let (owner, _) = fixture.admin().await?;
+        let sandboxes = fixture.gateway.sandboxes();
+        let managed = fixture.conversation(owner.id).await?;
+        sandboxes.ensure(&managed.id).await?;
+        let unrecorded = fixture.conversation(owner.id).await?;
+        fixture.backend.orphan(&managed.id, unrecorded.id).await?;
+        fixture
+            .backend
+            .unreadable
+            .lock()
+            .map_err(|_| "unreadable")?
+            .push("badlabels0001".into());
+        let later = std::time::SystemTime::UNIX_EPOCH + std::time::Duration::from_secs(121);
+        let swept = sandboxes.sweep_containers(later).await?;
+        assert_eq!(
+            (swept.removed, swept.failed),
+            (1, 1),
+            "the stray removed, the unreadable one counted"
+        );
+        Ok(())
+    })
+    .await
+}
+
 async fn wait_status(fixture: &support::Fixture, key: &str, status: &str) -> TestResult {
     tokio::time::timeout(DEADLINE, async {
         loop {
