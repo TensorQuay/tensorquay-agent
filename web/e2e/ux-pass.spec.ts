@@ -123,7 +123,7 @@ const SCREENS: Screen[] = [
   { name: "channels", open: at("/channels") },
   {
     name: "channel",
-    open: at("/channels/0192b3a4-5c6d-7e8f-9a0b-1c2d3e4f5a6b"),
+    open: at("/channels/0195d8c0-0000-7000-8000-00000000c4a2"),
   },
   { name: "settings-overview", open: at("/settings") },
   { name: "settings-account", open: at("/settings/account") },

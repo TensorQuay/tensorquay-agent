@@ -23,6 +23,27 @@ const channels = seededMap([
       viewers: null,
     },
   ],
+  // The channel page of 18.2 as the mock of 17 Nov 2026 drew it (WEB-E2E-145, the gallery WEB-E2E-146): two people,
+  // three agents (two at work), a PDF, a long report, an open proposal with its thread, two to-dos, a budget.
+  [
+    "0195d8c0-0000-7000-8000-00000000c4a2",
+    {
+      id: "0195d8c0-0000-7000-8000-00000000c4a2",
+      name: "Q4 pricing review",
+      purpose: "Settle the Q4 prices",
+      rule: "majority",
+      state: "open",
+      owner: { id: "0195d8c0-0000-7000-8000-00000000a0a0", name: "Ana" },
+      created_at: "2026-09-27T09:00:00Z",
+      ended_at: null,
+      role: "member",
+      member_count: 5,
+      last_seq: 12,
+      wake_budget: 300000,
+      spent_tokens: 114000,
+      viewers: null,
+    },
+  ],
 ]);
 const replies = seededMap();
 /** Each channel's open streams (ADR-0014 point 11): a new message goes to every one. */
@@ -55,7 +76,35 @@ const REVIEWER = {
   can_open: false,
   added_at: "2026-09-27T09:00:00Z",
 };
-const members = seededMap([[SEEDED, [CODER, REVIEWER]]]);
+const PRICING = "0195d8c0-0000-7000-8000-00000000c4a2";
+const agent = (id, title, state) => ({
+  kind: "conversation",
+  id: `0195d8c0-0000-7000-8000-0000000${id}`,
+  name: "Agent",
+  title,
+  owner_name: "ana",
+  role: "member",
+  run_status: state === "idle" ? "completed" : "running",
+  state,
+  can_open: true,
+  added_at: "2026-09-27T09:00:00Z",
+});
+const person = (id, name, role) => ({
+  kind: "user",
+  id: `0195d8c0-0000-7000-8000-0000000${id}`,
+  name,
+  role,
+  added_at: "2026-09-27T09:00:00Z",
+});
+const ANA = person("0a0a0", "Ana", "lead");
+const DANIEL = person("0d0d1", "Daniel Okafor", "member");
+const ANALYST = agent("0c0e1", "Pricing analyst", "working");
+const CHECKER = agent("0c0e2", "Data checker", "waiting");
+const FORECAST = agent("0c0e3", "Forecast", "idle");
+const members = seededMap([
+  [SEEDED, [CODER, REVIEWER]],
+  [PRICING, [ANA, DANIEL, ANALYST, CHECKER, FORECAST]],
+]);
 const at = (minute) => `2026-09-27T10:${String(minute).padStart(2, "0")}:00Z`;
 const by = (member) => ({
   kind: member.kind,
@@ -146,6 +195,133 @@ const logs = seededMap([
         ts: at(9),
         author: by(CODER),
         body: { type: "done", summary: "Release prepared." },
+      },
+    ],
+  ],
+  [
+    PRICING,
+    [
+      {
+        seq: 1,
+        ts: at(12),
+        author: by(ANA),
+        body: {
+          type: "text",
+          text: "The Q3 numbers are in. Can we settle the EU price for the Pro plan this week?",
+        },
+        files: [{ name: "q3-revenue-by-region.pdf", size: 1258291 }],
+      },
+      {
+        seq: 2,
+        ts: at(12),
+        author: by(ANA),
+        body: {
+          type: "text",
+          text: "@Pricing analyst please start with churn by tier.",
+        },
+      },
+      {
+        seq: 3,
+        ts: at(21),
+        author: by(ANALYST),
+        body: {
+          type: "text",
+          text: [
+            "**Churn by tier, Q3** (from the PDF, pages 3 to 9)",
+            "Pro churn in the EU was 1.8 % a month, under the 2.5 % line we set in June.",
+            "Starter churn rose to 4.1 %, mostly in the first month after a trial.",
+            "- Pro, EU: 1.8 % (Q2: 1.9 %)",
+            "- Pro, US: 2.0 % (Q2: 2.2 %)",
+            "- Starter, EU: 4.1 % (Q2: 3.4 %)",
+            "- Starter, US: 3.6 % (Q2: 3.3 %)",
+            "- Team: 0.9 %, flat",
+            "- Enterprise: 0.4 %, flat",
+            "A rise to €24 is inside what Pro customers absorbed in the 2025 change.",
+            "Churn then moved 0.3 points for two months and came back.",
+            "The trial change would matter more for Starter than any price.",
+            "Method: monthly cohorts, active seats, refunds counted as churn.",
+            "Data: the PDF's tables 2 to 5; region from billing country.",
+          ].join("\n\n"),
+        },
+      },
+      {
+        seq: 4,
+        ts: at(40),
+        author: by(DANIEL),
+        body: {
+          type: "proposal",
+          title: "Raise the EU Pro plan to €24 from 1 December",
+          text: "Per the churn report above. Starter stays where it is until the trial change ships.",
+          window_seconds: 86400,
+        },
+      },
+      {
+        seq: 5,
+        ts: at(41),
+        author: by(ANALYST),
+        parent: 4,
+        body: {
+          type: "text",
+          text: "Agreed: churn stays under the line at €24.",
+        },
+      },
+      {
+        seq: 6,
+        ts: at(41),
+        author: by(ANALYST),
+        body: { type: "vote", proposal_seq: 4, choice: "accept" },
+      },
+      {
+        seq: 7,
+        ts: at(42),
+        author: by(CHECKER),
+        parent: 4,
+        body: { type: "text", text: "I'll recheck VAT before I vote." },
+      },
+      {
+        seq: 8,
+        ts: at(43),
+        author: by(ANA),
+        body: {
+          type: "task",
+          title: "Recheck the EU VAT figures in the PDF",
+          spec: "Pages 11 and 12: the German and French rows look swapped.",
+        },
+      },
+      {
+        seq: 9,
+        ts: at(44),
+        author: by(CHECKER),
+        body: { type: "claim", task_seq: 8 },
+      },
+      {
+        seq: 10,
+        ts: at(45),
+        author: by(ANA),
+        body: {
+          type: "task",
+          title: "Draft the customer email for the new price",
+          spec: "Short, with the date and what Pro customers get.",
+        },
+      },
+      {
+        seq: 11,
+        ts: at(50),
+        author: by(FORECAST),
+        body: {
+          type: "text",
+          text: "At €24 with churn held at 1.8 %, EU Pro revenue rises about 9 % by March.",
+        },
+      },
+      {
+        seq: 12,
+        ts: at(51),
+        author: { kind: "gateway", id: "gateway", name: "gateway" },
+        body: {
+          type: "notice",
+          kind: "wake_budget_80",
+          text: "Woken agents have used 80 % of this channel's budget.",
+        },
       },
     ],
   ],

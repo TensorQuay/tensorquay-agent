@@ -713,3 +713,10 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* On a phone a panel is the whole screen (the mock's sheet, with its own Close). */
+@media (max-width: 599px) {
+  .channel-page > .channel-panel {
+    width: 100%;
+  }
+}

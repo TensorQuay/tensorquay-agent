@@ -9,6 +9,7 @@ import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
 
 import { ChannelMembers } from "./ChannelMembers";
+import { RULES } from "./ChannelsPage";
 import type {
   Channel,
   ChannelPost,
@@ -114,6 +115,9 @@ export function ChannelSide({
     >
       <header className="channel-panel-head">
         <h2 className="type-body-strong">{title}</h2>
+        {tab === "members" && (
+          <p className="type-small muted">{t(RULES[channel.rule])}</p>
+        )}
         <Button
           variant="ghost"
           aria-label={t("channels.closePanel", { name: title })}

@@ -32,11 +32,15 @@ for (const width of [1024, 1280] as const)
       await expect(
         log.getByRole("article", { name: "#4 Decision" }),
       ).toContainText("Accepted by majority");
+      // Replies open in the post's thread (WEB-U-523); the log shows how many.
+      await log.getByRole("button", { name: "1 reply" }).click();
+      const thread7 = page.getByRole("complementary", { name: "Thread" });
       await expect(
-        page
+        thread7
           .getByRole("list", { name: "Replies to #7" })
           .getByRole("article", { name: /^#8 / }),
       ).toBeVisible();
+      await thread7.getByRole("button", { name: "Close Thread" }).click();
       // A line names the proposal or task it is about, linked to its post, never "#2" (WEB-U-165).
       await expect(log.getByRole("article", { name: /^#3 / })).toContainText(
         "voted Accept on Ship on Friday",
@@ -69,28 +73,30 @@ for (const width of [1024, 1280] as const)
         .getByRole("button", { name: "Reply to #1", exact: true })
         .focus();
       await page.keyboard.press("Enter");
-      const form = page.getByRole("form", { name: "Post to the channel" });
-      await expect(form.getByText("Replying to #1")).toBeVisible();
+      const thread = page.getByRole("complementary", { name: "Thread" });
+      const reply = thread.getByRole("form", { name: "Reply in the thread" });
       const note = "Noted. I'll check the changelog next.";
-      await form.getByLabel("Your message").fill(note);
-      await form.getByRole("button", { name: "Post" }).click();
-      const replies = page.getByRole("list", {
+      await reply.getByLabel("Reply in the thread").fill(note);
+      await reply.getByRole("button", { name: "Send" }).click();
+      const replies = thread.getByRole("list", {
         name: "Replies to #1",
         exact: true,
       });
       await expect(replies).toContainText(note);
-      await expect(form.getByText("Replying to #1")).toHaveCount(0);
+      await thread.getByRole("button", { name: "Close Thread" }).click();
+      const form = page.getByRole("form", { name: "Post to the channel" });
 
-      // The seeded proposal is decided; one this test makes takes a vote (WEB-U-064).
+      // The seeded proposal is decided, folded to one line (WEB-U-521); one this test makes takes a vote (WEB-U-064).
       await expect(
-        page.getByRole("group", { name: "Votes on #2", exact: true }),
-      ).toContainText("Accepted by majority");
+        log.getByRole("button", { name: "Accepted · 1 to 0" }),
+      ).toBeVisible();
       const ask =
         "Ship 2.4 today, once the changelog, the release notes and the migration guide are merged?";
-      await form.getByRole("button", { name: "Propose…" }).click();
-      await form.getByLabel("Title").fill(ask);
-      await form.getByLabel("What and why").fill("All checks are green.");
-      await form.getByRole("button", { name: "Post" }).click();
+      await form.getByRole("button", { name: "Propose" }).click();
+      await form
+        .getByLabel("Proposal: its first line is the title")
+        .fill(`${ask}\nAll checks are green.`);
+      await form.getByRole("button", { name: "Send" }).click();
       const asked = page.getByRole("article").filter({ hasText: ask });
       const votes = asked.getByRole("group", { name: /^Votes on #/ });
       await expect(votes).toContainText("Accept 0 · Reject 0");
@@ -124,12 +130,14 @@ for (const width of [1024, 1280] as const)
 
       // A task this test adds, claimed from the board (WEB-U-065).
       const title = "Tag the release";
-      await form.getByRole("button", { name: "Add a to-do…" }).click();
-      await form.getByLabel("Title").fill(title);
+      await form.getByRole("button", { name: "To-do" }).click();
       await form
-        .getByLabel("What is to be done")
-        .fill("Tag v2.4.0 once the changelog is merged.");
-      await form.getByRole("button", { name: "Post" }).click();
+        .getByLabel("To-do: its first line is the title")
+        .fill(`${title}\nTag v2.4.0 once the changelog is merged.`);
+      await form.getByRole("button", { name: "Send" }).click();
+      // The board opens from the header's To-dos (WEB-U-519).
+      const header = page.getByRole("region", { name: "Channel header" });
+      await header.getByRole("button", { name: /^To-dos/ }).click();
       const board = page.getByRole("list", { name: "To-dos" });
       const task = board.getByRole("listitem", { name: title });
       await expect(task).toContainText("Open · 1 place");
@@ -138,7 +146,7 @@ for (const width of [1024, 1280] as const)
       await expect(task).toContainText("(you): Working");
       await axe(page);
       await capture(page, `channel-board-${width}-${colorScheme}`);
-      await page.getByRole("tab", { name: "Members" }).click();
+      await header.getByRole("button", { name: /^Members/ }).click();
       await expect(page.getByRole("list", { name: "Members" })).toContainText(
         "Coder · ana",
       );
@@ -148,16 +156,6 @@ for (const width of [1024, 1280] as const)
           .getByRole("list", { name: "Members" })
           .getByRole("listitem", { name: "Reviewer · ben" }),
       ).toContainText("Done");
-      // WEB-U-426: above the box, the agents that aren't running. Reviewer has finished and isn't the viewer's to open,
-      // so it is named without a link; Coder is working and isn't listed.
-      const idle = page.getByRole("region", { name: "1 agent isn’t running" });
-      await expect(idle).toBeVisible();
-      await expect(idle).toContainText(
-        "An agent reads this channel only while its task runs: open its task and ask it to work here, or ask its owner when the agent isn’t yours.",
-      );
-      await expect(idle).toContainText("Reviewer · ben");
-      await expect(idle.getByRole("link")).toHaveCount(0);
-      await expect(idle).not.toContainText("Coder");
       await axe(page);
       // Decided before 17.0: an agent's name opens its task, when the viewer may open it (the gateway's can_open).
       const members = page.getByRole("list", { name: "Members" });
@@ -177,7 +175,10 @@ for (const width of [1024, 1280] as const)
         /\/c\/0195d8c0-0000-7000-8000-00000000c0de$/,
       );
       await page.goto(back);
-      await page.getByRole("tab", { name: "Members" }).click();
+      await page
+        .getByRole("region", { name: "Channel header" })
+        .getByRole("button", { name: /^Members/ })
+        .click();
 
       await page.getByRole("link", { name: "Channels" }).click();
       await page.getByRole("button", { name: "New channel" }).first().click();
@@ -218,7 +219,10 @@ for (const width of [1024, 1280] as const)
       await expect(
         page.getByRole("heading", { level: 1, name: channelTitle }),
       ).toBeVisible();
-      await page.getByRole("tab", { name: "Members" }).click();
+      await page
+        .getByRole("region", { name: "Channel header" })
+        .getByRole("button", { name: /^Members/ })
+        .click();
       await expect(
         page
           .getByRole("list", { name: "Members" })
@@ -260,7 +264,10 @@ for (const [width, colorScheme] of [
     await dialog.getByRole("button", { name: "Create channel" }).click();
     await expect(page.getByRole("heading", { level: 1, name })).toBeVisible();
 
-    await page.getByRole("tab", { name: "Members" }).click();
+    await page
+      .getByRole("region", { name: "Channel header" })
+      .getByRole("button", { name: /^Members/ })
+      .click();
     await expect(
       page
         .getByRole("list", { name: "Members" })
@@ -351,6 +358,8 @@ test("WEB-U-063/064 post rows at 390 px, and the tally bar at every width", asyn
     .boundingBox();
   expect(who && meta).toBeTruthy();
   expect(Math.abs((meta?.y ?? 0) - (who?.y ?? 0))).toBeLessThan(12);
+  // The decided proposal is folded (WEB-U-521): opened, its tally bar spans its group.
+  await page.getByRole("button", { name: "Accepted · 1 to 0" }).click();
   const votes = page.getByRole("group", { name: "Votes on #2", exact: true });
   const bar = await votes.locator(".proposal-bar").boundingBox();
   const group = await votes.boundingBox();
@@ -377,7 +386,10 @@ for (const width of [1280, 390] as const)
     await dialog.getByLabel("What's this channel for?").fill(name);
     await dialog.getByRole("button", { name: "Create channel" }).click();
     await expect(page.getByRole("heading", { level: 1, name })).toBeVisible();
-    await page.getByRole("tab", { name: "Members" }).click();
+    await page
+      .getByRole("region", { name: "Channel header" })
+      .getByRole("button", { name: /^Members/ })
+      .click();
     await page.getByRole("button", { name: "Add", exact: true }).click();
     const box = page.getByRole("combobox", { name: "Add to the channel" });
     await box.fill("colleague@example.invalid");
