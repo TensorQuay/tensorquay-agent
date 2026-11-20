@@ -1,7 +1,7 @@
 //! A channel's wake, handed over (ADR-0014's amendment of 20 Nov 2026, reviewed on 20 Nov 2026): the wake is the
 //! gateway's tracked task, stopped by its cancel (GW-I-360); never handed to a runtime below 16 (GW-I-361), whose
 //! sandbox from before the wake it replaces instead (GW-I-382); and the run it starts is charged to it, not to whichever
-//! turn was touched last (GW-I-371).
+//! turn was touched last (GW-I-371). An upgraded install wakes no one for posts made before it (GW-I-383).
 #[path = "support/channel_agent.rs"]
 mod channel_agent;
 #[path = "support/fixture.rs"]
@@ -327,6 +327,55 @@ async fn gw_i_382_a_wake_replaces_a_sandbox_too_old_to_read_it(pool: PgPool) -> 
             destroys + 1,
             "one replacement only"
         );
+        Ok(())
+    }))
+    .await
+}
+
+// TEST: GW-I-383
+// An upgrade wakes no one for posts made before it (18.2, decided on 21 Nov 2026): the release before wakes didn't mark
+// whom a post wakes, and migration 0108 starts each member at its channel's last seq. A channel whose person's
+// top-level posts and voting agents date from before the upgrade (no wakes marked, every member read to the last seq,
+// as 0108 leaves them) wakes no one, by the first pass after start or by the sweep; a post made after it wakes them.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_383_an_upgrade_wakes_no_one_for_posts_made_before_it(pool: PgPool) -> TestResult {
+    Box::pin(support::run(pool, async |f| {
+        let (owner, cookie) = f.admin().await?;
+        let mut analyst = Agent::new(f, owner.id, "Pricing analyst").await?;
+        let mut checker = Agent::new(f, owner.id, "Data checker").await?;
+        // Before the upgrade: wakes don't exist yet (held), so the posts are only rows.
+        f.gateway.channel_wakes_hold(true);
+        let id = channel(f, &cookie, "pricing", &[(&analyst, "member"), (&checker, "member")]).await?;
+        post(f, &cookie, &id, text("The Q3 numbers are in; what stands out?"), None).await?;
+        post(f, &cookie, &id, text("Anyone?"), None).await?;
+        // What 0108 leaves of them: no wakes marked on the old posts, each member at the channel's last seq.
+        let channel_id = Uuid::parse_str(&id)?;
+        sqlx::query("UPDATE channel_messages SET wakes = '{}', hop = 0 WHERE channel_id = $1")
+            .bind(channel_id)
+            .execute(&f.pool)
+            .await?;
+        sqlx::query("UPDATE channel_members m SET read_seq = c.last_seq FROM channels c WHERE c.id = m.channel_id AND c.id = $1")
+            .bind(channel_id)
+            .execute(&f.pool)
+            .await?;
+        // The upgraded gateway starts: its first pass and the sweep send nothing.
+        f.gateway.channel_wakes_hold(false);
+        f.gateway.channel_wakes_now().await?;
+        f.gateway.channel_decisions_now().await?;
+        let sent: i64 = sqlx::query_scalar("SELECT count(*) FROM channel_wakes WHERE channel_id = $1")
+            .bind(channel_id)
+            .fetch_one(&f.pool)
+            .await?;
+        assert_eq!(sent, 0, "no wake for posts made before the upgrade");
+        analyst.quiet(f).await?;
+        checker.quiet(f).await?;
+        // A post made after the upgrade wakes both voting agents (a person's post to the channel).
+        let asked = post(f, &cookie, &id, text("Here is the file now: which plan lost the most?"), None).await?;
+        for agent in [&mut analyst, &mut checker] {
+            let sentence = agent.woken(f, &id, 2).await?;
+            assert!(sentence.contains(&format!("message {asked}")), "{sentence}");
+        }
         Ok(())
     }))
     .await
