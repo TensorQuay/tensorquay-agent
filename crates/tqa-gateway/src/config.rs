@@ -15,6 +15,7 @@ mod agent_teams;
 mod builtin_images;
 mod channels;
 mod computer;
+mod memory;
 pub(crate) use computer::{MAX_ACTIONS_PER_RUN, MAX_SCREENSHOTS_PER_RUN};
 mod desktop;
 pub(crate) use agent_teams::AgentTeams;
@@ -119,6 +120,8 @@ pub struct GatewayConfig {
     pub(crate) workspaces: workspaces::Workspaces,
     /// `[agent_teams]`: the install switch, off by default, and the team limits (ADR-0034).
     pub(crate) agent_teams: agent_teams::AgentTeams,
+    /// `[memory]`: long-term memory (ADR-0041); off by default until phase 1 is complete.
+    pub(crate) memory: memory::Memory,
     /// `[desktop]`: the Desktop environment's limits (ADR-0039).
     pub(crate) desktop: desktop::Desktop,
     /// `[channels]`: what woken runs may spend in a channel without a budget (ADR-0014's amendment of 20 Nov 2026).
@@ -188,6 +191,8 @@ struct Input {
     workspaces: workspaces::WorkspacesInput,
     #[serde(default)]
     agent_teams: agent_teams::AgentTeamsInput,
+    #[serde(default)]
+    memory: memory::MemoryInput,
     #[serde(default)]
     desktop: desktop::DesktopInput,
     #[serde(default)]
@@ -426,6 +431,7 @@ impl GatewayConfig {
             admission,
             workspaces,
             agent_teams: agent_teams::agent_teams(input.agent_teams)?,
+            memory: memory::memory(&input.memory),
             desktop: desktop::desktop(&input.desktop)?,
             channels: channels::channels(&input.channels),
             computer: computer::computer(&input.computer)?,

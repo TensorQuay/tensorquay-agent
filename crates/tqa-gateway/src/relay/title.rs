@@ -399,6 +399,8 @@ async fn name(state: &State, id: &ConversationId) -> Result<(), GatewayError> {
     })
     .await?;
     if named.is_some() {
+        // The task's memory digest, written under its first words, takes the name too (ADR-0041).
+        crate::files::digest::title_changed(state, id, &title).await;
         state
             .events
             .control(id, ServerFrame::TaskTitled { title })?;

@@ -1,0 +1,37 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.started AS \"started!\", EXISTS (SELECT 1 FROM events e WHERE e.conversation_id=$1 AND e.seq>r.started AND e.call_id IS NOT NULL) AS \"tools!\", (SELECT MIN(e.seq) FROM events e WHERE e.conversation_id=$1 AND e.seq>r.started AND e.step=(SELECT MAX(s.step) FROM events s WHERE s.conversation_id=$1 AND s.seq>r.started)) AS answer_from FROM (SELECT MAX(seq) AS started FROM events WHERE conversation_id=$1 AND lifecycle='run.started') r WHERE r.started IS NOT NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "started!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "tools!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "answer_from",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "81d0b6f86b4a9c5c43b7dc48b70c714e5d13bb549602664ae69c0366a2f12045"
+}
