@@ -269,6 +269,7 @@ class Check:
         registry = self.mirror()
         self.checkout()
         pool = free_pool(self.env)
+        self.say("sandbox pool {}, clear of every other installation's on this engine".format(pool))
 
         with socket.socket() as busy:
             busy.bind(("127.0.0.1", 0))
