@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (SELECT 1 FROM channel_unreachable WHERE channel_id = $1 AND conversation_id = $2                             AND reason = 'runtime')                     AND COALESCE((SELECT t.image = c.template_digest FROM conversations c                                   JOIN templates t ON t.name = c.template WHERE c.id = $2), true) AS \"held!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "held!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "b690640885e8a0dcaee9e58eea71425bb8a203fe0cfef27357cd4ee1923bf4db"
+}

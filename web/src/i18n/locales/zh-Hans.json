@@ -1475,7 +1475,7 @@
     "channels.chipTimedOut": "已超时",
     "channels.chipVetoed": "已否决（一票否决）",
     "channels.noticeDeleted": "{member} 无法被唤醒：它的任务已被删除。",
-    "channels.noticeUnreachable": "{member} 无法被唤醒：它的环境需要更新。",
+    "channels.noticeUnreachable": "{member} 无法被唤醒：重新启动后它的环境仍在运行旧版本。管理员可在设置中更新它的镜像，之后它会再次被唤醒。",
     "channels.noticeBudget80": "被唤醒的智能体已用掉此频道预算的 80%。",
     "channels.noticeBudgetSpent": "被唤醒的智能体已用完此频道的预算：在提高预算之前，这里不会唤醒任何智能体。",
     "channels.budgetTitle": "唤醒预算",

@@ -1469,7 +1469,7 @@
     "channels.chipTimedOut": "期限切れ",
     "channels.chipVetoed": "拒否権行使",
     "channels.noticeDeleted": "{member} を起こせません：タスクが削除されました。",
-    "channels.noticeUnreachable": "{member} を起こせません：環境の更新が必要です。",
+    "channels.noticeUnreachable": "{member} を起こせません：再起動後も環境が古いバージョンのままです。管理者が設定でイメージを更新すると、再び起こされます。",
     "channels.noticeBudget80": "起こされたエージェントがこのチャンネルの予算の 80% を使いました。",
     "channels.noticeBudgetSpent": "起こされたエージェントがこのチャンネルの予算を使い切りました：予算が増えるまで、ここでエージェントは起こされません。",
     "channels.budgetTitle": "起動予算",

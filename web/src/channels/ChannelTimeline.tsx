@@ -56,6 +56,32 @@ const NOTICES: Readonly<Record<string, MessageKey>> = {
   woken_run_stopped: "channels.noticeRunStopped",
 };
 
+/**
+ * An agent member's name as Members shows it to this viewer: its name in the channel, or, to its owner, the title of
+ * their own agent added before names (C-9). Notices about a member use it too, so two old agents never read as one
+ * "Agent" to their owner (C-15).
+ */
+export function memberShown(item: Member): string {
+  return item.kind === "conversation" &&
+    item.named === false &&
+    item.title !== undefined
+    ? item.title
+    : item.name;
+}
+
+/** The member a notice is about, as {@link memberShown} names it; by the notice's own word when it isn't a member. */
+function noticeMember(
+  body: { member?: string; member_id?: string },
+  members: readonly Member[],
+): string {
+  const member = body.member_id
+    ? members.find(
+        (item) => item.kind === "conversation" && item.id === body.member_id,
+      )
+    : undefined;
+  return member ? memberShown(member) : (body.member ?? "");
+}
+
 export function authorName(author: Author, members: readonly Member[]) {
   const member = members.find(
     (item) => item.kind === author.kind && item.id === author.id,
@@ -331,7 +357,12 @@ function Post({
           )}
         </span>
       </header>
-      <Body message={message} titles={titles} decided={decided} />
+      <Body
+        message={message}
+        members={members}
+        titles={titles}
+        decided={decided}
+      />
       {fileHref && message.files && message.files.length > 0 && (
         <ul
           className="attachment-chips channel-files type-small"
@@ -417,10 +448,12 @@ function Folding({ text, plain = false }: { text: string; plain?: boolean }) {
 
 function Body({
   message,
+  members,
   titles,
   decided,
 }: {
   message: ChannelMessage;
+  members: readonly Member[];
   titles: Titles;
   decided: boolean;
 }) {
@@ -527,7 +560,7 @@ function Body({
         return (
           <p className="type-small muted">
             {t("channels.noticeRunFailed", {
-              member: body.member ?? "",
+              member: noticeMember(body, members),
               reason: t(
                 knownFailure(body.code ?? "", "")?.reason ??
                   "run.stoppedUnknown",
@@ -537,7 +570,7 @@ function Body({
         );
       return (
         <p className="type-small muted">
-          {key ? t(key, { member: body.member ?? "" }) : body.text}
+          {key ? t(key, { member: noticeMember(body, members) }) : body.text}
         </p>
       );
     }

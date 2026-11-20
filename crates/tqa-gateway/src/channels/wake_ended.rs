@@ -85,6 +85,8 @@ pub(crate) async fn run_ended(
                 &MessageBody::Notice {
                     kind,
                     member: Some(woken.name),
+                    // Named as Members names it, for its owner by its title when it has no name here (C-15).
+                    member_id: Some(conversation.to_string()),
                     code,
                     text,
                 },

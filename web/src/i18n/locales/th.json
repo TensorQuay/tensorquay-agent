@@ -1469,7 +1469,7 @@
     "channels.chipTimedOut": "หมดเวลา",
     "channels.chipVetoed": "ถูกวีโต้",
     "channels.noticeDeleted": "ปลุก {member} ไม่ได้: งานของมันถูกลบแล้ว",
-    "channels.noticeUnreachable": "ปลุก {member} ไม่ได้: ต้องอัปเดตสภาพแวดล้อมของมัน",
+    "channels.noticeUnreachable": "ปลุก {member} ไม่ได้: สภาพแวดล้อมของมันยังเป็นเวอร์ชันเก่าแม้เริ่มใหม่แล้ว ผู้ดูแลระบบอัปเดตอิมเมจได้ในการตั้งค่า แล้วมันจะถูกปลุกอีกครั้ง",
     "channels.noticeBudget80": "เอเจนต์ที่ถูกปลุกใช้งบประมาณของช่องนี้ไปแล้ว 80%",
     "channels.noticeBudgetSpent": "เอเจนต์ที่ถูกปลุกใช้งบประมาณของช่องนี้หมดแล้ว: จะไม่มีเอเจนต์ถูกปลุกที่นี่จนกว่าจะเพิ่มงบประมาณ",
     "channels.budgetTitle": "งบการปลุก",

@@ -330,6 +330,10 @@ pub enum MessageBody {
         /// The member it is about, by its task's name, so a page words it in the reader's language.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         member: Option<String>,
+        /// That member's id (its task's), so a page names it as Members does: its owner sees the title of their own
+        /// unnamed agent, never two members alike as "Agent" (decided on 21 Nov 2026, C-15).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        member_id: Option<String>,
         /// A woken run's failure code, so a page words it as the task page does (decided on 20 Nov 2026, C-6).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         code: Option<String>,

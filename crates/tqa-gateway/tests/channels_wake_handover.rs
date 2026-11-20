@@ -1,15 +1,16 @@
 //! A channel's wake, handed over (ADR-0014's amendment of 20 Nov 2026, reviewed on 20 Nov 2026): the wake is the
-//! gateway's tracked task, stopped by its cancel (GW-I-360); never handed to a runtime below 16 (GW-I-361); and the run
-//! it starts is charged to it, not to whichever turn was touched last (GW-I-371).
+//! gateway's tracked task, stopped by its cancel (GW-I-360); never handed to a runtime below 16 (GW-I-361), whose
+//! sandbox from before the wake it replaces instead (GW-I-382); and the run it starts is charged to it, not to whichever
+//! turn was touched last (GW-I-371).
 #[path = "support/channel_agent.rs"]
 mod channel_agent;
 #[path = "support/fixture.rs"]
 mod support;
-use channel_agent::{Agent, QUIET, WAKE, channel, notices, post, runtime_call, text};
+use channel_agent::{Agent, QUIET, WAKE, channel, notices, post, replaced, runtime_call, text};
 use reqwest::Method;
 use serde_json::json;
 use sqlx::PgPool;
-use std::time::Duration;
+use std::{sync::atomic::Ordering, time::Duration};
 use support::{TestResult, call};
 use tqa_types::ClientFrame;
 use uuid::Uuid;
@@ -268,6 +269,64 @@ async fn gw_i_380_a_woken_run_never_parks_in_a_wait(pool: PgPool) -> TestResult 
             "{page}"
         );
         analyst.end(f).await?;
+        Ok(())
+    }))
+    .await
+}
+
+// TEST: GW-I-382
+// An upgrade needs nothing from people (decided on 21 Nov 2026, C-15): a wake for a member whose sandbox runs a runtime
+// below 16 replaces that sandbox, as an administrator's stop does, and goes to the new one; while a run goes, the
+// sandbox stays until the run has ended. No "can't be woken" notice when the replacement reads the wake.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_382_a_wake_replaces_a_sandbox_too_old_to_read_it(pool: PgPool) -> TestResult {
+    Box::pin(support::run(pool, async |f| {
+        let (owner, cookie) = f.admin().await?;
+        let mut old = Agent::new(f, owner.id, "Old runtime").await?;
+        let id = channel(f, &cookie, "pricing", &[(&old, "member")]).await?;
+        // Its sandbox from before the upgrade: the runtime announces 15, and a run of its own is going.
+        let (status, _) = call(
+            f,
+            Method::POST,
+            &format!("/api/v1/conversations/{}/messages", old.id),
+            &cookie,
+            (Some(json!({"text": "Start."})), Some("person-1")),
+        )
+        .await?;
+        assert!(status < 300, "{status}");
+        old.next_at(f, WAKE, 15).await?.ok_or("the person's turn")?;
+        old.start(f).await?;
+        let destroys = f.backend.destroys.load(Ordering::SeqCst);
+        let asked = post(f, &cookie, &id, text("@old runtime please look"), None).await?;
+        tokio::time::sleep(Duration::from_secs(2)).await;
+        assert_eq!(
+            f.backend.destroys.load(Ordering::SeqCst),
+            destroys,
+            "a run in progress keeps its sandbox"
+        );
+        // Its run ends: the sandbox is replaced, and the new one's runtime gets the wake.
+        old.end(f).await?;
+        replaced(f, &mut old, destroys, tqa_types::PROTOCOL_REVISION).await?;
+        let sentence = old.woken(f, &id, 0).await?;
+        assert!(sentence.contains(&format!("message {asked}")), "{sentence}");
+        assert_eq!(
+            notices(f, &id, "unreachable_runtime").await?,
+            0,
+            "no notice when the replacement reads it"
+        );
+        old.start(f).await?;
+        assert_eq!(old.read(f, &id, 0).await?, vec![asked]);
+        old.end(f).await?;
+        // The member is a member like any other now: the next post wakes it with no replacement.
+        let again = post(f, &cookie, &id, text("@old runtime one more"), None).await?;
+        let sentence = old.woken(f, &id, asked).await?;
+        assert!(sentence.contains(&format!("message {again}")), "{sentence}");
+        assert_eq!(
+            f.backend.destroys.load(Ordering::SeqCst),
+            destroys + 1,
+            "one replacement only"
+        );
         Ok(())
     }))
     .await

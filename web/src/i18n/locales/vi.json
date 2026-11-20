@@ -1469,7 +1469,7 @@
     "channels.chipTimedOut": "Hết thời gian",
     "channels.chipVetoed": "Bị phủ quyết",
     "channels.noticeDeleted": "Không thể đánh thức {member}: tác vụ của nó đã bị xóa.",
-    "channels.noticeUnreachable": "Không thể đánh thức {member}: môi trường của nó cần được cập nhật.",
+    "channels.noticeUnreachable": "Không thể đánh thức {member}: môi trường của nó vẫn chạy phiên bản cũ sau khi khởi động lại. Quản trị viên có thể cập nhật image của nó trong Cài đặt, và khi đó nó sẽ được đánh thức lại.",
     "channels.noticeBudget80": "Các agent được đánh thức đã dùng 80% ngân sách của kênh này.",
     "channels.noticeBudgetSpent": "Các agent được đánh thức đã dùng hết ngân sách của kênh này: không agent nào ở đây được đánh thức cho đến khi ngân sách được tăng.",
     "channels.budgetTitle": "Ngân sách đánh thức",

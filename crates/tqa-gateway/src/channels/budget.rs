@@ -75,7 +75,10 @@ pub(crate) async fn set_budget(
         let seq = super::wake::notice(
             &mut transaction,
             id,
-            (ChannelNoticeKind::WakeBudgetSet, Some(user.email.clone())),
+            (
+                ChannelNoticeKind::WakeBudgetSet,
+                Some((user.email.clone(), None)),
+            ),
             format!(
                 "{} set this channel's budget to {} tokens.",
                 user.email,

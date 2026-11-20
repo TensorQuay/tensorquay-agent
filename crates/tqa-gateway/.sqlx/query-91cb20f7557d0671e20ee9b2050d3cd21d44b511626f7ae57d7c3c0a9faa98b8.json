@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM channel_unreachable WHERE conversation_id = $1 AND reason = 'runtime'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "91cb20f7557d0671e20ee9b2050d3cd21d44b511626f7ae57d7c3c0a9faa98b8"
+}

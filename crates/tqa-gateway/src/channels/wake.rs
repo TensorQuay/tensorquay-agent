@@ -298,10 +298,13 @@ fn seq_of(seq: u64) -> Result<i64, GatewayError> {
 pub(crate) async fn notice(
     connection: &mut PgConnection,
     channel: Uuid,
-    (kind, member): (ChannelNoticeKind, Option<String>),
+    (kind, member): (ChannelNoticeKind, Option<(String, Option<Uuid>)>),
     text: String,
 ) -> Result<u64, GatewayError> {
     let author = super::store::gateway_author();
+    let (member, member_id) = member.map_or((None, None), |(name, id)| {
+        (Some(name), id.map(|id| id.to_string()))
+    });
     let message = super::store::append_body(
         connection,
         channel,
@@ -311,6 +314,7 @@ pub(crate) async fn notice(
             &MessageBody::Notice {
                 kind,
                 member,
+                member_id,
                 code: None,
                 text,
             },
@@ -324,7 +328,7 @@ pub(crate) async fn notice(
 async fn notice_now(
     state: &State,
     channel: Uuid,
-    (kind, member): (ChannelNoticeKind, Option<String>),
+    (kind, member): (ChannelNoticeKind, Option<(String, Option<Uuid>)>),
     text: String,
 ) -> Result<(), GatewayError> {
     let mut transaction = state.pool.begin().await?;
@@ -332,6 +336,27 @@ async fn notice_now(
     transaction.commit().await?;
     state.channels.published(channel, seq);
     Ok(())
+}
+
+/// A member's name as Members gives it to everyone: its name in the channel, else its agent profile's, else "Agent";
+/// never its task's title, which is its owner's (SEC-044).
+///
+/// # Errors
+/// Storage failure.
+pub(crate) async fn member_name(
+    connection: &mut PgConnection,
+    (channel, member): (Uuid, Uuid),
+) -> Result<String, GatewayError> {
+    Ok(sqlx::query_scalar!(
+        "SELECT COALESCE(m.name, c.profile->>'display_name', c.profile->>'name', 'Agent') AS \"name!\" \
+         FROM conversations c LEFT JOIN channel_members m ON m.conversation_id = c.id AND m.channel_id = $1 \
+         WHERE c.id = $2",
+        channel,
+        member
+    )
+    .fetch_optional(&mut *connection)
+    .await?
+    .unwrap_or_else(|| "Agent".into()))
 }
 
 /// Says once that `member` (named `title`) can't be woken, for `reason` (A10): `runtime` or `deleted`.
@@ -361,14 +386,15 @@ pub(crate) async fn unreachable(
     } else {
         (
             ChannelNoticeKind::UnreachableRuntime,
-            "its environment needs an update",
+            "its environment still runs an older version after it was started again. An administrator can \
+             update its image in Settings, and it is woken again then",
         )
     };
     Ok(Some(
         notice(
             connection,
             channel,
-            (kind, Some(title.to_owned())),
+            (kind, Some((title.to_owned(), Some(member)))),
             format!("{title} can't be woken: {why}."),
         )
         .await?,
@@ -411,7 +437,6 @@ struct Due {
     read_seq: i64,
     owner: Uuid,
     revision: Option<i32>,
-    title: String,
     budget: Option<i64>,
     spent: i64,
     /// The smallest hop among the unread messages that wake it.
@@ -424,9 +449,7 @@ struct Due {
 async fn due(state: &State, only: Option<Uuid>) -> Result<Vec<Due>, GatewayError> {
     Ok(sqlx::query!(
         "SELECT m.channel_id AS \"channel!\", m.conversation_id AS \"conversation!\", m.read_seq, cv.owner_id, \
-                cv.runtime_revision, \
-                COALESCE(m.name, cv.profile->>'display_name', cv.profile->>'name', 'An agent') AS \"title!\", \
-                ch.budget, ch.spent_tokens, \
+                cv.runtime_revision, ch.budget, ch.spent_tokens, \
                 (SELECT min(x.hop) FROM channel_messages x WHERE x.channel_id = m.channel_id AND x.seq > m.read_seq \
                  AND m.conversation_id = ANY(x.wakes)) AS \"hop!\", \
                 (SELECT CASE WHEN e.lifecycle = 'run.failed' THEN e.seq END FROM events e \
@@ -450,7 +473,6 @@ async fn due(state: &State, only: Option<Uuid>) -> Result<Vec<Due>, GatewayError
         read_seq: row.read_seq,
         owner: row.owner_id,
         revision: row.runtime_revision,
-        title: row.title,
         budget: row.budget,
         spent: row.spent_tokens,
         hop: row.hop,
@@ -482,22 +504,21 @@ async fn held_back(state: &State, due: &Due) -> Result<Option<i16>, GatewayError
     {
         return Ok(None);
     }
+    // A runtime below 16 doesn't hold a wake back (C-15): the hand-over replaces its sandbox, and a task with none
+    // starts at its environment's current image. Only a replacement that was still too old holds it, until the
+    // environment's image is newer than the one the task last ran (an administrator updated it) or a current runtime
+    // links (which clears the hold).
     if due
         .revision
         .is_some_and(|revision| revision < i32::from(tqa_types::CHANNEL_WAKE_REVISION))
-    {
-        let mut transaction = state.pool.begin().await?;
-        let said = unreachable(
-            &mut transaction,
-            (due.channel, due.member),
-            &due.title,
-            "runtime",
+        && sqlx::query_scalar!(
+            "SELECT EXISTS (SELECT 1 FROM channel_unreachable WHERE channel_id = $1 AND conversation_id = $2                             AND reason = 'runtime')                     AND COALESCE((SELECT t.image = c.template_digest FROM conversations c                                   JOIN templates t ON t.name = c.template WHERE c.id = $2), true) AS \"held!\"",
+            due.channel,
+            due.member
         )
-        .await?;
-        transaction.commit().await?;
-        if let Some(seq) = said {
-            state.channels.published(due.channel, seq);
-        }
+        .fetch_one(&mut *connection)
+        .await?
+    {
         return Ok(None);
     }
     let budget = budget_of(state, due.budget);
@@ -850,7 +871,9 @@ pub(crate) async fn member_state(
                 cv.runtime_revision, ch.budget, ch.spent_tokens, ch.wakes_bounded, \
                 EXISTS (SELECT 1 FROM channel_messages x JOIN channel_members m ON m.channel_id = x.channel_id \
                         AND m.conversation_id = $2 WHERE x.channel_id = $1 AND x.seq > m.read_seq \
-                        AND $2 = ANY(x.wakes)) AS \"unread!\" \
+                        AND $2 = ANY(x.wakes)) AS \"unread!\", \
+                EXISTS (SELECT 1 FROM channel_unreachable u WHERE u.channel_id = $1 AND u.conversation_id = $2 \
+                        AND u.reason = 'runtime') AS \"unreachable!\" \
          FROM channels ch, conversations cv WHERE ch.id = $1 AND cv.id = $2",
         channel,
         member,
@@ -861,9 +884,11 @@ pub(crate) async fn member_state(
     if row.waking {
         return Ok("waking");
     }
+    // Unreachable only once a replaced sandbox was still too old (C-15); before that a wake replaces it.
     if row
         .runtime_revision
         .is_some_and(|revision| revision < i32::from(tqa_types::CHANNEL_WAKE_REVISION))
+        && row.unreachable
     {
         return Ok("unreachable");
     }
@@ -884,7 +909,7 @@ pub(crate) async fn memberships(
 ) -> Result<Vec<(Uuid, String)>, GatewayError> {
     Ok(sqlx::query!(
         "SELECT m.channel_id, \
-         COALESCE(m.name, c.profile->>'display_name', c.profile->>'name', 'An agent') AS \"title!\" \
+         COALESCE(m.name, c.profile->>'display_name', c.profile->>'name', 'Agent') AS \"title!\" \
          FROM channel_members m JOIN channels ch ON ch.id = m.channel_id \
          JOIN conversations c ON c.id = m.conversation_id \
          WHERE m.conversation_id = $1 AND ch.kind = 'channel' AND ch.state = 'open' AND m.role <> 'observer'",
@@ -905,7 +930,11 @@ pub(crate) async fn deleted(state: &State, memberships: Vec<(Uuid, String)>) {
         if let Err(error) = notice_now(
             state,
             channel,
-            (ChannelNoticeKind::MemberDeleted, Some(title.clone())),
+            // Its task is gone, so no member id: no page can show its title any more.
+            (
+                ChannelNoticeKind::MemberDeleted,
+                Some((title.clone(), None)),
+            ),
             text,
         )
         .await

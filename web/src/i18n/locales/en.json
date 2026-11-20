@@ -1475,7 +1475,7 @@
     "channels.chipTimedOut": "Timed out",
     "channels.chipVetoed": "Vetoed",
     "channels.noticeDeleted": "{member} can't be woken: its task was deleted.",
-    "channels.noticeUnreachable": "{member} can't be woken: its environment needs an update.",
+    "channels.noticeUnreachable": "{member} can't be woken: its environment still runs an older version after it was started again. An administrator can update its image in Settings, and it is woken again then.",
     "channels.noticeBudget80": "Woken agents have used 80 % of this channel's budget.",
     "channels.noticeBudgetSpent": "Woken agents have used this channel's budget: no agent is woken here until it is raised.",
     "channels.budgetTitle": "Wake budget",

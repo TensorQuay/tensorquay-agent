@@ -16,6 +16,16 @@ use tqa_types::{ClientFrame, ConversationId};
 const FIRST_BACKOFF: Duration = Duration::from_millis(250);
 const MAX_BACKOFF: Duration = Duration::from_secs(4);
 
+/// What the hand-over does with a queued channel wake (C-15).
+enum Hand {
+    /// It goes to the runtime as any message does.
+    Over,
+    /// It was withdrawn: a sandbox started after it still runs a runtime too old to read it.
+    Withdrawn,
+    /// It waits while the sandbox is replaced.
+    Replacing,
+}
+
 /// A turn handed to the runtime and not yet seen to start a run.
 struct Turn {
     /// Its messages' rows, to put back on a busy refusal.
@@ -180,17 +190,22 @@ impl SandboxManager {
             let Some(queued) = queued else {
                 return Ok(delivered);
             };
-            if queued.route == messages
-                && self
-                    .withhold_wake(
-                        id,
-                        conversation,
-                        (&queued.key, queued.user_id),
-                        queued.queued_frame.as_deref(),
-                    )
-                    .await?
-            {
-                continue;
+            let hand = if queued.route == messages {
+                self.withhold_wake(
+                    id,
+                    conversation,
+                    (&queued.key, queued.user_id),
+                    queued.queued_frame.as_deref(),
+                )
+                .await?
+            } else {
+                Hand::Over
+            };
+            match hand {
+                Hand::Over => {}
+                Hand::Withdrawn => continue,
+                // The sandbox is on its way out: the wake stays queued for the one that replaces it.
+                Hand::Replacing => return Ok(delivered),
             }
             if queued.route == messages {
                 let lifecycle = latest.as_ref().map_or(0, |latest| latest.seq);
@@ -209,28 +224,53 @@ impl SandboxManager {
     }
 
     /// A channel's wake about to go to a runtime below revision 16, which couldn't parse it (ADR-0014's amendment of 20
-    /// Nov 2026, A4, A10): it is withdrawn instead of handed over, and the channel says once that the member can't be
-    /// woken. The link recorded the revision, so the wake pass sends it no other. `false` for anything else.
+    /// Nov 2026, A4, A10; C-15 of 21 Nov 2026). An upgrade needs nothing from people: a sandbox older than the wake (it
+    /// predates the environment's current image) is replaced, as an administrator's stop does (the task resumes on its
+    /// files, at its environment's current image), and the wake waits queued for the new one. A sandbox that started
+    /// after the wake already runs the current image, so replacing it can't help: the wake is withdrawn and the channel
+    /// told once that the member can't be woken. This runs only between runs (messages wait for a run's end), so a run in
+    /// progress is never cut short; and it rests on stored times, so a gateway restart neither repeats nor loses it.
     async fn withhold_wake(
         &self,
         id: &ConversationId,
         conversation: uuid::Uuid,
         (key, user): (&str, uuid::Uuid),
         frame: Option<&[u8]>,
-    ) -> Result<bool, GatewayError> {
+    ) -> Result<Hand, GatewayError> {
         let Some((_, revision)) = self.services.links.sandbox(id) else {
-            return Ok(false);
+            return Ok(Hand::Over);
         };
         if revision >= tqa_types::CHANNEL_WAKE_REVISION {
-            return Ok(false);
+            return Ok(Hand::Over);
         }
         let Some(Ok(ClientFrame::UserMessage {
             channel_wake: Some(wake),
             ..
         })) = frame.map(ClientFrame::parse)
         else {
-            return Ok(false);
+            return Ok(Hand::Over);
         };
+        let older = self
+            .bounded(async {
+                Ok(sqlx::query_scalar!(
+                    "SELECT s.created_at < i.created_at AS \"older!\" FROM sandbox_instances s \
+                     JOIN idempotency i ON i.conversation_id = s.conversation_id \
+                     WHERE s.conversation_id = $1 AND i.key = $2 AND i.user_id = $3",
+                    conversation,
+                    key,
+                    user
+                )
+                .fetch_optional(&self.services.pool)
+                .await?
+                .unwrap_or(false))
+            })
+            .await?;
+        if older {
+            tracing::info!(conversation_id = %id, revision,
+                "a channel wake waits while the task's sandbox is replaced: its runtime is too old to read it");
+            self.retire_for_switch(id, super::Teardown::RuntimeUpdate)?;
+            return Ok(Hand::Replacing);
+        }
         let channel = uuid::Uuid::parse_str(wake.channel.as_str())
             .map_err(|_| GatewayError::StoreUnavailable)?;
         let said = self
@@ -243,14 +283,13 @@ impl SandboxManager {
                 )
                 .execute(&mut *transaction)
                 .await?;
-                let title =
-                    sqlx::query_scalar!("SELECT title FROM conversations WHERE id = $1", conversation)
-                        .fetch_one(&mut *transaction)
-                        .await?;
+                // Named as Members names it to everyone, never by its task's title (SEC-044): the page shows its owner
+                // the title of their own unnamed agent from the notice's member id (C-15).
+                let name = crate::channels::wake::member_name(&mut transaction, (channel, conversation)).await?;
                 let said = crate::channels::wake::unreachable(
                     &mut transaction,
                     (channel, conversation),
-                    &title,
+                    &name,
                     "runtime",
                 )
                 .await?;
@@ -261,8 +300,9 @@ impl SandboxManager {
         if let Some(seq) = said {
             self.services.channels.published(channel, seq);
         }
-        tracing::info!(conversation_id = %id, revision, "a channel wake was withheld from a runtime too old to read it");
-        Ok(true)
+        tracing::info!(conversation_id = %id, revision,
+            "a channel wake was withheld: the task's replaced sandbox still runs a runtime too old to read it");
+        Ok(Hand::Withdrawn)
     }
 
     async fn deliver_one(

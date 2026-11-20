@@ -413,6 +413,69 @@ describe("WEB-U-520 the chat log", () => {
   });
 });
 
+// WEB-U-532 (C-15, 21 Nov 2026): a notice about a member names it as Members does. Two agents added before names both
+// read "Agent" to everyone; to their owner, who sees their titles in Members, the notices read by those titles. A notice
+// about one that is no longer a member keeps its own word.
+describe("WEB-U-532 a notice names its member as Members does", () => {
+  const OLD_A = "0195d8c0-0000-7000-8000-0000000000a1";
+  const OLD_B = "0195d8c0-0000-7000-8000-0000000000b1";
+  const unnamed = (id: string, title?: string): Member => ({
+    kind: "conversation",
+    id,
+    name: "Agent",
+    named: false,
+    owner_name: "pat",
+    role: "member",
+    added_at: "2026-09-27T09:00:00Z",
+    ...(title === undefined ? {} : { title }),
+  });
+  const notice = (seq: number, member_id?: string): ChannelMessage =>
+    post(
+      seq,
+      { kind: "gateway", id: "gateway", name: "gateway" },
+      {
+        type: "notice",
+        kind: "unreachable_runtime",
+        member: "Agent",
+        ...(member_id === undefined ? {} : { member_id }),
+        text: "Agent can't be woken.",
+      },
+    );
+  const log = [notice(1, OLD_A), notice(2, OLD_B), notice(3)];
+  const line = (seq: number) =>
+    screen.getByRole("article", { name: new RegExp(`^#${seq}`) }).textContent;
+
+  it("shows their owner each unnamed agent by its title", () => {
+    render(
+      <ChannelTimeline
+        messages={log}
+        members={[
+          unnamed(OLD_A, "Numbers helper"),
+          unnamed(OLD_B, "Second opinion"),
+        ]}
+      />,
+    );
+    expect(line(1)).toContain(
+      "Numbers helper can't be woken: its environment still runs an older version",
+    );
+    expect(line(2)).toContain("Second opinion can't be woken");
+    // Without a member id, the notice's own word.
+    expect(line(3)).toContain("Agent can't be woken");
+  });
+
+  it("shows anyone else the name Members shows them, never a title", () => {
+    render(
+      <ChannelTimeline
+        messages={log}
+        members={[unnamed(OLD_A), unnamed(OLD_B)]}
+      />,
+    );
+    expect(line(1)).toContain("Agent can't be woken");
+    expect(line(2)).toContain("Agent can't be woken");
+    expect(`${line(1)}${line(2)}`).not.toMatch(/Numbers helper|Second opinion/);
+  });
+});
+
 // WEB-U-521: in the log a decided proposal keeps its title on one line; its text folds with its votes.
 describe("WEB-U-521 a decided proposal's text folds", () => {
   it("keeps the title and hides the text once the decision is in the log", async () => {

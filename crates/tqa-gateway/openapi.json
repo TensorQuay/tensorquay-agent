@@ -26482,6 +26482,11 @@
                 "type": "string",
                 "description": "Who it is about, so a page words it in the reader's language: an agent member by its name in the channel, or, for wake_budget_set, the person who set the budget."
               },
+              "member_id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "The agent member's id (its task's), when the notice is about one that is still a member: a page names it as Members does, so its owner sees the title of their own agent without a name here (decided on 21 Nov 2026, C-15)."
+              },
               "code": {
                 "type": "string",
                 "description": "For woken_run_failed: the run's failure code, so a page words it as the task page does (decided on 20 Nov 2026)."

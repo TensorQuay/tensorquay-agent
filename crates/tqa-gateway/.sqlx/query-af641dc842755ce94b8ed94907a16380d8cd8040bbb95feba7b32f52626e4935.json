@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT EXISTS (SELECT 1 FROM idempotency WHERE conversation_id = $2 AND execution_status = 'queued' AND key LIKE $3) AS \"waking!\", cv.runtime_revision, ch.budget, ch.spent_tokens, ch.wakes_bounded, EXISTS (SELECT 1 FROM channel_messages x JOIN channel_members m ON m.channel_id = x.channel_id AND m.conversation_id = $2 WHERE x.channel_id = $1 AND x.seq > m.read_seq AND $2 = ANY(x.wakes)) AS \"unread!\" FROM channels ch, conversations cv WHERE ch.id = $1 AND cv.id = $2",
+  "query": "SELECT EXISTS (SELECT 1 FROM idempotency WHERE conversation_id = $2 AND execution_status = 'queued' AND key LIKE $3) AS \"waking!\", cv.runtime_revision, ch.budget, ch.spent_tokens, ch.wakes_bounded, EXISTS (SELECT 1 FROM channel_messages x JOIN channel_members m ON m.channel_id = x.channel_id AND m.conversation_id = $2 WHERE x.channel_id = $1 AND x.seq > m.read_seq AND $2 = ANY(x.wakes)) AS \"unread!\", EXISTS (SELECT 1 FROM channel_unreachable u WHERE u.channel_id = $1 AND u.conversation_id = $2 AND u.reason = 'runtime') AS \"unreachable!\" FROM channels ch, conversations cv WHERE ch.id = $1 AND cv.id = $2",
   "describe": {
     "columns": [
       {
@@ -58,6 +58,12 @@
         "name": "unread!",
         "type_info": "Bool",
         "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "unreachable!",
+        "type_info": "Bool",
+        "origin": "Expression"
       }
     ],
     "parameters": {
@@ -73,8 +79,9 @@
       true,
       false,
       false,
+      null,
       null
     ]
   },
-  "hash": "1efadeb9e16ca08bbc0205e01b7a1b11aa7774ccec949dcefedad5a00852650c"
+  "hash": "af641dc842755ce94b8ed94907a16380d8cd8040bbb95feba7b32f52626e4935"
 }

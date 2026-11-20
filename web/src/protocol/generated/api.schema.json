@@ -2598,6 +2598,10 @@
             "member": {
               "type": "string"
             },
+            "member_id": {
+              "type": "string",
+              "format": "uuid"
+            },
             "code": {
               "type": "string"
             }

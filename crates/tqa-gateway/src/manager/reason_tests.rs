@@ -26,6 +26,7 @@ fn teardowns() -> Vec<(Teardown, &'static str)> {
         (Teardown::Reconcile, "reconcile"),
         (Teardown::Lost, "lost"),
         (Teardown::Stray, "stray"),
+        (Teardown::RuntimeUpdate, "runtime_update"),
     ];
     for (reason, _) in &rows {
         match reason {
@@ -47,7 +48,8 @@ fn teardowns() -> Vec<(Teardown, &'static str)> {
             | Teardown::Retry
             | Teardown::Reconcile
             | Teardown::Lost
-            | Teardown::Stray => {}
+            | Teardown::Stray
+            | Teardown::RuntimeUpdate => {}
         }
     }
     rows
@@ -72,7 +74,7 @@ fn creates() -> Vec<(Create, &'static str)> {
 fn gw_u_167_each_reason_logs_its_own_fixed_value() {
     let teardowns = teardowns();
     let creates = creates();
-    assert_eq!(teardowns.len(), 19);
+    assert_eq!(teardowns.len(), 20);
     assert_eq!(creates.len(), 3);
     let mut seen = std::collections::HashSet::new();
     for (reason, value) in &teardowns {

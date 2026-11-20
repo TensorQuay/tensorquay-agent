@@ -1469,7 +1469,7 @@
     "channels.chipTimedOut": "시간 초과",
     "channels.chipVetoed": "거부권 행사됨",
     "channels.noticeDeleted": "{member}을(를) 깨울 수 없습니다: 작업이 삭제되었습니다.",
-    "channels.noticeUnreachable": "{member}을(를) 깨울 수 없습니다: 환경을 업데이트해야 합니다.",
+    "channels.noticeUnreachable": "{member}을(를) 깨울 수 없습니다: 다시 시작한 뒤에도 환경이 이전 버전입니다. 관리자가 설정에서 이미지를 업데이트하면 다시 깨웁니다.",
     "channels.noticeBudget80": "깨어난 에이전트가 이 채널 예산의 80%를 사용했습니다.",
     "channels.noticeBudgetSpent": "깨어난 에이전트가 이 채널의 예산을 모두 사용했습니다: 예산을 늘릴 때까지 이곳의 에이전트는 깨어나지 않습니다.",
     "channels.budgetTitle": "깨우기 예산",

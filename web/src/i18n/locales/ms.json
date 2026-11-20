@@ -1468,7 +1468,7 @@
     "channels.chipTimedOut": "Tamat masa",
     "channels.chipVetoed": "Diveto",
     "channels.noticeDeleted": "{member} tidak boleh dibangunkan: tugasannya telah dipadam.",
-    "channels.noticeUnreachable": "{member} tidak boleh dibangunkan: persekitarannya perlu dikemas kini.",
+    "channels.noticeUnreachable": "{member} tidak boleh dibangunkan: persekitarannya masih menjalankan versi lama selepas dimulakan semula. Pentadbir boleh mengemas kini imejnya dalam Tetapan, dan ia dibangunkan semula selepas itu.",
     "channels.noticeBudget80": "Ejen yang dibangunkan telah menggunakan 80% belanjawan saluran ini.",
     "channels.noticeBudgetSpent": "Ejen yang dibangunkan telah menghabiskan belanjawan saluran ini: tiada ejen dibangunkan di sini sehingga ia dinaikkan.",
     "channels.budgetTitle": "Bajet bangun",

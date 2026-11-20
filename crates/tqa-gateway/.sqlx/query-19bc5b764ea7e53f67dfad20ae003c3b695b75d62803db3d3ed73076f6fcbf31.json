@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT m.channel_id, COALESCE(m.name, c.profile->>'display_name', c.profile->>'name', 'An agent') AS \"title!\" FROM channel_members m JOIN channels ch ON ch.id = m.channel_id JOIN conversations c ON c.id = m.conversation_id WHERE m.conversation_id = $1 AND ch.kind = 'channel' AND ch.state = 'open' AND m.role <> 'observer'",
+  "query": "SELECT m.channel_id, COALESCE(m.name, c.profile->>'display_name', c.profile->>'name', 'Agent') AS \"title!\" FROM channel_members m JOIN channels ch ON ch.id = m.channel_id JOIN conversations c ON c.id = m.conversation_id WHERE m.conversation_id = $1 AND ch.kind = 'channel' AND ch.state = 'open' AND m.role <> 'observer'",
   "describe": {
     "columns": [
       {
@@ -31,5 +31,5 @@
       null
     ]
   },
-  "hash": "5e0d1f30a6b0caf24e3ebf7008770e2df06921cb6db41bf405864019d48409b9"
+  "hash": "19bc5b764ea7e53f67dfad20ae003c3b695b75d62803db3d3ed73076f6fcbf31"
 }

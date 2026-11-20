@@ -1464,7 +1464,7 @@
     "channels.chipTimedOut": "Expirée",
     "channels.chipVetoed": "Veto opposé",
     "channels.noticeDeleted": "Impossible de réveiller {member} : sa tâche a été supprimée.",
-    "channels.noticeUnreachable": "Impossible de réveiller {member} : son environnement doit être mis à jour.",
+    "channels.noticeUnreachable": "Impossible de réveiller {member} : son environnement utilise encore une version antérieure après avoir été redémarré. Un administrateur peut mettre à jour son image dans Paramètres ; il est alors réveillé de nouveau.",
     "channels.noticeBudget80": "Les agents réveillés ont utilisé 80 % du budget de ce canal.",
     "channels.noticeBudgetSpent": "Les agents réveillés ont épuisé le budget de ce canal : aucun agent n’y est réveillé tant qu’il n’est pas augmenté.",
     "channels.budgetTitle": "Budget de réveil",

@@ -1467,7 +1467,7 @@
     "channels.chipTimedOut": "Sin tiempo",
     "channels.chipVetoed": "Vetada",
     "channels.noticeDeleted": "No se puede despertar a {member}: su tarea se eliminó.",
-    "channels.noticeUnreachable": "No se puede despertar a {member}: su entorno necesita una actualización.",
+    "channels.noticeUnreachable": "No se puede despertar a {member}: su entorno sigue con una versión anterior después de iniciarse de nuevo. Un administrador puede actualizar su imagen en Configuración, y entonces se le despierta de nuevo.",
     "channels.noticeBudget80": "Los agentes despertados han usado el 80 % del presupuesto de este canal.",
     "channels.noticeBudgetSpent": "Los agentes despertados han agotado el presupuesto de este canal: aquí no se despierta a ningún agente hasta que se aumente.",
     "channels.budgetTitle": "Presupuesto de activación",

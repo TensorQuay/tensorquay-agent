@@ -24,7 +24,7 @@ import { ConfirmDialog } from "../ui/ConfirmDialog";
 import { Icon } from "../ui/Icon";
 import { Input } from "../ui/Input";
 
-import { authorName } from "./ChannelTimeline";
+import { authorName, memberShown } from "./ChannelTimeline";
 import type {
   Channel,
   ChannelRole,
@@ -121,9 +121,7 @@ export function MemberList({
         const unnamedMine = item.named === false && item.title !== undefined;
         const name =
           item.kind === "conversation"
-            ? unnamedMine
-              ? (item.title ?? item.name)
-              : item.name
+            ? memberShown(item)
             : item.id === me
               ? t("channels.you", { name: agent })
               : agent;
