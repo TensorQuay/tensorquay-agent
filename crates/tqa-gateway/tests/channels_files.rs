@@ -399,3 +399,39 @@ async fn sec_069_a_channel_files_name_cant_leave_uploads(pool: PgPool) -> TestRe
     }))
     .await
 }
+
+// TEST: GW-I-363
+// A channel upload has an upload's body limit, not the API's default (review of 20 Nov 2026): with the default
+// configuration a 2 MiB file uploads and downloads byte for byte, and one over files.upload_bytes is 413.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_363_a_channel_upload_has_the_upload_body_limit(pool: PgPool) -> TestResult {
+    Box::pin(support::run(pool, async |f| {
+        let (_, cookie) = f.admin().await?;
+        let id = channel(f, &cookie, "pricing", &[]).await?;
+        let bytes: Vec<u8> = (0..2 * 1024 * 1024)
+            .map(|n| u8::try_from(n % 251).unwrap_or(0))
+            .collect();
+        let file = uploaded(f, &cookie, &id, "big.bin", &bytes).await?;
+        let (status, posted) = post_with(f, &cookie, &id, text("the big one"), &[file]).await?;
+        assert_eq!(status, 201, "{posted}");
+        let seq = posted["seq"].as_u64().ok_or("seq")?;
+        let response = f
+            .get(
+                &format!("/api/v1/channels/{id}/messages/{seq}/files/0"),
+                &cookie,
+            )
+            .await?;
+        assert_eq!(response.status().as_u16(), 200);
+        assert_eq!(response.bytes().await?.to_vec(), bytes, "byte for byte");
+        let (status, answer) =
+            upload(f, &cookie, &id, "too.bin", vec![0; 25 * 1024 * 1024 + 1]).await?;
+        assert_eq!(
+            (status, &answer["error"]["code"]),
+            (413, &json!("upload_too_large")),
+            "{answer}"
+        );
+        Ok(())
+    }))
+    .await
+}
