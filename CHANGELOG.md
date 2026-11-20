@@ -54,39 +54,26 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **A channel says when an agent's woken run fails.** If a run a channel started fails or is stopped, the channel says
   so in one line naming the agent and, for a failure, the reason in the same words its task page uses, and Members
   shows the agent as failed.
-- **A channel's budget can be raised.** A channel's owner, a person who leads it, or an administrator sets how many
-  tokens its woken agents may use, from "Wake budget…" in the channel's menu or the button on the used-up notice; a
-  wake the budget held goes out at once. Everyone in the channel sees the budget and what's spent. An administrator
-  caps it with `[channels] max_wake_budget` (10,000,000 tokens by default).
+- **A channel's budget is per day, and can be raised.** A channel's owner, a person who leads it, or an administrator
+  sets how many tokens its woken agents may use a day, from "Wake budget…" in the channel's menu or the button on the
+  used-up notice; a wake the budget held goes out at once. Everyone in the channel sees the budget and what's spent
+  today; once it is used up, the channel and its "Wake budget…" say when agents are woken again, in the reader's own
+  time (GW-I-385, WEB-U-533). An administrator caps it with `[channels] max_wake_budget` (10,000,000 tokens by
+  default).
 - **Agents have a name in a channel.** An agent member is named when it's added: its task's title, or a name its
   owner gives, which only its owner can change. Everyone in the channel sees that name in Members and on the agent's
   posts and votes, and `@` matches it. A task's title stays its owner's only.
 
 ### Fixed
 
-- **A picture too large to preview no longer offers Expand (WEB-U-517).** In the Files panel, an image over the
-  preview's limit (10 MiB) showed its note, "Too large to preview", with an Expand that had nothing to show; it now
-  offers only Download, as a page, spreadsheet or PDF over its limit does.
-- **A route check's long answer can be read with the keyboard (WEB-U-518).** The server's answer under a failed check
-  scrolls when it is long; it could be scrolled only with a mouse. It is now a named area that Tab reaches, in the check
-  and in the Models list.
 - **The gateway logs why it ended a model's response early (GW-U-226).** When the relay stops a response before
   its end (the model server silent past the idle limit, the response deadline, the byte limit, the upstream
   breaking), a warning names the reason, the route, the bytes carried and the seconds it ran. Before, the task
   only said the model's answer was cut off, and nothing said why.
-- **A previewed page with no scripts says nothing about scripts (WEB-U-513).** A page of text, pictures and tables no
-  longer shows "Scripts are running in a sandbox" or Stop scripts; only Reload.
-- **A model's id on Settings > Models is never cut (WEB-E2E-144).** It has its own line, wrapping whole if it must,
-  with its Verified pill under it, so a long language's wider menu no longer cuts it.
 - **One unreadable container no longer stops the sandbox cleanup (SBX-U-022, GW-I-342).** A container carrying this
   installation's labels with one of them malformed made the whole container listing fail, so the sweep removed
   nothing and a task's teardown kept retrying. It is now left out of the listing, logged, and counted on Status as
   something the sweep couldn't remove; the rest are listed and swept as before.
-- **A shell command no longer fails when another process ends during its cleanup (RT-I-064).** After each command the
-  runtime looks through every process for escaped background children; one that ended between being listed and being
-  read (a browser's or an MCP server's child, for example) made that cleanup fail, and the command with it, with
-  "escaped process cleanup failed". A process that has ended is now skipped; the runtime's log names the step of any
-  other cleanup failure.
 ### Changed
 
 - **A helper's failed run says why on the lead's page (GW-I-343, WEB-U-512).** The lead task's line read only
@@ -101,6 +88,34 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   release has no name: it shows by its profile's name, as before, and is woken as before by to-dos, proposals, replies
   to its posts, decisions and reports, and a person's post to the whole channel; only `@` can't reach it. Its owner
   names it in the channel's Members: the row's "…" menu, Rename….
+- Migration `0111_channel_daily_budget` makes a channel's wake budget a daily allowance: every channel starts at 0
+  with no window open, so one the earlier lifetime budget had stopped can be woken again (GW-I-386). A budget someone
+  set keeps its number; one nobody set follows `[channels] wake_budget`, now 2,000,000 tokens a day.
+
+## 18.1.1 (20 November 2026)
+
+A fix release: a shell command no longer fails when another process ends during its cleanup, a previewed page
+without scripts says nothing about scripts, a picture too large to preview no longer offers Expand, a route check's
+long answer can be read with the keyboard, a model's id is never cut on Settings › Models, and the install guide
+names a second installation's settings first. No migration, protocol or configuration change: upgrade in place.
+
+### Fixed
+
+- **A previewed page with no scripts says nothing about scripts (WEB-U-513).** A page of text, pictures and tables no
+  longer shows "Scripts are running in a sandbox" or Stop scripts; only Reload.
+- **A picture too large to preview no longer offers Expand (WEB-U-517).** In the Files panel, an image over the
+  preview's limit (10 MiB) showed its note, "Too large to preview", with an Expand that had nothing to show; it now
+  offers only Download, as a page, spreadsheet or PDF over its limit does.
+- **A route check's long answer can be read with the keyboard (WEB-U-518).** The server's answer under a failed check
+  scrolls when it is long; it could be scrolled only with a mouse. It is now a named area that Tab reaches, in the check
+  and in the Models list.
+- **A model's id on Settings > Models is never cut (WEB-E2E-144).** It has its own line, wrapping whole if it must,
+  with its Verified pill under it, so a long language's wider menu no longer cuts it.
+- **A shell command no longer fails when another process ends during its cleanup (RT-I-064).** After each command the
+  runtime looks through every process for escaped background children; one that ended between being listed and being
+  read (a browser's or an MCP server's child, for example) made that cleanup fail, and the command with it, with
+  "escaped process cleanup failed". A process that has ended is now skipped; the runtime's log names the step of any
+  other cleanup failure.
 
 ## 18.1.0 (20 November 2026)
 
