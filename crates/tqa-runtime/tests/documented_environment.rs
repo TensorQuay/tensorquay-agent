@@ -1,5 +1,7 @@
-//! RT-I-022 (upgrade guard): the sandbox environment an install is documented to configure (`deploy/README.md`, the
-//! test stacks' `deploy/tests/compose.py` and the example configuration `deploy/examples/gateway.toml`, which must agree) sets every environment key each runtime image declares,
+//! RT-I-022 (upgrade guard): the sandbox environment an install is documented to configure (the install files that
+//! `deploy/tools/install_files.py` writes, which the guide's step 2 and `deploy/install.sh` both run; the test stacks'
+//! `deploy/tests/compose.py`; and the example configuration `deploy/examples/gateway.toml`, which must agree) sets every
+//! environment key each runtime image declares,
 //! since the backend refuses an image that adds keys the gateway did not choose; and the Workstation image's `go`
 //! works in a sandbox started with exactly that environment.
 use std::{collections::BTreeMap, time::Duration};
@@ -86,11 +88,22 @@ fn configured(text: &str) -> Result<BTreeMap<String, String>> {
         .collect())
 }
 
-/// The documented environment, checked to be the same in the guide, the test stacks and the example configuration.
+/// The documented environment, checked to be the same in the install files, the test stacks and the example
+/// configuration. The guide's step 2 writes the install files by running the same tool the installer runs, so the
+/// tool's block is the guide's, and the guide is checked to run it.
 fn environment() -> Result<BTreeMap<String, String>> {
     let root = concat!(env!("CARGO_MANIFEST_DIR"), "/../../deploy");
+    let readme = std::fs::read_to_string(format!("{root}/README.md"))?;
+    let step = readme
+        .split_once("### 2. Create the installation")
+        .and_then(|(_, rest)| rest.split("\n### ").next())
+        .ok_or("the guide has no step 2")?;
+    assert!(
+        step.contains("python3 deploy/tools/install_files.py"),
+        "the guide's step 2 writes the install files with deploy/tools/install_files.py"
+    );
     let guide = documented(
-        &std::fs::read_to_string(format!("{root}/README.md"))?,
+        &std::fs::read_to_string(format!("{root}/tools/install_files.py"))?,
         "[sandbox.env]\\n",
     )?;
     let stacks = documented(
@@ -99,7 +112,7 @@ fn environment() -> Result<BTreeMap<String, String>> {
     )?;
     assert_eq!(
         guide, stacks,
-        "deploy/README.md and deploy/tests/compose.py document the same sandbox environment"
+        "deploy/tools/install_files.py and deploy/tests/compose.py set the same sandbox environment"
     );
     // An install that starts from the example as-is must get the same environment, or every image is refused.
     let example = configured(&std::fs::read_to_string(format!(
