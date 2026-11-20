@@ -360,6 +360,7 @@ pub(crate) async fn append_body(
         author: author.clone(),
         parent: parent.map(seq_of).transpose()?,
         body: body.clone(),
+        files: Vec::new(),
     })
 }
 
@@ -415,6 +416,7 @@ pub(crate) async fn read(
             },
             parent: row.parent.map(seq_of).transpose()?,
             body: serde_json::from_value(row.body).map_err(|_| GatewayError::StoreUnavailable)?,
+            files: Vec::new(),
         });
     }
     let next_since = messages.last().map_or(since, |message| message.seq);

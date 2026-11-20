@@ -56,10 +56,11 @@ pub use catalog::{
     ToolCatalogLimit,
 };
 pub use channel::{
-    Author, AuthorKind, ChannelFilter, ChannelMessage, ChannelNoticeKind, ChannelPost, ChannelRole,
-    ChannelWake, ClaimLimit, DEFAULT_PROPOSAL_WINDOW_SECONDS, DecisionRule, MAX_CHANNEL_BODY_BYTES,
-    MAX_CHANNEL_MEMBERS, MAX_CHANNEL_MESSAGES_PER_DAY, MAX_CHANNEL_READ, MAX_CHANNEL_WAIT_SECONDS,
-    MessageBody, MessageType, Outcome, PROPOSAL_WINDOW_SECONDS, ReportStatus, VoteChoice,
+    Author, AuthorKind, ChannelFile, ChannelFilter, ChannelMessage, ChannelNoticeKind, ChannelPost,
+    ChannelRole, ChannelWake, ClaimLimit, DEFAULT_PROPOSAL_WINDOW_SECONDS, DecisionRule,
+    MAX_CHANNEL_BODY_BYTES, MAX_CHANNEL_MEMBERS, MAX_CHANNEL_MESSAGES_PER_DAY, MAX_CHANNEL_READ,
+    MAX_CHANNEL_WAIT_SECONDS, MessageBody, MessageType, Outcome, PROPOSAL_WINDOW_SECONDS,
+    ReportStatus, VoteChoice,
 };
 pub use chunk::{ChunkError, ToolOutputAssembler, chunk_tool_output};
 pub use client::ClientFrame;

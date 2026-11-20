@@ -18,6 +18,7 @@ fn message(seq: u64, kind: AuthorKind, body: MessageBody) -> ChannelMessage {
         },
         parent: None,
         body,
+        files: Vec::new(),
     }
 }
 
