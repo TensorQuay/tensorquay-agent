@@ -59,7 +59,6 @@ describe("WEB-U-080 density tokens", () => {
     ["group-label-gap", "var(--space-1)"],
     ["heading-line-height", "30px"],
     // The sign-in pages' wordmark, smaller (the design direction: the same form, a quieter mark).
-    ["wordmark-height", "24px"],
   ])("sets --%s to %s", (name, value) => {
     expect(declared(root, `--${name}`)).toBe(value);
   });
@@ -182,7 +181,7 @@ describe("WEB-U-080 labels, rows and the active item", () => {
 
   it("keeps the sign-in wordmark small, close above the form", () => {
     expect(
-      declared(rule(globals, ".auth-column .brand-wordmark"), "margin"),
+      declared(rule(globals, ".auth-column .brand-lockup"), "margin"),
     ).toBe("var(--space-2) 0");
   });
 
@@ -220,7 +219,6 @@ describe("WEB-U-451 one type scale, one step up", () => {
     ["display-size", "30px"],
     ["heading-size", "22px"],
     ["heading-line-height", "30px"],
-    ["task-title-size", "18px"],
     ["body-size", "16px"],
     ["body-leading", "1.5"],
     ["small-size", "14px"],

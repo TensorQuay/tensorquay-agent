@@ -9,8 +9,6 @@ import { useRequest } from "../api/use-request";
 import { useSession } from "../auth/use-session";
 import type { Conversation } from "../protocol/generated/api";
 
-import "./catalogue";
-
 /** The task's "keep the sign-in" switch as the Screen panel shows it (WEB-U-475): its state, and a change in flight. */
 export type KeepSignIn = {
   on: boolean;

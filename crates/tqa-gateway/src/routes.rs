@@ -392,6 +392,16 @@ pub(crate) const ROUTES: &[Route] = &[
     },
     Route {
         method: "GET",
+        path: "/api/v1/admin/sandboxes",
+        handler: Handler::AdminSandboxes,
+    },
+    Route {
+        method: "POST",
+        path: "/api/v1/admin/sandboxes/{conversation_id}/stop",
+        handler: Handler::AdminSandboxStop,
+    },
+    Route {
+        method: "GET",
         path: "/api/v1/admin/secrets",
         handler: Handler::AdminSecrets,
     },

@@ -63,6 +63,8 @@ fn turn(lead: bool, after: i64) -> Result<ClientFrame, GatewayError> {
 ///
 /// # Errors
 /// Storage failure, or the message route's refusals.
+/// Only this round's helpers are read for: a helper not in the round (a round-1 helper not brought back) is never woken
+/// by the round's messages, so it stays idle and is brought back as itself if named (GW-I-340, decided on 19 Nov 2026).
 pub(crate) async fn team(state: &State, team: Uuid) -> Result<(), GatewayError> {
     // The lead's place (`placed.after` below) is computed the same way in `people_read::found`, which gives it to the
     // person as `lead.read_seq`: a change to one is a change to both (GW-I-319 checks they agree).
@@ -78,7 +80,7 @@ pub(crate) async fn team(state: &State, team: Uuid) -> Result<(), GatewayError> 
            SELECT m.conversation_id, false, m.last_read_seq, t.channel_id, t.owner_id, \
                   m.state = 'failed' AND m.failed_run, NULLIF(m.failures, 0)::bigint \
            FROM agent_team_members m JOIN agent_teams t ON t.id = m.team_id \
-           WHERE t.id = $1 AND t.state = 'running' AND m.state NOT IN ('starting', 'stopped') \
+           WHERE t.id = $1 AND t.state = 'running' AND m.round = t.round AND m.state NOT IN ('starting', 'stopped') \
                  AND NOT (m.state = 'failed' AND NOT m.failed_run) \
                  AND NOT (m.state = 'failed' AND t.spent_tokens * 100 >= t.token_budget * $2) \
          ), placed AS ( \

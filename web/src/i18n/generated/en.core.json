@@ -363,6 +363,11 @@
     "activity.teamNoProfile": "There's no agent profile named “{name}”.",
     "activity.teamMemberLimit": "The team already has as many helpers as it may. A finished helper counts until it's stopped.",
     "activity.teamEnded": "The team had already ended.",
+    "activity.teamsOff": "Helpers are switched off for this installation.",
+    "activity.teamWasMember": "A task that was a helper can't lead a team.",
+    "activity.teamRuntimeOld": "This task's environment is too old to lead helpers.",
+    "activity.teamEndedForGood": "Its team has ended for good.",
+    "activity.teamBetweenRounds": "Its team's round has ended.",
     "activity.pushOutcomeUnknown": "It isn't clear whether the changes were saved. Check the project before trying again.",
     "activity.pushExpired": "Saving took too long to be allowed, so nothing was saved. Try again.",
     "activity.pushInvalid": "The agent asked to save the changes in a way that isn't possible. Try again, or say where to save them.",
@@ -382,6 +387,7 @@
     "tool.aHelper": "a helper",
     "tool.startedHelper": "Started a helper: {name}",
     "tool.startHelperFailed": "Couldn't start a helper: {name}",
+    "tool.cantLeadHere": "Can't lead helpers here",
     "tool.gaveWork": "Gave {name} more work",
     "tool.askedAllHelpers": "Asked every helper",
     "tool.toldDecision": "Told every helper a decision",
@@ -393,6 +399,7 @@
     "tool.checkedLead": "Checked for messages from the lead",
     "tool.checkedReports": "Checked for reports",
     "tool.wrappedUpTeam": "Wrapped up the team's work",
-    "workspaces.helperCopyName": "{name} (helper copy)"
+    "workspaces.helperCopyName": "{name} (helper copy)",
+    "screen.noticeSandboxStopped": "An administrator stopped this task's sandbox. It starts again when you send a message."
   }
 }

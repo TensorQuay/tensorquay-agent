@@ -315,10 +315,10 @@ function RouteRow({
       </td>
       <td>
         <div className="stack route-name">
-          <div className="data-name" title={item.model}>
-            <span>{item.model}</span>
-            <ProbeBadge probe={item.probe} />
-          </div>
+          {/* The id has its own line, whole (it wraps, never "…"), and its pill under it: a long language's wider menu
+              never cuts the one column a person reads here (WEB-E2E-144, the first hour's finding 5). */}
+          <span className="route-model">{item.model}</span>
+          <ProbeBadge probe={item.probe} />
           {shown.protocol && <CellNote>{t(PROTOCOLS[item.protocol])}</CellNote>}
         </div>
       </td>
@@ -350,13 +350,15 @@ function RouteRow({
         )}
       </td>
       <td className="data-cell-action">
+        {/* Edit in the table; on a phone card the whole card (the 17.2 review's finding 18): the stylesheet stretches
+            it over the card and hides its word, its name still read. */}
         <Link
           href={`${LIST}/${encodeURIComponent(item.name)}`}
-          className="button"
+          className="button route-open"
           data-variant="ghost"
           aria-label={t("models.editName", { name: routeLabel(item) })}
         >
-          {t("models.edit")}
+          <span className="route-open-word">{t("models.edit")}</span>
         </Link>
         <RowMenu
           label={t("models.more", { name: routeLabel(item) })}

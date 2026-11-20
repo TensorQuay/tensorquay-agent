@@ -202,6 +202,16 @@ applies on top. When a run needs a sandbox and no slot is free, in order:
 3. never evict a busy sandbox before its max lifetime, and never evict a pinned one.
 The UI shows slots in use. Diagnostics warn when the budget is smaller than one sandbox.
 
+**The administrator's view (Settings › Operations › Sandboxes; the Sandboxes page design note).** One listing of every
+running sandbox across people, from the admission records: owner, environment, state (starting, working, idle,
+stopping, from the phase and the run activity above), the size it was admitted with, its measured use (the backend's
+`stats`, sampled every 10 s) and when an idle one stops. Nothing of a task but its id: no title, message, file,
+workspace, route or profile. An administrator's **Stop** goes through the eviction path with the same checks minus the
+pinned and keep-sign-in exclusions: a working or starting sandbox, one with a message waiting and a Desktop whose
+screen a person holds are refused; the retire is audited (`admin_audit` area `sandboxes`, action `stop`), counted
+(`tqa_sandbox_retired_total{reason="administrator"}`) and told to the owner as a `sandbox.stopped` notice beside the
+transcript. The task keeps its files and history, and its next message starts a new sandbox.
+
 **Keep-alive pin.** A user may pin a conversation: its sandbox stays live through idle up to the max lifetime, so its
 next message starts without waking a sandbox. Pins count against the user's cap. A pin keeps the sandbox, not
 processes: background processes stop when the command that started them returns, and its answer tells the model so
@@ -582,6 +592,14 @@ pub trait ModelProvider: Send + Sync {
   message with fixed fields (goal, done, pending, decisions, key paths, open errors) rather than free prose. The
   last N turns and every tool result they reference are kept. **Pinned** items are never compacted: the task
   statement, the instruction files and the run notes (§7.1). The summary prompt is fixed and versioned.
+- **In-task recall** (18.1; the Product Owner, 18 Nov 2026: a question about something long ago must be answerable
+  with a tool): each compaction first appends the turns it replaces, as readable text, to the task's
+  `/workspace/.tqa/<conversation_id>/history.md` beside its notes and spill files, once per `through_seq` and
+  atomically (each person's message and answer whole, each tool call with its arguments, each result up to 8 KiB with
+  the size of the rest). The journaled summary then names that file in `key_paths`, and its projection adds one fixed
+  sentence: search it (grep, then read_file) before answering about anything earlier, never guess. No new tool, no
+  protocol change. A task that never compacts writes nothing and sends what it did before; a history that can't be
+  written leaves the compaction as it was (CTX-U-023, CORE-E-043, E2E-RECALL-001).
 - **Dedupe**: a tool result whose content hash equals an earlier result (the same file read twice) replaces the
   earlier copy with a one-line stub pointing at the latest. Small-window local models gain the most from this.
 - Tool result cap: `max_bytes` per result (default 64 KiB, overridable per route), and never more than half of the input
@@ -594,7 +612,7 @@ pub trait ModelProvider: Send + Sync {
 | Tier | What | v1.0 |
 |---|---|---|
 | Working memory | The context window above | yes |
-| Run memory | The journal, plus a **notes file** `/workspace/.tqa/<conversation_id>/notes.md` the agent writes with `write_notes` and reads with `read_notes`; it is pinned and re-injected after every compaction, so what the agent chose to remember survives | yes |
+| Run memory | The journal, plus a **notes file** `/workspace/.tqa/<conversation_id>/notes.md` the agent writes with `write_notes` and reads with `read_notes`; it is pinned and re-injected after every compaction, so what the agent chose to remember survives; and the task's **history file** `/workspace/.tqa/<conversation_id>/history.md`, the text of every summarised turn, which the summary names for the agent to search (§7, in-task recall) | yes |
 | Long-term memory | Cross-conversation and cross-workspace memory | v1.1: explicit, inspectable files per workspace and per user, retrieved through a `memory_search` tool, never injected automatically; no vector database in the core |
 
 ## 8. Tools (`tqa-tools`)
@@ -849,6 +867,14 @@ Rules:
   `tqa_provider_errors_total{route,code}`, `tqa_sandboxes{backend,state}`, `tqa_event_lag_seconds`.
 - An admin diagnostics page (backed by `/readyz` detail) checks the backend, images, KVM, model endpoints and the
   database.
+- The leak verdict (the Sandboxes page design note, §3.6): the periodic sweeps of stray containers and orphaned
+  networks keep their last two passes; something the engine could not remove in two consecutive passes, or found again
+  after a pass tried it, is **left behind**, named by the engine's name with its age, the engine's error code and the
+  command that removes it by hand. The counts are served in `/readyz?detail=1` (`sandboxes`) and as
+  `tqa_sandboxes{backend,state}`, `tqa_sandbox_oldest_seconds`, `tqa_sandbox_unowned{kind}` and
+  `tqa_sandbox_left_behind{kind}`; the names are on the Sandboxes page only. Green when nothing survived, amber when
+  something did, never red: the product keeps running. The gateway creates and labels no volume today, so the
+  `volumes` count is absent (it is defined for a volume workspace mode, should one come).
 
 ## 14. Configuration
 - One validated TOML per server component (`gateway.toml`, `models.toml`); environment variables only for secrets and

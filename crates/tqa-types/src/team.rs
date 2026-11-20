@@ -95,6 +95,21 @@ pub struct StartMember {
     /// An agent profile the person may use, by ID.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub profile: Option<String>,
+    /// A helper brought back: its copy as it is, or a fresh copy of the lead's files (ADR-0034's rounds amendment,
+    /// A3); ignored for a new helper.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub files: Option<BroughtBackFiles>,
+}
+
+/// A brought-back helper's files (ADR-0034's rounds amendment, A3).
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum BroughtBackFiles {
+    /// Its copy as it is, files it changed and never reported included.
+    #[default]
+    Keep,
+    /// A new copy of the lead's files now, replacing its copy.
+    FreshCopy,
 }
 
 /// A stored message's type.
@@ -125,11 +140,13 @@ pub enum TeamMessageType {
     Done,
     /// The gateway's end note, to the lead: how and why the team ended (ADR-0034 point 10).
     Ended,
+    /// The gateway to the team: a round started (ADR-0034's rounds amendment, A5), for people; never read by a model.
+    RoundStarted,
 }
 
 impl TeamMessageType {
     /// Every type.
-    pub const ALL: [Self; 12] = [
+    pub const ALL: [Self; 13] = [
         Self::Assign,
         Self::Question,
         Self::Answer,
@@ -142,6 +159,7 @@ impl TeamMessageType {
         Self::Notice,
         Self::Done,
         Self::Ended,
+        Self::RoundStarted,
     ];
 
     /// The longest text a message of this type carries, in bytes.
@@ -155,7 +173,7 @@ impl TeamMessageType {
             | Self::PersonMessage
             | Self::Ended => 16 * 1024,
             Self::Question | Self::Ask | Self::Decision | Self::Done => 8 * 1024,
-            Self::PersonQuestion | Self::Notice => 4 * 1024,
+            Self::PersonQuestion | Self::Notice | Self::RoundStarted => 4 * 1024,
         }
     }
 
@@ -344,6 +362,10 @@ pub enum TeamMessageBody {
         position: Option<u32>,
         /// The sentence.
         text: String,
+        /// The failed run's code, on a `member_failed` notice for a run that failed: for a page to say why in its own
+        /// words (18.2). Absent on every other notice.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        code: Option<crate::ErrorCode>,
     },
     /// The lead's end of the work.
     Done {
@@ -358,13 +380,27 @@ pub enum TeamMessageBody {
         /// The lead's `done` summary, when it ended that way.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         summary: Option<String>,
-        /// The tokens the team spent.
+        /// The tokens the team spent in this round.
         tokens: EndTokens,
+        /// The round this note ends (ADR-0034's rounds amendment, A1); absent on a note from before rounds.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        round: Option<u32>,
+        /// The tokens of every round so far, this one included (A4); absent on a note from before rounds.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        tokens_all_rounds: Option<i64>,
         /// Each member's reports, by message seq.
         reports: Vec<EndReport>,
         /// The files the members handed back with their reports.
         files: Vec<EndFile>,
         /// The note in the gateway's fixed sentences.
+        text: String,
+    },
+    /// The gateway to the team: its next round started (ADR-0034's rounds amendment, A5). People see it; a lead's
+    /// read never returns it.
+    RoundStarted {
+        /// The round that started.
+        round: u32,
+        /// The gateway's fixed sentence.
         text: String,
     },
 }
@@ -450,6 +486,7 @@ impl TeamMessageBody {
             Self::Notice { .. } => TeamMessageType::Notice,
             Self::Done { .. } => TeamMessageType::Done,
             Self::Ended { .. } => TeamMessageType::Ended,
+            Self::RoundStarted { .. } => TeamMessageType::RoundStarted,
         }
     }
 
@@ -468,7 +505,8 @@ impl TeamMessageBody {
             | Self::PersonMessage { text, .. }
             | Self::Notice { text, .. }
             | Self::Done { text }
-            | Self::Ended { text, .. } => text,
+            | Self::Ended { text, .. }
+            | Self::RoundStarted { text, .. } => text,
         }
     }
 }

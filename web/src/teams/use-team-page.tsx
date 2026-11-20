@@ -160,9 +160,19 @@ export function useTeamPage({
             },
           ]
         : lead && messages.data
-          ? teamLines(messages.data, viewer, open, state)
+          ? teamLines(messages.data, viewer, open, state, team.data?.helpers)
           : NO_LINES,
-    [unreadable, lead, messages.data, viewer, open, state, t, rereadLog],
+    [
+      unreadable,
+      lead,
+      messages.data,
+      viewer,
+      open,
+      state,
+      team.data?.helpers,
+      t,
+      rereadLog,
+    ],
   );
   const [problem, setProblem] = useState<MessageKey | null>(null);
   // A stopping or ended team waits for no one: the message box is the lead's own again (ADR-0034 S6).
@@ -253,7 +263,8 @@ export function useTeamPage({
   );
   // A lead whose team its person stopped (WEB-U-413): when, from the team's end in its log; null while still stopping.
   const stopReason = team.data?.stop_reason;
-  const endedAt = (messages.data ?? []).find(
+  // The newest round's end: a team that ran in rounds has an end note per round.
+  const endedAt = (messages.data ?? []).findLast(
     (message) => message.type === "ended",
   )?.at;
   const stoppedByPerson = useMemo(

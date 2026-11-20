@@ -20,7 +20,7 @@ import { StopHelperDialog, StopTeamDialog } from "./StopDialogs";
 import type { HelperView } from "./team-view";
 import { budgetLine, endedLine } from "./team-words";
 import { TeamEndNote } from "./TeamEndNote";
-import { TeamMessageLine } from "./TeamMessageLine";
+import { type LineHelper, TeamMessageLine } from "./TeamMessageLine";
 import { TeamStrip } from "./TeamStrip";
 import { teamKey, teamMessagesKey } from "./use-team";
 import { type ClosedWhy, WaitingCard } from "./WaitingCard";
@@ -229,6 +229,7 @@ export function teamLines(
   viewer: string | null,
   open?: number | null,
   state?: string,
+  helpers?: readonly LineHelper[],
 ): TimedLine[] {
   const answered = new Set(
     messages.flatMap((message) =>
@@ -246,7 +247,8 @@ export function teamLines(
     ),
   );
   // Why a question is no longer needed: the team's end and its reason, a team still stopping, or a newer question.
-  const end = messages.find((message) => message.type === "ended");
+  // The newest round's end (ADR-0034's rounds amendment): a team that ran in rounds has an end note per round.
+  const end = messages.findLast((message) => message.type === "ended");
   const why: ClosedWhy =
     open === null
       ? end
@@ -276,7 +278,10 @@ export function teamLines(
           why={why}
         />
       ) : (
-        <TeamMessageLine message={messageView(message, viewer)} />
+        <TeamMessageLine
+          message={messageView(message, viewer)}
+          helpers={helpers}
+        />
       ),
   }));
 }

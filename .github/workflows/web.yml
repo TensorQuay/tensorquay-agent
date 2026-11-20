@@ -48,3 +48,13 @@ jobs:
       - name: Install the fonts the interface lists for Linux
         run: sudo apt-get install --yes --no-install-recommends fonts-noto-core fonts-noto-cjk
       - run: corepack pnpm run test:e2e
+      # The UX pass's 120 pictures (WEB-E2E-143), kept for the release review (docs/release.md, The UX review); only
+      # those, for 7 days, and also when the suite fails, so a failing screen's picture can be read.
+      - name: Keep the UX pass's pictures
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ux-pass
+          path: web/test-results/ux-pass/
+          retention-days: 7
+          if-no-files-found: warn

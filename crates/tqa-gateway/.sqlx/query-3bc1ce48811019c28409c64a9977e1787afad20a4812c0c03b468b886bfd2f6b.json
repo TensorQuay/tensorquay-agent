@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE conversations SET profile = jsonb_set(profile, '{tools}', to_jsonb($2::text[])) WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3bc1ce48811019c28409c64a9977e1787afad20a4812c0c03b468b886bfd2f6b"
+}

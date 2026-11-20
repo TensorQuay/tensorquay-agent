@@ -2499,8 +2499,16 @@
       "description": "What was wrong with a text-protocol reply. An unknown `kind` from a newer runtime reads as [`Self::Other`].",
       "oneOf": [
         {
-          "description": "The call block is a JSON object without a `name` key.",
+          "description": "The call block is a JSON object without a key naming its tool (`name`, `function` or `tool`).",
           "properties": {
+            "keys": {
+              "description": "The keys the object had, identifier-like ones of at most [`MAX_MODEL_NAME_BYTES`], never a value, so a\nreader can tell arguments written at the top level from the tool named under another key (18.1 item F);\nat most [`MAX_PROBLEM_NAMES`]. Absent from an older runtime's.",
+              "items": {
+                "$ref": "#/definitions/ProblemName"
+              },
+              "maxItems": 8,
+              "type": "array"
+            },
             "kind": {
               "const": "no_name",
               "type": "string"
@@ -4324,6 +4332,11 @@
           "const": "screen.sign_in_released",
           "description": "A person turned it off: the profile is emptied at the next run's end, or at once when no run is going.",
           "type": "string"
+        },
+        {
+          "const": "sandbox.stopped",
+          "description": "An administrator stopped the task's sandbox from the Sandboxes page (18.1): the task keeps its files and\nhistory, and its next message starts a new sandbox.",
+          "type": "string"
         }
       ]
     },
@@ -4863,12 +4876,15 @@
               "type": "string"
             },
             "by": {
-              "allOf": [
+              "anyOf": [
                 {
                   "$ref": "#/definitions/ScreenPerson"
+                },
+                {
+                  "type": "null"
                 }
               ],
-              "description": "Who took over, handed back or signed out."
+              "description": "Who took over, handed back or signed out; absent on `sandbox.stopped`, which never names the administrator\nto the task's owner (the audit row says who)."
             },
             "ended": {
               "anyOf": [
@@ -4917,7 +4933,6 @@
           "required": [
             "type",
             "kind",
-            "by",
             "at",
             "after_seq"
           ],

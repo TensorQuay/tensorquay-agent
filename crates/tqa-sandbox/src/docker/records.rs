@@ -2,6 +2,26 @@ use crate::{BackendKind, SandboxError, SandboxHandle, SandboxStats};
 use bollard::models::{ContainerStatsResponse, ContainerSummary};
 use std::time::{Duration, SystemTime};
 
+/// This instance's containers as the engine listed them: each readable one as a handle, and the engine id of each whose
+/// labels can't be read, left out so one bad neighbour never fails the whole listing (SBX-U-022), each logged.
+pub(super) fn listing(containers: Vec<ContainerSummary>) -> (Vec<SandboxHandle>, Vec<String>) {
+    let mut handles = Vec::new();
+    let mut unreadable = Vec::new();
+    for container in containers {
+        let id = container.id.clone().unwrap_or_default();
+        if let Ok(found) = handle(container) {
+            handles.push(found);
+        } else {
+            tracing::warn!(
+                container = %id.chars().take(12).collect::<String>(),
+                "a container with this instance's labels couldn't be read; left out of the listing"
+            );
+            unreadable.push(id);
+        }
+    }
+    (handles, unreadable)
+}
+
 pub(super) fn handle(container: ContainerSummary) -> Result<SandboxHandle, SandboxError> {
     let invalid = || SandboxError::Backend("invalid sandbox labels in container listing".into());
     let labels = container.labels.ok_or_else(invalid)?;
@@ -15,8 +35,14 @@ pub(super) fn handle(container: ContainerSummary) -> Result<SandboxHandle, Sandb
         .ok_or_else(invalid)?
         .parse::<u64>()
         .map_err(|_| invalid())?;
+    // The engine's own creation time decides the age (SBX-U-021): the label, which anyone who can label a container
+    // sets, is still required and checked, and stands in only where the engine gives no time.
+    let seconds = container
+        .created
+        .and_then(|created| u64::try_from(created).ok())
+        .unwrap_or(timestamp);
     let created_at = SystemTime::UNIX_EPOCH
-        .checked_add(Duration::from_secs(timestamp))
+        .checked_add(Duration::from_secs(seconds))
         .ok_or_else(invalid)?;
     let id = container
         .id

@@ -97,6 +97,8 @@ async fn sbx_u_006_the_periodic_pass_only_removes_orphans_and_keeps_a_stuck_ones
             removed: 0,
             failed: 1,
             legacy: sweep_legacy()?,
+            removed_names: vec![],
+            failed_names: vec![("tqa-sbx-2".into(), "sandbox.backend")],
         }
     );
     assert_eq!(

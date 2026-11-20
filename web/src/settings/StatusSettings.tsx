@@ -13,6 +13,7 @@ import { Skeleton } from "../ui/Skeleton";
 import type { TemplatesApi } from "./admin/templates";
 import { unavailableKey } from "./environment-copy";
 import { settingsApi } from "./requests";
+import { reasonWords } from "./sandbox-reason";
 
 /**
  * The readiness checks an administrator can act on, in reading order, each with what its failure means and what to
@@ -91,7 +92,8 @@ function Status({ environments }: { environments?: TemplatesApi | undefined }) {
   return (
     <div className="stack">
       <p className="type-small muted">{t("health.intro")}</p>
-      {/* The one line first: can new tasks start right now. */}
+      {/* The one line first: can new tasks start right now. Then one list, its lines in one body size and its sections
+          named as labels (the 17.2 review's finding 13, decided on 18 Nov 2026). */}
       <div className="stack status-verdict">
         {/* Polite and live, so a change after Check again or a 30 s read is heard; a read that leaves it as it was says
             nothing (an accessibility review before 17.0). Checked at, below, isn't live. */}
@@ -104,12 +106,10 @@ function Status({ environments }: { environments?: TemplatesApi | undefined }) {
             ? t("health.canStart")
             : t("health.cannotStart", { count: Math.max(failed.length, 1) })}
         </p>
-        <p className="type-small muted">
-          {t("health.checkedAt", { time: checkedAt })}
-        </p>
+        <p className="muted">{t("health.checkedAt", { time: checkedAt })}</p>
         {/* Always there and live, empty while reads succeed, so a failed read is heard when it happens. */}
         {/* Quiet: an older read is shown, nothing is wrong with the installation (WEB-U-361). */}
-        <p role="status" className="type-small muted">
+        <p role="status" className="muted">
           {status.isError ? t("health.readFailed") : null}
         </p>
       </div>
@@ -120,7 +120,7 @@ function Status({ environments }: { environments?: TemplatesApi | undefined }) {
           className="stack status-problem"
           aria-labelledby={`status-${key}`}
         >
-          <h2 id={`status-${key}`} className="type-heading">
+          <h2 id={`status-${key}`} className="type-body-strong">
             {t(label)}
           </h2>
           <p>
@@ -131,13 +131,13 @@ function Status({ environments }: { environments?: TemplatesApi | undefined }) {
         </section>
       ))}
       {passed.length > 0 && (
-        <p className="type-small muted">
+        <p className="muted">
           {t("health.passing", {
             checks: passed.map(({ label }) => t(label)).join(", "),
           })}
         </p>
       )}
-      <p className="type-small muted">
+      <p className="muted">
         {t(microVm ? "health.runsMicroVm" : "health.runsDocker")}
       </p>
       {templates.default !== null && (
@@ -150,6 +150,7 @@ function Status({ environments }: { environments?: TemplatesApi | undefined }) {
       )}
       <KeptGitCredentials kept={status.data.git_credentials_kept} />
       <ActiveRuns active={status.data.runs_active} />
+      <SandboxesLine sandboxes={status.data.sandboxes} />
       <div>
         <Button
           variant="secondary"
@@ -175,7 +176,7 @@ function ActiveRuns({ active }: { active: ReadyDetail["runs_active"] }) {
   if (active === null) return null;
   return (
     <section className="stack" aria-labelledby={heading}>
-      <h2 id={heading} className="type-heading">
+      <h2 id={heading} className="type-body-strong">
         {t("health.activeTitle")}
       </h2>
       {/* A polite live line, so a screen reader hears the count when it changes while someone waits for a gap; the 30 s
@@ -185,6 +186,69 @@ function ActiveRuns({ active }: { active: ReadyDetail["runs_active"] }) {
           ? t("health.activeNone")
           : t("health.activeSome", { count: active })}
       </p>
+    </section>
+  );
+}
+
+/** "7 h" or "40 min": how long the oldest sandbox has run, to the hour past one. */
+/** A sandbox's age as the line says it: minutes, then hours, then days from two days on (never "224 h"). */
+function age(seconds: number, t: ReturnType<typeof useT>): string {
+  const minutes = Math.max(1, Math.round(seconds / 60));
+  const hours = Math.round(minutes / 60);
+  if (minutes < 60) return t("health.minutes", { count: minutes });
+  return hours < 48
+    ? t("health.hours", { count: hours })
+    : t("limits.days", { count: Math.floor(hours / 24) });
+}
+
+/**
+ * The leak verdict (the Sandboxes page design note, §3.6): how many sandboxes run, and whether the sweeps left
+ * anything unowned behind. Green names nothing; amber names what, why, the five-minute retry and the page where each
+ * survivor is listed with its remove command. The gateway always reports it (the answer requires it).
+ */
+function SandboxesLine({ sandboxes }: { sandboxes: ReadyDetail["sandboxes"] }) {
+  const t = useT();
+  const heading = useId();
+  const left = sandboxes.left_behind;
+  const kinds = (["containers", "networks", "volumes"] as const).filter(
+    (kind) => (left[kind] ?? 0) > 0,
+  );
+  const amber = kinds.length > 0;
+  const oldest = age(sandboxes.oldest_seconds, t);
+  return (
+    <section className="stack" aria-labelledby={heading}>
+      <h2 id={heading} className="type-body-strong">
+        {t("health.sandboxesTitle")}
+      </h2>
+      {/* A polite live line: a verdict that turns amber while someone watches is heard, as the active count is. */}
+      <p
+        role="status"
+        className="status-sandboxes-line"
+        data-tone={amber ? "warn" : "ok"}
+      >
+        {amber
+          ? t("health.sandboxesAmber", {
+              running: sandboxes.running,
+              oldest,
+              what: kinds
+                .map((kind) =>
+                  t("health.sandboxesWhat", { count: left[kind] ?? 0, kind }),
+                )
+                .join(", "),
+              reason: reasonWords(left.reason, t),
+            })
+          : t("health.sandboxesGreen", { running: sandboxes.running, oldest })}
+      </p>
+      {sandboxes.unowned.volumes === undefined && (
+        <p className="type-small muted">{t("health.sandboxesNoVolumes")}</p>
+      )}
+      {amber && (
+        <p className="type-small">
+          <Link href="/settings/sandboxes#left-behind">
+            {t("health.openSandboxes")}
+          </Link>
+        </p>
+      )}
     </section>
   );
 }
@@ -203,7 +267,7 @@ function KeptGitCredentials({
   if (kept === null || kept.not_web_address + kept.waiting === 0) return null;
   return (
     <section className="stack" aria-labelledby={heading}>
-      <h2 id={heading} className="type-heading">
+      <h2 id={heading} className="type-body-strong">
         {t("health.gitKeptTitle")}
       </h2>
       {kept.not_web_address > 0 && (
@@ -246,7 +310,7 @@ function DefaultEnvironment({
   )?.display_name;
   return (
     <section className="stack" aria-labelledby="status-default-environment">
-      <h2 id="status-default-environment" className="type-heading">
+      <h2 id="status-default-environment" className="type-body-strong">
         {t("health.defaultEnvironment")}
       </h2>
       <p className="environment-pills">
@@ -270,8 +334,8 @@ function DefaultEnvironment({
       </p>
       {!offered && (
         <>
-          <p className="type-small">{t(unavailableKey(reason))}</p>
-          <p className="type-small">
+          <p>{t(unavailableKey(reason))}</p>
+          <p>
             <Link href="/settings/environments">
               {t("health.openEnvironments")}
             </Link>
@@ -279,9 +343,7 @@ function DefaultEnvironment({
         </>
       )}
       {pending !== null && pending > 0 && (
-        <p className="type-small muted">
-          {t("health.checksPending", { count: pending })}
-        </p>
+        <p className="muted">{t("health.checksPending", { count: pending })}</p>
       )}
     </section>
   );

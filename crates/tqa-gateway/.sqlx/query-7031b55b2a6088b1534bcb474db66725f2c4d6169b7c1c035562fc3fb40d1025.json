@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO agent_team_members (conversation_id, team_id, name, role, workspace, round) SELECT $1, $2, $3, $4, $5, round FROM agent_teams WHERE id = $2 ON CONFLICT (team_id, lower(name)) DO NOTHING RETURNING name",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "agent_team_members",
+            "name": "name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "7031b55b2a6088b1534bcb474db66725f2c4d6169b7c1c035562fc3fb40d1025"
+}

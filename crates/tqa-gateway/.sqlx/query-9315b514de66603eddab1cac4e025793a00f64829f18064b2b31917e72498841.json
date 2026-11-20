@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE conversations h SET mcp_servers = ARRAY(SELECT x FROM unnest(h.mcp_servers) WITH ORDINALITY AS a(x, i) WHERE x = ANY(l.mcp_servers) ORDER BY i), connectors = ARRAY(SELECT x FROM unnest(h.connectors) WITH ORDINALITY AS a(x, i) WHERE x = ANY(l.connectors) ORDER BY i) FROM conversations l WHERE h.id = $1 AND l.id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9315b514de66603eddab1cac4e025793a00f64829f18064b2b31917e72498841"
+}

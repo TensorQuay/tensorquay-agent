@@ -48,6 +48,16 @@ that needs one starts it, uses it and gets its output in the same command. The k
 workspace, not processes. This is what the shell and runtime already do; it is recorded so the tests and documents
 stop promising more (TEST-PLAN TOOL-U-006, TOOL-U-008).
 
+## Amendment: an administrator's stop (17 Nov 2026)
+
+An administrator may retire another person's idle sandbox from the Sandboxes page (the design note of 17 Nov 2026).
+The stop is eviction's decision without its pinned and keep-sign-in exclusions: a sandbox whose run is active, one
+still starting, one with a message queued or sending, and a Desktop whose screen a person holds are refused, so an
+administrator never ends a person's running work (the person can cancel it themselves). The retire is the same the
+reaper delivers (`Teardown::Administrator` through the switch flag); the task keeps its workspace and journal, and its
+next message starts a new sandbox. It is audited, counted and told to the owner as a notice. Activeness stays what the
+lifecycle events say, never what the page shows: the listing's states are read from the same events and phases.
+
 ## Links
 
-- ARCHITECTURE §4.4; ADR-0020; TEST-PLAN GW-I-010, RT-I-004, TOOL-U-008
+- ARCHITECTURE §4.4; ADR-0020; TEST-PLAN GW-I-010, RT-I-004, TOOL-U-008; the Sandboxes page design note

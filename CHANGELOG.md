@@ -12,6 +12,174 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   the first administrator is. It then pulls the release, writes what the guide's steps make by hand, starts it, and
   creates that administrator. It never changes an existing installation. The guide's steps by hand stay as they are.
 
+### Fixed
+
+- **The gateway logs why it ended a model's response early (GW-U-226).** When the relay stops a response before
+  its end (the model server silent past the idle limit, the response deadline, the byte limit, the upstream
+  breaking), a warning names the reason, the route, the bytes carried and the seconds it ran. Before, the task
+  only said the model's answer was cut off, and nothing said why.
+- **A previewed page with no scripts says nothing about scripts (WEB-U-513).** A page of text, pictures and tables no
+  longer shows "Scripts are running in a sandbox" or Stop scripts; only Reload.
+- **A model's id on Settings > Models is never cut (WEB-E2E-144).** It has its own line, wrapping whole if it must,
+  with its Verified pill under it, so a long language's wider menu no longer cuts it.
+- **One unreadable container no longer stops the sandbox cleanup (SBX-U-022, GW-I-342).** A container carrying this
+  installation's labels with one of them malformed made the whole container listing fail, so the sweep removed
+  nothing and a task's teardown kept retrying. It is now left out of the listing, logged, and counted on Status as
+  something the sweep couldn't remove; the rest are listed and swept as before.
+### Changed
+
+- **A helper's failed run says why on the lead's page (GW-I-343, WEB-U-512).** The lead task's line read only
+  "places failed."; it now names the reason in plain words ("The model's reply was cut off at its output limit"),
+  links to the helper's task, and while the helper works again says so instead of "failed". A team's
+  `member_failed` notice carries the run's failure code in a new optional `code` field.
+
+## 18.1.0 (20 November 2026)
+
+A feature release: administrators see every running sandbox and can stop an idle one, agent teams work in rounds,
+a long task can look back past its summary, a built web app previews as it is, `edit_file` says what it found, eight
+draft languages have nearly all of the app's words, and the deploy guide gives measured reference hardware. Two
+database migrations (0106 and 0107), applied in place; no configuration key changes.
+
+### Added
+
+- **A built web app's own paths work in the preview (GW-U-223, GW-U-224, GW-I-321).** A default Vite or Create
+  React App build names its files from the server's root (`/assets/app.js`), which a preview's address can't serve,
+  so the page stayed blank. The preview now moves those paths under its own address in the page's HTML and in its
+  stylesheets; scripts are never changed. A static export's own pages open by their links (`/about` answers
+  `about.html`). Each previewed page carries a small reporter that tells the Files panel what it couldn't load.
+- **Administrators see every running sandbox, and can stop an idle one (Settings › Operations › Sandboxes;
+  GW-U-216 to 220, SEC-066, WEB-U-486 to 489, WEB-E2E-129).** Each row names its owner, environment, state and when it
+  stops, with its CPU and memory against its size; the page shows the slots in use and anyone waiting. Stop now retires
+  an idle sandbox the same way its idle window would: the task and its files stay, its next message starts a new one,
+  and its owner reads a notice saying an administrator stopped it. A working sandbox is never stopped. Each stop is
+  audited. The page shows nothing of a task but its owner and environment. Settings › Status now says whether a sweep
+  left anything behind (a container, a network, or a volume in volume mode) and why, and the page's Left behind section
+  gives each one's remove command. One database migration.
+- **The agent builds web apps that preview (PROMPT-U-028).** Where a web app can be built (Node, with the npm
+  registry among the allowed sites), the instructions say the Files panel previews a built folder under a
+  sub-path: build with relative paths (Vite `base: './'`, Create React App `"homepage": "."`) and a hash router,
+  and say which `index.html` to open. A default build's root paths and a browser-history router show a blank
+  frame in the preview. Instruction version 15; anywhere else the instructions are unchanged.
+- **A long task can look back past its summary (CTX-U-023, CORE-E-043, E2E-RECALL-001).** When a long task is
+  summarised to fit the model's window, the summarised turns are now kept as text in the task's
+  `.tqa/<id>/history.md`, and the summary tells the model to search it before answering about anything earlier. Ask
+  about a detail from an hour ago and the agent looks it up with its usual file tools, instead of guessing. A task
+  that is never summarised is unchanged.
+- **A team works in rounds (ADR-0034's rounds amendment; GW-I-330 to GW-I-342, E2E-AGENTS-040, E2E-AGENTS-041).**
+  When a lead task's team has stopped, a follow-up you send it can start the next round: the lead brings back helpers
+  by name, each with its history and its copy of the files (or a fresh copy), and adds new ones, and the round has a
+  fresh budget and time of its own. The page shows the round ("Round 2"), which helpers are "Not in this round", a
+  line where a round starts and each round's own summary. What you write to a helper between rounds is part of its
+  task when it comes back. One database migration (0107).
+- **Eight draft languages have about 99 % of the app's words (WEB-U-465).** Spanish, French, Japanese, Korean, Malay,
+  Tamil, Thai and Vietnamese had part of the app translated; each now has about 99 % of its words, with English where
+  a machine translation failed its checks. They stay drafts until a native speaker reviews them; English and
+  Simplified Chinese are complete. The Settings menu now widens to its longest label, so no section's name wraps in
+  any language.
+
+### Changed
+
+- **The rest of the 17.2 design review (18.1; WEB-U-498, WEB-U-499, WEB-U-501 to WEB-U-504, WEB-E2E-136).** A
+  Settings form's Advanced and its other disclosures are quiet toggles beside their bold section labels. The usage
+  chart is drawn in ink with its busiest day's tokens on its scale, and each share is its percentage on a thin track.
+  Status reads as one list, in one text size. Sign-in, setup, joining and the 404 page show the same lockup as the
+  app, the mark with "TensorQuay Agent". On a phone a Models card opens its route when tapped. In the dark theme your
+  messages have a thin edge, so they stand apart from the page.
+
+- **`edit_file` says what it found, so a model can fix its next call by itself (18.1; TOOL-U-004, CORE-E-041).** An
+  `old_text` that matches more than once lists the matching lines with their text (past ten, how many more, counted to a
+  thousand); one that matches nowhere names the nearest lines with their numbers and text, never a looser match; the
+  same refused call sent a second time also returns the file's lines around them, and a third still stops the run. An
+  edit whose `old_text` and `new_text` are the same is answered "no change" and leaves the file as it was; among real
+  edits it is skipped and said.
+- **`write_file`'s `create_parents` is optional (TOOL-U-003),** read as false when absent.
+- **The text tool-call route reads `tool` or `function` for the tool's name and `parameters` for its arguments
+  (PROMPT-U-024),** as the native route does; a call block without a name says which keys it had (`no_name`'s new
+  optional `keys`, PROTO-U-044; never a value).
+- **The task's header is one quiet line (WEB-U-495, WEB-E2E-135).** The title is in regular type at body size, and
+  the workspace it is in (and the profile it came from) follows it in grey on the same line, giving way first when
+  room is short. A finished task no longer says "Done" there: the end of the transcript and the sidebar say it, and a
+  screen reader still hears it. Every other state (Working…, Waiting for you, Failed, Stopped) stays on the line.
+- **A file opens beside the chat (WEB-U-494, WEB-E2E-134).** Expand on a file in the Files panel no longer opens a
+  dialog over the conversation: the file takes about 60 % of the page beside the chat, which stays readable and usable,
+  and a divider between them can be dragged or moved with the arrow keys; each person's choice is remembered in their
+  browser. Full width gives the file the whole page (Show chat brings the chat back), and Escape steps back. Every
+  kind of file that previews can be opened this way now, and a web page's preview is never loaded twice. On a phone the
+  panel takes the screen as before, with a back arrow.
+- **The transcript shows no scrollbar until you scroll (WEB-U-485, WEB-E2E-132).** A long task's transcript had the
+  browser's scrollbar beside it all the time, taking its width. Now a thin bar shows over the transcript's edge while
+  you scroll it, by wheel, touch, keys or Jump to latest, or while the pointer is at that edge, and fades about a
+  second after; it never shows while the page follows a running task's new output. It can be dragged, and it takes
+  no width, so nothing moves when it shows. The whole main area scrolls the transcript now, its text still the
+  centred column: a wheel or trackpad over the side margins scrolls it, and the bar sits at the area's right edge (the
+  Files panel's edge when it is open). Keys, focus and screen readers use the transcript as before. With forced
+  colours the system's scrollbar stays.
+
+- **For contributors: the web style check keeps type and radii to the tokens (WEB-U-509).** `pnpm tokens` (part of
+  `pnpm check`) now also refuses a font size, weight, line height, letter spacing or radius that isn't one of the
+  design tokens, and named colours, in CSS, style objects and class names. A style that must stay off the scale says
+  why on its line (`token-lint: allow <rule> (<reason>)`) and is listed in `web/scripts/token-allowances.txt`; five
+  are, today. Nothing on screen changes.
+- **For contributors: every shared component is in the design reference, with its states (WEB-U-510).** `/design`
+  (development and test builds) now draws each component in `web/src/ui` from one registry, in both themes, and
+  `pnpm check` fails for a new component that has no entry there. Nothing in the product changes.
+
+- **For contributors: a UX pass on every pull request, and a review of what changed at each release (WEB-E2E-142,
+  WEB-E2E-143).** Thirty screens at a desktop's and a phone's width, light and dark, must not scroll sideways, must
+  draw with the design tokens' sizes, weights and radii (checked in the page itself) and must pass the accessibility
+  check. `pnpm ux:compare` lists the screens that changed since the last release for the release review
+  (`docs/release.md`).
+
+### Fixed
+
+- **A long owner address on the Sandboxes page stays in its column (WEB-U-486, WEB-E2E-129).** An address such as
+  member@example.invalid ran under the State column with its pill over it; it now wraps after its @ or a dot, as
+  People's addresses do.
+- **A built web app that keeps its data in the browser previews (GW-U-224, WEB-E2E-140).** The preview runs a
+  page in a sandbox without same-origin access, where reading `localStorage` or `sessionStorage` throws, so an app
+  that keeps its data there (a to-do list, most small apps) stopped before drawing and the panel told you to use a
+  hash router. The page is now lent an in-memory storage that lasts until the preview reloads, and a page that stops
+  on an error gets no router advice. The sandbox also blocks forms, so the browser never told an app its form was sent
+  and an Add button did nothing: a click on a submit button, or Enter in a form without one, now runs the page's own
+  form handler. Nothing is ever submitted: the sandbox still refuses it.
+- **A page preview's note reads on one line (WEB-E2E-143).** In the Files panel, "Scripts are running in a sandbox"
+  was squeezed to a word or two a line beside Stop scripts and Reload; where the row is narrow, the two actions now
+  take a line of their own under it.
+- **A button's label is never cut (WEB-U-511, WEB-E2E-141).** A label longer than the room it has, such as a long
+  translation in a narrow dialog, now wraps onto a second line inside its button instead of running past its edges.
+  Checked in all ten languages at a phone's and a desktop's width.
+- **A task that may not lead helpers is told why, never "unknown tool" (TOOL-U-147, RT-I-062, GW-I-329,
+  WEB-U-497).** A lead whose team had ended, asked to continue, called its old team tools and was answered three
+  times that no such tool exists, while the page said "Couldn't start a helper" each time. Now the gateway says why
+  a task may not lead (helpers switched off, the task was a helper, its environment too old, or its team has ended),
+  the task is answered in one plain sentence that tells it to do the work itself and say so, and the page reads
+  "Can't lead helpers here" with the reason.
+
+- **Status says a sandbox's age in days from two days on (WEB-U-489).** The Sandboxes line said "the oldest for
+  224 h"; it now says "9 days". Under two days it still says hours, and under an hour minutes.
+
+### Upgrade notes
+
+- **Two migrations, applied by the gateway at its start, in place, with your data kept: back up the database
+  first.** 0106 records an administrator's stop on the Sandboxes page; 0107 adds agent-team rounds. Follow
+  [Upgrading to a new release](deploy/README.md#upgrading-to-a-new-release): it backs up with `pg_dump`, and its way
+  back restores the dump into an empty database, since a restore over 18.1's tables can't take them back to 18.0.
+
+## 18.0.2 (19 November 2026)
+
+A fix release: a tool call whose number or true/false a model sent as text runs instead of being refused until
+the run stopped. No migration, protocol or configuration change: upgrade in place.
+
+### Fixed
+
+- **A tool call whose number or true/false arrives as text still runs (TOOL-U-146).** One model server sends an
+  optional number, such as the shell's time limit, as `"30000"` instead of `30000`. The tools refused it, and a model
+  that couldn't see why sent it again until the run stopped. The agent's own tools now take an exact number, `true`,
+  `false` or `null` written as text where the setting takes no text. Anything else is still refused, and the refusal
+  now says what was sent (`expected null or integer, got a string`). Tools from a connected server get their
+  arguments exactly as the model wrote them, as before. The shell had lost its own argument rules inside the
+  runtime's process-cleanup wrapper, so a blank or `null` optional value reached it too; it now has them.
+
 ## 18.0.1 (18 November 2026)
 
 A fix release: a PDF read's step names its pages, the Screen panel's ⋯ menu fits its items and stays inside its
@@ -19,6 +187,11 @@ dialog, the expanded screen picture keeps its frame on a phone, and a PDF's page
 app moves to Next.js 16.4.5. No migration, protocol or configuration change: upgrade in place with 18.0.1's images.
 
 ### Fixed
+
+- **Two details from the 18.0.1 live look (WEB-U-492, WEB-U-493, WEB-E2E-133).** On a phone the Files panel wrote a
+  file's size on two lines beside Expand ("661.6 / kB"); the size now reads on one line, and the actions move under it
+  when the row can't hold all three. A PDF read's output in its step scrolled sideways, its paragraphs one long line
+  each; it now wraps them, a long address or word included, while a code or text file's read keeps its lines.
 
 - **A PDF read's step names the pages it read, not lines (WEB-U-482).** After reading pages 1 and 2 of a PDF, the
   step said "Read uploads/report.pdf lines 1–2"; it now says "pages 1–2", in every language. The result's own page

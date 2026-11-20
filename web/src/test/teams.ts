@@ -24,6 +24,7 @@ export function helper(
     last_message: null,
     // As the gateway decides it for a running team; a failed helper that had run passes can_stop: true itself.
     can_stop: !["stopped", "failed"].includes(extra.state ?? "working"),
+    round: 1,
     ...extra,
   };
 }
@@ -48,6 +49,17 @@ export function team(extra: Partial<Team> = {}): Team {
       }),
     ],
     version: 9,
+    round: 1,
+    rounds: [
+      {
+        round: 1,
+        started_at: "2026-10-02T20:00:00Z",
+        ended_at: null,
+        stop_reason: null,
+        budget: { tokens: 2_000_000, spent: 412_000 },
+      },
+    ],
+    tokens_all_rounds: 412_000,
     ...extra,
   };
 }

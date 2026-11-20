@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { RotateCw } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { api } from "../api/client";
 import { mintSitePass } from "../api/previews";
@@ -12,7 +12,8 @@ import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
 
 import "./changes-catalogue";
-import { blockedHosts, pageHosts } from "./page-hosts";
+import { blockedHosts, readPage } from "./page-hosts";
+import { type SiteReport, siteReportLine, siteReportPart } from "./site-report";
 
 /** The hosts the offline line names before it counts the rest. */
 const NAMED_HOSTS = 3;
@@ -56,18 +57,23 @@ export function PagePreview({
   const t = useT();
   const framed = size <= limit;
   // Nothing to say while it's read, or if it can't be: the sandbox note stands.
-  const hosts = useQuery({
-    queryKey: ["pageHosts", conversationId, path, etag],
-    queryFn: async ({ signal }) =>
-      pageHosts(
+  const read = useQuery({
+    queryKey: ["pageRead", conversationId, path, etag],
+    queryFn: async ({ signal }) => {
+      const html =
         text ??
-          (await (await api.fileBlob(conversationId, path, signal)).text()),
-      ),
+        (await (await api.fileBlob(conversationId, path, signal)).text());
+      // Its hosts, and whether it runs any script of its own: a page with none says nothing about scripts (WEB-U-513).
+      return readPage(html);
+    },
     enabled: framed,
     staleTime: Infinity,
     // One more read after a failure (a dropped connection), so one bad moment doesn't hide the line for this version.
     retry: 1,
   }).data;
+  const hosts = read?.hosts;
+  // Unknown until the page is read: the sandbox note stands meanwhile.
+  const scriptless = read?.scripts === false;
   // The page's folder as a site; until it answers, nothing is framed (no flash of the offline view). The pass lives 15
   // minutes from its last use; it's minted again after 10.
   const slash = path.lastIndexOf("/");
@@ -93,13 +99,36 @@ export function PagePreview({
   const left = !served && loads.frame === frame && loads.count > 1;
   const blocked =
     served?.network && hosts ? blockedHosts(hosts, served.network) : [];
-  const named = (list: readonly string[]) =>
-    new Intl.ListFormat(t.locale, { type: "conjunction" }).format([
+  const named = (list: readonly string[], beyond = 0) => {
+    const more = Math.max(0, list.length - NAMED_HOSTS) + beyond;
+    return new Intl.ListFormat(t.locale, { type: "conjunction" }).format([
       ...list.slice(0, NAMED_HOSTS),
-      ...(list.length > NAMED_HOSTS
-        ? [t("files.pageHostsMore", { count: list.length - NAMED_HOSTS })]
-        : []),
+      ...(more > 0 ? [t("files.pageHostsMore", { count: more })] : []),
     ]);
+  };
+  // What the page reported it couldn't load (the gateway's reporter, 18.1): only from this frame, whose origin is
+  // opaque, and only for this frame; a reload, Stop scripts or another page starts again with nothing said.
+  const frameRef = useRef<HTMLIFrameElement>(null);
+  const [report, setReport] = useState<{ frame: string } & SiteReport>({
+    frame: "",
+  });
+  useEffect(() => {
+    if (!served) return;
+    const listen = (event: MessageEvent) => {
+      const source = frameRef.current?.contentWindow;
+      if (!source || event.source !== source || event.origin !== "null") return;
+      const part = siteReportPart(event.data);
+      if (!part) return;
+      setReport((was) => ({
+        ...(was.frame === frame ? was : { frame }),
+        ...part,
+      }));
+    };
+    window.addEventListener("message", listen);
+    return () => window.removeEventListener("message", listen);
+  }, [served, frame]);
+  const said: SiteReport = served && report.frame === frame ? report : {};
+  const line = siteReportLine(said);
   const src = served
     ? `${served.url}${path
         .slice(slash + 1)
@@ -121,12 +150,16 @@ export function PagePreview({
   return (
     <div className="file-kind stack">
       <div className="file-kind-bar">
-        <span className="type-small muted">
-          {t(scripts ? "files.pageSandboxed" : "files.pageScriptsStopped")}
-        </span>
-        <Button variant="ghost" onClick={() => setScripts(!scripts)}>
-          {t(scripts ? "files.stopScripts" : "files.runScripts")}
-        </Button>
+        {!scriptless && (
+          <>
+            <span className="type-small muted">
+              {t(scripts ? "files.pageSandboxed" : "files.pageScriptsStopped")}
+            </span>
+            <Button variant="ghost" onClick={() => setScripts(!scripts)}>
+              {t(scripts ? "files.stopScripts" : "files.runScripts")}
+            </Button>
+          </>
+        )}
         <Button variant="ghost" onClick={() => setLoad(load + 1)}>
           <Icon glyph={RotateCw} size={16} />
           {t("files.reload")}
@@ -145,6 +178,27 @@ export function PagePreview({
               {t("files.pageOffline", { hosts: named(hosts) })}
             </p>
           )}
+      {line === "root" && said.root && (
+        <p className="type-small muted" role="status">
+          {said.root.paths.length > 0
+            ? t("files.siteRootPaths", {
+                paths: named(said.root.paths, said.root.more),
+              })
+            : t("files.siteRootPathsUnnamed")}
+        </p>
+      )}
+      {line === "missing" && said.missing && (
+        <p className="type-small muted" role="status">
+          {t("files.siteMissing", {
+            paths: named(said.missing.paths, said.missing.more),
+          })}
+        </p>
+      )}
+      {line === "empty" && (
+        <p className="type-small muted" role="status">
+          {t("files.siteEmpty")}
+        </p>
+      )}
       {left && (
         <p className="type-small muted" role="status">
           {t("files.pageLeft")}
@@ -154,6 +208,7 @@ export function PagePreview({
       {src && (
         <iframe
           key={frame}
+          ref={frameRef}
           className="file-page"
           title={t("files.pageFrame", { name })}
           src={src}

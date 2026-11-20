@@ -19,6 +19,38 @@ The read-only Docker socket still grants daemon control: the gateway is a truste
 Set `TQA_DOCKER_GID` to the socket's numeric group when it differs from the Compose default, 0. Ports bind to
 loopback; remote access needs an authenticated TLS reverse proxy and the matching `public_origin`.
 
+## Hardware
+
+The stack itself (PostgreSQL, the gateway, the web application and the sandboxes) is light; the model is what needs
+hardware. Every figure below was measured on 19 Nov 2026 on the reference workstation, with the setup named beside it.
+
+- **Reference workstation:** Intel Core Ultra 7 270K Plus (24 cores), 64 GB of RAM, one NVIDIA GeForce RTX 5090
+  (32 GB), Ubuntu 24.04, Docker Engine 29.8. The GPU serves the engine-backed models; the CPU-only figures below
+  were taken on the same machine with the model's container capped to fewer cores.
+- **On the GPU, the reference:** Qwen3.8 27B (FP8 key-value cache) on the RTX 5090, served by an inference
+  engine on the same machine, measured with the CPU runs' three prompts (2,055 prompt tokens by its own count, 200
+  out, temperature 0, one request at a time, nothing else on the GPU): the first token after 1.05 s, the prompt at
+  about 1,960 tokens/s and the answer at 61 tokens/s, the three runs within 0.5 % of each other. The engine reports
+  token counts but no timings, so the prompt's rate is its tokens over the time to the first token.
+- **CPU only, the minimum that works:** a small local model, qwen3:4b in Ollama 0.34.4, on CPU alone. Over a
+  2,013-token prompt answered with 200 tokens (three runs per cap, Ollama's own counts):
+
+  | Cores and memory given to Ollama | Prompt, tokens/s | Answer, tokens/s | First token after |
+  | --- | --- | --- | --- |
+  | 4 cores, 8 GB | 69 | 13 | 29 s |
+  | 8 cores, 16 GB | 113 to 130 | 19 | 16 to 18 s |
+  | 16 cores, 32 GB | 172 to 188 | 26 | 11 to 12 s |
+
+  A small real agent task through the stack (fixing an off-by-one bug in a short Python file, checked by its tests)
+  passed on 8 cores and 16 GB, with the model's context at 16,384: 5 steps and 18,792 tokens in 9 minutes.
+
+  What to expect: an agent step re-reads its whole conversation, so a long task's steps slow down as it grows; on 4
+  cores a step with a 2,000-token context waits about half a minute before the model's first word. CPU-only suits
+  trying the product and short tasks, not a team's daily work.
+- **Ollama uses 4 threads by default** on this CPU, whatever cores its container is given: in this measurement 8 and
+  16 cores ran no faster than 4 until the model's `num_thread` was set to the core count (`PARAMETER num_thread 8`
+  in a Modelfile, then `ollama create`). Set it, and check `n_threads` in Ollama's log.
+
 ## Install
 
 **In one command (from 18.1).** From a release's checkout, `deploy/install.sh` asks three things: where people will
@@ -104,6 +136,10 @@ More environments come from recipes: `deploy/build-environment.sh recipe.toml` a
 image `tqa-env:<name>` for the Environments page (the admin guide's Environments section has a recipe and each message).
 
 ### 1. Choose the settings
+
+**Is there an installation on this host already?** Then set this one's own names first, before step 2: see
+[Two or more installations on one host](#two-or-more-installations-on-one-host). Without them the new one's `up`
+replaces or collides with the first.
 
 Keep the provider key in a private, mode 0600 UTF-8 file outside this repository. Set these values in the shell; the
 model URL and model name are placeholders for the operator's actual model server, and the image lines take the images
@@ -249,7 +285,8 @@ single-disk Mac, a separate filesystem for storage isn't practical; for trying t
    `$TQA_INSTALL_DIR/compose.env`, 8080 if it isn't there), and create the first administrator with the bootstrap token: `TQA_BOOTSTRAP_TOKEN` in `$TQA_INSTALL_DIR/compose.env`. Creating it signs you in and opens
    **New task**. Only the gateway publishes a port; the page server is reachable only on its internal network.
 2. **First route.** Open the menu under your name at the bottom left and choose **Settings**, then **Models** (under
-   Administration). It lists `local`, the route seeded from `models.toml`, with its key from `secrets.toml`. Choose
+   Administration). It lists the route seeded from `models.toml`: its name is `local`, the page shows it by a display
+   name made from its model (for example "Qwen3.8 27b"), and its key is `local` from `secrets.toml`. Choose
    **⋯** on the route's row, then **Check**, then **Run check**, to confirm the gateway reaches the model with that key: it
    sends one short request (a few tokens, up to a minute), and a failing check names the reason. To add another route, choose **Add route**; **Paste key** stores its key as a secret.
    The [administrator's guide](../docs/admin-guide/web-settings.md#models) describes every field.
@@ -275,13 +312,25 @@ Read the release's notes in the [changelog](../CHANGELOG.md) first: a fix or min
 one names any further steps under [Upgrade notes](#upgrade-notes). From the new release's checkout, with
 `TQA_INSTALL_DIR` set as in step 1:
 
-1. **Back up the database**, and leave the installation folder as it is:
+0. **Check that what runs is what `compose.env` names**, so the backup and the way back start from the truth. Each
+   container's image should match its line; if one doesn't (a hand-started image, a tag that moved), set the line to
+   what runs, or start the installation once from `compose.env`, before going on:
+
+   ```sh
+   grep -E '^TQA_(GATEWAY|WEB)_IMAGE=' "$TQA_INSTALL_DIR/compose.env"
+   docker compose --env-file "$TQA_INSTALL_DIR/compose.env" -f deploy/compose/docker.yml images gateway web
+   ```
+
+1. **Back up the database, and keep a copy of the two files you are about to change:**
 
    ```sh
    docker compose --env-file "$TQA_INSTALL_DIR/compose.env" -f deploy/compose/docker.yml exec -T postgres \
      pg_dump -U tqa -d gateway --format=custom > "tensorquay-$(date +%Y%m%d-%H%M).dump"
+   cp "$TQA_INSTALL_DIR/compose.env" compose.env.before
+   cp "$TQA_INSTALL_DIR/gateway.toml" gateway.toml.before
    ```
 
+   `compose.env` holds the database password and the bootstrap token: keep its copy as private as the original.
 2. **Check out the release and get its images:** `git fetch --tags && git checkout v<version>`, then
    `deploy/pull-images.sh` (or `deploy/build-images.sh`), which prints the three `export` lines.
 3. **Point the installation at them:** in `$TQA_INSTALL_DIR/compose.env`, replace the `TQA_GATEWAY_IMAGE` and
@@ -289,15 +338,38 @@ one names any further steps under [Upgrade notes](#upgrade-notes). From the new 
    new `TQA_RUNTIME_IMAGE`. Check the file with the new gateway, as the admin guide's
    [Upgrading](../docs/admin-guide/README.md#upgrading) shows.
 4. **Start it again** with step 3's last three lines: the `pull` (for registry images), the `up`, and the `readyz`
-   check.
+   check. The check's port is the installation's: if `compose.env` sets `TQA_HTTP_PORT`, export it first, so the
+   `curl` asks the right port:
 
-To go back, put the earlier image lines back and restore the dump before starting the earlier version, since a newer
-gateway may have stored settings an earlier one can't read:
+   ```sh
+   export TQA_HTTP_PORT="$(sed -n 's/^TQA_HTTP_PORT=//p' "$TQA_INSTALL_DIR/compose.env")"
+   ```
 
-```sh
-docker compose --env-file "$TQA_INSTALL_DIR/compose.env" -f deploy/compose/docker.yml exec -T postgres \
-  pg_restore -U tqa -d gateway --clean --if-exists < tensorquay-<date>.dump
-```
+**To go back,** to the release you upgraded from:
+
+1. Stop the new gateway and web app, so nothing writes to the database while it is restored:
+
+   ```sh
+   docker compose --env-file "$TQA_INSTALL_DIR/compose.env" -f deploy/compose/docker.yml stop gateway web
+   ```
+
+2. Put step 1's copies of `compose.env` and `gateway.toml` back (the image lines and the runtime image together).
+3. Restore the dump into an empty database. A newer gateway may have stored settings an earlier one can't read, so
+   the restore comes before the earlier version starts; and a newer release's migrations add tables the dump doesn't
+   know, which a restore over them (`pg_restore --clean`) can't drop, leaving the table they hang from as the newer
+   gateway left it. So drop the database and create it again first (the gateway is stopped, so nothing is connected).
+   Everything since the backup is undone: tasks, messages, sign-ins and passwords changed since then are gone.
+
+   ```sh
+   compose() { docker compose --env-file "$TQA_INSTALL_DIR/compose.env" -f deploy/compose/docker.yml "$@"; }
+   compose exec -T postgres dropdb -U tqa gateway
+   compose exec -T postgres createdb -U tqa -O tqa gateway
+   compose exec -T postgres pg_restore -U tqa -d gateway < tensorquay-<date>.dump
+   ```
+
+   `pg_restore` should end with no errors; any error means the database isn't as it was, so stop and restore again.
+
+4. From the earlier release's checkout (`git checkout v<earlier version>`), start it with step 4's lines.
 
 ### Two or more installations on one host
 

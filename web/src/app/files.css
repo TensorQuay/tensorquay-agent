@@ -42,6 +42,78 @@
     box-shadow: var(--elevation);
   }
 }
+/* The split view (18.1, WEB-U-494): a preview opened wide takes its share of the task layout beside the chat, the
+   panel's left edge its divider; full width takes the whole main area from its edge, no line, the chat hidden. Only
+   where the panel docks: below it the narrow panel above always applies. */
+@container conversation-layout (min-width: 900px) {
+  .conversation-layout:has(> .files-panel[data-split]) {
+    gap: 0;
+  }
+  .files-panel[data-split="split"] {
+    position: relative;
+    flex: 0 0 calc(var(--split-share) * 100%);
+    width: calc(var(--split-share) * 100%);
+  }
+  .files-panel[data-split="full"] {
+    flex: 1 1 auto;
+    width: auto;
+    padding-left: 0;
+    border-left: 0;
+  }
+  .conversation-layout:has(> .files-panel[data-split="full"])
+    > .conversation-page {
+    display: none;
+  }
+}
+/* The divider: an 8 px grab area over the panel's 1 px edge, taking no width; a short grip shows where to hold. */
+.files-divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--space-1) * -1);
+  z-index: 2;
+  width: var(--space-2);
+  cursor: col-resize;
+  touch-action: none;
+}
+.files-divider::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--space-1);
+  height: var(--space-8);
+  border-radius: var(--pill-radius);
+  background: var(--line);
+  transform: translate(-50%, -50%);
+}
+.files-divider:hover::after,
+.files-divider:focus-visible::after {
+  background: var(--muted);
+}
+/* The split's header: the file's name, which gives way first, its size, Download, Full width and Close. */
+.split-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--bar-height);
+}
+.split-name {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: var(--nav-font-size);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.split-heading > .type-small {
+  white-space: nowrap;
+}
+/* A PDF's pages, drawn up to their readable width, sit in the middle of the split, as they did in the dialog. */
+.files-panel[data-split] .file-pdf {
+  align-items: center;
+}
 .files-heading {
   display: flex;
   align-items: center;
@@ -142,17 +214,27 @@ button.file-open:hover {
 }
 .file-preview-heading {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
+}
+/* The file's size reads on one line ("661.6 kB" wrapped beside Expand at 390): it never breaks or shrinks, and where the
+   row can't hold it and both actions, the actions move under it together, at the row's end (18.1, WEB-U-492). */
+.file-preview-size {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 /* An image, a rendered document or a table, as the agent made it; the text a toggle away. */
 .file-kind {
   gap: var(--space-2);
   min-width: 0;
 }
+/* A preview's bar: its note, then its actions. Where the row can't hold both, the actions take a line of their own
+   under the note, never squeezing it to a word a line (WEB-E2E-143). */
 .file-kind-bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
@@ -242,6 +324,7 @@ button.file-open:hover {
   position: absolute;
   inset: 0;
   overflow: clip;
+  /* token-lint: allow line-height (the PDF text layer matches pdf.js's glyph boxes, so selection lands on the drawn text) */
   line-height: 1;
   text-align: initial;
   letter-spacing: normal;
@@ -268,6 +351,7 @@ button.file-open:hover {
   --scale-x: 1;
   --rotate: 0deg;
   z-index: 1;
+  /* token-lint: allow font-size (pdf.js sizes each text run to the page's own glyphs and scale) */
   font-size: calc(var(--text-scale-factor) * var(--font-height));
   transform: rotate(var(--rotate)) scaleX(var(--scale-x))
     scale(var(--min-font-size-inv));
@@ -293,6 +377,7 @@ button.file-open:hover {
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  margin-inline-start: auto;
 }
 /* Expand: the same preview wide, over the conversation. */
 .preview-dialog {
@@ -489,7 +574,7 @@ button.sent-picture {
   width: var(--space-6);
   height: var(--space-6);
   object-fit: cover;
-  border-radius: var(--space-1);
+  border-radius: var(--thumbnail-radius);
   background: var(--line);
 }
 .attachment-name {

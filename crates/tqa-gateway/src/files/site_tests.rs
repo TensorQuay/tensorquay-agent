@@ -21,42 +21,63 @@ fn conversation() -> Result<ConversationId, Box<dyn std::error::Error>> {
 // TEST: GW-U-211
 #[test]
 fn gw_u_211_an_address_names_the_folders_file_or_its_page() -> TestResult {
-    let page = WorkspacePath::parse("dist/index.html")?;
+    let paths = |names: &[&str]| -> Result<Vec<WorkspacePath>, Box<dyn std::error::Error>> {
+        names
+            .iter()
+            .map(|name| WorkspacePath::parse(name).map_err(Into::into))
+            .collect()
+    };
+    // 18.1: the exact file, then `x/index.html`, then `x.html` for a name without an extension, then the folder's
+    // page (a single-page app's routes; a static export's own pages first).
     for (rest, expected) in [
-        ("", (page.clone(), true)),
-        ("/", (page.clone(), true)),
-        ("index.html", (page.clone(), true)),
-        ("about", (page.clone(), true)),
-        ("docs/", (page.clone(), true)),
-        ("docs/getting-started", (page.clone(), true)),
+        ("", vec!["dist/index.html"]),
+        ("/", vec!["dist/index.html"]),
+        ("index.html", vec!["dist/index.html"]),
+        (
+            "about",
+            vec![
+                "dist/about/index.html",
+                "dist/about.html",
+                "dist/index.html",
+            ],
+        ),
+        ("docs/", vec!["dist/docs/index.html", "dist/index.html"]),
+        (
+            "docs/getting-started",
+            vec![
+                "dist/docs/getting-started/index.html",
+                "dist/docs/getting-started.html",
+                "dist/index.html",
+            ],
+        ),
         (
             "assets/app.js",
-            (WorkspacePath::parse("dist/assets/app.js")?, false),
+            vec!["dist/assets/app.js", "dist/index.html"],
         ),
-        (
-            "style.css",
-            (WorkspacePath::parse("dist/style.css")?, false),
-        ),
-        (
-            "/favicon.ico",
-            (WorkspacePath::parse("dist/favicon.ico")?, false),
-        ),
+        ("style.css", vec!["dist/style.css", "dist/index.html"]),
+        ("/favicon.ico", vec!["dist/favicon.ico", "dist/index.html"]),
     ] {
-        assert_eq!(target_for("dist", rest), Some(expected), "{rest:?}");
+        assert_eq!(
+            targets_for("dist", rest),
+            Some(paths(&expected)?),
+            "{rest:?}"
+        );
     }
     // A path that climbs, a private area or a link is refused as missing: nothing says which.
-    for rest in ["../secrets.txt", "a/../../x.js", ".tqa/notes.txt"] {
-        assert_eq!(target_for("dist", rest), None, "{rest:?}");
+    for rest in [
+        "../secrets.txt",
+        "a/../../x.js",
+        ".tqa/notes.txt",
+        "a/../../x",
+    ] {
+        assert_eq!(targets_for("dist", rest), None, "{rest:?}");
     }
     // The workspace root as the folder.
     assert_eq!(
-        target_for("", "app.js"),
-        Some((WorkspacePath::parse("app.js")?, false))
+        targets_for("", "app.js"),
+        Some(paths(&["app.js", "index.html"])?)
     );
-    assert_eq!(
-        target_for("", ""),
-        Some((WorkspacePath::parse("index.html")?, true))
-    );
+    assert_eq!(targets_for("", ""), Some(paths(&["index.html"])?));
     Ok(())
 }
 

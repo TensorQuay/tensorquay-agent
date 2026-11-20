@@ -242,7 +242,7 @@ decision engine that passes its suite is accepted on that evidence (ARCHITECTURE
 | FR-19 | **Outside services, git included.** Nothing in the web UI or the setup is specific to git (PO, 2 Oct 2026). Git is a tool inside the sandbox like curl or pip: the agent clones, commits and pushes with plain `git`. A git host is an outside service like any other: the person's key or token for it lives in key management (FR-28, ADR-0037) and is swapped in at the network edge, never entering the sandbox, the model context, events or logs; the host's own rules (branch protection, token scopes) decide what is accepted. The `git_push` tool and the Git relay are removed (ADR-0037 §7; §12 item 12) |
 | FR-20 | *Superseded (22 Sep 2026).* The headless CLI was removed: there is no CLI product. Programmatic use is FR-26; the benchmark driver is test tooling that records a deterministic event log |
 | FR-21 | **Usage and metrics.** Per-run and per-user token usage; Prometheus metrics for runs, sandboxes, relay latency, provider errors, event lag |
-| FR-22 | **Admin settings.** Model registry editing, the secret vault (provider keys and connector credentials; write-only, encrypted at rest), egress allow-list, runtime backend status, sandbox limits per user (max live, idle window, max lifetime), connectors, templates and shared profiles |
+| FR-22 | **Admin settings.** Model registry editing, the secret vault (provider keys and connector credentials; write-only, encrypted at rest), egress allow-list, runtime backend status, sandbox limits per user (max live, idle window, max lifetime), connectors, templates and shared profiles; the running sandboxes across people, each with its owner, state and resources, an administrator's stop of an idle one, and whether the sweeps left anything unowned behind (the Sandboxes page, decided on 17 Nov 2026) |
 | FR-23 | **Agent profiles.** A profile defines instructions, model route, allowed tools and connectors, skills, sandbox template and budgets. Profiles are validated files or admin-UI records, shared or personal; a conversation is created from a profile and keeps it |
 | FR-24 | **Connectors.** A connector is a remote MCP server registered at the gateway with credentials in the vault (shared or per user). The sandbox reaches it only through the gateway MCP proxy with the per-run token; the proxy injects credentials and enforces the profile's allow-list |
 | FR-25 | **Sandbox templates.** Custom images derived from the runtime base image, registered by digest, selectable per profile and per conversation; the hardening posture is unchanged by a template; the Firecracker rootfs is built from the same image |
@@ -316,8 +316,10 @@ with slots, queue, eviction, parking and pin (ADR-0016).
    on 11 Oct 2026), and release 17.0 carries the microVM backend.
 4. **Public repository name** and when to open the repository: **Done (PO): `TensorQuay/tensorquay-agent`, public
    since 8 Nov 2026.**
-5. **Reference hardware for the published numbers:** the TensorQuay box (2 × RTX PRO 6000) for E2E and a
-   4-vCPU Linux KVM VM for Firecracker PERF.
+5. **Reference hardware for the published numbers:** **Decided on 15 Nov 2026:** one RTX 5090 workstation (Intel
+   Core Ultra 7 270K Plus, 24 cores, 64 GB) for the engine-backed models and E2E, and a CPU-only minimum measured on
+   it: qwen3:4b in Ollama on 4, 8 and 16 cores (measured 19 Nov 2026; deploy/README.md, "Hardware"). A 4-vCPU Linux
+   KVM VM remains the reference for Firecracker PERF.
 6. **Crate and image prefix:** **As built: `tqa`.**
 7. **Secret store:** **Decided (PO, 27 Sep 2026): the built-in store is the only secret store** (ADR-0033). No
    external vault backend is built, bundled or connected.

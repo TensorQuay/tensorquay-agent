@@ -448,7 +448,8 @@ pub fn parse_text_reply(
     }
 }
 
-/// The keys a whole-reply call object may name its tool and its arguments under (native routes only).
+/// The keys a call object may name its tool and its arguments under: a native route's whole-reply object, and a text
+/// route's block (18.1 item F, proposal F).
 const NAME_KEYS: [&str; 3] = ["name", "function", "tool"];
 const ARGUMENT_KEYS: [&str; 2] = ["arguments", "parameters"];
 
@@ -491,7 +492,8 @@ fn whole_object_call(
 }
 
 /// Reads one fenced block: `tqa_call` (or version 3's `tool_call`) blocks must be calls; `json` and unlabelled blocks are calls
-/// only with exactly `name` and `arguments` and a known tool; other labels are prose.
+/// only with exactly a name and arguments (under any of [`NAME_KEYS`] and [`ARGUMENT_KEYS`]) and a known tool; other
+/// labels are prose.
 fn block_call(
     label: &str,
     body: &str,
@@ -516,7 +518,7 @@ fn block_call(
     }
 }
 
-/// Rule 5: the whole reply is one object with exactly `name` and `arguments` naming a known tool.
+/// Rule 5: the whole reply is one object with exactly a name and arguments naming a known tool.
 fn bare_call(
     text: &str,
     check: &dyn Fn(&str, &Value) -> ToolCheck,
@@ -536,10 +538,8 @@ fn guarded(
     object: Map<String, Value>,
     check: &dyn Fn(&str, &Value) -> ToolCheck,
 ) -> Result<Option<FallbackCall>, Rejection> {
-    let known = object
-        .get("name")
-        .and_then(Value::as_str)
-        .zip(object.get("arguments"))
+    let known = parts(&object)
+        .and_then(|(name, arguments)| object.get(name)?.as_str().zip(object.get(arguments)))
         .is_some_and(|(name, arguments)| check(name, arguments) != ToolCheck::Unknown);
     if known {
         call(object, check).map(Some)
@@ -549,7 +549,19 @@ fn guarded(
 }
 
 fn two_keys(object: &Map<String, Value>) -> bool {
-    object.len() == 2 && object.contains_key("name") && object.contains_key("arguments")
+    object.len() == 2 && parts(object).is_some()
+}
+
+/// The keys an object names its tool and its arguments under: the first of [`NAME_KEYS`] and of [`ARGUMENT_KEYS`]
+/// it has, when it has both.
+fn parts(object: &Map<String, Value>) -> Option<(&'static str, &'static str)> {
+    let name = NAME_KEYS
+        .into_iter()
+        .find(|key| object.contains_key(*key))?;
+    let arguments = ARGUMENT_KEYS
+        .into_iter()
+        .find(|key| object.contains_key(*key))?;
+    Some((name, arguments))
 }
 
 fn call(
@@ -559,8 +571,11 @@ fn call(
     if let Some(problem) = shape_problem(&object) {
         return Err(Rejection::new(FallbackFailure::Malformed, Some(problem)));
     }
+    let Some((name_key, arguments_key)) = parts(&object) else {
+        return Err(FallbackFailure::Malformed.into());
+    };
     let (Some(Value::String(name)), Some(arguments)) =
-        (object.remove("name"), object.remove("arguments"))
+        (object.remove(name_key), object.remove(arguments_key))
     else {
         return Err(FallbackFailure::Malformed.into());
     };
@@ -585,28 +600,35 @@ fn call(
     })
 }
 
-/// What is wrong with a call object's keys, if anything, the first of these in this order: no `name`; keys besides
-/// `name` and `arguments` (only identifier-like ones of at most [`tqa_types::MAX_MODEL_NAME_BYTES`] are named, at most
-/// [`tqa_types::MAX_PROBLEM_NAMES`]); no `arguments`; a `name` that isn't a string. So `{"name": 3}` is `no_arguments`
-/// and `{"tool": "x", "arguments": {}}` is `no_name`: each sentence's fix still describes the one right shape.
+/// What is wrong with a call object's keys, if anything, the first of these in this order: no name (none of
+/// [`NAME_KEYS`]; the keys it had are named); keys besides its name and arguments (the first of [`NAME_KEYS`] and of
+/// [`ARGUMENT_KEYS`] it has; a second is an extra key); no arguments; a name that isn't a string. Keys are named only
+/// when identifier-like and at most [`tqa_types::MAX_MODEL_NAME_BYTES`], at most [`tqa_types::MAX_PROBLEM_NAMES`]. So
+/// `{"name": 3}` is `no_arguments`, and `{"tool": "x", "parameters": {}}` is a call (18.1 item F, proposal F).
 fn shape_problem(object: &Map<String, Value>) -> Option<FallbackProblem> {
+    let named = |keys: Vec<&String>| -> Vec<ProblemName> {
+        keys.into_iter()
+            .filter_map(|key| ProblemName::model(key))
+            .take(tqa_types::MAX_PROBLEM_NAMES)
+            .collect()
+    };
+    let Some(name_key) = NAME_KEYS.into_iter().find(|key| object.contains_key(*key)) else {
+        return Some(FallbackProblem::NoName {
+            keys: named(object.keys().collect()),
+        });
+    };
+    let arguments_key = ARGUMENT_KEYS
+        .into_iter()
+        .find(|key| object.contains_key(*key));
     let extra: Vec<&String> = object
         .keys()
-        .filter(|key| !matches!(key.as_str(), "name" | "arguments"))
+        .filter(|key| key.as_str() != name_key && Some(key.as_str()) != arguments_key)
         .collect();
-    if !object.contains_key("name") {
-        Some(FallbackProblem::NoName)
-    } else if !extra.is_empty() {
-        Some(FallbackProblem::ExtraKeys {
-            keys: extra
-                .into_iter()
-                .filter_map(|key| ProblemName::model(key))
-                .take(tqa_types::MAX_PROBLEM_NAMES)
-                .collect(),
-        })
-    } else if !object.contains_key("arguments") {
+    if !extra.is_empty() {
+        Some(FallbackProblem::ExtraKeys { keys: named(extra) })
+    } else if arguments_key.is_none() {
         Some(FallbackProblem::NoArguments)
-    } else if !object.get("name").is_some_and(Value::is_string) {
+    } else if !object.get(name_key).is_some_and(Value::is_string) {
         Some(FallbackProblem::NameNotString)
     } else {
         None

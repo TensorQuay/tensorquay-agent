@@ -31,6 +31,7 @@ const lead = (state: "running" | "ended"): Conversation => ({
   connectors: [],
   team: {
     role: "lead",
+    round: 1,
     id: "0195d8c0-0000-7000-8000-0000000000aa",
     state,
     helpers: 1,

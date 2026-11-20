@@ -24,6 +24,28 @@ async function openFile(page: Page, folder: string, name: RegExp) {
 
 // WEB-U-087 and WEB-U-088 in the browser: the agent's page runs in its sandbox, out of the app's reach, and a
 // spreadsheet reads as a table; at 1280 px in both themes.
+// WEB-U-513 (18.1.1, the first hour's finding 3): a page with no script says nothing about scripts: no sandbox note and
+// no Stop scripts, only Reload.
+test("WEB-U-513 a page with no scripts says nothing about them", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await signIn(page);
+  await page.goto(await createConversation(page));
+  const panel = await openFile(page, "reports", /^summary\.html/);
+  const preview = panel.getByRole("region", { name: "summary.html" });
+  await expect(
+    preview.frameLocator("iframe").getByRole("heading", { name: "Q3 summary" }),
+  ).toBeVisible();
+  await expect(preview.getByRole("button", { name: "Reload" })).toBeVisible();
+  await expect(
+    preview.getByText("Scripts are running in a sandbox"),
+  ).toHaveCount(0);
+  await expect(
+    preview.getByRole("button", { name: "Stop scripts" }),
+  ).toHaveCount(0);
+});
+
 for (const theme of ["light", "dark"] as const) {
   test(`WEB-U-087 a web page in the Files panel 1280 ${theme}`, async ({
     page,
@@ -176,15 +198,15 @@ for (const theme of ["light", "dark"] as const) {
       "aria-pressed",
       "true",
     );
-    // Expand: the same sheet wide, over the conversation; Escape closes it.
+    // Expand: the same sheet as a split beside the chat (WEB-U-494); Escape steps back to the panel.
     await sheets.getByRole("button", { name: "Totals" }).click();
     await panel.getByRole("button", { name: "Expand" }).click();
-    const dialog = page.getByRole("dialog", { name: "sales.xlsx" });
+    await expect(panel).toHaveAttribute("data-split", "split");
     await expect(
-      dialog.getByRole("table", { name: "Sheet Totals of sales.xlsx" }),
+      panel.getByRole("table", { name: "Sheet Totals of sales.xlsx" }),
     ).toBeVisible();
     // The cap holds wide too (about 320 px): one long cell never decides a column.
-    const wideCell = dialog
+    const wideCell = panel
       .getByRole("cell", {
         name: "https://example.invalid/reports/2026/q3/sales-by-region-final.xlsx",
       })
@@ -196,7 +218,7 @@ for (const theme of ["light", "dark"] as const) {
     await capture(page, `preview-sheet-wide-1280-${theme}`);
     expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
     await page.keyboard.press("Escape");
-    await expect(dialog).toBeHidden();
+    await expect(panel).not.toHaveAttribute("data-split");
     await expect(panel.getByRole("button", { name: "Expand" })).toBeFocused();
   });
 
@@ -206,17 +228,21 @@ for (const theme of ["light", "dark"] as const) {
     await signIn(page);
     await page.goto(await createConversation(page));
     const panel = await openFile(page, "reports", /^report\.html/);
-    await panel.getByRole("button", { name: "Expand" }).click();
-    const dialog = page.getByRole("dialog", { name: "report.html" });
     await expect(
-      dialog.frameLocator("iframe").getByText("Scripts ran."),
+      panel.frameLocator("iframe").getByText("Scripts ran."),
     ).toBeVisible();
-    // One frame at a time: the panel's own is gone while the wide one shows.
+    await panel.getByRole("button", { name: "Expand" }).click();
+    await expect(panel).toHaveAttribute("data-split", "split");
+    // The same one frame, made wider (WEB-U-494): its scripts ran once and never again.
     await expect(page.locator("iframe")).toHaveCount(1);
+    await expect(
+      panel.frameLocator("iframe").getByText("Scripts ran."),
+    ).toBeVisible();
     await settled(page);
     await capture(page, `preview-page-wide-1280-${theme}`);
     await page.keyboard.press("Escape");
-    await expect(dialog).toBeHidden();
+    await expect(panel).not.toHaveAttribute("data-split");
+    await expect(page.locator("iframe")).toHaveCount(1);
     await expect(
       panel.frameLocator("iframe").getByText("Scripts ran."),
     ).toBeVisible();
@@ -252,13 +278,8 @@ for (const theme of ["light", "dark"] as const) {
       (header?.y ?? 0) + (header?.height ?? Infinity) - 1,
     );
     await capture(page, `preview-sheet-390-${theme}`);
-    await panel.getByRole("button", { name: "Expand" }).click();
-    const dialog = page.getByRole("dialog", { name: "sales.xlsx" });
-    await expect(dialog.getByRole("table")).toBeVisible();
-    await settled(page);
-    await capture(page, `preview-sheet-wide-390-${theme}`);
-    await page.keyboard.press("Escape");
-    await expect(dialog).toBeHidden();
+    // Below the breakpoint the panel is the column already: no Expand (WEB-U-494).
+    await expect(panel.getByRole("button", { name: "Expand" })).toHaveCount(0);
     const path = panel.getByRole("navigation", { name: "Folder path" });
     await path.getByRole("button", { name: "reports" }).click();
     await panel.getByRole("button", { name: /^report\.html/ }).click();
@@ -267,15 +288,7 @@ for (const theme of ["light", "dark"] as const) {
     ).toBeVisible();
     await settled(page);
     await capture(page, `preview-page-390-${theme}`);
-    await panel.getByRole("button", { name: "Expand" }).click();
-    await expect(
-      page
-        .getByRole("dialog", { name: "report.html" })
-        .frameLocator("iframe")
-        .getByText("Scripts ran."),
-    ).toBeVisible();
-    await settled(page);
-    await capture(page, `preview-page-wide-390-${theme}`);
+    await expect(panel.getByRole("button", { name: "Expand" })).toHaveCount(0);
   });
 
   // WEB-U-091: pdf.js draws a real PDF in this page, under a policy without 'unsafe-eval' (as csp.spec), with its
@@ -354,11 +367,12 @@ for (const theme of ["light", "dark"] as const) {
     expect(dialogs).toEqual([]);
     expect(violations).toEqual([]);
     await panel.getByRole("button", { name: "Expand" }).click();
-    const dialog = page.getByRole("dialog", { name: "brief.pdf" });
-    await expect(dialog.getByRole("group", { name: "Page 1" })).toBeVisible();
+    await expect(panel).toHaveAttribute("data-split", "split");
+    await expect(panel.getByRole("group", { name: "Page 1" })).toBeVisible();
     await settled(page);
     await capture(page, `preview-pdf-wide-1280-${theme}`);
     await page.keyboard.press("Escape");
+    await expect(panel).not.toHaveAttribute("data-split");
     // A damaged PDF says so plainly.
     await panel
       .getByRole("navigation", { name: "Folder path" })

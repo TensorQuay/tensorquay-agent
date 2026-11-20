@@ -1,0 +1,318 @@
+import { signIn } from "./session";
+import { axe, capture, pinTime, rowMenu } from "./settings-page";
+import { expect, test } from "./test";
+
+// WEB-E2E-129: the Sandboxes page and the Status line on the fake front, in the browser (the Sandboxes page design note, §4): the
+// screens at 1280 and 390 in both themes; stopping an idle sandbox from the row's ⋯ and its confirm; the busy refusal;
+// the empty state; the amber Status line that opens the page's Left behind section; axe at each state; and the
+// summary at 390 px in Thai and Tamil, whose column headers must not wrap into a second line.
+
+for (const [width, name] of [
+  [1280, "sandboxes-1280"],
+  [390, "sandboxes-390"],
+] as const)
+  for (const colorScheme of ["light", "dark"] as const)
+    test(`WEB-E2E-129 the Sandboxes page at ${width} ${colorScheme}`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.emulateMedia({ colorScheme });
+      await signIn(page);
+      await pinTime(page);
+      await page.goto("/settings/sandboxes");
+      await expect(page).toHaveTitle("Sandboxes · TensorQuay Agent");
+      await expect(page.getByText("4 of 6 running")).toBeVisible();
+      await expect(page.getByText(/Desktops 1 of 2/)).toBeVisible();
+      await expect(
+        page.getByText("Sandboxes run as Docker containers."),
+      ).toBeVisible();
+      const table = page.getByRole("table", { name: "Running sandboxes" });
+      await expect(table.getByRole("row")).toHaveCount(5);
+      const working = table.getByRole("row", { name: /Working/ });
+      await expect(working).toContainText("ben@example.org");
+      await expect(working).toContainText("1.4 of 2 cores");
+      await expect(working).toContainText("3.1 of 4 GB");
+      await expect(table.getByRole("row", { name: /Kept on/ })).toContainText(
+        "You",
+      );
+      // No horizontal scroll at 390: the rows are cards.
+      if (width === 390)
+        expect(
+          await page.evaluate(
+            () =>
+              document.documentElement.scrollWidth <=
+              document.documentElement.clientWidth,
+          ),
+        ).toBe(true);
+      await axe(page);
+      await capture(page, `${name}-${colorScheme}`, { fullPage: true });
+    });
+
+test("WEB-E2E-129 stops an idle sandbox from its row, and a working one is refused with its reason", async ({
+  page,
+}) => {
+  await signIn(page);
+  await page.goto("/settings/sandboxes");
+  await expect(page.getByText("4 of 6 running")).toBeVisible();
+  // The working row's Stop now says why it can't, and stays reachable.
+  await page
+    .getByRole("button", { name: "More actions for ben@example.org's sandbox" })
+    .first()
+    .focus();
+  await page.keyboard.press("Enter");
+  const refused = page.getByRole("menuitem", {
+    name: "Stop ben@example.org's sandbox now",
+  });
+  await expect(refused).toHaveAttribute("aria-disabled", "true");
+  await expect(refused).toHaveAccessibleDescription(
+    "It is working now; it can be stopped once the run ends.",
+  );
+  await page.keyboard.press("Escape");
+  // The idle one: the second ⋯ of that owner.
+  await page
+    .getByRole("button", { name: "More actions for ben@example.org's sandbox" })
+    .nth(1)
+    .focus();
+  await page.keyboard.press("Enter");
+  await page
+    .getByRole("menuitem", { name: "Stop ben@example.org's sandbox now" })
+    .focus();
+  await page.keyboard.press("Enter");
+  const dialog = page.getByRole("dialog", {
+    name: "Stop ben@example.org's sandbox?",
+  });
+  await expect(dialog).toContainText(
+    "The task keeps its files and history. Its next message starts a new sandbox, and its owner sees a note in the task.",
+  );
+  await axe(page);
+  await dialog.getByRole("button", { name: "Stop sandbox" }).click();
+  await expect(
+    page.getByText("Stopping ben@example.org's sandbox."),
+  ).toBeVisible();
+  // Read again once the fake has retired it: three left.
+  await expect(page.getByText("3 of 6 running")).toBeVisible({
+    timeout: 15_000,
+  });
+});
+
+test("WEB-E2E-129 the kept-on Desktop of your own warns about the kept sign-in", async ({
+  page,
+}) => {
+  await signIn(page);
+  await page.goto("/settings/sandboxes");
+  await rowMenu(
+    page,
+    "More actions for member@example.invalid's sandbox",
+    "Stop member@example.invalid's sandbox now",
+  );
+  const dialog = page.getByRole("dialog", { name: "Stop your sandbox?" });
+  await expect(dialog).toContainText(
+    "It is kept on: its owner chose to keep it running. Its desktop sign-in ends with it.",
+  );
+  await dialog.getByRole("button", { name: "Cancel" }).click();
+  await expect(dialog).toBeHidden();
+});
+
+test("WEB-E2E-129 the empty state", async ({ page, context }) => {
+  await signIn(page);
+  await context.addCookies([
+    { name: "fixture_sandboxes", value: "empty", url: "http://localhost:3100" },
+  ]);
+  await page.goto("/settings/sandboxes");
+  await expect(
+    page.getByText(
+      "No sandbox is running. One starts when someone sends a message.",
+    ),
+  ).toBeVisible();
+  await expect(page.getByRole("table")).toHaveCount(0);
+  await axe(page);
+  await capture(page, "sandboxes-empty");
+});
+
+test("WEB-E2E-129 Status reads amber and opens the page's Left behind section", async ({
+  page,
+  context,
+}) => {
+  await signIn(page);
+  await context.addCookies([
+    { name: "fixture_sandboxes", value: "amber", url: "http://localhost:3100" },
+  ]);
+  await page.goto("/settings/status");
+  const section = page.getByRole("region", { name: "Sandboxes" });
+  await expect(section).toContainText(
+    "Left behind after the last sweep: 1 network (the engine timed out). The gateway tries again every 5 minutes.",
+  );
+  await expect(section).not.toContainText("tqa-sbx");
+  await axe(page);
+  await capture(page, "status-sandboxes-amber");
+  await section.getByRole("link", { name: "Open Sandboxes" }).click();
+  const left = page.getByRole("region", { name: "Left behind" });
+  await expect(left).toContainText(
+    "A network tqa-sbx-18e7c62210a67d70, 11 minutes old: the engine timed out",
+  );
+  await expect(
+    left.getByText("docker network rm tqa-sbx-18e7c62210a67d70"),
+  ).toBeVisible();
+  await axe(page);
+  await capture(page, "sandboxes-left-behind", { fullPage: true });
+});
+
+// Decision 7 of the review: Thai and Tamil checked at 390 px, where their column headers are the longest.
+for (const [language, headers] of [
+  ["th", ["เจ้าของ", "สถานะ", "สภาพแวดล้อม"]],
+  ["ta", ["உரிமையாளர்", "நிலை", "சூழல்"]],
+] as const)
+  test(`WEB-E2E-129 the summary and the headers at 390 in ${language}`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.addInitScript(
+      (code) => localStorage.setItem("tensorquay-language", code),
+      language,
+    );
+    await signIn(page);
+    await page.goto("/settings/sandboxes");
+    const table = page.getByRole("table");
+    await expect(table).toBeVisible();
+    for (const header of headers) {
+      const cell = table.getByRole("columnheader", { name: header });
+      // The header's words stay on one line: its box is one line tall.
+      const box = await cell.boundingBox();
+      const line = await cell.evaluate(
+        (element) => parseFloat(getComputedStyle(element).lineHeight) || 20,
+      );
+      expect(box?.height ?? 0).toBeLessThan(line * 2);
+    }
+    await capture(page, `sandboxes-390-${language}`);
+  });
+
+// The phone cards (reviewed on 18 Nov 2026): a line with the owner and the state pill, ⋯ at its end; then the
+// environment and the last activity, muted, on one line; then the use on one line ("1.4 of 2 cores · 3.1 of 4 GB"); all
+// left-aligned, with no per-field label. The table above 600 px keeps its right-aligned numbers.
+test("WEB-E2E-129 the phone cards read in three lines, without field labels", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await signIn(page);
+  await pinTime(page);
+  await page.goto("/settings/sandboxes");
+  await expect(page.getByText(/^4 of 6 running/)).toBeVisible();
+  const cards = await page.evaluate(() =>
+    [
+      ...document.querySelectorAll<HTMLTableRowElement>(".data-table tbody tr"),
+    ].map((row) => {
+      const cells = [...row.querySelectorAll<HTMLElement>("td")];
+      const box = (element: Element) => element.getBoundingClientRect();
+      const [owner, , environment, use, activity, action] = cells.map(box);
+      const pill = box(row.querySelector(".status-pill")!);
+      const parts = [
+        ...row.querySelectorAll<HTMLElement>(".sandboxes-use > *"),
+      ].map(box);
+      return {
+        labels: cells.map((cell) => getComputedStyle(cell, "::before").content),
+        lineOne:
+          Math.abs(owner!.top - pill.top) <= 4 &&
+          Math.abs(owner!.top - action!.top) <= 4,
+        actionLast: action!.left > pill.right,
+        lineTwo:
+          environment!.top > owner!.bottom - 1 &&
+          Math.abs(environment!.top - activity!.top) <= 2 &&
+          activity!.left > environment!.left,
+        mutedTwo: [cells[2]!, cells[4]!].every(
+          (cell) =>
+            getComputedStyle(cell).color ===
+            getComputedStyle(document.querySelector(".muted")!).color,
+        ),
+        lineThree:
+          use!.top >= environment!.bottom - 1 &&
+          parts.every((part) => Math.abs(part.top - parts[0]!.top) <= 2),
+        ownerOneLine:
+          owner!.height <=
+          parseFloat(getComputedStyle(cells[0]!).lineHeight) + 2,
+        left: [owner!.left, environment!.left, use!.left].every(
+          (x) => Math.abs(x - owner!.left) <= 1,
+        ),
+        useAlign: getComputedStyle(cells[3]!).textAlign,
+      };
+    }),
+  );
+  expect(cards).toHaveLength(4);
+  // The summary wraps only between its clauses, never inside one ("· 5.4" / "of 16 GB set aside").
+  const clauses = await page.evaluate(() =>
+    [...document.querySelectorAll(".sandboxes-headline .sandboxes-clause")].map(
+      (clause) => ({
+        text: clause.textContent,
+        lines: clause.getClientRects().length,
+      }),
+    ),
+  );
+  expect(clauses.length).toBeGreaterThanOrEqual(3);
+  expect(clauses.filter((clause) => clause.lines !== 1)).toEqual([]);
+  for (const card of cards) {
+    expect(
+      card.labels.every(
+        (content) => content === "none" || content === "normal",
+      ),
+    ).toBe(true);
+    expect(card).toMatchObject({
+      lineOne: true,
+      ownerOneLine: true,
+      actionLast: true,
+      lineTwo: true,
+      mutedTwo: true,
+      lineThree: true,
+      left: true,
+    });
+    expect(card.useAlign).not.toBe("right");
+  }
+  await capture(page, "sandboxes-cards-390", { fullPage: true });
+});
+
+// A guard for the 18.1 first-hour finding ("member@example.invalid" ran under the State column on a real stack, its
+// pill drawn over it): long owner addresses stay in their cells at every width the table or its cards show. The fake
+// front's columns leave the owner room, so this passes without the fix too; WEB-U-486's <wbr> case is the red test,
+// and the real stack showed the fix (the first-hour notes).
+for (const width of [1440, 1280, 1024, 768, 390])
+  test(`WEB-E2E-129 a long owner address stays in its cell at ${width}`, async ({
+    page,
+    context,
+  }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await signIn(page);
+    await context.addCookies([
+      {
+        name: "fixture_sandboxes",
+        value: "long",
+        url: "http://localhost:3100",
+      },
+    ]);
+    await page.goto("/settings/sandboxes");
+    const table = page.getByRole("table", { name: "Running sandboxes" });
+    await expect(table).toContainText("operations.team@tensorquay-example.org");
+    const spills = await table.evaluate((element) =>
+      [...element.querySelectorAll("tbody tr")].flatMap((row) => {
+        const owner = row.querySelector("td");
+        const name = owner?.querySelector(".cell-whole");
+        if (!owner || !name) return [];
+        const cell = owner.getBoundingClientRect();
+        const text = name.getBoundingClientRect();
+        // The address's own box, and the state pill beside it: neither may cross the other.
+        const pill = row.querySelector(".status-pill")?.getBoundingClientRect();
+        const crossed =
+          pill &&
+          text.right > pill.left + 0.5 &&
+          text.left < pill.right &&
+          text.bottom > pill.top + 0.5 &&
+          text.top < pill.bottom;
+        return text.right > cell.right + 0.5 ||
+          owner.scrollWidth > owner.clientWidth + 1 ||
+          crossed
+          ? [
+              `${name.textContent} (${Math.round(text.right)} past ${Math.round(cell.right)})`,
+            ]
+          : [];
+      }),
+    );
+    expect(spills).toEqual([]);
+    await capture(page, `sandboxes-long-owners-${width}`);
+  });

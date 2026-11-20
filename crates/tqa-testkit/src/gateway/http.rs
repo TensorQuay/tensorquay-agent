@@ -79,11 +79,14 @@ pub(super) async fn team_role(State(shared): State<Arc<Shared>>, headers: Header
         .clone();
     let role = match route {
         super::RoleRoute::Hangs => std::future::pending().await,
-        super::RoleRoute::Role(role) => Some(role),
+        super::RoleRoute::Role(role, reason) => Some((role, reason)),
         super::RoleRoute::Absent => None,
     };
     match role {
-        Some(role) => Json(serde_json::json!({"role": role})).into_response(),
+        Some((role, None)) => Json(serde_json::json!({"role": role})).into_response(),
+        Some((role, Some(reason))) => {
+            Json(serde_json::json!({"role": role, "reason": reason})).into_response()
+        }
         None => (
             StatusCode::NOT_FOUND,
             Json(serde_json::json!({"error":{"code":"not_found","message":"no such route"}})),

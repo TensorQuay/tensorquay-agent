@@ -111,12 +111,13 @@ class RestarterTests(unittest.TestCase):
                   for reply in replies for call in reply["events"] if call.get("name") == "start_member"}
         # The edge cases' leads (E2E-AGENTS-021..034): each person's message holds its own EDGE- phrase, named whole
         # since two leads may share a letter (EDGE-J's two teams).
-        edges = {"lead " + when: when for when in {r["when"] for r in replies} if when.startswith("EDGE-")}
+        edges = {"lead " + when: when for when in {r["when"] for r in replies} if when.startswith(("EDGE-", "ROUNDS-"))}
         firsts = dict(briefs, lead=ask, **edges)
         self.assertEqual(sorted(name for name in firsts if not name.startswith("lead ")),
-                         ["analyst", "files-one", "files-two", "fixer", "ghost", "holder-k", "holder-one", "holder-two",
+                         ["analyst", "checker-r", "files-one", "files-two", "fixer", "ghost", "holder-k", "holder-one",
+                          "holder-two",
                           "late-files", "late-report", "lead", "noter", "profiled", "quiet", "reporter-l", "reporter-u",
-                          "scribe-o", "slow-files", "spender", "writer"])
+                          "scribe-o", "slow-files", "spender", "tallier", "writer"])
         # The holders share one script on purpose (held replies, for Stop, delete and restart); ghost has none, so the
         # fake model refuses it and its run fails (E2E-AGENTS-021); profiled never starts, as its profile doesn't
         # exist (E2E-AGENTS-034), so it has none either.
@@ -136,9 +137,9 @@ class RestarterTests(unittest.TestCase):
         replies = json.loads((tests / "fixtures/agents.json").read_text())["responses"]
         specs = [tests.parent.parent / "web/e2e" / name
                  for name in ("agents-stack.spec.ts", "agents-edges-stack.spec.ts",
-                              "agents-lead-unread-stack.spec.ts")]
-        in_spec = {phrase for spec in specs for phrase in re.findall(r'"(EDGE-[^"]+)"', spec.read_text())}
-        in_fixture = {reply["when"] for reply in replies if reply["when"].startswith("EDGE-")}
+                              "agents-lead-unread-stack.spec.ts", "agents-rounds-stack.spec.ts")]
+        in_spec = {phrase for spec in specs for phrase in re.findall(r'"((?:EDGE|ROUNDS)-[^"]+)"', spec.read_text())}
+        in_fixture = {reply["when"] for reply in replies if reply["when"].startswith(("EDGE-", "ROUNDS-"))}
         self.assertEqual(in_spec, in_fixture)
 
     def test_every_tool_call_names_how_it_streams(self):

@@ -33,6 +33,7 @@
   --surface: #f7f7f7;
   --surface-raised: #ffffff;
   --line: #e5e5e5;
+  --message-edge: transparent;
   /* Field, select and text-area borders: 3:1 on every surface (WCAG 1.4.11); --line is for dividers. */
   --control-border: #8a8a8a;
   --ink: #111111;
@@ -57,6 +58,7 @@
   --surface: #1a1a19;
   --surface-raised: #222220;
   --line: #2c2c2a;
+  --message-edge: var(--line);
   --control-border: #767672;
   --ink: #f4f4f2;
   --muted: #a3a39e;
@@ -79,6 +81,7 @@
     --surface: #1a1a19;
     --surface-raised: #222220;
     --line: #2c2c2a;
+    --message-edge: var(--line);
     --control-border: #767672;
     --ink: #f4f4f2;
     --muted: #a3a39e;
@@ -143,9 +146,8 @@
   --pill-radius: 999px;
   --display-size: 30px;
   --heading-size: 22px;
-  /* The UI standard: a task's title is 18 px, weight 700 (the app ships 400 and 700, §4). The whole scale is one
-     step bigger, decided on 9 Nov 2026: body 16/24, small 14, nav 15/22, labels 13. */
-  --task-title-size: 18px;
+  /* The whole scale is one step bigger, decided on 9 Nov 2026: body 16/24, small 14, nav 15/22, labels 13. A task's
+     title in its header is at body size, in regular weight (WEB-U-495, decided on 17 Nov 2026). */
   --body-size: 16px;
   --small-size: 14px;
   --label-size: 13px;
@@ -204,6 +206,8 @@
   --row-inset: var(--space-half);
   --row-action-size: calc(var(--row-height-nav) - 2 * var(--row-inset));
   --row-action-radius: calc(var(--control-radius) - var(--row-inset));
+  /* §5: an image's 24 px thumbnail sits 4 px inside its 32 px attachment chip, so its corners are the chip's less 4 px. */
+  --thumbnail-radius: calc(var(--control-radius) - var(--space-1));
   --row-action-reach: calc(
     var(--row-action-size) + var(--row-inset) - var(--nav-pad-inline)
   );
@@ -238,7 +242,8 @@
   );
   /* The Settings menu, as wide as its widest label needs (17.4.1, WEB-U-465): an item gives its label its width less
      12 px of padding at each side, the 16 px icon and the 12 px gap, so 132 px here. That is the widest label we ship,
-     "Decision engines" at 124 px in 15 px Space Grotesk, and 8 px for a rendering that runs a little wider. */
+     "Decision engines" at 124 px in 15 px Space Grotesk, and 8 px for a rendering that runs a little wider. It is the
+     menu's least width: a language whose labels run longer widens the menu to them (settings.css). */
   --settings-nav-width: 184px;
   /* A field's starting width in a one-row settings form, before the row wraps. */
   --form-field-basis: 160px;
@@ -257,7 +262,6 @@
   --icon-text: 16px;
   --icon-control: 20px;
   --mark-header: 24px;
-  --wordmark-height: 24px;
   --border-width: 1px;
   --focus-width: 2px;
   --focus-offset: 2px;
@@ -453,10 +457,11 @@ h3 {
   letter-spacing: var(--display-tracking);
   font-weight: 400;
 }
+/* The task's title in its header: body size, regular weight, one quiet line with its origin (18.1, WEB-U-495). */
 .type-task-title {
-  font-size: var(--task-title-size);
-  line-height: var(--heading-leading);
-  font-weight: 700;
+  font-size: var(--body-size);
+  line-height: var(--body-leading);
+  font-weight: 400;
 }
 .type-heading {
   font-size: var(--heading-size);
@@ -525,17 +530,21 @@ h3 {
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  height: var(--control-height);
+  /* WEB-U-511: a label longer than its room wraps inside the button, centred, the button growing from the control
+     height; never an ellipsis, which would hide the action's name. */
+  min-height: var(--control-height);
   min-width: var(--button-min-width);
+  max-width: 100%;
   flex-shrink: 0;
-  padding: 0 var(--space-4);
+  padding: var(--space-1) var(--space-4);
   border: var(--border-width) solid transparent;
   border-radius: var(--control-radius);
   background: var(--ink);
   color: var(--paper);
   font-weight: 700;
+  text-align: center;
   text-decoration: none;
-  white-space: nowrap;
+  white-space: normal;
 }
 .button[data-variant="secondary"] {
   background: var(--surface);
@@ -592,7 +601,10 @@ h3 {
 .button-label {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-2);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .button-label[data-loading="true"] {
   opacity: 0;
@@ -602,9 +614,12 @@ h3 {
   display: flex;
   animation: spin 1s linear infinite;
 }
+/* An icon-only button keeps its fixed square: it has no words to wrap (WEB-U-511). */
 .icon-button {
   width: var(--control-height);
+  height: var(--control-height);
   min-width: 0;
+  min-height: 0;
   padding: 0;
 }
 .button.icon-button:focus-visible {
@@ -718,14 +733,13 @@ textarea.form-control {
 .empty-icon {
   color: var(--muted);
 }
-.brand-wordmark {
-  display: block;
-  height: var(--wordmark-height);
-  width: auto;
-  aspect-ratio: 330.25 / 64;
-  max-width: 100%;
-  background: var(--ink);
-  mask: url("/brand/wordmark.svg") left center / contain no-repeat;
+/* The app's one lockup on the pages before sign-in (the 17.2 review's finding 16): the mark and the product's name,
+   spaced as the sidebar's. */
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--control-height);
 }
 .empty-state {
   display: flex;
@@ -799,6 +813,14 @@ textarea.form-control {
 .dialog-header h2 {
   min-width: 0;
   overflow-wrap: anywhere;
+}
+/* A confirm the gateway refused because the thing changed (ConfirmDialog's final): why, as its own notice in body
+   ink with space above, not a small red error under the text. */
+.dialog .confirm-notice {
+  margin-top: var(--space-4);
+  padding: var(--space-3);
+  border-radius: var(--control-radius);
+  background: var(--surface);
 }
 .dialog-actions {
   display: flex;
@@ -1221,7 +1243,7 @@ textarea.form-control {
   gap: var(--space-8);
 }
 /* A quiet mark above the form (the design direction): the page's heading carries the words. */
-.auth-column .brand-wordmark {
+.auth-column .brand-lockup {
   align-self: flex-start;
   margin: var(--space-2) 0;
 }
@@ -1407,6 +1429,35 @@ textarea.form-control {
 }
 .design-dialog-trigger {
   align-self: flex-start;
+}
+/* The component gallery (WEB-U-510): a component's states side by side, each captioned under it. */
+.gallery-states {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-4) var(--space-6);
+}
+/* The overlay scrollbar's specimen: a short scroller in its positioned frame. */
+.gallery-wide {
+  inline-size: var(--field-width);
+  max-inline-size: 100%;
+}
+.gallery-scroll-frame {
+  position: relative;
+  inline-size: var(--field-width);
+  max-inline-size: 100%;
+}
+.gallery-scroll {
+  block-size: var(--space-16);
+  overflow: auto;
+}
+.gallery-state {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
 }
 @container (max-width: 420px) {
   .token-list,

@@ -43,8 +43,12 @@ pub(crate) enum Run {
     Active { last_progress_at: i64 },
     /// Ended normally at `at`.
     Ended { at: i64 },
-    /// Failed, with the run's own reason (the runtime's words, never an agent's); its code stays in the transcript.
-    Failed { reason: String },
+    /// Failed, with the run's own reason (the runtime's words, never an agent's) and its code, which the notice carries
+    /// for a page to say why in its own words (GW-I-343).
+    Failed {
+        reason: String,
+        code: Option<String>,
+    },
 }
 
 /// One member at one instant.
@@ -94,6 +98,8 @@ pub(crate) enum Action {
         kind: NoticeKind,
         member: Option<String>,
         text: String,
+        /// A failed run's code, on `member_failed` (GW-I-343).
+        code: Option<String>,
     },
     /// The member's state becomes `stuck`, or back to `working` once it makes progress.
     MarkStuck(String),
@@ -145,6 +151,7 @@ pub(crate) fn decide(team: &TeamView, now: i64, thresholds: &Thresholds) -> Vec<
             kind: NoticeKind::DeadlineNear,
             member: None,
             text: format!("The team's time is nearly up: {} min left.", minutes(left)),
+            code: None,
         });
     }
     for member in &team.members {
@@ -162,10 +169,11 @@ fn member_actions(member: &MemberView, now: i64, thresholds: &Thresholds) -> Vec
     // was told it failed, so it is neither stuck nor idle until its next run makes it working (GW-I-260).
     let failed = member.state == "failed";
     match &member.run {
-        Run::Failed { reason } if !member.told.failed => vec![Action::Notice {
+        Run::Failed { reason, code } if !member.told.failed => vec![Action::Notice {
             kind: NoticeKind::MemberFailed,
             member: Some(name.clone()),
             text: format!("{name} failed: {}.", reason.trim_end_matches('.')),
+            code: code.clone(),
         }],
         Run::Active { .. } | Run::Ended { .. } if failed => Vec::new(),
         Run::Active { last_progress_at } => {
@@ -183,6 +191,7 @@ fn member_actions(member: &MemberView, now: i64, thresholds: &Thresholds) -> Vec
                             "{name} seems stuck: nothing has moved for {} minutes.",
                             minutes(quiet)
                         ),
+                        code: None,
                     });
                 }
                 actions
@@ -205,6 +214,7 @@ fn member_actions(member: &MemberView, now: i64, thresholds: &Thresholds) -> Vec
                     "{name} stopped {} minutes ago without reporting.",
                     minutes(now - at)
                 ),
+                code: None,
             }]
         }
         _ => Vec::new(),

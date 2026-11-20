@@ -29,7 +29,15 @@ function seed() {
   put(".tqa/state.json", "{}");
   put("reports/report.html", REPORT);
   put("reports/weather.html", WEATHER);
+  // A page with no script at all (WEB-U-513): a heading, a picture and a table.
+  put(
+    "reports/summary.html",
+    `<!doctype html><html><head><title>Summary</title></head><body><h1>Q3 summary</h1>` +
+      `<img alt="A chart" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="><table><tr><th>Region</th><th>Total</th></tr>` +
+      `<tr><td>North</td><td>4.1 M</td></tr></table></body></html>`,
+  );
   put("reports/brief.pdf", BRIEF_PDF);
+  put("reports/sizable.pdf", SIZABLE_PDF);
   put("reports/chinese.pdf", CHINESE_PDF);
   put("reports/symbol.pdf", SYMBOL_PDF);
   put("reports/long.pdf", LONG_PDF);
@@ -138,6 +146,20 @@ function longPdf() {
   ]);
 }
 const LONG_PDF = longPdf();
+
+/**
+ * The brief, padded with comment lines to 677,478 bytes, so the Files panel writes its size as "661.6 kB", the live
+ * look's report.pdf (WEB-E2E-133). Comments after %%EOF are ignored by a PDF reader.
+ */
+const SIZABLE_PDF = (() => {
+  const line = "% padding to the live look's size\n";
+  const padding = 677478 - BRIEF_PDF.length;
+  return (
+    BRIEF_PDF +
+    line.repeat(Math.floor(padding / line.length)) +
+    "%".repeat(padding % line.length)
+  );
+})();
 
 /**
  * A one-page PDF in Chinese, its font not embedded: STSong-Light with the UniGB-UCS2-H CMap (Adobe-GB1), which pdf.js

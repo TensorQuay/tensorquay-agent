@@ -20,6 +20,16 @@ pub enum BackendKind {
     Firecracker,
 }
 
+/// One listing of this instance's sandboxes: the readable ones, and from the same listing the engine ids of those whose
+/// labels couldn't be read (SBX-U-023). A value, so two listings at once never read each other's.
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct Listing {
+    /// The sandboxes the listing could read.
+    pub handles: Vec<SandboxHandle>,
+    /// The engine ids of the containers with this instance's labels that it couldn't read.
+    pub unreadable: Vec<String>,
+}
+
 /// A backend identity and the immutable conversation binding used for reconciliation.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SandboxHandle {
@@ -90,8 +100,21 @@ pub trait SandboxBackend: Send + Sync {
     /// Lists the labelled sandbox inventory for this gateway instance.
     ///
     /// # Errors
-    /// Returns timeout or backend errors, including malformed managed labels.
+    /// Returns timeout or backend errors. A container whose managed labels are malformed is left out, never an error
+    /// (see [`listing`](Self::listing)).
     async fn list(&self) -> Result<Vec<SandboxHandle>, SandboxError>;
+    /// The inventory and, from the same listing, the containers it couldn't read: one call, so the sweep counts the
+    /// unreadable ones of its own listing, never of another one running at the same time (SBX-U-023). A backend that
+    /// reads no labels has none.
+    ///
+    /// # Errors
+    /// As [`list`](Self::list).
+    async fn listing(&self) -> Result<Listing, SandboxError> {
+        Ok(Listing {
+            handles: self.list().await?,
+            unreadable: Vec::new(),
+        })
+    }
     /// The container engine's own networks: every network's subnets, and its gateway addresses (the host's address on
     /// each bridge). An internal egress rule never reaches them (ADR-0035 amendment). A backend without an engine has
     /// none.

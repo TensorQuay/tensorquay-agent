@@ -13,6 +13,11 @@
 }
 /* The chips give way: the row shrinks and clips, each name is cut with "…" (whole in its tooltip and name), and the
    budget and All helpers keep their one line (WEB-U-369; three long names overlapped the budget at 1280). */
+/* From round 2 on, the round before the chips (ADR-0034's rounds amendment A5): one line, never squeezed. */
+.helpers-round {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
 .helpers-chips {
   display: flex;
   flex: 0 1 auto;
@@ -178,7 +183,7 @@
   display: grid;
   gap: var(--space-1);
   padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-control);
+  border-radius: var(--control-radius);
   background: var(--surface);
 }
 /* A helper's brief from its lead: a surface card at the top of its transcript, folded to six lines when longer. */
@@ -186,7 +191,7 @@
   display: grid;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-control);
+  border-radius: var(--control-radius);
   background: var(--surface);
 }
 .brief-card dl,
@@ -221,7 +226,7 @@
   display: grid;
   gap: var(--space-1);
   padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-control);
+  border-radius: var(--control-radius);
   background: var(--surface);
 }
 .waiting-card[data-tone="warn"] {
@@ -336,7 +341,7 @@
   flex-shrink: 0;
   inline-size: var(--space-2);
   block-size: var(--space-2);
-  border-radius: 50%;
+  border-radius: var(--pill-radius);
   background: var(--warn);
 }
 /* On a phone every row wraps and its link takes the line; a lead's row keeps its chevron, title and ⋯ on one line,

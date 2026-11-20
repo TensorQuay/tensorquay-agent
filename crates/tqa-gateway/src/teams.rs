@@ -2,6 +2,7 @@
 //! runtime routes, built slice by slice (DEV-PLAN Phase 10).
 // The cursor's rules as a pure model, tested (GW-U-126) and mirrored by the store's SQL.
 mod acceptance;
+mod bring_back;
 pub(crate) mod budget;
 pub(crate) mod cap;
 pub(crate) mod changed;
@@ -22,7 +23,12 @@ pub(crate) mod place;
 mod place_shape;
 mod read_shape;
 pub(crate) mod reconciler;
+mod role;
 mod roles;
+pub(crate) mod rounds_store;
+// The rounds state table (ADR-0034's rounds amendment): tested now, wired into start_member by step 2.
+#[cfg(test)]
+mod rounds;
 pub(crate) mod runtime;
 pub(crate) mod start;
 pub(crate) mod stop;

@@ -77,10 +77,17 @@ describe("WEB-U-460 the Settings menu stays in view", () => {
 // every shipped language. Its width once also set a settings form's fields and the details list's labels; they only
 // borrowed it, and keep their 160 px under names of their own.
 describe("WEB-U-465 the Settings menu is as wide as its labels need", () => {
-  it("takes its width from its own token, on the 4 px grid", () => {
-    expect(
-      declared(rule(settings, ".settings-page"), "grid-template-columns"),
-    ).toBe("var(--settings-nav-width) minmax(0, var(--form-width))");
+  it("takes at least its own token's width, on the 4 px grid, and grows to its widest label", () => {
+    // As written, with the line breaks the formatter puts in a long value read as spaces.
+    const columns = (
+      declared(rule(settings, ".settings-page"), "grid-template-columns") ?? ""
+    )
+      .replace(/\s+/g, " ")
+      .replace(/\( /g, "(")
+      .replace(/ \)/g, ")");
+    expect(columns).toBe(
+      "minmax(var(--settings-nav-width), max-content) minmax(0, var(--form-width))",
+    );
     expect(px("var(--settings-nav-width)") % 4).toBe(0);
   });
 

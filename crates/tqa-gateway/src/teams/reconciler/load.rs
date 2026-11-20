@@ -95,7 +95,7 @@ async fn members(
     let rows = sqlx::query!(
         "SELECT m.conversation_id, m.name, m.state, lc.lifecycle AS \"lifecycle?\", \
          EXTRACT(EPOCH FROM lc.created_at)::bigint AS \"lifecycle_at?\", \
-         lc.frame->'event'->>'reason' AS \"failed_reason?\", \
+         lc.frame->'event'->>'reason' AS \"failed_reason?\", lc.frame->'event'->>'code' AS \"failed_code?\", \
          (SELECT EXTRACT(EPOCH FROM MAX(e.created_at))::bigint FROM events e \
           WHERE e.conversation_id = m.conversation_id AND e.seq >= lc.seq) AS \"progress_at?\", \
          EXISTS (SELECT 1 FROM channel_messages r WHERE r.channel_id = $2 AND r.type = 'report' \
@@ -133,6 +133,7 @@ async fn members(
                 reason: row
                     .failed_reason
                     .unwrap_or_else(|| "no reason was recorded".into()),
+                code: row.failed_code,
             },
             Some(_) => Run::Ended { at },
             None => Run::None,

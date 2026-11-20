@@ -2157,6 +2157,331 @@
         "prompt_tokens": 40,
         "completion_tokens": 20
       }
+    },
+    {
+      "when": "ROUNDS-A count the regions over two rounds",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "tallier",
+            "workspace": "own_copy",
+            "profile": null,
+            "brief": {
+              "objective": "Count the regions named in the lead's brief and report the number.",
+              "output": "One line to the lead with the count.",
+              "sources": null,
+              "boundaries": "Don't edit anything."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "ROUNDS-A count the regions over two rounds",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "checker-r",
+            "workspace": "own_copy",
+            "profile": null,
+            "brief": {
+              "objective": "Check the tallier's count of regions and report it.",
+              "output": "One line to the lead with the count.",
+              "sources": null,
+              "boundaries": "Don't edit anything."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "ROUNDS-A count the regions over two rounds",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "read_reports",
+          "arguments": {
+            "wait": 30,
+            "limit": null
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "ROUNDS-A count the regions over two rounds",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "done",
+          "arguments": {
+            "summary": "Round one: four regions, checked."
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "ROUNDS-A count the regions over two rounds",
+      "events": [
+        {
+          "type": "text",
+          "text": "Round one is done."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "ROUNDS-A count the regions over two rounds",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "start_member",
+          "arguments": {
+            "role": "tallier",
+            "workspace": "own_copy",
+            "profile": null,
+            "files": "keep",
+            "brief": {
+              "objective": "Count the regions again and report the number.",
+              "output": "One line to the lead with the count.",
+              "sources": null,
+              "boundaries": "Don't edit anything."
+            }
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "ROUNDS-A count the regions over two rounds",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "read_reports",
+          "arguments": {
+            "wait": 30,
+            "limit": null
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "ROUNDS-A count the regions over two rounds",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "read_reports",
+          "arguments": {
+            "wait": 30,
+            "limit": null
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "ROUNDS-A count the regions over two rounds",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "read_reports",
+          "arguments": {
+            "wait": 30,
+            "limit": null
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "ROUNDS-A count the regions over two rounds",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "read_reports",
+          "arguments": {
+            "wait": 30,
+            "limit": null
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "ROUNDS-A count the regions over two rounds",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "done",
+          "arguments": {
+            "summary": "Round two: still four regions."
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "ROUNDS-A count the regions over two rounds",
+      "events": [
+        {
+          "type": "text",
+          "text": "Round two is done."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "tallier, a helper",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "send_to_lead",
+          "arguments": {
+            "type": "report",
+            "text": "Four regions.",
+            "question_seq": null,
+            "files": null
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "tallier, a helper",
+      "events": [
+        {
+          "type": "text",
+          "text": "I reported the count."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "tallier, a helper",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "send_to_lead",
+          "arguments": {
+            "type": "report",
+            "text": "Still four regions.",
+            "question_seq": null,
+            "files": null
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "tallier, a helper",
+      "events": [
+        {
+          "type": "text",
+          "text": "I reported the count again."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are checker-r",
+      "events": [
+        {
+          "type": "tool_call",
+          "name": "send_to_lead",
+          "arguments": {
+            "type": "report",
+            "text": "Checked: four regions.",
+            "question_seq": null,
+            "files": null
+          },
+          "split_into": 1
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
+    },
+    {
+      "when": "You are checker-r",
+      "events": [
+        {
+          "type": "text",
+          "text": "I reported the check."
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 40,
+        "completion_tokens": 20
+      }
     }
   ]
 }

@@ -418,8 +418,11 @@ async fn gw_i_214_a_task_linked_below_13_is_never_offered_the_lead(pool: PgPool)
             let (person, _) = f.member("owner@example.invalid").await?;
             // In no team yet, so the link takes it; but its later wakes couldn't reach it, so it never leads.
             for (revision, expected) in [
-                (tqa_types::LEAD_BRIEF_REVISION, "none"),
-                (tqa_types::TEAM_WAKE_REVISION, "may_lead"),
+                (
+                    tqa_types::LEAD_BRIEF_REVISION,
+                    json!({"role": "none", "reason": "runtime_too_old"}),
+                ),
+                (tqa_types::TEAM_WAKE_REVISION, json!({"role": "may_lead"})),
             ] {
                 let conversation = f.conversation(person.id).await?;
                 let _runtime = f.runtime_at(&conversation.id, revision).await?;
@@ -431,10 +434,118 @@ async fn gw_i_214_a_task_linked_below_13_is_never_offered_the_lead(pool: PgPool)
                     .to_owned();
                 assert_eq!(
                     role(f, &token).await?,
-                    (200, json!({"role": expected})),
+                    (200, expected),
                     "revision {revision}"
                 );
             }
+            Ok(())
+        },
+    ))
+    .await
+}
+
+// TEST: GW-I-329
+// The role says why a run may not lead (ADR-0034's rounds amendment, A2 and A7): each answer with its reason, and none
+// for a running team or a task in none.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_329_the_role_says_why_a_run_may_not_lead(pool: PgPool) -> TestResult {
+    Box::pin(support::run_configured(
+        pool,
+        Some(registry()?),
+        &config(""),
+        async |f| {
+            f.admin().await?;
+            let (person, _) = f.member("owner@example.invalid").await?;
+            let lead = task(f, person.id).await?;
+            assert_eq!(role(f, &lead.token).await?, (200, json!({"role": "may_lead"})));
+            let (_, started) = start(f, &lead.token, "c-1", &brief("researcher")).await?;
+            assert_eq!(role(f, &lead.token).await?, (200, json!({"role": "lead"})));
+            let member = connected(
+                f,
+                &started["member"]["conversation"].as_str().ok_or("id")?.parse()?,
+            )
+            .await?;
+            assert_eq!(role(f, &member.token).await?, (200, json!({"role": "member"})));
+            // The team ends at `done`, a round's reason: its note unread, the lead is between rounds.
+            sqlx::query(
+                "UPDATE agent_teams SET state = 'ended', stop_reason = 'done', ended_at = CURRENT_TIMESTAMP",
+            )
+            .execute(&f.pool)
+            .await?;
+            assert_eq!(
+                role(f, &member.token).await?,
+                (200, json!({"role": "none", "reason": "was_member"}))
+            );
+            let seq: i64 = sqlx::query_scalar(
+                "WITH next AS (UPDATE channels c SET last_seq = last_seq + 1 FROM agent_teams t \
+                 WHERE t.channel_id = c.id AND t.lead_conversation = $1 RETURNING c.id, c.last_seq) \
+                 INSERT INTO channel_messages (channel_id, seq, author_kind, author_id, author_name, type, to_kind, body) \
+                 SELECT id, last_seq, 'gateway', 'gateway', 'gateway', 'ended', 'lead', \
+                 '{\"type\": \"ended\", \"text\": \"The team stopped: done.\"}' FROM next RETURNING seq",
+            )
+            .bind(lead.id)
+            .fetch_one(&f.pool)
+            .await?;
+            assert_eq!(
+                role(f, &lead.token).await?,
+                (200, json!({"role": "ended", "reason": "between_rounds"}))
+            );
+            sqlx::query("UPDATE agent_teams SET lead_last_read_seq = $1 WHERE lead_conversation = $2")
+                .bind(seq)
+                .bind(lead.id)
+                .execute(&f.pool)
+                .await?;
+            // Its note read, the lead is still between rounds: it may open the next on a person's follow-up.
+            assert_eq!(
+                role(f, &lead.token).await?,
+                (200, json!({"role": "ended", "reason": "between_rounds"}))
+            );
+            // Its person disabled: ended for good, whether the note is read or not.
+            sqlx::query("UPDATE agent_teams SET stop_reason = 'person_disabled'")
+                .execute(&f.pool)
+                .await?;
+            assert_eq!(
+                role(f, &lead.token).await?,
+                (200, json!({"role": "none", "reason": "team_ended"}))
+            );
+            sqlx::query("UPDATE agent_teams SET lead_last_read_seq = 0")
+                .execute(&f.pool)
+                .await?;
+            assert_eq!(
+                role(f, &lead.token).await?,
+                (200, json!({"role": "none", "reason": "team_ended"}))
+            );
+            // A task in no team on a runtime below the wake's revision.
+            let old = f.conversation(person.id).await?;
+            let _runtime = f.runtime_at(&old.id, tqa_types::LEAD_BRIEF_REVISION).await?;
+            let token = f.backend.token(&old.id).ok_or("token")?.expose_secret().to_owned();
+            assert_eq!(
+                role(f, &token).await?,
+                (200, json!({"role": "none", "reason": "runtime_too_old"}))
+            );
+            Ok(())
+        },
+    ))
+    .await
+}
+
+// TEST: GW-I-329
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_329_with_teams_off_the_role_says_so(pool: PgPool) -> TestResult {
+    Box::pin(support::run_configured(
+        pool,
+        Some(registry()?),
+        &config("").replace("enabled = true", "enabled = false"),
+        async |f| {
+            f.admin().await?;
+            let (person, _) = f.member("owner@example.invalid").await?;
+            let lead = task(f, person.id).await?;
+            assert_eq!(
+                role(f, &lead.token).await?,
+                (200, json!({"role": "none", "reason": "teams_disabled"}))
+            );
             Ok(())
         },
     ))
@@ -477,12 +588,12 @@ async fn gw_i_202_a_runs_role_tells_which_team_tools_it_gets(pool: PgPool) -> Te
                 .await?;
             assert_eq!(
                 role(f, &member.token).await?,
-                (200, json!({"role": "none"}))
+                (200, json!({"role": "none", "reason": "was_member"}))
             );
             // One team per lead: the ended team's lead gets no team tools...
             assert_eq!(
                 role(f, &lead.token).await?,
-                (200, json!({"role": "none"}))
+                (200, json!({"role": "ended", "reason": "between_rounds"}))
             );
             // ...except, while its end note is unread, read_reports alone, which delivers it (a team that ended
             // between its runs is still told once).
@@ -498,7 +609,7 @@ async fn gw_i_202_a_runs_role_tells_which_team_tools_it_gets(pool: PgPool) -> Te
             .await?;
             assert_eq!(
                 role(f, &lead.token).await?,
-                (200, json!({"role": "ended"}))
+                (200, json!({"role": "ended", "reason": "between_rounds"}))
             );
             sqlx::query("UPDATE agent_teams SET lead_last_read_seq = $1 WHERE lead_conversation = $2")
                 .bind(seq)
@@ -507,7 +618,7 @@ async fn gw_i_202_a_runs_role_tells_which_team_tools_it_gets(pool: PgPool) -> Te
                 .await?;
             assert_eq!(
                 role(f, &lead.token).await?,
-                (200, json!({"role": "none"})),
+                (200, json!({"role": "ended", "reason": "between_rounds"})),
                 "once read, nothing"
             );
             // Without a runtime token, nothing.
@@ -530,7 +641,10 @@ async fn gw_i_202_with_agent_teams_off_every_role_is_none(pool: PgPool) -> TestR
             f.admin().await?;
             let (person, _) = f.member("owner@example.invalid").await?;
             let lead = task(f, person.id).await?;
-            assert_eq!(role(f, &lead.token).await?, (200, json!({"role": "none"})));
+            assert_eq!(
+                role(f, &lead.token).await?,
+                (200, json!({"role": "none", "reason": "teams_disabled"}))
+            );
             Ok(())
         },
     ))
@@ -545,15 +659,16 @@ async fn set_limit(f: &Fixture, cookie: &str, key: &str, value: u64) -> Result<(
         .and_then(|items| items.iter().find(|item| item["key"] == key))
         .and_then(|item| item["version"].as_i64())
         .ok_or_else(|| format!("no {key} in the listing"))?;
-    let response = f
-        .client
-        .put(f.url(&format!("/api/v1/admin/limits/{key}")))
-        .header("origin", f.origin())
-        .header("cookie", cookie)
-        .json(&json!({"value": value, "version": version}))
-        .send()
-        .await?;
-    assert_eq!(response.status().as_u16(), 200, "{key}");
+    // A retryable 503 (the store busy past its lock timeout on a loaded runner) is sent again.
+    let (status, answer) = support::send_retrying(
+        f.client
+            .put(f.url(&format!("/api/v1/admin/limits/{key}")))
+            .header("origin", f.origin())
+            .header("cookie", cookie)
+            .json(&json!({"value": value, "version": version})),
+    )
+    .await?;
+    assert_eq!(status, 200, "{key}: {answer}");
     Ok(())
 }
 
@@ -567,15 +682,15 @@ async fn gw_i_203_the_administrators_settings_apply_to_the_next_helper_and_team(
     Box::pin(support::run_configured(pool, Some(registry()?), &config(""), async |f| {
         let (_, admin) = f.admin().await?;
         // The helper's route, set by the administrator (no file value).
-        let put = f
-            .client
-            .put(f.url("/api/v1/admin/agent-teams"))
-            .header("origin", f.origin())
-            .header("cookie", &admin)
-            .json(&json!({"member_route": "spare", "acceptance_check": null, "version": 0}))
-            .send()
-            .await?;
-        assert_eq!(put.status().as_u16(), 200);
+        let (status, answer) = support::send_retrying(
+            f.client
+                .put(f.url("/api/v1/admin/agent-teams"))
+                .header("origin", f.origin())
+                .header("cookie", &admin)
+                .json(&json!({"member_route": "spare", "acceptance_check": null, "version": 0})),
+        )
+        .await?;
+        assert_eq!(status, 200, "{answer}");
         // A team's budget and deadline, and the cap on helpers, from the next team and helper on.
         set_limit(f, &admin, "agent_teams.token_budget", 50_000).await?;
         set_limit(f, &admin, "agent_teams.deadline_minutes", 30).await?;

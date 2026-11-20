@@ -249,6 +249,7 @@ pub(crate) async fn stop_member(
         caller.channel,
         (NoticeKind::MemberStopped, &member.name),
         &text,
+        None,
     )
     .await?;
     Ok(Stopped {
@@ -527,6 +528,7 @@ pub(crate) async fn notice(
     channel: Uuid,
     (kind, member): (tqa_types::NoticeKind, &str),
     text: &str,
+    code: Option<tqa_types::ErrorCode>,
 ) -> Result<u64, GatewayError> {
     let message = Message {
         channel,
@@ -538,6 +540,7 @@ pub(crate) async fn notice(
         member: Some(member.to_owned()),
         position: None,
         text: text.to_owned(),
+        code,
     };
     insert(connection, &message, &body).await
 }
@@ -562,6 +565,7 @@ pub(crate) async fn team_notice(
         member: None,
         position: None,
         text: text.to_owned(),
+        code: None,
     };
     insert(connection, &message, &body).await
 }
@@ -588,6 +592,7 @@ pub(crate) async fn member_notice(
         member: None,
         position: None,
         text: text.to_owned(),
+        code: None,
     };
     insert(connection, &message, &body).await
 }
@@ -605,6 +610,24 @@ pub(crate) async fn end_note(
         channel,
         author: None,
         to: ("lead", None),
+    };
+    insert(connection, &message, body).await
+}
+
+/// Stores a message from the gateway for people (the `round_started` line, ADR-0034's rounds amendment A5), addressed
+/// to the person, so no lead's or helper's read returns it and no wake follows.
+///
+/// # Errors
+/// `429 channel_rate`, storage failure.
+pub(crate) async fn post_gateway(
+    connection: &mut PgConnection,
+    channel: Uuid,
+    body: &TeamMessageBody,
+) -> Result<u64, GatewayError> {
+    let message = Message {
+        channel,
+        author: None,
+        to: ("person", None),
     };
     insert(connection, &message, body).await
 }
@@ -940,6 +963,7 @@ pub(crate) const fn type_text(kind: TeamMessageType) -> &'static str {
         TeamMessageType::Notice => "notice",
         TeamMessageType::Done => "done",
         TeamMessageType::Ended => "ended",
+        TeamMessageType::RoundStarted => "round_started",
     }
 }
 

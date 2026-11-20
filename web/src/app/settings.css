@@ -1,7 +1,12 @@
 /* UI-GUIDELINES §6: settings are a 760 px column with the sections listed on the left on wide screens. */
 .settings-page {
   display: grid;
-  grid-template-columns: var(--settings-nav-width) minmax(0, var(--form-width));
+  /* The menu is as wide as its widest label needs, in every language (WEB-U-465): the token is its least width, the
+     width English needs; a language whose labels run longer widens it, so no item takes two lines. */
+  grid-template-columns: minmax(var(--settings-nav-width), max-content) minmax(
+      0,
+      var(--form-width)
+    );
   grid-template-areas:
     "title title"
     "nav column";
@@ -181,6 +186,8 @@
 .data-table td .button {
   height: var(--table-control-height);
   min-height: var(--table-control-height);
+  /* A table's control stays on one line: a table that can't hold it becomes cards (§7 Table), never a wrapped Edit. */
+  white-space: nowrap;
 }
 .data-table td .icon-button {
   width: var(--table-control-height);
@@ -316,6 +323,7 @@
   flex: none;
   overflow: visible;
   min-height: var(--min-control-height);
+  /* token-lint: allow line-height (a one-line link fills its 32 px target this way; as a flex box it grew phone cards, WEB-E2E-111) */
   line-height: var(--min-control-height);
   color: var(--ink);
   text-decoration: underline;
@@ -578,6 +586,56 @@
   overflow: visible;
   white-space: pre-wrap;
 }
+/* The Models cards on a phone (the 17.2 review's finding 18, decided on 18 Nov 2026): a tap anywhere opens the route,
+   its Edit link laid over the whole card with its word hidden (a box a keyboard audit sees) (its name still read); the ⋯ and a card's own links
+   sit above it. One stop opens the card, its focus ring drawn around the card; then its ⋯. */
+:where(.data-table-scroll[data-cards]) .data-table.models-table tbody tr {
+  position: relative;
+}
+:where(.data-table-scroll[data-cards]) .data-table.models-table .route-open {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--control-radius);
+  background: transparent;
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.models-table
+  .route-open-word {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.models-table
+  .route-open:focus-visible {
+  outline: none;
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.models-table
+  tbody
+  tr:has(.route-open:focus-visible) {
+  outline: var(--focus-width) solid var(--focus);
+  outline-offset: var(--focus-offset);
+}
+:where(.data-table-scroll[data-cards]) .data-table.models-table tbody tr:hover {
+  border-color: var(--muted);
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.models-table
+  td
+  a:not(.route-open),
+:where(.data-table-scroll[data-cards]) .data-table.models-table td button {
+  position: relative;
+  z-index: 1;
+}
 .data-select {
   width: auto;
   min-height: var(--min-control-height);
@@ -743,6 +801,29 @@ details.route-group[open] > summary::before {
 }
 details.route-group > summary::-webkit-details-marker {
   display: none;
+}
+/* A quiet disclosure (the 17.2 review's finding 11, decided on 18 Nov 2026): the route form's Advanced and Reasoning
+   read as toggles beside the bold section labels, a ghost button's look: body size in regular weight, its own padding
+   and radius, the hover tint, and the focus ring. Its chevron is the group's. */
+details.route-group > summary.disclosure-quiet {
+  align-self: flex-start;
+  padding-inline: var(--space-2);
+  margin-inline-start: calc(-1 * var(--space-2));
+  border-radius: var(--control-radius);
+  font-size: var(--body-size);
+  line-height: var(--body-leading);
+  font-weight: 400;
+}
+details.route-group > summary.disclosure-quiet:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--paper),
+    var(--ink) var(--hover-share)
+  );
+}
+details.route-group > summary.disclosure-quiet:focus-visible {
+  outline: var(--focus-width) solid var(--focus);
+  outline-offset: var(--focus-offset);
 }
 .fallback-list {
   margin: 0;
@@ -1149,11 +1230,31 @@ button.model-option:focus-visible {
   justify-content: space-between;
   gap: var(--space-2);
 }
+/* In ink (the accent is the brand's and non-text marks', the 17.2 review's finding 12), its top rounded 2 px. */
 .usage-day {
   flex: 1 1 0;
   min-width: var(--border-width);
   height: calc(var(--share, 0) * 100%);
-  background: var(--accent);
+  background: var(--ink);
+  /* token-lint: allow radius (a chart bar is a data mark, not a surface: its top is rounded 2 px) */
+  border-radius: calc(2 * var(--border-width)) calc(2 * var(--border-width)) 0 0;
+}
+/* The bars with their scale at the right: the busiest day's tokens level with the bars' top, 0 at the baseline. */
+.usage-plot {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+.usage-plot > .usage-days {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.usage-scale {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: var(--space-16);
+  text-align: end;
 }
 .usage-day[data-empty] {
   background: transparent;
@@ -1164,13 +1265,16 @@ button.model-option:focus-visible {
   gap: var(--space-6);
   align-items: start;
 }
-/* A share reads as its number, with a thin bar under it for the eye. */
+/* A share reads as its number, on a 4 px track for the eye: its part of the whole in ink over the line colour. */
 .usage-share {
   display: inline-block;
   min-width: var(--space-12);
-  padding-bottom: var(--space-1);
-  background: linear-gradient(var(--accent), var(--accent)) left bottom /
-    calc(var(--share, 0) * 100%) calc(2 * var(--border-width)) no-repeat;
+  padding-bottom: calc(2 * var(--space-1));
+  background:
+    linear-gradient(var(--ink), var(--ink)) left bottom /
+      calc(var(--share, 0) * 100%) var(--space-1) no-repeat,
+    linear-gradient(var(--line), var(--line)) left bottom / 100% var(--space-1)
+      no-repeat;
 }
 
 /* Status (WEB-U-033): whether new tasks can start, in the colour of its answer; each failing check set apart. */
@@ -1183,6 +1287,10 @@ button.model-option:focus-visible {
 }
 .status-verdict-line[data-tone="danger"] {
   color: var(--danger);
+}
+/* The leak verdict's line (the Sandboxes page design note, §3.6): amber in the warn colour while something survived. */
+.status-sandboxes-line[data-tone="warn"] {
+  color: var(--warn);
 }
 .status-problem {
   padding: var(--space-3) var(--space-4);
@@ -1271,4 +1379,176 @@ tr[data-expired] td:not(.data-cell-action) {
 }
 .page-section-list {
   min-width: 0;
+}
+
+/* The Sandboxes page (the design note, §4.1; five columns from 18 Nov 2026): a row's Use is CPU over memory, one line
+   each; a left-behind thing's remove command sits beside its Copy with the standard gap, wrapping under it when short
+   of room. */
+.sandboxes-use {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+/* So the table fits a 600 px area (UI-GUIDELINES §7 Table): the state's detail ("Stops in about 10 min") wraps whole
+   under its pill instead of keeping a note column's share, and Last activity wraps too; its start is in the tooltip. */
+.data-table td .cell-note.sandboxes-detail {
+  min-width: 0;
+  contain: none;
+  overflow: visible;
+  white-space: normal;
+}
+:where(.data-table-scroll:not([data-cards])) .data-table .sandboxes-activity,
+:where(.data-table-scroll:not([data-cards]))
+  .data-table
+  .sandboxes-activity
+  time {
+  white-space: normal;
+}
+/* From a 740 px area the five columns fit with these on one line (about 720 px at their widest on touch), so the 600
+   to 739 px band wraps them (1024 px with its 700 px area among them). */
+@container data-table (width >= 740px) {
+  .data-table td .cell-note.sandboxes-detail,
+  .data-table .sandboxes-activity,
+  .data-table .sandboxes-activity time {
+    white-space: nowrap;
+  }
+}
+/* The summary's clauses stay whole: a narrow line wraps only at a " · " between them. */
+.sandboxes-clause {
+  white-space: nowrap;
+}
+/* Full: the summary line says so in the warn colour. */
+.sandboxes-headline[data-tone="warn"] {
+  color: var(--warn);
+}
+/* The phone cards (reviewed on 18 Nov 2026): the owner and the state pill with the ⋯ at the line's end; then the
+   environment and the last activity, muted, on one line; then the use on one line. All left-aligned, no field labels:
+   each line says what it is. Two zero-height breaks (the row's ::after, then its ::before) end the first two lines. */
+:where(.data-table-scroll[data-cards]) .data-table.sandboxes-table tbody tr {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  column-gap: var(--space-2);
+  row-gap: var(--space-1);
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  tbody
+  tr::after,
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  tbody
+  tr::before {
+  content: "";
+  flex-basis: 100%;
+  height: 0;
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  tbody
+  tr::after {
+  order: 2;
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  tbody
+  tr::before {
+  order: 4;
+}
+:where(.data-table-scroll[data-cards]) .data-table.sandboxes-table td {
+  order: 1;
+  /* Not the table form's full-width first cell: the owner shares its line with the pill and the ⋯. */
+  width: auto;
+  min-width: 0;
+  flex: 0 1 auto;
+  padding: 0;
+  text-align: start;
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  td[data-label]::before {
+  content: none;
+}
+/* The owner keeps its width (a full line at most); the state takes what's left of the line, its note ("Stops in about
+   2 min", "Kept on") wrapping under the pill inside it, so the ⋯ stays at the line's end. */
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  td:first-child {
+  flex: 0 0 auto;
+  max-width: 100%;
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  td:nth-child(2) {
+  flex: 1 1 0;
+}
+/* The table form's name takes the room the other columns leave (contained, 12ch at least); a card's owner is as wide as
+   its address instead. */
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  td:first-child
+  .data-name {
+  contain: none;
+  min-width: 0;
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  td.data-cell-action {
+  margin-inline-start: auto;
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  td:nth-child(3),
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  td:nth-child(5) {
+  order: 3;
+  color: var(--muted);
+  font-size: var(--small-size);
+  line-height: var(--small-leading);
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  td:nth-child(3)::after {
+  content: " ·";
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  td:nth-child(4) {
+  order: 5;
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  .sandboxes-detail {
+  display: inline;
+  margin-inline-start: var(--space-2);
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  .sandboxes-use {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--space-1);
+}
+:where(.data-table-scroll[data-cards])
+  .data-table.sandboxes-table
+  .sandboxes-use
+  > *
+  + *::before {
+  content: "· ";
+}
+.sandboxes-remove {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* A model's id on its own line, whole, and its check's pill under it (WEB-E2E-144). */
+.route-name .route-model {
+  overflow-wrap: anywhere;
+}
+.route-name > .status-pill {
+  align-self: flex-start;
 }

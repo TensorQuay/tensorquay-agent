@@ -133,6 +133,7 @@ fn a_stuck_member_that_makes_progress_is_working_again() {
 fn a_failed_run_is_told_once_with_its_code_and_reason() {
     let failed = Run::Failed {
         reason: "the run's step budget was spent".into(),
+        code: None,
     };
     let actions = decide(&team(vec![member("tester", failed.clone())]), NOW, &LIMITS);
     assert_eq!(
@@ -242,6 +243,7 @@ fn notices_due_when_the_team_idles_out_are_sent_before_the_stop() {
                 "ghost",
                 Run::Failed {
                     reason: "its sandbox couldn't start".into(),
+                    code: None,
                 },
             ),
         ])
@@ -329,6 +331,7 @@ fn a_failed_member_is_neither_stuck_nor_idle_but_its_failed_run_is_told() {
         "researcher",
         Run::Failed {
             reason: "the model provider kept failing".into(),
+            code: None,
         },
     );
     failed.state = "failed".into();

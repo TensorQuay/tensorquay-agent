@@ -123,6 +123,7 @@ describe("WEB-U-023/075 settings", () => {
         "Operations",
         [
           ["Usage", "/settings/usage"],
+          ["Sandboxes", "/settings/sandboxes"],
           ["Status", "/settings/status"],
         ],
       ],
@@ -172,6 +173,7 @@ describe("WEB-U-023/075 settings", () => {
       "Internet access": "lucide-globe",
       Limits: "lucide-gauge",
       Usage: "lucide-chart-column",
+      Sandboxes: "lucide-boxes",
       Status: "lucide-activity",
     });
     expect(
@@ -196,7 +198,7 @@ describe("WEB-U-023/075 settings", () => {
     expect(within(menu).getAllByRole("group")).toHaveLength(3);
     for (const name of ["Your account", "Administration", "Operations"])
       expect(within(menu).getByRole("group", { name })).toBeInTheDocument();
-    expect(within(menu).getAllByRole("menuitemradio")).toHaveLength(14);
+    expect(within(menu).getAllByRole("menuitemradio")).toHaveLength(15);
     fireEvent.click(
       within(menu).getByRole("menuitemradio", { name: "Models" }),
     );

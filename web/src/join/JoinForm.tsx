@@ -12,6 +12,7 @@ import { passwordProblem, type FieldProblem } from "../auth/field-problems";
 import { PasswordField } from "../auth/PasswordField";
 import { useT } from "../i18n/I18nProvider";
 import { APP_NAME } from "../lib/app";
+import { BrandLockup } from "../ui/BrandLockup";
 import { Button } from "../ui/Button";
 import { ErrorMessage } from "../ui/ErrorMessage";
 import { Input } from "../ui/Input";
@@ -63,11 +64,7 @@ export function JoinForm({ token }: { token: string }) {
   return (
     <section className="auth-column">
       <title>{t("join.tab", { product: APP_NAME })}</title>
-      <span
-        className="brand-wordmark"
-        role="img"
-        aria-label={t("auth.wordmark")}
-      />
+      <BrandLockup />
       <header className="stack auth-heading">
         <h1 className="type-display">
           {t("join.title", { product: APP_NAME })}

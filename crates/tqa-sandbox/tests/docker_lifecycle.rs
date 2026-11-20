@@ -291,23 +291,57 @@ async fn reconciliation_inventory(
         ))
         .await?;
     }
+    // list() reports the engine's creation time and create() its label's, which can be a second apart: shift every
+    // created handle by that second, so the comparisons below (by identity) hold whichever second each lands in.
+    let mut foreign_handle = foreign_handle;
+    for handle in handles
+        .iter_mut()
+        .chain(std::iter::once(&mut foreign_handle))
+    {
+        handle.created_at += Duration::from_secs(1);
+    }
     let listed = fixture.backend.list().await?;
     assert_eq!(listed.len(), 3);
-    assert!(handles.iter().all(|handle| listed.contains(handle)));
-    assert!(!listed.contains(&foreign_handle));
+    let listed_ids = identities(&listed);
+    assert!(
+        handles
+            .iter()
+            .all(|handle| listed_ids.contains(&identity(handle)))
+    );
+    assert!(!listed_ids.contains(&identity(&foreign_handle)));
     let reconciliation = reconcile(&handles[..2], &listed);
     assert!(reconciliation.missing.is_empty());
-    assert_eq!(reconciliation.orphans, vec![handles[2].clone()]);
+    assert_eq!(
+        identities(&reconciliation.orphans),
+        vec![identity(&handles[2])]
+    );
     fixture.backend.destroy(&reconciliation.orphans[0]).await?;
     assert!(!credentials[2].exists(), "orphan token directory survives");
     let remaining = fixture.backend.list().await?;
+    let remaining = identities(&remaining);
     assert_eq!(remaining.len(), 2);
     for (handle, directory) in handles[..2].iter().zip(&credentials) {
-        assert!(remaining.contains(handle));
+        assert!(remaining.contains(&identity(handle)));
         assert!(directory.join("token").is_file());
     }
-    assert_eq!(foreign.backend.list().await?, vec![foreign_handle]);
+    let foreign_listed = foreign.backend.list().await?;
+    assert_eq!(identities(&foreign_listed), vec![identity(&foreign_handle)]);
     Ok(())
+}
+
+/// What a handle names, without its creation time: `list()` reads the engine's own time and `create()` its label's,
+/// which can be a second apart, and nothing matches handles by time (reconcile and teardown go by id, recovery by
+/// conversation).
+fn identity(
+    handle: &tqa_sandbox::SandboxHandle,
+) -> (tqa_sandbox::BackendKind, &str, &tqa_types::ConversationId) {
+    (handle.kind, handle.id.as_str(), &handle.conversation_id)
+}
+
+fn identities(
+    handles: &[tqa_sandbox::SandboxHandle],
+) -> Vec<(tqa_sandbox::BackendKind, &str, &tqa_types::ConversationId)> {
+    handles.iter().map(identity).collect()
 }
 
 async fn credential_directory(

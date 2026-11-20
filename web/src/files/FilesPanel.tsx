@@ -4,7 +4,7 @@
 import "./changes-catalogue";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { RefreshCw, X } from "lucide-react";
+import { ArrowLeft, RefreshCw, X } from "lucide-react";
 import {
   lazy,
   Suspense,
@@ -13,6 +13,7 @@ import {
   useRef,
   useState,
   useSyncExternalStore,
+  type CSSProperties,
 } from "react";
 
 import { useSession } from "../auth/use-session";
@@ -35,6 +36,15 @@ import type { RunChoice } from "./ChangesView";
 import { FileList } from "./FileList";
 import { FilePath } from "./FilePath";
 import { PanelTabs, type PanelTab } from "./PanelTabs";
+import {
+  clampShare,
+  DEFAULT_SHARE,
+  keyedShare,
+  rememberShare,
+  rememberedShare,
+  bounds,
+} from "./split";
+import { SplitContext, type SplitMode } from "./split-context";
 import { FILES_PANEL_ID } from "./use-files-panel";
 import type { FileTarget } from "./use-files-panel";
 import { workspacePath } from "./workspace-path";
@@ -79,6 +89,7 @@ export function FilesPanel({
   signInMayRemain = true,
   screenHandedBack = false,
   keepSignIn = null,
+  docks = true,
 }: {
   conversationId: string;
   running: boolean;
@@ -106,6 +117,11 @@ export function FilesPanel({
   screenHandedBack?: boolean;
   /** The task's "keep the sign-in" switch, for the Screen tab's ⋯ (ADR-0039 §6, amended for 18.0); null: not offered. */
   keepSignIn?: KeepSignIn | null;
+  /**
+   * Whether the task layout docks the panel beside the chat: a preview may then open as a split (WEB-U-494); below it
+   * the panel takes the column and its way back is a back arrow.
+   */
+  docks?: boolean;
 }) {
   const [localTab, setLocalTab] = useState(tab);
   // The Context tab is there only when the run loaded something; a view it was on falls back to Files.
@@ -146,6 +162,42 @@ export function FilesPanel({
     moved.current = true;
   }, [folder, file]);
   const t = useT();
+  // The split view (WEB-U-494): a preview opened wide beside the chat, its file's share remembered for this user.
+  const user = useSession(false).data?.id ?? "";
+  const [mode, setMode] = useState<SplitMode>("panel");
+  const [share, setShare] = useState<number | null>(null);
+  const [layoutWidth, setLayoutWidth] = useState(0);
+  const splitting =
+    docks && mode !== "panel" && current === "files" && file !== null;
+  // Another file, another tab or the panel's own narrowing ends the split.
+  const [splitFor, setSplitFor] = useState(file);
+  if (splitFor !== file) {
+    setSplitFor(file);
+    setMode("panel");
+  }
+  useEffect(() => {
+    const layout = aside.current?.parentElement;
+    if (!layout) return;
+    const measure = () => setLayoutWidth(layout.getBoundingClientRect().width);
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(layout);
+    return () => observer.disconnect();
+  }, []);
+  const fileShare = clampShare(share ?? rememberedShare(user), layoutWidth);
+  const choose = (next: number) => {
+    const rounded = Math.round(next * 1000) / 1000;
+    setShare(rounded);
+    rememberShare(user, rounded);
+  };
+  const split = {
+    docks,
+    mode: splitting ? mode : ("panel" as const),
+    expand: () => setMode("split"),
+    toggleFull: () => setMode((now) => (now === "full" ? "split" : "full")),
+    close: () => setMode("panel"),
+  };
   // Labelled again once the Desktop tool's words arrive (WEB-U-422); the words' summaries load with this panel, off
   // the task page's first scripts (WEB-U-473).
   const words = useSyncExternalStore(
@@ -162,7 +214,9 @@ export function FilesPanel({
     [transcript, t, words],
   );
   // Escape anywhere inside the panel closes it (the bar's toggle then takes focus), except inside a dialog the panel
-  // opened (a preview opened wide), which closes only itself.
+  // opened, which closes only itself; in the split it steps back once: full width to the split, the split to the
+  // panel (WEB-U-494). The chat beside it is outside the panel, so its own Escape is never taken.
+  const currentMode = split.mode;
   useEffect(() => {
     const element = aside.current;
     const escape = (event: KeyboardEvent) => {
@@ -173,11 +227,13 @@ export function FilesPanel({
       )
         return;
       event.stopPropagation();
-      onClose();
+      if (currentMode === "full") setMode("split");
+      else if (currentMode === "split") setMode("panel");
+      else onClose();
     };
     element?.addEventListener("keydown", escape);
     return () => element?.removeEventListener("keydown", escape);
-  }, [onClose]);
+  }, [onClose, currentMode]);
   const refresh = () =>
     Promise.all([
       cache.invalidateQueries({ queryKey: ["files", conversationId] }),
@@ -204,31 +260,56 @@ export function FilesPanel({
       aria-label={t("files.title")}
       ref={aside}
       data-menu-bounds=""
+      data-split={splitting ? mode : undefined}
+      style={
+        splitting
+          ? ({ "--split-share": String(fileShare) } as CSSProperties)
+          : undefined
+      }
     >
-      <div className="files-heading">
-        <PanelTabs current={current} onTab={setTab} shown={available} />
-        {current !== "context" && current !== "screen" && (
-          <Button
-            variant="ghost"
-            className="icon-button"
-            aria-label={t("files.refresh")}
-            title={t("files.refresh")}
-            onClick={() => void refresh()}
-          >
-            <Icon glyph={RefreshCw} size={16} />
-          </Button>
-        )}
-        <Button
-          variant="ghost"
-          className="icon-button"
-          aria-label={t("files.close")}
-          title={t("files.close")}
-          onClick={onClose}
-        >
-          <Icon glyph={X} size={16} />
-        </Button>
-      </div>
-      {current === "files" && (
+      {splitting && mode === "split" && (
+        <Divider share={fileShare} width={layoutWidth} onShare={choose} />
+      )}
+      {!splitting && (
+        <div className="files-heading">
+          {/* Below the breakpoint the panel takes the column: one way back to the chat (WEB-U-494). */}
+          {!docks && (
+            <Button
+              variant="ghost"
+              className="icon-button"
+              aria-label={t("files.backToChat")}
+              title={t("files.backToChat")}
+              onClick={onClose}
+            >
+              <Icon glyph={ArrowLeft} size={16} />
+            </Button>
+          )}
+          <PanelTabs current={current} onTab={setTab} shown={available} />
+          {current !== "context" && current !== "screen" && (
+            <Button
+              variant="ghost"
+              className="icon-button"
+              aria-label={t("files.refresh")}
+              title={t("files.refresh")}
+              onClick={() => void refresh()}
+            >
+              <Icon glyph={RefreshCw} size={16} />
+            </Button>
+          )}
+          {docks && (
+            <Button
+              variant="ghost"
+              className="icon-button"
+              aria-label={t("files.close")}
+              title={t("files.close")}
+              onClick={onClose}
+            >
+              <Icon glyph={X} size={16} />
+            </Button>
+          )}
+        </div>
+      )}
+      {current === "files" && !splitting && (
         <FilePath folder={folder} file={file} onOpen={open} />
       )}
       {current === "files" && running && (
@@ -241,8 +322,10 @@ export function FilesPanel({
         // scrollable-region-focusable), as the panel below 1024 px often needs.
         // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
         tabIndex={0}
-        role="tabpanel"
-        {...tabPanelIds(FILES_PANEL_ID, current)}
+        // In the split the tabs give way to the file's header: no tab to label it then.
+        {...(splitting
+          ? { role: "region", "aria-label": file ?? undefined }
+          : { role: "tabpanel", ...tabPanelIds(FILES_PANEL_ID, current) })}
       >
         {current === "screen" ? (
           <Suspense fallback={<Skeleton label={t("screen.connecting")} />}>
@@ -299,11 +382,13 @@ export function FilesPanel({
           </>
         ) : (
           <Suspense fallback={<Skeleton label={t("files.opening")} />}>
-            <FilePreview
-              conversationId={conversationId}
-              path={file}
-              onBack={() => setFile(null)}
-            />
+            <SplitContext.Provider value={split}>
+              <FilePreview
+                conversationId={conversationId}
+                path={file}
+                onBack={() => setFile(null)}
+              />
+            </SplitContext.Provider>
           </Suspense>
         )}
       </div>
@@ -314,3 +399,71 @@ export function FilesPanel({
 /** Joins a folder and a name into a workspace path ("" is the root). */
 export const child = (folder: string, name: string) =>
   folder ? `${folder}/${name}` : name;
+
+/**
+ * The split's divider (WEB-U-494): the panel's left edge, a vertical separator the pointer drags and the keys move
+ * (arrows 2 %, Shift 10 %, Home and End to the limits, Enter back to 60 %; a double click too). Its value is the file's
+ * share of the task layout, as a percentage.
+ */
+function Divider({
+  share,
+  width,
+  onShare,
+}: {
+  share: number;
+  width: number;
+  onShare: (share: number) => void;
+}) {
+  const t = useT();
+  const drag = useRef<{ x: number; share: number } | null>(null);
+  const percent = Math.round(share * 100);
+  const { least, most } = bounds(width || 1);
+  return (
+    // A focusable separator is a widget (WAI-ARIA's window splitter): it takes the focus and the keys.
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+    <div
+      className="files-divider"
+      role="separator"
+      aria-orientation="vertical"
+      aria-controls={FILES_PANEL_ID}
+      aria-label={t("files.splitDivider")}
+      aria-valuemin={Math.round(least * 100)}
+      aria-valuemax={Math.round(most * 100)}
+      aria-valuenow={percent}
+      aria-valuetext={t("files.splitValue", {
+        file: String(percent),
+        chat: String(100 - percent),
+      })}
+      // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- the window splitter takes the focus
+      tabIndex={0}
+      onKeyDown={(event) => {
+        const next = keyedShare(event.key, event.shiftKey, share, width);
+        if (next === null) return;
+        event.preventDefault();
+        onShare(next);
+      }}
+      onDoubleClick={() => onShare(DEFAULT_SHARE)}
+      onPointerDown={(event) => {
+        if (event.button !== 0) return;
+        event.preventDefault();
+        event.currentTarget.setPointerCapture?.(event.pointerId);
+        drag.current = { x: event.clientX, share };
+      }}
+      onPointerMove={(event) => {
+        if (!drag.current || !(width > 0)) return;
+        onShare(
+          clampShare(
+            drag.current.share + (drag.current.x - event.clientX) / width,
+            width,
+          ),
+        );
+      }}
+      onPointerUp={() => {
+        drag.current = null;
+      }}
+      onPointerCancel={() => {
+        drag.current = null;
+      }}
+    />
+  );
+}

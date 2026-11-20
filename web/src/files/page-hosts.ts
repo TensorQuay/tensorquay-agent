@@ -11,8 +11,20 @@
  * relative to a CDN's address needs the internet too.
  */
 export function pageHosts(html: string): string[] {
-  const hosts = new Set<string>();
+  return hostsIn(new DOMParser().parseFromString(html, "text/html"));
+}
+
+/**
+ * What the preview needs from a page's text, read with one parse: the hosts it loads from and whether it runs
+ * scripts. A long page is parsed once, not once for each answer.
+ */
+export function readPage(html: string): { hosts: string[]; scripts: boolean } {
   const document = new DOMParser().parseFromString(html, "text/html");
+  return { hosts: hostsIn(document), scripts: scriptsIn(document) };
+}
+
+function hostsIn(document: Document): string[] {
+  const hosts = new Set<string>();
   collect(document, hosts, baseOf(document, PAGE));
   return [...hosts];
 }
@@ -148,4 +160,30 @@ export function blockedHosts(
       return host === rule;
     });
   return hosts.filter((host) => !allowed(host.toLowerCase()));
+}
+
+/**
+ * Whether a page runs any script of its own (WEB-U-513): a `<script>` of a type a browser runs, an inline handler
+ * (`onclick` and the like), or a `javascript:` address. A page with none has nothing for the preview to say about
+ * scripts.
+ */
+export function runsScripts(html: string): boolean {
+  return scriptsIn(new DOMParser().parseFromString(html, "text/html"));
+}
+
+function scriptsIn(document: Document): boolean {
+  for (const script of document.querySelectorAll("script"))
+    if (SCRIPT_TYPES.test((script.getAttribute("type") ?? "").trim()))
+      return true;
+  for (const element of document.querySelectorAll("*"))
+    for (const attribute of element.attributes) {
+      const name = attribute.name.toLowerCase();
+      if (name.startsWith("on")) return true;
+      if (
+        ["href", "src", "action", "formaction"].includes(name) &&
+        /^\s*javascript:/i.test(attribute.value)
+      )
+        return true;
+    }
+  return false;
 }

@@ -1,0 +1,207 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.conversation_id, s.phase, s.created_at, s.last_action_at, s.idle_seconds, s.max_lifetime_seconds, s.cpu_millicores, s.memory_bytes, s.pids, c.owner_id, u.email::text AS \"email!\", c.template, COALESCE(t.display_name, c.template) AS \"display_name!\", COALESCE('desktop'=ANY(t.capabilities), false) AS \"desktop!\", c.pinned, c.keep_sign_in, COALESCE((SELECT e.lifecycle FROM events e WHERE e.conversation_id=s.conversation_id AND e.lifecycle IS NOT NULL ORDER BY e.seq DESC LIMIT 1) IN ('run.started','run.resumed'), false) AS \"working!\", EXISTS (SELECT 1 FROM idempotency i WHERE i.conversation_id=s.conversation_id AND i.execution_status IN ('queued','sending')) AS \"work_waiting!\" FROM sandbox_instances s JOIN conversations c ON c.id=s.conversation_id JOIN users u ON u.id=c.owner_id LEFT JOIN templates t ON t.name=c.template ORDER BY s.created_at, s.conversation_id LIMIT $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "conversation_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "sandbox_instances",
+            "name": "conversation_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "phase",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "sandbox_instances",
+            "name": "phase"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "sandbox_instances",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "last_action_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "sandbox_instances",
+            "name": "last_action_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "idle_seconds",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "sandbox_instances",
+            "name": "idle_seconds"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "max_lifetime_seconds",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "sandbox_instances",
+            "name": "max_lifetime_seconds"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "cpu_millicores",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "sandbox_instances",
+            "name": "cpu_millicores"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "memory_bytes",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "sandbox_instances",
+            "name": "memory_bytes"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "pids",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "sandbox_instances",
+            "name": "pids"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "owner_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "owner_id"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "template",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "template"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "display_name!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 13,
+        "name": "desktop!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 14,
+        "name": "pinned",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "pinned"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "keep_sign_in",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "keep_sign_in"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "working!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 17,
+        "name": "work_waiting!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      null,
+      false,
+      null,
+      null,
+      false,
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "e2e2f6019ea24e67e6a68adb453fa465eeaf135eb6949dd840427efd83252aca"
+}

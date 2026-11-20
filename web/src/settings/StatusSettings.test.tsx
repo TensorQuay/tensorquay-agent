@@ -1,5 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { User } from "../protocol/generated/api";
@@ -35,6 +41,18 @@ const ready = {
   },
   git_credentials_kept: { not_web_address: 0, waiting: 0 },
   runs_active: 0,
+  sandboxes: {
+    running: 3,
+    oldest_seconds: 25_200,
+    unowned: { containers: 0, networks: 0 },
+    left_behind: {
+      containers: 0,
+      networks: 0,
+      oldest_seconds: null,
+      reason: null,
+    },
+    swept_at: "2026-11-17T01:25:00Z",
+  },
 };
 const fetch = vi.fn<typeof globalThis.fetch>();
 beforeEach(() => {
@@ -133,6 +151,7 @@ describe("WEB-U-033 status", () => {
       "Agent image",
       "Default environment",
       "Before a restart",
+      "Sandboxes",
     ]);
     expect(
       screen.getByRole("region", { name: "Environment engine" }),
@@ -571,4 +590,143 @@ describe("WEB-U-299 Status's sections and verdict", () => {
       vi.useRealTimers();
     }
   });
+});
+
+// The leak verdict on Status (the Sandboxes page design note, §4.4): green names nothing; amber names what, why, the
+// retry and the page.
+describe("WEB-U-489 Status says whether anything was left behind after a sweep", () => {
+  it("reads green with the running count and the oldest age, and that volumes aren't counted in bind mode", async () => {
+    fetch.mockImplementationOnce(() => json(ready));
+    show();
+    const section = await screen.findByRole("region", { name: "Sandboxes" });
+    expect(section).toHaveTextContent(
+      "Sandboxes: 3 running, the oldest for 7 h. Nothing left behind.",
+    );
+    expect(within(section).getByRole("status")).toHaveAttribute(
+      "data-tone",
+      "ok",
+    );
+    expect(section).toHaveTextContent(
+      "Volumes are not counted: workspaces are folders on the host, not volumes.",
+    );
+    expect(within(section).queryByRole("link")).toBeNull();
+  });
+
+  it("counts volumes in volume mode, and says none is running in minutes when young", async () => {
+    fetch.mockImplementationOnce(() =>
+      json({
+        ...ready,
+        sandboxes: {
+          ...ready.sandboxes,
+          running: 1,
+          oldest_seconds: 2_400,
+          unowned: { containers: 0, networks: 0, volumes: 0 },
+          left_behind: { ...ready.sandboxes.left_behind, volumes: 0 },
+        },
+      }),
+    );
+    show();
+    const section = await screen.findByRole("region", { name: "Sandboxes" });
+    expect(section).toHaveTextContent(
+      "Sandboxes: 1 running, the oldest for 40 min. Nothing left behind.",
+    );
+    expect(section).not.toHaveTextContent("Volumes are not counted");
+  });
+
+  it("says the oldest age in days from two days on, never hundreds of hours", async () => {
+    for (const [seconds, words] of [
+      [47 * 3600, "the oldest for 47 h."],
+      [48 * 3600, "the oldest for 2 days."],
+      [224 * 3600, "the oldest for 9 days."],
+    ] as const) {
+      fetch.mockImplementationOnce(() =>
+        json({
+          ...ready,
+          sandboxes: { ...ready.sandboxes, oldest_seconds: seconds },
+        }),
+      );
+      show();
+      const section = await screen.findByRole("region", { name: "Sandboxes" });
+      expect(section).toHaveTextContent(words);
+      cleanup();
+    }
+  });
+
+  it("reads amber naming what was left behind, why, the retry, and opens the page's Left behind section", async () => {
+    fetch.mockImplementationOnce(() =>
+      json({
+        ...ready,
+        sandboxes: {
+          ...ready.sandboxes,
+          unowned: { containers: 0, networks: 1 },
+          left_behind: {
+            containers: 0,
+            networks: 1,
+            oldest_seconds: 660,
+            reason: "timeout",
+          },
+        },
+      }),
+    );
+    show();
+    const section = await screen.findByRole("region", { name: "Sandboxes" });
+    expect(section).toHaveTextContent(
+      "Sandboxes: 3 running, the oldest for 7 h. Left behind after the last sweep: 1 network (the engine timed out). The gateway tries again every 5 minutes.",
+    );
+    expect(within(section).getByRole("status")).toHaveAttribute(
+      "data-tone",
+      "warn",
+    );
+    // Drawn in the warn colour, not the plain text's (the real-stack run, 18 Nov 2026).
+    expect(within(section).getByRole("status")).toHaveClass(
+      "status-sandboxes-line",
+    );
+    expect(
+      within(section).getByRole("link", { name: "Open Sandboxes" }),
+    ).toHaveAttribute("href", "/settings/sandboxes#left-behind");
+    // Never a name: the page lists those.
+    expect(section).not.toHaveTextContent("tqa-sbx");
+  });
+});
+
+// WEB-U-504 (18.1, the 17.2 review's finding 13, decided on 18 Nov 2026): Status reads as one list. Its lines are in
+// one body size (the page's intro under its name stays small, as every Settings page's does), and its one-line
+// sections are named in the section-label style, not 22 px headings.
+describe("WEB-U-504 Status reads as one list", () => {
+  it.each([
+    [
+      "ready",
+      {
+        ...ready,
+        git_credentials_kept: { not_web_address: 1, waiting: 0 },
+        runs_active: 2,
+      },
+    ],
+    ["failing", failing({ database: false })],
+  ] as const)(
+    "names its sections as labels and says its lines in one size (%s)",
+    async (_, answer) => {
+      fetch.mockImplementationOnce(() => json(answer));
+      show();
+      await screen.findByText(/^Checked at /);
+      const headings = screen.getAllByRole("heading", { level: 2 });
+      expect(headings.length).toBeGreaterThanOrEqual(2);
+      for (const heading of headings) {
+        expect(heading).toHaveClass("type-body-strong");
+        expect(heading).not.toHaveClass("type-heading");
+      }
+      for (const line of [
+        /^Checked at /,
+        /^Environments run as Docker containers\.$/,
+      ])
+        expect(screen.getByText(line)).not.toHaveClass("type-small");
+      if (answer.ready)
+        expect(screen.getByText(/^Passing: /)).not.toHaveClass("type-small");
+      expect(
+        screen.getByText(
+          "Whether this installation can start tasks. New tasks fail until every check passes.",
+        ),
+      ).toHaveClass("type-small", "muted");
+    },
+  );
 });

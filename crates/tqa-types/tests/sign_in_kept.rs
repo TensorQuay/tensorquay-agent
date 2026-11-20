@@ -114,10 +114,10 @@ fn proto_u_045_the_notices_say_who_turned_the_switch_on_or_off() -> TestResult {
             frame,
             ServerFrame::ScreenNotice {
                 kind,
-                by: ScreenPerson {
+                by: Some(ScreenPerson {
                     id: PERSON.to_owned(),
                     name: "Ada".to_owned()
-                },
+                }),
                 at: "2026-11-15T12:00:00Z".to_owned(),
                 after_seq: 41,
                 seconds: None,

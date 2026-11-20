@@ -16,6 +16,7 @@ mod remote;
 mod sheet;
 mod sheet_ods;
 mod site;
+mod site_rewrite;
 mod view;
 pub(crate) use check::{check_attachments, prepare_attachments};
 pub(crate) use endpoints::{content, download, list, upload};
