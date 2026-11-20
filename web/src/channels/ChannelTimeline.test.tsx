@@ -108,8 +108,9 @@ const card = (seq: number) =>
 // ADR-0014: a channel's log in seq order, each post by its type, with its author and role; replies under their
 // parent; content written by agents and people is never trusted as HTML (WEB-U-063).
 describe("WEB-U-063 the channel timeline", () => {
-  // Light rows: the name, "agent" for a task's agent, a role only when it isn't a plain member, then seq and time.
-  it("shows each post with its author, role, seq and time, in order", async () => {
+  // Light rows: the name, "agent" for a task's agent, then the time; no role pill and no seq on the screen (18.2,
+  // WEB-U-520: roles live in Members; the seq stays in each post's accessible name).
+  it("shows each post with its author and time, in order", async () => {
     show();
     await settleLazy();
     const posts = screen.getAllByRole("article");
@@ -125,17 +126,17 @@ describe("WEB-U-063 the channel timeline", () => {
       "#9 Coder · alice",
     ]);
     const first = card(1);
-    expect(within(first).getByText("Lead")).toBeVisible();
+    expect(within(first).queryByText("Lead")).toBeNull();
     expect(within(first).getByText("Agent")).toBeVisible();
     expect(within(first).getByRole("time")).toHaveAttribute("datetime", at(1));
     expect(within(first).getByText("release").tagName).toBe("STRONG");
-    expect(within(first).getByText("#1")).toBeInTheDocument();
+    expect(within(first).queryByText("#1")).toBeNull();
     // A plain member carries no role badge, and a person no kind badge.
     expect(within(card(2)).queryByText("Person")).toBeNull();
     expect(within(card(2)).queryByText("Member")).toBeNull();
     expect(within(card(3)).getByText("Agent")).toBeVisible();
     expect(within(card(3)).queryByText("Member")).toBeNull();
-    expect(first.querySelectorAll(".status-pill")).toHaveLength(1);
+    expect(first.querySelectorAll(".status-pill")).toHaveLength(0);
   });
 
   // As in chat apps: consecutive posts by one author share one header line, so names and badges aren't repeated.
@@ -145,13 +146,13 @@ describe("WEB-U-063 the channel timeline", () => {
     const name = (seq: number) =>
       card(seq).querySelector(":scope > .channel-post-head .type-body-strong");
     // #6 and #7 are Coder's, a minute apart: #7 continues #6's group, keeping its own seq, time and label.
-    expect(name(6)).toHaveTextContent("Coder · alice");
+    expect(name(6)).toHaveTextContent("Coder");
     expect(card(7)).toHaveAttribute("data-continued", "true");
     expect(name(7)).toBeNull();
     expect(card(7)).toHaveAccessibleName("#7 Coder · alice");
-    expect(within(card(7)).getByText("#7")).toBeInTheDocument();
+    expect(card(7).querySelector(":scope > .channel-post-head time")).not.toBeNull();
     // #9 is Coder's again, but #7's thread comes between: a new header.
-    expect(name(9)).toHaveTextContent("Coder · alice");
+    expect(name(9)).toHaveTextContent("Coder");
     expect(card(1)).not.toHaveAttribute("data-continued");
   });
 
@@ -331,5 +332,75 @@ describe("WEB-U-515 a post's files", () => {
     expect(pdf).toHaveTextContent("q3.pdf · 2 kB");
     expect(within(files).getAllByRole("link")).toHaveLength(2);
     expect(screen.queryByRole("list", { name: "Files of #2" })).toBeNull();
+  });
+});
+
+// WEB-U-520 (18.2 slice 3, the mock of 17 Nov 2026): one plain log. A run of posts by one author shows its face and name
+// once; an agent by its task's name with the agent mark, no role pill (roles live in Members); no seq numbers on the
+// screen. A vote, a claim, a decision and a notice are each one muted line, a notice in the reader's own words.
+describe("WEB-U-520 the chat log", () => {
+  const analyst = {
+    kind: "conversation" as const,
+    id: CODER,
+    name: "Coder",
+  };
+  const log: ChannelMessage[] = [
+    {
+      seq: 1,
+      ts: "2026-09-27T10:00:00Z",
+      author: analyst,
+      body: { type: "text", text: "Churn by tier first." },
+    },
+    {
+      seq: 2,
+      ts: "2026-09-27T10:01:00Z",
+      author: analyst,
+      body: { type: "text", text: "Then the forecast." },
+    },
+    {
+      seq: 3,
+      ts: "2026-09-27T10:02:00Z",
+      author: { kind: "user", id: ANA, name: "Ana" },
+      body: { type: "proposal", title: "Raise the EU price", text: "To 24." },
+    },
+    {
+      seq: 4,
+      ts: "2026-09-27T10:02:30Z",
+      author: { kind: "user", id: ANA, name: "Ana" },
+      body: { type: "vote", proposal_seq: 3, choice: "accept" },
+    },
+    {
+      seq: 5,
+      ts: "2026-09-27T10:03:00Z",
+      author: { kind: "gateway", id: "gateway", name: "gateway" },
+      body: {
+        type: "notice",
+        kind: "member_deleted",
+        member: "Forecast",
+        text: "Forecast can't be woken: its task was deleted.",
+      },
+    },
+  ];
+  it("groups a run of posts, names an agent by its task once, and keeps events to one muted line", () => {
+    render(
+      <ChannelTimeline
+        messages={log}
+        members={members.map((item) =>
+          item.id === CODER ? { ...item, title: "Pricing analyst" } : item,
+        )}
+      />,
+    );
+    const view = screen.getByRole("list", { name: "Channel log" });
+    expect(within(view).getAllByText("Pricing analyst")).toHaveLength(1);
+    expect(within(view).getAllByText("Agent")).toHaveLength(1);
+    expect(within(view).queryByText("Lead")).toBeNull();
+    expect(view.textContent ?? "", view.textContent ?? "").not.toMatch(/#\d/);
+    const vote = screen.getByRole("article", { name: /^#4/ });
+    expect(vote).toHaveAttribute("data-line");
+    const notice = screen.getByRole("article", { name: /^#5/ });
+    expect(notice).toHaveAttribute("data-line");
+    expect(
+      within(notice).getByText("Forecast can't be woken: its task was deleted."),
+    ).toHaveClass("muted");
   });
 });

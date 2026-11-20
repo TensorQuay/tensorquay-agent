@@ -84,10 +84,19 @@
   border-color: transparent;
   background: transparent;
 }
-/* A decision is tinted info (UI-GUIDELINES §7, Channel post). */
-.channel-post[data-tinted] {
-  border-color: color-mix(in srgb, var(--info) 45%, var(--line));
-  background: color-mix(in srgb, var(--info) var(--status-tint), var(--paper));
+/* The chat log (WEB-U-520, the mock of 17 Nov 2026): every post's text in one column after a gutter, the group's face
+   in the gutter on its first post only; an event line keeps to the same column, muted. */
+.channel-post {
+  padding-inline-start: calc(var(--avatar-size) + var(--space-3) * 2);
+}
+.channel-post-avatar {
+  position: absolute;
+  inset-inline-start: var(--space-3);
+  inset-block-start: var(--space-2);
+  margin-inline-start: 0;
+}
+.channel-post[data-line] {
+  color: var(--muted);
 }
 /* The author wraps within its own box; the quiet line keeps to the same line, at its end (no blank row at 390). */
 .channel-post-head {

@@ -1,6 +1,7 @@
 "use client";
 
 import "./catalogue";
+import { Bot } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { useT } from "../i18n/I18nProvider";
@@ -8,6 +9,9 @@ import { formatSize } from "../i18n/message";
 import type { MessageKey, Translate } from "../i18n/translate";
 import { DeferredMarkdown } from "../transcript/DeferredMarkdown";
 import { Button } from "../ui/Button";
+import { Icon } from "../ui/Icon";
+
+import { initials } from "./ChannelHeader";
 
 import type {
   Author,
@@ -19,11 +23,6 @@ import type {
   VoteChoice,
 } from "./contract";
 
-const ROLES: Readonly<Record<Member["role"], MessageKey>> = {
-  lead: "channels.roleLead",
-  member: "channels.roleMember",
-  observer: "channels.roleObserver",
-};
 const CHOICES: Readonly<Record<VoteChoice, MessageKey>> = {
   accept: "channels.choiceAccept",
   reject: "channels.choiceReject",
@@ -40,6 +39,15 @@ const WEB_LINK = /^https?:\/\//i;
 const GROUP_MS = 5 * 60_000;
 
 /** An author as people read it: a person's name, or an agent's profile and its owner ("Coder · alice"). */
+/** A gateway notice's words by its kind (ADR-0014's amendment of 20 Nov 2026). */
+const NOTICES: Readonly<Record<string, MessageKey>> = {
+  wake_budget_80: "channels.noticeBudget80",
+  wake_budget_spent: "channels.noticeBudgetSpent",
+  wakes_bounded: "channels.noticeBounded",
+  unreachable_runtime: "channels.noticeUnreachable",
+  member_deleted: "channels.noticeDeleted",
+};
+
 export function authorName(author: Author, members: readonly Member[]) {
   const member = members.find(
     (item) => item.kind === author.kind && item.id === author.id,
@@ -215,8 +223,18 @@ function Post({
   const member = members.find(
     (item) => item.kind === author.kind && item.id === author.id,
   );
-  const tinted = body.type === "decision";
-  const line = ["vote", "claim", "done"].includes(body.type);
+  // The page's name for the author (WEB-U-520): an agent by its task's name, never its owner (who is in Members).
+  const shown = gateway
+    ? name
+    : author.kind === "conversation"
+      ? (member?.title ?? author.name ?? member?.name ?? author.id)
+      : name;
+  const agent = author.kind === "conversation";
+  const tinted = false;
+  // Events are one muted line each (WEB-U-520): a vote, a claim, the end, a decision, a notice.
+  const line = ["vote", "claim", "done", "decision", "notice"].includes(
+    body.type,
+  );
   return (
     <article
       id={`post-${message.seq}`}
@@ -227,28 +245,32 @@ function Post({
       data-continued={continued || undefined}
       aria-label={`#${message.seq} ${name}`}
     >
+      {!continued && !line && (
+        <span
+          className="channel-avatar channel-post-avatar"
+          data-agent={agent || undefined}
+          aria-hidden
+        >
+          {agent ? <Icon glyph={Bot} size={16} /> : initials(shown)}
+        </span>
+      )}
       <header className="channel-post-head type-small">
-        {!continued && (
+        {!continued && !(line && gateway) && (
           <span className="channel-post-who">
-            <span className="type-body-strong">{name}</span>
-            {author.kind === "conversation" && (
-              <span className="muted">{t("channels.kindAgent")}</span>
-            )}
-            {member && member.role !== "member" && (
-              <span className="status-pill type-label" data-tone="info">
-                {t(ROLES[member.role])}
-              </span>
-            )}
+            <span className="type-body-strong">{shown}</span>
+            {agent && <span className="muted">{t("channels.kindAgent")}</span>}
           </span>
         )}
-        {/* Seq, time and Reply are quiet: shown on hover or focus, and always on touch screens (channels.css). */}
+        {/* Time and Reply are quiet: shown on hover or focus, and always on touch screens (channels.css). The time is
+            the post's link; no seq number is on the screen (WEB-U-520). */}
         <span className="channel-post-meta muted">
-          <a href={`#post-${message.seq}`}>{`#${message.seq}`}</a>
-          <time dateTime={message.ts}>
-            {new Intl.DateTimeFormat(t.locale, { timeStyle: "short" }).format(
-              new Date(message.ts),
-            )}
-          </time>
+          <a href={`#post-${message.seq}`}>
+            <time dateTime={message.ts}>
+              {new Intl.DateTimeFormat(t.locale, {
+                timeStyle: "short",
+              }).format(new Date(message.ts))}
+            </time>
+          </a>
           {onReply && !line && (
             <Button
               variant="ghost"
@@ -386,8 +408,15 @@ function Body({
             : t("channels.finished")}
         </p>
       );
-    case "notice":
-      // The gateway's line about the channel itself (ADR-0014's amendment of 20 Nov 2026), as one muted line.
-      return <p className="type-small muted">{body.text}</p>;
+    case "notice": {
+      // The gateway's line about the channel itself (ADR-0014's amendment of 20 Nov 2026), in the reader's words by its
+      // kind (WEB-U-520); a kind this page doesn't know, by the gateway's sentence.
+      const key = NOTICES[body.kind];
+      return (
+        <p className="type-small muted">
+          {key ? t(key, { member: body.member ?? "" }) : body.text}
+        </p>
+      );
+    }
   }
 }
