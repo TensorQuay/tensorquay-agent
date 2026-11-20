@@ -315,10 +315,10 @@ function RouteRow({
       </td>
       <td>
         <div className="stack route-name">
-          <div className="data-name" title={item.model}>
-            <span>{item.model}</span>
-            <ProbeBadge probe={item.probe} />
-          </div>
+          {/* The id has its own line, whole (it wraps, never "…"), and its pill under it: a long language's wider menu
+              never cuts the one column a person reads here (WEB-E2E-144, the first hour's finding 5). */}
+          <span className="route-model">{item.model}</span>
+          <ProbeBadge probe={item.probe} />
           {shown.protocol && <CellNote>{t(PROTOCOLS[item.protocol])}</CellNote>}
         </div>
       </td>
