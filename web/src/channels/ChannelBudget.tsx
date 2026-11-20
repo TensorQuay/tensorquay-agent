@@ -10,7 +10,6 @@ import { Dialog } from "../ui/Dialog";
 import { Input } from "../ui/Input";
 
 import { resetTime } from "./budget-time";
-
 import type { Channel } from "./contract";
 
 /**
