@@ -2970,7 +2970,7 @@
     "sandboxes.leftBehindTitle": "Restos",
     "sandboxes.leftBehindIntro": "La puerta de enlace no pudo eliminarlos y lo sigue intentando. Para eliminar uno manualmente, ejecuta su comando en el host del motor.",
     "sandboxes.leftBehindItem": "{kind, select, container {Un contenedor} network {Una red} other {Un volumen}} {name}, {age, plural, one {# minuto de antigüedad} other {# minutos de antigüedad}}: {reason}",
-    "sandboxes.reasonWords": "{reason, select, timeout {el motor agotó el tiempo de espera} engine_unavailable {no se pudo llegar al motor} store_unavailable {la puerta de enlace no pudo leer sus registros} other {el motor no lo eliminó}}",
+    "sandboxes.reasonWords": "{reason, select, timeout {el motor agotó el tiempo de espera} engine_unavailable {no se pudo llegar al motor} store_unavailable {la puerta de enlace no pudo leer sus registros} invalid_labels {el gateway no pudo leer sus etiquetas} other {el motor no lo eliminó}}",
     "health.sandboxesTitle": "Sandboxes",
     "health.sandboxesGreen": "{running, plural, =0 {Sandboxes: ninguno en ejecución. Nada quedó atrás.} one {Sandboxes: # en ejecución, el más antiguo lleva {oldest}. Nada quedó atrás.} other {Sandboxes: # en ejecución, el más antiguo lleva {oldest}. Nada quedó atrás.}}",
     "health.sandboxesAmber": "{running, plural, =0 {Sandboxes: ninguno en ejecución.} one {Sandboxes: # en ejecución, el más antiguo lleva {oldest}.} other {Sandboxes: # en ejecución, el más antiguo lleva {oldest}.}} Quedaron atrás: {what} ({reason}). La puerta de enlace sigue intentando eliminarlos.",

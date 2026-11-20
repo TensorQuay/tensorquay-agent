@@ -2975,7 +2975,7 @@
     "sandboxes.leftBehindTitle": "Tertinggal",
     "sandboxes.leftBehindIntro": "Gerbang tidak dapat membuang ini dan terus mencuba. Untuk membuang satu secara manual, jalankan perintahnya pada hos enjin.",
     "sandboxes.leftBehindItem": "{kind, select, container {Kontena} network {Rangkaian} other {Volum}} {name}, {age, plural, one {# minit} other {# minit}}: {reason}",
-    "sandboxes.reasonWords": "{reason, select, timeout {enjin tamat masa} engine_unavailable {enjin tidak dapat dihubungi} store_unavailable {gerbang tidak dapat membaca rekodnya} other {enjin tidak mahu membuangnya}}",
+    "sandboxes.reasonWords": "{reason, select, timeout {enjin tamat masa} engine_unavailable {enjin tidak dapat dihubungi} store_unavailable {gerbang tidak dapat membaca rekodnya} invalid_labels {gateway tidak dapat membaca labelnya} other {enjin tidak mahu membuangnya}}",
     "health.sandboxesTitle": "Kotak pasir",
     "health.sandboxesGreen": "{running, plural, =0 {Sandbox: tiada yang berjalan. Tiada yang ditinggalkan.} one {Sandbox: # berjalan, yang paling lama {oldest}. Tiada yang ditinggalkan.} other {Sandbox: # berjalan, yang paling lama {oldest}. Tiada yang ditinggalkan.}}",
     "health.sandboxesAmber": "{running, plural, =0 {Sandbox: tiada yang berjalan.} one {Sandbox: # berjalan, yang paling lama {oldest}.} other {Sandbox: # berjalan, yang paling lama {oldest}.}} Ditinggalkan: {what} ({reason}). Gerbang terus cuba membuangnya.",

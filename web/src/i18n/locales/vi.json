@@ -2978,7 +2978,7 @@
     "sandboxes.leftBehindTitle": "Còn sót lại",
     "sandboxes.leftBehindIntro": "Cổng không xóa được các mục này và sẽ tiếp tục thử. Để xóa thủ công, hãy chạy lệnh của nó trên máy chủ engine.",
     "sandboxes.leftBehindItem": "{kind, select, container {Một container} network {Một mạng} other {Một volume}} {name}, {age, plural, other {đã tồn tại # phút}}: {reason}",
-    "sandboxes.reasonWords": "{reason, select, timeout {engine bị hết thời gian chờ} engine_unavailable {không thể kết nối với engine} store_unavailable {cổng không thể đọc bản ghi của nó} other {engine không thể xóa nó}}",
+    "sandboxes.reasonWords": "{reason, select, timeout {engine bị hết thời gian chờ} engine_unavailable {không thể kết nối với engine} store_unavailable {cổng không thể đọc bản ghi của nó} invalid_labels {gateway không đọc được nhãn của nó} other {engine không thể xóa nó}}",
     "health.sandboxesTitle": "Hộp cát",
     "health.sandboxesGreen": "{running, plural, =0 {Sandbox: không có sandbox nào đang chạy. Không có gì sót lại.} one {Sandbox: # đang chạy, lâu nhất là {oldest}. Không có gì sót lại.} other {Sandbox: # đang chạy, lâu nhất là {oldest}. Không có gì sót lại.}}",
     "health.sandboxesAmber": "{running, plural, =0 {Sandbox: không có sandbox nào đang chạy.} one {Sandbox: # đang chạy, lâu nhất là {oldest}.} other {Sandbox: # đang chạy, lâu nhất là {oldest}.}} Sót lại: {what} ({reason}). Cổng sẽ tiếp tục thử xóa chúng.",

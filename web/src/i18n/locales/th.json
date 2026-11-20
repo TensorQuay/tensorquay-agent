@@ -2977,7 +2977,7 @@
     "sandboxes.leftBehindTitle": "ที่ค้างอยู่",
     "sandboxes.leftBehindIntro": "เกตเวย์ลบรายการเหล่านี้ไม่ได้และจะพยายามต่อไป หากต้องการลบด้วยตนเอง ให้รันคำสั่งของมันบนโฮสต์เอนจิน",
     "sandboxes.leftBehindItem": "{kind, select, container {คอนเทนเนอร์} network {เครือข่าย} other {วอลุ่ม}} {name}, {age, plural, other {อายุ # นาที}}: {reason}",
-    "sandboxes.reasonWords": "{reason, select, timeout {เอนจินหมดเวลา} engine_unavailable {ไม่สามารถเข้าถึงเอนจินได้} store_unavailable {เกตเวย์ไม่สามารถอ่านบันทึกได้} other {เอนจินไม่ยอมลบ}}",
+    "sandboxes.reasonWords": "{reason, select, timeout {เอนจินหมดเวลา} engine_unavailable {ไม่สามารถเข้าถึงเอนจินได้} store_unavailable {เกตเวย์ไม่สามารถอ่านบันทึกได้} invalid_labels {เกตเวย์อ่านป้ายกำกับของมันไม่ได้} other {เอนจินไม่ยอมลบ}}",
     "health.sandboxesTitle": "แซนด์บ็อกซ์",
     "health.sandboxesGreen": "{running, plural, =0 {แซนด์บ็อกซ์: ไม่มีกำลังทำงาน ไม่มีอะไรหลงเหลือ} one {แซนด์บ็อกซ์: # กำลังทำงาน เก่าสุดนาน {oldest} ไม่มีอะไรหลงเหลือ} other {แซนด์บ็อกซ์: # กำลังทำงาน เก่าสุดนาน {oldest} ไม่มีอะไรหลงเหลือ}}",
     "health.sandboxesAmber": "{running, plural, =0 {แซนด์บ็อกซ์: ไม่มีกำลังทำงาน} one {แซนด์บ็อกซ์: # กำลังทำงาน เก่าสุดนาน {oldest}} other {แซนด์บ็อกซ์: # กำลังทำงาน เก่าสุดนาน {oldest}}} หลงเหลือ: {what} ({reason}) เกตเวย์จะพยายามลบต่อไป",

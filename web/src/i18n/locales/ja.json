@@ -2975,7 +2975,7 @@
     "sandboxes.leftBehindTitle": "残留物",
     "sandboxes.leftBehindIntro": "ゲートウェイはこれらを削除できず、再試行を続けています。手動で削除するには、エンジンホストでそのコマンドを実行してください。",
     "sandboxes.leftBehindItem": "{kind, select, container {コンテナ} network {ネットワーク} other {ボリューム}} {name}、{age, plural, other {# 分経過}}: {reason}",
-    "sandboxes.reasonWords": "{reason, select, timeout {エンジンのタイムアウト} engine_unavailable {エンジンに接続できませんでした} store_unavailable {ゲートウェイがレコードを読み取れませんでした} other {エンジンが削除を拒否しました}}",
+    "sandboxes.reasonWords": "{reason, select, timeout {エンジンのタイムアウト} engine_unavailable {エンジンに接続できませんでした} store_unavailable {ゲートウェイがレコードを読み取れませんでした} invalid_labels {ゲートウェイがそのラベルを読めませんでした} other {エンジンが削除を拒否しました}}",
     "health.sandboxesTitle": "サンドボックス",
     "health.sandboxesGreen": "{running, plural, =0 {サンドボックス: 実行中なし。残存なし。} one {サンドボックス: # 件実行中、最古 {oldest}。残存なし。} other {サンドボックス: # 件実行中、最古 {oldest}。残存なし。}}",
     "health.sandboxesAmber": "{running, plural, =0 {サンドボックス: 実行中なし。} one {サンドボックス: # 件実行中、最古 {oldest}。} other {サンドボックス: # 件実行中、最古 {oldest}。}} 残存: {what} ({reason})。ゲートウェイは削除を再試行し続けます。",

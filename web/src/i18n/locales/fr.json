@@ -2970,7 +2970,7 @@
     "sandboxes.leftBehindTitle": "Restes",
     "sandboxes.leftBehindIntro": "La passerelle n’a pas pu les supprimer et continue d’essayer. Pour en supprimer un manuellement, exécutez sa commande sur l’hôte du moteur.",
     "sandboxes.leftBehindItem": "{kind, select, container {Un conteneur} network {Un réseau} other {Un volume}} {name}, {age, plural, one {# minute d’âge} other {# minutes d’âge}} : {reason}",
-    "sandboxes.reasonWords": "{reason, select, timeout {le moteur a expiré} engine_unavailable {le moteur était injoignable} store_unavailable {la passerelle ne pouvait pas lire ses enregistrements} other {le moteur ne le supprimait pas}}",
+    "sandboxes.reasonWords": "{reason, select, timeout {le moteur a expiré} engine_unavailable {le moteur était injoignable} store_unavailable {la passerelle ne pouvait pas lire ses enregistrements} invalid_labels {la passerelle n’a pas pu lire ses étiquettes} other {le moteur ne le supprimait pas}}",
     "health.sandboxesTitle": "Bacs à sable",
     "health.sandboxesGreen": "{running, plural, =0 {Sandboxes : aucun en cours d’exécution. Rien de laissé derrière.} one {Sandboxes : # en cours d’exécution, le plus ancien depuis {oldest}. Rien de laissé derrière.} other {Sandboxes : # en cours d’exécution, le plus ancien depuis {oldest}. Rien de laissé derrière.}}",
     "health.sandboxesAmber": "{running, plural, =0 {Sandboxes : aucun en cours d’exécution.} one {Sandboxes : # en cours d’exécution, le plus ancien depuis {oldest}.} other {Sandboxes : # en cours d’exécution, le plus ancien depuis {oldest}.}} Laissé derrière : {what} ({reason}). La passerelle continue d’essayer de les supprimer.",

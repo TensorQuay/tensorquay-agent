@@ -11,6 +11,8 @@ describe("WEB-U-489 a left-behind thing's reason in plain words", () => {
     ["timeout", "the engine timed out"],
     ["engine_unavailable", "the engine couldn't be reached"],
     ["store_unavailable", "the gateway couldn't read its records"],
+    // A container whose labels the listing can't read was never refused by the engine (decided on 21 Nov 2026).
+    ["invalid_labels", "the gateway couldn't read its labels"],
     ["sandbox_failed", "the engine wouldn't remove it"],
     ["a_code_from_a_newer_gateway", "the engine wouldn't remove it"],
   ])("%s reads “%s”", (code, words) => {

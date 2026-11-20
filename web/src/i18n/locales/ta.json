@@ -2979,7 +2979,7 @@
     "sandboxes.leftBehindTitle": "விடுபட்டவை",
     "sandboxes.leftBehindIntro": "கேட்வேயால் இவற்றை நீக்க முடியவில்லை; அது தொடர்ந்து முயற்சிக்கிறது. ஒன்றை கைமுறையாக நீக்க, இன்ஜின் ஹோஸ்டில் அதன் கட்டளை இயக்கவும்.",
     "sandboxes.leftBehindItem": "{kind, select, container {கன்டெய்னர்} network {நெட்வொர்க்} other {வோலியம்}} {name}, {age, plural, one {# நிமிடம் பழையது} other {# நிமிடங்கள் பழையது}}: {reason}",
-    "sandboxes.reasonWords": "{reason, select, timeout {இன்ஜினு நேரம் தீர்ந்தது} engine_unavailable {இன்ஜினு அணுக முடியவில்லை} store_unavailable {கேட்வே அதன் பதிவுகளை படிக்க முடியவில்லை} other {இன்ஜின் அதை நீக்க மறுத்தது}}",
+    "sandboxes.reasonWords": "{reason, select, timeout {இன்ஜினு நேரம் தீர்ந்தது} engine_unavailable {இன்ஜினு அணுக முடியவில்லை} store_unavailable {கேட்வே அதன் பதிவுகளை படிக்க முடியவில்லை} invalid_labels {கேட்வேயால் அதன் லேபிள்களைப் படிக்க முடியவில்லை} other {இன்ஜின் அதை நீக்க மறுத்தது}}",
     "health.sandboxesTitle": "சாண்ட்பாக்ஸ்கள்",
     "health.sandboxesGreen": "{running, plural, =0 {சாண்ட்பாக்ஸ்: இயங்குவது எதுவும் இல்லை. எதுவும் மீதம் இல்லை.} one {சாண்ட்பாக்ஸ்: # இயங்குகிறது, மிகப் பழையது {oldest} காலத்திற்கு. எதுவும் மீதம் இல்லை.} other {சாண்ட்பாக்ஸ்: # இயங்குகிறது, மிகப் பழையது {oldest} காலத்திற்கு. எதுவும் மீதம் இல்லை.}}",
     "health.sandboxesAmber": "{running, plural, =0 {சாண்ட்பாக்ஸ்: இயங்குவது எதுவும் இல்லை.} one {சாண்ட்பாக்ஸ்: # இயங்குகிறது, மிகப் பழையது {oldest} காலத்திற்கு.} other {சாண்ட்பாக்ஸ்: # இயங்குகிறது, மிகப் பழையது {oldest} காலத்திற்கு.}} மீதம்: {what} ({reason}). கேட்வே அவற்றை நீக்கத் தொடர்ந்து முயற்சிக்கிறது.",
