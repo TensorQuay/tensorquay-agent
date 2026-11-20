@@ -152,14 +152,17 @@ pub(super) fn answer_step(answer: &mut String, frame: &ServerFrame) {
     }
 }
 
-/// Whether the frame before a run's start says the gateway woke it (a team's wake) or a lead briefed it: such a run
-/// is not a person's task ending.
+/// Whether the frame before a run's start says the gateway woke it (a team's or a channel's wake) or a lead briefed
+/// it: such a run is not a person's task ending.
 pub(super) fn woken(opener: Option<&ServerFrame>) -> bool {
     matches!(
         opener,
         Some(ServerFrame::Event {
             event: Event::MessageUser {
                 team_wake: Some(_),
+                ..
+            } | Event::MessageUser {
+                channel_wake: Some(_),
                 ..
             } | Event::MessageUser {
                 lead_brief: Some(_),
