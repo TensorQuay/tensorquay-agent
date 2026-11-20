@@ -239,6 +239,22 @@ describe("WEB-U-486 the Sandboxes page's states", () => {
   });
 
   // The real-stack run's numbers (18 Nov 2026): a small use never rounds to nothing, and one core is one core.
+  // Found in 18.1's first hour on a real stack: "member@example.invalid" ran under the State column, its pill drawn
+  // over it (the table sized the column below the unbreakable address). As in People (WEB-U-117, WEB-U-382), the
+  // address may break only after its @ or a dot, so the column is sized by its parts; your own row says "You".
+  it("lets an owner's address break after its @ and dots, never inside a word", async () => {
+    show(fake([listing()]));
+    const table = await screen.findByRole("table", {
+      name: "Running sandboxes",
+    });
+    const working = within(table).getAllByRole("row")[1]!;
+    const owner = within(working).getAllByRole("cell")[0]!;
+    expect(owner.querySelector(".cell-whole")!.innerHTML).toBe(
+      "ben@<wbr>example.<wbr>org",
+    );
+    expect(owner).toHaveTextContent("ben@example.org");
+  });
+
   it("says a small use in megabytes, and one core as one core", async () => {
     const MIB = 2 ** 20;
     const small = row({

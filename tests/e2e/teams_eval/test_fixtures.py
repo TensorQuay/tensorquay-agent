@@ -66,7 +66,10 @@ class Tasks(unittest.TestCase):
                     scenario = json.loads((task_dir / "dry-run" / f"{side}.json").read_text())
                     self.assertEqual(scenario["select"], "prompt")
                     self.assertLess(len(json.dumps(scenario).encode()), 1 << 20, "the scripted model's bound")
-                    lead = [r for r in scenario["responses"] if not r["when"].startswith("You are ")]
+                    # A helper's replies are chosen by "You are <role>", or by "<role>, a helper" (which a rounds
+                    # task's round frame holds too); the lead's by a phrase of task.md.
+                    lead = [r for r in scenario["responses"]
+                            if not (r["when"].startswith("You are ") or r["when"].endswith(", a helper"))]
                     self.assertTrue(all(r["when"] in statement for r in lead), "the lead's phrase is in task.md")
                     self.assertTrue(all(1 <= len(r["events"]) <= 128 for r in scenario["responses"]))
                     workspace = self.workspace(task_dir, label=f"{side}-session")
@@ -80,7 +83,19 @@ class Tasks(unittest.TestCase):
                             target.parent.mkdir(parents=True, exist_ok=True)
                             target.write_text(event["arguments"]["content"])
                     names = [event["name"] for event in calls]
-                    if side == "team":
+                    # A rounds task's team runs two rounds: a start, a read and done each, the second bringing the
+                    # scout back (ADR-0034's rounds amendment); it takes no file.
+                    rounds = (task_dir / "follow_up.md").is_file()
+                    if side == "team" and rounds:
+                        self.assertEqual([n for n in names if n not in ("write_file", "shell")],
+                                         ["start_member"] * 2 + ["read_reports"] * 2 + ["done"]
+                                         + ["start_member"] * 3 + ["read_reports"] * 3 + ["done"])
+                        starts = [event["arguments"] for event in calls if event["name"] == "start_member"]
+                        # Round 2 brings round 1's two back by name with their copies kept, and adds one new.
+                        self.assertEqual([(each["role"], each.get("files")) for each in starts[2:]],
+                                         [(each["role"], "keep") for each in starts[:2]] + [(starts[4]["role"], None)])
+                        self.assertNotIn(starts[4]["role"], [each["role"] for each in starts[:2]])
+                    elif side == "team":
                         self.assertEqual([n for n in names if n not in ("write_file", "shell")],
                                          ["start_member", "read_reports", "take_files", "done"])
                         taken = workspace / "uploads" / "scout-scout-notes.md"

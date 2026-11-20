@@ -1,7 +1,12 @@
 /* UI-GUIDELINES §6: settings are a 760 px column with the sections listed on the left on wide screens. */
 .settings-page {
   display: grid;
-  grid-template-columns: var(--settings-nav-width) minmax(0, var(--form-width));
+  /* The menu is as wide as its widest label needs, in every language (WEB-U-465): the token is its least width, the
+     width English needs; a language whose labels run longer widens it, so no item takes two lines. */
+  grid-template-columns: minmax(var(--settings-nav-width), max-content) minmax(
+      0,
+      var(--form-width)
+    );
   grid-template-areas:
     "title title"
     "nav column";

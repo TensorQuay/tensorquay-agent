@@ -174,6 +174,13 @@ class Task:
     # the runtime's no-progress guard stops, as a real agent would never do.
     dry_run_setup: list = field(default_factory=list)
     dry_run_files: dict = None
+    # A person's follow-up, sent once the first ask has ended (ADR-0034's rounds amendment: a team's next round). A
+    # task with one is a rounds task: tagged teams-rounds, never teams-eval, and its team session runs two rounds.
+    follow_up: str = None
+    # A rounds task's message to one helper between the rounds ({"helper", "text"}), and its helpers by round: the
+    # roles round 1 starts and the one round 2 adds ({"round1": [...], "new": ...}), for the scripted session.
+    between: dict = None
+    rounds_roles: dict = None
 
 
 def text_or_bytes(path, content):
@@ -189,7 +196,7 @@ def write(task, root):
     directory = Path(root) / task.id
     if directory.exists():
         shutil.rmtree(directory)
-    tags = ["teams-eval", f"teams-{task.kind}"]
+    tags = ["teams-rounds" if task.follow_up else "teams-eval", f"teams-{task.kind}"]
     max_steps, wall, tokens = task.budgets
     lines = [f'id = "{task.id}"', f"title = {json.dumps(task.title)}", f"tags = {json.dumps(tags)}",
              f"budgets = {{ max_steps = {max_steps}, wall_clock_secs = {wall}, max_tokens = {tokens} }}",
@@ -197,8 +204,13 @@ def write(task, root):
              f'check = {{ image = "runtime", timeout_secs = {task.check_timeout} }}']
     if task.template:
         lines.append(f'template = "{task.template}"')
+    # tqa-e2e's task.toml takes no unknown field, so the follow-up is a file of its own beside task.md.
     text_or_bytes(directory / "task.toml", "\n".join(lines) + "\n")
     text_or_bytes(directory / "task.md", task.statement.strip() + "\n")
+    if task.follow_up:
+        text_or_bytes(directory / "follow_up.md", task.follow_up.strip() + "\n")
+    if task.between:
+        text_or_bytes(directory / "between.json", json.dumps(task.between, indent=1, ensure_ascii=False) + "\n")
     text_or_bytes(directory / "key_facts.json", json.dumps(task.key_facts, indent=1, ensure_ascii=False) + "\n")
     for path, content in sorted(task.seed.items()):
         text_or_bytes(directory / "seed" / path, content)
@@ -212,7 +224,8 @@ def write(task, root):
         text_or_bytes(directory / "check" / "hidden" / name, content)
     for name, content in sorted(task.check_files.items()):
         text_or_bytes(directory / "check" / name, content)
-    for side, scenario in (("single", dryrun.single(task)), ("team", dryrun.team(task))):
+    team = dryrun.rounds(task) if task.follow_up else dryrun.team(task)
+    for side, scenario in (("single", dryrun.single(task)), ("team", team)):
         text_or_bytes(directory / "dry-run" / f"{side}.json", json.dumps(scenario, indent=1, ensure_ascii=False) + "\n")
     for name, files in (("solution", task.solution), ("wrong", task.wrong)):
         for path, content in sorted(files.items()):

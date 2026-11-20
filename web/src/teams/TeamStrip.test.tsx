@@ -153,3 +153,34 @@ describe("WEB-U-310 an ended team's strip", () => {
     );
   });
 });
+
+// WEB-U-505 (18.1, ADR-0034's rounds amendment A5): from round 2 on the strip names the round, in its wide line and
+// its phone line; a team in its first round says nothing of rounds.
+describe("WEB-U-505 the strip names the round from round 2 on", () => {
+  it("says Round 2 in a team's second round", () => {
+    render(
+      <TeamStrip
+        team={{ ...team([helper("Researcher", "working")]), round: 2 }}
+        now={NOW}
+        onAll={vi.fn()}
+      />,
+    );
+    const strip = screen.getByRole("region", { name: "Helpers" });
+    expect(
+      within(strip).getAllByText(/^Round 2$/).length,
+    ).toBeGreaterThanOrEqual(1);
+  });
+
+  it("says nothing of rounds in the first", () => {
+    render(
+      <TeamStrip
+        team={{ ...team([helper("Researcher", "working")]), round: 1 }}
+        now={NOW}
+        onAll={vi.fn()}
+      />,
+    );
+    expect(
+      screen.getByRole("region", { name: "Helpers" }),
+    ).not.toHaveTextContent(/Round/);
+  });
+});

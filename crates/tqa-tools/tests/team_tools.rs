@@ -15,7 +15,8 @@ use std::sync::{Arc, Mutex};
 use tokio_util::sync::CancellationToken;
 use tqa_tools::Tool;
 use tqa_tools::builtin::team::{
-    ReadAnswer, TeamClient, TeamFailure, TeamRole, grouped, take_files, tools_for_role,
+    ReadAnswer, RoleAnswer, TeamClient, TeamFailure, TeamRole, grouped, take_files,
+    tools_for_answer, tools_for_role,
 };
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;
@@ -784,5 +785,202 @@ async fn tool_u_065_the_persons_message_to_the_lead_reads_in_fixed_words() -> Te
             .description
             .contains("The person may write while the team works; their word comes first"),
     );
+    Ok(())
+}
+
+/// Each reason a run may not lead, and the sentence a team tool's call is answered with (ADR-0034's rounds
+/// amendment, A6 and A7).
+const SENTENCES: [(&str, &str); 4] = [
+    (
+        "teams_disabled",
+        "Helpers are switched off for this installation. Do the work yourself, and say in your answer that you \
+         worked without helpers.",
+    ),
+    (
+        "was_member",
+        "This task was a helper, and a helper can't lead a team. Do the work yourself, and say so.",
+    ),
+    (
+        "runtime_too_old",
+        "This environment can't lead helpers (its runtime is too old). Do the work yourself, and say so; the \
+         person can start the task in a newer environment.",
+    ),
+    (
+        "team_ended",
+        "This team has ended for good (its lead task was deleted or its person's account was turned off). Do the \
+         work yourself, and say so.",
+    ),
+];
+
+/// The twelve team tool names: the lead's ten and the helper's two.
+fn team_names() -> Vec<String> {
+    let client = || Arc::new(Fake::default()) as Arc<dyn TeamClient>;
+    let mut names: Vec<String> = tools_for_role(client(), TeamRole::Lead)
+        .iter()
+        .chain(&tools_for_role(client(), TeamRole::Member))
+        .map(|tool| tool.spec().name.as_str().to_owned())
+        .collect();
+    names.sort();
+    names
+}
+
+/// The sentence a call's refusal carries, when it is `teams_unavailable`.
+fn refused(result: Result<tqa_tools::ToolOutput, tqa_tools::ToolError>) -> Option<String> {
+    match result {
+        Err(tqa_tools::ToolError::Channel { code, detail }) if code == "teams_unavailable" => {
+            Some(detail)
+        }
+        _ => None,
+    }
+}
+
+// TEST: TOOL-U-147
+#[tokio::test]
+async fn tool_u_147_under_none_every_team_tool_is_refused_in_words_for_its_reason() -> TestResult {
+    let fixture = tqa_testkit::workspace_fixture()?;
+    let cx = support::context(&fixture);
+    // A missing or unknown reason reads as switched off.
+    let cases = SENTENCES
+        .iter()
+        .map(|(reason, sentence)| (Some(*reason), *sentence))
+        .chain([
+            (None, SENTENCES[0].1),
+            (Some("a_new_reason"), SENTENCES[0].1),
+        ]);
+    for (reason, sentence) in cases {
+        let fake = Arc::new(Fake::default());
+        let tools = tools_for_answer(fake.clone(), &RoleAnswer::parse("none", reason), None);
+        assert!(offered(&tools).is_empty(), "{reason:?}: nothing offered");
+        let mut names: Vec<String> = tools
+            .iter()
+            .map(|tool| tool.spec().name.as_str().to_owned())
+            .collect();
+        names.sort();
+        assert_eq!(names, team_names(), "{reason:?}: the twelve names known");
+        for tool in &tools {
+            assert_eq!(
+                refused(tool.call(json!({}), &cx).await).as_deref(),
+                Some(sentence),
+                "{reason:?}: {}",
+                tool.spec().name.as_str()
+            );
+        }
+        assert!(
+            fake.sent.lock().map_err(|_| "lock")?.is_empty(),
+            "{reason:?}: nothing reached the gateway"
+        );
+    }
+    Ok(())
+}
+
+// TEST: TOOL-U-147
+#[tokio::test]
+async fn tool_u_147_between_rounds_read_reports_works_and_the_rest_say_why() -> TestResult {
+    let fixture = tqa_testkit::workspace_fixture()?;
+    let cx = support::context(&fixture);
+    let fake = Arc::new(Fake::default());
+    let tools = tools_for_answer(
+        fake.clone(),
+        &RoleAnswer::parse("ended", Some("between_rounds")),
+        None,
+    );
+    // The note to read, and the next round to open (A2).
+    assert_eq!(offered(&tools), ["read_reports", "start_member"]);
+    let mut names: Vec<String> = tools
+        .iter()
+        .map(|tool| tool.spec().name.as_str().to_owned())
+        .collect();
+    names.sort();
+    assert_eq!(names, team_names());
+    let between = "Your team's round has ended. Read its end note with read_reports, or start the next round with \
+                   start_member; the other team tools come back once a round runs.";
+    for tool in &tools {
+        let name = tool.spec().name.as_str();
+        let result = tool.call(json!({}), &cx).await;
+        if name == "read_reports" || name == "start_member" {
+            assert_eq!(refused(result), None, "{name} works");
+        } else {
+            assert_eq!(refused(result).as_deref(), Some(between), "{name}");
+        }
+    }
+    Ok(())
+}
+
+// TEST: TOOL-U-147
+#[test]
+fn tool_u_147_a_lead_a_helper_and_a_task_that_may_lead_are_offered_as_before() {
+    let client = || Arc::new(Fake::default()) as Arc<dyn TeamClient>;
+    for (role, reason) in [
+        ("lead", None),
+        ("member", None),
+        ("may_lead", None),
+        ("lead", Some("ignored")),
+    ] {
+        let answer = RoleAnswer::parse(role, reason);
+        assert_eq!(
+            offered(&tools_for_answer(client(), &answer, None)),
+            offered(&tools_for_role(client(), TeamRole::parse(role))),
+            "{role}"
+        );
+    }
+}
+
+// TEST: TOOL-U-148
+// Bringing a finished helper back is start_member's (ADR-0034's rounds amendment, A3): its schema takes `files`, its
+// description says the match rule, and a bring-back's answer says so first, never as a new helper.
+#[tokio::test]
+async fn tool_u_148_start_member_brings_a_finished_helper_back_in_its_own_words() -> TestResult {
+    let client = || Arc::new(Fake::default()) as Arc<dyn TeamClient>;
+    let tools = tools_for_role(client(), TeamRole::Lead);
+    let start = named(&tools, "start_member")?;
+    let spec = start.spec();
+    assert!(
+        spec.description.contains(
+            "Name a helper that has finished to bring it back with its history and its files. For a new helper on \
+             the same job, use a new role word."
+        ),
+        "{}",
+        spec.description
+    );
+    // A fresh copy discards the helper's unreported changes, and says so (reviewed on 18 Nov 2026).
+    assert!(
+        spec.description
+            .contains("fresh_copy starts from the lead's files now and discards this helper's unreported changes"),
+        "{}",
+        spec.description
+    );
+    let files = &spec.parameters["properties"]["files"];
+    assert_eq!(files["type"], json!(["string", "null"]), "{files}");
+    assert_eq!(
+        files["enum"],
+        json!(["keep", "fresh_copy", null]),
+        "{files}"
+    );
+    let fixture = tqa_testkit::workspace_fixture()?;
+    let cx = support::context(&fixture);
+    for (files, seq, words) in [
+        ("keep", 31, "its copy kept"),
+        (
+            "fresh_copy",
+            32,
+            "a fresh copy of your files; its unreported changes were discarded",
+        ),
+    ] {
+        let fake = Arc::new(Fake {
+            start: json!({"member": {"name": "researcher", "workspace": "own_copy", "state": "starting"},
+                          "seq": seq, "lead_tools": true, "brought_back": true, "files": files, "round": 2}),
+            ..Fake::default()
+        });
+        let tools = tools_for_role(fake.clone(), TeamRole::Lead);
+        let args = json!({"role": "researcher", "workspace": null, "profile": null, "files": files,
+                          "brief": {"objective": "o", "output": "p", "sources": null, "boundaries": "b"}});
+        let brought = named(&tools, "start_member")?.call(args, &cx).await?;
+        let expected = format!(
+            "Brought back researcher for round 2 ({words}); its brief is message {seq}. It reports to you."
+        );
+        assert_eq!(brought.text, expected);
+        let sent = fake.sent.lock().map_err(|_| "lock")?.clone();
+        assert_eq!(sent[0].1["files"], json!(files), "{sent:?}");
+    }
     Ok(())
 }

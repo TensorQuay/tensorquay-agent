@@ -191,11 +191,14 @@ function ActiveRuns({ active }: { active: ReadyDetail["runs_active"] }) {
 }
 
 /** "7 h" or "40 min": how long the oldest sandbox has run, to the hour past one. */
+/** A sandbox's age as the line says it: minutes, then hours, then days from two days on (never "224 h"). */
 function age(seconds: number, t: ReturnType<typeof useT>): string {
   const minutes = Math.max(1, Math.round(seconds / 60));
-  return minutes < 60
-    ? t("health.minutes", { count: minutes })
-    : t("health.hours", { count: Math.round(minutes / 60) });
+  const hours = Math.round(minutes / 60);
+  if (minutes < 60) return t("health.minutes", { count: minutes });
+  return hours < 48
+    ? t("health.hours", { count: hours })
+    : t("limits.days", { count: Math.floor(hours / 24) });
 }
 
 /**

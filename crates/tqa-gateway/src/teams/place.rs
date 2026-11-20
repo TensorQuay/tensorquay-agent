@@ -44,7 +44,7 @@ async fn places(state: &State, ids: &[Uuid]) -> Result<HashMap<Uuid, TeamPlace>,
     let mut connection = state.pool.acquire().await?;
     let mut places = HashMap::new();
     let leads = sqlx::query!(
-        "SELECT t.lead_conversation AS \"task!\", t.id, t.state, \
+        "SELECT t.lead_conversation AS \"task!\", t.id, t.state, t.round, \
          (SELECT count(*) FROM agent_team_members m JOIN conversations c ON c.id = m.conversation_id \
           WHERE m.team_id = t.id AND c.state <> 'deleted') AS \"helpers!\", \
          (SELECT count(*) FROM agent_team_members m JOIN conversations c ON c.id = m.conversation_id \
@@ -70,11 +70,12 @@ async fn places(state: &State, ids: &[Uuid]) -> Result<HashMap<Uuid, TeamPlace>,
                 helpers: count(row.helpers),
                 attention: attention(running, count(row.stuck), count(row.failed)),
                 waiting_for_you: Some(row.waiting),
+                round: count(i64::from(row.round)),
             },
         );
     }
     let members = sqlx::query!(
-        "SELECT m.conversation_id AS task, t.id, t.state, t.lead_conversation, c.title AS \"title?\", m.name, \
+        "SELECT m.conversation_id AS task, t.id, t.state, t.round, t.lead_conversation, c.title AS \"title?\", m.name, \
          m.state AS helper_state, m.failed_run FROM agent_team_members m JOIN agent_teams t ON t.id = m.team_id \
          JOIN conversations c ON c.id = t.lead_conversation WHERE m.conversation_id = ANY($1) \
          AND c.state <> 'deleted'",
@@ -96,6 +97,7 @@ async fn places(state: &State, ids: &[Uuid]) -> Result<HashMap<Uuid, TeamPlace>,
                 name: Some(row.name),
                 helper_state: Some(helper_state(&row.helper_state)),
                 can_stop: Some(stoppable),
+                round: count(i64::from(row.round)),
             },
         );
     }

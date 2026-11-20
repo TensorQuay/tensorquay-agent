@@ -334,8 +334,9 @@ impl Scenario {
                 "scenario model must have 1–128 bytes without control characters",
             ));
         }
-        if document.responses.is_empty() || document.responses.len() > 128 {
-            return Err(invalid("scenario requires 1–128 responses"));
+        // Up to 256 replies (TK-U-053: the agents stack suite's script grew past 128); the file's 1 MiB bound stays.
+        if document.responses.is_empty() || document.responses.len() > 256 {
+            return Err(invalid("scenario requires 1–256 responses"));
         }
         let prompt = document.select == Select::Prompt;
         if document.responses.iter().any(|reply| {

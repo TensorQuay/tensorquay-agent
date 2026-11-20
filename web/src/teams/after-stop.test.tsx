@@ -50,6 +50,7 @@ vi.mock("../auth/use-session", () => ({
       id: "0195d8c0-0000-7000-8000-000000000009",
       email: "me@example.invalid",
       role: "member",
+      round: 1,
       internet: "none",
       limits: {
         upload_bytes: 1,
@@ -115,6 +116,7 @@ const helperRecord = (
     workspace_id: leadId,
     team: {
       role: "member",
+      round: 1,
       id: teamId,
       state: "running",
       lead: { id: leadId, title: "Lead a team of three helpers" },
@@ -276,6 +278,7 @@ describe("WEB-U-413 a lead whose team a person stopped reads Stopped", () => {
     last_activity_at: "2026-01-01T00:10:00Z",
     team: {
       role: "lead",
+      round: 1,
       id: teamId,
       state: "ended",
       helpers: 3,
@@ -383,6 +386,7 @@ describe("WEB-U-424 the team's end card counts only the helpers' own reports", (
         run_status: "completed",
         team: {
           role: "lead",
+          round: 1,
           id: teamId,
           state: "ended",
           helpers: 2,

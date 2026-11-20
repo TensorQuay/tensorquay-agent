@@ -213,15 +213,17 @@ impl Services {
         )?);
         // A role the gateway can't give in time leaves this run without team tools rather than hold up its start; a
         // member then can't report this run, so the timeout is logged (an older gateway's 404 is not).
-        let role = if let Ok(role) =
-            tokio::time::timeout(ROLE_TIMEOUT, client.role(&input.shutdown)).await
-        {
-            role
-        } else {
+        let Ok(answer) = tokio::time::timeout(ROLE_TIMEOUT, client.role(&input.shutdown)).await
+        else {
             tracing::warn!(
                 "the agent-team role call timed out; the team tools are left out of this run"
             );
-            builtin::team::TeamRole::None
+            return Ok(());
+        };
+        // Without an answer (an older gateway), no team tool at all, as before; with one, a run that may not lead
+        // still knows the team tools' names, to say why in words (ADR-0034's rounds amendment, A6).
+        let Some(answer) = answer else {
+            return Ok(());
         };
         // A lead's `done` runs the administrator's acceptance check through the run's own shell tool (ADR-0034
         // point 10): the same directory, environment and process cleanup as any shell command.
@@ -229,7 +231,7 @@ impl Services {
             .get("shell")
             .cloned()
             .map(builtin::team::AcceptanceShell::new);
-        for tool in builtin::team::tools_with_check(client, role, check) {
+        for tool in builtin::team::tools_for_answer(client, &answer, check) {
             tools
                 .register(tool)
                 .map_err(|_| RuntimeError::Configuration("team tool schemas"))?;

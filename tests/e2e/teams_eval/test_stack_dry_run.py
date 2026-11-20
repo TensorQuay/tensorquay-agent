@@ -3,6 +3,7 @@
 Run: python3 -m unittest tests/e2e/teams_eval/test_stack_dry_run.py"""
 
 import sys
+import types
 import unittest
 from pathlib import Path
 
@@ -24,6 +25,10 @@ SWITCHES = [{"side": "single"}, {"side": "team"}]
 class Verdicts(unittest.TestCase):
     def test_a_clean_run_passes(self):
         self.assertEqual(stack_dry_run.verdicts([line("single"), line("team")], TASKS, SWITCHES), [])
+        # A rounds task's team starts two helpers in round 1 and adds one in round 2 (E2E-AGENTS-041).
+        rounds = [types.SimpleNamespace(id=TASKS[0], follow_up="Count them once more.")]
+        self.assertEqual(stack_dry_run.verdicts([line("single"), line("team", helpers=3)], rounds, SWITCHES), [])
+        self.assertTrue(stack_dry_run.verdicts([line("single"), line("team", helpers=1)], rounds, SWITCHES))
 
     def test_each_shortfall_is_named(self):
         found = stack_dry_run.verdicts([line("single", helpers=1), line("team", passed=False, helpers=0,

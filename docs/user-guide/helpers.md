@@ -92,9 +92,31 @@ and the lead task puts them in its workspace, by default in a folder named after
 When a team stops, the lead task's conversation gets a summary: why it stopped, each one's share of the work
 (the helpers and the lead task), their reports and the files they handed back. Every task stays: you can carry on with the lead task or with any helper, as with any task.
 
-A lead task leads one team. Once that team has stopped, the lead task works alone: a follow-up you send it is done
-without helpers. To take a helper's part further, write to that helper: it keeps its own work and files. For a new
-round of helpers, ask a new task to lead, and give it what the first team found.
+## Rounds
+<!-- Tests: GW-I-330 to GW-I-338, GW-U-221, GW-U-222, SEC-067, WEB-U-497, WEB-U-505 to WEB-U-508, E2E-AGENTS-040,
+E2E-AGENTS-041. -->
+A team works in rounds. When a team has stopped, a follow-up you send to its lead task can start the next round: the
+lead may then bring back helpers that have finished and add new ones, and the round has a fresh budget and time of its
+own, from the administrator's current limits. Only your follow-up starts a round, one per message: a helper's report or
+the lead's own work never does.
+
+- Bring a helper back: the lead names a finished helper to bring it back. It is the same task, with its history,
+  its brief and its reports, and it carries on in its own copy of the files as it left it. The lead can instead give it
+  a fresh copy of the lead's files, which discards the helper's changes it hadn't reported. A brought-back helper gets
+  no more than its lead has now: if you narrowed the lead task's profile or its servers between rounds, so is the
+  helper.
+- Write to a helper between rounds: what you send a helper while its team has stopped is part of its task when the
+  lead brings it back.
+- What the page says: from round 2 on, the strip under the lead's title starts with the round ("Round 2"), and
+  **All helpers** marks a helper the lead didn't bring back "Not in this round". The lead task's conversation shows a
+  quiet line when a round starts, and each round ends with its own summary, named from round 2 on ("Round 2: …"): that
+  round's reports and each helper's share of that round's work.
+- When a task can't lead: a team whose lead task was deleted, or whose person's account was turned off, has ended
+  for good and doesn't start again. A task that may not lead helpers (helpers are switched off, it was a helper itself,
+  or its environment is too old) is told why in words and does the work itself; its conversation says "Can't lead
+  helpers here" with the reason.
+
+To take one helper's part further without a new round, write to that helper: it keeps its own work and files.
 
 ## Delete
 Deleting a helper removes that helper, its messages and any files it sent that the lead hadn't taken yet. The lead is

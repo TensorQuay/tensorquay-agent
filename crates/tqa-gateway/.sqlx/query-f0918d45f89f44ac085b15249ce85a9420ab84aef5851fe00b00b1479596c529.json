@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO agent_team_rounds (team_id, round, started_at, token_budget, deadline_at, spent_tokens, ended_at, stop_reason, end_seq) SELECT id, round, created_at, token_budget, deadline_at, spent_tokens, COALESCE(ended_at, CURRENT_TIMESTAMP), stop_reason, $2 FROM agent_teams WHERE id = $1 ON CONFLICT (team_id, round) DO UPDATE SET spent_tokens = EXCLUDED.spent_tokens, ended_at = EXCLUDED.ended_at, stop_reason = EXCLUDED.stop_reason, end_seq = COALESCE(EXCLUDED.end_seq, agent_team_rounds.end_seq)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f0918d45f89f44ac085b15249ce85a9420ab84aef5851fe00b00b1479596c529"
+}

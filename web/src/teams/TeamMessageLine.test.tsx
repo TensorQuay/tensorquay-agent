@@ -1,8 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { english } from "../i18n/translate";
+
 import type { TeamMessageView } from "./team-view";
-import { TeamMessageLine } from "./TeamMessageLine";
+import { TeamMessageLine, teamMessageWords } from "./TeamMessageLine";
 
 const lead = { kind: "lead" as const };
 const member = (name: string) => ({ kind: "member" as const, name });
@@ -138,5 +140,23 @@ describe("WEB-U-222 team messages as quiet lines", () => {
       />,
     );
     expect(screen.getByRole("button")).toHaveTextContent("Something.");
+  });
+});
+
+// WEB-U-507 (18.1, ADR-0034's rounds amendment A5): the gateway's round_started reads as one quiet line, the round
+// named, never the stored text's words.
+describe("WEB-U-507 a round's start as a quiet line", () => {
+  it("says Round 2 started", () => {
+    const words = teamMessageWords(
+      message(
+        "round_started",
+        { kind: "gateway" },
+        { kind: "person" },
+        "Round 2 of this team started.",
+        { round: 2 },
+      ),
+      english,
+    );
+    expect(words).toBe("Round 2 started");
   });
 });

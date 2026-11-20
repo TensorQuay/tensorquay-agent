@@ -59,8 +59,8 @@ pub struct GatewayRequest {
 enum RoleRoute {
     /// 404, as a gateway without the team routes.
     Absent,
-    /// Answers this role.
-    Role(String),
+    /// Answers this role, with this reason when there is one.
+    Role(String, Option<String>),
     /// Never answers.
     Hangs,
 }
@@ -224,7 +224,17 @@ impl FakeGateway {
             .data
             .lock()
             .unwrap_or_else(PoisonError::into_inner)
-            .team_role = role.map_or(RoleRoute::Absent, |role| RoleRoute::Role(role.to_owned()));
+            .team_role = role.map_or(RoleRoute::Absent, |role| {
+            RoleRoute::Role(role.to_owned(), None)
+        });
+    }
+    /// The role and the reason `GET /runtime/teams/role` answers (ADR-0034's rounds amendment, A2).
+    pub fn set_team_role_with(&self, role: &str, reason: &str) {
+        self.shared
+            .data
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .team_role = RoleRoute::Role(role.to_owned(), Some(reason.to_owned()));
     }
     /// Makes `GET /runtime/teams/role` never answer, as a gateway that hangs.
     pub fn hang_team_role(&self) {

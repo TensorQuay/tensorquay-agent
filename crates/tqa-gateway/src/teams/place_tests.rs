@@ -20,6 +20,7 @@ fn lead() -> TeamPlace {
             failed: 0,
         },
         waiting_for_you: Some(true),
+        round: 2,
     }
 }
 
@@ -36,6 +37,7 @@ fn member() -> TeamPlace {
         name: Some("researcher".into()),
         helper_state: Some("working"),
         can_stop: Some(true),
+        round: 2,
     }
 }
 
@@ -46,12 +48,12 @@ fn gw_u_135_the_own_person_gets_every_field() -> Result<(), serde_json::Error> {
     assert_eq!(
         serde_json::to_value(lead().for_viewer(true))?,
         json!({"role": "lead", "id": team, "state": "running", "helpers": 3,
-               "attention": {"stuck": 1, "failed": 0}, "waiting_for_you": true})
+               "attention": {"stuck": 1, "failed": 0}, "waiting_for_you": true, "round": 2})
     );
     assert_eq!(
         serde_json::to_value(member().for_viewer(true))?,
         json!({"role": "member", "id": team, "state": "running", "lead": {"id": task, "title": "Report on Q3"},
-               "name": "researcher", "helper_state": "working", "can_stop": true})
+               "name": "researcher", "helper_state": "working", "can_stop": true, "round": 2})
     );
     // An untitled lead is null, not left out.
     let mut untitled = member();
@@ -73,11 +75,11 @@ fn gw_u_135_anyone_else_gets_no_content() -> Result<(), serde_json::Error> {
     assert_eq!(
         serde_json::to_value(lead().for_viewer(false))?,
         json!({"role": "lead", "id": team, "state": "running", "helpers": 3,
-               "attention": {"stuck": 1, "failed": 0}})
+               "attention": {"stuck": 1, "failed": 0}, "round": 2})
     );
     assert_eq!(
         serde_json::to_value(member().for_viewer(false))?,
-        json!({"role": "member", "id": team, "state": "running", "lead": {"id": task}})
+        json!({"role": "member", "id": team, "state": "running", "lead": {"id": task}, "round": 2})
     );
     Ok(())
 }

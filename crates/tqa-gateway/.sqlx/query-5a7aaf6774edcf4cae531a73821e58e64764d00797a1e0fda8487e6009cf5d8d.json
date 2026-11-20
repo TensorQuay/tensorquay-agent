@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE agent_team_members m SET state = 'starting', round = t.round FROM agent_teams t WHERE m.conversation_id = $1 AND t.id = m.team_id RETURNING t.round",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "round",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "agent_teams",
+            "name": "round"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "5a7aaf6774edcf4cae531a73821e58e64764d00797a1e0fda8487e6009cf5d8d"
+}

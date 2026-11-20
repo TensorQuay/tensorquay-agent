@@ -47,6 +47,7 @@ vi.mock("../auth/use-session", () => ({
       id: "0195d8c0-0000-7000-8000-000000000009",
       email: "me@example.invalid",
       role: "member",
+      round: 1,
       internet: "none",
       limits: {
         upload_bytes: 1,
@@ -102,6 +103,7 @@ const lead: Conversation = {
   run_status: "completed",
   team: {
     role: "lead",
+    round: 1,
     id: teamId,
     state: "running",
     helpers: 1,
