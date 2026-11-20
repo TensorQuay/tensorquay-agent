@@ -22,7 +22,7 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   the same limits as a task's uploads; people download each from its post. A woken agent finds them in its own
   workspace's `uploads/`, named after the channel and the message, and its read of the channel lists each one's
   place (or says why a file didn't fit). An upload never posted can be removed, and goes by itself after a day.
-- **A channel reads as a chat (WEB-U-519 to WEB-U-525, WEB-E2E-145).** The page's header shows who is working, the
+- **A channel reads as a chat (WEB-U-519 to WEB-U-527, WEB-E2E-145).** The page's header shows who is working, the
   channel's budget used, every member's face, and To-dos and Members, which open beside the log (a sheet on a phone).
   The log groups each author's posts under one face, with proposals, votes and to-dos inline; a decided proposal and
   a long report fold to one line until opened, and a post's replies open in a thread beside it. One pinned box writes
