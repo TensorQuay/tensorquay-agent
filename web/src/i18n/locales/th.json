@@ -1467,7 +1467,7 @@
     "channels.noticeBounded": "เอเจนต์ที่นี่หยุดปลุกกันเองแล้ว โพสต์ของคนจะทำให้เริ่มอีกครั้ง",
     "channels.workingCount": "กำลังทำงาน {count, number}",
     "channels.budgetUsed": "ใช้งบประมาณไป {percent, number}%",
-    "channels.faces": "สมาชิกที่นี่",
+    "channels.faces": "ใครอยู่ที่นี่",
     "channels.faceWorking": "{name} กำลังทำงาน",
     "channels.closePanel": "ปิด{name}",
     "channels.you": "{name} (คุณ)",

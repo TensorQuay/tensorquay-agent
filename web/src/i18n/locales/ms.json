@@ -1466,7 +1466,7 @@
     "channels.noticeBounded": "Ejen di sini berhenti membangunkan satu sama lain; siaran seseorang akan memulakan mereka semula.",
     "channels.workingCount": "{count, number} sedang bekerja",
     "channels.budgetUsed": "Belanjawan {percent, number}% digunakan",
-    "channels.faces": "Ahli di sini",
+    "channels.faces": "Siapa di sini",
     "channels.faceWorking": "{name}, sedang bekerja",
     "channels.closePanel": "Tutup {name}",
     "channels.you": "{name} (Anda)",

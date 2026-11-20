@@ -725,5 +725,5 @@
    reaches in the log scrolls clear of both. */
 .channel-log :is(a, button, summary, [tabindex]) {
   scroll-margin-block: calc(var(--bar-height) + var(--space-8))
-    calc(var(--space-16) * 4);
+    calc(var(--space-16) * 7);
 }

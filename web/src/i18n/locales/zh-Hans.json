@@ -1473,7 +1473,7 @@
     "channels.noticeBounded": "这里的智能体已停止互相唤醒；有人发帖后会重新开始。",
     "channels.workingCount": "{count, number} 个工作中",
     "channels.budgetUsed": "预算已用 {percent, number}%",
-    "channels.faces": "这里的成员",
+    "channels.faces": "谁在这里",
     "channels.faceWorking": "{name}，工作中",
     "channels.closePanel": "关闭{name}",
     "channels.you": "{name}（你）",

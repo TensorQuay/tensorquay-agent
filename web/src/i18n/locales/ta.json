@@ -1467,7 +1467,7 @@
     "channels.noticeBounded": "இங்குள்ள ஏஜென்ட்கள் ஒன்றையொன்று எழுப்புவதை நிறுத்தின; ஒருவரின் இடுகை அவற்றை மீண்டும் தொடங்கும்.",
     "channels.workingCount": "{count, number} வேலையில்",
     "channels.budgetUsed": "பட்ஜெட் {percent, number}% பயன்பட்டது",
-    "channels.faces": "இங்குள்ள உறுப்பினர்கள்",
+    "channels.faces": "இங்கு யார்",
     "channels.faceWorking": "{name}, வேலையில்",
     "channels.closePanel": "{name} ஐ மூடு",
     "channels.you": "{name} (நீங்கள்)",

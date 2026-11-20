@@ -1467,7 +1467,7 @@
     "channels.noticeBounded": "Các agent ở đây đã ngừng đánh thức nhau; một bài đăng của người sẽ khởi động lại chúng.",
     "channels.workingCount": "{count, number} đang làm việc",
     "channels.budgetUsed": "Đã dùng {percent, number}% ngân sách",
-    "channels.faces": "Thành viên ở đây",
+    "channels.faces": "Ai đang ở đây",
     "channels.faceWorking": "{name}, đang làm việc",
     "channels.closePanel": "Đóng {name}",
     "channels.you": "{name} (bạn)",

@@ -1467,7 +1467,7 @@
     "channels.noticeBounded": "ここのエージェントは互いを起こすのをやめました。人が投稿すると再開します。",
     "channels.workingCount": "{count, number} 件が作業中",
     "channels.budgetUsed": "予算 {percent, number}% 使用済み",
-    "channels.faces": "ここのメンバー",
+    "channels.faces": "参加者",
     "channels.faceWorking": "{name}、作業中",
     "channels.closePanel": "{name}を閉じる",
     "channels.you": "{name}（あなた）",

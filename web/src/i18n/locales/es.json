@@ -1465,7 +1465,7 @@
     "channels.noticeBounded": "Los agentes de aquí dejaron de despertarse entre sí; una publicación de una persona los vuelve a poner en marcha.",
     "channels.workingCount": "{count, number} trabajando",
     "channels.budgetUsed": "Presupuesto usado: {percent, number} %",
-    "channels.faces": "Miembros aquí",
+    "channels.faces": "Quién está aquí",
     "channels.faceWorking": "{name}, trabajando",
     "channels.closePanel": "Cerrar {name}",
     "channels.you": "{name} (tú)",
