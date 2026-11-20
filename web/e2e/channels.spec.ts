@@ -147,24 +147,23 @@ for (const width of [1024, 1280] as const)
       await axe(page);
       await capture(page, `channel-board-${width}-${colorScheme}`);
       await header.getByRole("button", { name: /^Members/ }).click();
+      // Agents read by their name in the channel, whose agent in words (A12).
       await expect(page.getByRole("list", { name: "Members" })).toContainText(
-        "Coder · ana",
+        "ana's agent",
       );
       // Each agent's run status (WEB-U-065, GW-I-113), checked in both themes.
       await expect(
         page
           .getByRole("list", { name: "Members" })
-          .getByRole("listitem", { name: "Reviewer · ben" }),
+          .getByRole("listitem", { name: "Reviewer" }),
       ).toContainText("Done");
       await axe(page);
       // Decided before 17.0: an agent's name opens its task, when the viewer may open it (the gateway's can_open).
       const members = page.getByRole("list", { name: "Members" });
       await expect(
-        members
-          .getByRole("listitem", { name: "Reviewer · ben" })
-          .getByRole("link"),
+        members.getByRole("listitem", { name: "Reviewer" }).getByRole("link"),
       ).toHaveCount(0);
-      const coder = members.getByRole("link", { name: "Coder · ana" });
+      const coder = members.getByRole("link", { name: "Coder" });
       await expect(coder).toHaveAttribute(
         "href",
         "/c/0195d8c0-0000-7000-8000-00000000c0de",

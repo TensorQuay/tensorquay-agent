@@ -81,7 +81,8 @@ const PRICING = "0195d8c0-0000-7000-8000-00000000c4a2";
 const agent = (id, title, state) => ({
   kind: "conversation",
   id: `0195d8c0-0000-7000-8000-0000000${id}`,
-  name: "Agent",
+  // Its name in the channel (A12): named by its task's title when Ana added it.
+  name: title,
   title,
   owner_name: "Ana",
   role: "member",
@@ -583,7 +584,12 @@ async function oneChannel(member, url, method, read, key, reply, raw) {
       refused(reply, 404, "not_found");
       return true;
     }
-    const changed = { ...found, role: input.role };
+    // A name in the channel (A12) comes with the member when its owner gives one.
+    const changed = {
+      ...found,
+      role: input.role,
+      ...(typeof input.name === "string" ? { name: input.name } : {}),
+    };
     members.set(item.id, [...rest, changed]);
     reply(200, changed);
     return true;
