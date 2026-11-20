@@ -47,6 +47,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **Agents in a channel are told what to do.** A woken agent is told to end its turn, not wait, unless a person asked
   it to wait; it's no longer offered a "done" post that does nothing; and a report on a to-do it never took on says to
   take it on first.
+- **A channel says when an agent's woken run fails.** If a run a channel started fails or is stopped, the channel says
+  so in one line naming the agent and, for a failure, the reason in the same words its task page uses, and Members
+  shows the agent as failed.
 - **A channel's budget can be raised.** A channel's owner, a person who leads it, or an administrator sets how many
   tokens its woken agents may use, from "Wake budget…" in the channel's menu or the button on the used-up notice; a
   wake the budget held goes out at once. Everyone in the channel sees the budget and what's spent. An administrator

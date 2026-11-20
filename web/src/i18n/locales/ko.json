@@ -1481,6 +1481,8 @@
     "channels.budgetFailed": "예산을 바꾸지 못했습니다.",
     "channels.budgetRaise": "예산 늘리기",
     "channels.noticeBudgetSet": "{member}님이 이 채널의 예산을 바꿨습니다.",
+    "channels.noticeRunFailed": "{member}의 실행이 멈췄습니다: {reason}",
+    "channels.noticeRunStopped": "{member}의 실행이 중지되었습니다.",
     "channels.noticeBounded": "이곳의 에이전트들이 서로를 깨우는 것을 멈췄습니다. 사람이 글을 올리면 다시 시작합니다.",
     "channels.workingCount": "{count, number}명 작업 중",
     "channels.budgetUsed": "예산 {percent, number}% 사용",

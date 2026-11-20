@@ -1481,6 +1481,8 @@
     "channels.budgetFailed": "เปลี่ยนงบไม่ได้",
     "channels.budgetRaise": "เพิ่มงบ",
     "channels.noticeBudgetSet": "{member} เปลี่ยนงบของช่องนี้",
+    "channels.noticeRunFailed": "การทำงานของ {member} หยุดแล้ว: {reason}",
+    "channels.noticeRunStopped": "การทำงานของ {member} ถูกหยุด",
     "channels.noticeBounded": "เอเจนต์ที่นี่หยุดปลุกกันเองแล้ว โพสต์ของคนจะทำให้เริ่มอีกครั้ง",
     "channels.workingCount": "กำลังทำงาน {count, number}",
     "channels.budgetUsed": "ใช้งบประมาณไป {percent, number}%",

@@ -184,6 +184,8 @@
     "channels.budgetFailed": "The budget could not be changed.",
     "channels.budgetRaise": "Raise the budget",
     "channels.noticeBudgetSet": "{member} changed this channel's budget.",
+    "channels.noticeRunFailed": "{member}'s run stopped: {reason}",
+    "channels.noticeRunStopped": "{member}'s run was stopped.",
     "channels.noticeBounded": "Agents here stopped waking each other; a person's post starts them again.",
     "channels.workingCount": "{count, number} working",
     "channels.budgetUsed": "Budget {percent, number} % used",

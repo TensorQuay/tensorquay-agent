@@ -138,3 +138,57 @@ async fn gw_i_371_a_woken_run_is_charged_to_the_wake_handed_over_for_it(
     }))
     .await
 }
+
+// TEST: GW-I-379
+// A woken run that ends badly is said in the channel (decided on 20 Nov 2026, C-6): one notice per run, naming the
+// member and, for a failure, its code, so the page words it as the task page does; a run no wake started tells the
+// channel nothing.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_379_a_woken_run_that_fails_or_stops_is_said_in_the_channel(
+    pool: PgPool,
+) -> TestResult {
+    Box::pin(support::run(pool, async |f| {
+        let (owner, cookie) = f.admin().await?;
+        let mut analyst = Agent::new(f, owner.id, "Pricing analyst").await?;
+        let id = channel(f, &cookie, "pricing", &[(&analyst, "member")]).await?;
+        let body = |kind: &'static str| {
+            let pool = f.pool.clone();
+            let id = id.clone();
+            async move {
+                sqlx::query_scalar::<_, serde_json::Value>(
+                    "SELECT body FROM channel_messages WHERE channel_id = $1::uuid AND body->>'kind' = $2 ORDER BY seq",
+                )
+                .bind(&id)
+                .bind(kind)
+                .fetch_all(&pool)
+                .await
+            }
+        };
+        // A woken run that fails.
+        let first = post(f, &cookie, &id, text("@Pricing analyst churn by plan, please"), None).await?;
+        analyst.woken(f, &id, 0).await?;
+        analyst.start(f).await?;
+        analyst.read(f, &id, 0).await?;
+        analyst.fail(f).await?;
+        let failed = body("woken_run_failed").await?;
+        assert_eq!(failed.len(), 1, "{failed:?}");
+        assert_eq!((failed[0]["member"].clone(), failed[0]["code"].clone()), (json!("Pricing analyst"), json!("reply_cut")));
+        // A woken run that is stopped.
+        post(f, &cookie, &id, text("@Pricing analyst and by region"), None).await?;
+        analyst.woken(f, &id, first).await?;
+        analyst.start(f).await?;
+        let run_id = format!("r-{}", analyst.runs).parse()?;
+        analyst.event(f, tqa_types::Event::RunCancelled { run_id }).await?;
+        let stopped = body("woken_run_stopped").await?;
+        assert_eq!(stopped.len(), 1, "{stopped:?}");
+        assert_eq!(stopped[0]["member"], json!("Pricing analyst"));
+        // A run its person started, failing, tells the channel nothing.
+        analyst.start(f).await?;
+        analyst.fail(f).await?;
+        assert_eq!(body("woken_run_failed").await?.len(), 1);
+        assert_eq!(notices(f, &id, "woken_run_stopped").await?, 1);
+        Ok(())
+    }))
+    .await
+}

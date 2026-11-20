@@ -330,6 +330,9 @@ pub enum MessageBody {
         /// The member it is about, by its task's name, so a page words it in the reader's language.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         member: Option<String>,
+        /// A woken run's failure code, so a page words it as the task page does (decided on 20 Nov 2026, C-6).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        code: Option<String>,
         /// The sentence.
         text: String,
     },
@@ -356,6 +359,12 @@ pub enum ChannelNoticeKind {
     /// A person set the channel's wake budget; `member` names them (A5, decided on 20 Nov 2026).
     #[serde(rename = "wake_budget_set")]
     WakeBudgetSet,
+    /// A run a wake started failed; `member` names it and `code` says why (decided on 20 Nov 2026, C-6).
+    #[serde(rename = "woken_run_failed")]
+    WokenRunFailed,
+    /// A run a wake started was stopped; `member` names it (C-6).
+    #[serde(rename = "woken_run_stopped")]
+    WokenRunStopped,
 }
 
 impl MessageBody {

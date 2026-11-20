@@ -306,7 +306,15 @@ pub(crate) async fn notice(
         connection,
         channel,
         &author,
-        (None, &MessageBody::Notice { kind, member, text }),
+        (
+            None,
+            &MessageBody::Notice {
+                kind,
+                member,
+                code: None,
+                text,
+            },
+        ),
     )
     .await?;
     Ok(message.seq)
@@ -705,21 +713,65 @@ pub(crate) async fn run_started(
     Ok(())
 }
 
-/// A run ends on `conversation`: nothing more is charged to a channel (A5).
+/// A run ends on `conversation`: nothing more is charged to a channel (A5). A run a wake started that failed (`Some`
+/// with its code) or was stopped (`Some(None)`) is said in that channel, once, while it is open (decided on 20 Nov
+/// 2026, C-6); answers the channel and the notice's seq, to publish after the commit.
 ///
 /// # Errors
 /// Storage failure.
 pub(crate) async fn run_ended(
     connection: &mut PgConnection,
     conversation: Uuid,
-) -> Result<(), GatewayError> {
+    badly: Option<Option<String>>,
+) -> Result<Option<(Uuid, u64)>, GatewayError> {
+    let mut said = None;
+    if let Some(code) = badly
+        && let Some(woken) = sqlx::query!(
+            "SELECT g.channel_id, COALESCE(m.name, c.profile->>'display_name', c.profile->>'name', 'An agent') \
+             AS \"name!\" FROM channel_charges g JOIN channels ch ON ch.id = g.channel_id AND ch.state = 'open' \
+             JOIN conversations c ON c.id = g.conversation_id \
+             LEFT JOIN channel_members m ON m.channel_id = g.channel_id AND m.conversation_id = g.conversation_id \
+             WHERE g.conversation_id = $1",
+            conversation
+        )
+        .fetch_optional(&mut *connection)
+        .await?
+    {
+        let (kind, text) = match &code {
+            Some(code) => (
+                ChannelNoticeKind::WokenRunFailed,
+                format!("{}'s run failed ({code}).", woken.name),
+            ),
+            None => (
+                ChannelNoticeKind::WokenRunStopped,
+                format!("{}'s run was stopped.", woken.name),
+            ),
+        };
+        let author = super::store::gateway_author();
+        let message = super::store::append_body(
+            connection,
+            woken.channel_id,
+            &author,
+            (
+                None,
+                &MessageBody::Notice {
+                    kind,
+                    member: Some(woken.name),
+                    code,
+                    text,
+                },
+            ),
+        )
+        .await?;
+        said = Some((woken.channel_id, message.seq));
+    }
     sqlx::query!(
         "DELETE FROM channel_charges WHERE conversation_id = $1",
         conversation
     )
     .execute(&mut *connection)
     .await?;
-    Ok(())
+    Ok(said)
 }
 
 /// Whether `before` < `percent` % of `budget` <= `after`, in whole numbers.

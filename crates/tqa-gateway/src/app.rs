@@ -342,7 +342,8 @@ impl Gateway {
             &config, &secrets, &pool, &cancel, registry,
         ))
         .await?;
-        let channels = Arc::new(crate::channels::Hub::default());
+        // One publisher for channels, the event store's: a woken run's end is said from there (C-6).
+        let channels = events.channels().clone();
         let (manager, own_backend) = Box::pin(build_manager(
             &config,
             backend,

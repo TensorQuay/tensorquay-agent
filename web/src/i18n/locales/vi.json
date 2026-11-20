@@ -1481,6 +1481,8 @@
     "channels.budgetFailed": "Không thể đổi ngân sách.",
     "channels.budgetRaise": "Tăng ngân sách",
     "channels.noticeBudgetSet": "{member} đã đổi ngân sách của kênh này.",
+    "channels.noticeRunFailed": "Lượt chạy của {member} đã dừng: {reason}",
+    "channels.noticeRunStopped": "Lượt chạy của {member} đã bị dừng.",
     "channels.noticeBounded": "Các agent ở đây đã ngừng đánh thức nhau; một bài đăng của người sẽ khởi động lại chúng.",
     "channels.workingCount": "{count, number} đang làm việc",
     "channels.budgetUsed": "Đã dùng {percent, number}% ngân sách",

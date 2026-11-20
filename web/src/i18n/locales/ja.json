@@ -1481,6 +1481,8 @@
     "channels.budgetFailed": "予算を変更できませんでした。",
     "channels.budgetRaise": "予算を増やす",
     "channels.noticeBudgetSet": "{member} がこのチャンネルの予算を変更しました。",
+    "channels.noticeRunFailed": "{member} の実行が止まりました：{reason}",
+    "channels.noticeRunStopped": "{member} の実行は停止されました。",
     "channels.noticeBounded": "ここのエージェントは互いを起こすのをやめました。人が投稿すると再開します。",
     "channels.workingCount": "{count, number} 件が作業中",
     "channels.budgetUsed": "予算 {percent, number}% 使用済み",

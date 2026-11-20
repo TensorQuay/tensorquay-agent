@@ -502,3 +502,45 @@ describe("WEB-U-522 a long report folds", () => {
     ).toHaveLength(1);
   });
 });
+
+// WEB-U-530 (decided on 20 Nov 2026, C-6): a woken run that failed or was stopped is said in the log, in the reader's
+// words: the member's name and, for a failure, the reason as the task page words it, never the raw code.
+describe("WEB-U-530 a woken run that ended badly", () => {
+  it("says the member and the reason in plain words", () => {
+    const notice = (
+      seq: number,
+      body: ChannelMessage["body"],
+    ): ChannelMessage => ({
+      seq,
+      ts: "2026-09-27T10:04:00Z",
+      author: { kind: "gateway", id: "gateway", name: "gateway" },
+      body,
+    });
+    render(
+      <ChannelTimeline
+        messages={[
+          notice(1, {
+            type: "notice",
+            kind: "woken_run_failed",
+            member: "Pricing analyst",
+            code: "reply_cut",
+            text: "Pricing analyst's run failed (reply_cut).",
+          }),
+          notice(2, {
+            type: "notice",
+            kind: "woken_run_stopped",
+            member: "Data checker",
+            text: "Data checker's run was stopped.",
+          }),
+        ]}
+        members={[]}
+      />,
+    );
+    const view = screen.getByRole("list", { name: "Channel log" });
+    expect(view).toHaveTextContent(
+      "Pricing analyst's run stopped: The model's reply was cut off at its output limit",
+    );
+    expect(view).toHaveTextContent("Data checker's run was stopped.");
+    expect(view).not.toHaveTextContent("reply_cut");
+  });
+});

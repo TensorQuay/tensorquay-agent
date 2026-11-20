@@ -14,6 +14,7 @@ import { useT } from "../i18n/I18nProvider";
 import { formatSize } from "../i18n/message";
 import type { MessageKey, Translate } from "../i18n/translate";
 import { DeferredMarkdown } from "../transcript/DeferredMarkdown";
+import { knownFailure } from "../transcript/failure-keys";
 import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
 
@@ -52,6 +53,7 @@ const NOTICES: Readonly<Record<string, MessageKey>> = {
   unreachable_runtime: "channels.noticeUnreachable",
   member_deleted: "channels.noticeDeleted",
   wake_budget_set: "channels.noticeBudgetSet",
+  woken_run_stopped: "channels.noticeRunStopped",
 };
 
 export function authorName(author: Author, members: readonly Member[]) {
@@ -503,6 +505,19 @@ function Body({
       // The gateway's line about the channel itself (ADR-0014's amendment of 20 Nov 2026), in the reader's words by its
       // kind (WEB-U-520); a kind this page doesn't know, by the gateway's sentence.
       const key = NOTICES[body.kind];
+      // A woken run's failure (C-6): its reason as the task page words it, never the code.
+      if (body.kind === "woken_run_failed")
+        return (
+          <p className="type-small muted">
+            {t("channels.noticeRunFailed", {
+              member: body.member ?? "",
+              reason: t(
+                knownFailure(body.code ?? "", "")?.reason ??
+                  "run.stoppedUnknown",
+              ),
+            })}
+          </p>
+        );
       return (
         <p className="type-small muted">
           {key ? t(key, { member: body.member ?? "" }) : body.text}

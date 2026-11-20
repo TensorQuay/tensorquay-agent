@@ -2583,13 +2583,19 @@
                 "wake_budget_spent",
                 "wakes_bounded",
                 "unreachable_runtime",
-                "member_deleted"
+                "member_deleted",
+                "wake_budget_set",
+                "woken_run_failed",
+                "woken_run_stopped"
               ]
             },
             "text": {
               "type": "string"
             },
             "member": {
+              "type": "string"
+            },
+            "code": {
               "type": "string"
             }
           }

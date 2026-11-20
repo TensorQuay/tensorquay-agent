@@ -1480,6 +1480,8 @@
     "channels.budgetFailed": "Bajet tidak dapat ditukar.",
     "channels.budgetRaise": "Naikkan bajet",
     "channels.noticeBudgetSet": "{member} menukar bajet saluran ini.",
+    "channels.noticeRunFailed": "Larian {member} berhenti: {reason}",
+    "channels.noticeRunStopped": "Larian {member} telah dihentikan.",
     "channels.noticeBounded": "Ejen di sini berhenti membangunkan satu sama lain; siaran seseorang akan memulakan mereka semula.",
     "channels.workingCount": "{count, number} sedang bekerja",
     "channels.budgetUsed": "Belanjawan {percent, number}% digunakan",

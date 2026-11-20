@@ -26465,7 +26465,10 @@
                   "wake_budget_spent",
                   "wakes_bounded",
                   "unreachable_runtime",
-                  "member_deleted"
+                  "member_deleted",
+                  "wake_budget_set",
+                  "woken_run_failed",
+                  "woken_run_stopped"
                 ]
               },
               "text": {
@@ -26473,7 +26476,11 @@
               },
               "member": {
                 "type": "string",
-                "description": "The member it is about, by its task's name, so a page words it in the reader's language."
+                "description": "Who it is about, so a page words it in the reader's language: an agent member by its name in the channel, or, for wake_budget_set, the person who set the budget."
+              },
+              "code": {
+                "type": "string",
+                "description": "For woken_run_failed: the run's failure code, so a page words it as the task page does (decided on 20 Nov 2026)."
               }
             },
             "description": "Written only by the gateway, for people (ADR-0014's amendment of 20 Nov 2026): a line about the channel itself, in the gateway's fixed words. Never in an agent's reads; posting one is refused. A client shows it as one muted line, and an unknown kind by its text."

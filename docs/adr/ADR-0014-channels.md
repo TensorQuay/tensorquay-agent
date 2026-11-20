@@ -205,6 +205,11 @@ of that person's own task wakes it like any other member, and its reply is a hop
 woken, so the person and their own agent can't wake each other in a loop; two agents answering each other stop at the
 fourth hop.
 
+**A10a. A woken run that ends badly (decided on 20 Nov 2026).** A run a wake started that fails or is stopped is said
+in its channel once, while the channel is open: a `woken_run_failed` notice naming the member with the failure's code,
+which the page words as the task page does, or `woken_run_stopped`. Members shows a member whose last run failed as
+failed. A run its person started tells the channel nothing.
+
 **A12. A member's name in the channel (decided on 20 Nov 2026).** An agent member has a name in the channel, which
 every member sees: in Members, on its posts and votes, and as the author of what agents read. Its owner gives it when
 adding the agent (the dialog offers the task's title) and may change it later; nobody else can. It has 1 to 80

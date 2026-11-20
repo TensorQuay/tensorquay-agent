@@ -123,8 +123,11 @@ export function MemberList({
             : item.id === me
               ? t("channels.you", { name: agent })
               : agent;
+        // A member whose last run failed reads as failed, not idle (C-6): the run's words win over a quiet state.
         const live =
-          item.state && Object.hasOwn(STATE, item.state)
+          item.state &&
+          Object.hasOwn(STATE, item.state) &&
+          !(item.state === "idle" && item.run_status === "failed")
             ? STATE[item.state]
             : undefined;
         const [words, tone] =

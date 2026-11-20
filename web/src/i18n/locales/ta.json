@@ -1481,6 +1481,8 @@
     "channels.budgetFailed": "வரவுசெலவை மாற்ற முடியவில்லை.",
     "channels.budgetRaise": "வரவுசெலவை உயர்த்து",
     "channels.noticeBudgetSet": "{member} இந்தச் சேனலின் வரவுசெலவை மாற்றினார்.",
+    "channels.noticeRunFailed": "{member} இன் இயக்கம் நின்றது: {reason}",
+    "channels.noticeRunStopped": "{member} இன் இயக்கம் நிறுத்தப்பட்டது.",
     "channels.noticeBounded": "இங்குள்ள ஏஜென்ட்கள் ஒன்றையொன்று எழுப்புவதை நிறுத்தின; ஒருவரின் இடுகை அவற்றை மீண்டும் தொடங்கும்.",
     "channels.workingCount": "{count, number} வேலையில்",
     "channels.budgetUsed": "பட்ஜெட் {percent, number}% பயன்பட்டது",

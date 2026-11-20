@@ -606,7 +606,38 @@ async function oneChannel(member, url, method, read, key, reply, raw) {
   }
   const part = match[2];
   if (!part && method === "GET") reply(200, shown(item, member));
-  else if (!part && method === "DELETE") {
+  else if (!part && method === "PATCH") {
+    // The wake budget (C-1), as the gateway sets it: its owner, a person who leads it, or an administrator; the
+    // channel says who set it.
+    const shownItem = shown(item, member);
+    if (
+      shownItem.role !== "lead" &&
+      item.owner.id !== member.account.id &&
+      member.account.role !== "admin"
+    ) {
+      refused(reply, 403, "not_lead");
+      return true;
+    }
+    const input = await read();
+    item.wake_budget = input.wake_budget;
+    item.spent_tokens = item.spent_tokens ?? 0;
+    const log = logs.get(item.id) ?? [];
+    const stored = {
+      seq: (log.at(-1)?.seq ?? 0) + 1,
+      ts: new Date().toISOString(),
+      author: { kind: "gateway", id: "gateway", name: "gateway" },
+      body: {
+        type: "notice",
+        kind: "wake_budget_set",
+        member: member.account.email,
+        text: `${member.account.email} set this channel's budget.`,
+      },
+    };
+    logs.set(item.id, [...log, stored]);
+    item.last_seq = stored.seq;
+    publish(item.id, stored);
+    reply(200, shown(item, member));
+  } else if (!part && method === "DELETE") {
     if (item.owner.id !== member.account.id && member.account.role !== "admin")
       refused(reply, 403, "not_owner");
     else {

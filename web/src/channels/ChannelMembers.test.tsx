@@ -521,3 +521,30 @@ describe("WEB-U-528 a member's name in the channel", () => {
     expect(screen.queryByRole("menuitem", { name: "Rename…" })).toBeNull();
   });
 });
+
+describe("WEB-U-530 a member whose woken run failed", () => {
+  it("reads as failed, not idle", () => {
+    const failed = member("conversation", "Analyst", {
+      title: "Analyst",
+      owner_name: "Ana",
+      run_status: "failed",
+      state: "idle",
+    });
+    render(
+      <ChannelMembers
+        channel={RELEASE}
+        members={[OWNER, failed]}
+        me={OWNER.id}
+        tasks={[]}
+        onSet={() => Promise.resolve()}
+        onRemove={() => Promise.resolve()}
+      />,
+    );
+    expect(row("Analyst")).toHaveTextContent("Failed");
+    expect(row("Analyst")).not.toHaveTextContent("Idle");
+    expect(row("Analyst").querySelector(".member-dot")).toHaveAttribute(
+      "data-tone",
+      "danger",
+    );
+  });
+});

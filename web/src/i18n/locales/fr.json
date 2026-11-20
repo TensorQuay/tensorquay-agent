@@ -1476,6 +1476,8 @@
     "channels.budgetFailed": "Le budget n'a pas pu être modifié.",
     "channels.budgetRaise": "Augmenter le budget",
     "channels.noticeBudgetSet": "{member} a modifié le budget de ce canal.",
+    "channels.noticeRunFailed": "L'exécution de {member} s'est arrêtée : {reason}",
+    "channels.noticeRunStopped": "L'exécution de {member} a été arrêtée.",
     "channels.noticeBounded": "Les agents d’ici ont cessé de se réveiller mutuellement ; un message d’une personne les relance.",
     "channels.workingCount": "{count, number} au travail",
     "channels.budgetUsed": "Budget utilisé : {percent, number} %",
