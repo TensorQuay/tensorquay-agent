@@ -11,6 +11,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   longer shows "Scripts are running in a sandbox" or Stop scripts; only Reload.
 - **A model's id on Settings > Models is never cut (WEB-E2E-144).** It has its own line, wrapping whole if it must,
   with its Verified pill under it, so a long language's wider menu no longer cuts it.
+- **A shell command no longer fails when another process ends during its cleanup (RT-I-064).** After each command the
+  runtime looks through every process for escaped background children; one that ended between being listed and being
+  read (a browser's or an MCP server's child, for example) made that cleanup fail, and the command with it, with
+  "escaped process cleanup failed". A process that has ended is now skipped; the runtime's log names the step of any
+  other cleanup failure.
 
 ## 18.1.0 (20 November 2026)
 
