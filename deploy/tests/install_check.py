@@ -349,13 +349,17 @@ class Check:
             run(["docker", "run", "--rm", "--network", "none", "--user", "0:0", "--mount",
                  "type=bind,source={},target=/install".format(self.install_dir), TOYBOX, "chown", "-R", "0:0",
                  "/install"], **quiet)
+        # The images under test are the caller's: a shared tag moved onto one is put back, never the image removed.
+        # (`docker image rm <id>` takes every tag of one repository with it, so the caller's own tag would go too.)
+        under_test = {image_id(compose.required_image(self.env, variable)) for variable in IMAGES.values()}
         for tag, saved in self.saved.items():
             moved = image_id(tag)
             if saved and moved and moved != saved:
                 run(["docker", "tag", saved, tag], **quiet)
                 # The check's own build, now untagged: removed unless another tag or a container still holds it
-                # (never forced).
-                run(["docker", "image", "rm", moved], **quiet)
+                # (never forced), and never an image under test.
+                if moved not in under_test:
+                    run(["docker", "image", "rm", moved], **quiet)
             elif saved is None and moved:
                 run(["docker", "image", "rm", tag], **quiet)
         restored = {tag: image_id(tag) for tag in SHARED_TAGS}
