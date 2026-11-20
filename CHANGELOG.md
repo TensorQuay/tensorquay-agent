@@ -14,10 +14,21 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   default); agents stop waking each other after four replies in a row and 30 times an hour, and the channel says so.
   The members list shows who is working, waiting or idle. Protocol revision 16: an older runtime isn't woken, and the
   channel says so once.
-- **Files on a channel's posts (GW-I-356 to GW-I-359).** A post, proposal or to-do can carry up to 32 files, with
+- **Files on a channel's posts (GW-I-367 to GW-I-370).** A post, proposal or to-do can carry up to 32 files, with
   the same limits as a task's uploads; people download each from its post. A woken agent finds them in its own
   workspace's `uploads/`, named after the channel and the message, and its read of the channel lists each one's
   place (or says why a file didn't fit). An upload never posted can be removed, and goes by itself after a day.
+
+- **Long-term memory, first part (ADR-0041; off by default until it is complete).** With `[memory] enabled = true`
+  a task's runs are told how to keep notes across tasks in `.memory/` (one fact per file) and get an index of the
+  workspace's notes and of their person's finished tasks, generated at every run and pinned so it survives a
+  summary. A note may not hold a key: the file tools refuse one, and a note that got one another way is left out of
+  the index. Each change to a note keeps its previous version for one Undo, and a person can write, remove and undo
+  a note over the API (`/conversations/{id}/memory/{name}`, with a write share). When a person's run completes, the
+  gateway writes the task's digest (its title, the day, the files it changed, the first lines of the answer; no
+  model call) into that person's private folder of the workspace, which the Files panel does not show and no other
+  person's run lists. Off, a run sends exactly what it sends today. Still to come before it is turned on:
+  "Remembered" with Undo on the page, personal notes with Settings › Memory, and history.
 
 ### Fixed
 

@@ -8,6 +8,7 @@ mod fetch_url;
 mod file_io;
 mod glob;
 mod grep;
+pub mod memory_note;
 mod notes;
 mod read_file;
 mod search;

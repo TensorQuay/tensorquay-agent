@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO channel_charges (conversation_id, channel_id, hop) SELECT conversation_id, channel_id, hop FROM channel_wakes WHERE conversation_id = $1 AND handed AND NOT started ORDER BY sent_at DESC LIMIT 1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "df76b08407d8d7ae8ff7947d00605bd3a7b39480284b788e0f7ad34891408664"
+}

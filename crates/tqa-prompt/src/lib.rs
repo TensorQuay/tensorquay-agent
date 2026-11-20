@@ -3,6 +3,7 @@ mod compaction;
 mod error;
 mod fallback;
 mod instructions;
+mod memory;
 mod skill_tool;
 mod skills;
 mod system;
@@ -17,6 +18,10 @@ pub use fallback::{
 pub use instructions::{
     InstructionFile, MAX_INSTRUCTION_FILE_BYTES, MAX_INSTRUCTION_TOTAL_BYTES, discover, render,
     render_profile_instructions,
+};
+pub use memory::{
+    DIGEST_ROOT, MAX_INDEX_BYTES, MAX_INDEX_LINES, MEMORY_DIRECTORY, MemoryIndex, MemoryLine,
+    discover_memory, render_memory_index,
 };
 pub use skill_tool::{MAX_LISTED_SKILL_FILES, SkillTool};
 pub use skills::{

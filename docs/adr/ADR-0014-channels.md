@@ -200,7 +200,7 @@ task: the wake waits for the run's end, never a second run, never lost), GW-I-34
 GW-I-349 (the sweep sends a wake lost to a restart), GW-I-350 (the budget charged, the 80 % notice, a person's run
 uncharged), GW-I-351 (the budget stops a long exchange), GW-I-352 (the four-hop bound and its notice; a person's own
 agent, A11), GW-I-353 (the hourly bound), GW-I-354 (the members' live state), GW-I-355 (a deleted task or a runtime
-below 16: not woken, one notice, A10). Attachments (A9): GW-U-231 (the wake counts the files, never names them), GW-I-356 (the composer's limits), GW-I-357 (a post's files and their download), GW-I-358 (placed before the wake, never over a file, not moved by a rename), GW-I-359 (the member's read names the paths), GW-I-363 (an upload's body limit), GW-I-364 (the uploader removes an unposted upload), GW-I-365 (unposted uploads swept after a day), GW-I-366 (a file that didn't fit is said so), SEC-069 (a name can't leave `uploads/`), TOOL-U-149 (the read shows each path), TOOL-U-150 (and says why one didn't fit) and PROTO-U-049 (a message's files).
+below 16: not woken, one notice, A10). Attachments (A9): GW-U-234 (the wake counts the files, never names them), GW-I-367 (the composer's limits), GW-I-368 (a post's files and their download), GW-I-369 (placed before the wake, never over a file, not moved by a rename), GW-I-370 (the member's read names the paths), GW-I-363 (an upload's body limit), GW-I-364 (the uploader removes an unposted upload), GW-I-365 (unposted uploads swept after a day), GW-I-366 (a file that didn't fit is said so), SEC-069 (a name can't leave `uploads/`), TOOL-U-149 (the read shows each path), TOOL-U-150 (and says why one didn't fit) and PROTO-U-049 (a message's files).
 
 ## Consequences
 

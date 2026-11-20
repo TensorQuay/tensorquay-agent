@@ -27,6 +27,8 @@ impl Fixture {
             workspace: self.directory.path().join("workspace"),
             skills: self.directory.path().join("skills"),
             sync_before_result: false,
+            memory: false,
+            memory_person: None,
         }
     }
 }
@@ -194,6 +196,52 @@ fn rt_i_024_sync_before_result_is_a_declared_backend_property() -> TestResult {
                 sync_before_result(Some(value)),
                 Err(tqa_runtime::RuntimeError::Configuration(
                     "TQA_SYNC_BEFORE_RESULT"
+                ))
+            ),
+            "{value:?} is refused"
+        );
+    }
+    Ok(())
+}
+
+// TEST: RT-I-063
+#[test]
+fn rt_i_063_tqa_memory_is_on_only_when_exactly_one() -> TestResult {
+    use tqa_runtime::memory;
+    assert!(!memory(None)?, "absent: off, as before 18.2");
+    assert!(memory(Some("1"))?, "set by the gateway when memory is on");
+    for value in ["0", "true", "yes", "", " 1"] {
+        assert!(
+            matches!(
+                memory(Some(value)),
+                Err(tqa_runtime::RuntimeError::Configuration("TQA_MEMORY"))
+            ),
+            "{value:?} is refused"
+        );
+    }
+    Ok(())
+}
+
+// TEST: RT-I-063
+#[test]
+fn rt_i_063_the_persons_digest_folder_is_named_by_the_gateway_or_not_at_all() -> TestResult {
+    use tqa_runtime::memory_person;
+    assert_eq!(
+        memory_person(None)?,
+        None,
+        "absent: the index lists no finished tasks"
+    );
+    assert_eq!(
+        memory_person(Some("0190f3a2-7c1e-7d55-9b0a-3f6c2d1e4a5b"))?.as_deref(),
+        Some("0190f3a2-7c1e-7d55-9b0a-3f6c2d1e4a5b")
+    );
+    // Anything that could name another folder is refused, never read as "no person" or cleaned up.
+    for value in ["", "..", "../0190f3a2", "a/b", "0190 f3a2", "someone"] {
+        assert!(
+            matches!(
+                memory_person(Some(value)),
+                Err(tqa_runtime::RuntimeError::Configuration(
+                    "TQA_MEMORY_PERSON"
                 ))
             ),
             "{value:?} is refused"
