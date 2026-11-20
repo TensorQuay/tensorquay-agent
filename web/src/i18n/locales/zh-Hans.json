@@ -2394,6 +2394,7 @@
     "models.checkName": "检查路由 {name}",
     "models.checkTitle": "检查路由 {name}",
     "models.checkIntro": "像任务一样，通过此路由发送一个包含一次工具调用的简短请求，会消耗少量令牌。最多可能需要一分钟。",
+    "models.checkExcerpt": "服务器的回复",
     "models.checkIntroLocal": "像任务一样，通过此路由发送一个包含一次工具调用的简短请求，会消耗少量令牌。本地模型可能需要一两分钟。",
     "models.runCheck": "运行检查",
     "models.checkDetails": "详情",

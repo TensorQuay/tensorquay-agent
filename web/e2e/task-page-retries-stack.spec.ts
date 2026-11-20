@@ -185,12 +185,13 @@ test("WEB-E2E-092 a call block without a name is retried naming it, and the step
       "Invalid protocol event",
     );
 
-    // One retry, its stable reason unchanged, its problem the missing name.
+    // One retry, its stable reason unchanged, its problem the missing name with the keys the block had (18.1:
+    // `{"arguments": …}` at the top level, task-page.json), never their values.
     expect(await retries(page, id)).toEqual([
       {
         type: "provider.retry",
         reason: "fallback_parse: malformed",
-        fallback_problem: { kind: "no_name" },
+        fallback_problem: { kind: "no_name", keys: ["arguments"] },
       },
     ]);
   } finally {

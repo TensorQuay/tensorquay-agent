@@ -2388,6 +2388,7 @@
     "models.checkName": "루트 {name} 확인",
     "models.checkTitle": "루트 {name} 확인",
     "models.checkIntro": "작업과 마찬가지로 이 루트를 통해 도구 호출이 포함된 짧은 요청을 보내고 몇 개의 토큰을 사용합니다. 최대 1분 정도 걸릴 수 있습니다.",
+    "models.checkExcerpt": "서버의 응답",
     "models.checkIntroLocal": "작업과 마찬가지로 이 루트를 통해 도구 호출이 포함된 짧은 요청을 보내고 몇 개의 토큰을 사용합니다. 로컬 모델은 1~2분 정도 걸릴 수 있습니다.",
     "models.runCheck": "검사 실행",
     "models.checkDetails": "세부 정보",

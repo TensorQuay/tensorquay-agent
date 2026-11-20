@@ -71,3 +71,37 @@ test("WEB-U-022 a chart and an SVG show as images, and the SVG's script never ru
     ),
   ).toBeUndefined();
 });
+
+// WEB-U-517 (WEB-E2E-056 on the real stack): an image over the preview's limit (10 MiB) shows its note and no Expand,
+// where a small one, in the same layout, offers Expand.
+test("WEB-U-517 an image too large to preview says so, with no Expand", async ({
+  page,
+  baseURL,
+}) => {
+  if (!baseURL) throw new Error("The driver must supply the front's origin");
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const panel = await made(page);
+  const id = new URL(page.url()).pathname.split("/").pop();
+  const uploaded = await page.request.post(
+    `/api/v1/conversations/${id}/uploads?name=big.png`,
+    {
+      headers: { Origin: baseURL, "content-type": "application/octet-stream" },
+      data: Buffer.concat([
+        Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+        Buffer.alloc(11 * 1024 * 1024 - 8),
+      ]),
+    },
+  );
+  expect(uploaded.status()).toBe(201);
+  await panel.getByRole("button", { name: "Refresh" }).click();
+  await open(panel, ["uploads", "big\\.png"]);
+  await expect(
+    panel.getByText(/^Too large to preview \(.+\)\. Download it to open it\.$/),
+  ).toBeVisible();
+  await expect(panel.getByRole("button", { name: "Expand" })).toHaveCount(0);
+  // The same layout offers Expand for a small image.
+  await page.reload();
+  const again = await openFilesPanel(page);
+  await open(again, ["out", "chart\\.png"]);
+  await expect(again.getByRole("button", { name: "Expand" })).toBeVisible();
+});
