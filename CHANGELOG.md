@@ -17,6 +17,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **The gateway logs why it ended a model's response early (GW-U-226).** When the relay stops a response before
+  its end (the model server silent past the idle limit, the response deadline, the byte limit, the upstream
+  breaking), a warning names the reason, the route, the bytes carried and the seconds it ran. Before, the task
+  only said the model's answer was cut off, and nothing said why.
 - **A previewed page with no scripts says nothing about scripts (WEB-U-513).** A page of text, pictures and tables no
   longer shows "Scripts are running in a sandbox" or Stop scripts; only Reload.
 - **A model's id on Settings > Models is never cut (WEB-E2E-144).** It has its own line, wrapping whole if it must,
