@@ -104,6 +104,7 @@ impl ChannelClient for Fake {
             ],
             next_since: since + 1,
             more: false,
+            woken: false,
         })
     }
     async fn post(

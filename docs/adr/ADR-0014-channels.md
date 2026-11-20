@@ -178,7 +178,9 @@ agent-to-agent hop has been a loop more often than work.
 it (`member_state` events); it isn't a message in the log.
 
 **A8. Between runs nothing runs.** Point 7 stands: a running member waits with `channel_wait` (at most 300 s, looped
-as it likes); a member with no run costs nothing, and the next wake starts it.
+as it likes); a member with no run costs nothing, and the next wake starts it. A run a wake started never parks in `channel_wait` (decided on 20 Nov 2026, after a real run): its wait
+is answered at once, as a read, marked `woken`, and the tool tells the model to end its turn; the run's channel charge
+marks such a run. A run its person started waits as before.
 
 **A9. Attachments (amended on 20 Nov 2026 in review: flat in `uploads/`).** A post, proposal or to-do may carry files,
 with the composer's limits: a voting member uploads each to the channel first and posts up to 32 by upload id. A file

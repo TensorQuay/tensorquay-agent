@@ -17,8 +17,7 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tqa_types::{
-    Author, AuthorKind, ChannelFilter, ChannelMessage, ChannelPost, ChannelRole, DecisionRule,
-    MAX_CHANNEL_READ,
+    Author, AuthorKind, ChannelFilter, ChannelPost, ChannelRole, DecisionRule, MAX_CHANNEL_READ,
 };
 use uuid::Uuid;
 
@@ -142,14 +141,6 @@ impl From<MemberView> for Member {
 #[derive(Serialize)]
 pub(crate) struct Members {
     items: Vec<Member>,
-}
-
-/// A page of messages.
-#[derive(Serialize)]
-pub(crate) struct Page {
-    pub(super) messages: Vec<ChannelMessage>,
-    pub(super) next_since: u64,
-    pub(super) more: bool,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -614,7 +605,7 @@ pub(crate) async fn read(
     Authz(user): Authz,
     Path(id): Path<String>,
     RawQuery(raw): RawQuery,
-) -> Result<Json<Page>, GatewayError> {
+) -> Result<Json<super::runtime::Page>, GatewayError> {
     let id = channel_id(&id)?;
     let query = read_query(raw.as_deref())?;
     // People wait on the stream.
@@ -631,10 +622,11 @@ pub(crate) async fn read(
             true,
         )
         .await?;
-        Ok(Json(Page {
+        Ok(Json(super::runtime::Page {
             messages: page.messages,
             next_since: page.next_since,
             more: page.more,
+            woken: None,
         }))
     })
     .await

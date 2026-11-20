@@ -5,7 +5,7 @@
 mod channel_agent;
 #[path = "support/fixture.rs"]
 mod support;
-use channel_agent::{Agent, QUIET, WAKE, channel, notices, post, text};
+use channel_agent::{Agent, QUIET, WAKE, channel, notices, post, runtime_call, text};
 use reqwest::Method;
 use serde_json::json;
 use sqlx::PgPool;
@@ -188,6 +188,86 @@ async fn gw_i_379_a_woken_run_that_fails_or_stops_is_said_in_the_channel(
         analyst.fail(f).await?;
         assert_eq!(body("woken_run_failed").await?.len(), 1);
         assert_eq!(notices(f, &id, "woken_run_stopped").await?, 1);
+        Ok(())
+    }))
+    .await
+}
+
+// TEST: GW-I-380
+// A woken run never parks in channel_wait (decided on 20 Nov 2026, C-11): its wait answers at once with what is new,
+// as a read does, and says it was woken, so the agent ends its turn and is woken again when more arrives. A run its
+// person started waits as before.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_380_a_woken_run_never_parks_in_a_wait(pool: PgPool) -> TestResult {
+    Box::pin(support::run(pool, async |f| {
+        let (owner, cookie) = f.admin().await?;
+        let mut analyst = Agent::new(f, owner.id, "Pricing analyst").await?;
+        let id = channel(f, &cookie, "pricing", &[(&analyst, "member")]).await?;
+        let asked = post(
+            f,
+            &cookie,
+            &id,
+            text("@Pricing analyst churn by plan"),
+            None,
+        )
+        .await?;
+        analyst.woken(f, &id, 0).await?;
+        analyst.start(f).await?;
+        let token = analyst.token(f)?;
+        let waited = |since: u64| {
+            let token = token.clone();
+            let id = id.clone();
+            async move {
+                let started = std::time::Instant::now();
+                let (status, page) = runtime_call(
+                    f,
+                    Method::GET,
+                    &format!("/runtime/channels/{id}/messages?since={since}&wait=30"),
+                    &token,
+                    None,
+                )
+                .await?;
+                Ok::<_, Box<dyn std::error::Error>>((status, page, started.elapsed()))
+            }
+        };
+        // In the woken run: at once, with what is new, and marked.
+        let (status, page, took) = waited(0).await?;
+        assert_eq!(status, 200, "{page}");
+        assert!(
+            took < Duration::from_secs(5),
+            "a woken run's wait parked for {took:?}"
+        );
+        assert_eq!(page["woken"], json!(true), "{page}");
+        assert_eq!(page["messages"][0]["seq"], json!(asked), "{page}");
+        // Nothing new: still at once, empty, marked.
+        let (_, page, took) = waited(asked).await?;
+        assert!(took < Duration::from_secs(5), "{took:?}");
+        assert_eq!(
+            (page["messages"].clone(), page["woken"].clone()),
+            (json!([]), json!(true))
+        );
+        analyst.end(f).await?;
+        // A run its person started waits as before (here until a post arrives), unmarked.
+        analyst.start(f).await?;
+        let later = {
+            let cookie = cookie.clone();
+            let id = id.clone();
+            async move {
+                tokio::time::sleep(Duration::from_secs(2)).await;
+                post(f, &cookie, &id, text("Separately: lunch?"), None).await
+            }
+        };
+        let ((_, page, took), _) = tokio::try_join!(waited(asked), later)?;
+        assert!(
+            took >= Duration::from_secs(2),
+            "a person's run's wait returned early ({took:?})"
+        );
+        assert!(
+            page.get("woken").is_none() || page["woken"] == json!(false),
+            "{page}"
+        );
+        analyst.end(f).await?;
         Ok(())
     }))
     .await

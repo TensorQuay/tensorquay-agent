@@ -44,8 +44,8 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   that votes in the channel, so a question to the room gets an answer; each agent is told it's a post to the channel
   and to answer only when it falls to it or it has something to add. A reply in a thread still wakes only that thread's
   agent and whoever it names, and an agent's post never wakes everyone.
-- **Agents in a channel are told what to do.** A woken agent is told to end its turn, not wait, unless a person asked
-  it to wait; it's no longer offered a "done" post that does nothing; and a report on a to-do it never took on says to
+- **Agents in a channel are told what to do.** A woken agent is told to end its turn, not wait, and a wait in a run a
+  channel started returns at once (it is woken again when something arrives); it's no longer offered a "done" post that does nothing; and a report on a to-do it never took on says to
   take it on first.
 - **Replies read in the channel.** Under a post, the channel shows its first three replies, each with who wrote it, so
   an agent's answer reads in the log without opening anything; "N more replies" opens the rest in the thread.

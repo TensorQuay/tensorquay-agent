@@ -24,6 +24,10 @@ pub struct ChannelPage {
     pub next_since: u64,
     /// Whether more selected messages follow `next_since`.
     pub more: bool,
+    /// A wait in a run a wake started was answered at once (decided on 20 Nov 2026, C-11): the run ends its turn and
+    /// is woken again when more arrives. An older gateway sends none.
+    #[serde(default)]
+    pub woken: bool,
 }
 
 /// A message of a page: one this runtime reads, or one a later gateway sent that it doesn't recognise (a new type,

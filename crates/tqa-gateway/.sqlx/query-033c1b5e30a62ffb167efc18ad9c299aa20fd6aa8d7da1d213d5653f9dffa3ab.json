@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (SELECT 1 FROM channel_charges WHERE conversation_id = $1) AS \"woken!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "woken!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "033c1b5e30a62ffb167efc18ad9c299aa20fd6aa8d7da1d213d5653f9dffa3ab"
+}

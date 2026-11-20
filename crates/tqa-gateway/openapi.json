@@ -26574,6 +26574,10 @@
           },
           "more": {
             "type": "boolean"
+          },
+          "woken": {
+            "type": "boolean",
+            "description": "On a runtime's wait in a run a channel's wake started (decided on 20 Nov 2026): the wait didn't wait and the page is a read's; the run ends its turn and is woken again when more arrives. Absent otherwise."
           }
         }
       },
