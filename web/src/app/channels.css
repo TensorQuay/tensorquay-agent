@@ -657,3 +657,18 @@
   text-decoration: underline;
   text-underline-offset: 0.15em;
 }
+
+/* A decided proposal folds to one line (WEB-U-521): its outcome and count, opening to the votes. */
+.proposal-fold {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.proposal-fold:hover {
+  color: var(--ink);
+}

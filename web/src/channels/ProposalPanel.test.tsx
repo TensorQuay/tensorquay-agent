@@ -141,9 +141,10 @@ describe("WEB-U-064 a proposal's votes and decision", () => {
         decision: { seq: 9, outcome: "vetoed" },
       }),
     );
+    // Decided, it folds to one line with its outcome (WEB-U-521), and no vote control is offered.
     expect(
-      screen.getByRole("group", { name: "Votes on #2" }),
-    ).toHaveTextContent("Vetoed");
+      screen.getByRole("button", { name: "Vetoed · 1 to 0" }),
+    ).toBeVisible();
     expect(screen.queryByRole("button", { name: /#2$/ })).toBeNull();
   });
 
@@ -209,5 +210,39 @@ describe("WEB-U-166 the vote this person chose is marked", () => {
       "aria-pressed",
       "true",
     );
+  });
+});
+
+// WEB-U-521 (18.2 slice 3, decided on 20 Nov 2026): a decided proposal folds to one line, its outcome and the votes
+// for and against; opening it shows the tally and each vote, and closing folds it again. An open one stays unfolded.
+describe("WEB-U-521 a decided proposal folds to one line", () => {
+  it("says the outcome and the count on one line, and opens to the votes", () => {
+    show(
+      state({
+        state: "decided",
+        tally: { accept: 2, reject: 0 },
+        votes: [
+          { author: author(CODER), choice: "accept", seq: 3 },
+          { author: author(BEN), choice: "accept", seq: 4 },
+        ],
+        decision: { seq: 5, outcome: "accepted" },
+      }),
+    );
+    const fold = screen.getByRole("button", { name: "Accepted · 2 to 0" });
+    expect(fold).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("group", { name: "Votes on #2" })).toBeNull();
+    fireEvent.click(fold);
+    expect(fold).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("group", { name: "Votes on #2" })).toHaveTextContent(
+      "Accept 2 · Reject 0",
+    );
+    fireEvent.click(fold);
+    expect(screen.queryByRole("group", { name: "Votes on #2" })).toBeNull();
+  });
+
+  it("leaves an open proposal unfolded", () => {
+    show(state());
+    expect(screen.getByRole("group", { name: "Votes on #2" })).toBeVisible();
+    expect(screen.queryByRole("button", { name: /·.*to/ })).toBeNull();
   });
 });

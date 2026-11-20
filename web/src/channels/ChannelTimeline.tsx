@@ -12,7 +12,6 @@ import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
 
 import { initials } from "./ChannelHeader";
-
 import type {
   Author,
   ChannelMessage,
@@ -139,6 +138,12 @@ export function ChannelTimeline({
   for (const { seq, body } of messages)
     if (body.type === "proposal" || body.type === "task")
       titles[body.type].set(seq, body.title);
+  // A decided proposal's text folds with its votes (WEB-U-521).
+  const decided = new Set(
+    messages.flatMap((message) =>
+      message.body.type === "decision" ? [message.body.proposal_seq] : [],
+    ),
+  );
   const replies = new Map<number, ChannelMessage[]>();
   for (const message of messages)
     if (message.parent != null && known.has(message.parent))
@@ -173,6 +178,7 @@ export function ChannelTimeline({
           members={members}
           titles={titles}
           continued={continues(message, list[index - 1])}
+          decided={decided.has(message.seq)}
           {...(onReply ? { onReply } : {})}
           {...(fileHref ? { fileHref } : {})}
           extra={after?.(message)}
@@ -201,6 +207,7 @@ function Post({
   members,
   titles,
   continued,
+  decided,
   onReply,
   fileHref,
   extra,
@@ -211,6 +218,8 @@ function Post({
   titles: Titles;
   /** Whether it continues the author's previous post, whose header it shares. */
   continued: boolean;
+  /** Whether it is a proposal whose decision is in the log: its text folds (WEB-U-521). */
+  decided: boolean;
   onReply?: (seq: number) => void;
   fileHref?: (seq: number, index: number) => string;
   extra: ReactNode;
@@ -283,7 +292,7 @@ function Post({
           )}
         </span>
       </header>
-      <Body message={message} titles={titles} />
+      <Body message={message} titles={titles} decided={decided} />
       {fileHref && message.files && message.files.length > 0 && (
         <ul
           className="channel-files type-small"
@@ -310,9 +319,11 @@ function Post({
 function Body({
   message,
   titles,
+  decided,
 }: {
   message: ChannelMessage;
   titles: Titles;
+  decided: boolean;
 }) {
   const t = useT();
   const body = message.body;
@@ -324,7 +335,7 @@ function Body({
         <div className="stack">
           <p className="type-label muted">{t("channels.proposal")}</p>
           <p className="type-body-strong">{body.title}</p>
-          <DeferredMarkdown text={body.text} />
+          {!decided && <DeferredMarkdown text={body.text} />}
         </div>
       );
     case "vote":

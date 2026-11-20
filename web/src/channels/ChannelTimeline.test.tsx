@@ -150,7 +150,9 @@ describe("WEB-U-063 the channel timeline", () => {
     expect(card(7)).toHaveAttribute("data-continued", "true");
     expect(name(7)).toBeNull();
     expect(card(7)).toHaveAccessibleName("#7 Coder · alice");
-    expect(card(7).querySelector(":scope > .channel-post-head time")).not.toBeNull();
+    expect(
+      card(7).querySelector(":scope > .channel-post-head time"),
+    ).not.toBeNull();
     // #9 is Coder's again, but #7's thread comes between: a new header.
     expect(name(9)).toHaveTextContent("Coder");
     expect(card(1)).not.toHaveAttribute("data-continued");
@@ -400,7 +402,52 @@ describe("WEB-U-520 the chat log", () => {
     const notice = screen.getByRole("article", { name: /^#5/ });
     expect(notice).toHaveAttribute("data-line");
     expect(
-      within(notice).getByText("Forecast can't be woken: its task was deleted."),
+      within(notice).getByText(
+        "Forecast can't be woken: its task was deleted.",
+      ),
     ).toHaveClass("muted");
+  });
+});
+
+// WEB-U-521: in the log a decided proposal keeps its title on one line; its text folds with its votes.
+describe("WEB-U-521 a decided proposal's text folds", () => {
+  it("keeps the title and hides the text once the decision is in the log", async () => {
+    const proposal: ChannelMessage = {
+      seq: 1,
+      ts: "2026-09-27T10:00:00Z",
+      author: { kind: "user", id: ANA, name: "Ana" },
+      body: {
+        type: "proposal",
+        title: "Raise the EU price",
+        text: "To 24 from December.",
+      },
+    };
+    const { rerender } = render(
+      <ChannelTimeline messages={[proposal]} members={members} />,
+    );
+    await settleLazy();
+    expect(screen.getByText("To 24 from December.")).toBeInTheDocument();
+    rerender(
+      <ChannelTimeline
+        messages={[
+          proposal,
+          {
+            seq: 2,
+            ts: "2026-09-27T10:10:00Z",
+            author: { kind: "gateway", id: "gateway", name: "gateway" },
+            body: {
+              type: "decision",
+              proposal_seq: 1,
+              outcome: "accepted",
+              rule: "majority",
+            },
+          },
+        ]}
+        members={members}
+      />,
+    );
+    const item = screen.getByRole("article", { name: /^#1/ });
+    expect(within(item).getByText("Raise the EU price")).toBeVisible();
+    expect(screen.queryByText("To 24 from December.")).toBeNull();
   });
 });
