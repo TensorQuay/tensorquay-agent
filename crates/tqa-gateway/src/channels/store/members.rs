@@ -428,10 +428,6 @@ pub(crate) async fn set_member_name(
     }
 }
 
-/// An agent member's name in the channel, if it has one.
-///
-/// # Errors
-/// Storage failure.
 /// Whether `conversation` is already a member of `channel`.
 ///
 /// # Errors
@@ -450,6 +446,10 @@ pub(crate) async fn is_member(
     .await?)
 }
 
+/// An agent member's name in the channel, if it has one.
+///
+/// # Errors
+/// Storage failure.
 pub(crate) async fn name_in(
     connection: &mut PgConnection,
     channel: Uuid,
