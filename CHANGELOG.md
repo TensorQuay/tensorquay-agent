@@ -32,6 +32,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   installation's labels with one of them malformed made the whole container listing fail, so the sweep removed
   nothing and a task's teardown kept retrying. It is now left out of the listing, logged, and counted on Status as
   something the sweep couldn't remove; the rest are listed and swept as before.
+- **A shell command no longer fails when another process ends during its cleanup (RT-I-064).** After each command the
+  runtime looks through every process for escaped background children; one that ended between being listed and being
+  read (a browser's or an MCP server's child, for example) made that cleanup fail, and the command with it, with
+  "escaped process cleanup failed". A process that has ended is now skipped; the runtime's log names the step of any
+  other cleanup failure.
 ### Changed
 
 - **A helper's failed run says why on the lead's page (GW-I-343, WEB-U-512).** The lead task's line read only
