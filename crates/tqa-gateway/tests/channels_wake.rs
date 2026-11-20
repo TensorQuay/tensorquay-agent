@@ -923,3 +923,47 @@ async fn gw_i_360_a_cancelled_gateway_sends_no_wake(pool: PgPool) -> TestResult 
     }))
     .await
 }
+
+// TEST: GW-I-361
+// A wake never reaches a runtime below 16 (review of 20 Nov 2026): a member never linked before is woken, its sandbox
+// starts, and its runtime announces 15. The wake isn't handed over (it couldn't parse it); the channel says once that
+// the member can't be woken, and the member's own work goes on as before.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_361_a_wake_is_never_handed_to_a_runtime_below_16(pool: PgPool) -> TestResult {
+    Box::pin(support::run(pool, async |f| {
+        let (owner, cookie) = f.admin().await?;
+        let mut old = Agent::new(f, owner.id, "Old runtime").await?;
+        let id = channel(f, &cookie, "pricing", &[(&old, "member")]).await?;
+        post(f, &cookie, &id, text("@old runtime look"), None).await?;
+        // Its sandbox starts for the wake; its runtime links at 15 and is handed nothing.
+        let next = old.next_at(f, QUIET, 15).await?;
+        assert!(next.is_none(), "a runtime below 16 was handed {next:?}");
+        assert_eq!(notices(f, &id, "unreachable_runtime").await?, 1);
+        post(f, &cookie, &id, text("@old runtime again"), None).await?;
+        assert!(old.next(f, QUIET).await?.is_none());
+        assert_eq!(
+            notices(f, &id, "unreachable_runtime").await?,
+            1,
+            "said once"
+        );
+        // The person's own message still runs it.
+        let (status, _) = call(
+            f,
+            Method::POST,
+            &format!("/api/v1/conversations/{}/messages", old.id),
+            &cookie,
+            (Some(json!({"text": "Start."})), Some("person-1")),
+        )
+        .await?;
+        assert!(status < 300, "{status}");
+        let Some(ClientFrame::UserMessage {
+            channel_wake: None, ..
+        }) = old.next(f, WAKE).await?
+        else {
+            return Err("the person's own message".into());
+        };
+        Ok(())
+    }))
+    .await
+}
