@@ -341,29 +341,160 @@
 .member-actions {
   flex: none;
 }
-/* From 1280 px the side sits beside the log: the two in the middle, the space left on either side, the bar across all. */
-@media (min-width: 1280px) {
+/* The chat page (WEB-U-519, the mock of 17 Nov 2026): the header stays on top and the composer at the bottom while the
+   log scrolls between them; To-dos, Members or a thread open beside the log from 1024 px, and as a sheet below that. */
+.channel-page > .channel-bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--paper);
+  padding-block: var(--space-2);
+  border-bottom: var(--border-width) solid var(--line);
+}
+.channel-page > .channel-composer-dock {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  background: var(--paper);
+  padding-block: var(--space-2);
+}
+.channel-facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+.channel-working {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.channel-live,
+.channel-dot {
+  display: inline-block;
+  width: var(--dot-size);
+  height: var(--dot-size);
+  border-radius: var(--pill-radius);
+  background: var(--ok);
+}
+.channel-faces {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.channel-avatar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  margin-inline-start: calc(var(--space-1) * -1);
+  border: var(--border-width) solid var(--paper);
+  border-radius: var(--pill-radius);
+  background: var(--surface-raised);
+  color: var(--ink);
+  font-size: var(--label-size);
+  font-weight: 700;
+}
+.channel-avatar:first-child {
+  margin-inline-start: 0;
+}
+.channel-avatar > .channel-dot {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  border: var(--border-width) solid var(--paper);
+}
+.channel-panels {
+  display: flex;
+  gap: var(--space-1);
+}
+.channel-panel-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--composer-button-size);
+  padding-inline: var(--space-2);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+}
+.channel-panel-button[aria-expanded="true"] {
+  background: var(--surface-raised);
+}
+.channel-count {
+  color: var(--muted);
+}
+.channel-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.channel-panel-head h2 {
+  margin: 0;
+}
+/* On a phone the panel buttons are icons with their counts (decided on 20 Nov 2026); the words stay for readers. */
+@media (max-width: 599px) {
+  .channel-panel-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .channel-faces {
+    display: none;
+  }
+}
+/* Below 1024 px a panel is a sheet over the page: the whole screen on a phone, a drawer from the right on a tablet. */
+@media (max-width: 1023px) {
+  .channel-page > .channel-panel {
+    position: fixed;
+    inset: 0 0 0 auto;
+    z-index: 3;
+    width: min(100%, var(--drawer-width));
+    max-width: none;
+    margin: 0;
+    overflow-y: auto;
+    border-radius: 0;
+    box-shadow: var(--shadow-elevated);
+  }
+}
+/* From 1024 px the panel sits beside the log: the log in the middle column, the panel on the right. */
+@media (min-width: 1024px) {
   .channel-page {
     display: grid;
     grid-template-columns:
       [wide-start] minmax(0, 1fr) [log-start] minmax(0, var(--transcript-width))
-      [log-end] var(--space-6) [side-start] var(--channel-side-width)
-      [side-end] minmax(0, 1fr) [wide-end];
+      [log-end] minmax(0, 1fr) [wide-end];
     column-gap: 0;
     align-items: start;
   }
-  /* Everything on the page reads in the log's column (its idle agents, its first step, its composer), unless placed. */
+  .channel-page[data-panel] {
+    grid-template-columns:
+      [wide-start] minmax(0, 1fr) [log-start] minmax(0, var(--transcript-width))
+      [log-end] var(--space-6) [side-start] var(--channel-side-width)
+      [side-end] minmax(0, 1fr) [wide-end];
+  }
   .channel-page > * {
     grid-column: log;
   }
   .channel-page > .channel-bar {
     grid-column: wide;
   }
-  .channel-page > .channel-side {
+  .channel-page > .channel-panel {
     grid-column: side;
-    grid-row: 2 / span 2;
+    grid-row: 2 / span 3;
     position: sticky;
-    top: var(--space-4);
+    top: calc(var(--bar-height) + var(--space-4));
+    max-height: calc(100dvh - var(--bar-height) - var(--space-8));
+    overflow-y: auto;
   }
 }
 

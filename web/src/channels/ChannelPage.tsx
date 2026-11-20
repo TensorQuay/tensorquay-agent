@@ -12,18 +12,16 @@ import { useT } from "../i18n/I18nProvider";
 import { APP_NAME } from "../lib/app";
 import { parseApi } from "../protocol/validate";
 import { settingsEndpoint } from "../settings/operations";
-import { NavigationButton } from "../shell/NavigationButton";
 import { TabTitle } from "../shell/TabTitle";
 import { Skeleton } from "../ui/Skeleton";
 
 import { ChannelActions } from "./ChannelActions";
 import { ChannelComposer } from "./ChannelComposer";
 import { ChannelFirstStep } from "./ChannelFirstStep";
-import { ChannelIdleAgents } from "./ChannelIdleAgents";
+import { ChannelHeader, type HeaderPanel } from "./ChannelHeader";
 import { ChannelMissing } from "./ChannelMissing";
 import { ChannelProposal, proposalKey } from "./ChannelProposal";
 import { ChannelSide, TaskClaims, tasksKey } from "./ChannelSide";
-import { RULES } from "./ChannelsPage";
 import { ChannelTimeline } from "./ChannelTimeline";
 import type {
   ChannelMessage,
@@ -154,6 +152,13 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
     void cache.invalidateQueries({ queryKey: ["channel", id] });
   });
   const [replyTo, setReplyTo] = useState<number | null>(null);
+  /** The panel open beside the log (WEB-U-519): the to-dos or the members, or none. */
+  const [panel, setPanel] = useState<HeaderPanel | null>(null);
+  const board = useQuery({
+    queryKey: tasksKey(id),
+    queryFn: ({ signal }) => api.tasks(id, signal),
+    retry: false,
+  });
   /** A message put in the box from the first step; a new one remounts the composer with it. */
   const [draft, setDraft] = useState<{ n: number; text: string }>({
     n: 0,
@@ -213,37 +218,28 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
   // WEB-U-250: the title is usually the purpose's start; the line under it says only what it adds.
   const beyond = purposeBeyond(item.purpose, item.name);
   return (
-    <div className="channel-page">
+    <div className="channel-page" data-panel={panel ?? undefined}>
       <TabTitle>
         {t("channels.pageTab", { name: item.name, product: APP_NAME })}
       </TabTitle>
-      <section className="channel-bar" aria-label={t("channels.header")}>
-        <NavigationButton />
-        <div className="channel-name">
-          {/* One line by design: a long name ends in an ellipsis, the whole in the tooltip (WEB-E2E-124). */}
-          <h1 className="type-heading" title={item.name}>
-            {item.name}
-          </h1>
-          {beyond && (
-            <p className="type-small muted" title={item.purpose}>
-              {beyond}
-            </p>
-          )}
-        </div>
-        <p className="channel-facts type-small muted">
-          <span
-            className="status-pill type-label"
-            data-tone={item.state === "open" ? "ok" : "muted"}
-          >
-            {t(item.state === "open" ? "channels.open" : "channels.ended")}
-          </span>
-          <span>{t(RULES[item.rule])}</span>
-          <span>{t("channels.members", { count: item.member_count })}</span>
-        </p>
-        {administers && (
-          <ChannelActions channel={item} onEnd={end} onDelete={remove} />
-        )}
-      </section>
+      <ChannelHeader
+        channel={item}
+        members={members.data?.items ?? []}
+        openTasks={
+          board.data
+            ? board.data.items.filter((task) => task.claims.length < task.limit)
+                .length
+            : null
+        }
+        panel={panel}
+        onPanel={setPanel}
+        purpose={beyond || null}
+        actions={
+          administers && (
+            <ChannelActions channel={item} onEnd={end} onDelete={remove} />
+          )
+        }
+      />
       <ChannelTimeline
         messages={log.messages}
         members={members.data?.items ?? []}
@@ -282,29 +278,33 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
           onUse={(text) => setDraft(({ n }) => ({ n: n + 1, text }))}
         />
       )}
-      <ChannelSide
-        api={api}
-        id={id}
-        channel={item}
-        members={members.data?.items ?? []}
-        me={me}
-        memberRole={item.role}
-        ended={item.state === "ended"}
-        onClaim={claim}
-        onPost={post}
-      />
-      {/* WEB-U-426: an agent reads the channel only while its task runs: the panel names those that aren't. */}
-      {posts && <ChannelIdleAgents members={members.data?.items ?? []} />}
-      <ChannelComposer
-        key={draft.n}
-        initialText={draft.text}
-        focusBox={firstStep || draft.n > 0}
-        memberRole={item.role}
-        state={item.state}
-        replyTo={replyTo}
-        onCancelReply={() => setReplyTo(null)}
-        onPost={post}
-      />
+      {panel && (
+        <ChannelSide
+          view={panel}
+          onClose={() => setPanel(null)}
+          api={api}
+          id={id}
+          channel={item}
+          members={members.data?.items ?? []}
+          me={me}
+          memberRole={item.role}
+          ended={item.state === "ended"}
+          onClaim={claim}
+          onPost={post}
+        />
+      )}
+      <div className="channel-composer-dock">
+        <ChannelComposer
+          key={draft.n}
+          initialText={draft.text}
+          focusBox={firstStep || draft.n > 0}
+          memberRole={item.role}
+          state={item.state}
+          replyTo={replyTo}
+          onCancelReply={() => setReplyTo(null)}
+          onPost={post}
+        />
+      </div>
     </div>
   );
 }

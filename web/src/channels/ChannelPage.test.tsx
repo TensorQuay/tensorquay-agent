@@ -1,8 +1,4 @@
-import {
-  focusManager,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   act,
   cleanup,
@@ -24,7 +20,7 @@ import {
 import { settleLazy } from "../test/lazy";
 
 import { ChannelPage } from "./ChannelPage";
-import type { ChannelsApi, Member } from "./contract";
+import type { ChannelsApi } from "./contract";
 
 const router = vi.hoisted(() => ({ push: vi.fn() }));
 vi.mock("next/navigation", () => ({
@@ -83,13 +79,11 @@ describe("WEB-U-063 the channel page", () => {
       await screen.findByRole("heading", { level: 1, name: "release" }),
     ).toBeVisible();
     const bar = screen.getByRole("region", { name: "Channel header" });
-    for (const text of [
-      "Plan the 1.0 release",
-      "Open",
-      "Decided by majority",
-      "2 members",
-    ])
-      expect(within(bar).getByText(text)).toBeVisible();
+    // The header of 18.2 (WEB-U-519): the purpose under the name, and Members with its count.
+    expect(within(bar).getByText("Plan the 1.0 release")).toBeVisible();
+    expect(
+      within(bar).getByRole("button", { name: "Members 2" }),
+    ).toBeVisible();
     await settleLazy();
     const log = screen.getByRole("list", { name: "Channel log" });
     expect(
@@ -300,6 +294,8 @@ describe("WEB-U-063 the channel page", () => {
       me: ME,
     });
     show(fake.api);
+    // The board opens from the header's To-dos (WEB-U-519).
+    fireEvent.click(await screen.findByRole("button", { name: /^To-dos/ }));
     const tasks = await screen.findByRole("list", { name: "To-dos" });
     expect(tasks).toHaveTextContent("Open · 2 places");
     fireEvent.click(within(tasks).getByRole("button", { name: "Take on #1" }));
@@ -317,7 +313,7 @@ describe("WEB-U-063 the channel page", () => {
         screen.getByRole("article", { name: "#1 Coder · alice" }),
       ).toHaveTextContent("1 of 2 places taken"),
     );
-    fireEvent.click(screen.getByRole("tab", { name: "Members" }));
+    fireEvent.click(screen.getByRole("button", { name: /^Members/ }));
     expect(screen.getByRole("list", { name: "Members" })).toHaveTextContent(
       "Coder · alice",
     );
@@ -332,13 +328,12 @@ describe("WEB-U-063 the channel page", () => {
       me: ME,
     });
     show(fake.api);
-    expect(
-      await screen.findByRole("tab", { name: "To-dos", selected: true }),
-    ).toBeVisible();
+    fireEvent.click(await screen.findByRole("button", { name: /^To-dos/ }));
+    expect(screen.getByRole("complementary", { name: "To-dos" })).toBeVisible();
     expect(await screen.findByText("No to-dos yet.")).toBeVisible();
     expect(screen.getByRole("button", { name: "Add a to-do…" })).toBeVisible();
     expect(screen.queryByText(/No tasks yet|Add a task/)).toBeNull();
-    fireEvent.click(screen.getByRole("tab", { name: "Members" }));
+    fireEvent.click(screen.getByRole("button", { name: /^Members/ }));
     expect(screen.getByRole("list", { name: "Members" })).toHaveTextContent(
       "Coder · alice",
     );
@@ -472,7 +467,9 @@ describe("WEB-U-066 ending, deleting and managing a channel", () => {
     cleanup();
     show(setup().api, OWNED.id, { id: ME.id, role: "member" });
     const other = await screen.findByRole("region", { name: "Channel header" });
-    expect(within(other).queryByRole("button")).toBeNull();
+    expect(
+      within(other).queryByRole("button", { name: /More actions/ }),
+    ).toBeNull();
   });
 
   it("says when the channel could not be ended", async () => {
@@ -497,174 +494,13 @@ describe("WEB-U-066 ending, deleting and managing a channel", () => {
     const fake = setup();
     show(fake.api, OWNED.id, { id: OWNER.id, role: "member" });
     await screen.findByRole("region", { name: "Channel header" });
-    fireEvent.click(screen.getByRole("tab", { name: "Members" }));
+    fireEvent.click(screen.getByRole("button", { name: /^Members/ }));
     fireEvent.click(await screen.findByRole("button", { name: "Add" }));
     fireEvent.click(await screen.findByRole("option", { name: "Docs" }));
     await vi.waitFor(() =>
       expect(screen.getByRole("list", { name: "Members" })).toHaveTextContent(
         "Docs",
       ),
-    );
-  });
-});
-
-// WEB-U-426: an agent reads a channel only while its task runs, and nothing here starts it (7 Nov 2026: a proposal
-// timed out unvoted by two agents whose tasks had finished). Above the box, the page says which agents aren't running
-// and how to bring them in.
-describe("WEB-U-426 the page says which agents aren't running", () => {
-  const SKY = member("conversation", "Sky", {
-    title: "Why the Sky Is Blue",
-    run_status: "completed",
-    can_open: true,
-  });
-  const FIRST = member("conversation", "First", {
-    title: "My first task",
-    run_status: "idle",
-    can_open: true,
-  });
-  const BUSY = member("conversation", "Busy", {
-    title: "A busy task",
-    run_status: "running",
-    can_open: true,
-  });
-  const THEIRS = member("conversation", "Planner", {
-    owner_name: "alice",
-    run_status: "failed",
-  });
-  const READER = member("conversation", "Reader", {
-    title: "A reading task",
-    run_status: "idle",
-    can_open: true,
-    role: "observer",
-  });
-  const NEWER = member("conversation", "Newer", {
-    title: "A task in a newer state",
-    // A state from a newer gateway than this page (the Members tab reads it as "Status unknown").
-    run_status: "parked" as unknown as NonNullable<Member["run_status"]>,
-    can_open: true,
-  });
-  const hint = (count: string) => screen.findByRole("region", { name: count });
-
-  it("names each agent whose task isn't running, and links the tasks you may open", async () => {
-    show(
-      fakeChannels({
-        channels: [RELEASE],
-        members: { [RELEASE.id]: [SKY, FIRST, BUSY, THEIRS, ME] },
-      }).api,
-    );
-    const region = await hint("3 agents aren’t running");
-    // Planner isn't the viewer's: its owner is the one who can start it.
-    expect(region).toHaveTextContent(
-      "An agent reads this channel only while its task runs: open its task and ask it to work here, or ask its owner when the agent isn’t yours.",
-    );
-    expect(
-      within(region).getByRole("link", { name: "Why the Sky Is Blue" }),
-    ).toHaveAttribute("href", `/c/${encodeURIComponent(SKY.id)}`);
-    expect(
-      within(region).getByRole("link", { name: "My first task" }),
-    ).toHaveAttribute("href", `/c/${encodeURIComponent(FIRST.id)}`);
-    // Another person's agent can't be opened from here: its name and owner, as the Members tab shows it.
-    expect(within(region).getByText("Planner · alice")).toBeVisible();
-    expect(
-      within(region).queryByRole("link", { name: /Planner/ }),
-    ).not.toBeInTheDocument();
-    expect(within(region).queryByText("A busy task")).not.toBeInTheDocument();
-    // It sits above the box it is about.
-    const box = screen.getByRole("textbox", { name: "Your message" });
-    expect(
-      region.compareDocumentPosition(box) & Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy();
-  });
-
-  it("says one agent in the singular", async () => {
-    show(
-      fakeChannels({
-        channels: [RELEASE],
-        members: { [RELEASE.id]: [SKY, BUSY, ME] },
-      }).api,
-    );
-    const region = await hint("1 agent isn’t running");
-    expect(within(region).getAllByRole("listitem")).toHaveLength(1);
-    // Only the viewer's own agents: nothing about owners.
-    expect(region).toHaveTextContent(
-      /^1 agent isn’t runningAn agent reads this channel only while its task runs: open its task and ask it to work here\.Why the Sky Is Blue$/,
-    );
-  });
-
-  it("says nothing while every agent runs, with people only, or for an agent that reads only or a state it doesn't know", async () => {
-    for (const members of [
-      [BUSY, ME],
-      [ME, member("user", "Bo")],
-      [READER, NEWER, ME],
-    ]) {
-      cleanup();
-      show(
-        fakeChannels({
-          channels: [RELEASE],
-          members: { [RELEASE.id]: members },
-        }).api,
-      );
-      expect(
-        await screen.findByRole("textbox", { name: "Your message" }),
-      ).toBeVisible();
-      await settleLazy();
-      expect(
-        screen.queryByRole("region", { name: /running/ }),
-      ).not.toBeInTheDocument();
-    }
-  });
-
-  it("says nothing to a member who reads only, or on an ended channel", async () => {
-    for (const item of [
-      { ...RELEASE, role: "observer" as const },
-      { ...RELEASE, state: "ended" as const },
-    ]) {
-      cleanup();
-      show(
-        fakeChannels({ channels: [item], members: { [item.id]: [SKY, ME] } })
-          .api,
-      );
-      expect(
-        await screen.findByRole("heading", { level: 1, name: "release" }),
-      ).toBeVisible();
-      await settleLazy();
-      expect(
-        screen.queryByRole("region", { name: /running/ }),
-      ).not.toBeInTheDocument();
-    }
-  });
-
-  it("goes once the agent's task runs", async () => {
-    const members = { [RELEASE.id]: [FIRST, ME] };
-    show(fakeChannels({ channels: [RELEASE], members }).api);
-    await hint("1 agent isn’t running");
-    members[RELEASE.id] = [{ ...FIRST, run_status: "running" }, ME];
-    // The members list comes again on focus and every 15 s (no stream hint yet).
-    act(() => {
-      focusManager.setFocused(false);
-      focusManager.setFocused(true);
-    });
-    await vi.waitFor(() =>
-      expect(
-        screen.queryByRole("region", { name: /running/ }),
-      ).not.toBeInTheDocument(),
-    );
-    focusManager.setFocused(undefined);
-  });
-
-  it("no longer tells a new channel that everyone reads each post", async () => {
-    show(
-      fakeChannels({
-        channels: [RELEASE],
-        members: { [RELEASE.id]: [SKY, ME] },
-        messages: { [RELEASE.id]: [] },
-      }).api,
-    );
-    const first = await screen.findByRole("region", {
-      name: "Tell your agents what you need",
-    });
-    expect(first).toHaveTextContent(
-      "People here see each post; an agent sees them while its task runs.",
     );
   });
 });

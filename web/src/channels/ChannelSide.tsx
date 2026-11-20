@@ -2,10 +2,11 @@
 
 import "./catalogue";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useId, useState } from "react";
+import { X } from "lucide-react";
 
 import { useT } from "../i18n/I18nProvider";
-import { TabList, tabPanelIds } from "../ui/Tabs";
+import { Button } from "../ui/Button";
+import { Icon } from "../ui/Icon";
 
 import { ChannelMembers } from "./ChannelMembers";
 import type {
@@ -65,6 +66,8 @@ export function ChannelSide({
   ended,
   onClaim,
   onPost,
+  view,
+  onClose,
 }: {
   api: ChannelsApi;
   id: string;
@@ -75,11 +78,13 @@ export function ChannelSide({
   ended: boolean;
   onClaim: (seq: number) => Promise<void>;
   onPost: (write: ChannelPost) => Promise<void>;
+  /** What the panel shows, as the header chose it (WEB-U-519). */
+  view: "tasks" | "members";
+  onClose: () => void;
 }) {
   const t = useT();
-  const base = useId();
   const cache = useQueryClient();
-  const [tab, setTab] = useState<"tasks" | "members">("tasks");
+  const tab = view;
   // The viewer's own tasks, for adding a task's agent (WEB-U-066); read when the Members tab opens.
   const own = useQuery({
     queryKey: ["channel-own-tasks"],
@@ -99,25 +104,25 @@ export function ChannelSide({
     queryFn: ({ signal }) => api.tasks(id, signal),
     retry: false,
   });
-  const tabs = [
-    { value: "tasks", label: t("channels.tasks") },
-    { value: "members", label: t("channels.membersTitle") },
-  ] as const;
+  const title = t(tab === "tasks" ? "channels.tasks" : "channels.membersTitle");
   return (
     <aside
-      className="channel-side stack"
-      aria-label={t("channels.side")}
+      className="channel-side channel-panel stack"
+      aria-label={title}
       // Tooltips inside stay within the side panel.
       data-tip-bounds
     >
-      <TabList
-        id={base}
-        label={t("channels.side")}
-        views={tabs}
-        current={tab}
-        onChoose={setTab}
-      />
-      <div role="tabpanel" {...tabPanelIds(base, tab)}>
+      <header className="channel-panel-head">
+        <h2 className="type-body-strong">{title}</h2>
+        <Button
+          variant="ghost"
+          aria-label={t("channels.closePanel", { name: title })}
+          onClick={onClose}
+        >
+          <Icon glyph={X} size={16} />
+        </Button>
+      </header>
+      <div>
         {tab === "tasks" ? (
           tasks.data ? (
             <TaskBoard

@@ -329,6 +329,7 @@
     "list.emptyFiltered": "No tasks on this workspace yet.",
     "workspaces.title": "Workspaces",
     "channels.title": "Channels",
+    "channels.side": "To-dos and members",
     "workspaces.nameLabel": "Workspace name",
     "activity.keyUsed": "Called {host} with {name}",
     "activity.keyUsedUnnamed": "Called {host} with a key",
