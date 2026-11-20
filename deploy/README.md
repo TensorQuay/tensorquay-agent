@@ -66,7 +66,7 @@ installation on the host. The steps below do the same by hand and remain the ref
 
 Start from a release: clone the newest tag from the
 [Releases page](https://github.com/TensorQuay/tensorquay-agent/releases/latest) (for example
-`git clone --branch v18.0.1 https://github.com/TensorQuay/tensorquay-agent.git`), not `main`. Then either pull the
+`git clone --branch v18.1.1 https://github.com/TensorQuay/tensorquay-agent.git`), not `main`. Then either pull the
 release's prebuilt images or build them yourself; both end with the same three `export` lines for step 1.
 
 **Pull them (from 18.0).** Each release from 18.0 has prebuilt images on the GitHub Container Registry, for amd64 and
@@ -77,7 +77,7 @@ repository root:
 deploy/pull-images.sh
 ```
 
-It pulls the release the checkout's tag names (or the one you name: `deploy/pull-images.sh 18.0.1`), pins each image by
+It pulls the release the checkout's tag names (or the one you name: `deploy/pull-images.sh 18.1.1`), pins each image by
 the digest the registry gives, tags the runtimes as the build does, so the environments register themselves the same
 way, and prints the three `export` lines step 1 needs. `--workstation` and `--desktop` work as for the build below.
 It needs no build tools and takes a few minutes. The test model (`--fake-model`) is only built, never pulled. Releases
