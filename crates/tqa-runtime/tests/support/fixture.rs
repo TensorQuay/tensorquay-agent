@@ -41,6 +41,10 @@ pub struct Fixture {
     pub gateway: FakeGateway,
     pub clock: FakeClock,
     pub sleeper: Arc<FakeSleeper>,
+    /// Long-term memory for the runs this fixture launches (`TQA_MEMORY`); off unless a test turns it on.
+    pub memory: std::sync::atomic::AtomicBool,
+    /// The run's own person's digest folder (`TQA_MEMORY_PERSON`); none unless a test names one.
+    pub memory_person: std::sync::Mutex<Option<String>>,
 }
 /// Where a fixture keeps the runtime's state, journal included.
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -111,6 +115,8 @@ impl Fixture {
             gateway,
             clock,
             sleeper,
+            memory: std::sync::atomic::AtomicBool::new(false),
+            memory_person: std::sync::Mutex::new(None),
         })
     }
     pub fn deps(&self) -> Result<RuntimeDeps, Box<dyn std::error::Error>> {
@@ -128,6 +134,12 @@ impl Fixture {
             workspace: self.directory.path().join("workspace"),
             skills: self.directory.path().join("skills"),
             sync_before_result: false,
+            memory: self.memory.load(std::sync::atomic::Ordering::Relaxed),
+            memory_person: self
+                .memory_person
+                .lock()
+                .ok()
+                .and_then(|person| person.clone()),
         })?;
         Ok(RuntimeDeps {
             config,

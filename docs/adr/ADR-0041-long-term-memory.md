@@ -74,6 +74,41 @@ person; and a task without memory must cost exactly what it costs today.
 Amended 20 Nov 2026, before any release: the folder (`.memory/`, section 1), the rules' place (section 4), saves
 detected from the folder (section 4) and the default (section 6), found while building the first slices.
 
+**Second amendment, 20 Nov 2026, before any release: what was built, where it differs from sections 1 to 5.**
+
+- **A1. Saves are guarded where they are written, not found afterwards (replaces section 4's comparison).** Every
+  file tool writes through one place, which refuses a note under `.memory/` that holds what looks like a key and
+  tells the model to save where the key is kept, never its value. A note that got a key another way (the shell, a
+  script) is left out of the index and counted, so the key isn't carried into later runs; it is not removed. The
+  runtime compares nothing before and after a step.
+- **A2. One Undo.** Each change to a note keeps its previous version in `.memory/.undo/` (hidden, never listed), and
+  a note that is new at a change carries a mark there. An Undo restores the kept version, or removes a note that
+  carries the mark; with neither there is nothing to undo, so the same Undo sent twice changes nothing the second
+  time. The file tools and a person's changes keep the same one level.
+- **A3. A person's changes.** `PUT` and `DELETE /conversations/{id}/memory/{name}` and `POST …/undo`, with a write
+  share, by directory handle and never through a link; a text that holds what looks like a key is refused. Listing
+  and reading are the files operations on `.memory/`.
+- **A4. `written by` is not written (replaces section 1's third header line).** A note's header is `about` and
+  `kind`. Where a note came from is the task whose changes list it; nothing edits a note after the model wrote it.
+- **A5. Digests are private to their person (replaces section 3's place).** The gateway writes
+  `.tqa/memory/tasks/<owner>/<task's first day>-<task id>.md`, not `.memory/tasks/`. A digest holds a task's title
+  and the first lines of its answer, which are the person's conversation: in a shared workspace `.memory/tasks/`
+  would have shown them to everyone the workspace is shared with, in the Files panel and pinned in their runs.
+  `.tqa/` is private as a whole to the file view, the change list and the runtime link. The gateway names the
+  conversation owner's folder to the sandbox (`TQA_MEMORY_PERSON`, a typed field of its spec), and a run's index
+  lists that folder only. What remains reachable: another person with a write share can have their own agent read
+  the folder on purpose, as it can read `.tqa/<task>/history.md` today (section 5's rule for history is the same).
+- **A6. Which runs leave a digest.** A person's task when one of its runs completes: the title, the day, the files
+  the task changed since its first recorded message (the Changes panel's comparison; none listed when no record
+  exists) and the first lines of the run's answer. A run that used no tool leaves the task's digest as it is. A
+  team's helper, and a run the gateway woke or a lead briefed, leave none. A new title reaches the digest's first
+  line. A title, a path or an answer that holds what looks like a key is left out and said so. No model call.
+- **A7. Directory workspaces first.** The gateway's own writes (a person's note changes, digests) are made on
+  directory workspaces; a microVM installation answers `files_unavailable` for the first and writes no digest until
+  its workspace link gains the operation. Notes the agent writes, and the index, work in both modes.
+- **A8. History's scope (section 5) is decided:** a person's own tasks only (the Product Owner's delegation of 20 Nov
+  2026).
+
 ## Consequences
 
 - People stop repeating themselves; agents learn a workspace's conventions once.

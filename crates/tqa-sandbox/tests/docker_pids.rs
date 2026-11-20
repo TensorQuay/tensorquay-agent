@@ -7,7 +7,7 @@
 use std::{collections::BTreeMap, time::Duration};
 
 use tokio_util::sync::CancellationToken;
-use tqa_sandbox::{ByteSize, CpuLimit, ImageRef, SandboxBackend, SandboxHandle};
+use tqa_sandbox::{ByteSize, CpuLimit, ImageRef, SandboxBackend, SandboxError, SandboxHandle};
 
 #[path = "support/docker.rs"]
 mod support;
@@ -98,6 +98,49 @@ async fn runtime_image(fixture: &support::Fixture) -> Result<ImageRef, Box<dyn s
     Ok(ImageRef::local_id(&image)?)
 }
 
+/// The stormed sandbox's process count, read from the host. A read is an observation, so one that fails is read again
+/// a few times; one that still fails says which read it was, why (the error's own words, which its display and debug redact)
+/// and what state the container was in: SEC-010 once failed on CI with only "sandbox backend operation failed".
+async fn pids(
+    fixture: &support::Fixture,
+    stormed: &SandboxHandle,
+    which: &str,
+) -> Result<u64, Box<dyn std::error::Error>> {
+    let mut failures = Vec::new();
+    loop {
+        match fixture.backend.stats(stormed).await {
+            Ok(stats) => return Ok(stats.pids),
+            Err(error) if failures.len() < 3 => {
+                failures.push(why(&error));
+                tokio::time::sleep(Duration::from_millis(500)).await;
+            }
+            Err(error) => {
+                failures.push(why(&error));
+                let state = bounded(fixture.docker.inspect_container(&stormed.id, None))
+                    .await
+                    .map_or_else(
+                        |inspect| format!("inspect failed: {inspect}"),
+                        |inspect| format!("{:?}", inspect.state),
+                    );
+                return Err(format!(
+                    "the {which} read failed {} times: {}; container state: {state}",
+                    failures.len(),
+                    failures.join(", ")
+                )
+                .into());
+            }
+        }
+    }
+}
+
+/// An error's own words: a backend error's display redacts its detail, which a test may show.
+fn why(error: &SandboxError) -> String {
+    match error {
+        SandboxError::Backend(detail) => format!("backend: {detail}"),
+        other => other.to_string(),
+    }
+}
+
 /// From the host, without a process in the sandbox: the count reaches the limit and never passes it.
 async fn reaches_the_limit(
     fixture: &support::Fixture,
@@ -106,7 +149,7 @@ async fn reaches_the_limit(
     let deadline = tokio::time::Instant::now() + Duration::from_secs(30);
     let mut highest = 0;
     loop {
-        let pids = fixture.backend.stats(stormed).await?.pids;
+        let pids = pids(fixture, stormed, "storm's process count").await?;
         assert!(
             pids <= u64::from(PIDS),
             "{pids} processes exceed the limit of {PIDS}"
@@ -178,14 +221,16 @@ async fn sec_010_a_process_storm_stops_at_the_pids_limit_and_other_sandboxes_are
         let stormed = fixture
             .backend
             .create(spec, CancellationToken::new())
-            .await?;
+            .await
+            .map_err(|error| format!("the stormed sandbox's create failed: {}", why(&error)))?;
         let neighbour = fixture
             .backend
             .create(
                 fixture.spec("pids-neighbour", false)?,
                 CancellationToken::new(),
             )
-            .await?;
+            .await
+            .map_err(|error| format!("the neighbour's create failed: {}", why(&error)))?;
         // In the background: the exec's shell starts the storm and returns.
         let command = [
             "sh",
@@ -202,7 +247,7 @@ async fn sec_010_a_process_storm_stops_at_the_pids_limit_and_other_sandboxes_are
             0,
             "another sandbox must still run a command during the storm"
         );
-        let holding = fixture.backend.stats(&stormed).await?.pids;
+        let holding = pids(fixture, &stormed, "holding count").await?;
         assert!(
             (u64::from(PIDS) - 2..=u64::from(PIDS)).contains(&holding),
             "the storm no longer held the limit when the neighbour ran ({holding} processes)"

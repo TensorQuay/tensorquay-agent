@@ -98,6 +98,10 @@ pub(crate) enum Handler {
     SiteRoot,
     SiteFile,
     Upload,
+    /// A person's changes to a workspace's memory notes (ADR-0041).
+    MemoryNotePut,
+    MemoryNoteDelete,
+    MemoryNoteUndo,
     RunChanges,
     RunChangesDiff,
     Ready,

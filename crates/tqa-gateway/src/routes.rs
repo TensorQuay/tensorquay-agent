@@ -801,6 +801,21 @@ pub(crate) const ROUTES: &[Route] = &[
         handler: Handler::Upload,
     },
     Route {
+        method: "PUT",
+        path: "/api/v1/conversations/{id}/memory/{name}",
+        handler: Handler::MemoryNotePut,
+    },
+    Route {
+        method: "DELETE",
+        path: "/api/v1/conversations/{id}/memory/{name}",
+        handler: Handler::MemoryNoteDelete,
+    },
+    Route {
+        method: "POST",
+        path: "/api/v1/conversations/{id}/memory/{name}/undo",
+        handler: Handler::MemoryNoteUndo,
+    },
+    Route {
         method: "GET",
         path: "/api/v1/conversations/{id}/runs/{run_id}/changes",
         handler: Handler::RunChanges,

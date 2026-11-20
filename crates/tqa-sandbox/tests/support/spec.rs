@@ -32,5 +32,7 @@ pub fn spec() -> Result<SandboxSpec, Box<dyn Error>> {
         env: BTreeMap::from([("LANG".into(), "C".into())]),
         skills: tqa_sandbox::SkillsMounts::default(),
         desktop: false,
+        long_term_memory: false,
+        memory_person: None,
     })
 }

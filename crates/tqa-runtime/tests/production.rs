@@ -26,6 +26,8 @@ fn dependencies(directory: &TempDir) -> Result<RuntimeDeps, Box<dyn std::error::
         state_dir,
         skills: directory.path().join("skills"),
         sync_before_result: false,
+        memory: false,
+        memory_person: None,
     })?;
     Ok(RuntimeDeps::production(config)?)
 }
