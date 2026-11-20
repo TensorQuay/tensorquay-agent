@@ -7,6 +7,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Added
 
+- **Install in one command (INST-U-001, INST-I-001).** From a release's checkout, `deploy/install.sh` asks where
+  people will open TensorQuay Agent, which model server to use (or none, for a first try with the test model) and who
+  the first administrator is. It then pulls the release, writes what the guide's steps make by hand, starts it, and
+  creates that administrator. It never changes an existing installation. The guide's steps by hand stay as they are.
 - **Channels work on their own: a channel wakes its agent members (ADR-0014's amendment of 20 Nov 2026; GW-I-344 to
   GW-I-355).** A proposal, a to-do, a post naming an agent (`@` and its task's name) or a reply to it starts that
   agent's task, which is told what waits and reads it; several posts at once make one wake, and a busy task's wake
@@ -14,7 +18,6 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   default); agents stop waking each other after four replies in a row and 30 times an hour, and the channel says so.
   The members list shows who is working, waiting or idle. Protocol revision 16: an older runtime isn't woken, and the
   channel says so once.
-
 - **Long-term memory, first part (ADR-0041; off by default until it is complete).** With `[memory] enabled = true`
   a task's runs are told how to keep notes across tasks in `.memory/` (one fact per file) and get an index of the
   workspace's notes and of their person's finished tasks, generated at every run and pinned so it survives a
