@@ -533,6 +533,25 @@ fn tool_u_153_wait_says_when_to_end_the_turn_and_done_is_not_offered() -> TestRe
     Ok(())
 }
 
+// TOOL-U-157 (C-13, 21 Nov 2026): task_claim says an agent holds one to-do at a time, claims it before working on it,
+// and reports it before claiming another; the refusal's code is named.
+#[test]
+fn tool_u_157_task_claim_says_one_at_a_time() -> TestResult {
+    let fake = Arc::new(Fake::default());
+    let claim = tool(&fake, "task_claim")?;
+    let words = &claim.spec().description;
+    for said in [
+        "before working on it",
+        "You hold one at a time",
+        "one_at_a_time",
+        "report it (channel_post, type report), then claim the next",
+        "already_claimed",
+    ] {
+        assert!(words.contains(said), "{said}: {words}");
+    }
+    Ok(())
+}
+
 // TOOL-U-154 (decided on 20 Nov 2026): a report refused because the member never claimed the task names the fix.
 #[tokio::test]
 async fn tool_u_154_a_report_without_a_claim_names_the_fix() -> TestResult {

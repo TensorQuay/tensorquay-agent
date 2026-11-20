@@ -162,3 +162,33 @@ fn gw_u_234_the_wake_counts_the_files_and_names_their_messages_only() {
         " 3 files wait in your workspace, from messages 12, 14 and 16; channel_read lists their paths."
     );
 }
+
+// TEST: GW-U-237
+// C-13 (21 Nov 2026): the wake lists to-dos as open for claims, never as work it may take on (one agent took all
+// three); the manners say to take one at a time: claim, report, then the next, and leave others' to-dos to them.
+#[test]
+fn gw_u_237_the_wake_shares_out_to_dos_one_at_a_time() {
+    let channel = Uuid::from_u128(9);
+    let one = sentence(channel, 3, &[Waiting::Task(4)]);
+    assert!(
+        one.contains(": a to-do open for claims (message 4)."),
+        "{one}"
+    );
+    let three = sentence(
+        channel,
+        3,
+        &[Waiting::Task(4), Waiting::Task(5), Waiting::Task(6)],
+    );
+    assert!(
+        three.contains(": 3 to-dos open for claims (messages 4, 5, 6)."),
+        "{three}"
+    );
+    assert!(!three.contains("you may take on"), "{three}");
+    assert!(
+        three.contains(
+            "Take on one to-do at a time: claim it with task_claim before working on it, report it with \
+             channel_post when done, then claim another if any is left; leave to-dos others have claimed to them."
+        ),
+        "{three}"
+    );
+}
