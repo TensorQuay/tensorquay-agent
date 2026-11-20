@@ -1,11 +1,11 @@
-"""GW-I-326 and GW-I-327: the administrator's Sandboxes page on a real Docker engine with the testkit's fake model
+"""GW-I-326, GW-I-327 and GW-I-328: the administrator's Sandboxes page on a real Docker engine with the testkit's fake model
 (the Sandboxes page design note; GW-U-216 to GW-U-218 on the fixture's engine are the same rules without one).
 
 Each case starts its own stack (robustness.Stack: its own name, pool, port and installation), with a fake-model
 scenario that answers each task by a phrase of its first message (prompt selection), so tasks of two people run their
 own scripts side by side. The cases read only the public API, the engine and the stack's own database.
 
-Usage: TQA_DOCKER_TESTS=1 python3 deploy/tests/sandboxes_stack.py listing|stop
+Usage: TQA_DOCKER_TESTS=1 python3 deploy/tests/sandboxes_stack.py listing|stop|verdict
 """
 import argparse
 import http.cookiejar
@@ -16,8 +16,10 @@ import tempfile
 import time
 import urllib.error
 import urllib.request
+import uuid
 
 import compose
+import demo
 import robustness
 
 
@@ -264,7 +266,121 @@ def stop_case(stack):
           "refused 409", flush=True)
 
 
-CASES = {"listing": listing_case, "stop": stop_case}
+# GW-I-328: the sweep every 10 s (`[sandbox] sweep_seconds`, GW-U-233) and the shortest create budget, so a planted
+# container is a stray after a minute.
+SWEEP = "sweep_seconds=10\ncreate_budget_seconds=60\n"
+CREATE_BUDGET = 60
+
+
+def detail(admin):
+    return admin.ok("/readyz?detail=1")["sandboxes"]
+
+
+def gauge(text, name, kind):
+    line = next((line for line in text.splitlines() if line.startswith('{}{{kind="{}"}} '.format(name, kind))), None)
+    return None if line is None else int(float(line.rsplit(" ", 1)[1]))
+
+
+def agree(stack, sandboxes):
+    """`/readyz?detail=1` and `/metrics` say the same counts."""
+    text = metrics(stack)
+    for kind in ("containers", "networks"):
+        assert gauge(text, "tqa_sandbox_unowned", kind) == sandboxes["unowned"][kind], (kind, sandboxes, text[-2000:])
+        assert gauge(text, "tqa_sandbox_left_behind", kind) == sandboxes["left_behind"][kind], (kind, sandboxes)
+
+
+def plant(stack, name, image, prefix):
+    labels = ["--label", "tqa.instance=" + prefix, "--label", "tqa.conversation=" + str(uuid.uuid4()),
+              "--label", "tqa.created_at={}".format(int(time.time()))]
+    return stack.command(["docker", "run", "-d", "--name", name, "--network", "none", *labels, "--entrypoint", "sleep",
+                          image, "3600"])
+
+
+def gone(stack, kind, name):
+    listed = stack.command(["docker", kind, "ls", "-aq" if kind == "container" else "-q", "--filter",
+                            "name=^{}$".format(name)])
+    return not listed.strip()
+
+
+def next_pass(admin, after, seconds=60):
+    """The readiness detail of the first sweep that ends after `after` (its `swept_at`)."""
+    def newer():
+        sandboxes = detail(admin)
+        return sandboxes if sandboxes["swept_at"] and sandboxes["swept_at"] > after else None
+    return wait(newer, seconds, "a sweep after {}".format(after), every=1)
+
+
+def verdict_case(stack):
+    """GW-I-328: a planted stray container and network are swept and counted, green; a container carrying this
+    installation's labels that the listing can't read (its conversation label is no task id) can never be checked
+    against a record, so every pass counts it as one it couldn't remove: amber at its second pass, listed with its
+    remove command; removed by hand with that command, the next pass is green. (A paused container is no such case:
+    the sweep stops it first, which a paused container allows, and removes it.) The readiness detail and the metrics
+    agree at each step."""
+    admin = administrator(stack)
+    prefix, image = stack.env["TQA_SANDBOX_NETWORK"], demo.runtime_image(stack.env)
+    tag = secrets.token_hex(4)
+    stray, unreadable, network = "tqa-stray-" + tag, "tqa-stray-unreadable-" + tag, "tqa-stray-net-" + tag
+    plant(stack, stray, image, prefix)
+    stack.command(["docker", "network", "create", "--label", "tqa.instance=" + prefix, "--label",
+                   "tqa.subnet=192.0.2.0/29", network])
+    try:
+        # Each pass is read the moment it is recorded, until the one after which the stray container is gone.
+        passes, at = [], ""
+        while True:
+            sandboxes = next_pass(admin, at)
+            at = sandboxes["swept_at"]
+            agree(stack, sandboxes)
+            passes.append(sandboxes)
+            print("pass: unowned {} left behind {}".format(sandboxes["unowned"], sandboxes["left_behind"]), flush=True)
+            if gone(stack, "container", stray):
+                break
+            assert len(passes) < 20, "the stray container was never swept: {}".format(passes)
+        assert gone(stack, "network", network), "the planted network is gone"
+        assert any(entry["unowned"]["networks"] >= 1 for entry in passes), \
+            "the network counted in the pass that removed it: {}".format(passes)
+        removal = passes[-1]
+        assert removal["unowned"]["containers"] == 1 and removal["left_behind"]["containers"] == 0, \
+            "the pass that removed the stray container counts it, green: {}".format(removal)
+        print("GW-I-328: stray container and network swept and counted; green", flush=True)
+        # A container the listing can't read: counted from its first pass, amber from its second.
+        unreadable_id = stack.command([
+            "docker", "run", "-d", "--name", unreadable, "--network", "none", "--label", "tqa.instance=" + prefix,
+            # Not a task id (a space and "!": an id is letters, digits, "-" and "_"), so the listing can't read it;
+            # "not-a-task" would be a valid id, a young stray the sweep skips.
+            "--label", "tqa.conversation=not a task!", "--label", "tqa.created_at=1", "--entrypoint", "sleep",
+            image, "3600"])
+        first = next_pass(admin, at)
+        agree(stack, first)
+        assert first["unowned"]["containers"] == 1 and first["left_behind"]["containers"] == 0, \
+            "met once: counted, green: {}".format(first)
+        second = next_pass(admin, first["swept_at"])
+        agree(stack, second)
+        assert second["left_behind"]["containers"] == 1 and second["left_behind"]["reason"] == "invalid_labels", second
+        survivors = listing(admin)["left_behind"]
+        assert len(survivors) == 1, survivors
+        survivor = survivors[0]
+        assert survivor["kind"] == "container" and survivor["name"] == unreadable_id[:12], survivor
+        assert survivor["reason"] == "invalid_labels", survivor
+        assert survivor["remove"] == "docker rm -f " + unreadable_id[:12], survivor
+        print("GW-I-328: the unreadable one amber at its second pass, listed with {} (age {} s)".format(
+            survivor["remove"], survivor["age_seconds"]), flush=True)
+        # Removed by hand with the listed command: the next pass is green and lists nothing.
+        stack.command(survivor["remove"].split())
+        third = next_pass(admin, second["swept_at"])
+        agree(stack, third)
+        assert third["left_behind"]["containers"] == 0 and third["unowned"]["containers"] == 0, third
+        assert listing(admin)["left_behind"] == [], "nothing listed once it is gone"
+        print("GW-I-328: removed by its listed command; the next pass is green", flush=True)
+    finally:
+        for name in (stray, unreadable):
+            if not gone(stack, "container", name):
+                stack.command(["docker", "rm", "-f", name])
+        if not gone(stack, "network", network):
+            stack.command(["docker", "network", "rm", network])
+
+
+CASES = {"listing": listing_case, "stop": stop_case, "verdict": verdict_case}
 
 
 def main():
@@ -281,7 +397,7 @@ def main():
     directory = compose.installation(temporary)
     stack, failure = robustness.Stack(directory, env), None
     try:
-        stack.prepare(args.case, scenario=SCENARIO, **METRICS)
+        stack.prepare(args.case, scenario=SCENARIO, settings=SWEEP if args.case == "verdict" else None, **METRICS)
         CASES[args.case](stack)
     except BaseException as error:
         failure = error

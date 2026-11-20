@@ -1,4 +1,4 @@
-//! GW-I-326 and GW-I-327: the administrator's Sandboxes page on a real Docker engine with the testkit's fake model.
+//! GW-I-326, GW-I-327 and GW-I-328: the administrator's Sandboxes page on a real Docker engine with the testkit's fake model.
 //! Each runs `deploy/tests/sandboxes_stack.py` against an owned stack (its own name, pool, port and installation).
 use std::{error::Error, process::Stdio, time::Duration};
 
@@ -42,4 +42,12 @@ async fn gw_i_326_the_listing_names_three_sandboxes_of_two_people_and_measures_t
 async fn gw_i_327_an_administrators_stop_on_the_real_engine_and_the_task_resumes_on_its_files()
 -> Result<(), Box<dyn Error>> {
     contract("stop").await
+}
+
+// TEST: GW-I-328
+#[tokio::test]
+#[ignore = "requires TQA_DOCKER_TESTS=1 and built gateway, runtime, web and model images"]
+async fn gw_i_328_the_leak_verdict_on_the_real_engine_sweeps_counts_and_names_what_survives()
+-> Result<(), Box<dyn Error>> {
+    contract("verdict").await
 }

@@ -185,7 +185,11 @@ class Stack:
         check_stream_timeout((self.directory / "gateway.toml").read_text())
         config = self.directory / "gateway.toml"
         if settings:
-            compose.write(config, config.read_text().replace("[sandbox]\n", "[sandbox]\n" + settings, 1))
+            # A key the caller sets replaces the stack's own line for it (TOML refuses a key twice).
+            text = config.read_text()
+            for key in [line.split("=", 1)[0].strip() for line in settings.splitlines() if "=" in line]:
+                text = re.sub(r"(?m)^{}\s*=.*\n".format(re.escape(key)), "", text)
+            compose.write(config, text.replace("[sandbox]\n", "[sandbox]\n" + settings, 1))
         if top:
             text = config.read_text()
             assert "metrics_listen=false\n" in text, "the stack's gateway.toml has no metrics_listen line to replace"
