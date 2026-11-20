@@ -1,5 +1,6 @@
-//! The leak verdict (the Sandboxes page design note, §3.6): what the last two sweeps found that no record accounts for,
-//! and what survived them. Green when nothing unowned survived a sweep, amber when something did, never red: the
+//! The leak verdict (the Sandboxes page design note, §3.6): what the last sweep pass (the container sweep and the
+//! network sweep) found that no record accounts for, removed or not, and what survived: failed in that pass and met in
+//! the pass before it. Green when nothing unowned survived a sweep, amber when something did, never red: the
 //! reaper's rules protect the slots, the verdict protects the host's disk and address pool. Pure; the sweeps record
 //! their passes and the readiness detail, the metrics and the listing read the verdict.
 use serde::Serialize;

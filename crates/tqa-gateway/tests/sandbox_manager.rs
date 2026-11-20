@@ -570,3 +570,70 @@ async fn gw_i_372_a_pass_that_removes_a_stray_container_counts_it_as_unowned(
     })
     .await
 }
+
+// TEST: GW-I-373
+/// A sweep pass slower than its period keeps its verdict: the owned sweep doesn't run a second pass the moment a slow
+/// one ends, which found nothing left and overwrote the counts within a millisecond (GW-I-328's debug run, 20 Nov
+/// 2026: a stray's stop took 10.5 s against a 10 s period). The fixture's engine holds the stray's destroy past the
+/// period, then lets it finish.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_373_a_pass_slower_than_its_period_keeps_its_verdict(pool: PgPool) -> TestResult {
+    run_configured(
+        pool,
+        None,
+        "[sandbox]\nsweep_seconds=10\n",
+        async |fixture| {
+            let (owner, cookie) = fixture.admin().await?;
+            let sandboxes = fixture.gateway.sandboxes();
+            let managed = fixture.conversation(owner.id).await?;
+            sandboxes.ensure(&managed.id).await?;
+            let before = fixture.backend.destroys.load(Ordering::SeqCst);
+            fixture.backend.hold_destroy.store(true, Ordering::SeqCst);
+            let unrecorded = fixture.conversation(owner.id).await?;
+            fixture.backend.orphan(&managed.id, unrecorded.id).await?;
+            // The owned sweep's next pass reaches the stray's destroy and waits there, past its 10 s period.
+            tokio::time::timeout(std::time::Duration::from_secs(30), async {
+                while fixture.backend.destroys.load(Ordering::SeqCst) == before {
+                    tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+                }
+            })
+            .await?;
+            tokio::time::sleep(std::time::Duration::from_secs(11)).await;
+            let read = async || -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+                Ok(fixture
+                    .get("/readyz?detail=1", &cookie)
+                    .await?
+                    .json::<serde_json::Value>()
+                    .await?["sandboxes"]
+                    .clone())
+            };
+            let held = read().await?["swept_at"].clone();
+            fixture.backend.hold_destroy.store(false, Ordering::SeqCst);
+            fixture.backend.release_destroy.notify_waiters();
+            // The slow pass records once its destroy ends; its verdict is the next the readiness detail shows.
+            let recorded = tokio::time::timeout(std::time::Duration::from_secs(5), async {
+                loop {
+                    let sandboxes = read().await?;
+                    if sandboxes["swept_at"] != held {
+                        return Ok::<_, Box<dyn std::error::Error>>(sandboxes);
+                    }
+                    tokio::time::sleep(std::time::Duration::from_millis(20)).await;
+                }
+            })
+            .await??;
+            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+            let later = read().await?;
+            assert_eq!(
+                recorded["unowned"]["containers"], 1,
+                "the slow pass counts the stray it removed: {recorded}"
+            );
+            assert_eq!(
+                later["swept_at"], recorded["swept_at"],
+                "no second pass right after the slow one: {recorded} then {later}"
+            );
+            Ok(())
+        },
+    )
+    .await
+}

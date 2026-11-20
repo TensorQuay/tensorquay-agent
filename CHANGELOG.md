@@ -14,6 +14,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **A slow sandbox sweep's counts stand until the next sweep (GW-I-373).** A sweep that took longer than its period
+  (a stray container takes about ten seconds to stop) was followed at once by another that found nothing left, so the
+  readiness detail and the `tqa_sandbox_unowned` gauge showed no stray removed. The next sweep now starts a full period
+  after one ends.
 - **The gateway logs why it ended a model's response early (GW-U-226).** When the relay stops a response before
   its end (the model server silent past the idle limit, the response deadline, the byte limit, the upstream
   breaking), a warning names the reason, the route, the bytes carried and the seconds it ran. Before, the task

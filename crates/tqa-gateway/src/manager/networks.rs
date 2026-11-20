@@ -117,6 +117,10 @@ impl SandboxManager {
                     _ = timer.tick() => {}
                 }
                 manager.sweep_pass_now().await;
+                // The next pass is a full period after this one ends. A pass slower than the period (a stray's stop
+                // takes about 10 s) otherwise met its missed tick at once, and a pass that found nothing left replaced
+                // the slow pass's verdict within a millisecond (GW-I-373).
+                timer.reset();
             }
         });
     }
