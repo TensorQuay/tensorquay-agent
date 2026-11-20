@@ -179,7 +179,7 @@ fourth hop.
 
 **Test rows:** GW-U-227 (the wake key), GW-U-228 (the sentence carries no content), GW-U-229 (naming: the longest
 name, no case), GW-U-230 (the hop rule); PROTO-U-048 (`channel_wake`, revision 16); SEC-068 (no channel content in a
-wake); TOOL-U-149 (a read moves the place), TOOL-U-150 (a post's hop); GW-I-344 (who is woken, A1), GW-I-345 (a burst
+wake); GW-I-344 (who is woken, A1), GW-I-345 (a burst
 is one wake; a woken run that doesn't read isn't woken again), GW-I-346 (a failed run is woken again), GW-I-347 (a busy
 task: the wake waits for the run's end, never a second run, never lost), GW-I-348 (two channels, one turn at a time),
 GW-I-349 (the sweep sends a wake lost to a restart), GW-I-350 (the budget charged, the 80 % notice, a person's run
