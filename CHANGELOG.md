@@ -5,6 +5,12 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ## Unreleased
 
+## 18.1.1 (20 November 2026)
+
+A fix release: a shell command no longer fails when another process ends during its cleanup, a previewed page
+without scripts says nothing about scripts, a model's id is never cut on Settings › Models, and the install guide
+names a second installation's settings first. No migration, protocol or configuration change: upgrade in place.
+
 ### Fixed
 
 - **A previewed page with no scripts says nothing about scripts (WEB-U-513).** A page of text, pictures and tables no
