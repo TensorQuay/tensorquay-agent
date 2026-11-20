@@ -13,6 +13,7 @@ use url::Url;
 mod admission;
 mod agent_teams;
 mod builtin_images;
+mod channels;
 mod computer;
 pub(crate) use computer::{MAX_ACTIONS_PER_RUN, MAX_SCREENSHOTS_PER_RUN};
 mod desktop;
@@ -120,6 +121,8 @@ pub struct GatewayConfig {
     pub(crate) agent_teams: agent_teams::AgentTeams,
     /// `[desktop]`: the Desktop environment's limits (ADR-0039).
     pub(crate) desktop: desktop::Desktop,
+    /// `[channels]`: what woken runs may spend in a channel without a budget (ADR-0014's amendment of 20 Nov 2026).
+    pub(crate) channels: channels::Channels,
     /// `[computer]`: the `computer` tool's per-run caps (ADR-0039 section 4).
     pub(crate) computer: computer::Computer,
     /// `[tasks]`: how tasks behave, file-only.
@@ -187,6 +190,8 @@ struct Input {
     agent_teams: agent_teams::AgentTeamsInput,
     #[serde(default)]
     desktop: desktop::DesktopInput,
+    #[serde(default)]
+    channels: channels::ChannelsInput,
     #[serde(default)]
     computer: computer::ComputerInput,
     #[serde(default)]
@@ -422,6 +427,7 @@ impl GatewayConfig {
             workspaces,
             agent_teams: agent_teams::agent_teams(input.agent_teams)?,
             desktop: desktop::desktop(&input.desktop)?,
+            channels: channels::channels(&input.channels),
             computer: computer::computer(&input.computer)?,
             tasks: input.tasks,
             sandbox: input.sandbox,

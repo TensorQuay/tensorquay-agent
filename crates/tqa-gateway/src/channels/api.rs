@@ -98,6 +98,10 @@ pub(crate) struct Member {
     /// Whether the caller may open an agent member's task page; absent for a person.
     #[serde(skip_serializing_if = "Option::is_none")]
     can_open: Option<bool>,
+    /// An agent's live state for this channel (ADR-0014's amendment of 20 Nov 2026, A7): `working`, `waiting`,
+    /// `waking`, `idle`, `held` or `unreachable`; absent for a person.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    state: Option<&'static str>,
 }
 
 impl From<MemberView> for Member {
@@ -116,6 +120,7 @@ impl From<MemberView> for Member {
             added_at: view.added_at,
             run_status: view.run_status,
             can_open: view.can_open,
+            state: None,
         }
     }
 }
@@ -331,10 +336,18 @@ pub(crate) async fn members(
     crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
         let mut connection = state.pool.acquire().await?;
         store::visible(&mut connection, caller(&user), id).await?;
-        let items = store::members(&mut connection, id, caller(&user)).await?;
-        Ok(Json(Members {
-            items: items.into_iter().map(Member::from).collect(),
-        }))
+        let views = store::members(&mut connection, id, caller(&user)).await?;
+        let mut items = Vec::with_capacity(views.len());
+        for view in views {
+            let mut member = Member::from(view);
+            if member.kind == "conversation" {
+                member.state = Some(
+                    super::wake::member_state(&state, &mut connection, (id, member.id)).await?,
+                );
+            }
+            items.push(member);
+        }
+        Ok(Json(Members { items }))
     })
     .await
 }
@@ -546,6 +559,7 @@ pub(crate) async fn read(
             &mut connection,
             id,
             (query.since, &query.filter, query.limit),
+            true,
         )
         .await?;
         Ok(Json(Page {
@@ -640,6 +654,8 @@ pub(crate) async fn post(
         if let Some(last) = appended.last() {
             state.channels.published(id, last.seq);
         }
+        // Whom it wakes, just after the commit (ADR-0014's amendment of 20 Nov 2026, A3).
+        super::wake::soon(&state, Some(id));
         Ok((StatusCode::CREATED, Json(body)))
     })
     .await
@@ -829,6 +845,8 @@ pub(crate) async fn sweep(state: &State) -> Result<usize, GatewayError> {
             decided += 1;
         }
     }
+    // The wakes that are due, the decisions' among them, and any a restart lost or a run held back (A3).
+    super::wake::send(state, None).await?;
     Ok(decided)
 }
 

@@ -118,6 +118,10 @@ async fn complete(
     crate::teams::budget::check(&state, &caller.conversation)
         .await
         .map_err(store_deadline)?;
+    // A run a channel's wake started, once that channel's budget is spent (ADR-0014's amendment of 20 Nov 2026, A5).
+    crate::channels::wake::check(&state, crate::conversations::uuid(&caller.conversation)?)
+        .await
+        .map_err(store_deadline)?;
     let secret = credential(&state, &caller.route, &reader(&caller, run.as_ref())?).await?;
     let request = request::build(
         &state.relay.client,

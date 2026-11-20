@@ -25226,6 +25226,18 @@
             ],
             "description": "An agent member's run, from the lifecycle projection (GW-I-113); present only for kind conversation. A run that started and never ended (a crash) reads running, as on the conversation page. A client shows an unknown value as plain words."
           },
+          "state": {
+            "type": "string",
+            "enum": [
+              "working",
+              "waiting",
+              "waking",
+              "idle",
+              "held",
+              "unreachable"
+            ],
+            "description": "An agent member's live state in this channel (ADR-0014's amendment of 20 Nov 2026, A7): working (a run is active), waiting (that run waits on this channel), waking (a wake is queued), idle, held (the budget or the bound on agents waking each other holds its wake back) or unreachable (its runtime is too old to be woken); present only for kind conversation. A client shows an unknown value as plain words."
+          },
           "can_open": {
             "type": "boolean",
             "description": "Whether the caller may open this agent member's task page: true for the task's owner and for an administrator (who gets its private view), false otherwise. Present only for kind conversation."
@@ -25467,6 +25479,34 @@
                 "type": "string"
               }
             }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "kind",
+              "text"
+            ],
+            "properties": {
+              "type": {
+                "const": "notice"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "wake_budget_80",
+                  "wake_budget_spent",
+                  "wakes_bounded",
+                  "unreachable_runtime",
+                  "member_deleted"
+                ]
+              },
+              "text": {
+                "type": "string"
+              }
+            },
+            "description": "Written only by the gateway, for people (ADR-0014's amendment of 20 Nov 2026): a line about the channel itself, in the gateway's fixed words. Never in an agent's reads; posting one is refused. A client shows it as one muted line, and an unknown kind by its text."
           }
         ]
       },
@@ -26523,6 +26563,26 @@
               "after"
             ],
             "description": "Set on the gateway's wake of an agent team's reader (protocol revision 13's marker): a client shows its notice, never the text as the person's message, and offers no Cancel."
+          },
+          "channel_wake": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "channel": {
+                "type": "string",
+                "description": "The channel's id."
+              },
+              "after": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "The member's place in the channel's log: the waiting messages come after it."
+              }
+            },
+            "required": [
+              "channel",
+              "after"
+            ],
+            "description": "Set on a channel's wake of its agent member (protocol revision 16's marker, ADR-0014's amendment of 20 Nov 2026): a client shows its notice, never the text as the person's message, and offers no Cancel."
           },
           "lead_brief": {
             "const": true,

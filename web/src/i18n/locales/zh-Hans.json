@@ -206,6 +206,7 @@
     "notice.resumed": "环境重启后已恢复",
     "notice.askedAgain": "与服务器的连接中断了 {seconds} 秒，因此重新询问了模型，这一步从头开始。",
     "notice.wakeTeam": "团队有新消息",
+    "notice.wakeChannel": "频道有新消息",
     "notice.compacted": "已概括先前的步骤",
     "notice.workspaceFull": "工作区已满。请释放一些空间（删除不再需要的文件）后继续。",
     "notice.switched": "已切换到 {template}",

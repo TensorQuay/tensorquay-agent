@@ -85,20 +85,31 @@ export function TranscriptTurns({
                 {t("notice.wakeTeam")}
               </p>
             )}
-            {turn.prompt && !turn.prompt.brief && !turn.prompt.wake && (
-              <article className="user-message" aria-label={t("prompt.yours")}>
-                <p className="message-text">{turn.prompt.text}</p>
-                {turn.prompt.attachments.length > 0 && (
-                  <Suspense fallback={null}>
-                    <SentAttachments
-                      paths={turn.prompt.attachments}
-                      conversationId={conversationId}
-                      onOpenFile={onOpenFile}
-                    />
-                  </Suspense>
-                )}
-              </article>
+            {turn.prompt?.channelWake && (
+              <p className="transcript-notice type-small muted">
+                {t("notice.wakeChannel")}
+              </p>
             )}
+            {turn.prompt &&
+              !turn.prompt.brief &&
+              !turn.prompt.wake &&
+              !turn.prompt.channelWake && (
+                <article
+                  className="user-message"
+                  aria-label={t("prompt.yours")}
+                >
+                  <p className="message-text">{turn.prompt.text}</p>
+                  {turn.prompt.attachments.length > 0 && (
+                    <Suspense fallback={null}>
+                      <SentAttachments
+                        paths={turn.prompt.attachments}
+                        conversationId={conversationId}
+                        onOpenFile={onOpenFile}
+                      />
+                    </Suspense>
+                  )}
+                </article>
+              )}
             {(turn.activities.length > 0 ||
               turn.work.length > 0 ||
               turn.retries.length > 0 ||

@@ -206,6 +206,7 @@
     "notice.resumed": "Resumed after the environment restarted",
     "notice.askedAgain": "The connection to the server dropped for {seconds} s, so the model was asked again and this step started over.",
     "notice.wakeTeam": "New team messages",
+    "notice.wakeChannel": "New channel messages",
     "notice.compacted": "Earlier steps summarised",
     "notice.workspaceFull": "The workspace is full. Free some space (delete files you no longer need) and continue.",
     "notice.routeFallback": "Switched to {to} ({from} unavailable)",

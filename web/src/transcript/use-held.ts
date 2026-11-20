@@ -13,7 +13,7 @@ import type { QueuedMessage } from "../protocol/generated/api";
  * offered to cancel, which would withdraw the wake or the brief (WEB-U-387, WEB-U-388).
  */
 export const gatewayTurn = (message: QueuedMessage) =>
-  Boolean(message.team_wake || message.lead_brief);
+  Boolean(message.team_wake || message.lead_brief || message.channel_wake);
 
 /**
  * The task's messages waiting for its run (GW-I-129), or for a slot (GW-I-173), as the gateway keeps them: read again
@@ -86,6 +86,10 @@ export function useHeldMessages(
     waiting: people.filter((message) => message.state === "waiting_for_slot"),
     /** Whether the gateway's wake of this team reader waits for a slot or its sandbox (WEB-U-387). */
     wakeWaiting: gatewayWaiting((message) => Boolean(message.team_wake)),
+    /** Whether a channel's wake of this member waits for a slot or its sandbox (WEB-U-514). */
+    channelWakeWaiting: gatewayWaiting((message) =>
+      Boolean(message.channel_wake),
+    ),
     /** Whether a member's first turn, with its lead's brief, waits for a slot or its sandbox (WEB-U-388). */
     briefWaiting: gatewayWaiting((message) => Boolean(message.lead_brief)),
     /** How many of the person's waiting messages were queued before the gateway's waiting turn, whose notice goes after

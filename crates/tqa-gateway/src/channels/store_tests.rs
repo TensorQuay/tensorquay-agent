@@ -266,24 +266,24 @@ async fn gw_i_032_reads_page_by_since_and_limit_and_filter(pool: PgPool) -> Test
             .map(|message| message.seq)
             .collect::<Vec<_>>()
     };
-    let page = read(&mut connection, id, (0, &everything, 2)).await?;
+    let page = read(&mut connection, id, (0, &everything, 2), true).await?;
     assert_eq!(
         (seqs(&page), page.next_since, page.more),
         (vec![1, 2], 2, true)
     );
-    let page = read(&mut connection, id, (2, &everything, 10)).await?;
+    let page = read(&mut connection, id, (2, &everything, 10), true).await?;
     assert_eq!(
         (seqs(&page), page.next_since, page.more),
         (vec![3, 4, 5], 5, false)
     );
-    let page = read(&mut connection, id, (5, &everything, 10)).await?;
+    let page = read(&mut connection, id, (5, &everything, 10), true).await?;
     assert_eq!(
         (seqs(&page), page.next_since, page.more),
         (vec![], 5, false)
     );
     let shared = &pool;
     let filtered = |filter: ChannelFilter| async move {
-        read(&mut *shared.acquire().await?, id, (0, &filter, 200))
+        read(&mut *shared.acquire().await?, id, (0, &filter, 200), true)
             .await
             .map(|page| seqs(&page))
     };
@@ -320,7 +320,7 @@ async fn gw_i_032_reads_page_by_since_and_limit_and_filter(pool: PgPool) -> Test
         [3, 4, 5]
     );
     // What is stored reads back as it was written.
-    let page = read(&mut connection, id, (0, &everything, 200)).await?;
+    let page = read(&mut connection, id, (0, &everything, 200), true).await?;
     assert_eq!(page.messages[2].author, agent);
     assert_eq!(page.messages[1].body, task);
     Ok(())

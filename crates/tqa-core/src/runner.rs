@@ -51,7 +51,7 @@ pub struct UserTurn {
     /// gets as it is.
     pub team_wake: Option<tqa_types::TeamWake>,
     /// The gateway's wake of a channel member (revision 16), journaled beside the text as `team_wake` is.
-    pub channel_wake: Option<tqa_types::ChannelWake>,
+    pub channel_wake: Option<Box<tqa_types::ChannelWake>>,
 }
 /// Explicit dependencies; none of these services is discovered from the host by the loop.
 pub struct RunnerDeps {

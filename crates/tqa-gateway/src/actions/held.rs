@@ -41,7 +41,7 @@ pub(crate) struct Part {
     /// a person's words.
     pub team_wake: Option<tqa_types::TeamWake>,
     /// The gateway's wake of a channel member (revision 16): a turn of its own too.
-    pub channel_wake: Option<tqa_types::ChannelWake>,
+    pub channel_wake: Option<Box<tqa_types::ChannelWake>>,
 }
 
 impl Part {
@@ -187,7 +187,7 @@ pub(crate) struct Item {
     team_wake: Option<tqa_types::TeamWake>,
     /// The gateway's wake of a channel member (revision 16): a client shows its notice, never the person's message.
     #[serde(skip_serializing_if = "Option::is_none")]
-    channel_wake: Option<tqa_types::ChannelWake>,
+    channel_wake: Option<Box<tqa_types::ChannelWake>>,
     /// A team member's first turn, with its lead's brief (GW-I-300): a client shows its notice, not the frame.
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     lead_brief: bool,

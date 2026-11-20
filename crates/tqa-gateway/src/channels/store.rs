@@ -98,6 +98,7 @@ const fn type_text(kind: MessageType) -> &'static str {
         MessageType::Claim => "claim",
         MessageType::Report => "report",
         MessageType::Done => "done",
+        MessageType::Notice => "notice",
     }
 }
 
@@ -193,7 +194,8 @@ pub(crate) async fn add_member(
             return Err(GatewayError::Conflict("channel_full"));
         }
         sqlx::query!(
-            "INSERT INTO channel_members (channel_id, user_id, conversation_id, role, added_by) VALUES ($1, $2, $3, $4, $5)",
+            "INSERT INTO channel_members (channel_id, user_id, conversation_id, role, added_by, read_seq) \
+             SELECT $1, $2, $3, $4, $5, last_seq FROM channels WHERE id = $1",
             channel,
             user,
             conversation,
@@ -286,14 +288,14 @@ pub(crate) async fn append_body(
     author: &Author,
     (parent, body): (Option<u64>, &MessageBody),
 ) -> Result<ChannelMessage, GatewayError> {
-    let state = sqlx::query_scalar!(
-        "SELECT state FROM channels WHERE id = $1 FOR UPDATE",
+    let found = sqlx::query!(
+        "SELECT state, kind FROM channels WHERE id = $1 FOR UPDATE",
         channel
     )
     .fetch_optional(&mut *connection)
     .await?
     .ok_or(GatewayError::NotFound)?;
-    if state == "ended" {
+    if found.state == "ended" {
         return Err(GatewayError::Conflict("channel_ended"));
     }
     if author.kind != AuthorKind::Gateway {
@@ -348,6 +350,10 @@ pub(crate) async fn append_body(
     )
     .fetch_one(&mut *connection)
     .await?;
+    // Who it wakes and its hop (ADR-0014's amendment of 20 Nov 2026); an agent team's log has its own wakes.
+    if found.kind == "channel" {
+        super::wake::mark(connection, (channel, seq), author, (parent, body)).await?;
+    }
     Ok(ChannelMessage {
         seq: seq_of(seq)?,
         ts: timestamp(created)?,
@@ -357,7 +363,8 @@ pub(crate) async fn append_body(
     })
 }
 
-/// The messages after `since` that match `filter`, at most `limit`, in seq order.
+/// The messages after `since` that match `filter`, at most `limit`, in seq order; the gateway's notices only for
+/// `people` (an agent's reads never have them).
 ///
 /// # Errors
 /// Storage failure.
@@ -365,6 +372,7 @@ pub(crate) async fn read(
     connection: &mut PgConnection,
     channel: Uuid,
     (since, filter, limit): (u64, &ChannelFilter, u32),
+    people: bool,
 ) -> Result<Page, GatewayError> {
     let types: Vec<String> = filter
         .types
@@ -378,6 +386,7 @@ pub(crate) async fn read(
          AND ($4::bigint IS NULL OR parent = $4) \
          AND ($5::bigint IS NULL OR task_seq = $5 OR (seq = $5 AND type = 'task')) \
          AND ($6::text IS NULL OR author_kind = $6) \
+         AND ($8 OR type <> 'notice') \
          ORDER BY seq LIMIT $7",
         channel,
         db_seq(since)?,
@@ -385,7 +394,8 @@ pub(crate) async fn read(
         filter.parent.map(db_seq).transpose()?,
         filter.task_seq.map(db_seq).transpose()?,
         filter.author_kind.map(kind_text),
-        i64::from(limit) + 1
+        i64::from(limit) + 1,
+        people
     )
     .fetch_all(connection)
     .await?;
@@ -433,7 +443,9 @@ mod decisions;
 mod members;
 
 pub(crate) use claims::{Claimed, claim, tasks};
-pub(crate) use decisions::{ballots, close_open, decide, due_proposals, post, proposal, voters};
+pub(crate) use decisions::{
+    ballots, close_open, decide, due_proposals, gateway_author, post, proposal, voters,
+};
 pub(crate) use members::{
     Listed, MemberView, RunStatus, conversation_author, conversation_owner, delete, end, exists,
     listed, members, memberships, remove_member, visible,

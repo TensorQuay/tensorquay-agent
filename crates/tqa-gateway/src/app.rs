@@ -676,7 +676,9 @@ impl Gateway {
     /// Holds channel wakes (`true`): nothing is sent after a commit or by the sweep, as if the gateway had stopped
     /// first; [`Gateway::channel_wakes_now`] still sends. Only with the `testing` feature.
     #[cfg(feature = "testing")]
-    pub fn channel_wakes_hold(&self, _held: bool) {}
+    pub fn channel_wakes_hold(&self, held: bool) {
+        self.state.channels.hold(held);
+    }
 
     /// Sends every channel wake that is due now, as the sweep does (ADR-0014's amendment of 20 Nov 2026, A3). Only
     /// with the `testing` feature.
@@ -685,7 +687,7 @@ impl Gateway {
     /// Storage failure.
     #[cfg(feature = "testing")]
     pub async fn channel_wakes_now(&self) -> Result<(), GatewayError> {
-        Ok(())
+        crate::channels::wake::send(&self.state, None).await
     }
 
     /// Trusts `certificate` (DER) as an upstream root for keyed hosts, beside the public ones: for tests whose keyed

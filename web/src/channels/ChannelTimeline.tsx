@@ -362,5 +362,8 @@ function Body({
             : t("channels.finished")}
         </p>
       );
+    case "notice":
+      // The gateway's line about the channel itself (ADR-0014's amendment of 20 Nov 2026), as one muted line.
+      return <p className="type-small muted">{body.text}</p>;
   }
 }

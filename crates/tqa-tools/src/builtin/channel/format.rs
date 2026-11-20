@@ -103,7 +103,8 @@ fn unrecognised(channel: &str, value: &serde_json::Value) -> Result<String, Tool
 /// A typed body in plain words.
 pub(crate) fn body_text(body: &MessageBody) -> String {
     match body {
-        MessageBody::Text { text } => text.clone(),
+        // The gateway keeps notices from agents' reads; one that came would read as its sentence.
+        MessageBody::Text { text } | MessageBody::Notice { text, .. } => text.clone(),
         MessageBody::Proposal {
             title,
             text,
@@ -186,6 +187,7 @@ pub(crate) const fn type_name(kind: MessageType) -> &'static str {
         MessageType::Claim => "claim",
         MessageType::Report => "report",
         MessageType::Done => "done",
+        MessageType::Notice => "notice",
     }
 }
 

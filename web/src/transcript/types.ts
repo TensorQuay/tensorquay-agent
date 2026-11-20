@@ -99,6 +99,11 @@ export type Item =
        * the person's words; the turn's text is the model's sentence and is not shown. Who wrote is in the team's log.
        */
       wake?: true;
+      /**
+       * A channel's wake of its agent member (protocol revision 16, ADR-0014's amendment of 20 Nov 2026): new channel
+       * messages are waiting. The gateway's notice, never the person's words; the model's sentence is not shown.
+       */
+      channelWake?: true;
     }
   | {
       kind: "notice";

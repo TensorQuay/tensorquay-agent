@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE conversations SET runtime_revision = $2 WHERE id = $1 AND runtime_revision IS DISTINCT FROM $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f2dbfcb39eb8cdc2694ce9b5328a20bdc206eba7cba442a8eaeeaef5c100ea54"
+}

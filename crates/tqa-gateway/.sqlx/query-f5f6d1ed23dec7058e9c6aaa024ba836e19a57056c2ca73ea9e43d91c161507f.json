@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO channel_charges (conversation_id, channel_id, hop) SELECT w.conversation_id, w.channel_id, w.hop FROM channel_wakes w WHERE w.conversation_id = $1 AND w.key = (SELECT i.key FROM idempotency i WHERE i.conversation_id = $1 AND i.execution_status = 'delivered' ORDER BY i.updated_at DESC LIMIT 1) ORDER BY w.sent_at DESC LIMIT 1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f5f6d1ed23dec7058e9c6aaa024ba836e19a57056c2ca73ea9e43d91c161507f"
+}

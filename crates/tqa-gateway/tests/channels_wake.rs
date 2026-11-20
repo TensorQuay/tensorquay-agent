@@ -59,21 +59,16 @@ impl Agent {
         revision: u16,
     ) -> Result<Option<ClientFrame>> {
         if self.runtime.is_none() {
-            let deadline = tokio::time::Instant::now() + wait;
-            while f.backend.created(&self.id).is_none() {
-                if tokio::time::Instant::now() >= deadline {
-                    return Ok(None);
-                }
-                tokio::time::sleep(Duration::from_millis(50)).await;
+            if !created(f, &self.id, wait).await {
+                return Ok(None);
             }
             self.runtime = Some(f.runtime_at(&self.id, revision).await?);
         }
-        Ok(self
-            .runtime
+        self.runtime
             .as_mut()
             .ok_or("runtime")?
             .try_action(wait)
-            .await?)
+            .await
     }
 
     async fn next(&mut self, f: &Fixture, wait: Duration) -> Result<Option<ClientFrame>> {
@@ -90,7 +85,7 @@ impl Agent {
                 team_wake: None,
                 lead_brief: None,
                 ..
-            }) => Ok(Some((text, wake))),
+            }) => Ok(Some((text, *wake))),
             Some(other) => Err(format!("not a channel's wake: {other:?}").into()),
         }
     }
@@ -201,6 +196,18 @@ impl Agent {
         .fetch_one(&f.pool)
         .await?)
     }
+}
+
+/// Whether the task's sandbox exists within `wait`.
+async fn created(f: &Fixture, id: &ConversationId, wait: Duration) -> bool {
+    let deadline = tokio::time::Instant::now() + wait;
+    while f.backend.created(id).is_none() {
+        if tokio::time::Instant::now() >= deadline {
+            return false;
+        }
+        tokio::time::sleep(Duration::from_millis(50)).await;
+    }
+    true
 }
 
 async fn runtime_call(
@@ -613,6 +620,12 @@ async fn gw_i_350_351_woken_runs_spend_the_budget_and_it_stops_a_long_exchange(
             let (owner, cookie) = f.admin().await?;
             let mut analyst = Agent::new(f, owner.id, "Pricing analyst").await?;
             let id = channel(f, &cookie, "pricing", &[(&analyst, "member")]).await?;
+            let secret =
+                secrecy::SecretString::from(format!("synthetic-provider-{}", Uuid::now_v7()));
+            f.gateway
+                .secret_store()
+                .put(&"secrets/local".parse()?, secret)
+                .await?;
             // A run the person started is never charged.
             let (status, _) = call(
                 f,

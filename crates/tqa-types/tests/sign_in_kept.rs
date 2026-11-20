@@ -3,9 +3,7 @@
 //! `screen.keep_sign_in`; the runtime's `screen.reset` says when a run's end kept the profile (`kept`); the gateway's
 //! notices say who turned the switch on or off.
 use serde_json::{Value, json};
-use tqa_types::{
-    ClientFrame, PROTOCOL_REVISION, PROTOCOL_REVISIONS, ScreenNoticeKind, ScreenPerson, ServerFrame,
-};
+use tqa_types::{ClientFrame, PROTOCOL_REVISIONS, ScreenNoticeKind, ScreenPerson, ServerFrame};
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;
 
@@ -145,7 +143,10 @@ fn proto_u_045_the_notices_say_who_turned_the_switch_on_or_off() -> TestResult {
 
 #[test]
 fn proto_u_045_revision_15_names_the_switch_and_the_floor_stays_10() {
-    assert!(PROTOCOL_REVISION >= 15, "revision 15 stays in the table");
+    assert!(
+        PROTOCOL_REVISIONS.iter().any(|row| row.number == 15),
+        "revision 15 stays in the table"
+    );
     assert_eq!(tqa_types::MIN_RUNTIME_REVISION, 10);
     assert_eq!(tqa_types::KEEP_SIGN_IN_REVISION, 15);
     let row = &PROTOCOL_REVISIONS[14];

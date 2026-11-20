@@ -143,7 +143,7 @@ pub enum Event {
         /// The gateway's wake of a channel member (revision 16, ADR-0014's amendment of 20 Nov 2026): shown as the
         /// gateway's notice of waiting messages, never as the person's words.
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        channel_wake: Option<crate::ChannelWake>,
+        channel_wake: Option<Box<crate::ChannelWake>>,
     },
     /// A run begins.
     #[serde(rename = "run.started")]

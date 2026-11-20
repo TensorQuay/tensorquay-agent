@@ -118,6 +118,7 @@
     "clone.fetchFailed": "Couldn't get the workspace's files{reason, select, egress_denied {: its site isn't on the list of sites the agent may reach} io {: they couldn't be downloaded} other {}}",
     "notice.resumed": "Resumed after the environment restarted",
     "notice.wakeTeam": "New team messages",
+    "notice.wakeChannel": "New channel messages",
     "notice.compacted": "Earlier steps summarised",
     "notice.workspaceFull": "The workspace is full. Free some space (delete files you no longer need) and continue.",
     "notice.routeFallback": "Switched to {to} ({from} unavailable)",

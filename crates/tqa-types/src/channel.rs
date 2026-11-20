@@ -233,10 +233,12 @@ pub enum MessageType {
     Report,
     /// The work is finished.
     Done,
+    /// Written only by the gateway, for people (ADR-0014's amendment of 20 Nov 2026): never in an agent's reads.
+    Notice,
 }
 
 impl MessageType {
-    /// Every message type.
+    /// Every message type an agent reads or posts; a notice is the page's alone.
     pub const ALL: [Self; 8] = [
         Self::Text,
         Self::Proposal,
@@ -320,6 +322,34 @@ pub enum MessageBody {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         summary: Option<String>,
     },
+    /// Written only by the gateway, for people: a line about the channel itself, in the gateway's fixed words (ADR-0014's
+    /// amendment of 20 Nov 2026, A5, A6, A10). Never in an agent's reads.
+    Notice {
+        /// What it says.
+        kind: ChannelNoticeKind,
+        /// The sentence.
+        text: String,
+    },
+}
+
+/// What a channel's notice says (ADR-0014's amendment of 20 Nov 2026).
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize, JsonSchema)]
+pub enum ChannelNoticeKind {
+    /// Woken runs have spent 80 % of the channel's budget (A5).
+    #[serde(rename = "wake_budget_80")]
+    WakeBudget80,
+    /// Woken runs have spent the channel's budget: no agent is woken any more (A5).
+    #[serde(rename = "wake_budget_spent")]
+    WakeBudgetSpent,
+    /// Agents here stopped waking each other: a person's post starts them again (A6).
+    #[serde(rename = "wakes_bounded")]
+    WakesBounded,
+    /// A member can't be woken: its environment's runtime is too old (A10).
+    #[serde(rename = "unreachable_runtime")]
+    UnreachableRuntime,
+    /// A member can't be woken: its task was deleted (A10).
+    #[serde(rename = "member_deleted")]
+    MemberDeleted,
 }
 
 impl MessageBody {
@@ -335,6 +365,7 @@ impl MessageBody {
             Self::Claim { .. } => MessageType::Claim,
             Self::Report { .. } => MessageType::Report,
             Self::Done { .. } => MessageType::Done,
+            Self::Notice { .. } => MessageType::Notice,
         }
     }
 
@@ -353,7 +384,7 @@ impl MessageBody {
     /// `invalid_frame` naming the field (`body.<field>`).
     pub fn validate(&self) -> Result<(), FrameError> {
         match self {
-            Self::Text { text } => required("body.text", text),
+            Self::Text { text } | Self::Notice { text, .. } => required("body.text", text),
             Self::Proposal {
                 title,
                 text,
@@ -508,6 +539,9 @@ impl ChannelPost {
             }
             MessageBody::Claim { .. } => {
                 return Err(invalid("body.type", "a claim is made with task_claim"));
+            }
+            MessageBody::Notice { .. } => {
+                return Err(invalid("body.type", "a notice is written by the gateway"));
             }
             _ => {}
         }

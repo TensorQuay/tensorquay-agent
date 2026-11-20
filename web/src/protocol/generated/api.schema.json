@@ -2305,6 +2305,17 @@
             "cancelled"
           ]
         },
+        "state": {
+          "type": "string",
+          "enum": [
+            "working",
+            "waiting",
+            "waking",
+            "idle",
+            "held",
+            "unreachable"
+          ]
+        },
         "can_open": {
           "type": "boolean"
         }
@@ -2541,6 +2552,33 @@
               "const": "done"
             },
             "summary": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "kind",
+            "text"
+          ],
+          "properties": {
+            "type": {
+              "const": "notice"
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "wake_budget_80",
+                "wake_budget_spent",
+                "wakes_bounded",
+                "unreachable_runtime",
+                "member_deleted"
+              ]
+            },
+            "text": {
               "type": "string"
             }
           }
@@ -3052,6 +3090,23 @@
             }
           },
           "required": [
+            "after"
+          ]
+        },
+        "channel_wake": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "channel": {
+              "type": "string"
+            },
+            "after": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "channel",
             "after"
           ]
         },

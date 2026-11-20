@@ -158,7 +158,7 @@ fn lead_brief(role: &str, workspace: WorkspaceMode, brief: Brief) -> LeadBrief {
     }
 }
 
-pub(super) async fn person(state: &State, id: Uuid) -> Result<crate::auth::User, GatewayError> {
+pub(crate) async fn person(state: &State, id: Uuid) -> Result<crate::auth::User, GatewayError> {
     let row = sqlx::query!(
         "SELECT email::text AS \"email!\", role FROM users WHERE id = $1",
         id
