@@ -100,6 +100,7 @@ export function fakeChannels({
   tasks = [],
   people = {},
   admin = false,
+  refuseUploads = {},
 }: {
   channels?: Channel[];
   members?: Record<string, Member[]>;
@@ -112,13 +113,22 @@ export function fakeChannels({
   people?: Record<string, Member>;
   /** Whether `me` is an administrator, who may end or delete any channel. */
   admin?: boolean;
+  /** Upload refusals by file name: `upload_too_large` or `uploads_full` (A9). */
+  refuseUploads?: Record<string, string>;
 } = {}) {
   const store = [...channels];
   const logs = new Map(
     Object.entries(messages).map(([id, log]) => [id, [...log]]),
   );
   const creates: NewChannel[] = [];
-  const posts: { id: string; write: ChannelPost; key: string }[] = [];
+  const posts: {
+    id: string;
+    write: ChannelPost;
+    key: string;
+    files?: string[];
+  }[] = [];
+  const uploads = new Map<string, { id: string; name: string; size: number }>();
+  const removedUploads: string[] = [];
   const streams: FakeStream[] = [];
   const find = (id: string) => {
     const found = store.find((item) => item.id === id);
@@ -183,19 +193,54 @@ export function fakeChannels({
       streams.push(opened);
       return opened;
     },
-    post: (id, write, key) =>
+    post: (id, write, key, files) =>
       settle(() => {
         find(id);
-        posts.push({ id, write, key });
+        posts.push({
+          id,
+          write,
+          key,
+          ...(files?.length ? { files: [...files] } : {}),
+        });
         const log = logs.get(id) ?? [];
-        const stored = message(
-          (log.at(-1)?.seq ?? 0) + 1,
-          me,
-          write.body,
-          write.parent,
-        );
+        const stored = {
+          ...message((log.at(-1)?.seq ?? 0) + 1, me, write.body, write.parent),
+          ...(files?.length
+            ? {
+                files: files.map((upload) => {
+                  const kept = uploads.get(upload);
+                  return { name: kept?.name ?? upload, size: kept?.size ?? 0 };
+                }),
+              }
+            : {}),
+        };
         logs.set(id, [...log, stored]);
         return stored;
+      }),
+    // A9: an upload kept for the next post; a name in `refuseUploads` is refused with its code.
+    upload: (id, file) =>
+      settle(() => {
+        find(id);
+        const code = refuseUploads[file.name];
+        if (code)
+          throw new ApiError(
+            code === "upload_too_large" ? 413 : 409,
+            code,
+            "fixture refusal",
+          );
+        const kept = {
+          id: idFrom(`upload:${file.name}:${uploads.size}`),
+          name: file.name,
+          size: file.size,
+        };
+        uploads.set(kept.id, kept);
+        return kept;
+      }),
+    removeUpload: (id, upload) =>
+      settle(() => {
+        find(id);
+        removedUploads.push(upload);
+        uploads.delete(upload);
       }),
   };
   const voting = (id: string) =>
@@ -398,6 +443,7 @@ export function fakeChannels({
     api: api as ChannelsApi,
     creates,
     posts,
+    removedUploads,
     streams,
     created: () => store[0],
     /** Ends a channel, as its owner would. */

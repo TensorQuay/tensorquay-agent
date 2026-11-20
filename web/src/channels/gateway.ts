@@ -1,4 +1,5 @@
 import { api, type ApiClient } from "../api/client";
+import { failure } from "../api/error";
 import { pathFor } from "../api/operations";
 import { openEventStream } from "../api/stream";
 import { parseApi } from "../protocol/validate";
@@ -70,12 +71,45 @@ export function gatewayChannelsFor(client: ApiClient): ChannelsApi {
         (value) => parseApi(value, "ChannelMessage"),
         { parameters: { id, seq: String(seq) }, key },
       ),
-    post: (id, write, key) =>
+    post: (id, write, key, files) =>
       client.request(
         settingsEndpoint("channelPost"),
         (value) => parseApi(value, "ChannelMessage"),
-        { parameters: { id }, body: JSON.stringify(write), key },
+        {
+          parameters: { id },
+          body: JSON.stringify(
+            files && files.length > 0 ? { ...write, files } : write,
+          ),
+          key,
+        },
       ),
+    // The file is the raw body, as a task's upload is; the gateway sanitises its name (A9).
+    upload: async (id, file) => {
+      const response = await fetch(
+        pathFor(
+          settingsEndpoint("channelUpload"),
+          { id },
+          new URLSearchParams({ name: file.name }),
+        ),
+        {
+          method: "POST",
+          body: file,
+          credentials: "same-origin",
+          headers: {
+            accept: "application/json",
+            "content-type": "application/octet-stream",
+          },
+        },
+      );
+      const value: unknown = await response.json().catch(() => null);
+      if (response.status !== 201)
+        throw await failure(response.status, response.headers, value);
+      return parseApi(value, "ChannelUpload");
+    },
+    removeUpload: (id, upload) =>
+      client.request(settingsEndpoint("channelUploadDelete"), () => undefined, {
+        parameters: { id, upload },
+      }),
     setMember: (id, kind, member, role) =>
       client.request(
         settingsEndpoint("channelMemberPut"),

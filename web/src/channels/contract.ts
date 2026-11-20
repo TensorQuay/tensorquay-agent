@@ -8,6 +8,7 @@ import type {
   ChannelList,
   ChannelMember,
   ChannelMembers,
+  ChannelUpload,
   ChannelMessage,
   ChannelMessageBody,
   ChannelMessagePage,
@@ -42,6 +43,7 @@ export type ClaimLimit = NonNullable<
  * whether the caller may open an agent's task (its owner, or an administrator's private view).
  */
 export type Member = ChannelMember;
+export type { ChannelUpload };
 /** What a member posts; the gateway sets the author, so the web never sends one. */
 export type ChannelPost = Omit<GeneratedPost, "author">;
 
@@ -68,7 +70,17 @@ export type ChannelsApi = {
     since: number,
     signal?: AbortSignal,
   ): Promise<ChannelMessagePage>;
-  post(id: string, write: ChannelPost, key: string): Promise<ChannelMessage>;
+  /** Posts `write`, with the caller's uploads `files` by id (ADR-0014's amendment of 20 Nov 2026, A9). */
+  post(
+    id: string,
+    write: ChannelPost,
+    key: string,
+    files?: readonly string[],
+  ): Promise<ChannelMessage>;
+  /** Uploads one file for the caller's next post: refused 413 upload_too_large or 409 uploads_full (A9). */
+  upload(id: string, file: File): Promise<ChannelUpload>;
+  /** Removes the caller's own upload that no post took (the composer's remove). */
+  removeUpload(id: string, upload: string): Promise<void>;
   /** The task board (ADR-0014 point 8). */
   tasks(id: string, signal?: AbortSignal): Promise<ChannelTaskBoard>;
   /** Claims a task for the caller (ADR-0014 point 8); a repeat answers the existing claim. */

@@ -1,12 +1,15 @@
 "use client";
 
 import "./catalogue";
-import { useState, type FormEvent } from "react";
+import { Paperclip, Send, X } from "lucide-react";
+import { useRef, useState, type FormEvent } from "react";
 
 import { ApiError } from "../api/error";
 import { useT } from "../i18n/I18nProvider";
+import { formatSize } from "../i18n/message";
 import type { MessageKey } from "../i18n/translate";
 import { Button } from "../ui/Button";
+import { Icon } from "../ui/Icon";
 import { Input } from "../ui/Input";
 import { Select } from "../ui/Select";
 import { Textarea } from "../ui/Textarea";
@@ -15,6 +18,7 @@ import type {
   ChannelPost,
   ChannelRole,
   ChannelState,
+  ChannelUpload,
   ClaimLimit,
 } from "./contract";
 
@@ -32,12 +36,22 @@ const REFUSALS: Readonly<Record<string, MessageKey>> = {
   observer: "channels.postObserver",
   not_member: "channels.postNotMember",
   channel_rate: "channels.postRate",
+  message_invalid: "channels.postFilesInvalid",
 };
+/** An upload's refusals, in plain words (ADR-0014's amendment of 20 Nov 2026, A9). */
+const UPLOAD_REFUSALS: Readonly<Record<string, MessageKey>> = {
+  upload_too_large: "channels.uploadTooLarge",
+  uploads_full: "channels.uploadsFull",
+};
+/** A proposal's or to-do's title is its first line, at most this long (the gateway's bound). */
+const MAX_TITLE = 200;
 const MAX_CLAIMANTS = 32;
 
 /**
- * Posts to a channel (ADR-0014; WEB-U-063): one message box, which Propose and Add a task turn into a titled form (a
- * proposal with its voting window, a task with how many may claim it) and Cancel turns back; or a reply. Observers, people who aren't members and ended channels read only.
+ * The channel's composer, pinned under the log (WEB-U-524, the mock of 17 Nov 2026): one box for a Message, a Proposal or
+ * a To-do, whose first line is the title; a proposal's voting window, a to-do's who may take it on; files attached as
+ * they are chosen, each removable, sent with the post (A9). A thread's reply box has a message only. Observers, people
+ * who aren't members and ended channels read only.
  */
 export function ChannelComposer({
   initialText = "",
@@ -47,6 +61,8 @@ export function ChannelComposer({
   replyTo,
   onCancelReply,
   onPost,
+  onUpload,
+  onRemoveUpload,
   thread = false,
 }: {
   /** A message to start from (a new channel's first step). */
@@ -58,19 +74,27 @@ export function ChannelComposer({
   state: ChannelState;
   replyTo: number | null;
   onCancelReply: () => void;
-  onPost: (write: ChannelPost) => Promise<void>;
+  onPost: (write: ChannelPost, files: readonly string[]) => Promise<void>;
+  /** Uploads a chosen file for this post; absent, nothing can be attached. */
+  onUpload?: (file: File) => Promise<ChannelUpload>;
+  onRemoveUpload?: (upload: string) => Promise<void>;
   /** A thread panel's reply box (WEB-U-523): a reply to `replyTo` only, with no other kind of post. */
   thread?: boolean;
 }) {
   const t = useT();
   const [kind, setKind] = useState<Kind>("text");
   const [text, setText] = useState(initialText);
-  const [title, setTitle] = useState("");
   const [window, setWindow] = useState(600);
   const [who, setWho] = useState<"one" | "some" | "all">("one");
   const [count, setCount] = useState("2");
-  const [failure, setFailure] = useState<MessageKey | null>(null);
+  const [failure, setFailure] = useState<{
+    key: MessageKey;
+    name?: string;
+  } | null>(null);
   const [pending, setPending] = useState(false);
+  const [files, setFiles] = useState<ChannelUpload[]>([]);
+  const [uploading, setUploading] = useState(0);
+  const chooser = useRef<HTMLInputElement>(null);
   if (state === "ended")
     return <p className="type-small muted">{t("channels.readOnlyEnded")}</p>;
   if (role === "observer")
@@ -85,47 +109,84 @@ export function ChannelComposer({
       ? value
       : undefined;
   };
+  /** A proposal's or to-do's title is the first line; the rest is its text (the title again when there is none). */
+  const split = () => {
+    const [first = "", ...rest] = text.split("\n");
+    const title = first.trim();
+    const more = rest.join("\n").trim();
+    return { title, more: more || title };
+  };
   const body = (): ChannelPost["body"] | null => {
     if (kind === "text") return text.trim() ? { type: "text", text } : null;
-    if (!title.trim() || !text.trim()) return null;
+    const { title, more } = split();
+    if (!title || title.length > MAX_TITLE) return null;
     if (kind === "proposal")
-      return {
-        type: "proposal",
-        title: title.trim(),
-        text,
-        window_seconds: window,
-      };
+      return { type: "proposal", title, text: more, window_seconds: window };
     const limit = claims();
     return {
       type: "task",
-      title: title.trim(),
-      spec: text,
+      title,
+      spec: more,
       ...(limit === undefined ? {} : { claims: limit }),
     };
   };
+  async function attach(chosen: FileList | null) {
+    if (!chosen || !onUpload) return;
+    for (const file of Array.from(chosen)) {
+      setUploading((n) => n + 1);
+      try {
+        const kept = await onUpload(file);
+        setFiles((current) => [...current, kept]);
+      } catch (error) {
+        setFailure({
+          key:
+            (error instanceof ApiError
+              ? UPLOAD_REFUSALS[error.code]
+              : undefined) ?? "channels.uploadFailed",
+          name: file.name,
+        });
+      } finally {
+        setUploading((n) => n - 1);
+      }
+    }
+  }
+  async function remove(upload: ChannelUpload) {
+    setFiles((current) => current.filter((item) => item.id !== upload.id));
+    await onRemoveUpload?.(upload.id).catch(() => undefined);
+  }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (kind !== "text" && split().title.length > MAX_TITLE) {
+      setFailure({ key: "channels.titleTooLong" });
+      return;
+    }
     const next = body();
-    if (!next || pending) return;
+    if (!next || pending || uploading > 0) return;
     setFailure(null);
     setPending(true);
     try {
-      await onPost({
-        ...(replyTo === null ? {} : { parent: replyTo }),
-        body: next,
-      });
+      await onPost(
+        { ...(replyTo === null ? {} : { parent: replyTo }), body: next },
+        files.map((file) => file.id),
+      );
       setText("");
-      setTitle("");
+      setFiles([]);
       setKind("text");
     } catch (error) {
-      setFailure(
-        (error instanceof ApiError ? REFUSALS[error.code] : undefined) ??
+      setFailure({
+        key:
+          (error instanceof ApiError ? REFUSALS[error.code] : undefined) ??
           "channels.postFailed",
-      );
+      });
     } finally {
       setPending(false);
     }
   }
+  const modes: readonly [Kind, MessageKey][] = [
+    ["text", "channels.modeMessage"],
+    ["proposal", "channels.modePropose"],
+    ["task", "channels.modeTodo"],
+  ];
   return (
     <form
       className="channel-composer stack"
@@ -140,20 +201,24 @@ export function ChannelComposer({
           </Button>
         </p>
       )}
-      {kind !== "text" && (
-        <p className="type-body-strong">
-          {t(kind === "proposal" ? "channels.newProposal" : "channels.newTask")}
-        </p>
-      )}
-      {kind !== "text" && (
-        <Input
-          label={t("channels.postTitle")}
-          value={title}
-          // Chosen from Propose or Add a task, so the title is where the person is going next.
-          // eslint-disable-next-line jsx-a11y/no-autofocus
-          autoFocus
-          onChange={(event) => setTitle(event.target.value)}
-        />
+      {!thread && (
+        <div
+          className="channel-modes"
+          role="group"
+          aria-label={t("channels.postKind")}
+        >
+          {modes.map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              className="channel-mode type-small"
+              aria-pressed={kind === value}
+              onClick={() => setKind(value)}
+            >
+              {t(label)}
+            </button>
+          ))}
+        </div>
       )}
       <Textarea
         label={t(
@@ -162,8 +227,8 @@ export function ChannelComposer({
             : kind === "text"
               ? "channels.messageText"
               : kind === "proposal"
-                ? "channels.proposalText"
-                : "channels.taskSpec",
+                ? "channels.proposalFirstLine"
+                : "channels.todoFirstLine",
         )}
         value={text}
         rows={3}
@@ -206,41 +271,67 @@ export function ChannelComposer({
           )}
         </>
       )}
-      {failure && <p className="field-error">{t(failure)}</p>}
+      {files.length > 0 && (
+        <ul className="channel-attached" aria-label={t("channels.attached")}>
+          {files.map((file) => (
+            <li key={file.id} className="channel-file type-small">
+              <span>
+                {t("channels.file", {
+                  name: file.name,
+                  size: formatSize(file.size, t.locale),
+                })}
+              </span>
+              <Button
+                variant="ghost"
+                type="button"
+                aria-label={t("channels.removeFile", { name: file.name })}
+                onClick={() => void remove(file)}
+              >
+                <Icon glyph={X} size={16} />
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {failure && (
+        <p className="type-small" role="alert">
+          {t(failure.key, { name: failure.name ?? "" })}
+        </p>
+      )}
       <div className="channel-composer-actions">
-        {thread ? (
-          <span />
-        ) : kind === "text" ? (
-          <div className="channel-composer-kinds">
+        {onUpload && !thread ? (
+          <>
+            <input
+              ref={chooser}
+              type="file"
+              multiple
+              hidden
+              aria-label={t("channels.attach")}
+              onChange={(event) => {
+                void attach(event.target.files);
+                event.target.value = "";
+              }}
+            />
             <Button
               variant="ghost"
               type="button"
-              onClick={() => setKind("proposal")}
+              aria-label={t("channels.attach")}
+              onClick={() => chooser.current?.click()}
             >
-              {t("channels.propose")}
+              <Icon glyph={Paperclip} size={16} />
             </Button>
-            <Button
-              variant="ghost"
-              type="button"
-              onClick={() => setKind("task")}
-            >
-              {t("channels.addTask")}
-            </Button>
-          </div>
+          </>
         ) : (
-          <Button
-            variant="secondary"
-            type="button"
-            onClick={() => {
-              setKind("text");
-              setTitle("");
-            }}
-          >
-            {t("common.cancel")}
-          </Button>
+          <span />
         )}
-        <Button type="submit" loading={pending}>
-          {t(thread ? "channels.send" : "channels.post")}
+        <Button
+          type="submit"
+          loading={pending}
+          disabled={uploading > 0}
+          aria-label={t("channels.send")}
+        >
+          <Icon glyph={Send} size={16} />
+          {t("channels.send")}
         </Button>
       </div>
     </form>

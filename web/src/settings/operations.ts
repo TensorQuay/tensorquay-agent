@@ -40,6 +40,11 @@ export const settingsOperations = {
   channelMembers: { method: "GET", path: "/api/v1/channels/{id}/members" },
   channelMessages: { method: "GET", path: "/api/v1/channels/{id}/messages" },
   channelPost: { method: "POST", path: "/api/v1/channels/{id}/messages" },
+  channelUpload: { method: "POST", path: "/api/v1/channels/{id}/uploads" },
+  channelUploadDelete: {
+    method: "DELETE",
+    path: "/api/v1/channels/{id}/uploads/{upload}",
+  },
   channelFile: {
     method: "GET",
     path: "/api/v1/channels/{id}/messages/{seq}/files/{index}",

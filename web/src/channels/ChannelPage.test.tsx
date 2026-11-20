@@ -172,7 +172,7 @@ describe("WEB-U-063 the channel page", () => {
       "Get the 1.0 release out by Friday",
     );
     expect(box2).toHaveFocus();
-    fireEvent.click(within(again).getByRole("button", { name: "Post" }));
+    fireEvent.click(within(again).getByRole("button", { name: "Send" }));
     expect(await screen.findByRole("article", { name: /^#1 / })).toBeVisible();
     expect(
       screen.queryByRole("region", { name: "Tell your agents what you need" }),
@@ -333,7 +333,12 @@ describe("WEB-U-063 the channel page", () => {
     fireEvent.click(await screen.findByRole("button", { name: /^To-dos/ }));
     expect(screen.getByRole("complementary", { name: "To-dos" })).toBeVisible();
     expect(await screen.findByText("No to-dos yet.")).toBeVisible();
-    expect(screen.getByRole("button", { name: "Add a to-do…" })).toBeVisible();
+    // The composer's To-do mode makes one (WEB-U-524).
+    expect(
+      within(
+        screen.getByRole("form", { name: "Post to the channel" }),
+      ).getByRole("button", { name: "To-do" }),
+    ).toBeVisible();
     expect(screen.queryByText(/No tasks yet|Add a task/)).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: /^Members/ }));
     expect(screen.getByRole("list", { name: "Members" })).toHaveTextContent(

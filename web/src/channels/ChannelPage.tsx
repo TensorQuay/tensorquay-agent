@@ -195,8 +195,8 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
       />
     );
   const item = channel.data;
-  async function post(write: ChannelPost) {
-    const stored = await api.post(id, write, newActionKey());
+  async function post(write: ChannelPost, files: readonly string[] = []) {
+    const stored = await api.post(id, write, newActionKey(), files);
     log.add([stored]);
   }
   async function claim(seq: number) {
@@ -315,6 +315,8 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
           state={item.state}
           replyTo={null}
           onCancelReply={() => undefined}
+          onUpload={(file) => api.upload(id, file)}
+          onRemoveUpload={(upload) => api.removeUpload(id, upload)}
           onPost={post}
         />
       </div>
