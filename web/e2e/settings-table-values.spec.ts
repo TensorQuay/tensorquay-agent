@@ -42,6 +42,13 @@ type Shown = { page: string; table: string; kind: KindName; in?: string };
 
 /** A value that would widen its table wraps whole in its column: the text whole, none of it clipped by its box. */
 const WRAPS: Shown[] = [
+  // A model's id has its own line and wraps whole, its pill under it (WEB-E2E-144, the first hour's finding 5).
+  {
+    page: "/settings/models",
+    table: "Model routes",
+    kind: "model",
+    in: ".route-model",
+  },
   {
     page: "/settings/keys",
     table: "Your keys for web services",
@@ -144,12 +151,6 @@ const CUT: Shown[] = [
     page: "/settings/models",
     table: "Model routes",
     kind: "routeLabel",
-    in: ".data-name",
-  },
-  {
-    page: "/settings/models",
-    table: "Model routes",
-    kind: "model",
     in: ".data-name",
   },
   {
@@ -456,13 +457,14 @@ async function start(page: Page) {
   return `/settings/people/${person.id}`;
 }
 
-/** Where in a cell a value may sit: a note's link, a value or reference held to one line, a note, a name. */
+/** Where in a cell a value may sit: a note's link, a value or reference held to one line, a note, a name, a model's id. */
 const SLOTS = [
   ".cell-note-link",
   ".cell-cut",
   ".secret-ref-line",
   ".cell-note",
   ".data-name",
+  ".route-model",
 ];
 
 /**
