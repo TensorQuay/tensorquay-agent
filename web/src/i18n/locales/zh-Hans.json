@@ -703,6 +703,8 @@
     "team.endRound": "第 {round} 轮：{reason}",
     "team.noticeStuck": "{member} 似乎卡住了。",
     "team.noticeFailed": "{member} 失败了。",
+    "team.noticeFailedWhy": "{member} 失败：{reason}。",
+    "team.noticeFailedAgain": "{member} 曾停止：{reason}。现在已重新开始工作。",
     "team.noticeStopped": "{member} 已被停止。",
     "team.noticeDeleted": "一个助手已被删除。",
     "team.noticeBudget": "团队已用掉 80% 的预算。已请每位助手汇报手头的成果。",

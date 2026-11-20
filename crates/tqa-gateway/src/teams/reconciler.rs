@@ -125,13 +125,27 @@ async fn apply(
     action: decide::Action,
 ) -> Result<(), GatewayError> {
     match action {
-        decide::Action::Notice { kind, member, text } => {
+        decide::Action::Notice {
+            kind,
+            member,
+            text,
+            code,
+        } => {
+            // The run's code as the protocol's: one it doesn't know is left out, never a failed notice.
+            let code: Option<tqa_types::ErrorCode> =
+                code.and_then(|code| serde_json::from_value(serde_json::Value::String(code)).ok());
             let seq = super::stop::step(state, async {
                 let mut transaction = state.pool.begin().await?;
                 let seq = match member {
                     Some(member) => {
-                        super::store::notice(&mut transaction, team.channel, (kind, &member), &text)
-                            .await?
+                        super::store::notice(
+                            &mut transaction,
+                            team.channel,
+                            (kind, &member),
+                            &text,
+                            code,
+                        )
+                        .await?
                     }
                     None => {
                         super::store::team_notice(&mut transaction, team.channel, kind, &text)

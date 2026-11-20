@@ -1,10 +1,12 @@
 "use client";
 
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 import { useT } from "../i18n/I18nProvider";
 import type { MessageKey, Translate } from "../i18n/translate";
+import { knownFailure } from "../transcript/failure-keys";
 import { Icon } from "../ui/Icon";
 
 import type { Party, TeamMessageView } from "./team-view";
@@ -33,7 +35,41 @@ const name = (party: Party, t: Translate) =>
       : "";
 
 /** A team message in words (UI-GUIDELINES §13b), its text after the sentence's own words. */
-export function teamMessageWords(message: TeamMessageView, t: Translate) {
+/** A helper of the team, as the lead's page knows it: for a failed run's line to link to it and say how it is now. */
+export type LineHelper = { name: string; conversation: string; state: string };
+
+/** States in which a helper that failed has started again (WEB-U-512): its old failure isn't news. */
+const AGAIN = new Set(["working", "queued", "starting", "stuck"]);
+
+/**
+ * A helper's failed run, said with its reason in the run's own plain words (WEB-U-512, the first hour's finding 6):
+ * the notice's code picks the words, the run's reason (in the notice's sentence) refines them. Null for any other
+ * line, or a code this page doesn't know, which keeps the short "… failed.".
+ */
+function failedWords(
+  message: TeamMessageView,
+  t: Translate,
+  helperState?: string,
+): string | null {
+  const notice = message.notice;
+  if (notice?.kind !== "member_failed" || !notice.code || !notice.member)
+    return null;
+  const runReason = message.text
+    .replace(`${notice.member} failed: `, "")
+    .replace(/\.$/, "");
+  const failure = knownFailure(notice.code, runReason);
+  if (!failure) return null;
+  const reason = t(failure.reason);
+  return helperState && AGAIN.has(helperState)
+    ? t("team.noticeFailedAgain", { member: notice.member, reason })
+    : t("team.noticeFailedWhy", { member: notice.member, reason });
+}
+
+export function teamMessageWords(
+  message: TeamMessageView,
+  t: Translate,
+  helperState?: string,
+) {
   const text = message.text;
   switch (message.type) {
     case "assign":
@@ -83,6 +119,8 @@ export function teamMessageWords(message: TeamMessageView, t: Translate) {
       return t("team.lineRoundStarted", { round: message.round ?? 2 });
     case "notice": {
       const notice = message.notice;
+      const failed = failedWords(message, t, helperState);
+      if (failed) return failed;
       const key = (notice && NOTICES[notice.kind]) ?? "team.noticeOther";
       return t(key, {
         member: notice?.member ?? "",
@@ -100,9 +138,34 @@ export function teamMessageWords(message: TeamMessageView, t: Translate) {
  * One team message in the lead task's transcript (UI-GUIDELINES §13b): one muted 13 px line with a small arrow; a
  * decision tinted info. A long line ends in "…", and a click opens the full text in place.
  */
-export function TeamMessageLine({ message }: { message: TeamMessageView }) {
+export function TeamMessageLine({
+  message,
+  helpers,
+}: {
+  message: TeamMessageView;
+  /** The team's helpers: a helper's failed run links to its task and says how it is now (WEB-U-512). */
+  helpers?: readonly LineHelper[] | undefined;
+}) {
   const t = useT();
   const [open, setOpen] = useState(false);
+  const helper =
+    message.notice?.kind === "member_failed"
+      ? helpers?.find((each) => each.name === message.notice?.member)
+      : undefined;
+  if (helper)
+    return (
+      <div className="team-line type-small muted">
+        <Link
+          href={`/c/${encodeURIComponent(helper.conversation)}`}
+          className="team-line-toggle"
+        >
+          <Icon glyph={ArrowRight} size={16} />
+          <span className="team-line-text">
+            {teamMessageWords(message, t, helper.state)}
+          </span>
+        </Link>
+      </div>
+    );
   return (
     <div
       className="team-line type-small muted"

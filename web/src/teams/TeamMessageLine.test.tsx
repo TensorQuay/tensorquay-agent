@@ -166,7 +166,7 @@ describe("WEB-U-507 a round's start as a quiet line", () => {
 describe("WEB-U-512 a helper's failed run on the lead's page", () => {
   const failed = message(
     "notice",
-    { kind: "gateway" } as TeamMessageView["from"],
+    { kind: "gateway" },
     lead,
     "places failed: the model's reply was cut off.",
     { notice: { kind: "member_failed", member: "places", code: "reply_cut" } },
@@ -193,7 +193,14 @@ describe("WEB-U-512 a helper's failed run on the lead's page", () => {
   });
 
   it("keeps the short words for a code it doesn't know, and no link without the helper", () => {
-    const unknown = { ...failed, notice: { kind: "member_failed", member: "places", code: "something_new" } };
+    const unknown = {
+      ...failed,
+      notice: {
+        kind: "member_failed",
+        member: "places",
+        code: "something_new",
+      },
+    };
     render(<TeamMessageLine message={unknown} />);
     expect(screen.getByText("places failed.")).toBeVisible();
     expect(screen.queryByRole("link")).toBeNull();

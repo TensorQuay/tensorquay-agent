@@ -27662,6 +27662,10 @@
           "text"
         ],
         "properties": {
+          "code": {
+            "type": "string",
+            "description": "On a member_failed notice for a helper's run that failed, that run's code (as a run.failed event's): for the page to say why in its own words. Absent otherwise; show a code you don't know as the notice alone."
+          },
           "seq": {
             "type": "integer",
             "minimum": 1

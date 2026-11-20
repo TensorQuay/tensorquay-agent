@@ -705,6 +705,8 @@
     "team.endRound": "Round {round}: {reason}",
     "team.noticeStuck": "{member} seems stuck.",
     "team.noticeFailed": "{member} failed.",
+    "team.noticeFailedWhy": "{member} failed: {reason}.",
+    "team.noticeFailedAgain": "{member} stopped: {reason}. It's working again.",
     "team.noticeStopped": "{member} was stopped.",
     "team.noticeDeleted": "A helper was deleted.",
     "team.noticeBudget": "The team has used 80 % of its budget. Each helper was asked to report what it has.",

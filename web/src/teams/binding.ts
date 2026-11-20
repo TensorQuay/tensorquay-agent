@@ -84,6 +84,7 @@ export function messageView(
             ...(message.position !== undefined
               ? { position: message.position }
               : {}),
+            ...(message.code ? { code: message.code } : {}),
           }
         : undefined,
     round: message.type === "round_started" ? message.round : undefined,

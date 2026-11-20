@@ -20,7 +20,7 @@ import { StopHelperDialog, StopTeamDialog } from "./StopDialogs";
 import type { HelperView } from "./team-view";
 import { budgetLine, endedLine } from "./team-words";
 import { TeamEndNote } from "./TeamEndNote";
-import { TeamMessageLine } from "./TeamMessageLine";
+import { type LineHelper, TeamMessageLine } from "./TeamMessageLine";
 import { TeamStrip } from "./TeamStrip";
 import { teamKey, teamMessagesKey } from "./use-team";
 import { type ClosedWhy, WaitingCard } from "./WaitingCard";
@@ -229,6 +229,7 @@ export function teamLines(
   viewer: string | null,
   open?: number | null,
   state?: string,
+  helpers?: readonly LineHelper[],
 ): TimedLine[] {
   const answered = new Set(
     messages.flatMap((message) =>
@@ -277,7 +278,10 @@ export function teamLines(
           why={why}
         />
       ) : (
-        <TeamMessageLine message={messageView(message, viewer)} />
+        <TeamMessageLine
+          message={messageView(message, viewer)}
+          helpers={helpers}
+        />
       ),
   }));
 }
