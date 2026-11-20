@@ -327,6 +327,9 @@ pub enum MessageBody {
     Notice {
         /// What it says.
         kind: ChannelNoticeKind,
+        /// The member it is about, by its task's name, so a page words it in the reader's language.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        member: Option<String>,
         /// The sentence.
         text: String,
     },

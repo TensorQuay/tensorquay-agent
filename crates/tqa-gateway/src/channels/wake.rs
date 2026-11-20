@@ -349,7 +349,7 @@ fn seq_of(seq: u64) -> Result<i64, GatewayError> {
 pub(crate) async fn notice(
     connection: &mut PgConnection,
     channel: Uuid,
-    kind: ChannelNoticeKind,
+    (kind, member): (ChannelNoticeKind, Option<String>),
     text: String,
 ) -> Result<u64, GatewayError> {
     let author = super::store::gateway_author();
@@ -357,7 +357,7 @@ pub(crate) async fn notice(
         connection,
         channel,
         &author,
-        (None, &MessageBody::Notice { kind, text }),
+        (None, &MessageBody::Notice { kind, member, text }),
     )
     .await?;
     Ok(message.seq)
@@ -367,11 +367,11 @@ pub(crate) async fn notice(
 async fn notice_now(
     state: &State,
     channel: Uuid,
-    kind: ChannelNoticeKind,
+    (kind, member): (ChannelNoticeKind, Option<String>),
     text: String,
 ) -> Result<(), GatewayError> {
     let mut transaction = state.pool.begin().await?;
-    let seq = notice(&mut transaction, channel, kind, text).await?;
+    let seq = notice(&mut transaction, channel, (kind, member), text).await?;
     transaction.commit().await?;
     state.channels.published(channel, seq);
     Ok(())
@@ -411,7 +411,7 @@ pub(crate) async fn unreachable(
         notice(
             connection,
             channel,
-            kind,
+            (kind, Some(title.to_owned())),
             format!("{title} can't be woken: {why}."),
         )
         .await?,
@@ -433,7 +433,7 @@ async fn bounded(state: &State, channel: Uuid) -> Result<(), GatewayError> {
     let seq = notice(
         &mut transaction,
         channel,
-        ChannelNoticeKind::WakesBounded,
+        (ChannelNoticeKind::WakesBounded, None),
         BOUNDED.into(),
     )
     .await?;
@@ -788,7 +788,7 @@ pub(crate) async fn spend(
             notice(
                 connection,
                 channel.id,
-                ChannelNoticeKind::WakeBudget80,
+                (ChannelNoticeKind::WakeBudget80, None),
                 text,
             )
             .await?,
@@ -801,7 +801,7 @@ pub(crate) async fn spend(
             notice(
                 connection,
                 channel.id,
-                ChannelNoticeKind::WakeBudgetSpent,
+                (ChannelNoticeKind::WakeBudgetSpent, None),
                 text,
             )
             .await?,
@@ -928,7 +928,13 @@ pub(crate) async fn memberships(
 pub(crate) async fn deleted(state: &State, memberships: Vec<(Uuid, String)>) {
     for (channel, title) in memberships {
         let text = format!("{title} can't be woken: its task was deleted.");
-        if let Err(error) = notice_now(state, channel, ChannelNoticeKind::MemberDeleted, text).await
+        if let Err(error) = notice_now(
+            state,
+            channel,
+            (ChannelNoticeKind::MemberDeleted, Some(title.clone())),
+            text,
+        )
+        .await
         {
             tracing::warn!(
                 code = error.code(),

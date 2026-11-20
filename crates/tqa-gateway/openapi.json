@@ -25378,6 +25378,16 @@
           "last_seq": {
             "type": "integer",
             "minimum": 0
+          },
+          "wake_budget": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "The tokens woken runs may spend here: its own budget, or the installation's [channels] wake_budget (ADR-0014's amendment of 20 Nov 2026, A5); on one channel's read only."
+          },
+          "spent_tokens": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "What woken runs have spent here; on one channel's read only."
           }
         }
       },
@@ -25755,6 +25765,10 @@
               },
               "text": {
                 "type": "string"
+              },
+              "member": {
+                "type": "string",
+                "description": "The member it is about, by its task's name, so a page words it in the reader's language."
               }
             },
             "description": "Written only by the gateway, for people (ADR-0014's amendment of 20 Nov 2026): a line about the channel itself, in the gateway's fixed words. Never in an agent's reads; posting one is refused. A client shows it as one muted line, and an unknown kind by its text."

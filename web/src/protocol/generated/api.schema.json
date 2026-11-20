@@ -2227,6 +2227,14 @@
         "last_seq": {
           "type": "integer",
           "minimum": 0
+        },
+        "wake_budget": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "spent_tokens": {
+          "type": "integer",
+          "minimum": 0
         }
       }
     },
@@ -2579,6 +2587,9 @@
               ]
             },
             "text": {
+              "type": "string"
+            },
+            "member": {
               "type": "string"
             }
           }

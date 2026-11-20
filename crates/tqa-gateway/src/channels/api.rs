@@ -43,6 +43,13 @@ pub(crate) struct ChannelView {
     role: Option<ChannelRole>,
     member_count: i64,
     last_seq: i64,
+    /// The tokens woken runs may spend here: its own budget, or the installation's (ADR-0014's amendment of 20 Nov
+    /// 2026, A5); on one channel's read only.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    wake_budget: Option<i64>,
+    /// What woken runs have spent here; on one channel's read only.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    spent_tokens: Option<i64>,
 }
 
 #[derive(Serialize)]
@@ -69,6 +76,8 @@ impl From<Listed> for ChannelView {
             role: listed.role,
             member_count: listed.member_count,
             last_seq: channel.last_seq,
+            wake_budget: None,
+            spent_tokens: None,
         }
     }
 }
@@ -240,11 +249,20 @@ pub(crate) async fn get(
     let id = channel_id(&id)?;
     crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
         let mut connection = state.pool.acquire().await?;
-        Ok(Json(
-            store::visible(&mut connection, caller(&user), id)
-                .await?
-                .into(),
-        ))
+        let mut view: ChannelView = store::visible(&mut connection, caller(&user), id)
+            .await?
+            .into();
+        // Its wake budget and spend, for the page's header (ADR-0014's amendment of 20 Nov 2026, A5).
+        let spend = sqlx::query!(
+            "SELECT budget, spent_tokens FROM channels WHERE id = $1",
+            id
+        )
+        .fetch_one(&mut *connection)
+        .await?;
+        let installation = i64::try_from(state.config.channels.wake_budget).unwrap_or(i64::MAX);
+        view.wake_budget = Some(spend.budget.unwrap_or(installation));
+        view.spent_tokens = Some(spend.spent_tokens);
+        Ok(Json(view))
     })
     .await
 }
