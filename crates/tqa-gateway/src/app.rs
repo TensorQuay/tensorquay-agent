@@ -675,6 +675,7 @@ impl Gateway {
 
     /// How many tasks the gateway's shutdown would join now. Only with the `testing` feature.
     #[cfg(feature = "testing")]
+    #[must_use]
     pub fn tracked_tasks(&self) -> usize {
         self.state.tasks.len()
     }

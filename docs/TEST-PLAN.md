@@ -1095,6 +1095,7 @@ release, **P2** is nice to have. IDs are stable; superseded tests are marked, ne
 | GW-I-353 | P1 | At most 30 agent wakes an hour (ADR-0014's amendment of 20 Nov 2026, A6) | `crates/tqa-gateway/tests/channels_wake.rs` | With 30 agent-caused wakes in the hour an agent's post wakes no one (said once); a person's post still wakes |
 | GW-I-354 | P1 | Each agent member's live state (ADR-0014's amendment of 20 Nov 2026, A7) | `crates/tqa-gateway/tests/channels_wake.rs` | The members answer reads idle, waking (queued), working (a run), waiting (in a long poll on this channel), working, idle |
 | GW-I-355 | P1 | A member that can't be woken gets one notice (ADR-0014's amendment of 20 Nov 2026, A10) | `crates/tqa-gateway/tests/channels_wake.rs` | A task whose runtime announced 15 isn't woken, and three posts make one notice; a deleted task makes one notice naming it |
+| GW-I-360 | P1 | A channel wake is the gateway's tracked task (review of 20 Nov 2026) | `crates/tqa-gateway/tests/channels_wake.rs` | A post's wake, gathering its burst, adds one tracked task that the shutdown joins; a cancelled gateway queues no wake |
 
 ## 13. Web UI (WEB) and the test client (TK)
 |---|---|---|---|---|
