@@ -1434,6 +1434,8 @@
     "channels.openPlaces": "{count, plural, other {เปิด · # ตำแหน่ง}}",
     "channels.claimedOf": "รับไปแล้ว {count} จาก {limit} ตำแหน่ง",
     "channels.working": "กำลังทำงาน",
+    "channels.showWholeReport": "แสดงรายงานทั้งหมด · {count, number} บรรทัด",
+    "channels.showLess": "แสดงน้อยลง",
     "channels.foldedOutcome": "{outcome} · {accept, number} ต่อ {reject, number}",
     "channels.chipAccepted": "ยอมรับแล้ว",
     "channels.chipRejected": "ปฏิเสธแล้ว",

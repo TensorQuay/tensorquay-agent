@@ -1434,6 +1434,8 @@
     "channels.openPlaces": "{count, plural, other {열림 · #곳}}",
     "channels.claimedOf": "{limit}곳 중 {count}곳이 배정되었습니다",
     "channels.working": "작업 중",
+    "channels.showWholeReport": "보고서 전체 보기 · {count, number}줄",
+    "channels.showLess": "간단히 보기",
     "channels.foldedOutcome": "{outcome} · {accept, number} 대 {reject, number}",
     "channels.chipAccepted": "수락됨",
     "channels.chipRejected": "거부됨",

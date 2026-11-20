@@ -148,6 +148,8 @@
     "channels.openPlaces": "{count, plural, one {Open · # place} other {Open · # places}}",
     "channels.claimedOf": "{count} of {limit} places taken",
     "channels.working": "Working",
+    "channels.showWholeReport": "Show the whole report · {count, plural, one {# line} other {# lines}}",
+    "channels.showLess": "Show less",
     "channels.foldedOutcome": "{outcome} · {accept, number} to {reject, number}",
     "channels.chipAccepted": "Accepted",
     "channels.chipRejected": "Rejected",

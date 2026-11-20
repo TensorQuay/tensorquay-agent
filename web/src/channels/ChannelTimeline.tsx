@@ -1,8 +1,8 @@
 "use client";
 
 import "./catalogue";
-import { Bot } from "lucide-react";
-import type { ReactNode } from "react";
+import { Bot, ChevronDown, ChevronUp } from "lucide-react";
+import { type ReactNode, useState } from "react";
 
 import { useT } from "../i18n/I18nProvider";
 import { formatSize } from "../i18n/message";
@@ -316,6 +316,55 @@ function Post({
   );
 }
 
+/** A post longer than this many lines folds (WEB-U-522), showing the first {@link FOLDED_LINES}. */
+const FOLD_OVER = 12;
+const FOLDED_LINES = 6;
+
+/**
+ * A long report folded to its first lines, with "Show the whole report · N lines", and back (WEB-U-522, the mock of 17
+ * Nov 2026). Lines are the text's non-empty lines; a short text shows whole. `plain` text isn't Markdown.
+ */
+function Folding({ text, plain = false }: { text: string; plain?: boolean }) {
+  const t = useT();
+  const [open, setOpen] = useState(false);
+  const lines = text.split("\n");
+  const count = lines.filter((line) => line.trim() !== "").length;
+  const folds = count > FOLD_OVER;
+  let shown = text;
+  if (folds && !open) {
+    let seen = 0;
+    const kept: string[] = [];
+    for (const line of lines) {
+      if (line.trim() !== "") seen += 1;
+      if (seen > FOLDED_LINES) break;
+      kept.push(line);
+    }
+    shown = kept.join("\n");
+  }
+  return (
+    <>
+      {plain ? (
+        <p className="message-text">{shown}</p>
+      ) : (
+        <DeferredMarkdown text={shown} />
+      )}
+      {folds && (
+        <button
+          type="button"
+          className="proposal-fold type-small"
+          aria-expanded={open}
+          onClick={() => setOpen(!open)}
+        >
+          <Icon glyph={open ? ChevronUp : ChevronDown} size={16} />
+          {open
+            ? t("channels.showLess")
+            : t("channels.showWholeReport", { count })}
+        </button>
+      )}
+    </>
+  );
+}
+
 function Body({
   message,
   titles,
@@ -329,7 +378,7 @@ function Body({
   const body = message.body;
   switch (body.type) {
     case "text":
-      return <DeferredMarkdown text={body.text} />;
+      return <Folding text={body.text} />;
     case "proposal":
       return (
         <div className="stack">
@@ -392,7 +441,7 @@ function Body({
               {t(copy)}
             </span>
           </p>
-          <p className="message-text">{body.summary}</p>
+          <Folding text={body.summary} plain />
           {body.refs && body.refs.length > 0 && (
             <ul className="channel-refs type-small">
               {body.refs.map((ref) => (

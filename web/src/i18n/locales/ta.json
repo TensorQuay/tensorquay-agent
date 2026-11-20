@@ -1434,6 +1434,8 @@
     "channels.openPlaces": "{count, plural, one {திறந்தது · # இடம்} other {திறந்தது · # இடங்கள்}}",
     "channels.claimedOf": "{limit} இடங்களில் {count} இடங்கள் எடுக்கப்பட்டன",
     "channels.working": "பணிபுரிவது",
+    "channels.showWholeReport": "முழு அறிக்கையையும் காட்டு · {count, plural, one {# வரி} other {# வரிகள்}}",
+    "channels.showLess": "குறைவாகக் காட்டு",
     "channels.foldedOutcome": "{outcome} · {accept, number} - {reject, number}",
     "channels.chipAccepted": "ஏற்கப்பட்டது",
     "channels.chipRejected": "நிராகரிக்கப்பட்டது",

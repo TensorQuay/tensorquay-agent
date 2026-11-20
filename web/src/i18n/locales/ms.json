@@ -1433,6 +1433,8 @@
     "channels.openPlaces": "{count, plural, other {Terbuka · # tempat}}",
     "channels.claimedOf": "{count} daripada {limit} tempat telah diambil",
     "channels.working": "Sedang bekerja",
+    "channels.showWholeReport": "Tunjukkan seluruh laporan · {count, number} baris",
+    "channels.showLess": "Tunjukkan kurang",
     "channels.foldedOutcome": "{outcome} · {accept, number} lawan {reject, number}",
     "channels.chipAccepted": "Diterima",
     "channels.chipRejected": "Ditolak",

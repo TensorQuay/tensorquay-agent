@@ -451,3 +451,50 @@ describe("WEB-U-521 a decided proposal's text folds", () => {
     expect(screen.queryByText("To 24 from December.")).toBeNull();
   });
 });
+
+// WEB-U-522 (18.2 slice 3, the mock of 17 Nov 2026): a long report (a post of more than 12 lines, or a report's summary)
+// shows its first 6 lines and "Show the whole report · N lines"; opened, it shows all and can fold again. A short post
+// is whole.
+describe("WEB-U-522 a long report folds", () => {
+  const long = Array.from(
+    { length: 41 },
+    (_, n) => `Line ${n + 1} of the churn report.`,
+  ).join("\n\n");
+  it("shows the first lines and opens to the whole", async () => {
+    render(
+      <ChannelTimeline
+        messages={[
+          {
+            seq: 1,
+            ts: "2026-09-27T10:00:00Z",
+            author: { kind: "conversation", id: CODER, name: "Coder" },
+            body: { type: "text", text: long },
+          },
+          {
+            seq: 2,
+            ts: "2026-09-27T10:01:00Z",
+            author: { kind: "user", id: ANA, name: "Ana" },
+            body: { type: "text", text: "Short." },
+          },
+        ]}
+        members={members}
+      />,
+    );
+    await settleLazy();
+    expect(screen.getByText("Line 6 of the churn report.")).toBeInTheDocument();
+    expect(screen.queryByText("Line 7 of the churn report.")).toBeNull();
+    const open = screen.getByRole("button", {
+      name: "Show the whole report · 41 lines",
+    });
+    fireEvent.click(open);
+    await settleLazy();
+    expect(
+      screen.getByText("Line 41 of the churn report."),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Show less" }));
+    expect(screen.queryByText("Line 41 of the churn report.")).toBeNull();
+    expect(
+      screen.getAllByRole("button", { name: /Show the whole report/ }),
+    ).toHaveLength(1);
+  });
+});

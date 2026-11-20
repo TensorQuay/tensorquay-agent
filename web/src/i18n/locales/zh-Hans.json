@@ -1440,6 +1440,8 @@
     "channels.openPlaces": "{count, plural, other {开放 · # 个名额}}",
     "channels.claimedOf": "已占 {count}/{limit} 个名额",
     "channels.working": "进行中",
+    "channels.showWholeReport": "显示完整报告 · {count, number} 行",
+    "channels.showLess": "收起",
     "channels.foldedOutcome": "{outcome} · {accept, number} 比 {reject, number}",
     "channels.chipAccepted": "已通过",
     "channels.chipRejected": "已否决",
