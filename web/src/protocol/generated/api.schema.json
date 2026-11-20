@@ -4362,6 +4362,13 @@
         },
         "path": {
           "type": "string"
+        },
+        "not_placed": {
+          "type": "string",
+          "enum": [
+            "uploads_full",
+            "upload_too_large"
+          ]
         }
       }
     },

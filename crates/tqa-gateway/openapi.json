@@ -29119,6 +29119,14 @@
           "path": {
             "type": "string",
             "description": "Where it is in the reading agent member's workspace (uploads/<channel>-<seq>-<file>); only in an agent's own read, never in a person's."
+          },
+          "not_placed": {
+            "type": "string",
+            "enum": [
+              "uploads_full",
+              "upload_too_large"
+            ],
+            "description": "Why it isn't in the reading agent member's workspace and won't be; only in an agent's own read."
           }
         },
         "description": "A file posted with a channel message (ADR-0014's amendment of 20 Nov 2026, A9)."

@@ -623,7 +623,8 @@ async fn deliver(state: &State, due: &Due, hop: i16) -> Result<bool, GatewayErro
         super::files::place(state, (due.channel, due.member), (due.read_seq, None))
             .await?
             .into_iter()
-            .map(|(seq, _, _)| seq)
+            .filter(|placed| placed.path.is_some())
+            .map(|placed| placed.seq)
             .collect();
     let after = u64::try_from(due.read_seq).map_err(|_| GatewayError::StoreUnavailable)?;
     let channel: tqa_types::ChannelId = due

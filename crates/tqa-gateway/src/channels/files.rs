@@ -282,6 +282,7 @@ pub(crate) async fn attach(
             name: taken.name,
             size: u64::try_from(taken.size).unwrap_or(0),
             path: None,
+            not_placed: None,
         });
     }
     Ok(files)
@@ -312,6 +313,7 @@ pub(crate) async fn of_messages(
             name: row.name,
             size: u64::try_from(row.size).unwrap_or(0),
             path: None,
+            not_placed: None,
         });
     }
     Ok(found)
@@ -378,7 +380,7 @@ pub(crate) async fn place(
     state: &State,
     (channel, member): (Uuid, Uuid),
     (after, through): (i64, Option<i64>),
-) -> Result<Vec<(i64, i16, String)>, GatewayError> {
+) -> Result<Vec<Placed>, GatewayError> {
     let missing = sqlx::query!(
         "SELECT f.seq, f.index, f.name, ch.name AS channel_name FROM channel_files f \
          JOIN channels ch ON ch.id = f.channel_id \
@@ -409,7 +411,7 @@ pub(crate) async fn place(
         }
     }
     Ok(sqlx::query!(
-        "SELECT seq, index, path FROM channel_file_placements WHERE channel_id = $1 AND conversation_id = $2 \
+        "SELECT seq, index, path, not_placed FROM channel_file_placements WHERE channel_id = $1 AND conversation_id = $2 \
          AND seq > $3 AND ($4::bigint IS NULL OR seq <= $4) ORDER BY seq, index",
         channel,
         member,
@@ -419,8 +421,21 @@ pub(crate) async fn place(
     .fetch_all(&state.pool)
     .await?
     .into_iter()
-    .map(|row| (row.seq, row.index, row.path))
+    .map(|row| Placed {
+        seq: row.seq,
+        index: row.index,
+        path: row.path,
+        not_placed: row.not_placed,
+    })
     .collect())
+}
+
+/// Where a file went for a member: its path, or why it didn't fit.
+pub(crate) struct Placed {
+    pub(crate) seq: i64,
+    pub(crate) index: i16,
+    pub(crate) path: Option<String>,
+    pub(crate) not_placed: Option<String>,
 }
 
 /// A file not yet in a member's workspace: its message, its place in it, and the name it gets there.
@@ -442,8 +457,12 @@ async fn place_each(
         let from = stored
             .join(file.seq.to_string())
             .join(file.index.to_string());
-        let path = match handed::place(state, workspace, &file.name, &from).await {
-            Ok((path, _)) => path,
+        // Placed, or recorded as not fitting (the member's read says why); any other failure is tried again later.
+        let (path, not_placed) = match handed::place(state, workspace, &file.name, &from).await {
+            Ok((path, _)) => (Some(path), None),
+            Err(error) if matches!(error.code(), "uploads_full" | "upload_too_large") => {
+                (None, Some(error.code()))
+            }
             Err(error) => {
                 tracing::warn!(
                     code = error.code(),
@@ -453,13 +472,14 @@ async fn place_each(
             }
         };
         sqlx::query!(
-            "INSERT INTO channel_file_placements (channel_id, seq, index, conversation_id, path) \
-             VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING",
+            "INSERT INTO channel_file_placements (channel_id, seq, index, conversation_id, path, not_placed) \
+             VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING",
             channel,
             file.seq,
             file.index,
             member,
-            path
+            path,
+            not_placed
         )
         .execute(&state.pool)
         .await?;

@@ -89,9 +89,20 @@ fn block(channel: &str, message: &ChannelMessage) -> Result<String, ToolError> {
         body.push_str("\n\nFiles:");
         for file in &message.files {
             // Writing to a String can't fail.
-            let _ = match &file.path {
-                Some(path) => write!(body, "\n- {path} ({}, {} bytes)", file.name, file.size),
-                None => write!(
+            let _ = match (&file.path, file.not_placed.as_deref()) {
+                (Some(path), _) => write!(body, "\n- {path} ({}, {} bytes)", file.name, file.size),
+                (None, Some(why)) => write!(
+                    body,
+                    "\n- {} ({} bytes): not in your workspace: {}",
+                    file.name,
+                    file.size,
+                    match why {
+                        "uploads_full" => "its uploads are full",
+                        "upload_too_large" => "larger than a workspace upload may be",
+                        _ => "it couldn't be placed",
+                    }
+                ),
+                (None, None) => write!(
                     body,
                     "\n- {} ({} bytes): not in your workspace yet",
                     file.name, file.size
