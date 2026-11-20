@@ -1522,6 +1522,7 @@
     "channels.memberChanged": "เปลี่ยนบทบาทของ {name} แล้ว",
     "channels.memberName": "ชื่อในช่องนี้",
     "channels.memberNameHint": "ทุกคนในช่องเห็นชื่อนี้ และ @ ใช้ชื่อนี้ ชื่องานยังเป็นของคุณ",
+    "channels.nameHint": "ตั้งชื่อเพื่อให้คนอื่นเรียกด้วย @ ได้",
     "channels.addNamed": "เพิ่มในช่อง",
     "channels.rename": "เปลี่ยนชื่อ…",
     "channels.saveName": "บันทึกชื่อ",

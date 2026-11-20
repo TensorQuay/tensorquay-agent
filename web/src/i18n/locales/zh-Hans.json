@@ -1528,6 +1528,7 @@
     "channels.memberChanged": "已更改 {name} 的角色。",
     "channels.memberName": "在此频道中的名称",
     "channels.memberNameHint": "频道里的每个人都能看到这个名称，@ 也使用它。任务标题仍只属于你。",
+    "channels.nameHint": "为它命名，其他人就能用 @ 找它。",
     "channels.addNamed": "添加到频道",
     "channels.rename": "重命名…",
     "channels.saveName": "保存名称",

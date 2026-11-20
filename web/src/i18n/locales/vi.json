@@ -1522,6 +1522,7 @@
     "channels.memberChanged": "Đã thay đổi vai trò của {name}.",
     "channels.memberName": "Tên trong kênh này",
     "channels.memberNameHint": "Mọi người trong kênh thấy tên này, và @ dùng tên này. Tiêu đề tác vụ vẫn là của riêng bạn.",
+    "channels.nameHint": "Đặt tên để người khác có thể gọi bằng @.",
     "channels.addNamed": "Thêm vào kênh",
     "channels.rename": "Đổi tên…",
     "channels.saveName": "Lưu tên",

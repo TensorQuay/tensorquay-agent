@@ -111,6 +111,10 @@ pub(crate) struct Member {
     /// `waking`, `idle`, `held` or `unreachable`; absent for a person.
     #[serde(skip_serializing_if = "Option::is_none")]
     state: Option<&'static str>,
+    /// Whether an agent member has a name in the channel (A12): one without shows by its profile's name until its
+    /// owner names it; absent for a person.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    named: Option<bool>,
 }
 
 impl From<MemberView> for Member {
@@ -130,6 +134,7 @@ impl From<MemberView> for Member {
             run_status: view.run_status,
             can_open: view.can_open,
             state: None,
+            named: view.named,
         }
     }
 }

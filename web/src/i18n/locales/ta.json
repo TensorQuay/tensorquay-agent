@@ -1522,6 +1522,7 @@
     "channels.memberChanged": "{name} இன் பங்கு மாற்றப்பட்டது.",
     "channels.memberName": "இந்தச் சேனலில் அதன் பெயர்",
     "channels.memberNameHint": "சேனலில் உள்ள அனைவரும் இந்தப் பெயரைப் பார்ப்பார்கள், @ இதைப் பயன்படுத்தும். பணியின் தலைப்பு உங்களுக்கு மட்டுமே.",
+    "channels.nameHint": "மற்றவர்கள் @ மூலம் கேட்க இதற்குப் பெயரிடுங்கள்.",
     "channels.addNamed": "சேனலில் சேர்",
     "channels.rename": "பெயரை மாற்று…",
     "channels.saveName": "பெயரைச் சேமி",

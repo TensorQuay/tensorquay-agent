@@ -1521,6 +1521,7 @@
     "channels.memberChanged": "Menukar peranan {name}.",
     "channels.memberName": "Namanya dalam saluran ini",
     "channels.memberNameHint": "Semua orang dalam saluran melihat nama ini, dan @ menggunakannya. Tajuk tugas kekal milik anda.",
+    "channels.nameHint": "Namakannya supaya orang lain boleh memanggilnya dengan @.",
     "channels.addNamed": "Tambah ke saluran",
     "channels.rename": "Namakan semula…",
     "channels.saveName": "Simpan nama",

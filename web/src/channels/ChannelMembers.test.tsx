@@ -548,3 +548,37 @@ describe("WEB-U-530 a member whose woken run failed", () => {
     );
   });
 });
+
+describe("WEB-U-528 an agent added before names", () => {
+  it("shows its owner its task's title and how to name it; others see it as before", () => {
+    const mine = member("conversation", "Agent", {
+      title: "Q3 pricing",
+      owner_name: "Ana",
+      run_status: "completed",
+      state: "idle",
+      named: false,
+    });
+    const bens = member("conversation", "Agent", {
+      owner_name: "Ben",
+      run_status: "completed",
+      state: "idle",
+      named: false,
+    });
+    render(
+      <ChannelMembers
+        channel={RELEASE}
+        members={[OWNER, mine, bens]}
+        me={OWNER.id}
+        tasks={[]}
+        onSet={() => Promise.resolve()}
+        onRemove={() => Promise.resolve()}
+      />,
+    );
+    expect(row("Q3 pricing")).toHaveTextContent(
+      "Name it so others can ask it with @.",
+    );
+    const theirs = within(list()).getAllByRole("listitem").at(-1);
+    expect(theirs).toHaveTextContent("Ben's agent");
+    expect(theirs).not.toHaveTextContent("Name it");
+  });
+});

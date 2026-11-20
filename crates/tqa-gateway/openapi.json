@@ -26207,6 +26207,10 @@
           "can_open": {
             "type": "boolean",
             "description": "Whether the caller may open this agent member's task page: true for the task's owner and for an administrator (who gets its private view), false otherwise. Present only for kind conversation."
+          },
+          "named": {
+            "type": "boolean",
+            "description": "Whether an agent member has a name in the channel (ADR-0014's amendment A12). One without shows by its profile's name, its owner sees its task's title, and @ can't reach it until its owner names it. Absent for a person."
           }
         }
       },

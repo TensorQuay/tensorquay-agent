@@ -1522,6 +1522,7 @@
     "channels.memberChanged": "{name} のロールを変更しました。",
     "channels.memberName": "このチャンネルでの名前",
     "channels.memberNameHint": "この名前はチャンネルの全員に見え、@ で使われます。タスクのタイトルはあなただけのものです。",
+    "channels.nameHint": "名前を付けると、ほかの人が @ で呼べます。",
     "channels.addNamed": "チャンネルに追加",
     "channels.rename": "名前を変更…",
     "channels.saveName": "名前を保存",

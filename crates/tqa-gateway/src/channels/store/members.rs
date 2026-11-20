@@ -125,6 +125,8 @@ pub(crate) struct MemberView {
     /// Whether the viewer may open a conversation member's task page: its owner, or an administrator (the private
     /// view); never set for a user.
     pub can_open: Option<bool>,
+    /// Whether an agent member has a name in the channel (A12); never set for a user.
+    pub named: Option<bool>,
 }
 
 /// The channel's members, in the order they were added.
@@ -163,22 +165,27 @@ pub(crate) async fn members(
                     added_at: row.added_at,
                     run_status: None,
                     can_open: None,
+                    named: None,
                 }),
-                (None, Some(conversation)) => Ok(MemberView {
-                    id: MemberId::Conversation(conversation),
-                    // Its name in the channel, which its owner chose to show; one added before names had none.
-                    name: row
-                        .member_name
-                        .or(row.profile_name)
-                        .unwrap_or_else(|| "Agent".into()),
-                    owner_name: row.conversation_owner_email,
-                    // Titles are content (SEC-044): its owner's only, never an administrator's.
-                    title: row.title.filter(|_| row.conversation_owner == Some(viewer)),
-                    role,
-                    added_at: row.added_at,
-                    run_status: Some(RunStatus::of(row.latest.as_deref())),
-                    can_open: Some(admin || row.conversation_owner == Some(viewer)),
-                }),
+                (None, Some(conversation)) => {
+                    let named = row.member_name.is_some();
+                    Ok(MemberView {
+                        id: MemberId::Conversation(conversation),
+                        // Its name in the channel, which its owner chose to show; one added before names had none.
+                        name: row
+                            .member_name
+                            .or(row.profile_name)
+                            .unwrap_or_else(|| "Agent".into()),
+                        owner_name: row.conversation_owner_email,
+                        // Titles are content (SEC-044): its owner's only, never an administrator's.
+                        title: row.title.filter(|_| row.conversation_owner == Some(viewer)),
+                        role,
+                        added_at: row.added_at,
+                        run_status: Some(RunStatus::of(row.latest.as_deref())),
+                        can_open: Some(admin || row.conversation_owner == Some(viewer)),
+                        named: Some(named),
+                    })
+                }
                 _ => Err(GatewayError::StoreUnavailable),
             }
         })

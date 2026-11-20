@@ -1517,6 +1517,7 @@
     "channels.memberChanged": "Le rôle de {name} a été modifié.",
     "channels.memberName": "Son nom dans ce canal",
     "channels.memberNameHint": "Tout le monde dans le canal voit ce nom, et @ l'utilise. Le titre de la tâche reste à vous.",
+    "channels.nameHint": "Nommez-le pour que les autres puissent l'appeler avec @.",
     "channels.addNamed": "Ajouter au canal",
     "channels.rename": "Renommer…",
     "channels.saveName": "Enregistrer le nom",

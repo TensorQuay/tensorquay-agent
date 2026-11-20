@@ -2326,6 +2326,9 @@
         },
         "can_open": {
           "type": "boolean"
+        },
+        "named": {
+          "type": "boolean"
         }
       }
     },

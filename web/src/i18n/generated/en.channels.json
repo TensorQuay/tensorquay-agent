@@ -224,6 +224,7 @@
     "channels.memberChanged": "Changed the role of {name}.",
     "channels.memberName": "Its name in this channel",
     "channels.memberNameHint": "Everyone in the channel sees this name, and @ uses it. The task's title stays yours.",
+    "channels.nameHint": "Name it so others can ask it with @.",
     "channels.addNamed": "Add to the channel",
     "channels.rename": "Rename…",
     "channels.saveName": "Save the name",

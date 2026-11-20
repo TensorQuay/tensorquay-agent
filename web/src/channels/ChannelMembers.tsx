@@ -117,9 +117,13 @@ export function MemberList({
         const author = { kind: item.kind, id: item.id, name: item.name };
         const agent = authorName(author, members);
         // An agent reads by its name in the channel (A12), which every member sees; never by a title.
+        // An agent added before names (A12) shows its owner its task's title, which they may see, and how to name it.
+        const unnamedMine = item.named === false && item.title !== undefined;
         const name =
           item.kind === "conversation"
-            ? item.name
+            ? unnamedMine
+              ? (item.title ?? item.name)
+              : item.name
             : item.id === me
               ? t("channels.you", { name: agent })
               : agent;
@@ -169,6 +173,11 @@ export function MemberList({
                 )}
               </span>
               {detail && <span className="type-small muted">{detail}</span>}
+              {unnamedMine && (
+                <span className="type-small muted">
+                  {t("channels.nameHint")}
+                </span>
+              )}
             </span>
             {actions?.(item, name)}
           </li>
@@ -385,7 +394,11 @@ export function ChannelMembers({
                               id: item.id,
                               role: item.role,
                               adding: false,
-                              value: item.name,
+                              // An agent added before names: its title is the name its owner likely means.
+                              value:
+                                item.named === false && item.title
+                                  ? item.title
+                                  : item.name,
                             })
                         : undefined
                     }

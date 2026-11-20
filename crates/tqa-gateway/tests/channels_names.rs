@@ -97,6 +97,7 @@ async fn gw_i_375_a_member_has_a_name_in_the_channel(pool: PgPool) -> TestResult
         .await?;
         assert_eq!(status, 200, "{body}");
         assert_eq!(body["name"], "Checker");
+        assert_eq!(body["named"], true);
         for cookie in [&ana_cookie, &daniel_cookie] {
             assert_eq!(names(f, cookie, &id).await?, ["Pricing analyst", "Checker"]);
         }
@@ -235,6 +236,28 @@ async fn gw_i_378_an_unnamed_member_is_woken_by_everything_but_at(pool: PgPool) 
             .bind(old.uuid)
             .execute(&f.pool)
             .await?;
+        // The members answer says it has no name, so its owner's page can show its title and offer one.
+        let (status, listed) = call(
+            f,
+            Method::GET,
+            &format!("/api/v1/channels/{id}/members"),
+            &cookie,
+            (None, None),
+        )
+        .await?;
+        assert_eq!(status, 200);
+        let old_row = listed["items"]
+            .as_array()
+            .ok_or("items")?
+            .iter()
+            .find(|item| item["id"] == json!(old.id))
+            .cloned()
+            .ok_or("old")?;
+        assert_eq!(
+            (old_row["named"].clone(), old_row["title"].clone()),
+            (json!(false), json!("Old helper")),
+            "{old_row}"
+        );
         let mut place = 0;
         let task = post(
             f,

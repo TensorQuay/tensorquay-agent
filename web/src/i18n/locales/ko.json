@@ -1522,6 +1522,7 @@
     "channels.memberChanged": "{name}의 역할을 변경했습니다.",
     "channels.memberName": "이 채널에서의 이름",
     "channels.memberNameHint": "채널의 모든 사람이 이 이름을 보며 @에 사용됩니다. 작업 제목은 나만 봅니다.",
+    "channels.nameHint": "이름을 지으면 다른 사람이 @로 부를 수 있습니다.",
     "channels.addNamed": "채널에 추가",
     "channels.rename": "이름 변경…",
     "channels.saveName": "이름 저장",

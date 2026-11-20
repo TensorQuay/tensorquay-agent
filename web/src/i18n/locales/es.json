@@ -1520,6 +1520,7 @@
     "channels.memberChanged": "Se cambió el rol de {name}.",
     "channels.memberName": "Su nombre en este canal",
     "channels.memberNameHint": "Todos en el canal ven este nombre, y @ lo usa. El título de la tarea sigue siendo solo tuyo.",
+    "channels.nameHint": "Ponle un nombre para que los demás puedan llamarlo con @.",
     "channels.addNamed": "Añadir al canal",
     "channels.rename": "Cambiar nombre…",
     "channels.saveName": "Guardar el nombre",
