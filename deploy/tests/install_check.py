@@ -89,11 +89,31 @@ def free_port():
         return probe.getsockname()[1]
 
 
-def kept_pools():
-    """Pools named in installations' gateway.toml files: they are no network until a sandbox exists."""
+def mounted_configs(env):
+    """The gateway.toml of every gateway container on the engine, running or stopped: an installation may keep its
+    folder anywhere, and a stopped one still owns its pool."""
+    names = run(["docker", "ps", "-aq"], env=env).stdout.split()
+    if not names:
+        return []
+    done = run(["docker", "inspect", "--format",
+                '{{range .Mounts}}{{if eq .Destination "/etc/tqa/gateway.toml"}}{{.Source}}{{"\\n"}}{{end}}{{end}}',
+                *names], env=env, check=False)
+    return [Path(line) for line in done.stdout.splitlines() if line.strip()]
+
+
+def kept_pools(env=None):
+    """Pools named in installations' gateway.toml files: they are no network until a sandbox exists. Found under
+    ~/.local/share and in every gateway container's mount (a folder elsewhere, as a developer's own installation)."""
     found = []
-    for config in Path.home().glob(".local/share/*/gateway.toml"):
-        for line in config.read_text(errors="replace").splitlines():
+    configs = set(Path.home().glob(".local/share/*/gateway.toml"))
+    if env is not None:
+        configs.update(mounted_configs(env))
+    for config in sorted(configs):
+        try:
+            text = config.read_text(errors="replace")
+        except OSError:
+            continue
+        for line in text.splitlines():
             if line.replace(" ", "").startswith("cidr="):
                 try:
                     found.append(ipaddress.ip_network(line.split("=", 1)[1].strip().strip("\"'"), strict=False))
@@ -103,7 +123,7 @@ def kept_pools():
 
 
 def free_pool(env):
-    taken = [ipaddress.ip_network(subnet, strict=False) for subnet in compose.engine_subnets(env)] + kept_pools()
+    taken = [ipaddress.ip_network(subnet, strict=False) for subnet in compose.engine_subnets(env)] + kept_pools(env)
     free = [pool for pool in POOLS if not any(pool.version == other.version and pool.overlaps(other)
                                                for other in taken)]
     require(free, "no free 10.230-250 /16 sandbox pool on this engine")
