@@ -63,9 +63,10 @@ export function ChannelHeader({
   const t = useT();
   const busy = members.filter(working).length;
   const budget = channel.wake_budget ?? 0;
+  // Floored, so 99.8 % reads 99 % and "used up" only once it is (the review of 21 Nov 2026).
   const used =
     budget > 0
-      ? Math.round(((channel.spent_tokens ?? 0) * 100) / budget)
+      ? Math.floor(((channel.spent_tokens ?? 0) * 100) / budget)
       : null;
   const toggle = (view: HeaderPanel) => onPanel(panel === view ? null : view);
   return (
@@ -94,6 +95,10 @@ export function ChannelHeader({
               {t("channels.workingCount", { count: busy })}
             </span>
           )
+        )}
+        {channel.wake_budget === 0 && channel.state === "open" && (
+          // A budget of 0 turns waking off: it is not a used-up day.
+          <span className="muted">{t("channels.wakingOff")}</span>
         )}
         {used !== null && (
           <span className="muted">

@@ -82,16 +82,19 @@ export function ChannelBudget({
       }
     >
       <div className="stack">
-        <p>
-          {t("channels.budgetSpentOf", {
-            spent: number.format(spent),
-            budget: number.format(budget),
-            percent: number.format(
-              budget > 0 ? Math.round((spent * 100) / budget) : 100,
-            ),
-          })}
-        </p>
-        {channel.budget_resets_at && (
+        {budget > 0 ? (
+          <p>
+            {t("channels.budgetSpentOf", {
+              spent: number.format(spent),
+              budget: number.format(budget),
+              percent: number.format(Math.floor((spent * 100) / budget)),
+            })}
+          </p>
+        ) : (
+          // 0 turns waking off, not a spent budget (the review of 21 Nov 2026).
+          <p>{t("channels.budgetOff")}</p>
+        )}
+        {budget > 0 && channel.budget_resets_at && (
           <p>
             {t("channels.budgetResets", {
               time: resetTime(channel.budget_resets_at, t.locale),

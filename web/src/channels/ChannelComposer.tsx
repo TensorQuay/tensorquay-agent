@@ -38,7 +38,21 @@ const REFUSALS: Readonly<Record<string, MessageKey>> = {
   observer: "channels.postObserver",
   not_member: "channels.postNotMember",
   channel_rate: "channels.postRate",
-  message_invalid: "channels.postFilesInvalid",
+  body_too_large: "channels.postTooLong",
+};
+/**
+ * A post refused naming a field (`400`, `details[].reason` `message_invalid`): its files, or the post itself, usually
+ * too long for the gateway's 16 KiB (the review of 21 Nov 2026). Never the files' words for a post without one.
+ */
+const postRefusal = (error: unknown): MessageKey | undefined => {
+  if (!(error instanceof ApiError)) return undefined;
+  const problem = error.details.find(
+    (detail) => detail.reason === "message_invalid",
+  );
+  if (!problem) return REFUSALS[error.code];
+  return problem.field === "files"
+    ? "channels.postFilesInvalid"
+    : "channels.postTooLong";
 };
 /** An upload's refusals, in plain words (ADR-0014's amendment of 20 Nov 2026, A9). */
 const UPLOAD_REFUSALS: Readonly<Record<string, MessageKey>> = {
@@ -174,11 +188,7 @@ export function ChannelComposer({
       setFiles([]);
       setKind("text");
     } catch (error) {
-      setFailure({
-        key:
-          (error instanceof ApiError ? REFUSALS[error.code] : undefined) ??
-          "channels.postFailed",
-      });
+      setFailure({ key: postRefusal(error) ?? "channels.postFailed" });
     } finally {
       setPending(false);
     }

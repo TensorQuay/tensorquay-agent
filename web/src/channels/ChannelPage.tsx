@@ -133,6 +133,13 @@ function useChannelLog(api: ChannelsApi, id: string, onEnded: () => void) {
   return { messages, add, loaded };
 }
 
+/** The notices that change a channel's budget or today's spend. */
+const BUDGET_NOTICES: ReadonlySet<string> = new Set([
+  "wake_budget_set",
+  "wake_budget_80",
+  "wake_budget_spent",
+]);
+
 /** One channel's page (ADR-0014; WEB-U-063): its bar, its log in seq order with threads, and the composer. */
 export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
   const t = useT();
@@ -185,9 +192,30 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
         // A task, claim or report changes the board (ADR-0014 point 8).
         if (["task", "claim", "report"].includes(message.body.type))
           void cache.invalidateQueries({ queryKey: tasksKey(id) });
+        // A budget notice changes the channel's budget or spend: the header and Wake budget… read it again, so they
+        // never disagree with the log (the review of 21 Nov 2026).
+        if (
+          message.body.type === "notice" &&
+          BUDGET_NOTICES.has(message.body.kind)
+        )
+          void cache.invalidateQueries({ queryKey: ["channel", id] });
       }
     seen.current = log.messages.at(-1)?.seq ?? seen.current;
   }, [log.messages, cache, id]);
+  // The viewer's role comes with the channel; Members (read every 5 s) shows a change first, for example the owner
+  // making them lead: the channel is read again, so the budget field and Raise the budget follow.
+  const listedRole = members.data?.items.find(
+    (member) => member.kind === "user" && member.id === me,
+  )?.role;
+  const channelRole = channel.data?.role;
+  useEffect(() => {
+    if (
+      listedRole !== undefined &&
+      channelRole !== undefined &&
+      listedRole !== channelRole
+    )
+      void cache.invalidateQueries({ queryKey: ["channel", id] });
+  }, [listedRole, channelRole, cache, id]);
   if (channel.isPending) return <Skeleton label={t("channels.opening")} />;
   if (channel.isError)
     return (
