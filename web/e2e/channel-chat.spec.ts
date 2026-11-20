@@ -52,6 +52,31 @@ for (const width of [1440, 390] as const)
       const box = await thread.boundingBox();
       if (width === 390) expect(box?.width).toBe(390);
       else expect((box?.x ?? 0) + (box?.width ?? 0)).toBeLessThanOrEqual(1440);
+      // Room for whole posts (the review of 20 Nov 2026): each author's name and "Agent" on one line, replies flush
+      // with the root's text, and a reply's text at least 240 px wide.
+      const fit = await thread.evaluate((aside) => {
+        const lines = [...aside.querySelectorAll(".channel-post-who")].map(
+          (who) => {
+            const box = who.getBoundingClientRect();
+            const line = Number.parseFloat(getComputedStyle(who).lineHeight);
+            return Math.round(box.height / line);
+          },
+        );
+        const root = aside.querySelector(".channel-post p");
+        const reply = aside.querySelector(".channel-replies .channel-post p");
+        return {
+          lines,
+          flush:
+            Math.round(root?.getBoundingClientRect().left ?? 0) ===
+            Math.round(reply?.getBoundingClientRect().left ?? -1),
+          text: Math.round(reply?.getBoundingClientRect().width ?? 0),
+        };
+      });
+      expect({
+        lines: fit.lines.filter((count) => count !== 1),
+        flush: fit.flush,
+        roomy: fit.text >= 240,
+      }).toEqual({ lines: [], flush: true, roomy: true });
       expect(
         await pageProblems(page, `the thread at ${width}, ${theme}`),
       ).toEqual([]);

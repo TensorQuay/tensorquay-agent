@@ -251,6 +251,8 @@
   --detail-label-width: 160px;
   --transcript-width: 720px;
   --channel-side-width: 18rem;
+  /* A thread holds whole posts, so it takes more room than a list (the review of 20 Nov 2026). */
+  --channel-thread-width: 22rem;
   /* §6: the right panel for files and changes. */
   --panel-width: 360px;
   /* Workspace cards fill the row from this width; the size meter and the lease dot. */

@@ -494,6 +494,12 @@
       [log-end] var(--space-6) [side-start] var(--channel-side-width)
       [side-end] minmax(0, 1fr) [wide-end];
   }
+  .channel-page[data-panel="thread"] {
+    grid-template-columns:
+      [wide-start] minmax(0, 1fr) [log-start] minmax(0, var(--transcript-width))
+      [log-end] var(--space-6) [side-start] var(--channel-thread-width)
+      [side-end] minmax(0, 1fr) [wide-end];
+  }
   .channel-page > * {
     grid-column: log;
   }
@@ -729,4 +735,22 @@
 .channel-log :is(a, button, summary, [tabindex]) {
   scroll-margin-block: calc(var(--bar-height) + var(--space-8))
     calc(var(--space-16) * 7);
+}
+
+/* A thread's replies sit flush with its root's text, no nesting rule, and its posts take a narrower face gutter: a
+   panel has no room to spare (the review of 20 Nov 2026). */
+.channel-thread {
+  --thread-gutter: calc(var(--avatar-size) + var(--space-2) * 2);
+}
+.channel-thread .channel-replies {
+  /* Back by the root's gutter and its border, so a reply's own border and gutter land where the root's do. */
+  margin-inline-start: calc(-1 * (var(--thread-gutter) + var(--border-width)));
+  padding-left: 0;
+  border-left: 0;
+}
+.channel-thread .channel-post {
+  padding-inline: var(--thread-gutter) var(--space-2);
+}
+.channel-thread .channel-post > .channel-post-avatar {
+  inset-inline-start: var(--space-1);
 }

@@ -226,7 +226,12 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
   // WEB-U-250: the title is usually the purpose's start; the line under it says only what it adds.
   const beyond = purposeBeyond(item.purpose, item.name);
   return (
-    <div className="channel-page" data-panel={panel ? "" : undefined}>
+    <div
+      className="channel-page"
+      data-panel={
+        panel ? (typeof panel === "object" ? "thread" : panel) : undefined
+      }
+    >
       <TabTitle>
         {t("channels.pageTab", { name: item.name, product: APP_NAME })}
       </TabTitle>
