@@ -36,6 +36,8 @@ pub(crate) fn spec() -> Result<SandboxSpec, Box<dyn Error>> {
         env: BTreeMap::from([("LANG".into(), "C.UTF-8".into())]),
         skills: crate::SkillsMounts::default(),
         desktop: false,
+        long_term_memory: false,
+        memory_person: None,
     })
 }
 

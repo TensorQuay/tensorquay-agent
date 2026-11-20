@@ -54,6 +54,54 @@ pub(crate) async fn before_delivery(
     }
 }
 
+/// The files a task changed, in path order: the live workspace compared with the task's earliest kept snapshot.
+/// `None` when the task has no snapshot to compare with. Memory's own folder is left out. Directory workspaces.
+///
+/// # Errors
+/// Database and host I/O failures.
+pub(crate) async fn task_files(
+    state: &crate::app::State,
+    workspace: Uuid,
+    conversation: Uuid,
+) -> Result<Option<Vec<String>>, GatewayError> {
+    let first = crate::io::bounded(
+        state.config.io_timeout(),
+        &state.cancel,
+        store::first_of(&state.pool, conversation),
+    )
+    .await?;
+    let Some(first) = first else {
+        return Ok(None);
+    };
+    let storage_root = state.config.storage_root.clone();
+    let before = {
+        let storage_root = storage_root.clone();
+        blocking(move || Place::new(&storage_root, workspace).read(first)).await?
+    };
+    let mut limits = limits(&state.config.files);
+    limits.deadline = Some(std::time::Instant::now() + state.config.io_timeout());
+    let root = state.storage.workspace(workspace).await?;
+    let previous = before.clone();
+    let scan_root = storage_root.clone();
+    let after = live::LIVE
+        .get(workspace, || {
+            blocking(move || {
+                let place = Place::new(&scan_root, workspace);
+                let root = path::open_root(&root)?;
+                scan(root.as_fd(), Some(&previous), &limits, &place.blobs())
+            })
+        })
+        .await?;
+    let blobs = Place::new(&storage_root, workspace).blobs();
+    Ok(Some(
+        compare::changes(&before, &after, &blobs)
+            .into_iter()
+            .map(|change| change.path)
+            .filter(|path| !path.starts_with(".memory/"))
+            .collect(),
+    ))
+}
+
 async fn snapshot(
     services: &Services,
     config: &GatewayConfig,

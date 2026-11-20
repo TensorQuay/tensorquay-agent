@@ -5,6 +5,19 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ## Unreleased
 
+### Added
+
+- **Long-term memory, first part (ADR-0041; off by default until it is complete).** With `[memory] enabled = true`
+  a task's runs are told how to keep notes across tasks in `.memory/` (one fact per file) and get an index of the
+  workspace's notes and of their person's finished tasks, generated at every run and pinned so it survives a
+  summary. A note may not hold a key: the file tools refuse one, and a note that got one another way is left out of
+  the index. Each change to a note keeps its previous version for one Undo, and a person can write, remove and undo
+  a note over the API (`/conversations/{id}/memory/{name}`, with a write share). When a person's run completes, the
+  gateway writes the task's digest (its title, the day, the files it changed, the first lines of the answer; no
+  model call) into that person's private folder of the workspace, which the Files panel does not show and no other
+  person's run lists. Off, a run sends exactly what it sends today. Still to come before it is turned on:
+  "Remembered" with Undo on the page, personal notes with Settings › Memory, and history.
+
 ### Fixed
 
 - **The gateway logs why it ended a model's response early (GW-U-226).** When the relay stops a response before
