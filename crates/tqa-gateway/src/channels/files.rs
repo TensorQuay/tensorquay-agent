@@ -186,7 +186,7 @@ pub(crate) async fn sweep_uploads(state: &State) -> Result<usize, GatewayError> 
 }
 
 /// How often unposted uploads are swept.
-const SWEEP_EVERY: std::time::Duration = std::time::Duration::from_secs(3600);
+const SWEEP_EVERY: std::time::Duration = std::time::Duration::from_hours(1);
 
 /// Starts the hourly sweep of unposted uploads, on the gateway's task tracker, stopped by its cancel.
 pub(crate) fn start(state: &Arc<State>) {
@@ -425,7 +425,7 @@ pub(crate) async fn place(
         seq: row.seq,
         index: row.index,
         path: row.path,
-        not_placed: row.not_placed,
+        why_not: row.not_placed,
     })
     .collect())
 }
@@ -435,7 +435,8 @@ pub(crate) struct Placed {
     pub(crate) seq: i64,
     pub(crate) index: i16,
     pub(crate) path: Option<String>,
-    pub(crate) not_placed: Option<String>,
+    /// Why it isn't there (`uploads_full`, `upload_too_large`), when it couldn't be placed.
+    pub(crate) why_not: Option<String>,
 }
 
 /// A file not yet in a member's workspace: its message, its place in it, and the name it gets there.

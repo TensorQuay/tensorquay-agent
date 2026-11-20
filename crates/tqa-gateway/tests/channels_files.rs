@@ -1,7 +1,7 @@
-//! Files on a channel's posts (ADR-0014's amendment of 20 Nov 2026, A9): the composer's limits (GW-I-356); a post with
-//! files and its download (GW-I-357); delivery into a woken agent member's workspace, flat in `uploads/` as
-//! `<channel>-<seq>-<file>`, never overwriting, the wake naming each exact path, a rename moving nothing (GW-I-358);
-//! the member's read naming the placed paths, a person's naming none (GW-I-359); a name that can't leave `uploads/`
+//! Files on a channel's posts (ADR-0014's amendment of 20 Nov 2026, A9): the composer's limits (GW-I-367); a post with
+//! files and its download (GW-I-368); delivery into a woken agent member's workspace, flat in `uploads/` as
+//! `<channel>-<seq>-<file>`, never overwriting, the wake naming each exact path, a rename moving nothing (GW-I-369);
+//! the member's read naming the placed paths, a person's naming none (GW-I-370); a name that can't leave `uploads/`
 //! (SEC-069).
 #[path = "support/channel_agent.rs"]
 mod channel_agent;
@@ -80,10 +80,10 @@ async fn post_with(
 
 const SMALL: &str = "\n[files]\nupload_bytes = 1024\nuploads_bytes = 4096\n";
 
-// TEST: GW-I-356
+// TEST: GW-I-367
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
-async fn gw_i_356_a_channels_files_keep_the_composers_limits(pool: PgPool) -> TestResult {
+async fn gw_i_367_a_channels_files_keep_the_composers_limits(pool: PgPool) -> TestResult {
     Box::pin(support::run_configured(pool, None, SMALL, async |f| {
         let (_, cookie) = f.admin().await?;
         let id = channel(f, &cookie, "pricing", &[]).await?;
@@ -153,10 +153,10 @@ async fn gw_i_356_a_channels_files_keep_the_composers_limits(pool: PgPool) -> Te
     .await
 }
 
-// TEST: GW-I-357
+// TEST: GW-I-368
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
-async fn gw_i_357_a_post_carries_its_files_and_people_download_them(pool: PgPool) -> TestResult {
+async fn gw_i_368_a_post_carries_its_files_and_people_download_them(pool: PgPool) -> TestResult {
     Box::pin(support::run(pool, async |f| {
         let (_, cookie) = f.admin().await?;
         let id = channel(f, &cookie, "pricing", &[]).await?;
@@ -256,11 +256,11 @@ fn named_path(sentence: &str, start: &str) -> Option<String> {
         .map(str::to_owned)
 }
 
-// TEST: GW-I-358
-// TEST: GW-I-359
+// TEST: GW-I-369
+// TEST: GW-I-370
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
-async fn gw_i_358_359_a_woken_member_gets_the_files_where_its_wake_says(
+async fn gw_i_369_370_a_woken_member_gets_the_files_where_its_wake_says(
     pool: PgPool,
 ) -> TestResult {
     Box::pin(support::run(pool, async |f| {

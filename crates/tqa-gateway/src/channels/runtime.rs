@@ -198,7 +198,7 @@ async fn with_paths(
                 placed.seq == seq && usize::try_from(placed.index).ok() == Some(index)
             }) {
                 file.path.clone_from(&placed.path);
-                file.not_placed.clone_from(&placed.not_placed);
+                file.not_placed.clone_from(&placed.why_not);
             }
         }
     }
