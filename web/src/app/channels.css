@@ -720,3 +720,10 @@
     width: 100%;
   }
 }
+
+/* Keyboard focus never lands under the pinned header or composer (the a11y audit's covered stops): what the focus
+   reaches in the log scrolls clear of both. */
+.channel-log :is(a, button, summary, [tabindex]) {
+  scroll-margin-block: calc(var(--bar-height) + var(--space-8))
+    calc(var(--space-16) * 4);
+}

@@ -279,9 +279,9 @@ for (const [width, colorScheme] of [
     await expect(box).toBeFocused();
     await box.fill("nobody@example.invalid");
     await box.press("Enter");
-    await expect(page.getByRole("tabpanel").getByRole("alert")).toContainText(
-      "No account uses that email.",
-    );
+    await expect(
+      page.getByRole("complementary", { name: "Members" }).getByRole("alert"),
+    ).toContainText("No account uses that email.");
     await box.fill("colleague@example.invalid");
     await box.press("Enter");
     await expect(page.getByRole("status")).toContainText(

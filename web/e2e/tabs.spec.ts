@@ -27,25 +27,12 @@ async function shot(area: Locator, name: string) {
   await area.screenshot({ path: join(directory, `${name}.png`) });
 }
 
-/** The three places with tabs: a task's Files panel, a channel's side and Keys' Mine | Shared. */
+/** The places with tabs: a task's Files panel and Keys' Mine | Shared (a channel's side has none since 18.2). */
 const places = {
   async files(page: Page) {
     await page.goto(await createConversation(page));
     const panel = await openFilesPanel(page);
     return panel.getByRole("tablist", { name: "Task views" });
-  },
-  async channel(page: Page) {
-    await page.goto("/channels");
-    await page
-      .getByRole("list", { name: "Channels" })
-      .getByRole("link", { name: "release", exact: true })
-      .click();
-    await expect(
-      page.getByRole("heading", { level: 1, name: "release" }),
-    ).toBeVisible();
-    return page
-      .getByRole("complementary", { name: "To-dos and members" })
-      .getByRole("tablist");
   },
   async keys(page: Page) {
     await page.goto("/settings/keys");
@@ -122,8 +109,9 @@ async function oneStyle(page: Page, strip: Locator, at: string) {
 // WEB-E2E-116 (UI-GUIDELINES §7 Tabs, 9 Nov 2026): one tab style everywhere. The chosen tab is a soft filled
 // pill, the others plain muted labels that take the pill's tint on hover; one weight, no underline; at least 32 px
 // tall, 4 to 8 px apart. A tab list keeps the ARIA keys: the arrows move and choose (and wrap), Home and End go to the
-// ends, and only the chosen tab is in the Tab order, with the focus ring in full. The Files panel's tabs, a channel's
-// side tabs and Keys' Mine | Shared (links to two pages, so a navigation drawn as tabs).
+// ends, and only the chosen tab is in the Tab order, with the focus ring in full. The Files panel's tabs and Keys' Mine
+// | Shared (links to two pages, so a navigation drawn as tabs); a channel's side tabs became the header's To-dos and
+// Members in 18.2 (WEB-U-519).
 for (const colorScheme of ["light", "dark"] as const)
   test(`WEB-E2E-116 one tab style at 1280 ${colorScheme}`, async ({
     browser,
@@ -185,25 +173,6 @@ for (const colorScheme of ["light", "dark"] as const)
       });
       expect.soft(ring, "the focus ring inside the strip").toBe(true);
       await shot(strip, `files-tabs-focus-${colorScheme}`);
-    });
-
-    await test.step("a channel's side tabs", async () => {
-      const strip = await places.channel(page);
-      await expect(strip).toBeVisible();
-      await page.mouse.move(10, 700);
-      await shot(strip.locator("xpath=.."), `channel-tabs-${colorScheme}`);
-      await oneStyle(page, strip, "channel");
-      await strip.getByRole("tab", { name: "To-dos" }).focus();
-      await page.keyboard.press("ArrowRight");
-      const members = strip.getByRole("tab", { name: "Members" });
-      await expect.soft(members).toHaveAttribute("aria-selected", "true");
-      await expect.soft(members).toBeFocused();
-      const stops = (await tabs(strip)).filter((tab) => tab.tabIndex === 0);
-      expect.soft(stops.map((tab) => tab.name)).toEqual(["Members"]);
-      await shot(
-        strip.locator("xpath=.."),
-        `channel-tabs-members-${colorScheme}`,
-      );
     });
 
     await test.step("Keys' Mine | Shared", async () => {

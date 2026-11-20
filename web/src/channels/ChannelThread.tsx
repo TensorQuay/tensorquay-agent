@@ -54,7 +54,7 @@ export function ChannelThread({
         messages={thread}
         members={members}
         fileHref={fileHref}
-        label={t("channels.repliesTo", { seq })}
+        label={title}
       />
       {posts && (
         <ChannelComposer
