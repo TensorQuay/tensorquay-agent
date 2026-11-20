@@ -16,6 +16,7 @@ import { Splittable } from "../test/split";
 import { LIMITS } from "../test/user";
 
 import { FilePreview } from "./FilePreview";
+import { MAX_IMAGE_BYTES } from "./image-bytes";
 
 const content = (path: string, size: number, text: string | null) =>
   ({
@@ -632,6 +633,16 @@ describe("WEB-U-088 a spreadsheet in the Files panel", () => {
     files[path] = content(path, limit + 1, null);
     show(path);
     expect(await screen.findByText(new RegExp(`^${words}`))).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Expand" })).toBeNull();
+    expect(screen.getByRole("link", { name: "Download" })).toBeTruthy();
+  });
+
+  // WEB-U-517: an image over the preview's own limit shows the same kind of note, and no Expand either (18.1.0 made an
+  // image wide at any size: WEB-E2E-056 on the real stack, an 11 MiB picture).
+  it("offers no Expand for an image over its limit", async () => {
+    files["huge.png"] = content("huge.png", MAX_IMAGE_BYTES + 1, null);
+    show("huge.png");
+    expect(await screen.findByText(/^Too large to preview/)).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Expand" })).toBeNull();
     expect(screen.getByRole("link", { name: "Download" })).toBeTruthy();
   });
