@@ -530,3 +530,43 @@ async fn wait_status(fixture: &support::Fixture, key: &str, status: &str) -> Tes
     })
     .await?
 }
+
+// TEST: GW-I-372
+/// A sweep pass that removes a stray container counts it as unowned in the verdict it records: the readiness detail
+/// and the metrics say 1 container (the leak verdict counts what a pass found that no record accounts for, removed or
+/// not; GW-U-219). On a real engine (GW-I-328's first runs, 20 Nov 2026) the pass that removed two strays read 0.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_372_a_pass_that_removes_a_stray_container_counts_it_as_unowned(
+    pool: PgPool,
+) -> TestResult {
+    run(pool, async |fixture| {
+        let (owner, cookie) = fixture.admin().await?;
+        let sandboxes = fixture.gateway.sandboxes();
+        let managed = fixture.conversation(owner.id).await?;
+        sandboxes.ensure(&managed.id).await?;
+        let unrecorded = fixture.conversation(owner.id).await?;
+        fixture.backend.orphan(&managed.id, unrecorded.id).await?;
+        sandboxes.sweep_pass_now().await;
+        let detail: serde_json::Value = fixture
+            .get("/readyz?detail=1", &cookie)
+            .await?
+            .json()
+            .await?;
+        assert_eq!(
+            detail["sandboxes"]["unowned"]["containers"], 1,
+            "the stray the pass removed is counted: {detail}"
+        );
+        assert_eq!(
+            detail["sandboxes"]["left_behind"]["containers"], 0,
+            "{detail}"
+        );
+        assert_eq!(
+            fixture.backend.list().await?.len(),
+            1,
+            "the stray is gone, the managed sandbox stays"
+        );
+        Ok(())
+    })
+    .await
+}
