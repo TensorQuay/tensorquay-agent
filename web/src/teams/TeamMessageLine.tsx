@@ -55,6 +55,7 @@ function failedWords(
   if (notice?.kind !== "member_failed" || !notice.code || !notice.member)
     return null;
   const runReason = message.text
+    // copy-lint: not user copy (the gateway's stored sentence, parsed for the run's reason)
     .replace(`${notice.member} failed: `, "")
     .replace(/\.$/, "");
   const failure = knownFailure(notice.code, runReason);
