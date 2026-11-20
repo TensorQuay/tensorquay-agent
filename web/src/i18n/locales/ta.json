@@ -1457,6 +1457,7 @@
     "channels.postFilesInvalid": "ஒரு கோப்பு இந்த இடுகையுடன் செல்ல முடியவில்லை: மீண்டும் இணைக்கவும்.",
     "channels.thread": "திரி",
     "channels.repliesCount": "{count, plural, one {# பதில்} other {# பதில்கள்}}",
+    "channels.moreReplies": "{count, plural, one {மேலும் # பதில்} other {மேலும் # பதில்கள்}}",
     "channels.replyInThread": "திரியில் பதிலளி",
     "channels.send": "அனுப்பு",
     "channels.showWholeReport": "முழு அறிக்கையையும் காட்டு · {count, plural, one {# வரி} other {# வரிகள்}}",

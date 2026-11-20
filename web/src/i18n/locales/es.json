@@ -1455,6 +1455,7 @@
     "channels.postFilesInvalid": "Un archivo no pudo ir con esta publicación: vuelve a adjuntarlo.",
     "channels.thread": "Hilo",
     "channels.repliesCount": "{count, plural, one {# respuesta} other {# respuestas}}",
+    "channels.moreReplies": "{count, plural, one {# respuesta más} other {# respuestas más}}",
     "channels.replyInThread": "Responder en el hilo",
     "channels.send": "Enviar",
     "channels.showWholeReport": "Mostrar el informe completo · {count, plural, one {# línea} other {# líneas}}",

@@ -1457,6 +1457,7 @@
     "channels.postFilesInvalid": "이 글과 함께 보낼 수 없는 파일이 있습니다. 다시 첨부하세요.",
     "channels.thread": "스레드",
     "channels.repliesCount": "답글 {count, number}개",
+    "channels.moreReplies": "답글 {count}개 더 보기",
     "channels.replyInThread": "스레드에 답글",
     "channels.send": "보내기",
     "channels.showWholeReport": "보고서 전체 보기 · {count, number}줄",

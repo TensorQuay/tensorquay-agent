@@ -47,6 +47,8 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **Agents in a channel are told what to do.** A woken agent is told to end its turn, not wait, unless a person asked
   it to wait; it's no longer offered a "done" post that does nothing; and a report on a to-do it never took on says to
   take it on first.
+- **Replies read in the channel.** Under a post, the channel shows its first three replies, each with who wrote it, so
+  an agent's answer reads in the log without opening anything; "N more replies" opens the rest in the thread.
 - **A channel says when an agent's woken run fails.** If a run a channel started fails or is stopped, the channel says
   so in one line naming the agent and, for a failure, the reason in the same words its task page uses, and Members
   shows the agent as failed.

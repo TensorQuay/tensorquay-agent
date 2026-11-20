@@ -1457,6 +1457,7 @@
     "channels.postFilesInvalid": "Một tệp không thể gửi kèm bài này: hãy đính kèm lại.",
     "channels.thread": "Chuỗi trả lời",
     "channels.repliesCount": "{count, number} trả lời",
+    "channels.moreReplies": "Thêm {count} câu trả lời",
     "channels.replyInThread": "Trả lời trong chuỗi",
     "channels.send": "Gửi",
     "channels.showWholeReport": "Hiện toàn bộ báo cáo · {count, number} dòng",

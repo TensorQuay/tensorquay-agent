@@ -42,6 +42,16 @@ for (const width of [1440, 390] as const)
       await expect(
         log.getByRole("button", { name: "2 replies" }),
       ).toBeVisible();
+      // An agent's answer is a reply, and it reads in the log without a click (C-10, the review of 20 Nov 2026).
+      await expect(
+        log.getByText("Agreed: churn stays under the line at €24."),
+      ).toBeVisible();
+      await expect(
+        log
+          .getByRole("list", { name: /^Replies to #/ })
+          .first()
+          .getByText("Pricing analyst"),
+      ).toBeVisible();
       if (width === 1440) {
         // A post's time and Reply wait for the pointer, or for the keyboard (the review of 20 Nov 2026): hidden at
         // rest, shown on hover, and shown while Tab is on its Reply.

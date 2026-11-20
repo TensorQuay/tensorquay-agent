@@ -1457,6 +1457,7 @@
     "channels.postFilesInvalid": "มีไฟล์ที่ส่งไปพร้อมโพสต์นี้ไม่ได้ ให้แนบใหม่",
     "channels.thread": "เธรด",
     "channels.repliesCount": "{count, number} คำตอบ",
+    "channels.moreReplies": "อีก {count} คำตอบ",
     "channels.replyInThread": "ตอบในเธรด",
     "channels.send": "ส่ง",
     "channels.showWholeReport": "แสดงรายงานทั้งหมด · {count, number} บรรทัด",

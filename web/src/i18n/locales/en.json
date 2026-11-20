@@ -1463,6 +1463,7 @@
     "channels.postFilesInvalid": "A file couldn't go with this post: attach it again.",
     "channels.thread": "Thread",
     "channels.repliesCount": "{count, plural, one {# reply} other {# replies}}",
+    "channels.moreReplies": "{count, plural, one {# more reply} other {# more replies}}",
     "channels.replyInThread": "Reply in the thread",
     "channels.send": "Send",
     "channels.showWholeReport": "Show the whole report · {count, plural, one {# line} other {# lines}}",

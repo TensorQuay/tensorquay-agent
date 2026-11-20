@@ -1456,6 +1456,7 @@
     "channels.postFilesInvalid": "Ada fail yang tidak dapat dihantar bersama siaran ini: lampirkan semula.",
     "channels.thread": "Bebenang",
     "channels.repliesCount": "{count, number} balasan",
+    "channels.moreReplies": "{count} lagi balasan",
     "channels.replyInThread": "Balas dalam bebenang",
     "channels.send": "Hantar",
     "channels.showWholeReport": "Tunjukkan seluruh laporan · {count, number} baris",

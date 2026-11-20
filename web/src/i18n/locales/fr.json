@@ -1452,6 +1452,7 @@
     "channels.postFilesInvalid": "Un fichier n’a pas pu accompagner ce message : joignez-le de nouveau.",
     "channels.thread": "Fil",
     "channels.repliesCount": "{count, plural, one {# réponse} other {# réponses}}",
+    "channels.moreReplies": "{count, plural, one {# autre réponse} other {# autres réponses}}",
     "channels.replyInThread": "Répondre dans le fil",
     "channels.send": "Envoyer",
     "channels.showWholeReport": "Afficher tout le rapport · {count, plural, one {# ligne} other {# lignes}}",

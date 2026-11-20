@@ -544,3 +544,82 @@ describe("WEB-U-530 a woken run that ended badly", () => {
     expect(view).not.toHaveTextContent("reply_cut");
   });
 });
+
+// WEB-U-531 (decided on 20 Nov 2026, C-10): under a post the log shows its first three replies without a click, each
+// with its author's name, then "N more replies" (or "N replies" when all show), which opens the thread.
+describe("WEB-U-531 a post's replies in the log", () => {
+  const post = (
+    seq: number,
+    who: { kind: "user" | "conversation"; id: string; name: string },
+    text: string,
+    parent?: number,
+  ): ChannelMessage => ({
+    seq,
+    ts: `2026-09-27T10:0${seq}:00Z`,
+    author: who,
+    ...(parent ? { parent } : {}),
+    body: { type: "text", text },
+  });
+  const mei = { kind: "user" as const, id: "u-mei", name: "Mei" };
+  const analyst = {
+    kind: "conversation" as const,
+    id: "c-1",
+    name: "Pricing analyst",
+  };
+  const checker = {
+    kind: "conversation" as const,
+    id: "c-2",
+    name: "Data checker",
+  };
+
+  it("shows the first three replies with their authors, then how many more", async () => {
+    const onThread = vi.fn();
+    render(
+      <ChannelTimeline
+        messages={[
+          post(1, mei, "What stands out in Q3?"),
+          post(2, analyst, "EU Pro churn fell to 1.8 %.", 1),
+          post(3, checker, "The EU rows check out.", 1),
+          post(4, mei, "Good, and the US?", 1),
+          post(5, analyst, "US Pro is flat at 2.0 %.", 1),
+          post(6, checker, "US rows check out too.", 1),
+        ]}
+        members={[]}
+        onThread={onThread}
+      />,
+    );
+    await settleLazy();
+    const log = screen.getByRole("list", { name: "Channel log" });
+    const replies = within(log).getByRole("list", { name: "Replies to #1" });
+    expect(replies).toHaveTextContent("Pricing analyst");
+    expect(replies).toHaveTextContent("EU Pro churn fell to 1.8 %.");
+    expect(replies).toHaveTextContent("Data checker");
+    expect(replies).toHaveTextContent("The EU rows check out.");
+    expect(replies).toHaveTextContent("Good, and the US?");
+    expect(replies).not.toHaveTextContent("US Pro is flat");
+    fireEvent.click(
+      within(log).getByRole("button", { name: "2 more replies" }),
+    );
+    expect(onThread).toHaveBeenCalledWith(1);
+  });
+
+  it("says how many replies when all of them show", async () => {
+    render(
+      <ChannelTimeline
+        messages={[
+          post(1, mei, "What stands out in Q3?"),
+          post(2, analyst, "EU Pro churn fell to 1.8 %.", 1),
+          post(3, checker, "The EU rows check out.", 1),
+        ]}
+        members={[]}
+        onThread={vi.fn()}
+      />,
+    );
+    await settleLazy();
+    const log = screen.getByRole("list", { name: "Channel log" });
+    expect(within(log).getByText("The EU rows check out.")).toBeVisible();
+    expect(
+      within(log).getByRole("button", { name: "2 replies" }),
+    ).toBeVisible();
+  });
+});

@@ -1463,6 +1463,7 @@
     "channels.postFilesInvalid": "有文件无法随此帖发送：请重新附加。",
     "channels.thread": "话题",
     "channels.repliesCount": "{count, number} 条回复",
+    "channels.moreReplies": "还有 {count} 条回复",
     "channels.replyInThread": "在话题中回复",
     "channels.send": "发送",
     "channels.showWholeReport": "显示完整报告 · {count, number} 行",

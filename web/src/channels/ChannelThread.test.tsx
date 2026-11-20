@@ -20,9 +20,9 @@ const PRICING = channel("pricing", {
 const MEI = member("user", "Mei Lin", { role: "member" });
 const ANALYST = member("conversation", "Agent", { title: "Pricing analyst" });
 
-// WEB-U-523 (18.2 slice 3, the mock of 17 Nov 2026): no nesting in the log. A post with replies shows "N replies"; the
-// replies open in a thread panel beside the log (a sheet on a phone) with the post, its replies and a reply box, and a
-// reply posted there joins the thread, not the log.
+// WEB-U-523 (18.2 slice 3, the mock of 17 Nov 2026; C-10 of 20 Nov 2026): a post with replies shows its first three
+// under it and "N replies"; the replies open in a thread panel beside the log (a sheet on a phone) with the post, its
+// replies and a reply box, and a reply posted there joins the thread and the ones under the post.
 describe("WEB-U-523 replies open in a thread", () => {
   it("shows the count in the log and the thread in its panel", async () => {
     const fake = fakeChannels({
@@ -55,7 +55,8 @@ describe("WEB-U-523 replies open in a thread", () => {
       within(log)
         .getAllByRole("article")
         .map((item) => item.getAttribute("aria-label")),
-    ).toEqual(["#1 Mei Lin", "#4 Mei Lin"]);
+    ).toEqual(["#1 Mei Lin", "#2 Agent", "#3 Mei Lin", "#4 Mei Lin"]);
+    // The first replies show under their post without a click (C-10, WEB-U-531); the button opens the thread.
     fireEvent.click(within(log).getByRole("button", { name: "2 replies" }));
     const thread = screen.getByRole("complementary", { name: "Thread" });
     await settleLazy();
@@ -71,7 +72,8 @@ describe("WEB-U-523 replies open in a thread", () => {
     expect(
       within(log).getByRole("button", { name: "3 replies" }),
     ).toBeVisible();
-    expect(within(log).queryByText("Agreed.")).toBeNull();
+    // The third reply joins the ones the log shows under the post (C-10).
+    expect(await within(log).findByText("Agreed.")).toBeVisible();
     fireEvent.click(
       within(thread).getByRole("button", { name: "Close Thread" }),
     );

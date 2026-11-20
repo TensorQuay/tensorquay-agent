@@ -200,14 +200,28 @@ export function ChannelTimeline({
         >
           {thread.length > 0 &&
             (onThread ? (
-              <button
-                type="button"
-                className="proposal-fold type-small"
-                onClick={() => onThread(message.seq)}
-              >
-                <Icon glyph={MessageSquare} size={16} />
-                {t("channels.repliesCount", { count: thread.length })}
-              </button>
+              // The first replies show in the log without a click (decided on 20 Nov 2026, C-10): an agent's answer
+              // is a reply, and the log mustn't look silent while the work is done. The rest open the thread.
+              <>
+                <ul
+                  className="channel-replies"
+                  aria-label={t("channels.repliesTo", { seq: message.seq })}
+                >
+                  {thread.slice(0, INLINE_REPLIES).map(render)}
+                </ul>
+                <button
+                  type="button"
+                  className="proposal-fold type-small"
+                  onClick={() => onThread(message.seq)}
+                >
+                  <Icon glyph={MessageSquare} size={16} />
+                  {thread.length > INLINE_REPLIES
+                    ? t("channels.moreReplies", {
+                        count: thread.length - INLINE_REPLIES,
+                      })
+                    : t("channels.repliesCount", { count: thread.length })}
+                </button>
+              </>
             ) : (
               <ul
                 className="channel-replies"
@@ -348,6 +362,9 @@ function Post({
     </article>
   );
 }
+
+/** How many of a post's replies the log shows under it before "N more replies" (C-10). */
+const INLINE_REPLIES = 3;
 
 /** A post longer than this many lines folds (WEB-U-522), showing the first {@link FOLDED_LINES}. */
 const FOLD_OVER = 12;

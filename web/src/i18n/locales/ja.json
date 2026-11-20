@@ -1457,6 +1457,7 @@
     "channels.postFilesInvalid": "この投稿と一緒に送れないファイルがありました。もう一度添付してください。",
     "channels.thread": "スレッド",
     "channels.repliesCount": "返信 {count, number} 件",
+    "channels.moreReplies": "ほかに {count} 件の返信",
     "channels.replyInThread": "スレッドで返信",
     "channels.send": "送信",
     "channels.showWholeReport": "レポート全体を表示 · {count, number} 行",
