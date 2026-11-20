@@ -124,6 +124,9 @@ So every message before it reads makes one wake, two posts at once make one, and
 isn't woken again for the same messages. A member of two channels gets one turn at a time: the second channel's wake
 comes after the first run ends. A wake is sent just after the commit that made it due, and the channel sweep (point 9's
 pass) sends it again from stored state, so a wake lost to a restart still comes.
+- **A busy task (decided on 20 Nov 2026 in review).** While a member's task has a run active (the person's own message,
+  a team round, an earlier wake), no wake is sent: the wake waits behind that run, never a second run at once and never
+  lost. When the run ends the sweep sends it, if what woke the member is still unread; a run that read it needs none.
 
 **A4. What the woken run is told.** The wake's `user.message` is the gateway's fixed sentence and nothing written by
 anyone else: the channel's id, the place, what waits by kind and seq ("a proposal for your vote, message 12; two posts
@@ -131,7 +134,7 @@ naming you, 14 and 15"), and the call that reads it (`channel_read`, the channel
 or channel name: those are written by other agents and people, so they reach the model only inside `channel_read`'s
 marked block (point 10; SEC-068). The message carries `channel_wake {channel, after}` so a client shows the gateway's
 notice, never a person's message, as `team_wake` does: **protocol revision 16**. A member whose runtime announces less
-than 16 isn't woken; its state says so (A7). The sentence ends: "end your turn when you are waiting for more."
+than 16 isn't woken; its state says so (A7), and so does one notice (A10). The sentence ends: "end your turn when you are waiting for more."
 
 **A5. The budget, enforced.** Point 12's stored `budget` becomes the channel's token budget for wakes. A channel with
 none takes the installation's `[channels] wake_budget` (300,000 tokens by default; 0 turns wakes off). Charged: the
@@ -164,12 +167,25 @@ file, 32 a message, the installation's uploads total). They reach each agent mem
 placed before the run that reads the post, at `uploads/channels/<channel id>/<seq>-<file name>`; nothing in a
 workspace is overwritten. People download them from the post.
 
+**A10. One notice for a member that can't be woken (decided on 20 Nov 2026 in review).** A member whose task was
+deleted, or whose environment's runtime is below revision 16, isn't woken. The channel gets one plain notice naming the
+member and why ("Pricing analyst can't be woken: its environment needs an update"; "… its task was deleted"), once
+per member and reason, never one per message; it is posted again only after the member could be woken in between.
+
+**A11. A person's own agent (decided on 20 Nov 2026 in review).** A person's post that names, or replies to, the agent
+of that person's own task wakes it like any other member, and its reply is a hop like any other (A6). People are never
+woken, so the person and their own agent can't wake each other in a loop; two agents answering each other stop at the
+fourth hop.
+
 **Test rows:** GW-U-227 (the wake key), GW-U-228 (the sentence carries no content), GW-U-229 (naming: the longest
 name, no case), GW-U-230 (the hop rule); PROTO-U-048 (`channel_wake`, revision 16); SEC-068 (no channel content in a
-wake); TOOL-U-149 (a read moves the place), TOOL-U-150 (a post's hop); GW-I-344 to GW-I-355 (who is woken, a burst is
-one wake, a woken run that doesn't read isn't woken again, a failed one is, two channels one turn, the sweep after a
-restart, the budget charged and stopping a long exchange, a person's run uncharged, the four-hop bound and its notice,
-the hourly bound, the members' live state, below revision 16 not woken).
+wake); TOOL-U-149 (a read moves the place), TOOL-U-150 (a post's hop); GW-I-344 (who is woken, A1), GW-I-345 (a burst
+is one wake; a woken run that doesn't read isn't woken again), GW-I-346 (a failed run is woken again), GW-I-347 (a busy
+task: the wake waits for the run's end, never a second run, never lost), GW-I-348 (two channels, one turn at a time),
+GW-I-349 (the sweep sends a wake lost to a restart), GW-I-350 (the budget charged, the 80 % notice, a person's run
+uncharged), GW-I-351 (the budget stops a long exchange), GW-I-352 (the four-hop bound and its notice; a person's own
+agent, A11), GW-I-353 (the hourly bound), GW-I-354 (the members' live state), GW-I-355 (a deleted task or a runtime
+below 16: not woken, one notice, A10).
 
 ## Consequences
 

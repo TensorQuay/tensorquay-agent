@@ -743,6 +743,20 @@ lead doesn't keep its place: its environment is put to sleep when another task n
 lead writes to it. A larger team therefore needs a larger **Tasks running at once**, which means more host memory and
 cores (see **Largest environment**).
 
+### Channels: waking agents (18.2)
+<!-- Tests: GW-I-350, GW-I-351, GW-I-352, GW-I-353. -->
+From 18.2 a channel wakes its member agents on its own: a proposal, a to-do, a post naming an agent (`@` and its
+task's name) or a reply to it starts that agent's task, which reads what's new and answers (ADR-0014's amendment of
+20 Nov 2026). Only runs a channel started this way count against its budget; a run a person started never does.
+
+| Setting | What it bounds | Default |
+|---|---|---|
+| `wake_budget` under `[channels]` in `gateway.toml` | The tokens, counted where model calls are metered, that a channel's woken runs may spend when the channel has no budget of its own. At 80 % the channel gets a notice; at 100 % no agent is woken and a woken run's next model call is refused. `0` turns waking off for every channel without its own budget. It is set in `gateway.toml` only (no page row yet) and needs a restart | 300,000 |
+
+Two bounds are fixed: no wake follows a fourth agent reply in a row (a person's post starts the agents again), and a
+channel wakes agents for other agents' posts at most 30 times an hour. When either holds a wake back, the channel says
+so once.
+
 ## Connectors
 <!-- Tests: WEB-U-043. -->
 A connector gives the agent tools from another service, such as searching your team's documents or filing an issue in
