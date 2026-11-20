@@ -37,6 +37,15 @@ impl Fixture {
         &self,
         id: &tqa_types::ConversationId,
     ) -> Result<Runtime, Box<dyn std::error::Error>> {
+        Box::pin(self.runtime_of_sandbox_at(id, tqa_types::PROTOCOL_REVISION)).await
+    }
+
+    /// [`Self::runtime_of_sandbox`], its runtime announcing `revision`.
+    pub async fn runtime_of_sandbox_at(
+        &self,
+        id: &tqa_types::ConversationId,
+        revision: u16,
+    ) -> Result<Runtime, Box<dyn std::error::Error>> {
         let token = self
             .backend
             .live_token(id)
@@ -46,7 +55,7 @@ impl Fixture {
             .lock()
             .map_err(|_| "lock")?
             .insert(id.to_string(), token);
-        Box::pin(self.runtime_at(id, tqa_types::PROTOCOL_REVISION)).await
+        Box::pin(self.runtime_at(id, revision)).await
     }
 
     /// Connects the fake runtime of a conversation known only by id (for example, one created over HTTP).

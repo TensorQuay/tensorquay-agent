@@ -2,8 +2,9 @@
 //! member's place and one wake for a burst (A2, A3, GW-I-345), a failed run woken again (GW-I-346), a busy task's wake
 //! behind its run (GW-I-347), one turn at a time across channels (GW-I-348), the sweep after a restart (GW-I-349), the
 //! budget (A5, GW-I-350, GW-I-351), the hop bound and a person's own agent (A6, A11, GW-I-352), the hourly bound
-//! (GW-I-353), the members' live state (A7, GW-I-354) and a member that can't be woken (A10, GW-I-355). SEC-068: the
-//! wake's turn carries nothing written by anyone else.
+//! (GW-I-353), the members' live state (A7, GW-I-354), a member that can't be woken (A10, GW-I-355) and a sandbox too
+//! old for a wake replaced by the wake itself (C-15, GW-I-382). SEC-068: the wake's turn carries nothing written by
+//! anyone else.
 #[path = "support/channel_agent.rs"]
 mod channel_agent;
 #[path = "support/fixture.rs"]
@@ -12,7 +13,10 @@ use channel_agent::{Agent, Result, WAKE, channel, notices, post, text};
 use reqwest::Method;
 use serde_json::{Value, json};
 use sqlx::PgPool;
-use std::{sync::Arc, time::Duration};
+use std::{
+    sync::{Arc, atomic::Ordering},
+    time::Duration,
+};
 use support::{Fixture, TestResult, call};
 use tqa_testkit::{FakeModelServer, Script, Scripted};
 use tqa_types::ClientFrame;
@@ -600,16 +604,26 @@ async fn gw_i_355_a_member_that_cant_be_woken_gets_one_notice_not_one_per_messag
         old.next_at(f, WAKE, 15).await?.ok_or("the person's turn")?;
         old.start(f).await?;
         old.end(f).await?;
-        for n in 0..3 {
+        // The first wake replaces its sandbox (C-15); the replacement's runtime is still too old, so the wake is
+        // withdrawn and the channel told once; the next posts are held, never a replacement or a notice each.
+        let destroys = f.backend.destroys.load(Ordering::SeqCst);
+        post(f, &cookie, &id, text("@old runtime 0"), None).await?;
+        replaced(f, &mut old, destroys, 15).await?;
+        for n in 1..3 {
             post(f, &cookie, &id, text(&format!("@old runtime {n}")), None).await?;
         }
         old.quiet(f).await?;
+        assert_eq!(f.backend.destroys.load(Ordering::SeqCst), destroys + 1, "one replacement, not one per message");
         assert_eq!(notices(f, &id, "unreachable_runtime").await?, 1, "one notice, not one per message");
         let notice: String = sqlx::query_scalar("SELECT body->>'text' FROM channel_messages WHERE channel_id = $1 AND type = 'notice' AND body->>'kind' = 'unreachable_runtime'")
             .bind(Uuid::parse_str(&id)?)
             .fetch_one(&f.pool)
             .await?;
-        assert_eq!(notice, "Old runtime can't be woken: its environment needs an update.");
+        assert_eq!(
+            notice,
+            "Old runtime can't be woken: its environment still runs an older version after it was started again; an \
+             administrator can update its image in Settings, and it is woken again then."
+        );
         // A deleted task leaves the channel with one notice.
         let (status, _) = call(f, Method::DELETE, &format!("/api/v1/conversations/{}", gone.id), &cookie, (None, None)).await?;
         assert!(status < 300, "{status}");
@@ -756,6 +770,71 @@ async fn gw_i_377_a_persons_post_to_the_channel_wakes_every_voting_agent(
         assert!(sentence.contains(&format!("a post naming you (message {named})")), "{sentence}");
         assert!(!sentence.contains("a post to the channel"), "{sentence}");
         analyst.quiet(f).await?;
+        Ok(())
+    }))
+    .await
+}
+
+/// Waits until `agent`'s sandbox was replaced (a destroy after `destroys`) and connects the new sandbox's runtime at
+/// `revision`.
+async fn replaced(f: &Fixture, agent: &mut Agent, destroys: usize, revision: u16) -> TestResult {
+    let deadline = tokio::time::Instant::now() + WAKE;
+    while f.backend.destroys.load(Ordering::SeqCst) == destroys {
+        if tokio::time::Instant::now() > deadline {
+            return Err("the old sandbox was not replaced".into());
+        }
+        tokio::time::sleep(Duration::from_millis(50)).await;
+    }
+    agent.runtime = None;
+    f.forget_runtime(&agent.id)?;
+    loop {
+        match f.runtime_of_sandbox_at(&agent.id, revision).await {
+            Ok(runtime) => {
+                agent.runtime = Some(runtime);
+                return Ok(());
+            }
+            Err(_) if tokio::time::Instant::now() < deadline => {
+                tokio::time::sleep(Duration::from_millis(100)).await;
+            }
+            Err(error) => return Err(format!("no replacement sandbox: {error}").into()),
+        }
+    }
+}
+
+// TEST: GW-I-382
+// An upgrade needs nothing from people (decided on 21 Nov 2026, C-15): a wake for a member whose sandbox runs a runtime
+// below 16 replaces that sandbox, as an administrator's stop does, and goes to the new one; while a run goes, the
+// sandbox stays until the run has ended. No "can't be woken" notice when the replacement reads the wake.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_382_a_wake_replaces_a_sandbox_too_old_to_read_it(pool: PgPool) -> TestResult {
+    Box::pin(support::run(pool, async |f| {
+        let (owner, cookie) = f.admin().await?;
+        let mut old = Agent::new(f, owner.id, "Old runtime").await?;
+        let id = channel(f, &cookie, "pricing", &[(&old, "member")]).await?;
+        // Its sandbox from before the upgrade: the runtime announces 15, and a run of its own is going.
+        let (status, _) = call(f, Method::POST, &format!("/api/v1/conversations/{}/messages", old.id), &cookie, (Some(json!({"text": "Start."})), Some("person-1"))).await?;
+        assert!(status < 300, "{status}");
+        old.next_at(f, WAKE, 15).await?.ok_or("the person's turn")?;
+        old.start(f).await?;
+        let destroys = f.backend.destroys.load(Ordering::SeqCst);
+        let asked = post(f, &cookie, &id, text("@old runtime please look"), None).await?;
+        tokio::time::sleep(Duration::from_secs(2)).await;
+        assert_eq!(f.backend.destroys.load(Ordering::SeqCst), destroys, "a run in progress keeps its sandbox");
+        // Its run ends: the sandbox is replaced, and the new one's runtime gets the wake.
+        old.end(f).await?;
+        replaced(f, &mut old, destroys, tqa_types::PROTOCOL_REVISION).await?;
+        let sentence = old.woken(f, &id, 0).await?;
+        assert!(sentence.contains(&format!("message {asked}")), "{sentence}");
+        assert_eq!(notices(f, &id, "unreachable_runtime").await?, 0, "no notice when the replacement reads it");
+        old.start(f).await?;
+        assert_eq!(old.read(f, &id, 0).await?, vec![asked]);
+        old.end(f).await?;
+        // The member is a member like any other now: the next post wakes it with no replacement.
+        let again = post(f, &cookie, &id, text("@old runtime one more"), None).await?;
+        let sentence = old.woken(f, &id, asked).await?;
+        assert!(sentence.contains(&format!("message {again}")), "{sentence}");
+        assert_eq!(f.backend.destroys.load(Ordering::SeqCst), destroys + 1, "one replacement only");
         Ok(())
     }))
     .await
