@@ -363,7 +363,7 @@ pub enum TeamMessageBody {
         /// The sentence.
         text: String,
         /// The failed run's code, on a `member_failed` notice for a run that failed: for a page to say why in its own
-        /// words (18.1.1). Absent on every other notice.
+        /// words (18.2). Absent on every other notice.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         code: Option<crate::ErrorCode>,
     },

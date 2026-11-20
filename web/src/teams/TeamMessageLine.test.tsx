@@ -161,7 +161,7 @@ describe("WEB-U-507 a round's start as a quiet line", () => {
   });
 });
 
-// WEB-U-512 (18.1.1, the first hour's finding 6): a helper's failed run names its reason in plain words and links to
+// WEB-U-512 (18.2, the first hour's finding 6): a helper's failed run names its reason in plain words and links to
 // the helper's task; while that helper works again, the line says so instead of "failed".
 describe("WEB-U-512 a helper's failed run on the lead's page", () => {
   const failed = message(

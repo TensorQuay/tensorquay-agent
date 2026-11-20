@@ -167,7 +167,7 @@ async fn gw_i_111_a_helper_without_progress_is_marked_stuck_and_working_again_on
 
 // TEST: GW-I-343
 /// A helper's failed run is told with its run's code beside the sentence, so the lead's page can name the reason in
-/// its own words (18.1.1, the first hour's finding 6).
+/// its own words (18.2, the first hour's finding 6).
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
 async fn gw_i_343_a_helpers_failed_notice_carries_its_runs_code(pool: PgPool) -> TestResult {
