@@ -26,6 +26,10 @@ pub const HEADER_BYTES: u64 = 4 * 1024;
 pub const MAX_ABOUT_CHARS: usize = 160;
 /// At most this many files are looked at in each directory (a workspace can't make the run start slow).
 pub const MAX_FILES_SCANNED: usize = 2_000;
+/// A note is read for a key up to this many bytes, and at most this many notes are read (the index shows 40).
+pub const NOTE_SCAN_BYTES: u64 = 64 * 1024;
+/// See [`NOTE_SCAN_BYTES`].
+pub const MAX_NOTES_READ: usize = 200;
 
 /// The rules, always shown when memory is on (an agent must know it may save the first note), then the index.
 const RULES: &str = "\n# Memory\nThis workspace keeps notes across tasks in .memory/, one fact per file. When you learn \
@@ -52,29 +56,41 @@ pub struct MemoryIndex {
     pub notes: Vec<MemoryLine>,
     /// Task digests, newest first (their file names start with the date).
     pub digests: Vec<MemoryLine>,
+    /// Notes left out because they hold what looks like a key (written some other way than the file tools, which
+    /// refuse one): never listed, so the key isn't carried into later runs.
+    pub withheld: usize,
 }
 
 /// Reads the workspace's notes and digests. Missing directories mean no memory; a file that is a link, not a regular
 /// file, not UTF-8 or unreadable is skipped, never followed.
 #[must_use]
 pub fn discover_memory(workspace: &WorkspaceRoot) -> MemoryIndex {
+    let (notes, withheld) = lines(workspace, MEMORY_DIRECTORY, false);
+    let (digests, _) = lines(workspace, DIGEST_DIRECTORY, true);
     MemoryIndex {
-        notes: lines(workspace, MEMORY_DIRECTORY, false),
-        digests: lines(workspace, DIGEST_DIRECTORY, true),
+        notes,
+        digests,
+        withheld,
     }
 }
 
-fn lines(workspace: &WorkspaceRoot, directory: &str, newest_first: bool) -> Vec<MemoryLine> {
+/// The directory's lines and how many of its files were left out for holding a key.
+fn lines(
+    workspace: &WorkspaceRoot,
+    directory: &str,
+    newest_first: bool,
+) -> (Vec<MemoryLine>, usize) {
+    let none = (Vec::new(), 0);
     let Ok(path) = workspace.resolve(directory) else {
-        return Vec::new();
+        return none;
     };
     // The directory itself must be a real directory inside the workspace, not a link to one elsewhere.
     match fs::symlink_metadata(&path) {
         Ok(metadata) if metadata.is_dir() => {}
-        _ => return Vec::new(),
+        _ => return none,
     }
     let Ok(entries) = fs::read_dir(&path) else {
-        return Vec::new();
+        return none;
     };
     let mut names: Vec<String> = entries
         .filter_map(Result::ok)
@@ -91,16 +107,33 @@ fn lines(workspace: &WorkspaceRoot, directory: &str, newest_first: bool) -> Vec<
     if newest_first {
         names.reverse();
     }
-    names
-        .into_iter()
-        .filter_map(|name| {
-            let about = about(&path.join(&name), newest_first)?;
-            Some(MemoryLine {
+    let mut withheld = 0;
+    let mut found = Vec::new();
+    for name in names.into_iter().take(MAX_NOTES_READ) {
+        let file = path.join(&name);
+        if holds_key(&file) {
+            withheld += 1;
+            continue;
+        }
+        if let Some(about) = about(&file, newest_first) {
+            found.push(MemoryLine {
                 path: format!("{directory}/{name}"),
                 about,
-            })
-        })
-        .collect()
+            });
+        }
+    }
+    (found, withheld)
+}
+
+/// Whether a regular file's first [`NOTE_SCAN_BYTES`] hold what looks like a key (a link or unreadable file: no).
+fn holds_key(path: &Path) -> bool {
+    let regular = fs::symlink_metadata(path).is_ok_and(|metadata| metadata.is_file());
+    if !regular {
+        return false;
+    }
+    let mut text = Vec::new();
+    let read = File::open(path).and_then(|file| file.take(NOTE_SCAN_BYTES).read_to_end(&mut text));
+    read.is_ok() && tqa_tools::builtin::memory_note::holds_key(&String::from_utf8_lossy(&text))
 }
 
 /// A note's `about:` header line, or a digest's first `# ` title; the file's name when it has neither (a note never
@@ -170,6 +203,17 @@ pub fn render_memory_index(index: &MemoryIndex) -> String {
         let _ = writeln!(
             out,
             "({left_notes} more notes in {MEMORY_DIRECTORY}: list it to see them.)"
+        );
+    }
+    if index.withheld > 0 {
+        let _ = writeln!(
+            out,
+            "({} left out of this list: they hold what looks like a key or token. Take the key out of them.)",
+            if index.withheld == 1 {
+                "1 note is".to_owned()
+            } else {
+                format!("{} notes are", index.withheld)
+            }
         );
     }
     if left_digests > 0 {

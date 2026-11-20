@@ -236,3 +236,48 @@ fn prompt_u_029_the_byte_cap_holds_and_long_or_marked_up_lines_are_flattened() -
     assert!(text.contains("more notes in .memory"), "the cut says so");
     Ok(())
 }
+
+// TEST: PROMPT-U-029
+#[test]
+fn prompt_u_029_a_note_holding_a_key_is_left_out_and_counted() -> TestResult {
+    // A made-up key, generated here so the source holds nothing key-shaped for the secrets scan (G-10).
+    const BASE62: &[u8] = b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    let mut state: u64 = 5;
+    let body: String = (0..40)
+        .map(|_| {
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+            char::from(BASE62[usize::try_from(state % 62).unwrap_or(0)])
+        })
+        .collect();
+    let (directory, root) = workspace()?;
+    note(
+        &directory,
+        "deploy.md",
+        &format!("about: how to deploy\n\nexport TOKEN=sk-{body}\n"),
+    )?;
+    note(&directory, "pnpm.md", "about: use pnpm\n")?;
+    let index = discover_memory(&root);
+    assert_eq!(index.withheld, 1);
+    assert_eq!(
+        index
+            .notes
+            .iter()
+            .map(|line| line.about.as_str())
+            .collect::<Vec<_>>(),
+        ["use pnpm"]
+    );
+    let text = render_memory_index(&index);
+    assert!(
+        !text.contains("deploy.md") && !text.contains(&body),
+        "{text}"
+    );
+    assert!(
+        text.contains(
+            "(1 note is left out of this list: they hold what looks like a key or token."
+        ),
+        "{text}"
+    );
+    Ok(())
+}

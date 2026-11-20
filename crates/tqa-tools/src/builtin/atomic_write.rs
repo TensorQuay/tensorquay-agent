@@ -18,6 +18,10 @@ pub(super) fn replace(
 ) -> Result<(), ToolError> {
     file_io::cancelled(cancel)?;
     let path = workspace.resolve(requested)?;
+    // A memory note is kept and shown to later tasks: it may not hold a key (ADR-0041).
+    if let Some(reason) = super::memory_note::refusal(workspace.path(), &path, content) {
+        return Err(ToolError::invalid("/content", reason));
+    }
     let permissions = match path.metadata() {
         Ok(metadata) if metadata.is_file() => Some(metadata.permissions()),
         Ok(_) => return Err(ToolError::PathInvalid("expected regular file".into())),

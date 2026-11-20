@@ -686,3 +686,78 @@ async fn tool_u_004_an_ambiguous_refusal_stops_counting_at_a_thousand() -> TestR
     );
     Ok(())
 }
+
+/// A made-up key body, generated here so the source holds nothing key-shaped for the secrets scan (G-10).
+fn made_up_key() -> String {
+    const BASE62: &[u8] = b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    let mut state: u64 = 7;
+    let body: String = (0..40)
+        .map(|_| {
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+            char::from(BASE62[usize::try_from(state % 62).unwrap_or(0)])
+        })
+        .collect();
+    format!("sk-{body}")
+}
+
+// TEST: TOOL-U-151
+#[tokio::test]
+async fn tool_u_151_no_file_tool_saves_a_key_into_a_memory_note() -> TestResult {
+    use tqa_tools::builtin::WriteFile;
+    let fixture = workspace_fixture()?;
+    let cx = support::context(&fixture);
+    let key = made_up_key();
+    // write_file: refused with the reason, and nothing is left behind (no note, no folder's staging file).
+    let refused = WriteFile::new()
+        .call(
+            json!({"path": ".memory/deploy.md", "create_parents": true,
+                   "content": format!("about: the deploy key\n\nThe key is {key}\n")}),
+            &cx,
+        )
+        .await;
+    let said = refused.map_or_else(detail, |_| "written".to_owned());
+    assert!(said.contains("can't hold a key"), "{said}");
+    assert!(!fixture.root().join(".memory/deploy.md").exists());
+    let left: Vec<_> = fs::read_dir(fixture.root().join(".memory"))
+        .map(|entries| entries.filter_map(Result::ok).collect())
+        .unwrap_or_default();
+    assert!(left.is_empty(), "{left:?}");
+    // An ordinary note is saved; an edit that would add the key is refused and the note stays as it was.
+    let note = "about: Deploys go through staging\nkind: convention\n\nRun make stage first.\n";
+    WriteFile::new()
+        .call(
+            json!({"path": ".memory/deploy.md", "create_parents": true, "content": note}),
+            &cx,
+        )
+        .await?;
+    let edited = EditFile::new()
+        .call(
+            request(
+                ".memory/deploy.md",
+                "Run make stage first.",
+                &format!("Use {key}."),
+            ),
+            &cx,
+        )
+        .await;
+    assert!(
+        edited
+            .map_or_else(detail, |_| "edited".to_owned())
+            .contains("can't hold a key")
+    );
+    assert_eq!(
+        fs::read_to_string(fixture.root().join(".memory/deploy.md"))?,
+        note
+    );
+    // The same content outside the memory folder is the workspace's own business, as before.
+    WriteFile::new()
+        .call(
+            json!({"path": "config.env", "content": format!("TOKEN={key}\n")}),
+            &cx,
+        )
+        .await?;
+    assert!(fixture.root().join("config.env").is_file());
+    Ok(())
+}
