@@ -82,7 +82,9 @@ export type TeamMessageView = {
   /** The helper a person wrote to (`person_message`). */
   member?: string | undefined;
   /** A gateway notice's kind and its helper (`notice`). */
-  notice?: { kind: string; member?: string; position?: number } | undefined;
+  notice?:
+    | { kind: string; member?: string; position?: number; code?: string }
+    | undefined;
   /** The round that started (`round_started`). */
   round?: number | undefined;
 };

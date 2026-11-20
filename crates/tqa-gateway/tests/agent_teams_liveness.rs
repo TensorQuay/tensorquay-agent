@@ -165,6 +165,35 @@ async fn gw_i_111_a_helper_without_progress_is_marked_stuck_and_working_again_on
     .await
 }
 
+// TEST: GW-I-343
+/// A helper's failed run is told with its run's code beside the sentence, so the lead's page can name the reason in
+/// its own words (18.2, the first hour's finding 6).
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_343_a_helpers_failed_notice_carries_its_runs_code(pool: PgPool) -> TestResult {
+    support::run_configured(pool, None, ENABLED, async |f| {
+        let t = team(f).await?;
+        let failed = Event::RunFailed {
+            run_id: "r-2".parse()?,
+            reason: "the model's reply was cut off".into(),
+            code: ErrorCode::ReplyCut,
+            provider_message: None,
+        };
+        event(f, &t.researcher.0, 2, "r-2", failed).await?;
+        f.gateway.reconcile_agent_teams_now().await?;
+        let code: Option<String> = sqlx::query_scalar(
+            "SELECT m.body->>'code' FROM channel_messages m JOIN agent_teams t ON t.channel_id = m.channel_id \
+             WHERE t.id = $1 AND m.type = 'notice'",
+        )
+        .bind(t.id)
+        .fetch_one(&f.pool)
+        .await?;
+        assert_eq!(code.as_deref(), Some("reply_cut"));
+        Ok(())
+    })
+    .await
+}
+
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
 async fn gw_i_111_a_helpers_failed_run_is_told_with_its_reason_once(pool: PgPool) -> TestResult {

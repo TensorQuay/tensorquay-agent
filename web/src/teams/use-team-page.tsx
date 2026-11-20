@@ -160,9 +160,19 @@ export function useTeamPage({
             },
           ]
         : lead && messages.data
-          ? teamLines(messages.data, viewer, open, state)
+          ? teamLines(messages.data, viewer, open, state, team.data?.helpers)
           : NO_LINES,
-    [unreadable, lead, messages.data, viewer, open, state, t, rereadLog],
+    [
+      unreadable,
+      lead,
+      messages.data,
+      viewer,
+      open,
+      state,
+      team.data?.helpers,
+      t,
+      rereadLog,
+    ],
   );
   const [problem, setProblem] = useState<MessageKey | null>(null);
   // A stopping or ended team waits for no one: the message box is the lead's own again (ADR-0034 S6).

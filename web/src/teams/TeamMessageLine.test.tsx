@@ -160,3 +160,49 @@ describe("WEB-U-507 a round's start as a quiet line", () => {
     expect(words).toBe("Round 2 started");
   });
 });
+
+// WEB-U-512 (18.2, the first hour's finding 6): a helper's failed run names its reason in plain words and links to
+// the helper's task; while that helper works again, the line says so instead of "failed".
+describe("WEB-U-512 a helper's failed run on the lead's page", () => {
+  const failed = message(
+    "notice",
+    { kind: "gateway" },
+    lead,
+    "places failed: the model's reply was cut off.",
+    { notice: { kind: "member_failed", member: "places", code: "reply_cut" } },
+  );
+  const helper = (state: string) => [
+    { name: "places", conversation: "c-places", state },
+  ];
+
+  it("names the reason in plain words and links the line to the helper's task", () => {
+    render(<TeamMessageLine message={failed} helpers={helper("failed")} />);
+    const link = screen.getByRole("link", {
+      name: "places failed: The model's reply was cut off at its output limit.",
+    });
+    expect(link).toHaveAttribute("href", "/c/c-places");
+  });
+
+  it("says the helper works again, never failed, while it does", () => {
+    render(<TeamMessageLine message={failed} helpers={helper("working")} />);
+    const link = screen.getByRole("link");
+    expect(link).toHaveTextContent(
+      "places stopped: The model's reply was cut off at its output limit. It's working again.",
+    );
+    expect(link.textContent).not.toMatch(/failed/);
+  });
+
+  it("keeps the short words for a code it doesn't know, and no link without the helper", () => {
+    const unknown = {
+      ...failed,
+      notice: {
+        kind: "member_failed",
+        member: "places",
+        code: "something_new",
+      },
+    };
+    render(<TeamMessageLine message={unknown} />);
+    expect(screen.getByText("places failed.")).toBeVisible();
+    expect(screen.queryByRole("link")).toBeNull();
+  });
+});

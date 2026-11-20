@@ -249,6 +249,7 @@ pub(crate) async fn stop_member(
         caller.channel,
         (NoticeKind::MemberStopped, &member.name),
         &text,
+        None,
     )
     .await?;
     Ok(Stopped {
@@ -527,6 +528,7 @@ pub(crate) async fn notice(
     channel: Uuid,
     (kind, member): (tqa_types::NoticeKind, &str),
     text: &str,
+    code: Option<tqa_types::ErrorCode>,
 ) -> Result<u64, GatewayError> {
     let message = Message {
         channel,
@@ -538,6 +540,7 @@ pub(crate) async fn notice(
         member: Some(member.to_owned()),
         position: None,
         text: text.to_owned(),
+        code,
     };
     insert(connection, &message, &body).await
 }
@@ -562,6 +565,7 @@ pub(crate) async fn team_notice(
         member: None,
         position: None,
         text: text.to_owned(),
+        code: None,
     };
     insert(connection, &message, &body).await
 }
@@ -588,6 +592,7 @@ pub(crate) async fn member_notice(
         member: None,
         position: None,
         text: text.to_owned(),
+        code: None,
     };
     insert(connection, &message, &body).await
 }

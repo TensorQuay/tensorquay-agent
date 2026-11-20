@@ -192,6 +192,7 @@ async fn failed(
             channel,
             (NoticeKind::MemberFailed, name),
             &text,
+            None,
         )
         .await?;
         transaction.commit().await?;

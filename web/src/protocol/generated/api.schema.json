@@ -3501,6 +3501,9 @@
         "text"
       ],
       "properties": {
+        "code": {
+          "type": "string"
+        },
         "seq": {
           "type": "integer",
           "minimum": 1

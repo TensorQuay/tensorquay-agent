@@ -211,6 +211,7 @@ pub(crate) async fn sandbox_failed(
         helper.channel_id,
         (tqa_types::NoticeKind::MemberFailed, &helper.name),
         &text,
+        None,
     )
     .await?;
     transaction.commit().await?;

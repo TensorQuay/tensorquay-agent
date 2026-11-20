@@ -15,6 +15,12 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   installation's labels with one of them malformed made the whole container listing fail, so the sweep removed
   nothing and a task's teardown kept retrying. It is now left out of the listing, logged, and counted on Status as
   something the sweep couldn't remove; the rest are listed and swept as before.
+### Changed
+
+- **A helper's failed run says why on the lead's page (GW-I-343, WEB-U-512).** The lead task's line read only
+  "places failed."; it now names the reason in plain words ("The model's reply was cut off at its output limit"),
+  links to the helper's task, and while the helper works again says so instead of "failed". A team's
+  `member_failed` notice carries the run's failure code in a new optional `code` field.
 
 ## 18.1.0 (20 November 2026)
 
