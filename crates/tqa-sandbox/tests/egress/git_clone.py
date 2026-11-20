@@ -68,3 +68,9 @@ def check(stack):
                        "denied": "egress_denied", "preserved": "skipped"}, "Unexpected clone outcomes"
     print("RT-I-015 clone: full checkout, branch, tag, denied host, preserved workspace; "
           "TLS verified and every Git request observed from the gateway proxy", flush=True)
+
+
+if __name__ == "__main__":
+    # A library: run as `python3 -m egress.git_clone` it ran nothing and exited 0, so a step that called it passed
+    # with no clone at all. RT-I-015's runner owns the stack.
+    raise SystemExit("egress.git_clone is RT-I-015's library; run crates/tqa-sandbox/tests/workspace_clone.py")
