@@ -230,6 +230,23 @@ async fn gw_i_357_a_post_carries_its_files_and_people_download_them(pool: PgPool
     .await
 }
 
+/// The member's read of message `seq`: its first file's path in the member's workspace.
+async fn read_path(f: &Fixture, agent: &Agent, channel: &str, seq: u64) -> Result<String> {
+    let (status, page) = channel_agent::runtime_call(
+        f,
+        Method::GET,
+        &format!("/runtime/channels/{channel}/messages?since={}", seq - 1),
+        &agent.token(f)?,
+        None,
+    )
+    .await?;
+    assert_eq!(status, 200, "{page}");
+    Ok(page["messages"][0]["files"][0]["path"]
+        .as_str()
+        .ok_or_else(|| format!("no path: {page}"))?
+        .to_owned())
+}
+
 /// The path the wake's sentence names that starts with `start` (an `uploads/…` path).
 fn named_path(sentence: &str, start: &str) -> Option<String> {
     sentence
@@ -263,10 +280,20 @@ async fn gw_i_358_359_a_woken_member_gets_the_files_where_its_wake_says(
         .await?;
         assert_eq!(status, 201, "{posted}");
         let seq = posted["seq"].as_u64().ok_or("seq")?;
+        // The wake says a file waits and from which message, never its path (SEC-068); the read gives the path.
         let sentence = analyst.woken(f, &id, 0).await?;
-        let path = named_path(&sentence, "uploads/pricing-")
-            .ok_or_else(|| format!("no path in: {sentence}"))?;
-        assert_eq!(path, format!("uploads/pricing-{seq}-q3.pdf"), "{sentence}");
+        assert!(
+            sentence.ends_with(&format!(
+                " 1 file waits in your workspace, from message {seq}; channel_read lists its path."
+            )),
+            "{sentence}"
+        );
+        assert!(
+            named_path(&sentence, "uploads/").is_none() && !sentence.contains("q3"),
+            "{sentence}"
+        );
+        let path = read_path(f, &analyst, &id, seq).await?;
+        assert_eq!(path, format!("uploads/pricing-{seq}-q3.pdf"));
         let workspace = f.backend.mounted(&analyst.id).ok_or("workspace")?;
         assert_eq!(std::fs::read(workspace.join(&path))?, pdf);
         // Its read names the same path; a person's read names none.
@@ -317,9 +344,8 @@ async fn gw_i_358_359_a_woken_member_gets_the_files_where_its_wake_says(
         .await?;
         let second = again["seq"].as_u64().ok_or("seq")?;
         assert_eq!(second, seq + 1);
-        let sentence = analyst.woken(f, &id, seq).await?;
-        let placed = named_path(&sentence, "uploads/pricing-renamed-")
-            .ok_or_else(|| format!("no path in: {sentence}"))?;
+        analyst.woken(f, &id, seq).await?;
+        let placed = read_path(f, &analyst, &id, second).await?;
         assert_ne!(
             placed,
             format!("uploads/pricing-renamed-{second}-q3.pdf"),
@@ -382,11 +408,15 @@ async fn sec_069_a_channel_files_name_cant_leave_uploads(pool: PgPool) -> TestRe
         assert_eq!(placed.len(), 3, "{placed:?}");
         for name in &placed {
             assert!(!name.starts_with('.') && !name.contains(".."), "{name}");
-            assert!(
-                sentence.contains(&format!("uploads/{name}")),
-                "{name} in {sentence}"
-            );
         }
+        // SEC-068: neither the channel's name nor a file's reaches the wake's turn; it counts them.
+        for planted in ["pricing", "passwd", "bashrc", "a\u{7}b", "uploads/"] {
+            assert!(!sentence.contains(planted), "{planted} in {sentence}");
+        }
+        assert!(
+            sentence.contains("3 files wait in your workspace, from message 1;"),
+            "{sentence}"
+        );
         assert!(
             !workspace.join("etc").exists()
                 && !workspace
