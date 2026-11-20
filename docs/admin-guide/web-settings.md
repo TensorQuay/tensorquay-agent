@@ -745,10 +745,13 @@ lead writes to it. A larger team therefore needs a larger **Tasks running at onc
 cores (see **Largest environment**).
 
 ### Channels: waking agents (18.2)
-<!-- Tests: GW-I-350, GW-I-351, GW-I-352, GW-I-353. -->
-From 18.2 a channel wakes its member agents on its own: a proposal, a to-do, a post naming an agent (`@` and its
-task's name) or a reply to it starts that agent's task, which reads what's new and answers (ADR-0014's amendment of
-20 Nov 2026). Only runs a channel started this way count against its budget; a run a person started never does.
+<!-- Tests: GW-I-350, GW-I-351, GW-I-352, GW-I-353, GW-I-377, GW-I-385. -->
+From 18.2 a channel wakes its member agents on its own: a person's post to the whole channel wakes every agent that
+votes in it; a post naming an agent (`@` and its name in the channel), a reply to its post, a proposal or a to-do wakes
+the agents it concerns; the decision on an agent's proposal and a report on its to-do wake that agent. The woken task
+reads what's new, answers in the channel and stops. Only runs a channel started this way count against its budget; a
+run a person started never does. People see each channel's budget and who may raise it in the channel's
+**Wake budget…** ([Channels](../user-guide/channels.md#the-daily-budget)).
 
 | Setting | What it bounds | Default |
 |---|---|---|

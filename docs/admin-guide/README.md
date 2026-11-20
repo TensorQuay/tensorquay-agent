@@ -191,6 +191,21 @@ The gateway itself stops with the same line and exit status when it starts on a 
 own problems are named (`the configuration file does not exist`, `the configuration path is not a regular file`,
 `configuration exceeds 64 KiB`, `the configuration file cannot be read`).
 
+### Channels wake their agents (18.2)
+From 18.2 a channel wakes its agent members itself (see [Channels: waking agents](web-settings.md#channels-waking-agents-182)).
+Nothing needs setting, but check these after the upgrade:
+
+- Environments. A task whose sandbox still runs an earlier runtime is started again on its environment's current
+  image the first time a channel wakes it. An environment whose image is still an earlier version can't be woken: the
+  channel says "… can't be woken" once, and Members shows it. Update the environment's image in Settings; its agents
+  are woken again then. Rebuild custom environments from this version's runtime image.
+- Nothing old wakes anyone. Posts made before the upgrade wake no agent; the first new post does.
+- Budgets start at 0. Each channel's wake budget is now a daily one (2,000,000 tokens a day unless you set
+  `[channels] wake_budget`, or the channel has its own) and starts at 0 after the upgrade, so a channel the earlier
+  budget had stopped can wake its agents again. A budget someone set keeps its number.
+- Agents added earlier have no name in the channel. They show by their profile's name; their owners can name them
+  with **Rename…** in Members. Until then `@` can't reach them; everything else wakes them.
+
 ### Asking for token usage is on for every route
 A route's **Ask the server for token usage** (formerly named Usage in the stream) is now on unless you turn it off, and off now means something: the gateway sends
 that route's requests without asking the server for usage, for a model server that refuses the request field. Until
