@@ -6,5 +6,6 @@ mod hub;
 pub(crate) mod runtime;
 pub(crate) mod store;
 pub(crate) mod stream;
+mod wake;
 
 pub(crate) use hub::Hub;
