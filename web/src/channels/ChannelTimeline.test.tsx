@@ -294,3 +294,42 @@ describe("WEB-U-165 a line names the proposal or task it is about", () => {
     expect(link).toHaveAttribute("href", "#post-1");
   });
 });
+
+// WEB-U-515 (ADR-0014's amendment of 20 Nov 2026, A9): a post's files are downloads under it, each by its name and
+// size; a post without files lists none.
+describe("WEB-U-515 a post's files", () => {
+  it("lists each file as a download", () => {
+    const log: ChannelMessage[] = [
+      {
+        seq: 1,
+        ts: "2026-09-27T10:00:00Z",
+        author: { kind: "user", id: ANA, name: "Ana" },
+        body: { type: "text", text: "The price list" },
+        files: [
+          { name: "q3.pdf", size: 2048 },
+          { name: "notes.txt", size: 3 },
+        ],
+      },
+      {
+        seq: 2,
+        ts: "2026-09-27T10:01:00Z",
+        author: { kind: "user", id: ANA, name: "Ana" },
+        body: { type: "text", text: "No file here" },
+      },
+    ];
+    render(
+      <ChannelTimeline
+        messages={log}
+        members={members}
+        fileHref={(seq, index) => `/files/${seq}/${index}`}
+      />,
+    );
+    const files = screen.getByRole("list", { name: "Files of #1" });
+    const pdf = within(files).getByRole("link", { name: /q3\.pdf/ });
+    expect(pdf).toHaveAttribute("href", "/files/1/0");
+    expect(pdf).toHaveAttribute("download");
+    expect(pdf).toHaveTextContent("q3.pdf · 2 kB");
+    expect(within(files).getAllByRole("link")).toHaveLength(2);
+    expect(screen.queryByRole("list", { name: "Files of #2" })).toBeNull();
+  });
+});

@@ -317,6 +317,10 @@ pub(crate) async fn delete(
             crate::settings::audit(&mut transaction, &change).await?;
         }
         transaction.commit().await?;
+        // Its files go with it (A9); a failure leaves bytes no row names, logged.
+        if let Err(error) = state.storage.remove_channel_files(id).await {
+            tracing::warn!(code = error.code(), channel_id = %id, "a deleted channel's files weren't removed");
+        }
         tracing::info!(user_id = %user.id, channel_id = %id, "channel deleted");
         Ok(StatusCode::NO_CONTENT)
     })
@@ -627,13 +631,18 @@ pub(crate) async fn post(
     bytes: Bytes,
 ) -> Result<(StatusCode, Json<serde_json::Value>), GatewayError> {
     let id = channel_id(&raw_id)?;
-    let post = parse_post(&bytes)?;
-    let keyed = Keyed::new(
-        user.id,
-        &headers,
-        format!("POST /api/v1/channels/{id}/messages"),
-        &post,
-    )?;
+    // The files it posts, by upload id (ADR-0014's amendment of 20 Nov 2026, A9); the rest is the post.
+    let mut request: serde_json::Value =
+        serde_json::from_slice(&bytes).map_err(|_| invalid("body", InvalidReason::BodyInvalid))?;
+    let files = super::files::take_files(&mut request)?;
+    let post = parse_post(&serde_json::to_vec(&request)?)?;
+    // A post without files keys as it always did; one with them keys on both.
+    let route = format!("POST /api/v1/channels/{id}/messages");
+    let keyed = if files.is_empty() {
+        Keyed::new(user.id, &headers, route, &post)?
+    } else {
+        Keyed::new(user.id, &headers, route, &(&post, &files))?
+    };
     crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
         let mut transaction = state.pool.begin().await?;
         if let Some((status, body)) = keyed.begin(&state, &mut transaction).await? {
@@ -645,7 +654,13 @@ pub(crate) async fn post(
             Some(role) if !role.may_post() => return Err(GatewayError::Denied("observer")),
             Some(_) => {}
         }
-        let appended = store::post(&mut transaction, id, &person(&user), &post).await?;
+        let mut appended = store::post(&mut transaction, id, &person(&user), &post).await?;
+        if !files.is_empty() {
+            let first = appended.first_mut().ok_or(GatewayError::StoreUnavailable)?;
+            let seq = i64::try_from(first.seq).map_err(|_| GatewayError::StoreUnavailable)?;
+            first.files =
+                super::files::attach(&state, &mut transaction, (id, seq, user.id), &files).await?;
+        }
         let body = serde_json::to_value(appended.first().ok_or(GatewayError::StoreUnavailable)?)?;
         keyed
             .record(&mut transaction, StatusCode::CREATED, &body)

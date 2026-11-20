@@ -222,6 +222,21 @@ pub(crate) const ROUTES: &[Route] = &[
     },
     Route {
         method: "POST",
+        path: "/api/v1/channels/{id}/uploads",
+        handler: Handler::Channels(ChannelRoute::Upload),
+    },
+    Route {
+        method: "DELETE",
+        path: "/api/v1/channels/{id}/uploads/{upload}",
+        handler: Handler::Channels(ChannelRoute::DeleteUpload),
+    },
+    Route {
+        method: "GET",
+        path: "/api/v1/channels/{id}/messages/{seq}/files/{index}",
+        handler: Handler::Channels(ChannelRoute::FileDownload),
+    },
+    Route {
+        method: "POST",
         path: "/api/v1/channels/{id}/tasks/{seq}/claim",
         handler: Handler::Channels(ChannelRoute::Claim),
     },

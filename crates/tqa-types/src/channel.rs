@@ -484,6 +484,26 @@ pub struct ChannelMessage {
     pub parent: Option<u64>,
     /// The typed body.
     pub body: MessageBody,
+    /// The files posted with it (ADR-0014's amendment of 20 Nov 2026, A9; revision 16); none when absent.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub files: Vec<ChannelFile>,
+}
+
+/// A file posted with a channel message (ADR-0014's amendment of 20 Nov 2026, A9).
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ChannelFile {
+    /// Its name as posted.
+    pub name: String,
+    /// Its size in bytes.
+    pub size: u64,
+    /// Where it is in the reading agent member's workspace, once placed there; absent for people and before then.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub path: Option<String>,
+    /// Why it isn't in the reading agent member's workspace and won't be (`uploads_full`, `upload_too_large`); absent
+    /// when it is, or may still be, placed.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub not_placed: Option<String>,
 }
 
 /// What a member posts: a body and an optional parent. An `author` in the request is accepted and dropped: the

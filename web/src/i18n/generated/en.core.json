@@ -127,6 +127,7 @@
     "run.providerError": "The model provider refused the request",
     "run.emptyReply": "The model answered with nothing",
     "run.teamBudget": "The team used its whole budget",
+    "run.channelBudget": "The channel's budget for waking agents is used up",
     "run.budget": "The task reached one of its limits",
     "run.replyCut": "The model's reply was cut off at its output limit",
     "run.thinkingCut": "The model spent its whole output limit thinking and wrote no answer",

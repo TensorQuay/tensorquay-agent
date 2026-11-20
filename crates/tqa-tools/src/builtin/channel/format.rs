@@ -82,7 +82,35 @@ fn block(channel: &str, message: &ChannelMessage) -> Result<String, ToolError> {
     if let Some(task) = &task {
         attributes.push(("task_seq", task));
     }
-    untrusted::wrap("channel", &attributes, &body_text(&message.body))
+    let mut body = body_text(&message.body);
+    // Its files (ADR-0014's amendment of 20 Nov 2026, A9): each placed one by its exact path, inside the block, since a
+    // file's name is someone else's words.
+    if !message.files.is_empty() {
+        body.push_str("\n\nFiles:");
+        for file in &message.files {
+            // Writing to a String can't fail.
+            let _ = match (&file.path, file.not_placed.as_deref()) {
+                (Some(path), _) => write!(body, "\n- {path} ({}, {} bytes)", file.name, file.size),
+                (None, Some(why)) => write!(
+                    body,
+                    "\n- {} ({} bytes): not in your workspace: {}",
+                    file.name,
+                    file.size,
+                    match why {
+                        "uploads_full" => "its uploads are full",
+                        "upload_too_large" => "larger than a workspace upload may be",
+                        _ => "it couldn't be placed",
+                    }
+                ),
+                (None, None) => write!(
+                    body,
+                    "\n- {} ({} bytes): not in your workspace yet",
+                    file.name, file.size
+                ),
+            };
+        }
+    }
+    untrusted::wrap("channel", &attributes, &body)
 }
 
 /// A message this runtime doesn't recognise, as one marked block: its seq when it has one, and the gateway's JSON as

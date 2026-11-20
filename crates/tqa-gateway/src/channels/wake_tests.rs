@@ -110,3 +110,23 @@ fn gw_u_230_hops_start_at_a_persons_post_and_stop_at_four() {
     assert_eq!(wake_hop(&[MAX_HOP, MAX_HOP - 1]), Some(MAX_HOP - 1));
     assert_eq!(wake_hop(&[]), None);
 }
+
+// TEST: GW-U-234
+// SEC-068 (review of 20 Nov 2026): the wake says how many files wait and from which messages, never a path (a channel's
+// or a file's name is someone's words); channel_read's result lists the paths.
+#[test]
+fn gw_u_234_the_wake_counts_the_files_and_names_their_messages_only() {
+    assert_eq!(super::files_sentence(&[]), "");
+    assert_eq!(
+        super::files_sentence(&[12]),
+        " 1 file waits in your workspace, from message 12; channel_read lists its path."
+    );
+    assert_eq!(
+        super::files_sentence(&[12, 12, 14]),
+        " 3 files wait in your workspace, from messages 12 and 14; channel_read lists their paths."
+    );
+    assert_eq!(
+        super::files_sentence(&[12, 14, 16]),
+        " 3 files wait in your workspace, from messages 12, 14 and 16; channel_read lists their paths."
+    );
+}

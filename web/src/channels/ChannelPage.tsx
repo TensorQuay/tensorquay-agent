@@ -6,10 +6,12 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { newActionKey } from "../api/action-key";
+import { pathFor } from "../api/operations";
 import { useSession } from "../auth/use-session";
 import { useT } from "../i18n/I18nProvider";
 import { APP_NAME } from "../lib/app";
 import { parseApi } from "../protocol/validate";
+import { settingsEndpoint } from "../settings/operations";
 import { NavigationButton } from "../shell/NavigationButton";
 import { TabTitle } from "../shell/TabTitle";
 import { Skeleton } from "../ui/Skeleton";
@@ -245,6 +247,13 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
       <ChannelTimeline
         messages={log.messages}
         members={members.data?.items ?? []}
+        fileHref={(seq, index) =>
+          pathFor(settingsEndpoint("channelFile"), {
+            id,
+            seq: String(seq),
+            index: String(index),
+          })
+        }
         after={(message) =>
           message.body.type === "proposal" ? (
             <ChannelProposal

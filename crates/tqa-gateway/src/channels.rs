@@ -2,6 +2,7 @@
 pub(crate) mod api;
 pub(crate) mod candidates;
 mod decide;
+pub(crate) mod files;
 mod hub;
 pub(crate) mod runtime;
 pub(crate) mod store;

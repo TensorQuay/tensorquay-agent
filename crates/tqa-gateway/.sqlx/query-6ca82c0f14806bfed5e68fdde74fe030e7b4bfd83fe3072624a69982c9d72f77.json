@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT runtime_revision FROM conversations WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "runtime_revision",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "conversations",
+            "name": "runtime_revision"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "6ca82c0f14806bfed5e68fdde74fe030e7b4bfd83fe3072624a69982c9d72f77"
+}

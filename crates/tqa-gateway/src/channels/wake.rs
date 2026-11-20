@@ -92,6 +92,34 @@ pub(crate) fn sentence(channel: Uuid, after: i64, waiting: &[Waiting]) -> String
     )
 }
 
+/// The sentence the wake adds for the files placed for it (A9): how many wait and from which messages, never a path,
+/// since a channel's or a file's name is someone's words (SEC-068); `channel_read` lists the paths. `seqs` has each
+/// placed file's message.
+pub(crate) fn files_sentence(seqs: &[i64]) -> String {
+    let mut messages: Vec<i64> = seqs.to_vec();
+    messages.sort_unstable();
+    messages.dedup();
+    let named = match messages.as_slice() {
+        [] => return String::new(),
+        [one] => format!("message {one}"),
+        [rest @ .., last] => format!(
+            "messages {} and {last}",
+            rest.iter()
+                .map(i64::to_string)
+                .collect::<Vec<_>>()
+                .join(", ")
+        ),
+    };
+    if seqs.len() == 1 {
+        format!(" 1 file waits in your workspace, from {named}; channel_read lists its path.")
+    } else {
+        format!(
+            " {} files wait in your workspace, from {named}; channel_read lists their paths.",
+            seqs.len()
+        )
+    }
+}
+
 /// The members a text names (A1): `@` and a member's name, matched without case, the longest name first; each once.
 pub(crate) fn named(text: &str, members: &[(Uuid, &str)]) -> Vec<Uuid> {
     let lower = text.to_lowercase();
@@ -590,6 +618,14 @@ async fn deliver(state: &State, due: &Due, hop: i16) -> Result<bool, GatewayErro
         return Ok(false);
     }
     let waiting = waiting(state, due).await?;
+    // The unread messages' files, in its workspace before the turn that names their paths (A9).
+    let placed: Vec<i64> =
+        super::files::place(state, (due.channel, due.member), (due.read_seq, None))
+            .await?
+            .into_iter()
+            .filter(|placed| placed.path.is_some())
+            .map(|placed| placed.seq)
+            .collect();
     let after = u64::try_from(due.read_seq).map_err(|_| GatewayError::StoreUnavailable)?;
     let channel: tqa_types::ChannelId = due
         .channel
@@ -597,7 +633,7 @@ async fn deliver(state: &State, due: &Due, hop: i16) -> Result<bool, GatewayErro
         .parse()
         .map_err(|_| GatewayError::StoreUnavailable)?;
     let turn = ClientFrame::UserMessage {
-        text: sentence(due.channel, due.read_seq, &waiting),
+        text: sentence(due.channel, due.read_seq, &waiting) + &files_sentence(&placed),
         attachments: Vec::new(),
         host_keys: Vec::new(),
         lead_brief: None,
