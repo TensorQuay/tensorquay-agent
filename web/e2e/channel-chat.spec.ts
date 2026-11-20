@@ -20,7 +20,7 @@ for (const width of [1440, 390] as const)
         header.getByRole("heading", { level: 1, name: "Q4 pricing review" }),
       ).toBeVisible();
       await expect(header.getByText("2 working")).toBeVisible();
-      await expect(header.getByText("Budget 38 % used")).toBeVisible();
+      await expect(header.getByText("Budget 38 % used today")).toBeVisible();
       const log = page.getByRole("list", { name: "Channel log" });
       await expect(
         log.getByText("The Q3 numbers are in.", { exact: false }),

@@ -39,3 +39,8 @@ pub(super) fn channels(input: &ChannelsInput) -> Channels {
         max_wake_budget: input.max_wake_budget.unwrap_or(DEFAULT_MAX_WAKE_BUDGET),
     }
 }
+
+
+#[cfg(test)]
+#[path = "channels_tests.rs"]
+mod tests;

@@ -7,18 +7,17 @@
 //! anyone else.
 #[path = "support/channel_agent.rs"]
 mod channel_agent;
+#[path = "support/channel_spend.rs"]
+mod channel_spend;
 #[path = "support/fixture.rs"]
 mod support;
 use channel_agent::{Agent, Result, WAKE, channel, notices, post, replaced, text};
+use channel_spend::{model, model_call, registry, spent};
 use reqwest::Method;
-use serde_json::{Value, json};
+use serde_json::json;
 use sqlx::PgPool;
-use std::{
-    sync::{Arc, atomic::Ordering},
-    time::Duration,
-};
+use std::{sync::atomic::Ordering, time::Duration};
 use support::{Fixture, TestResult, call};
-use tqa_testkit::{FakeModelServer, Script, Scripted};
 use tqa_types::ClientFrame;
 use uuid::Uuid;
 
@@ -268,66 +267,6 @@ async fn gw_i_349_a_wake_lost_to_a_restart_comes_from_the_sweep(pool: PgPool) ->
         Ok(())
     }))
     .await
-}
-
-/// A model server answering `answers` requests, each reporting 40 tokens (30 in, 10 out).
-async fn model(answers: usize) -> Result<FakeModelServer> {
-    let script = Script::new(vec![
-        Scripted::Text("done".into()),
-        Scripted::Usage(tqa_llm::Usage {
-            prompt_tokens: 30,
-            completion_tokens: 10,
-            cached_tokens: None,
-            reasoning_tokens: None,
-        }),
-    ]);
-    Ok(FakeModelServer::start(vec![script; answers], Arc::new(tqa_llm::TokioSleeper)).await?)
-}
-
-fn registry(server: &FakeModelServer) -> Result<tqa_llm::Registry> {
-    Ok(tqa_llm::Registry::from_toml(&format!(
-        "[[routes]]\nname='local'\nprotocol='openai_chat'\nbase_url='{}'\nmodel='pinned-model'\nauth={{kind='bearer'}}\nkey_ref='secrets/local'\nstream_usage=true",
-        server.base_url()
-    ))?)
-}
-
-/// A model call from the agent's run, through the relay: the status and the refusal's code.
-async fn model_call(f: &Fixture, agent: &Agent) -> Result<(u16, Value)> {
-    let response = f
-        .client
-        .post(f.url("/relay/r/local/chat/completions"))
-        .bearer_auth(agent.token(f)?)
-        .json(
-            &json!({"model": "m", "messages": [{"role": "user", "content": "hi"}], "stream": true}),
-        )
-        .send()
-        .await?;
-    let status = response.status().as_u16();
-    let text = response.text().await?;
-    Ok((
-        status,
-        serde_json::from_str::<Value>(&text)
-            .map_or(Value::Null, |body| body["error"]["code"].clone()),
-    ))
-}
-
-/// The channel's spend once it reaches `tokens` (the meter writes after the answer ends).
-async fn spent(f: &Fixture, channel: &str, tokens: i64) -> Result<i64> {
-    let id = Uuid::parse_str(channel)?;
-    tokio::time::timeout(Duration::from_secs(10), async {
-        loop {
-            let now: i64 = sqlx::query_scalar("SELECT spent_tokens FROM channels WHERE id = $1")
-                .bind(id)
-                .fetch_one(&f.pool)
-                .await?;
-            if now >= tokens {
-                return Ok::<i64, Box<dyn std::error::Error>>(now);
-            }
-            tokio::time::sleep(Duration::from_millis(50)).await;
-        }
-    })
-    .await
-    .map_err(|_| format!("the channel's spend never reached {tokens}"))?
 }
 
 // TEST: GW-I-350

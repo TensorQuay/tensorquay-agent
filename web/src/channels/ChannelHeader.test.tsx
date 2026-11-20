@@ -70,7 +70,7 @@ function show() {
 
 // WEB-U-519 (18.2 slice 3, the mock of 17 Nov 2026 and its defaults decided on 20 Nov 2026): the channel's header stays
 // on top: its name, who is working (an agent in a run or waiting on the channel), every member's face with a dot on a
-// working agent, the budget as one muted "Budget N % used", and To-dos and Members with their counts, each opening its
+// working agent, the budget as one muted "Budget N % used today", and To-dos and Members with their counts, each opening its
 // panel and closing it again.
 describe("WEB-U-519 the channel's header", () => {
   it("says who is working, the budget, and opens To-dos and Members", async () => {
@@ -85,7 +85,7 @@ describe("WEB-U-519 the channel's header", () => {
       }),
     ).toBeVisible();
     expect(within(header).getByText("2 working")).toBeVisible();
-    expect(within(header).getByText("Budget 38 % used")).toHaveClass("muted");
+    expect(within(header).getByText("Budget 38 % used today")).toHaveClass("muted");
     const faces = within(header).getByRole("list", { name: "Who's here" });
     expect(within(faces).getAllByRole("listitem")).toHaveLength(4);
     expect(within(faces).getByTitle("Pricing analyst, working")).toBeVisible();
