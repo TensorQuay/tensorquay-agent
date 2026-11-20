@@ -277,7 +277,7 @@ async fn gw_i_378_an_unnamed_member_is_woken_by_everything_but_at(pool: PgPool) 
         .await?;
         let sentence = old.woken(f, &id, place).await?;
         assert!(
-            sentence.contains(&format!("a to-do you may take on (message {task})")),
+            sentence.contains(&format!("a to-do open for claims (message {task})")),
             "{sentence}"
         );
         assert!(

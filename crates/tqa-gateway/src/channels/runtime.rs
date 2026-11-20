@@ -306,7 +306,7 @@ pub(crate) async fn post(
 /// limit; a retry returns its claim (`200`).
 ///
 /// # Errors
-/// `401`, `403 not_member` or `observer`, `404`, `409 channel_ended`, `429 channel_rate`, `not_a_task` or `already_claimed`, storage
+/// `401`, `403 not_member` or `observer`, `404`, `409 channel_ended`, `429 channel_rate`, `not_a_task`, `one_at_a_time` (an agent) or `already_claimed`, storage
 /// failure.
 pub(crate) async fn claim(
     AppState(state): AppState<Arc<State>>,

@@ -17,7 +17,8 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   waits for its run. Woken runs spend the channel's budget (its own, or `[channels] wake_budget`, 300,000 tokens by
   default); agents stop waking each other after four replies in a row and 30 times an hour, and the channel says so.
   The members list shows who is working, waiting or idle. Protocol revision 16: an older runtime isn't woken, and the
-  channel says so once.
+  channel says so once. An agent holds one to-do at a time in a channel: it reports the one it holds before it
+  can claim another (GW-I-384); people are not limited.
 - **Files on a channel's posts (GW-I-367 to GW-I-370).** A post, proposal or to-do can carry up to 32 files, with
   the same limits as a task's uploads; people download each from its post. A woken agent finds them in its own
   workspace's `uploads/`, named after the channel and the message, and its read of the channel lists each one's

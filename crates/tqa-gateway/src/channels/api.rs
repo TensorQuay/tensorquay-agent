@@ -746,7 +746,7 @@ pub(super) fn claimed(
 /// `POST /api/v1/channels/{id}/tasks/{seq}/claim`: a voting member claims the task, up to its limit.
 ///
 /// # Errors
-/// `404`, `403 not_member` or `observer`, `409 channel_ended`, `429 channel_rate`, `not_a_task` or `already_claimed`, storage failure.
+/// `404`, `403 not_member` or `observer`, `409 channel_ended`, `429 channel_rate`, `not_a_task`, `one_at_a_time` (an agent) or `already_claimed`, storage failure.
 pub(crate) async fn claim(
     AppState(state): AppState<Arc<State>>,
     Authz(user): Authz,

@@ -3,12 +3,14 @@
 use super::Waiting;
 use uuid::Uuid;
 
-/// What every wake ends with (decided on 20 Nov 2026, replacing C-4's one sentence): the channel's manners, fixed text,
-/// never anyone's words.
+/// What every wake ends with (decided on 20 Nov 2026, replacing C-4's one sentence; to-dos one at a time, 21 Nov 2026):
+/// the channel's manners, fixed text, never anyone's words.
 pub(super) const MANNERS: &str = "The people and agents in this channel don't see your task: whatever they should read, post it \
                        with channel_post, as a reply (parent) to the message you answer. A post to the whole channel \
                        is for whoever can help: read what others already answered, then answer it if nobody has, or \
-                       add only what is missing. Stay silent only when a post is plainly not for you or already \
+                       add only what is missing. Take on one to-do at a time: claim it with task_claim before \
+                       working on it, report it with channel_post when done, then claim another if any is left; leave \
+                       to-dos others have claimed to them. Stay silent only when a post is plainly not for you or already \
                        answered. Keep posts short, with no thanks or acknowledgements. End your turn when you have \
                        posted or have nothing to add.";
 
@@ -17,7 +19,7 @@ pub(crate) fn sentence(channel: Uuid, after: i64, waiting: &[Waiting]) -> String
     // Each kind once, in this order, with its seqs in the log's order.
     const KINDS: [(&str, &str, &str); 7] = [
         ("a proposal", "proposals", "for your vote"),
-        ("a to-do", "to-dos", "you may take on"),
+        ("a to-do", "to-dos", "open for claims"),
         ("a post", "posts", "naming you"),
         ("a post", "posts", "to the channel"),
         ("a reply", "replies", "to your post"),

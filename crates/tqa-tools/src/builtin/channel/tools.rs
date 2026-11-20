@@ -364,7 +364,7 @@ impl TaskClaim {
         Self {
             spec: specification(
                 "task_claim",
-                "Claim a task in a channel. A task takes as many claimants as it says (one by default); when it is full, the claim is refused with already_claimed. Claiming again returns your existing claim.",
+                "Claim a task in a channel before working on it. You hold one at a time: while a task you claimed in this channel has no report from you, another claim is refused with one_at_a_time; report it (channel_post, type report), then claim the next. A task takes as many claimants as it says (one by default); when it is full, the claim is refused with already_claimed. Claiming again returns your existing claim.",
                 object(&properties),
                 false,
             ),

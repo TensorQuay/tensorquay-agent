@@ -14711,7 +14711,7 @@
       "post": {
         "operationId": "claimChannelTask",
         "summary": "Claim a task",
-        "description": "A voting member claims the task, atomically up to its limit (ADR-0014 point 8): 201 with the new claim, 200 with the caller's existing one; 409 already_claimed when the limit is reached, not_a_task, channel_ended; 403 not_member or observer. 429 channel_rate once the channel has had 5,000 messages in the last 24 hours (ADR-0014), with Retry-After.",
+        "description": "A voting member claims the task, atomically up to its limit (ADR-0014 point 8): 201 with the new claim, 200 with the caller's existing one; 409 already_claimed when the limit is reached, not_a_task, channel_ended, one_at_a_time when the caller is an agent holding a claim on another to-do of this channel it has not reported on (ADR-0014's amendment, A13; people are not limited); 403 not_member or observer. 429 channel_rate once the channel has had 5,000 messages in the last 24 hours (ADR-0014), with Retry-After.",
         "security": [
           {
             "sessionCookie": []

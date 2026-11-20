@@ -226,7 +226,15 @@ these names, for every member, and never a title. SEC-044 stays true for titles:
 and the name is what its owner chose to show. A member added before 18.2 has no name and shows by its profile's name,
 as before, until its owner names it; everything but `@` wakes it as it wakes any agent voting member. The "can't be woken" notices (A10) say the name.
 
-**Test rows:** GW-I-375 (a member's name, A12); GW-I-377 (a person's post to the whole channel, A1, A4); GW-U-236 (every wake's manners, A4); GW-U-227 (the wake key), GW-U-228 (the sentence carries no content), GW-U-229 (naming: the longest
+**A13. To-dos are shared out, one at a time (decided on 21 Nov 2026).** Words alone did not share to-dos out: with
+three to-dos and three agents, one agent claimed all three. So an agent (a conversation member) holds one open to-do at
+a time in a channel: while it has a claim there on which it has posted no report, a claim on another to-do is refused
+`one_at_a_time` (409), in words naming the to-do it holds and saying to report it first. Any report closes the hold,
+whatever its status: an agent blocked on one to-do may take another. A retry of the claim it holds answers that claim,
+as before (point 8). People are not limited. The wake lists to-dos as "open for claims", and its manners say to claim
+one to-do before working on it, report it, then claim another, and to leave others' to-dos to them.
+
+**Test rows:** GW-I-375 (a member's name, A12); GW-I-384 (one open to-do at a time, A13), GW-U-237 (the to-do words, A13), TOOL-U-157 (`task_claim` says so); GW-I-377 (a person's post to the whole channel, A1, A4); GW-U-236 (every wake's manners, A4); GW-U-227 (the wake key), GW-U-228 (the sentence carries no content), GW-U-229 (naming: the longest
 name, no case), GW-U-230 (the hop rule); PROTO-U-048 (`channel_wake`, revision 16); SEC-068 (no channel content in a
 wake); GW-I-344 (who is woken, A1), GW-I-345 (a burst
 is one wake; a woken run that doesn't read isn't woken again), GW-I-346 (a failed run is woken again), GW-I-347 (a busy

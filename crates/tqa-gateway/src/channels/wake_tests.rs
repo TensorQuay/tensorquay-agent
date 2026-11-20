@@ -49,8 +49,8 @@ fn gw_u_228_the_wake_names_kinds_and_seqs_and_the_call_that_reads_them() {
             ]
         ),
         format!(
-            "New in channel {channel} since message 11: a proposal for your vote (message 12); a to-do you may \
-             take on (message 13); 2 posts naming you (messages 14, 15); a reply to your post (message 16); the \
+            "New in channel {channel} since message 11: a proposal for your vote (message 12); a to-do open for \
+             claims (message 13); 2 posts naming you (messages 14, 15); a reply to your post (message 16); the \
              decision on your proposal (message 17); a report on your to-do (message 18). Read them with \
              channel_read (channel {channel}, since 11). {MANNERS}"
         )
@@ -74,7 +74,9 @@ fn gw_u_236_every_wake_ends_with_the_channels_manners() {
     let manners = "The people and agents in this channel don't see your task: whatever they should read, post it \
                    with channel_post, as a reply (parent) to the message you answer. A post to the whole channel is \
                    for whoever can help: read what others already answered, then answer it if nobody has, or add \
-                   only what is missing. Stay silent only when a post is plainly not for you or already answered. \
+                   only what is missing. Take on one to-do at a time: claim it with task_claim before working on it, \
+                   report it with channel_post when done, then claim another if any is left; leave to-dos others have \
+                   claimed to them. Stay silent only when a post is plainly not for you or already answered. \
                    Keep posts short, with no thanks or acknowledgements. End your turn when you have posted or have \
                    nothing to add.";
     for waiting in [

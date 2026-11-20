@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT c.task_seq FROM channel_claims c WHERE c.channel_id = $1 AND c.claimant_kind = 'conversation' AND c.claimant_id = $2 AND c.task_seq <> $3 AND NOT EXISTS (SELECT 1 FROM channel_messages r WHERE r.channel_id = c.channel_id AND r.type = 'report' AND r.task_seq = c.task_seq AND r.author_kind = 'conversation' AND r.author_id = c.claimant_id) ORDER BY c.task_seq LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "task_seq",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "channel_claims",
+            "name": "task_seq"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "0683439e2f242c1d00bc90b6505dd2576f09be25ea1cdf180cde6339c01cbd81"
+}
