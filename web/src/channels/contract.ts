@@ -106,6 +106,8 @@ export type ChannelsApi = {
     kind: MemberKind,
     member: string,
     role: ChannelRole,
+    /** An agent's name in the channel, its owner's to give (A12). */
+    name?: string,
   ): Promise<Member>;
   /** Removes a member; a person may remove themselves, which is leaving. */
   removeMember(id: string, kind: MemberKind, member: string): Promise<void>;

@@ -317,7 +317,7 @@ describe("WEB-U-063 the channel page", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: /^Members/ }));
     expect(screen.getByRole("list", { name: "Members" })).toHaveTextContent(
-      "Coder · alice",
+      "alice's agent",
     );
   });
 
@@ -342,7 +342,7 @@ describe("WEB-U-063 the channel page", () => {
     expect(screen.queryByText(/No tasks yet|Add a task/)).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: /^Members/ }));
     expect(screen.getByRole("list", { name: "Members" })).toHaveTextContent(
-      "Coder · alice",
+      "alice's agent",
     );
   });
 
@@ -504,6 +504,7 @@ describe("WEB-U-066 ending, deleting and managing a channel", () => {
     fireEvent.click(screen.getByRole("button", { name: /^Members/ }));
     fireEvent.click(await screen.findByRole("button", { name: "Add" }));
     fireEvent.click(await screen.findByRole("option", { name: "Docs" }));
+    fireEvent.click(screen.getByRole("button", { name: "Add to the channel" }));
     await vi.waitFor(() =>
       expect(screen.getByRole("list", { name: "Members" })).toHaveTextContent(
         "Docs",

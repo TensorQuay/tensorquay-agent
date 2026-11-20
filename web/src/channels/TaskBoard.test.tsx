@@ -181,8 +181,8 @@ describe("WEB-U-065 member status", () => {
     // An agent reads by its task's title when the viewer may see it, else by its name and owner; its run and kind
     // follow on a quiet line, and a role shows only when it isn't a plain member.
     expect(rows.map((row) => row.textContent)).toEqual([
-      "Coder · aliceLeadFailed · Agent",
-      "Review the releaseWorking · Reviewer, bob's agent",
+      "CoderLeadFailed · alice's agent",
+      "ReviewerWorking · bob's agent",
       "Ana (you)",
       "WuReads only",
     ]);

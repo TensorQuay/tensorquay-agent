@@ -154,8 +154,9 @@ export function ChannelSide({
               kind: MemberKind,
               member: string,
               role: ChannelRole,
+              name?: string,
             ) => {
-              await api.setMember(id, kind, member, role);
+              await api.setMember(id, kind, member, role, name);
               await refresh();
             }}
             onRemove={async (kind: MemberKind, member: string) => {

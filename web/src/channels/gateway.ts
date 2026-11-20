@@ -102,11 +102,14 @@ export function gatewayChannelsFor(client: ApiClient): ChannelsApi {
       client.request(settingsEndpoint("channelUploadDelete"), () => undefined, {
         parameters: { id, upload },
       }),
-    setMember: (id, kind, member, role) =>
+    setMember: (id, kind, member, role, name) =>
       client.request(
         settingsEndpoint("channelMemberPut"),
         (value) => parseApi(value, "ChannelMember"),
-        { parameters: { id, kind, member }, body: JSON.stringify({ role }) },
+        {
+          parameters: { id, kind, member },
+          body: JSON.stringify(name === undefined ? { role } : { role, name }),
+        },
       ),
     removeMember: (id, kind, member) =>
       client.request(settingsEndpoint("channelMemberDelete"), () => undefined, {

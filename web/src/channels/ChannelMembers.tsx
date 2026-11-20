@@ -4,6 +4,7 @@ import "./catalogue";
 import {
   Crown,
   Eye,
+  Pencil,
   Plus,
   SquareArrowOutUpRight,
   User,
@@ -21,6 +22,7 @@ import { ActionMenu, type MenuAction } from "../ui/ActionMenu";
 import { Button } from "../ui/Button";
 import { ConfirmDialog } from "../ui/ConfirmDialog";
 import { Icon } from "../ui/Icon";
+import { Input } from "../ui/Input";
 
 import { authorName } from "./ChannelTimeline";
 import type {
@@ -70,6 +72,7 @@ const REFUSALS: Readonly<Record<string, MessageKey>> = {
   not_found: "channels.memberGone",
   user_not_found: "channels.userNotFound",
   rate_limited: "channels.memberRate",
+  member_name_taken: "channels.memberNameTaken",
 };
 /** A refusal in the viewer's words; for an email, a 400 means it isn't one address, or is the owner's own. */
 export const refusal = (error: unknown, email = false): MessageKey =>
@@ -101,27 +104,25 @@ export function MemberList({
   const myName = members.find(
     (item) => item.kind === "user" && item.id === me,
   )?.name;
-  /** Whose agent a titled agent is, in words (the review of 20 Nov 2026): its own name first unless the default. */
-  const whose = (item: Member) => {
-    const named = item.name && item.name !== "Agent" ? item.name : null;
-    if (!item.owner_name) return named ?? t("channels.kindAgent");
-    if (item.owner_name === myName)
-      return named
-        ? t("channels.namedYourAgent", { name: named })
-        : t("channels.yourAgent");
-    return named
-      ? t("channels.namedOwnersAgent", { name: named, owner: item.owner_name })
-      : t("channels.ownersAgent", { owner: item.owner_name });
-  };
+  /** Whose agent it is, in words (the review of 20 Nov 2026): the row already says its name (A12). */
+  const whose = (item: Member) =>
+    !item.owner_name
+      ? t("channels.kindAgent")
+      : item.owner_name === myName
+        ? t("channels.yourAgent")
+        : t("channels.ownersAgent", { owner: item.owner_name });
   return (
     <ul className="member-list" aria-label={t("channels.membersTitle")}>
       {members.map((item) => {
         const author = { kind: item.kind, id: item.id, name: item.name };
         const agent = authorName(author, members);
+        // An agent reads by its name in the channel (A12), which every member sees; never by a title.
         const name =
-          item.kind === "user" && item.id === me
-            ? t("channels.you", { name: agent })
-            : (item.title ?? agent);
+          item.kind === "conversation"
+            ? item.name
+            : item.id === me
+              ? t("channels.you", { name: agent })
+              : agent;
         const live =
           item.state && Object.hasOwn(STATE, item.state)
             ? STATE[item.state]
@@ -130,12 +131,7 @@ export function MemberList({
           live ?? (item.run_status ? run(item.run_status) : [null, null]);
         const detail =
           item.kind === "conversation"
-            ? [
-                words ? t(words) : null,
-                item.title ? whose(item) : t("channels.kindAgent"),
-              ]
-                .filter(Boolean)
-                .join(" · ")
+            ? [words ? t(words) : null, whose(item)].filter(Boolean).join(" · ")
             : "";
         return (
           <li
@@ -200,6 +196,7 @@ function MemberMenu({
   onOpen,
   onRole,
   onRemove,
+  onRename,
 }: {
   name: string;
   /** The agent's task id, when the viewer may open it. */
@@ -209,6 +206,8 @@ function MemberMenu({
   onOpen: () => void;
   onRole: (role: ChannelRole) => void;
   onRemove: () => void;
+  /** The viewer's own agent: its name in the channel is theirs to change (A12). */
+  onRename?: (() => void) | undefined;
 }) {
   const t = useT();
   const actions: MenuAction[] = [
@@ -219,6 +218,16 @@ function MemberMenu({
             label: t("channels.openTask"),
             icon: SquareArrowOutUpRight,
             href: taskPath(task),
+          },
+        ]
+      : []),
+    ...(onRename
+      ? [
+          {
+            id: "rename",
+            label: t("channels.rename"),
+            icon: Pencil,
+            onSelect: onRename,
           },
         ]
       : []),
@@ -268,7 +277,13 @@ export function ChannelMembers({
   me: string;
   /** The viewer's own tasks, whose agents they may add. */
   tasks: readonly OwnTask[];
-  onSet: (kind: MemberKind, id: string, role: ChannelRole) => Promise<void>;
+  /** Adds a member or changes its role; with `name`, an agent's name in the channel (A12). */
+  onSet: (
+    kind: MemberKind,
+    id: string,
+    role: ChannelRole,
+    name?: string,
+  ) => Promise<void>;
   onRemove: (kind: MemberKind, id: string) => Promise<void>;
   /** Present once the gateway adds people by email. */
   onAddPerson?: (email: string, role: ChannelRole) => Promise<void>;
@@ -279,6 +294,13 @@ export function ChannelMembers({
   const [adding, setAdding] = useState(false);
   const [pending, setPending] = useState(false);
   const [leaving, setLeaving] = useState<Leaving | null>(null);
+  /** An agent being named: one of the viewer's tasks being added, or their member being renamed (A12). */
+  const [naming, setNaming] = useState<{
+    id: string;
+    role: ChannelRole;
+    adding: boolean;
+    value: string;
+  } | null>(null);
   const [removal, setRemoval] = useState<{
     pending: boolean;
     error: Error | null;
@@ -347,6 +369,23 @@ export function ChannelMembers({
                       owner ? ROLES.filter((role) => role !== item.role) : []
                     }
                     onOpen={() => setAdding(false)}
+                    onRename={
+                      item.kind === "conversation" &&
+                      (own.has(item.id) ||
+                        (item.owner_name !== undefined &&
+                          item.owner_name ===
+                            members.find(
+                              (one) => one.kind === "user" && one.id === me,
+                            )?.name))
+                        ? () =>
+                            setNaming({
+                              id: item.id,
+                              role: item.role,
+                              adding: false,
+                              value: item.name,
+                            })
+                        : undefined
+                    }
                     onRole={(role) =>
                       void act(
                         () => onSet(item.kind, item.id, role),
@@ -394,9 +433,14 @@ export function ChannelMembers({
               focus
               onPick={(pick) =>
                 void (pick.kind === "task"
-                  ? act(
-                      () => onSet("conversation", pick.task.id, "member"),
-                      t("channels.added", { name: taskTitle(pick.task, t) }),
+                  ? // An agent joins with a name everyone will see: asked first, its task's title offered (A12).
+                    Promise.resolve(
+                      setNaming({
+                        id: pick.task.id,
+                        role: "member",
+                        adding: true,
+                        value: taskTitle(pick.task, t),
+                      }),
                     )
                   : act(
                       () =>
@@ -409,6 +453,52 @@ export function ChannelMembers({
             />
           )}
         </div>
+      )}
+      {naming && (
+        <form
+          className="stack channel-naming"
+          onSubmit={(event) => {
+            event.preventDefault();
+            const value = naming.value.trim();
+            void act(
+              () => onSet("conversation", naming.id, naming.role, value),
+              t(naming.adding ? "channels.added" : "channels.renamed", {
+                name: value,
+              }),
+            ).then(() => setNaming(null));
+          }}
+        >
+          <Input
+            label={t("channels.memberName")}
+            aria-describedby="channel-naming-hint"
+            value={naming.value}
+            maxLength={80}
+            // Opened by a choice just made, the name is what to type next.
+            // eslint-disable-next-line jsx-a11y/no-autofocus
+            autoFocus
+            onChange={(event) =>
+              setNaming({ ...naming, value: event.target.value })
+            }
+          />
+          <p id="channel-naming-hint" className="type-small muted">
+            {t("channels.memberNameHint")}
+          </p>
+          <div className="proposal-actions">
+            <Button
+              type="submit"
+              disabled={pending || naming.value.trim() === ""}
+            >
+              {t(naming.adding ? "channels.addNamed" : "channels.saveName")}
+            </Button>
+            <Button
+              variant="ghost"
+              type="button"
+              onClick={() => setNaming(null)}
+            >
+              {t("common.cancel")}
+            </Button>
+          </div>
+        </form>
       )}
       {open && !owner && channel.role !== null && (
         <div className="proposal-actions">

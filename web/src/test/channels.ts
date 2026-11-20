@@ -383,7 +383,7 @@ export function fakeChannels({
     else list.push(added);
     return added;
   };
-  api.setMember = (id, kind, who, role) =>
+  api.setMember = (id, kind, who, role, name) =>
     settle(() => {
       mayManage(id, kind, who, role);
       const known = roster(id).find(
@@ -395,9 +395,9 @@ export function fakeChannels({
       return place(
         id,
         known
-          ? { ...known, role }
+          ? { ...known, role, ...(name === undefined ? {} : { name }) }
           : {
-              ...member(kind, task?.title ?? who),
+              ...member(kind, name ?? task?.title ?? who),
               id: who,
               owner_name: me.name,
               role,

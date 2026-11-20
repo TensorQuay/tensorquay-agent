@@ -104,9 +104,9 @@ const addBox = () => {
 describe("WEB-U-066 channel membership", () => {
   it("lists agents by task title with their run, and a role only when it isn't a plain member", () => {
     show();
-    const planner = row("Plan the release");
+    const planner = row("Planner");
     // Whose agent, in words (WEB-U-527): the viewer's own.
-    expect(planner).toHaveTextContent("Planner, your agent");
+    expect(planner).toHaveTextContent("Your agent");
     expect(planner).toHaveTextContent("Working");
     expect(planner.querySelector(".member-dot")).toHaveAttribute(
       "data-tone",
@@ -114,7 +114,7 @@ describe("WEB-U-066 channel membership", () => {
     );
     expect(within(planner).getByText("Lead")).toBeVisible();
     // Without a title the agent reads by its name and owner; a plain member carries no badge.
-    expect(row("Coder · Ana")).toBeVisible();
+    expect(row("Coder")).toBeVisible();
     expect(within(row("Ben")).queryByText("Member")).toBeNull();
     expect(within(row("Wu")).getByText("Reads only")).toBeVisible();
     // No role pickers or Remove buttons in the rows themselves.
@@ -127,22 +127,22 @@ describe("WEB-U-066 channel membership", () => {
   it("links each agent's name to its task, and a person's to nothing", () => {
     show({ item: { ...RELEASE, state: "ended" } });
     expect(
-      within(row("Plan the release")).getByRole("link", {
-        name: "Plan the release",
+      within(row("Planner")).getByRole("link", {
+        name: "Planner",
       }),
     ).toHaveAttribute("href", `/c/${PLANNER.id}`);
     expect(
-      within(row("Coder · Ana")).getByRole("link", { name: "Coder · Ana" }),
+      within(row("Coder")).getByRole("link", { name: "Coder" }),
     ).toHaveAttribute("href", `/c/${CODER.id}`);
     expect(within(row("Ben")).queryByRole("link")).toBeNull();
     // Reviewer is Ben's task: Ana may not open it.
-    expect(within(row("Reviewer · Ben")).queryByRole("link")).toBeNull();
+    expect(within(row("Reviewer")).queryByRole("link")).toBeNull();
     expect(within(list()).getAllByRole("link")).toHaveLength(2);
     cleanup();
     show({ me: BEN, tasks: BENS_TASKS });
     expect(
-      within(row("Reviewer · Ben")).getByRole("link", {
-        name: "Reviewer · Ben",
+      within(row("Reviewer")).getByRole("link", {
+        name: "Reviewer",
       }),
     ).toHaveAttribute("href", `/c/${REVIEWER.id}`);
     expect(within(list()).getAllByRole("link")).toHaveLength(1);
@@ -163,13 +163,19 @@ describe("WEB-U-066 channel membership", () => {
       key: "Escape",
     });
     fireEvent.click(
-      within(row("Coder · Ana")).getByRole("button", {
-        name: "More actions for Coder · Ana",
+      within(row("Coder")).getByRole("button", {
+        name: "More actions for Coder",
       }),
     );
     expect(
       screen.getAllByRole("menuitem").map((item) => item.textContent),
-    ).toEqual(["Open task", "Make lead", "Make read-only", "Remove"]);
+    ).toEqual([
+      "Open task",
+      "Rename…",
+      "Make lead",
+      "Make read-only",
+      "Remove",
+    ]);
     expect(screen.getByRole("menuitem", { name: "Open task" })).toHaveAttribute(
       "href",
       `/c/${CODER.id}`,
@@ -184,9 +190,9 @@ describe("WEB-U-066 channel membership", () => {
     await vi.waitFor(() =>
       expect(set).toHaveBeenCalledWith("user", BEN.id, "observer"),
     );
-    choose("Coder · Ana", "Remove");
+    choose("Coder", "Remove");
     const confirm = screen.getByRole("dialog", {
-      name: "Remove Coder · Ana from the channel?",
+      name: "Remove Coder from the channel?",
     });
     expect(remove).not.toHaveBeenCalled();
     fireEvent.click(within(confirm).getByRole("button", { name: "Remove" }));
@@ -196,9 +202,7 @@ describe("WEB-U-066 channel membership", () => {
     // The note follows the removal's own round trip, so it is read until it is in: the status region already holds
     // the role change's note, and a read right after the call saw that one (CI's runner).
     await vi.waitFor(() =>
-      expect(screen.getByRole("status")).toHaveTextContent(
-        "Removed Coder · Ana.",
-      ),
+      expect(screen.getByRole("status")).toHaveTextContent("Removed Coder."),
     );
   });
 
@@ -216,11 +220,14 @@ describe("WEB-U-066 channel membership", () => {
       screen.getAllByRole("option").map((option) => option.textContent),
     ).toEqual(["Docs"]);
     fireEvent.click(screen.getByRole("option", { name: "Docs" }));
+    // Its name in the channel is asked first (A12, WEB-U-528), the task's title offered.
+    fireEvent.click(screen.getByRole("button", { name: "Add to the channel" }));
     await vi.waitFor(() =>
       expect(set).toHaveBeenCalledWith(
         "conversation",
         "0195d8c0-0000-7000-8000-00000000cafe",
         "member",
+        "Docs",
       ),
     );
     expect(await screen.findByRole("status")).toHaveTextContent("Added Docs.");
@@ -278,29 +285,31 @@ describe("WEB-U-066 channel membership", () => {
   it("lets a member add and remove only their own tasks' agents, and leave", async () => {
     const { set, remove } = show({ me: BEN, tasks: BENS_TASKS });
     expect(
-      within(row("Coder · Ana")).queryByRole("button", {
+      within(row("Coder")).queryByRole("button", {
         name: /^More actions/,
       }),
     ).toBeNull();
     fireEvent.click(
-      within(row("Reviewer · Ben")).getByRole("button", {
-        name: "More actions for Reviewer · Ben",
+      within(row("Reviewer")).getByRole("button", {
+        name: "More actions for Reviewer",
       }),
     );
     // Not the owner: no roles to give, only opening the task and Remove.
     expect(
       screen.getAllByRole("menuitem").map((item) => item.textContent),
-    ).toEqual(["Open task", "Remove"]);
+    ).toEqual(["Open task", "Rename…", "Remove"]);
     fireEvent.keyDown(screen.getAllByRole("menuitem")[0] as HTMLElement, {
       key: "Escape",
     });
     const box = addBox();
     fireEvent.click(screen.getByRole("option", { name: "Tests" }));
+    fireEvent.click(screen.getByRole("button", { name: "Add to the channel" }));
     await vi.waitFor(() =>
       expect(set).toHaveBeenCalledWith(
         "conversation",
         "0195d8c0-0000-7000-8000-00000000beef",
         "member",
+        "Tests",
       ),
     );
     expect(box).toBeInTheDocument();
@@ -372,8 +381,8 @@ describe("WEB-U-525 a member's live state", () => {
       ["held", "Held: budget or limit reached", "warn"],
       ["unreachable", "Can't be woken", "danger"],
     ] as const;
-    const agents = states.map(([state], index) =>
-      member("conversation", `Agent ${index + 1}`, {
+    const agents = states.map(([state]) =>
+      member("conversation", `Task ${state}`, {
         title: `Task ${state}`,
         owner_name: "Ana",
         run_status: "running",
@@ -404,18 +413,18 @@ describe("WEB-U-525 a member's live state", () => {
       );
     }
     expect(row("Task waiting")).not.toHaveTextContent("Working");
-    expect(row("Task older")).toHaveTextContent("Done");
-    expect(row("Task older").querySelector(".member-dot")).toHaveAttribute(
+    expect(row("Older")).toHaveTextContent("Done");
+    expect(row("Older").querySelector(".member-dot")).toHaveAttribute(
       "data-tone",
       "ok",
     );
   });
 });
 
-// WEB-U-527 (the review of 20 Nov 2026): a titled agent's quiet line says whose agent it is in words, by the owner's
-// name as the list shows people, the viewer's own as theirs.
+// WEB-U-527 (the review of 20 Nov 2026): an agent's quiet line says whose agent it is in words, by the owner's name as
+// the list shows people, the viewer's own as theirs; the row's name is its name in the channel (A12).
 describe("WEB-U-527 whose agent, in words", () => {
-  it("says the owner's agent, its own name first when it has one, and the viewer's as theirs", () => {
+  it("says whose agent it is, the viewer's as theirs, and never its title", () => {
     const mine = member("conversation", "Agent", {
       owner_name: "Ana",
       title: "Settle the prices",
@@ -443,11 +452,72 @@ describe("WEB-U-527 whose agent, in words", () => {
         onRemove={() => Promise.resolve()}
       />,
     );
-    expect(row("Settle the prices")).toHaveTextContent("Working · Your agent");
-    expect(row("Review the prices")).toHaveTextContent(
-      "Idle · Reviewer, Ben's agent",
+    expect(row("Agent")).toHaveTextContent("Working · Your agent");
+    expect(row("Reviewer")).toHaveTextContent("Idle · Ben's agent");
+    expect(row("Forecast")).toHaveTextContent("Done · Your agent");
+    expect(row("Reviewer")).not.toHaveTextContent("Review the prices");
+  });
+});
+
+// WEB-U-528 (ADR-0014's amendment A12, decided on 20 Nov 2026): an agent member has a name in the channel, which every
+// member sees. Adding one of the viewer's tasks asks for it, offering the task's title; the agent's owner renames it
+// from its row's menu; a row reads by the name, never by a title.
+describe("WEB-U-528 a member's name in the channel", () => {
+  it("asks the name when adding an agent, offering the task's title", async () => {
+    const { set } = show({
+      tasks: [{ id: "0195d8c0-0000-7000-8000-00000000cafe", title: "Docs" }],
+    });
+    addBox();
+    fireEvent.click(screen.getByRole("option", { name: "Docs" }));
+    const name = screen.getByRole("textbox", {
+      name: "Its name in this channel",
+    });
+    expect(name).toHaveValue("Docs");
+    expect(set).not.toHaveBeenCalled();
+    fireEvent.change(name, { target: { value: "Docs writer" } });
+    fireEvent.click(screen.getByRole("button", { name: "Add to the channel" }));
+    await vi.waitFor(() =>
+      expect(set).toHaveBeenCalledWith(
+        "conversation",
+        "0195d8c0-0000-7000-8000-00000000cafe",
+        "member",
+        "Docs writer",
+      ),
     );
-    expect(row("Forecast Q4")).toHaveTextContent("Done · Forecast, your agent");
-    expect(row("Review the prices")).not.toHaveTextContent("· Ben ·");
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Added Docs writer.",
+    );
+  });
+
+  it("lets the agent's owner rename it, and reads every row by its name", async () => {
+    const { set } = show();
+    // Rows by name: Planner's task title is the viewer's, yet the row says the name everyone sees.
+    expect(row("Planner")).toBeVisible();
+    expect(within(list()).queryByText("Plan the release")).toBeNull();
+    choose("Planner", "Rename…");
+    const name = screen.getByRole("textbox", {
+      name: "Its name in this channel",
+    });
+    expect(name).toHaveValue("Planner");
+    fireEvent.change(name, { target: { value: "Release planner" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save the name" }));
+    await vi.waitFor(() =>
+      expect(set).toHaveBeenCalledWith(
+        "conversation",
+        PLANNER.id,
+        "lead",
+        "Release planner",
+      ),
+    );
+  });
+
+  it("offers Rename only on the viewer's own agents", () => {
+    show();
+    fireEvent.click(
+      within(row("Reviewer")).getByRole("button", {
+        name: /^More actions for Reviewer/,
+      }),
+    );
+    expect(screen.queryByRole("menuitem", { name: "Rename…" })).toBeNull();
   });
 });
