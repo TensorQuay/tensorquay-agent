@@ -10,6 +10,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **A picture too large to preview no longer offers Expand (WEB-U-517).** In the Files panel, an image over the
   preview's limit (10 MiB) showed its note, "Too large to preview", with an Expand that had nothing to show; it now
   offers only Download, as a page, spreadsheet or PDF over its limit does.
+- **A route check's long answer can be read with the keyboard (WEB-U-518).** The server's answer under a failed check
+  scrolls when it is long; it could be scrolled only with a mouse. It is now a named area that Tab reaches, in the check
+  and in the Models list.
 - **The gateway logs why it ended a model's response early (GW-U-226).** When the relay stops a response before
   its end (the model server silent past the idle limit, the response deadline, the byte limit, the upstream
   breaking), a warning names the reason, the route, the bytes carried and the seconds it ran. Before, the task
