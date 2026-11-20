@@ -84,8 +84,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 ### Upgrade notes
 
 - Migration `0110_channel_member_names` adds a member's name to `channel_members`. An agent member added before this
-  release has no name: it shows by its profile's name, as before, and `@` doesn't match it until its owner names it
-  in Members.
+  release has no name: it shows by its profile's name, as before, and is woken as before by to-dos, proposals, replies
+  to its posts, decisions and reports, and a person's post to the whole channel; only `@` can't reach it. Its owner
+  names it in the channel's Members: the row's "…" menu, Rename….
 
 ## 18.1.0 (20 November 2026)
 

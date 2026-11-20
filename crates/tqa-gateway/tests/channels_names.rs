@@ -218,3 +218,94 @@ async fn gw_i_375_a_member_has_a_name_in_the_channel(pool: PgPool) -> TestResult
     }))
     .await
 }
+
+// TEST: GW-I-378
+// A member without a name (added before names, or by someone who isn't its owner) is reached by everything but "@":
+// a to-do, a proposal, a reply to its post and a person's post to the channel wake it; "@" with its title names no
+// one, so a top-level post with it goes to the whole channel (C-4) and still wakes it, as a post to the channel.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_378_an_unnamed_member_is_woken_by_everything_but_at(pool: PgPool) -> TestResult {
+    Box::pin(support::run(pool, async |f| {
+        let (ana, cookie) = f.admin().await?;
+        let mut old = Agent::new(f, ana.id, "Old helper").await?;
+        let id = channel(f, &cookie, "pricing", &[(&old, "member")]).await?;
+        // As on an upgraded installation: added before names existed.
+        sqlx::query("UPDATE channel_members SET name = NULL WHERE conversation_id = $1")
+            .bind(old.uuid)
+            .execute(&f.pool)
+            .await?;
+        let mut place = 0;
+        let task = post(
+            f,
+            &cookie,
+            &id,
+            json!({"type": "task", "title": "Recheck VAT", "spec": "Pages 11 and 12."}),
+            None,
+        )
+        .await?;
+        let proposal = post(
+            f,
+            &cookie,
+            &id,
+            json!({"type": "proposal", "title": "Ship it", "text": "All green."}),
+            None,
+        )
+        .await?;
+        let sentence = old.woken(f, &id, place).await?;
+        assert!(
+            sentence.contains(&format!("a to-do you may take on (message {task})")),
+            "{sentence}"
+        );
+        assert!(
+            sentence.contains(&format!("a proposal for your vote (message {proposal})")),
+            "{sentence}"
+        );
+        old.start(f).await?;
+        old.read(f, &id, place).await?;
+        let own = old.post(f, &id, text("Looking at VAT now.")).await?;
+        old.end(f).await?;
+        place = proposal;
+        // A reply to its post.
+        let reply = post(
+            f,
+            &cookie,
+            &id,
+            text("Thanks, pages 11 and 12 only."),
+            Some(own),
+        )
+        .await?;
+        let sentence = old.woken(f, &id, place).await?;
+        assert!(
+            sentence.contains(&format!("a reply to your post (message {reply})")),
+            "{sentence}"
+        );
+        old.start(f).await?;
+        place = *old.read(f, &id, place).await?.last().ok_or("read")?;
+        old.end(f).await?;
+        // "@" with its title names no one: a post to the whole channel, which still reaches it.
+        let at = post(
+            f,
+            &cookie,
+            &id,
+            text("@Old helper what did you find?"),
+            None,
+        )
+        .await?;
+        let sentence = old.woken(f, &id, place).await?;
+        assert!(
+            sentence.contains(&format!("a post to the channel (message {at})")),
+            "{sentence}"
+        );
+        let wakes: Vec<Uuid> = sqlx::query_scalar(
+            "SELECT wakes FROM channel_messages WHERE channel_id = $1::uuid AND seq = $2",
+        )
+        .bind(&id)
+        .bind(i64::try_from(at)?)
+        .fetch_one(&f.pool)
+        .await?;
+        assert_eq!(wakes, [old.uuid]);
+        Ok(())
+    }))
+    .await
+}

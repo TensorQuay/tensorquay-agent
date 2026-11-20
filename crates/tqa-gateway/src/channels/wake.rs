@@ -142,7 +142,8 @@ async fn addressees(
     (channel, writer, person): (Uuid, Option<Uuid>, bool),
     (parent, body): (Option<i64>, &MessageBody),
 ) -> Result<Vec<Uuid>, GatewayError> {
-    let others: Vec<(Uuid, String)> = sqlx::query!(
+    // Every agent voting member is an addressee; only "@" needs a name, and one without a name has none to match.
+    let others: Vec<(Uuid, Option<String>)> = sqlx::query!(
         "SELECT m.conversation_id AS \"conversation!\", m.name FROM channel_members m \
          JOIN conversations c ON c.id = m.conversation_id \
          WHERE m.channel_id = $1 AND m.conversation_id IS NOT NULL AND m.role <> 'observer' AND c.state = 'active' \
@@ -153,8 +154,7 @@ async fn addressees(
     .await?
     .into_iter()
     .filter(|member| Some(member.conversation) != writer)
-    // "@" matches members' names in the channel, never a title (ADR-0014's amendment); one without a name has none.
-    .filter_map(|member| member.name.map(|name| (member.conversation, name)))
+    .map(|member| (member.conversation, member.name))
     .collect();
     let mut wakes: Vec<Uuid> = Vec::new();
     let mut add = |id: Option<Uuid>| {
@@ -187,9 +187,10 @@ async fn addressees(
         _ => {}
     }
     if let Some(words) = words {
+        // "@" matches members' names in the channel, never a title (A12); a member without a name can't be named.
         let names: Vec<(Uuid, &str)> = others
             .iter()
-            .map(|(member, title)| (*member, title.as_str()))
+            .filter_map(|(member, name)| name.as_deref().map(|name| (*member, name)))
             .collect();
         for member in named(words, &names) {
             add(Some(member));

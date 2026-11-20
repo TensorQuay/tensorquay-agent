@@ -208,7 +208,7 @@ characters, no control characters, and is unique in the channel without regard t
 refused in words, while a default one takes a number ("Analyst 2"). Renaming the task doesn't change it. `@` matches
 these names, for every member, and never a title. SEC-044 stays true for titles: a title is still its owner's only,
 and the name is what its owner chose to show. A member added before 18.2 has no name and shows by its profile's name,
-as before, until its owner names it. The "can't be woken" notices (A10) say the name.
+as before, until its owner names it; everything but `@` wakes it as it wakes any agent voting member. The "can't be woken" notices (A10) say the name.
 
 **Test rows:** GW-I-375 (a member's name, A12); GW-I-377 (a person's post to the whole channel, A1, A4); GW-U-227 (the wake key), GW-U-228 (the sentence carries no content), GW-U-229 (naming: the longest
 name, no case), GW-U-230 (the hop rule); PROTO-U-048 (`channel_wake`, revision 16); SEC-068 (no channel content in a
