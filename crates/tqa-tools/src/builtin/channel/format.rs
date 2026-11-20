@@ -82,7 +82,24 @@ fn block(channel: &str, message: &ChannelMessage) -> Result<String, ToolError> {
     if let Some(task) = &task {
         attributes.push(("task_seq", task));
     }
-    untrusted::wrap("channel", &attributes, &body_text(&message.body))
+    let mut body = body_text(&message.body);
+    // Its files (ADR-0014's amendment of 20 Nov 2026, A9): each placed one by its exact path, inside the block, since a
+    // file's name is someone else's words.
+    if !message.files.is_empty() {
+        body.push_str("\n\nFiles:");
+        for file in &message.files {
+            match &file.path {
+                Some(path) => {
+                    body.push_str(&format!("\n- {path} ({}, {} bytes)", file.name, file.size))
+                }
+                None => body.push_str(&format!(
+                    "\n- {} ({} bytes): not in your workspace yet",
+                    file.name, file.size
+                )),
+            }
+        }
+    }
+    untrusted::wrap("channel", &attributes, &body)
 }
 
 /// A message this runtime doesn't recognise, as one marked block: its seq when it has one, and the gateway's JSON as

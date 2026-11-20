@@ -294,3 +294,36 @@ fn tool_u_036_an_unrecognised_message_is_an_opaque_marked_block() -> TestResult 
     );
     Ok(())
 }
+
+// TEST: TOOL-U-149
+// A message's files in an agent's read (ADR-0014's amendment of 20 Nov 2026, A9): each placed one by its exact path in
+// the workspace, one not placed yet said so, all inside the message's marked block (a file's name is untrusted).
+#[test]
+fn tool_u_149_a_read_shows_each_files_workspace_path_inside_the_block() -> TestResult {
+    let mut posted = message(12, AuthorKind::User, text("The price list"));
+    posted.files = vec![
+        tqa_types::ChannelFile {
+            name: "q3.pdf".into(),
+            size: 1200,
+            path: Some("uploads/pricing-12-q3.pdf".into()),
+        },
+        tqa_types::ChannelFile {
+            name: "notes.txt".into(),
+            size: 3,
+            path: None,
+        },
+    ];
+    let page = ChannelPage {
+        messages: vec![posted.into()],
+        next_since: 12,
+        more: false,
+    };
+    let rendered = format::page("ch-1", &page, format::BUDGET)?;
+    let block_end = rendered.find("</untrusted-content").ok_or("no block")?;
+    let inside = &rendered[..block_end];
+    assert!(
+        inside.contains("Files:\n- uploads/pricing-12-q3.pdf (q3.pdf, 1200 bytes)\n- notes.txt (3 bytes): not in your workspace yet"),
+        "{rendered}"
+    );
+    Ok(())
+}
