@@ -32,6 +32,52 @@ pub fn refusal(root: &Path, path: &Path, content: &str) -> Option<&'static str> 
     (in_memory && holds_key(content)).then_some(KEY_IN_NOTE)
 }
 
+/// Where a note's previous version is kept for one Undo, relative to the workspace root: hidden, so the index and
+/// the agent's listing of its notes never count it.
+pub const UNDO_DIRECTORY: &str = ".memory/.undo";
+
+/// Before a note directly under `.memory/` is replaced: its current content is copied to [`UNDO_DIRECTORY`] under the
+/// same name, so one Undo can put it back; a note about to be created gets any stale copy removed, so its Undo
+/// removes it. Other paths (elsewhere in the workspace, digests under `.memory/tasks/`) are left alone.
+///
+/// # Errors
+/// The copy's I/O failure: a note isn't replaced when its previous version couldn't be kept.
+pub fn keep_previous(root: &Path, path: &Path) -> std::io::Result<()> {
+    let Some(name) = note_name(root, path) else {
+        return Ok(());
+    };
+    let undo = root.join(UNDO_DIRECTORY);
+    let kept = undo.join(name);
+    match std::fs::symlink_metadata(path) {
+        Ok(metadata) if metadata.is_file() => {
+            std::fs::create_dir_all(&undo)?;
+            std::fs::copy(path, &kept).map(|_| ())
+        }
+        _ => match std::fs::remove_file(&kept) {
+            Err(error) if error.kind() != std::io::ErrorKind::NotFound => Err(error),
+            _ => Ok(()),
+        },
+    }
+}
+
+/// The file name of a note directly under `.memory/` (a regular `*.md`, not hidden); `None` for any other path.
+#[must_use]
+pub fn note_name<'a>(root: &Path, path: &'a Path) -> Option<&'a std::ffi::OsStr> {
+    let relative = path.strip_prefix(root).ok()?;
+    let mut parts = relative.components();
+    let first = parts.next()?;
+    let name = parts.next()?;
+    if parts.next().is_some() || first.as_os_str() != MEMORY_DIRECTORY {
+        return None;
+    }
+    let name = name.as_os_str();
+    let text = name.to_str()?;
+    let markdown = Path::new(text)
+        .extension()
+        .is_some_and(|extension| extension.eq_ignore_ascii_case("md"));
+    (markdown && !text.starts_with('.')).then_some(name)
+}
+
 #[cfg(test)]
 #[path = "memory_note_tests.rs"]
 mod tests;

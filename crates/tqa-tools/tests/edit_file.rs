@@ -761,3 +761,58 @@ async fn tool_u_151_no_file_tool_saves_a_key_into_a_memory_note() -> TestResult 
     assert!(fixture.root().join("config.env").is_file());
     Ok(())
 }
+
+// TEST: TOOL-U-151
+#[tokio::test]
+async fn tool_u_151_a_replaced_note_keeps_its_previous_version_for_one_undo() -> TestResult {
+    use tqa_tools::builtin::WriteFile;
+    let fixture = workspace_fixture()?;
+    let cx = support::context(&fixture);
+    let kept = fixture.root().join(".memory/.undo/build.md");
+    let first = "about: The build command is make all\n";
+    WriteFile::new()
+        .call(
+            json!({"path": ".memory/build.md", "create_parents": true, "content": first}),
+            &cx,
+        )
+        .await?;
+    assert!(!kept.exists(), "a new note has no previous version");
+    // An edit keeps the version before it; a second edit keeps the one before that edit (one level).
+    EditFile::new()
+        .call(request(".memory/build.md", "make all", "make release"), &cx)
+        .await?;
+    assert_eq!(fs::read_to_string(&kept)?, first);
+    let second = fs::read_to_string(fixture.root().join(".memory/build.md"))?;
+    WriteFile::new()
+        .call(
+            json!({"path": ".memory/build.md", "content": "about: Use just build\n"}),
+            &cx,
+        )
+        .await?;
+    assert_eq!(fs::read_to_string(&kept)?, second);
+    // Elsewhere nothing is kept: not for other files, nor for digests under .memory/tasks/.
+    WriteFile::new()
+        .call(json!({"path": "a.md", "content": "1"}), &cx)
+        .await?;
+    WriteFile::new()
+        .call(json!({"path": "a.md", "content": "2"}), &cx)
+        .await?;
+    WriteFile::new()
+        .call(
+            json!({"path": ".memory/tasks/t.md", "create_parents": true, "content": "# one"}),
+            &cx,
+        )
+        .await?;
+    WriteFile::new()
+        .call(
+            json!({"path": ".memory/tasks/t.md", "content": "# two"}),
+            &cx,
+        )
+        .await?;
+    let names: Vec<_> = fs::read_dir(fixture.root().join(".memory/.undo"))?
+        .filter_map(Result::ok)
+        .map(|entry| entry.file_name())
+        .collect();
+    assert_eq!(names, ["build.md"]);
+    Ok(())
+}

@@ -50,6 +50,8 @@ pub(super) fn replace(
             return Err(ToolError::PathOutsideWorkspace);
         }
         before_rename(&path)?;
+        // A memory note's previous version is kept for one Undo (ADR-0041); a new note has none.
+        super::memory_note::keep_previous(workspace.path(), &path)?;
         fs::rename(&temporary, &path)?;
         Ok(())
     })();
