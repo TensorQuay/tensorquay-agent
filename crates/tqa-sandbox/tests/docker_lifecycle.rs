@@ -105,10 +105,15 @@ async fn sbx_c_010_image_presence_reports_local_and_missing_digests_without_crea
 #[ignore = "needs Docker; run with --run-ignored all and TQA_DOCKER_TESTS=1"]
 async fn sbx_c_001_create_ready_destroy_is_idempotent() -> TestResult {
     run(async |fixture| {
+        // The create starts just before a whole second, so the engine creates the container in the next one: the
+        // handle carries our clock's second, sampled before the create, and the listing the engine's (SBX-U-021).
+        near_the_end_of_a_second().await;
+        let started = std::time::Instant::now();
         let handle = fixture
             .backend
             .create(fixture.spec("lifecycle", false)?, CancellationToken::new())
             .await?;
+        let took = started.elapsed();
         fixture
             .backend
             .wait_ready(
@@ -118,7 +123,26 @@ async fn sbx_c_001_create_ready_destroy_is_idempotent() -> TestResult {
                 CancellationToken::new(),
             )
             .await?;
-        assert!(fixture.backend.list().await?.contains(&handle));
+        // Listed by what it names (kind, id, conversation), not by its creation time: the listing reads the engine's,
+        // the handle carries our clock's second sampled before the engine's create, and with the create started just
+        // before a whole second they differ by one. Both fall inside the create call and each is cut to its second, so
+        // they are at most the call's time plus 1 s apart (2 s on an idle engine; more on a busy one, which would make
+        // a fixed bound flaky).
+        let listed = fixture.backend.list().await?;
+        let found = listed
+            .iter()
+            .find(|listed| identity(listed) == identity(&handle))
+            .ok_or_else(|| format!("{handle:?} not listed: {listed:?}"))?;
+        let apart = found
+            .created_at
+            .duration_since(handle.created_at)
+            .or_else(|_| handle.created_at.duration_since(found.created_at))?;
+        assert!(
+            apart <= took + Duration::from_secs(1),
+            "listed {:?} against created {:?}, the create took {took:?}",
+            found.created_at,
+            handle.created_at
+        );
         let address = fixture.backend.address(&handle).await?;
         assert!(!address.is_unspecified() && !address.is_loopback());
         let mut foreign = handle.clone();
@@ -464,4 +488,17 @@ async fn sbx_c_013_destroy_terminates_an_active_process() -> TestResult {
         Ok(())
     })
     .await
+}
+
+/// Waits until the wall clock is at least 0.93 s into its current second.
+async fn near_the_end_of_a_second() {
+    loop {
+        let into = std::time::SystemTime::now()
+            .duration_since(std::time::SystemTime::UNIX_EPOCH)
+            .map_or(0, |now| now.subsec_millis());
+        if into >= 930 {
+            return;
+        }
+        tokio::time::sleep(Duration::from_millis(u64::from(930 - into))).await;
+    }
 }

@@ -140,6 +140,8 @@ async fn inbound(
                 // A completed run may be the task's first: it may then get a short title (GW-I-138).
                 if completed {
                     crate::relay::title::after_first_run(state, conversation);
+                    // With long-term memory on, the task's digest (ADR-0041), in the background.
+                    crate::files::digest::after_run(state, conversation);
                 }
                 // A lifecycle event is journaled, so the conversation already has history.
                 super::session::notice(state, conversation, sandbox, true)

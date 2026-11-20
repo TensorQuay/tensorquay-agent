@@ -22,7 +22,9 @@ CREATE TABLE channel_wakes (
     key text,
     sent_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
     -- Whether a run started after it was sent: until then the wake is on its way, and no other is sent.
-    started boolean NOT NULL DEFAULT false
+    started boolean NOT NULL DEFAULT false,
+    -- Whether its turn was handed to the runtime: the run that starts next is this wake's, and charged to it.
+    handed boolean NOT NULL DEFAULT false
 );
 CREATE INDEX channel_wakes_recent_idx ON channel_wakes (channel_id, sent_at);
 CREATE INDEX channel_wakes_key_idx ON channel_wakes (conversation_id, key);

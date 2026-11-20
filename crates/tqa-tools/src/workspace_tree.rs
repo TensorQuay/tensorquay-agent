@@ -3,6 +3,7 @@
 //! the runtime (the workspace service inside a microVM, ADR-0030), so both produce identical results. Model-facing path
 //! resolution is [`crate::WorkspaceRoot`]'s job, not this module's.
 pub mod manifest;
+pub mod memory;
 pub mod path;
 pub mod upload;
 
