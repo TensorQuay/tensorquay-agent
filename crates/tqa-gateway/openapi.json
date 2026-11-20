@@ -1116,7 +1116,7 @@
             }
           }
         },
-        "description": "Idempotency-Key is required and scoped to the authenticated user. The canonical request body is fingerprinted. A replay returns the original 201 response and conversation id without repeating side effects; a changed body returns 422 idempotency_key_reused and a key used on another route returns 409 idempotency_route. The conversation and key record commit atomically. Records expire after the configured idempotency retention (24 hours by default). The title given here counts as the first message's (title_source message): after the task's first completed run the gateway may replace it with a 3-6 word name, unless [tasks] auto_title is off; a later PATCH of the title is never replaced."
+        "description": "Idempotency-Key is required and scoped to the authenticated user. The canonical request body is fingerprinted. A replay returns the original 201 response and conversation id without repeating side effects; a changed body returns 422 idempotency_key_reused and a key used on another route returns 409 idempotency_route. The conversation and key record commit atomically. Records expire after the configured idempotency retention (24 hours by default). The title given here counts as the first message's (title_source message): after the task's first completed run the gateway may replace it with a 3-6 word name, unless [tasks] auto_title is off; a later PATCH of the title is never replaced. The title given at creation is provisional: the automatic title replaces it after the first run; a rename with PATCH holds."
       },
       "get": {
         "operationId": "list",

@@ -44,6 +44,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   that votes in the channel, so a question to the room gets an answer; each agent is told it's a post to the channel
   and to answer only when it falls to it or it has something to add. A reply in a thread still wakes only that thread's
   agent and whoever it names, and an agent's post never wakes everyone.
+- **Agents in a channel are told what to do.** A woken agent is told to end its turn, not wait, unless a person asked
+  it to wait; it's no longer offered a "done" post that does nothing; and a report on a to-do it never took on says to
+  take it on first.
 - **A channel's budget can be raised.** A channel's owner, a person who leads it, or an administrator sets how many
   tokens its woken agents may use, from "Wake budget…" in the channel's menu or the button on the used-up notice; a
   wake the budget held goes out at once. Everyone in the channel sees the budget and what's spent. An administrator
