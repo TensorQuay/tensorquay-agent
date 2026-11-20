@@ -392,3 +392,71 @@ async fn gw_i_381_an_agents_claim_carries_its_name(pool: PgPool) -> TestResult {
     }))
     .await
 }
+
+// TEST: GW-I-378
+// The two cases left (21 Nov 2026): a member without a name is reached as a writer too. The decision on the proposal it
+// made wakes it ("the decision on your proposal"), and a person's report on the to-do it posted wakes it ("a report on
+// your to-do"): both find it by its author id, never by a name.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_378_an_unnamed_writer_gets_its_decision_and_its_report(pool: PgPool) -> TestResult {
+    Box::pin(support::run(pool, async |f| {
+        let (ana, cookie) = f.admin().await?;
+        let mut old = Agent::new(f, ana.id, "Old helper").await?;
+        let id = channel(f, &cookie, "pricing", &[(&old, "member")]).await?;
+        sqlx::query("UPDATE channel_members SET name = NULL WHERE conversation_id = $1")
+            .bind(old.uuid)
+            .execute(&f.pool)
+            .await?;
+        // A person's post to the channel wakes it; in that run it proposes, votes for it, and posts a to-do.
+        post(f, &cookie, &id, text("Anything to settle this week?"), None).await?;
+        old.woken(f, &id, 0).await?;
+        old.start(f).await?;
+        let mut place = *old.read(f, &id, 0).await?.last().ok_or("read")?;
+        let proposal = old
+            .post(f, &id, json!({"type": "proposal", "title": "Raise EU Pro to 24", "text": "Churn is 1.8 %."}))
+            .await?;
+        old.post(f, &id, json!({"type": "vote", "proposal_seq": proposal, "choice": "accept"}))
+            .await?;
+        let todo = old
+            .post(f, &id, json!({"type": "task", "title": "Draft the notice", "spec": "Two lines."}))
+            .await?;
+        // Its own posts don't move its place: the next wake is told from what it read.
+        old.end(f).await?;
+        // Ana's vote decides it (two of two): the decision wakes its proposer.
+        post(f, &cookie, &id, json!({"type": "vote", "proposal_seq": proposal, "choice": "accept"}), None).await?;
+        let decision: i64 = sqlx::query_scalar(
+            "SELECT seq FROM channel_messages WHERE channel_id = $1::uuid AND type = 'decision'",
+        )
+        .bind(&id)
+        .fetch_one(&f.pool)
+        .await?;
+        let sentence = old.woken(f, &id, place).await?;
+        assert!(sentence.contains(&format!("the decision on your proposal (message {decision})")), "{sentence}");
+        old.start(f).await?;
+        place = *old.read(f, &id, place).await?.last().ok_or("read")?;
+        old.end(f).await?;
+        // Ana takes the to-do and reports on it: the report wakes its writer.
+        let (status, claimed) = call(
+            f,
+            Method::POST,
+            &format!("/api/v1/channels/{id}/tasks/{todo}/claim"),
+            &cookie,
+            (None, Some("claim-1")),
+        )
+        .await?;
+        assert_eq!(status, 201, "{claimed}");
+        let report = post(
+            f,
+            &cookie,
+            &id,
+            json!({"type": "report", "task_seq": todo, "status": "completed", "summary": "Drafted."}),
+            None,
+        )
+        .await?;
+        let sentence = old.woken(f, &id, place).await?;
+        assert!(sentence.contains(&format!("a report on your to-do (message {report})")), "{sentence}");
+        Ok(())
+    }))
+    .await
+}
