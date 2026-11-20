@@ -9,6 +9,7 @@ pub(crate) mod path;
 pub(crate) mod upload;
 pub(crate) use config::FilesConfig;
 mod check;
+pub(crate) mod digest;
 mod endpoints;
 mod holder;
 mod linked;

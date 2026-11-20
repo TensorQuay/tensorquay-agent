@@ -112,6 +112,10 @@ pub(super) async fn apply(
     if let Some(on) = changed.keep_sign_in {
         sign_in_switched(state, user, id, on).await;
     }
+    // A renamed task's memory digest takes the new name (ADR-0041); never the request's failure.
+    if let Some(title) = title {
+        crate::files::digest::title_changed(state, id, title).await;
+    }
     Ok((status, Json(body)))
 }
 
