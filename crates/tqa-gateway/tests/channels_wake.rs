@@ -551,7 +551,12 @@ async fn gw_i_354_each_agent_members_live_state_is_on_the_members_answer(
         analyst.woken(f, &id, 0).await?;
         analyst.start(f).await?;
         until_state(f, &cookie, &id, &[("Pricing analyst", "working")]).await?;
-        // In channel_wait on this channel: waiting, until the wait answers.
+        analyst.end(f).await?;
+        until_state(f, &cookie, &id, &[("Pricing analyst", "idle")]).await?;
+        // In channel_wait on this channel: waiting, until the wait answers. In a run its person started: a woken run's
+        // wait answers at once (C-11, GW-I-380).
+        analyst.start(f).await?;
+        until_state(f, &cookie, &id, &[("Pricing analyst", "working")]).await?;
         let token = analyst.token(f)?;
         let path = format!("/runtime/channels/{id}/messages?since=1&wait=20");
         let waiting = tokio::spawn({
@@ -567,7 +572,8 @@ async fn gw_i_354_each_agent_members_live_state_is_on_the_members_answer(
             }
         });
         until_state(f, &cookie, &id, &[("Pricing analyst", "waiting")]).await?;
-        post(f, &cookie, &id, text("an answer for the wait"), None).await?;
+        // A reply in the person's own thread: it answers the wait and wakes no one (C-4).
+        post(f, &cookie, &id, text("an answer for the wait"), Some(1)).await?;
         assert_eq!(waiting.await??, 200);
         until_state(f, &cookie, &id, &[("Pricing analyst", "working")]).await?;
         analyst.end(f).await?;
