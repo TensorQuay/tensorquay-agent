@@ -271,6 +271,22 @@ impl Storage {
         .await
     }
 
+    /// Removes an upload no post took; one already gone is done.
+    ///
+    /// # Errors
+    /// A storage failure or the bound elapsing.
+    pub async fn remove_channel_upload(
+        &self,
+        channel: uuid::Uuid,
+        upload: uuid::Uuid,
+    ) -> Result<(), GatewayError> {
+        let path = self
+            .channel_files(channel)
+            .join("uploads")
+            .join(upload.to_string());
+        crate::io::bounded(self.timeout, &self.cancel, remove_file(&path)).await
+    }
+
     /// Removes a deleted channel's files; ones already gone are done.
     ///
     /// # Errors

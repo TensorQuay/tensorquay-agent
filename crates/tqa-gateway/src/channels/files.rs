@@ -128,6 +128,83 @@ pub(crate) async fn upload(
     ))
 }
 
+/// `DELETE /api/v1/channels/{id}/uploads/{upload}`: the composer's remove: the caller's own upload that no post took
+/// goes, bytes and row, and its room in the channel's total comes back.
+///
+/// # Errors
+/// `404` for a channel the caller can't see, or an upload that isn't theirs, unposted, in this channel; storage failure.
+pub(crate) async fn delete_upload(
+    AppState(state): AppState<Arc<State>>,
+    Authz(user): Authz,
+    Path((raw_id, upload)): Path<(String, Uuid)>,
+) -> Result<StatusCode, GatewayError> {
+    let id = super::api::channel_id(&raw_id)?;
+    let mut connection = state.pool.acquire().await?;
+    store::visible(&mut connection, caller(&user), id).await?;
+    sqlx::query_scalar!(
+        "DELETE FROM channel_uploads WHERE id = $1 AND channel_id = $2 AND user_id = $3 AND posted_seq IS NULL \
+         RETURNING id",
+        upload,
+        id,
+        user.id
+    )
+    .fetch_optional(&mut *connection)
+    .await?
+    .ok_or(GatewayError::NotFound)?;
+    state.storage.remove_channel_upload(id, upload).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+/// How long an upload no post took is kept.
+const UNPOSTED_FOR: &str = "24 hours";
+
+/// Removes the uploads no post took within [`UNPOSTED_FOR`], rows then bytes; answers how many went.
+///
+/// # Errors
+/// Storage failure.
+pub(crate) async fn sweep_uploads(state: &State) -> Result<usize, GatewayError> {
+    let gone = sqlx::query!(
+        "DELETE FROM channel_uploads WHERE posted_seq IS NULL \
+         AND created_at < CURRENT_TIMESTAMP - $1::text::interval RETURNING id, channel_id",
+        UNPOSTED_FOR
+    )
+    .fetch_all(&state.pool)
+    .await?;
+    for row in &gone {
+        if let Err(error) = state
+            .storage
+            .remove_channel_upload(row.channel_id, row.id)
+            .await
+        {
+            tracing::warn!(
+                code = error.code(),
+                "an unposted channel upload's bytes weren't removed"
+            );
+        }
+    }
+    Ok(gone.len())
+}
+
+/// How often unposted uploads are swept.
+const SWEEP_EVERY: std::time::Duration = std::time::Duration::from_secs(3600);
+
+/// Starts the hourly sweep of unposted uploads, on the gateway's task tracker, stopped by its cancel.
+pub(crate) fn start(state: &Arc<State>) {
+    let owned = state.clone();
+    state.tasks.spawn(async move {
+        let mut interval = tokio::time::interval(SWEEP_EVERY);
+        interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
+        loop {
+            tokio::select! {biased;
+                () = owned.cancel.cancelled() => break,
+                _ = interval.tick() => if let Err(error) = sweep_uploads(&owned).await {
+                    tracing::warn!(code = error.code(), "the channel uploads sweep failed");
+                },
+            }
+        }
+    });
+}
+
 /// The upload ids a post names, from its request body's `files` (taken out of it, so the rest is the post).
 ///
 /// # Errors

@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM channel_uploads WHERE id = $1 AND channel_id = $2 AND user_id = $3 AND posted_seq IS NULL RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "channel_uploads",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "12d521f2c8e8ce884ad0bd5aa8f3d9ffa5e71b136135d9bbd9fa60ca2ae79ec9"
+}

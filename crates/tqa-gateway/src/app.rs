@@ -694,7 +694,9 @@ impl Gateway {
     /// Storage failure.
     #[cfg(feature = "testing")]
     pub async fn channel_uploads_sweep_now(&self) -> Result<(), GatewayError> {
-        Ok(())
+        crate::channels::files::sweep_uploads(&self.state)
+            .await
+            .map(|_| ())
     }
 
     /// Sends every channel wake that is due now, as the sweep does (ADR-0014's amendment of 20 Nov 2026, A3). Only
@@ -917,6 +919,7 @@ fn start_sweeps(state: &Arc<State>) {
     crate::secrets::rotation::start(state);
     crate::secrets::reads::start(state);
     crate::channels::api::start(state);
+    crate::channels::files::start(state);
     crate::purge::start(state);
     crate::teams::changed::start(state);
 }

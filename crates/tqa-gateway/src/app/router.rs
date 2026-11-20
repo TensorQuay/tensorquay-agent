@@ -140,6 +140,7 @@ fn channels_router(route: ChannelRoute) -> MethodRouter<Arc<AppState>> {
         ChannelRoute::Candidates => get(crate::channels::candidates::candidates),
         ChannelRoute::Upload => post(crate::channels::files::upload),
         ChannelRoute::FileDownload => get(crate::channels::files::download),
+        ChannelRoute::DeleteUpload => delete(crate::channels::files::delete_upload),
         ChannelRoute::RuntimeClaim => post(crate::channels::runtime::claim),
     }
 }
