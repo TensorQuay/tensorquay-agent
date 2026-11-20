@@ -561,3 +561,59 @@ async fn gw_i_365_unposted_uploads_older_than_a_day_are_swept(pool: PgPool) -> T
     }))
     .await
 }
+
+// TEST: GW-I-366
+// A file that doesn't fit a member's workspace is said so (review of 20 Nov 2026): its read gives no path and the
+// reason, so the agent never assumes it has the file; it isn't tried again on every read.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_366_a_file_that_didnt_fit_is_said_so_in_the_read(pool: PgPool) -> TestResult {
+    Box::pin(support::run_configured(pool, None, SMALL, async |f| {
+        let (owner, cookie) = f.admin().await?;
+        let mut analyst = Agent::new(f, owner.id, "Pricing analyst").await?;
+        let id = channel(f, &cookie, "pricing", &[(&analyst, "member")]).await?;
+        // Its workspace's uploads hold 3,500 of their 4,096 bytes already.
+        let (status, _) = call(
+            f,
+            Method::POST,
+            &format!("/api/v1/conversations/{}/messages", analyst.id),
+            &cookie,
+            (Some(json!({"text": "Start."})), Some("person-1")),
+        )
+        .await?;
+        assert!(status < 300, "{status}");
+        analyst
+            .next(f, channel_agent::WAKE)
+            .await?
+            .ok_or("the person's turn")?;
+        let workspace = f.backend.mounted(&analyst.id).ok_or("workspace")?;
+        std::fs::create_dir_all(workspace.join("uploads"))?;
+        std::fs::write(workspace.join("uploads/filler.bin"), vec![0; 3500])?;
+        analyst.start(f).await?;
+        analyst.end(f).await?;
+        let file = uploaded(f, &cookie, &id, "q3.pdf", &[1; 1000]).await?;
+        let (status, posted) =
+            post_with(f, &cookie, &id, text("@pricing analyst the file"), &[file]).await?;
+        assert_eq!(status, 201, "{posted}");
+        analyst.woken(f, &id, 0).await?;
+        for _ in 0..2 {
+            let (status, page) = channel_agent::runtime_call(
+                f,
+                Method::GET,
+                &format!("/runtime/channels/{id}/messages?since=0"),
+                &analyst.token(f)?,
+                None,
+            )
+            .await?;
+            assert_eq!(status, 200, "{page}");
+            assert_eq!(
+                page["messages"][0]["files"],
+                json!([{"name": "q3.pdf", "size": 1000, "not_placed": "uploads_full"}]),
+                "{page}"
+            );
+        }
+        assert!(!workspace.join("uploads/pricing-1-q3.pdf").exists());
+        Ok(())
+    }))
+    .await
+}
