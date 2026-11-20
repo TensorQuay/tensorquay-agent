@@ -670,8 +670,9 @@ pub(crate) fn soon(state: &std::sync::Arc<State>, channel: Option<Uuid>) {
     });
 }
 
-/// A run starts on `conversation`, in the transaction that stores its start: if a channel's wake started it (the turn
-/// delivered last), it is charged to that channel with that wake's hop (A5, A6); any other run is charged to none.
+/// A run starts on `conversation`, in the transaction that stores its start: if a channel's wake started it (the wake
+/// whose turn was handed over and hasn't started a run yet), it is charged to that channel with that wake's hop (A5,
+/// A6); any other run is charged to none.
 ///
 /// # Errors
 /// Storage failure.
@@ -685,19 +686,19 @@ pub(crate) async fn run_started(
     )
     .execute(&mut *connection)
     .await?;
-    // Whatever turn started it, the wakes sent before it are on their way no more.
+    // The wake handed over for this run, marked at the hand-over: never "the turn delivered last", which update times
+    // can't tell apart (CI on #144: an earlier wake's row touched later reset the chain's hop).
     sqlx::query!(
-        "UPDATE channel_wakes SET started = true WHERE conversation_id = $1 AND NOT started",
+        "INSERT INTO channel_charges (conversation_id, channel_id, hop) \
+         SELECT conversation_id, channel_id, hop FROM channel_wakes \
+         WHERE conversation_id = $1 AND handed AND NOT started ORDER BY sent_at DESC LIMIT 1",
         conversation
     )
     .execute(&mut *connection)
     .await?;
+    // Whatever turn started it, the wakes sent before it are on their way no more.
     sqlx::query!(
-        "INSERT INTO channel_charges (conversation_id, channel_id, hop) \
-         SELECT w.conversation_id, w.channel_id, w.hop FROM channel_wakes w \
-         WHERE w.conversation_id = $1 AND w.key = (SELECT i.key FROM idempotency i WHERE i.conversation_id = $1 \
-               AND i.execution_status = 'delivered' ORDER BY i.updated_at DESC LIMIT 1) \
-         ORDER BY w.sent_at DESC LIMIT 1",
+        "UPDATE channel_wakes SET started = true WHERE conversation_id = $1 AND NOT started",
         conversation
     )
     .execute(&mut *connection)
