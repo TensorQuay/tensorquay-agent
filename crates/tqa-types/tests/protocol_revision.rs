@@ -232,5 +232,11 @@ fn expected_schema_names() -> Vec<&'static [(&'static str, &'static str)]> {
             ("ScreenNoticeKind", "screen.sign_in_kept"),
             ("ScreenNoticeKind", "screen.sign_in_released"),
         ],
+        &[
+            ("ClientFrame", "channel_wake"),
+            ("Event", "channel_wake"),
+            ("ChannelWake", "channel"),
+            ("ChannelWake", "after"),
+        ],
     ]
 }
