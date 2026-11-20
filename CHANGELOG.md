@@ -10,8 +10,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **Long-term memory, first part (ADR-0041; off by default until it is complete).** With `[memory] enabled = true`
   a task's runs are told how to keep notes across tasks in `.memory/` (one fact per file) and get an index of
   the workspace's notes and finished tasks, generated at every run and pinned so it survives a summary. A note may
-  not hold a key: the file tools refuse one, and a note that got one another way is left out of the index. Off, a
-  run sends exactly what it sends today. The rest (notes in the Files panel, a secret scan on saves, "Remembered" with
+  not hold a key: the file tools refuse one, and a note that got one another way is left out of the index. Each
+  change to a note keeps its previous version for one Undo, and a person can write, remove and undo a note over the
+  API (`/conversations/{id}/memory/{name}`, with a write share). Off, a run sends exactly what it sends today. The rest (notes in the Files panel, a secret scan on saves, "Remembered" with
   Undo, task digests, personal notes) comes before it's turned on.
 
 ### Fixed

@@ -12,6 +12,7 @@ mod check;
 mod endpoints;
 mod holder;
 mod linked;
+mod memory;
 mod remote;
 mod sheet;
 mod sheet_ods;
@@ -20,6 +21,7 @@ mod site_rewrite;
 mod view;
 pub(crate) use check::{check_attachments, prepare_attachments};
 pub(crate) use endpoints::{content, download, list, upload};
+pub(crate) use memory::{delete_note, put_note, undo_note};
 pub(crate) use sheet::sheet;
 pub(crate) use site::{
     Passes as SitePasses, file as site_file, mint as site_mint, root as site_root,
