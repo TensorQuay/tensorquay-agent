@@ -160,6 +160,10 @@ pub(crate) struct NewChannelBody {
 #[serde(deny_unknown_fields)]
 pub(crate) struct RoleBody {
     role: ChannelRole,
+    /// An agent member's name in the channel, set by the agent's owner (its task's title when its owner adds it
+    /// without one).
+    #[serde(default)]
+    name: Option<String>,
 }
 
 pub(super) fn caller(user: &User) -> (Uuid, bool) {
@@ -444,7 +448,45 @@ pub(crate) async fn put_member(
         if !exists {
             return Err(GatewayError::NotFound);
         }
+        // Its name is its owner's to choose (ADR-0014's amendment): checked before anything is written.
+        let name = match (member, body.name.as_deref()) {
+            (MemberId::Conversation(conversation), given) => {
+                let owner = store::conversation_owner(&mut transaction, conversation).await?;
+                let theirs = owner == Some(user.id);
+                if given.is_some() && !theirs {
+                    return Err(GatewayError::Denied("not_agent_owner"));
+                }
+                match given {
+                    Some(given) => Some((store::member_name(given)?, false)),
+                    // Added by its owner without one: its task's title, which is theirs to show.
+                    None if theirs && store::name_in(&mut transaction, id, conversation).await?.is_none() => {
+                        sqlx::query_scalar!("SELECT title FROM conversations WHERE id = $1", conversation)
+                            .fetch_one(&mut *transaction)
+                            .await
+                            .map(|title| store::member_name(&title).ok())?
+                            .map(|title| (title, true))
+                    }
+                    None => None,
+                }
+            }
+            (MemberId::User(_), Some(_)) => {
+                return Err(GatewayError::ParameterRefused {
+                    field: "name",
+                    said: "Only an agent member has a name of its own here; a person is shown by their account.".into(),
+                });
+            }
+            (MemberId::User(_), None) => None,
+        };
         store::add_member(&mut transaction, id, member, (body.role, Some(user.id))).await?;
+        if let (MemberId::Conversation(conversation), Some((name, default))) = (member, name) {
+            // A default name takes a number when another member has it; a chosen one is refused instead.
+            let name = if default {
+                store::free_name(&mut transaction, id, conversation, &name).await?
+            } else {
+                name
+            };
+            store::set_member_name(&mut transaction, id, conversation, &name).await?;
+        }
         let listed = store::members(&mut transaction, id, caller(&user)).await?;
         transaction.commit().await?;
         listed

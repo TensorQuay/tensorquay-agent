@@ -40,6 +40,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   person's run lists. Off, a run sends exactly what it sends today. Still to come before it is turned on:
   "Remembered" with Undo on the page, personal notes with Settings › Memory, and history.
 
+- **Agents have a name in a channel.** An agent member is named when it's added: its task's title, or a name its
+  owner gives, which only its owner can change. Everyone in the channel sees that name in Members and on the agent's
+  posts and votes, and `@` matches it. A task's title stays its owner's only.
+
 ### Fixed
 
 - **A picture too large to preview no longer offers Expand (WEB-U-517).** In the Files panel, an image over the
@@ -71,6 +75,13 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   "places failed."; it now names the reason in plain words ("The model's reply was cut off at its output limit"),
   links to the helper's task, and while the helper works again says so instead of "failed". A team's
   `member_failed` notice carries the run's failure code in a new optional `code` field.
+
+
+### Upgrade notes
+
+- Migration `0110_channel_member_names` adds a member's name to `channel_members`. An agent member added before this
+  release has no name: it shows by its profile's name, as before, and `@` doesn't match it until its owner names it
+  in Members.
 
 ## 18.1.0 (20 November 2026)
 

@@ -214,7 +214,7 @@ async fn addressees(
     (parent, body): (Option<i64>, &MessageBody),
 ) -> Result<Vec<Uuid>, GatewayError> {
     let others: Vec<(Uuid, String)> = sqlx::query!(
-        "SELECT m.conversation_id AS \"conversation!\", c.title FROM channel_members m \
+        "SELECT m.conversation_id AS \"conversation!\", m.name FROM channel_members m \
          JOIN conversations c ON c.id = m.conversation_id \
          WHERE m.channel_id = $1 AND m.conversation_id IS NOT NULL AND m.role <> 'observer' AND c.state = 'active' \
          ORDER BY m.added_at",
@@ -224,7 +224,8 @@ async fn addressees(
     .await?
     .into_iter()
     .filter(|member| Some(member.conversation) != writer)
-    .map(|member| (member.conversation, member.title))
+    // "@" matches members' names in the channel, never a title (ADR-0014's amendment); one without a name has none.
+    .filter_map(|member| member.name.map(|name| (member.conversation, name)))
     .collect();
     let mut wakes: Vec<Uuid> = Vec::new();
     let mut add = |id: Option<Uuid>| {
@@ -479,7 +480,9 @@ struct Due {
 async fn due(state: &State, only: Option<Uuid>) -> Result<Vec<Due>, GatewayError> {
     Ok(sqlx::query!(
         "SELECT m.channel_id AS \"channel!\", m.conversation_id AS \"conversation!\", m.read_seq, cv.owner_id, \
-                cv.runtime_revision, cv.title, ch.budget, ch.spent_tokens, \
+                cv.runtime_revision, \
+                COALESCE(m.name, cv.profile->>'display_name', cv.profile->>'name', 'An agent') AS \"title!\", \
+                ch.budget, ch.spent_tokens, \
                 (SELECT min(x.hop) FROM channel_messages x WHERE x.channel_id = m.channel_id AND x.seq > m.read_seq \
                  AND m.conversation_id = ANY(x.wakes)) AS \"hop!\", \
                 (SELECT CASE WHEN e.lifecycle = 'run.failed' THEN e.seq END FROM events e \
@@ -925,7 +928,9 @@ pub(crate) async fn memberships(
     conversation: Uuid,
 ) -> Result<Vec<(Uuid, String)>, GatewayError> {
     Ok(sqlx::query!(
-        "SELECT m.channel_id, c.title FROM channel_members m JOIN channels ch ON ch.id = m.channel_id \
+        "SELECT m.channel_id, \
+         COALESCE(m.name, c.profile->>'display_name', c.profile->>'name', 'An agent') AS \"title!\" \
+         FROM channel_members m JOIN channels ch ON ch.id = m.channel_id \
          JOIN conversations c ON c.id = m.conversation_id \
          WHERE m.conversation_id = $1 AND ch.kind = 'channel' AND ch.state = 'open' AND m.role <> 'observer'",
         conversation

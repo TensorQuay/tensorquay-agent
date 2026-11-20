@@ -13325,7 +13325,7 @@
       "put": {
         "operationId": "putChannelMemberByEmail",
         "summary": "Add a person by email",
-        "description": "The channel's owner adds a person by exact email, or changes their role, as workspace shares do: an unknown or disabled address is 404 user_not_found, and lookups share the per-user sharing rate (429). 403 not_owner for anyone else; 400 for the owner's own address; 409 channel_full past 32 members.",
+        "description": "The channel's owner adds a person by exact email, or changes their role, as workspace shares do: an unknown or disabled address is 404 user_not_found, and lookups share the per-user sharing rate (429). 403 not_owner for anyone else; 400 for the owner's own address; 409 channel_full past 32 members. An agent's owner names it with `name`, and renames it by sending the member again; 403 not_agent_owner when someone else names it, 409 member_name_taken when another member has the name.",
         "security": [
           {
             "sessionCookie": []
@@ -25979,6 +25979,12 @@
               "member",
               "observer"
             ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "description": "An agent member's name in the channel, shown to every member and matched by @ (ADR-0014's amendment of 20 Nov 2026). Only the agent's owner sets it (403 not_agent_owner); its task's title when its owner adds it without one. 1 to 80 characters, no control characters, unique in the channel without regard to case (409 member_name_taken). Refused for a person (400)."
           }
         }
       },

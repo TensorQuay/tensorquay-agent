@@ -223,9 +223,13 @@ pub(crate) async fn post(
     let post = api::parse_post(&bytes)?;
     crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
         let mut transaction = state.pool.begin().await?;
-        let (owner, name) = store::conversation_author(&mut transaction, conversation)
+        let (owner, profile_name) = store::conversation_author(&mut transaction, conversation)
             .await?
             .ok_or(GatewayError::Unauthorized)?;
+        // Its posts carry its name in the channel, as every member sees it (ADR-0014's amendment).
+        let name = store::name_in(&mut transaction, id, conversation)
+            .await?
+            .or(profile_name);
         // The key is scoped to the conversation: another conversation of the same owner may send the same key.
         let keyed = if headers.contains_key("idempotency-key") {
             let route = format!("POST /runtime/channels/{id}/messages as {conversation}");
