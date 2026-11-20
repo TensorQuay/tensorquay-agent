@@ -501,7 +501,10 @@ async fn gw_i_342_an_unreadable_container_is_counted_and_the_rest_are_swept(
             .unreadable
             .lock()
             .map_err(|_| "unreadable")?
-            .push("badlabels0001".into());
+            .push(tqa_sandbox::Unreadable {
+                id: "badlabels0001".into(),
+                created_at: None,
+            });
         let later = std::time::SystemTime::UNIX_EPOCH + std::time::Duration::from_secs(121);
         let swept = sandboxes.sweep_containers(later).await?;
         assert_eq!(
@@ -509,6 +512,53 @@ async fn gw_i_342_an_unreadable_container_is_counted_and_the_rest_are_swept(
             (1, 1),
             "the stray removed, the unreadable one counted"
         );
+        Ok(())
+    })
+    .await
+}
+
+// TEST: GW-I-387
+/// A container whose labels the listing can't read is listed by its age from the engine's own creation time, not 0 s
+/// (a real-engine run listed one at "age 0 s", 20 Nov 2026; plan row 16): five minutes old, both the readiness detail's
+/// oldest and the Sandboxes answer's left-behind entry say so after the pass that makes it amber.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_387_an_unreadable_container_is_listed_with_its_engine_age(
+    pool: PgPool,
+) -> TestResult {
+    run(pool, async |fixture| {
+        let (_, cookie) = fixture.admin().await?;
+        let sandboxes = fixture.gateway.sandboxes();
+        let created = std::time::SystemTime::now() - std::time::Duration::from_secs(300);
+        fixture
+            .backend
+            .unreadable
+            .lock()
+            .map_err(|_| "unreadable")?
+            .push(tqa_sandbox::Unreadable {
+                id: "badlabels0002".into(),
+                created_at: Some(created),
+            });
+        sandboxes.sweep_pass_now().await;
+        sandboxes.sweep_pass_now().await;
+        let detail: serde_json::Value = fixture
+            .get("/readyz?detail=1", &cookie)
+            .await?
+            .json()
+            .await?;
+        let oldest = detail["sandboxes"]["left_behind"]["oldest_seconds"]
+            .as_u64()
+            .ok_or("oldest_seconds")?;
+        assert!((299..400).contains(&oldest), "{detail}");
+        let listed: serde_json::Value = fixture
+            .get("/api/v1/admin/sandboxes", &cookie)
+            .await?
+            .json()
+            .await?;
+        let age = listed["left_behind"][0]["age_seconds"]
+            .as_u64()
+            .ok_or("age_seconds")?;
+        assert!((299..400).contains(&age), "{listed}");
         Ok(())
     })
     .await
