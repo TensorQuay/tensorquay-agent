@@ -71,6 +71,21 @@ pub(crate) async fn set_budget(
         if !leads {
             return Err(GatewayError::Denied("not_lead"));
         }
+        // Today's spend and the budget before, so a budget set at or under the spend says it is used up as a charge
+        // would (the second review of #153): once, and not for 0, which turns waking off.
+        let installation = i64::try_from(state.config.channels.wake_budget).unwrap_or(i64::MAX);
+        let today = sqlx::query!(
+            "SELECT COALESCE(budget, $2) AS \"before!\", \
+                    CASE WHEN budget_window_start + make_interval(secs => $3) > CURRENT_TIMESTAMP \
+                         THEN spent_tokens ELSE 0 END AS \"spent!\", \
+                    budget_window_start + make_interval(secs => $3) AS resets \
+             FROM channels WHERE id = $1",
+            id,
+            installation,
+            state.config.channels.budget_window.as_secs_f64()
+        )
+        .fetch_one(&mut *transaction)
+        .await?;
         sqlx::query!("UPDATE channels SET budget = $2 WHERE id = $1", id, stored)
             .execute(&mut *transaction)
             .await?;
@@ -88,11 +103,23 @@ pub(crate) async fn set_budget(
             ),
         )
         .await?;
+        let was_used_up = today.before > 0 && today.spent >= today.before;
+        let used_up = (stored > 0 && today.spent >= stored && !was_used_up)
+            .then_some(today.resets)
+            .flatten();
+        let spent_seq = match used_up {
+            Some(resets) => Some(spent_notice(&mut transaction, id, resets).await?),
+            None => None,
+        };
         transaction.commit().await?;
-        Ok(seq)
+        Ok((seq, spent_seq))
     })
     .await?;
+    let (seq, spent_seq) = seq;
     state.channels.published(id, seq);
+    if let Some(spent_seq) = spent_seq {
+        state.channels.published(id, spent_seq);
+    }
     // A wake the budget held goes out now, as after a post (the sweep would find it later).
     super::wake::soon(&state, Some(id));
     tracing::info!(user_id = %user.id, channel_id = %id, budget, "channel wake budget set");
@@ -211,14 +238,18 @@ async fn spent_notice(
 /// # Errors
 /// Storage failure.
 pub(crate) async fn renew(state: &State) -> Result<u64, GatewayError> {
-    let renewed = sqlx::query!(
-        "UPDATE channels SET spent_tokens = 0, budget_window_start = NULL WHERE budget_window_start IS NOT NULL \
-         AND budget_window_start + make_interval(secs => $1) <= CURRENT_TIMESTAMP",
-        state.config.channels.budget_window.as_secs_f64()
-    )
-    .execute(&state.pool)
-    .await?
-    .rows_affected();
+    // Within the I/O bound, as the sweep's other steps are, so a stalled database never holds the sweep.
+    let renewed = crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
+        Ok(sqlx::query!(
+            "UPDATE channels SET spent_tokens = 0, budget_window_start = NULL WHERE budget_window_start IS NOT NULL \
+             AND budget_window_start + make_interval(secs => $1) <= CURRENT_TIMESTAMP",
+            state.config.channels.budget_window.as_secs_f64()
+        )
+        .execute(&state.pool)
+        .await?
+        .rows_affected())
+    })
+    .await?;
     if renewed > 0 {
         tracing::info!(renewed, "channel budget windows renewed");
     }

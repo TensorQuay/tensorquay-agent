@@ -445,6 +445,11 @@ pub(crate) async fn put_member(
         let mut transaction = state.pool.begin().await?;
         let seen = store::visible(&mut transaction, caller(&user), id).await?;
         may_manage(&mut transaction, (&seen, &user), member, Some(body.role)).await?;
+        // Names are checked, then written: the channel's row is locked first, as claims and posts lock it, so two
+        // members given one name at once get it and a worded refusal (or the next default), never a constraint error.
+        sqlx::query!("SELECT id FROM channels WHERE id = $1 FOR UPDATE", id)
+            .fetch_one(&mut *transaction)
+            .await?;
         let exists = match member {
             MemberId::Conversation(conversation) => {
                 store::conversation_owner(&mut transaction, conversation)
@@ -473,8 +478,9 @@ pub(crate) async fn put_member(
                 }
                 match given {
                     Some(given) => Some((store::member_name(given)?, false)),
-                    // Added by its owner without one: its task's title, which is theirs to show.
-                    None if theirs && store::name_in(&mut transaction, id, conversation).await?.is_none() => {
+                    // ADDED by its owner without one: its task's title, which is theirs to show. A role change of a member
+                    // already here (an agent added before names among them) never names it (SEC-044).
+                    None if theirs && !store::is_member(&mut transaction, id, conversation).await? => {
                         sqlx::query_scalar!("SELECT title FROM conversations WHERE id = $1", conversation)
                             .fetch_one(&mut *transaction)
                             .await

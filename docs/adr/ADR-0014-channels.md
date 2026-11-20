@@ -173,6 +173,13 @@ line says the same without the time, which its failure doesn't carry. Migration 
 window open: no release had wakes, and the runs' metering keeps what was spent. Test rows: GW-U-238, GW-I-385, GW-I-386,
 WEB-U-533, WEB-E2E-148.
 
+**A5b. Where a run's spend and hops belong (decided on 21 Nov 2026, the second review of #153).** A run's spend belongs
+to the channel whose wake started it, whichever channel it then reads or posts in, and its posts carry that wake's hop
+into any channel: so a chain of agents waking each other across channels is bounded too, and a used-up channel stops
+its woken run's work everywhere. A budget set at or under today's spend uses the day up at once, with the same notice
+a charge gives (once; not for 0, which turns waking off). After a day ends, the header and a channel's read show 0 at
+once, while Members may still say a member is held until the sweep renews the day, within seconds.
+
 **A6. No ping-pong: N = 4 hops, and 30 agent wakes an hour.** Each message has a hop, stored beside it: a person's post
 is 0; an agent's post is one more than the hop of the wake that started its run (1 in a run a person started); a
 `decision` takes the hop of what decided it (the deciding vote, or the proposal on a timeout). A wake's hop is the

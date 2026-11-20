@@ -405,21 +405,51 @@ pub(crate) async fn set_member_name(
             ),
         });
     }
-    sqlx::query!(
+    // The caller holds the channel's row; a name taken in between anyway (another path, a manual change) is still the
+    // worded refusal, never a constraint error (the second review of #153).
+    match sqlx::query!(
         "UPDATE channel_members SET name = $3 WHERE channel_id = $1 AND conversation_id = $2",
         channel,
         conversation,
         name
     )
     .execute(connection)
-    .await?;
-    Ok(())
+    .await
+    {
+        Err(sqlx::Error::Database(error)) if error.code().as_deref() == Some("23505") => {
+            Err(GatewayError::ConflictSaid {
+                code: "member_name_taken",
+                said: format!(
+                    "Another member of this channel is already named {name}; choose another name."
+                ),
+            })
+        }
+        other => other.map(|_| ()).map_err(Into::into),
+    }
 }
 
 /// An agent member's name in the channel, if it has one.
 ///
 /// # Errors
 /// Storage failure.
+/// Whether `conversation` is already a member of `channel`.
+///
+/// # Errors
+/// Storage failure.
+pub(crate) async fn is_member(
+    connection: &mut PgConnection,
+    channel: Uuid,
+    conversation: Uuid,
+) -> Result<bool, GatewayError> {
+    Ok(sqlx::query_scalar!(
+        "SELECT EXISTS (SELECT 1 FROM channel_members WHERE channel_id = $1 AND conversation_id = $2) AS \"member!\"",
+        channel,
+        conversation
+    )
+    .fetch_one(connection)
+    .await?)
+}
+
 pub(crate) async fn name_in(
     connection: &mut PgConnection,
     channel: Uuid,

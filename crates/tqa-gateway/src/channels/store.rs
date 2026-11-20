@@ -464,8 +464,8 @@ pub(crate) use decisions::{
 };
 pub(crate) use members::{
     Listed, MemberView, RunStatus, conversation_author, conversation_owner, delete, end, exists,
-    free_name, listed, member_name, members, memberships, name_in, remove_member, set_member_name,
-    visible,
+    free_name, is_member, listed, member_name, members, memberships, name_in, remove_member,
+    set_member_name, visible,
 };
 
 #[cfg(test)]
