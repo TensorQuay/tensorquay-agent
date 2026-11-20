@@ -489,6 +489,28 @@ async function oneChannel(member, url, method, read, key, reply, raw) {
     request.on("close", () => open.delete(response));
     return true;
   }
+  // A post's file (A9), as the gateway serves it: an attachment under its own name, the bytes a stand-in.
+  const filed =
+    /^\/api\/v1\/channels\/([^/]+)\/messages\/(\d+)\/files\/(\d+)$/.exec(
+      url.pathname,
+    );
+  if (filed && method === "GET") {
+    const id = decodeURIComponent(filed[1]);
+    const item = channels.get(id);
+    const file = (logs.get(id) ?? []).find(
+      (one) => one.seq === Number(filed[2]),
+    )?.files?.[Number(filed[3])];
+    if (!item || !visible(item, member) || !file) {
+      refused(reply, 404, "not_found");
+      return true;
+    }
+    raw.response.writeHead(200, {
+      "content-type": "application/octet-stream",
+      "content-disposition": `attachment; filename="${file.name}"`,
+    });
+    raw.response.end(`the file ${file.name}`);
+    return true;
+  }
   const proposed = /^\/api\/v1\/channels\/([^/]+)\/proposals\/(\d+)$/.exec(
     url.pathname,
   );

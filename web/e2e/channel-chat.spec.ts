@@ -28,19 +28,72 @@ for (const width of [1440, 390] as const)
       await expect(
         log.getByText("Pro churn in the EU was 1.8 %", { exact: false }),
       ).toBeVisible();
-      await expect(
-        log.getByRole("link", { name: /q3-revenue-by-region\.pdf/ }),
-      ).toBeVisible();
+      const pdf = log.getByRole("link", { name: /q3-revenue-by-region\.pdf/ });
+      await expect(pdf).toBeVisible();
+      // A post's file downloads under its own name (the review of 20 Nov 2026).
+      const [download] = await Promise.all([
+        page.waitForEvent("download"),
+        pdf.click(),
+      ]);
+      expect(download.suggestedFilename()).toBe("q3-revenue-by-region.pdf");
       await expect(
         log.getByRole("button", { name: "Show the whole report · 14 lines" }),
       ).toBeVisible();
       await expect(
         log.getByRole("button", { name: "2 replies" }),
       ).toBeVisible();
+      if (width === 1440) {
+        // A post's time and Reply wait for the pointer, or for the keyboard (the review of 20 Nov 2026): hidden at
+        // rest, shown on hover, and shown while Tab is on its Reply.
+        const post = log
+          .getByRole("article")
+          .filter({ hasText: "The Q3 numbers are in." })
+          .first();
+        const meta = post.locator(".channel-post-meta").first();
+        const opacity = () =>
+          meta.evaluate((element) => getComputedStyle(element).opacity);
+        // At rest: no pointer over it and no focus in it (the download above left the focus on its file).
+        await page.mouse.move(0, 0);
+        await page.evaluate(() => {
+          (document.activeElement as HTMLElement | null)?.blur();
+        });
+        expect(await opacity()).toBe("0");
+        await post.hover();
+        expect(await opacity()).toBe("1");
+        await page.mouse.move(0, 0);
+        const reply = post.getByRole("button", { name: /^Reply/ });
+        await reply.evaluate((element) => {
+          (element.previousElementSibling as HTMLElement | null)?.focus();
+        });
+        await page.keyboard.press("Tab");
+        await expect(reply).toBeFocused();
+        expect(await opacity()).toBe("1");
+      }
       const composer = page.getByRole("form", { name: "Post to the channel" });
       await expect(
         composer.getByRole("button", { name: "Send" }),
       ).toBeInViewport();
+      // The task's composer (the review of 20 Nov 2026): one card, + / the text / a round Send in one row, under the
+      // post's kind; at rest no taller than 140 px (it was 265 at 1440).
+      const shape = await composer.evaluate((form) => {
+        const row = form.querySelector(".composer-row");
+        const centre = (element: Element | null | undefined) => {
+          const box = element?.getBoundingClientRect();
+          return box ? Math.round(box.top + box.height / 2) : -1;
+        };
+        return {
+          card: form.classList.contains("composer-card"),
+          height: Math.round(form.getBoundingClientRect().height),
+          row: [
+            centre(row?.querySelector(".composer-attach")),
+            centre(row?.querySelector("textarea")),
+            centre(row?.querySelector(".composer-submit")),
+          ],
+        };
+      });
+      expect(shape.card).toBe(true);
+      expect(shape.height).toBeLessThanOrEqual(140);
+      expect(new Set(shape.row).size, shape.row.join(",")).toBe(1);
       expect(await pageProblems(page, `the log at ${width}, ${theme}`)).toEqual(
         [],
       );

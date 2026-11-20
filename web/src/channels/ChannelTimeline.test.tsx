@@ -332,6 +332,10 @@ describe("WEB-U-515 a post's files", () => {
     expect(pdf).toHaveAttribute("href", "/files/1/0");
     expect(pdf).toHaveAttribute("download");
     expect(pdf).toHaveTextContent("q3.pdf · 2 kB");
+    // A file reads as one, as a task's sent file does (the review of 20 Nov 2026): a chip with the file icon.
+    expect(pdf.closest("li")).toHaveClass("attachment-chip");
+    expect(pdf).toHaveClass("attachment-open");
+    expect(pdf.querySelector("svg")).not.toBeNull();
     expect(within(files).getAllByRole("link")).toHaveLength(2);
     expect(screen.queryByRole("list", { name: "Files of #2" })).toBeNull();
   });

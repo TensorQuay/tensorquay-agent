@@ -173,11 +173,12 @@
 }
 
 /* The channel composer (WEB-U-063): a card like the task composer. */
+/* The task's composer card (§7 Composer, the review of 20 Nov 2026): its border, radius and 8 px; the post's kind above
+   the row, what a proposal or a to-do adds below it. */
 .channel-composer {
-  padding: var(--space-4);
-  border: var(--border-width) solid var(--line);
-  border-radius: var(--composer-radius);
-  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 .channel-replying {
   display: flex;
@@ -634,13 +635,6 @@
   list-style: none;
 }
 /* WEB-U-063: Propose and Add a task on the left of the composer's Post. */
-.channel-composer-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
 .channel-composer-kinds {
   display: flex;
   flex-wrap: wrap;
@@ -753,4 +747,10 @@
 }
 .channel-thread .channel-post > .channel-post-avatar {
   inset-inline-start: var(--space-1);
+}
+
+/* A post's files are a task's sent chips; the name and size share one line, so a name keeps more room before it is
+   cut (its title has it whole). */
+.channel-files .attachment-name {
+  max-width: 48ch;
 }

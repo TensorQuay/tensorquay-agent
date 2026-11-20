@@ -197,7 +197,9 @@ const file = (name: string, size = 2048) =>
   new File([new Uint8Array(size)], name);
 const choose_files = (...files: File[]) =>
   fireEvent.change(
-    within(form()).getByLabelText("Attach files", { selector: "input" }),
+    within(form()).getByLabelText("Choose files to attach", {
+      selector: "input",
+    }),
     {
       target: { files },
     },

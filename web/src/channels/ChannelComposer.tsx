@@ -1,15 +1,17 @@
 "use client";
 
 import "./catalogue";
-import { Paperclip, Send, X } from "lucide-react";
-import { useRef, useState, type FormEvent } from "react";
+import { ArrowUp, X } from "lucide-react";
+import { useState, type FormEvent } from "react";
 
 import { ApiError } from "../api/error";
+import { AttachButton } from "../files/AttachButton";
 import { useT } from "../i18n/I18nProvider";
 import { formatSize } from "../i18n/message";
 import type { MessageKey } from "../i18n/translate";
 import { Button } from "../ui/Button";
 import { Icon } from "../ui/Icon";
+import { IconAction } from "../ui/IconAction";
 import { Input } from "../ui/Input";
 import { Select } from "../ui/Select";
 import { Textarea } from "../ui/Textarea";
@@ -94,7 +96,6 @@ export function ChannelComposer({
   const [pending, setPending] = useState(false);
   const [files, setFiles] = useState<ChannelUpload[]>([]);
   const [uploading, setUploading] = useState(0);
-  const chooser = useRef<HTMLInputElement>(null);
   if (state === "ended")
     return <p className="type-small muted">{t("channels.readOnlyEnded")}</p>;
   if (role === "observer")
@@ -130,7 +131,7 @@ export function ChannelComposer({
       ...(limit === undefined ? {} : { claims: limit }),
     };
   };
-  async function attach(chosen: FileList | null) {
+  async function attach(chosen: readonly File[] | FileList | null) {
     if (!chosen || !onUpload) return;
     for (const file of Array.from(chosen)) {
       setUploading((n) => n + 1);
@@ -192,6 +193,8 @@ export function ChannelComposer({
           ? "channels.proposalFirstLine"
           : "channels.todoFirstLine",
   );
+  /** The box grows with its text, from one line to six, as the task's composer does. */
+  const lines = Math.min(6, Math.max(1, text.split("\n").length));
   const modes: readonly [Kind, MessageKey][] = [
     ["text", "channels.modeMessage"],
     ["proposal", "channels.modePropose"],
@@ -199,7 +202,7 @@ export function ChannelComposer({
   ];
   return (
     <form
-      className="channel-composer stack"
+      className="channel-composer composer-card"
       aria-label={t(thread ? "channels.replyInThread" : "channels.postTo")}
       onSubmit={(event) => void submit(event)}
     >
@@ -230,17 +233,6 @@ export function ChannelComposer({
           ))}
         </div>
       )}
-      <Textarea
-        label={boxLabel}
-        labelHidden
-        placeholder={boxLabel}
-        value={text}
-        rows={2}
-        // Only a new channel's first step or its suggested message asks for the focus.
-        // eslint-disable-next-line jsx-a11y/no-autofocus
-        autoFocus={focusBox}
-        onChange={(event) => setText(event.target.value)}
-      />
       {kind === "proposal" && (
         <Select
           label={t("channels.window")}
@@ -302,41 +294,41 @@ export function ChannelComposer({
           {t(failure.key, { name: failure.name ?? "" })}
         </p>
       )}
-      <div className="channel-composer-actions">
-        {onUpload && !thread ? (
-          <>
-            <input
-              ref={chooser}
-              type="file"
-              multiple
-              hidden
-              aria-label={t("channels.attach")}
-              onChange={(event) => {
-                void attach(event.target.files);
-                event.target.value = "";
-              }}
-            />
-            <Button
-              variant="ghost"
-              type="button"
-              aria-label={t("channels.attach")}
-              onClick={() => chooser.current?.click()}
-            >
-              <Icon glyph={Paperclip} size={16} />
-            </Button>
-          </>
-        ) : (
-          <span />
+      {/* One row, as the task's composer (§7 Composer, the review of 20 Nov 2026): + at its start, the text, then the
+          round Send at its end. */}
+      <div className="composer-row">
+        {onUpload && !thread && (
+          <AttachButton
+            onFiles={(chosen) => void attach(chosen)}
+            disabled={false}
+          />
         )}
-        <Button
+        <Textarea
+          className="composer-input"
+          label={boxLabel}
+          labelHidden
+          placeholder={boxLabel}
+          value={text}
+          rows={lines}
+          // Only a new channel's first step or its suggested message asks for the focus.
+          // eslint-disable-next-line jsx-a11y/no-autofocus
+          autoFocus={focusBox}
+          onChange={(event) => setText(event.target.value)}
+        />
+        <IconAction
+          className="composer-submit"
+          glyph={ArrowUp}
+          round
+          variant="primary"
           type="submit"
+          name={t("channels.send")}
+          tip={t("channels.send")}
           loading={pending}
           disabled={uploading > 0}
-          aria-label={t("channels.send")}
-        >
-          <Icon glyph={Send} size={16} />
-          {t("channels.send")}
-        </Button>
+          fill="ink"
+          // The form sends (its submit handler); the click itself does nothing more.
+          onClick={() => undefined}
+        />
       </div>
     </form>
   );

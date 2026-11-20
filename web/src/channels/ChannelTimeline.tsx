@@ -1,7 +1,13 @@
 "use client";
 
 import "./catalogue";
-import { Bot, ChevronDown, ChevronUp, MessageSquare } from "lucide-react";
+import {
+  Bot,
+  ChevronDown,
+  ChevronUp,
+  FileText,
+  MessageSquare,
+} from "lucide-react";
 import { type ReactNode, useState } from "react";
 
 import { useT } from "../i18n/I18nProvider";
@@ -311,16 +317,24 @@ function Post({
       <Body message={message} titles={titles} decided={decided} />
       {fileHref && message.files && message.files.length > 0 && (
         <ul
-          className="channel-files type-small"
+          className="attachment-chips channel-files type-small"
           aria-label={t("channels.filesOf", { seq: message.seq })}
         >
           {message.files.map((file, index) => (
-            <li key={index}>
-              <a href={fileHref(message.seq, index)} download>
-                {t("channels.file", {
-                  name: file.name,
-                  size: formatSize(file.size, t.locale),
-                })}
+            // A task's sent file's chip (the review of 20 Nov 2026): the file icon, then its name and size.
+            <li key={index} className="attachment-chip" data-status="sent">
+              <a
+                className="attachment-open"
+                href={fileHref(message.seq, index)}
+                download
+              >
+                <Icon glyph={FileText} size={16} />
+                <span className="attachment-name" title={file.name}>
+                  {t("channels.file", {
+                    name: file.name,
+                    size: formatSize(file.size, t.locale),
+                  })}
+                </span>
               </a>
             </li>
           ))}
