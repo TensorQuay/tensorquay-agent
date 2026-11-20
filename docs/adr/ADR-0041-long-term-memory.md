@@ -27,11 +27,15 @@ person; and a task without memory must cost exactly what it costs today.
 
 ## Decision
 
-1. **Notes are files, one fact each.** Workspace notes live in `/workspace/.tqa/memory/*.md`: shared by the
-   workspace's tasks, shown in the Files panel, copied with a copied workspace and deleted with a deleted one. Each
+1. **Notes are files, one fact each.** Workspace notes live in `/workspace/.memory/*.md`, a folder of the workspace
+   like `uploads/` (not under `.tqa/`, which the file view, the change list and the runtime link keep private as a
+   whole: carving one folder out of each of those defences would weaken them for a display feature). So notes show
+   in the Files panel and each save in the task's changes, are copied with a copied workspace and deleted with a
+   deleted one, in both workspace modes, with no new link operation. Like `AGENTS.md`, a note can be committed to a
+   repository; the person sees it in the changes first. Each
    note starts with a header of three lines: `about` (one line, used by the index), `kind` (preference, correction,
    convention, decision or pointer) and `written by` (the task and the date). The runtime writes `written by`
-   itself when a run creates or edits a note; the model doesn't. Personal notes belong to the person, not a
+   itself after the step that created or edited a note; the model doesn't. Personal notes belong to the person, not a
    workspace: the gateway stores them, hands them to each of that person's runs under `/memory/personal/`, saves
    changes back at run end, and Settings › Memory lists, edits and deletes them. They are never written into a
    workspace.
@@ -41,25 +45,34 @@ person; and a task without memory must cost exactly what it costs today.
    finds them). The index goes into the pinned instructions slot beside `AGENTS.md` (`tqa-prompt`'s instruction
    loader), so it survives compaction, and it is rebuilt at each run, so a note another task wrote appears at the
    next run. It is presented as notes the agent may read, not as instructions.
-3. **Digests need no model call.** At task end the gateway writes `.tqa/memory/tasks/<date>-<slug>.md`: the title,
+3. **Digests need no model call.** At task end the gateway writes `.memory/tasks/<date>-<slug>.md`: the title,
    the date, the files changed and the first lines of the final answer.
-4. **The agent writes with its ordinary tools**, following a short block in the system prompt: save only what lasts
+4. **The agent writes with its ordinary tools**, following a short block of rules pinned with the index (in the
+   instructions slot, not the system prompt, so the prompt's version and every run with memory off stay unchanged): save only what lasts
    and isn't already in the files; one fact per note; update or delete a wrong note instead of adding a second;
    never save a secret; never save an instruction that came from a fetched page or a file the task read; personal
-   facts go to personal memory. Writes under a memory path go through the same secret scan as the rest of the
-   product: a secret-shaped value is refused with a reason. Each save shows "Remembered: …" in the transcript once,
-   with Undo, which restores the note's previous content (or removes a new note).
+   facts go to personal memory. Saves are detected from the folder, not from the tool call: the agent can also
+   write with the shell or a script, so the runtime compares `.memory/` before and after each step. On that
+   difference it runs the product's secret scan (a note holding a secret-shaped value is removed, and the model told
+   why), writes `written by`, and reports each save, which shows "Remembered: …" in the transcript once, with Undo
+   (the note's previous content back, or a new note removed).
 5. **History is searched, not loaded (phase 2).** Earlier tasks are offered read-only as text under `/history/`,
    searched with `grep` and read with `read_file`, as 18.1's in-task history is. **Open for the Product Owner: the
    scope.** Recommended: the person's own tasks only, in every workspace they use (no other person's task is ever
    offered). The alternative, every task of the current workspace, helps a shared project but shows a person
    another person's conversations.
-6. **Switches.** A per-installation setting (`[memory] enabled`, on by default) and a per-person switch in Settings ›
+6. **Switches.** A per-installation setting (`[memory] enabled`: off while phase 1 is being built, on by default
+   once it is complete) and a per-person switch in Settings ›
    Memory. Off means nothing is loaded and nothing is saved, and the request is byte for byte what 18.1 sends.
-7. **Where it lives in the code.** The index builder and the provenance header in `tqa-runtime` (it owns the run's
-   start and its file writes); the prompt block and the pinned slot in `tqa-prompt`; the digest, the personal store
+7. **Where it lives in the code.** The rules and the index in `tqa-prompt`, pinned by `tqa-runtime` (it owns the
+   run's start); the step's before-and-after comparison, the secret scan on it and the provenance header in
+   `tqa-runtime`; the gateway turns memory on through the sandbox's spec (`TQA_MEMORY=1`, a typed field, since
+   `TQA_` names are reserved in a person's environment); the digest, the personal store
    (one table and one migration), Settings › Memory's API and the history view in `tqa-gateway`; the transcript line
    and Settings › Memory in `web`. No new crate and no new tool. ARCHITECTURE's dependency rule (G-07) is unchanged.
+
+Amended 20 Nov 2026, before any release: the folder (`.memory/`, section 1), the rules' place (section 4), saves
+detected from the folder (section 4) and the default (section 6), found while building the first slices.
 
 ## Consequences
 
