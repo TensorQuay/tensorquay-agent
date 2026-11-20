@@ -40,6 +40,10 @@ export const settingsOperations = {
   channelMembers: { method: "GET", path: "/api/v1/channels/{id}/members" },
   channelMessages: { method: "GET", path: "/api/v1/channels/{id}/messages" },
   channelPost: { method: "POST", path: "/api/v1/channels/{id}/messages" },
+  channelFile: {
+    method: "GET",
+    path: "/api/v1/channels/{id}/messages/{seq}/files/{index}",
+  },
   channelEvents: { method: "GET", path: "/api/v1/channels/{id}/events" },
   channelTasks: { method: "GET", path: "/api/v1/channels/{id}/tasks" },
   channelProposal: {

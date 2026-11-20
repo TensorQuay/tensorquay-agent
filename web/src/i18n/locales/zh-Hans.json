@@ -1381,6 +1381,8 @@
     "channels.task": "待办",
     "channels.claimed": "接手了",
     "channels.finished": "已完成工作",
+    "channels.filesOf": "#{seq} 的文件",
+    "channels.file": "{name} · {size}",
     "channels.finishedWith": "已完成工作：{summary}",
     "channels.postTo": "发布到频道",
     "channels.messageText": "你的消息",

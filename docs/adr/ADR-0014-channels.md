@@ -162,10 +162,19 @@ it (`member_state` events); it isn't a message in the log.
 **A8. Between runs nothing runs.** Point 7 stands: a running member waits with `channel_wait` (at most 300 s, looped
 as it likes); a member with no run costs nothing, and the next wake starts it.
 
-**A9. Attachments (the next slice).** A post, proposal or to-do may carry files, with the composer's limits (25 MiB a
-file, 32 a message, the installation's uploads total). They reach each agent member as the wake's turn attachments,
-placed before the run that reads the post, at `uploads/channels/<channel id>/<seq>-<file name>`; nothing in a
-workspace is overwritten. People download them from the post.
+**A9. Attachments (amended on 20 Nov 2026 in review: flat in `uploads/`).** A post, proposal or to-do may carry files,
+with the composer's limits: a voting member uploads each to the channel first (an attachment's size each, a
+workspace's uploads for the channel's files together) and posts up to 32 by upload id. People download each from its
+post. An agent member gets the files of the messages it hasn't read in its own workspace, flat in `uploads/` through
+the same placing as a team's handed-back files, so no new workspace operation and no protocol revision is needed:
+- the name is the channel's name, the message's seq and the file's name, `<channel>-<seq>-<file>`, sanitised as any
+  upload is, and a name already taken gets `-2` (and so on): nothing in a workspace is ever overwritten;
+- they are placed before the wake's turn goes, and the turn names each one's exact workspace path, so the agent never
+  guesses; a workspace that can't take files at that moment (a sandbox not linked) gets them at the member's next
+  read, whose answer names each placed path (`channel_read` shows it inside the message's marked block);
+- each file is placed once per member and remembered: renaming the channel later moves nothing already placed;
+- a runtime below revision 16 is sent no files in its reads, which it couldn't parse.
+A deleted channel's files go with it.
 
 **A10. One notice for a member that can't be woken (decided on 20 Nov 2026 in review).** A member whose task was
 deleted, or whose environment's runtime is below revision 16, isn't woken. The channel gets one plain notice naming the
@@ -185,7 +194,7 @@ task: the wake waits for the run's end, never a second run, never lost), GW-I-34
 GW-I-349 (the sweep sends a wake lost to a restart), GW-I-350 (the budget charged, the 80 % notice, a person's run
 uncharged), GW-I-351 (the budget stops a long exchange), GW-I-352 (the four-hop bound and its notice; a person's own
 agent, A11), GW-I-353 (the hourly bound), GW-I-354 (the members' live state), GW-I-355 (a deleted task or a runtime
-below 16: not woken, one notice, A10).
+below 16: not woken, one notice, A10). Attachments (A9): GW-U-231 (the wake names each path), GW-I-356 (the composer's limits), GW-I-357 (a post's files and their download), GW-I-358 (placed where the wake says, never over a file, not moved by a rename), GW-I-359 (the member's read names the paths), SEC-069 (a name can't leave `uploads/`), TOOL-U-149 (the read shows each path) and PROTO-U-049 (a message's files).
 
 ## Consequences
 

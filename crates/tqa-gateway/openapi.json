@@ -13530,7 +13530,7 @@
       "post": {
         "operationId": "postChannelMessage",
         "summary": "Post to a channel",
-        "description": "A voting member posts as themselves; the author is never taken from the body. 403 not_member, observer or not_claimant (a report by someone who holds no claim on the task); 409 channel_ended; 400 message_invalid naming the field (a decision or a claim is never posted). A vote must name an open proposal (409 not_a_proposal, proposal_closed); only a person vetoes (403 veto_not_allowed); a vote that decides its proposal is followed by the gateway's decision. 429 channel_rate once the channel has had 5,000 messages in the last 24 hours (ADR-0014), with Retry-After.",
+        "description": "A voting member posts as themselves; the author is never taken from the body. 403 not_member, observer or not_claimant (a report by someone who holds no claim on the task); 409 channel_ended; 400 message_invalid naming the field (a decision or a claim is never posted). A vote must name an open proposal (409 not_a_proposal, proposal_closed); only a person vetoes (403 veto_not_allowed); a vote that decides its proposal is followed by the gateway's decision. 429 channel_rate once the channel has had 5,000 messages in the last 24 hours (ADR-0014), with Retry-After. With files, each must be the caller's upload to this channel not posted yet, at most 32 (400 message_invalid naming files); the message then lists them (ADR-0014's amendment of 20 Nov 2026, A9).",
         "security": [
           {
             "sessionCookie": []
@@ -13646,7 +13646,12 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ChannelPost"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/ChannelPost"
+                  }
+                ],
+                "description": "The post, and optionally `files`: up to 32 of the caller's own uploads to this channel not posted yet, by id (ADR-0014's amendment of 20 Nov 2026, A9); any other is 400 message_invalid naming files."
               }
             }
           }
@@ -19369,6 +19374,252 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/channels/{id}/uploads": {
+      "post": {
+        "operationId": "uploadChannelFile",
+        "summary": "Upload a file for a channel post",
+        "description": "A voting member uploads a file for their next post in the channel (ADR-0014's amendment of 20 Nov 2026, A9). The request body is the file; its name is sanitised as a workspace upload's. Refused before anything is kept: over files.upload_bytes (default 25 MiB) 413 upload_too_large; over files.uploads_bytes for the channel's files together (default 1 GiB) 409 uploads_full. 403 not_member or observer; 404 for a channel the caller can't see. Cookie requests need the exact Origin. Contents are not scanned; a posted file is served only as a download.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "description": "The client's file name; sanitised as described.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          },
+          {
+            "personalToken": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid request or unsupported protocol",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origin, ownership or role denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Record not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Bootstrap closed, idempotency route conflict or deleted conversation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate or capacity limit reached",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable or gateway restarting",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "I/O deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Kept for a post",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelUpload"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/channels/{id}/messages/{seq}/files/{index}": {
+      "get": {
+        "operationId": "downloadChannelFile",
+        "summary": "Download a channel post's file",
+        "description": "One file of a channel message, as an attachment (application/octet-stream, nosniff) (ADR-0014's amendment of 20 Nov 2026, A9). 404 for a channel the caller can't see, or no such file.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "seq",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "index",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 31
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          },
+          {
+            "personalToken": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Record not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable or gateway restarting",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "I/O deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The file",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
                 }
               }
             }
@@ -25561,6 +25812,14 @@
           },
           "body": {
             "$ref": "#/components/schemas/ChannelMessageBody"
+          },
+          "files": {
+            "type": "array",
+            "maxItems": 32,
+            "items": {
+              "$ref": "#/components/schemas/ChannelFile"
+            },
+            "description": "The files posted with it, in order; absent when none (ADR-0014's amendment of 20 Nov 2026, A9). Download each from GET /api/v1/channels/{id}/messages/{seq}/files/{index}."
           }
         }
       },
@@ -28709,6 +28968,54 @@
             "description": "The exact hosts and *.domain entries the page may reach (ports left out), sorted; empty with internet access off."
           }
         }
+      },
+      "ChannelFile": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "size"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Its name as posted (sanitised as uploads are)."
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Its size in bytes."
+          },
+          "path": {
+            "type": "string",
+            "description": "Where it is in the reading agent member's workspace (uploads/<channel>-<seq>-<file>); only in an agent's own read, never in a person's."
+          }
+        },
+        "description": "A file posted with a channel message (ADR-0014's amendment of 20 Nov 2026, A9)."
+      },
+      "ChannelUpload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "size"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "What a post names in its files."
+          },
+          "name": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "description": "A file uploaded to a channel and kept for the uploader's next post (ADR-0014's amendment of 20 Nov 2026, A9)."
       }
     }
   }

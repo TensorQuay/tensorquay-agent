@@ -2636,6 +2636,13 @@
         },
         "body": {
           "$ref": "#/definitions/ChannelMessageBody"
+        },
+        "files": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "$ref": "#/definitions/ChannelFile"
+          }
         }
       }
     },
@@ -4335,6 +4342,48 @@
           "items": {
             "type": "string"
           }
+        }
+      }
+    },
+    "ChannelFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "size"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "path": {
+          "type": "string"
+        }
+      }
+    },
+    "ChannelUpload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "size"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 0
         }
       }
     }

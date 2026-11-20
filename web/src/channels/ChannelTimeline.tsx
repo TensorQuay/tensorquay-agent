@@ -4,6 +4,7 @@ import "./catalogue";
 import type { ReactNode } from "react";
 
 import { useT } from "../i18n/I18nProvider";
+import { formatSize } from "../i18n/message";
 import type { MessageKey, Translate } from "../i18n/translate";
 import { DeferredMarkdown } from "../transcript/DeferredMarkdown";
 import { Button } from "../ui/Button";
@@ -111,10 +112,13 @@ export function ChannelTimeline({
   members,
   onReply,
   after,
+  fileHref,
 }: {
   messages: readonly ChannelMessage[];
   members: readonly Member[];
   onReply?: (seq: number) => void;
+  /** Where a post's file downloads from, by its seq and index (ADR-0014's amendment of 20 Nov 2026, A9). */
+  fileHref?: (seq: number, index: number) => string;
   /** Extra content under a post, by seq: a proposal's tally and controls, a task's claim state. */
   after?: (message: ChannelMessage) => ReactNode;
 }) {
@@ -162,6 +166,7 @@ export function ChannelTimeline({
           titles={titles}
           continued={continues(message, list[index - 1])}
           {...(onReply ? { onReply } : {})}
+          {...(fileHref ? { fileHref } : {})}
           extra={after?.(message)}
         >
           {thread.length > 0 && (
@@ -189,6 +194,7 @@ function Post({
   titles,
   continued,
   onReply,
+  fileHref,
   extra,
   children,
 }: {
@@ -198,6 +204,7 @@ function Post({
   /** Whether it continues the author's previous post, whose header it shares. */
   continued: boolean;
   onReply?: (seq: number) => void;
+  fileHref?: (seq: number, index: number) => string;
   extra: ReactNode;
   children: ReactNode;
 }) {
@@ -255,6 +262,23 @@ function Post({
         </span>
       </header>
       <Body message={message} titles={titles} />
+      {fileHref && message.files && message.files.length > 0 && (
+        <ul
+          className="channel-files type-small"
+          aria-label={t("channels.filesOf", { seq: message.seq })}
+        >
+          {message.files.map((file, index) => (
+            <li key={index}>
+              <a href={fileHref(message.seq, index)} download>
+                {t("channels.file", {
+                  name: file.name,
+                  size: formatSize(file.size, t.locale),
+                })}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
       {extra}
       {children}
     </article>

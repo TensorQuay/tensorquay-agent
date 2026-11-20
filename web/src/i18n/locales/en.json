@@ -1381,6 +1381,8 @@
     "channels.task": "To-do",
     "channels.claimed": "took on",
     "channels.finished": "finished",
+    "channels.filesOf": "Files of #{seq}",
+    "channels.file": "{name} · {size}",
     "channels.finishedWith": "finished: {summary}",
     "channels.postTo": "Post to the channel",
     "channels.messageText": "Your message",
