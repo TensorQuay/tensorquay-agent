@@ -8,6 +8,7 @@ mod hub;
 pub(crate) mod runtime;
 pub(crate) mod store;
 pub(crate) mod stream;
+pub(crate) mod sweep;
 pub(crate) mod wake;
 
 pub(crate) use hub::Hub;

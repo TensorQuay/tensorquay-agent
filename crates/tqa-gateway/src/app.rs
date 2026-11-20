@@ -764,7 +764,7 @@ impl Gateway {
     /// # Errors
     /// A store failure.
     pub async fn channel_decisions_now(&self) -> Result<usize, GatewayError> {
-        crate::channels::api::sweep(&self.state).await
+        crate::channels::sweep::sweep(&self.state).await
     }
 
     /// Holds the next event-stream open at `point` until the returned hold is released, so a test can land a delete
@@ -921,7 +921,7 @@ fn start_sweeps(state: &Arc<State>) {
     crate::workspaces::start_upkeep(state);
     crate::secrets::rotation::start(state);
     crate::secrets::reads::start(state);
-    crate::channels::api::start(state);
+    crate::channels::sweep::start(state);
     crate::channels::files::start(state);
     crate::purge::start(state);
     crate::teams::changed::start(state);
