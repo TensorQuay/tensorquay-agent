@@ -167,6 +167,7 @@ fn gw_u_232_the_answer_is_the_last_attempts_text_and_a_woken_run_is_no_task_end(
         attachments: vec![],
         lead_brief: None,
         team_wake: None,
+        channel_wake: None,
     });
     assert!(!woken(Some(&person)));
     assert!(!woken(None), "an unknown opener counts as the person's");
