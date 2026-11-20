@@ -97,7 +97,10 @@ export function ChannelHeader({
         )}
         {used !== null && (
           <span className="muted">
-            {t("channels.budgetUsed", { percent: used })}
+            {/* From 100 % it is used up, never "137 %" (the live check of 21 Nov 2026). */}
+            {used >= 100
+              ? t("channels.budgetUsedUp")
+              : t("channels.budgetUsed", { percent: used })}
           </span>
         )}
       </p>

@@ -337,6 +337,10 @@ pub enum MessageBody {
         /// A woken run's failure code, so a page words it as the task page does (decided on 20 Nov 2026, C-6).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         code: Option<String>,
+        /// The gateway's own refusal that ended that run (`gateway.<code> <status>`, such as the channel's spent budget),
+        /// so a page words it as the task page does; never the run's other failure detail (decided on 21 Nov 2026).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        refusal: Option<String>,
         /// When a used-up daily budget renews (RFC 3339), so a page says it in the reader's own time (decided on 21 Nov
         /// 2026, C-14); on `wake_budget_spent` only.
         #[serde(default, skip_serializing_if = "Option::is_none")]

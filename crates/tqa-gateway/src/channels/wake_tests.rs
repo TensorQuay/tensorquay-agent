@@ -194,3 +194,55 @@ fn gw_u_237_the_wake_shares_out_to_dos_one_at_a_time() {
         "{three}"
     );
 }
+
+// TEST: GW-U-239
+// A woken run that failed is said in its channel with what the page needs to word it as the task page does (decided on
+// 21 Nov 2026, the live check of a used-up channel): its code and, when the gateway refused it, that refusal
+// ("gateway.channel_budget 409"); any other failure detail, which may be the task's own words, never reaches the channel.
+#[test]
+fn gw_u_239_a_failed_runs_notice_carries_the_gateways_refusal_and_nothing_else()
+-> Result<(), Box<dyn std::error::Error>> {
+    use super::Ending;
+    use tqa_types::{ErrorCode, Event, ServerFrame};
+    let failed =
+        |reason: &str, code: ErrorCode| -> Result<ServerFrame, Box<dyn std::error::Error>> {
+            Ok(ServerFrame::Event {
+                seq: 1.into(),
+                run_id: None,
+                step: None,
+                ts: "2026-11-21T00:00:00Z".into(),
+                event: Event::RunFailed {
+                    run_id: "r-1".parse()?,
+                    reason: reason.into(),
+                    code,
+                    provider_message: None,
+                },
+            })
+        };
+    assert_eq!(
+        Ending::of(
+            "run.failed",
+            &failed("gateway.channel_budget 409", ErrorCode::Budget)?
+        ),
+        Ending::Failed {
+            code: Some("budget".into()),
+            refusal: Some("gateway.channel_budget 409".into())
+        }
+    );
+    for reason in [
+        "budget.output_tokens",
+        "the tool printed the customer's file",
+        "gateway.channel_budget",
+        "gateway.x 409 y",
+    ] {
+        assert_eq!(
+            Ending::of("run.failed", &failed(reason, ErrorCode::Budget)?),
+            Ending::Failed {
+                code: Some("budget".into()),
+                refusal: None
+            },
+            "{reason}"
+        );
+    }
+    Ok(())
+}

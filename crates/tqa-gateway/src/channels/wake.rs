@@ -316,6 +316,7 @@ pub(crate) async fn notice(
                 member,
                 member_id,
                 code: None,
+                refusal: None,
                 resets_at: None,
                 text,
             },

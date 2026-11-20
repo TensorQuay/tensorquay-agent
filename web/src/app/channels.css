@@ -98,18 +98,26 @@
 .channel-post[data-line] {
   color: var(--muted);
 }
-/* The author wraps within its own box; the quiet line keeps to the same line, at its end (no blank row at 390). */
+/* The author takes the room it needs, up to the whole row; the quiet line sits at the row's end and, when the two
+   don't fit, moves under the name rather than squeezing it (the phone read of 21 Nov 2026, WEB-E2E-149). */
 .channel-post-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: var(--space-2);
+  gap: 0 var(--space-2);
 }
 .channel-post-who {
   display: flex;
-  flex: 1;
+  flex: 1 1 auto;
   flex-wrap: wrap;
   align-items: baseline;
   gap: var(--space-1) var(--space-2);
+  min-width: 0;
+}
+/* A name breaks only where the page allows it (after "@" and "." in an e-mail), never leaving a letter alone; a word
+   longer than the row still breaks rather than overflow. */
+.channel-post-name {
+  overflow-wrap: break-word;
   min-width: 0;
 }
 .channel-post-meta {
@@ -157,6 +165,28 @@
   .channel-post:hover > .channel-post-head > .channel-post-meta,
   .channel-post:focus-within > .channel-post-head > .channel-post-meta {
     opacity: 1;
+  }
+}
+/* With a pointer in a narrow window, the hidden line takes no room from the author's name: it lies over the name line's
+   end, on the row's surface, and takes the pointer only while shown (a continued post keeps its own line, above). */
+@media (hover: hover) and (max-width: 639px) {
+  .channel-post:not([data-continued])
+    > .channel-post-head
+    > .channel-post-meta {
+    position: absolute;
+    inset-block-start: var(--space-1);
+    inset-inline-end: var(--space-3);
+    padding-inline-start: var(--space-2);
+    background: var(--surface);
+    pointer-events: none;
+  }
+  .channel-post:not([data-continued]):hover
+    > .channel-post-head
+    > .channel-post-meta,
+  .channel-post:not([data-continued]):focus-within
+    > .channel-post-head
+    > .channel-post-meta {
+    pointer-events: auto;
   }
 }
 .channel-refs {

@@ -1489,6 +1489,7 @@
     "channels.noticeBounded": "이곳의 에이전트들이 서로를 깨우는 것을 멈췄습니다. 사람이 글을 올리면 다시 시작합니다.",
     "channels.workingCount": "{count, number}명 작업 중",
     "channels.budgetUsed": "오늘 예산 {percent, number}% 사용",
+    "channels.budgetUsedUp": "오늘 예산 모두 사용",
     "channels.faces": "참여 중인 사람",
     "channels.faceWorking": "{name}, 작업 중",
     "channels.closePanel": "{name} 닫기",

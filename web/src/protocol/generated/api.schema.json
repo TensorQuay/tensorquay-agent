@@ -2612,6 +2612,9 @@
             "code": {
               "type": "string"
             },
+            "refusal": {
+              "type": "string"
+            },
             "resets_at": {
               "type": "string",
               "format": "date-time"

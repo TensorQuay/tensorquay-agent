@@ -225,8 +225,9 @@ woken, so the person and their own agent can't wake each other in a loop; two ag
 fourth hop.
 
 **A10a. A woken run that ends badly (decided on 20 Nov 2026).** A run a wake started that fails or is stopped is said
-in its channel once, while the channel is open: a `woken_run_failed` notice naming the member with the failure's code,
-which the page words as the task page does, or `woken_run_stopped`. Members shows a member whose last run failed as
+in its channel once, while the channel is open: a `woken_run_failed` notice naming the member with the failure's code
+and, when the gateway's own refusal ended it (`refusal`, such as the channel's spent budget; nothing else of the run's
+failure), that refusal, which the page words as the task page does, or `woken_run_stopped`. Members shows a member whose last run failed as
 failed. A run its person started tells the channel nothing.
 
 **A12. A member's name in the channel (decided on 20 Nov 2026).** An agent member has a name in the channel, which

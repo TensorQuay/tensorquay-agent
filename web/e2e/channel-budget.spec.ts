@@ -58,7 +58,7 @@ test("WEB-E2E-148 a used-up daily budget says when agents are woken again", asyn
     }).format(new Date("2026-11-22T03:00:00Z")),
   );
   const header = page.getByRole("region", { name: "Channel header" });
-  await expect(header.getByText("Budget 100 % used today")).toBeVisible();
+  await expect(header.getByText("Budget used up today")).toBeVisible();
   const log = page.getByRole("list", { name: "Channel log" });
   await expect(log).toContainText(
     `Woken agents have used this channel's budget for today: agents are woken here again on ${local}, or sooner if the channel's owner, a lead or an administrator raises it.`,
@@ -76,3 +76,63 @@ test("WEB-E2E-148 a used-up daily budget says when agents are woken again", asyn
     0,
   );
 });
+
+// WEB-E2E-149 (the lead's read of the phone page, 21 Nov 2026): at 390 px a post's author uses the row. A 19-character
+// e-mail is one line, and an agent's name has its "Agent" label beside it, with a pointer (time and Reply wait for
+// hover or focus and take no room) and on a touch screen (they show, and Reply is reachable by touch). No sideways scroll.
+for (const touch of [false, true])
+  test(`WEB-E2E-149 a post's author line uses the row at 390 px (${touch ? "touch" : "pointer"})`, async ({
+    browser,
+  }) => {
+    const context = await browser.newContext({
+      viewport: { width: 390, height: 844 },
+      ...(touch ? { hasTouch: true, isMobile: true } : {}),
+    });
+    const page = await context.newPage();
+    await signIn(page);
+    await page.goto("/channels/0195d8c0-0000-7000-8000-00000000c4a3");
+    const log = page.getByRole("list", { name: "Channel log" });
+    await expect(log.getByText("What is 17 + 25?")).toBeVisible();
+    /** The line boxes of an element's own text, and its top. */
+    const lines = (text: string) =>
+      log
+        .getByText(text, { exact: true })
+        .first()
+        .evaluate((element) => {
+          const range = document.createRange();
+          range.selectNodeContents(element);
+          const rects = [...range.getClientRects()].filter(
+            (rect) => rect.width > 0,
+          );
+          return {
+            count: new Set(rects.map((rect) => Math.round(rect.top))).size,
+            top: rects[0]?.top ?? 0,
+          };
+        });
+    expect((await lines("pat@example.invalid")).count).toBe(1);
+    const helper = await lines("Helper");
+    const label = await lines("Agent");
+    expect(helper.count).toBe(1);
+    expect(Math.abs(helper.top - label.top)).toBeLessThan(6);
+    expect(
+      await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth -
+          document.documentElement.clientWidth,
+      ),
+    ).toBeLessThanOrEqual(0);
+    await page.screenshot({
+      path: test
+        .info()
+        .outputPath(`author-390-${touch ? "touch" : "pointer"}.png`),
+    });
+    if (touch) {
+      const reply = log.getByRole("button", { name: /^Reply to/ }).first();
+      await expect(reply).toBeVisible();
+      await reply.tap();
+      await expect(
+        page.getByRole("complementary").or(page.getByRole("dialog")).first(),
+      ).toBeVisible();
+    }
+    await context.close();
+  });

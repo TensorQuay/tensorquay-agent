@@ -1484,6 +1484,7 @@
     "channels.noticeBounded": "Les agents d’ici ont cessé de se réveiller mutuellement ; un message d’une personne les relance.",
     "channels.workingCount": "{count, number} au travail",
     "channels.budgetUsed": "Budget utilisé aujourd’hui : {percent, number} %",
+    "channels.budgetUsedUp": "Budget du jour épuisé",
     "channels.faces": "Qui est là",
     "channels.faceWorking": "{name}, au travail",
     "channels.closePanel": "Fermer {name}",

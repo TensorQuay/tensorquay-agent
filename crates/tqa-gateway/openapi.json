@@ -26499,6 +26499,10 @@
                 "type": "string",
                 "description": "For woken_run_failed: the run's failure code, so a page words it as the task page does (decided on 20 Nov 2026)."
               },
+              "refusal": {
+                "type": "string",
+                "description": "For woken_run_failed: the gateway's own refusal that ended the run (gateway.<code> <status>, such as gateway.channel_budget 409), so a page words it as the task page does; never the run's other failure detail (decided on 21 Nov 2026)."
+              },
               "resets_at": {
                 "type": "string",
                 "format": "date-time",

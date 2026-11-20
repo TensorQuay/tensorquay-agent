@@ -192,6 +192,7 @@ async fn spent_notice(
                 member: None,
                 member_id: None,
                 code: None,
+                refusal: None,
                 resets_at: Some(stamp),
                 text: format!(
                     "Woken agents have used this channel's budget for today: no agent is woken here until it renews at \

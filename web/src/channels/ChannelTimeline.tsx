@@ -83,6 +83,19 @@ function noticeMember(
   return member ? memberShown(member) : (body.member ?? "");
 }
 
+/** A name with break opportunities after "@" and "." only, so an e-mail wraps at sensible places (WEB-E2E-149). */
+export function breakable(name: string): ReactNode {
+  const parts = name.split(/(?<=[@.])/);
+  return parts.length < 2
+    ? name
+    : parts.map((part, index) => (
+        <span key={index}>
+          {part}
+          {index < parts.length - 1 && <wbr />}
+        </span>
+      ));
+}
+
 export function authorName(author: Author, members: readonly Member[]) {
   const member = members.find(
     (item) => item.kind === author.kind && item.id === author.id,
@@ -332,7 +345,9 @@ function Post({
       <header className="channel-post-head type-small">
         {!continued && !(line && gateway) && (
           <span className="channel-post-who">
-            <span className="type-body-strong">{shown}</span>
+            <span className="type-body-strong channel-post-name">
+              {breakable(shown)}
+            </span>
             {agent && <span className="muted">{t("channels.kindAgent")}</span>}
           </span>
         )}
@@ -563,7 +578,7 @@ function Body({
             {t("channels.noticeRunFailed", {
               member: noticeMember(body, members),
               reason: t(
-                knownFailure(body.code ?? "", "")?.reason ??
+                knownFailure(body.code ?? "", body.refusal ?? "")?.reason ??
                   "run.stoppedUnknown",
               ),
             })}

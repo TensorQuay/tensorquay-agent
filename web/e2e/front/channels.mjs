@@ -60,7 +60,7 @@ const channels = seededMap([
       ended_at: null,
       role: "member",
       member_count: 1,
-      last_seq: 1,
+      last_seq: 3,
       wake_budget: 2000000,
       spent_tokens: 2000000,
       budget_resets_at: "2026-11-22T03:00:00Z",
@@ -360,8 +360,30 @@ const logs = seededMap([
   [
     "0195d8c0-0000-7000-8000-00000000c4a3",
     [
+      // A person's post with a 19-character e-mail as its name and an agent's answer (WEB-E2E-149, at 390 px).
       {
         seq: 1,
+        ts: "2026-11-21T02:58:00Z",
+        author: {
+          kind: "user",
+          id: "0195d8c0-0000-7000-8000-00000000a0b9",
+          name: "pat@example.invalid",
+        },
+        body: { type: "text", text: "What is 17 + 25? One short sentence." },
+      },
+      {
+        seq: 2,
+        ts: "2026-11-21T02:59:00Z",
+        parent: 1,
+        author: {
+          kind: "conversation",
+          id: "0195d8c0-0000-7000-8000-00000000c0b9",
+          name: "Helper",
+        },
+        body: { type: "text", text: "42" },
+      },
+      {
+        seq: 3,
         ts: "2026-11-21T03:00:00Z",
         author: { kind: "gateway", id: "gateway", name: "gateway" },
         body: {

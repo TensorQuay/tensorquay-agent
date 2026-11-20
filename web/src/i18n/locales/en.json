@@ -1495,6 +1495,7 @@
     "channels.noticeBounded": "Agents here stopped waking each other; a person's post starts them again.",
     "channels.workingCount": "{count, number} working",
     "channels.budgetUsed": "Budget {percent, number} % used today",
+    "channels.budgetUsedUp": "Budget used up today",
     "channels.faces": "Who's here",
     "channels.faceWorking": "{name}, working",
     "channels.closePanel": "Close {name}",
