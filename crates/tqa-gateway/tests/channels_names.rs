@@ -460,3 +460,87 @@ async fn gw_i_378_an_unnamed_writer_gets_its_decision_and_its_report(pool: PgPoo
     }))
     .await
 }
+
+// TEST: GW-I-391
+// The second review of #153 (21 Nov 2026). A role change of an agent added before names keeps it unnamed: its task's
+// title becomes its name only when its owner adds it, never by a later "Make lead" (SEC-044). Two members given the same
+// name at the same moment: one gets it, the other the worded refusal, never a 503.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_391_a_role_change_never_names_an_agent_and_a_name_race_is_worded(
+    pool: PgPool,
+) -> TestResult {
+    Box::pin(support::run(pool, async |f| {
+        let (ana, cookie) = f.admin().await?;
+        let old = Agent::new(f, ana.id, "Acquisition target shortlist").await?;
+        let id = channel(f, &cookie, "deals", &[(&old, "member")]).await?;
+        sqlx::query("UPDATE channel_members SET name = NULL WHERE conversation_id = $1")
+            .bind(old.uuid)
+            .execute(&f.pool)
+            .await?;
+        // What the page sends on "Make lead": the role alone.
+        let (status, body) = put_agent(f, &cookie, &id, &old, json!({"role": "lead"})).await?;
+        assert_eq!(status, 200, "{body}");
+        assert_eq!(
+            (&body["named"], &body["role"]),
+            (&json!(false), &json!("lead")),
+            "{body}"
+        );
+        let stored: Option<String> =
+            sqlx::query_scalar("SELECT name FROM channel_members WHERE conversation_id = $1")
+                .bind(old.uuid)
+                .fetch_one(&f.pool)
+                .await?;
+        assert_eq!(stored, None, "the title became its name");
+        // The same name twice at once.
+        let (first, second) = (
+            Agent::new(f, ana.id, "One").await?,
+            Agent::new(f, ana.id, "Two").await?,
+        );
+        let (a, b) = tokio::join!(
+            put_agent(
+                f,
+                &cookie,
+                &id,
+                &first,
+                json!({"role": "member", "name": "Reviewer"})
+            ),
+            put_agent(
+                f,
+                &cookie,
+                &id,
+                &second,
+                json!({"role": "member", "name": "reviewer"})
+            ),
+        );
+        let (a, b) = (a?, b?);
+        let mut statuses = [a.0, b.0];
+        statuses.sort_unstable();
+        assert_eq!(
+            statuses,
+            [200, 409],
+            "one gets it, the other is refused in words: {a:?} {b:?}"
+        );
+        let refused = if a.0 == 409 { &a.1 } else { &b.1 };
+        assert_eq!(refused["error"]["code"], "member_name_taken", "{refused}");
+        // And two defaults at once: the second takes a number.
+        let (third, fourth) = (
+            Agent::new(f, ana.id, "Writer").await?,
+            Agent::new(f, ana.id, "Writer").await?,
+        );
+        let (c, d) = tokio::join!(
+            put_agent(f, &cookie, &id, &third, json!({"role": "member"})),
+            put_agent(f, &cookie, &id, &fourth, json!({"role": "member"})),
+        );
+        let (c, d) = (c?, d?);
+        assert_eq!((c.0, d.0), (200, 200), "{c:?} {d:?}");
+        let mut given = [
+            c.1["name"].as_str().unwrap_or("").to_owned(),
+            d.1["name"].as_str().unwrap_or("").to_owned(),
+        ];
+        given.sort();
+        assert_eq!(given, ["Writer".to_owned(), "Writer 2".to_owned()]);
+        Ok(())
+    }))
+    .await
+}

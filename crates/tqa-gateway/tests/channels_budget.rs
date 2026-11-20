@@ -254,3 +254,38 @@ async fn gw_i_386_an_upgrade_starts_every_channels_budget_at_zero(pool: PgPool) 
     assert_eq!(of(set), Some((Some(500_000), 0, None)), "{rows:?}");
     Ok(())
 }
+
+// TEST: GW-I-392
+// The second review of #153 (21 Nov 2026): a budget set at or under today's spend uses it up at once, and the channel
+// says so as a charge would, with when it renews; once only, and nothing for 0 (waking off) or a budget above the spend.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_392_a_budget_set_under_todays_spend_says_it_is_used_up(pool: PgPool) -> TestResult {
+    Box::pin(support::run(pool, async |f| {
+        let (owner, cookie) = f.admin().await?;
+        let agent = Agent::new(f, owner.id, "Pricing analyst").await?;
+        let id = channel(f, &cookie, "pricing", &[(&agent, "member")]).await?;
+        // Today's spend: 500 tokens, in an open window.
+        sqlx::query("UPDATE channels SET spent_tokens = 500, budget_window_start = CURRENT_TIMESTAMP WHERE id = $1::uuid")
+            .bind(&id)
+            .execute(&f.pool)
+            .await?;
+        assert_eq!(set(f, &cookie, &id, json!({"wake_budget": 1000})).await?.0, 200);
+        assert_eq!(notices(f, &id, "wake_budget_spent").await?, 0, "above the spend: nothing");
+        assert_eq!(set(f, &cookie, &id, json!({"wake_budget": 400})).await?.0, 200);
+        assert_eq!(notices(f, &id, "wake_budget_spent").await?, 1, "under the spend: used up, said once");
+        let (said, resets_at) = notice_of(f, &id, "wake_budget_spent").await?;
+        assert!(said.contains("until it renews at"), "{said}");
+        assert!(resets_at.is_string(), "the page shows the time and Raise the budget");
+        assert_eq!(set(f, &cookie, &id, json!({"wake_budget": 500})).await?.0, 200);
+        assert_eq!(notices(f, &id, "wake_budget_spent").await?, 1, "already used up: no second notice");
+        assert_eq!(set(f, &cookie, &id, json!({"wake_budget": 0})).await?.0, 200);
+        assert_eq!(notices(f, &id, "wake_budget_spent").await?, 1, "0 is waking off, not a used-up day");
+        // Raised above the spend, then lowered to it again: a new used-up notice.
+        assert_eq!(set(f, &cookie, &id, json!({"wake_budget": 2000})).await?.0, 200);
+        assert_eq!(set(f, &cookie, &id, json!({"wake_budget": 500})).await?.0, 200);
+        assert_eq!(notices(f, &id, "wake_budget_spent").await?, 2);
+        Ok(())
+    }))
+    .await
+}
