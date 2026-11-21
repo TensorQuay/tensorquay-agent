@@ -61,7 +61,8 @@ fn gw_u_226_an_early_end_is_logged_with_its_reason_route_bytes_and_time()
 // (300 s) a silence longer than the old 60 s and shorter than 300 s completes; one past 300 s is cut with the same
 // words as before, which the "ended early" line logs. A title request and a route check keep their 60 s.
 #[tokio::test(start_paused = true)]
-async fn gw_u_241_a_long_silence_completes_and_one_past_the_limit_is_cut() -> Result<(), Box<dyn std::error::Error>> {
+async fn gw_u_241_a_long_silence_completes_and_one_past_the_limit_is_cut()
+-> Result<(), Box<dyn std::error::Error>> {
     use futures::StreamExt as _;
     let config = super::super::config::RelayConfig::default();
     assert_eq!(config.idle_timeout, 300);
@@ -82,10 +83,16 @@ async fn gw_u_241_a_long_silence_completes_and_one_past_the_limit_is_cut() -> Re
     );
     let mut too_long = after(301);
     let cut = super::next_within(&mut too_long, (idle, deadline), &cancel).await;
-    assert_eq!(cut.map_err(|error| error.to_string()), Err("relay response idle deadline".to_owned()));
+    assert_eq!(
+        cut.map_err(|error| error.to_string()),
+        Err("relay response idle deadline".to_owned())
+    );
     // The checks keep the old bound, and a lower setting still applies to them.
     assert_eq!(config.check_idle(), Duration::from_mins(1));
-    let lower = super::super::config::RelayConfig { idle_timeout: 20, ..config };
+    let lower = super::super::config::RelayConfig {
+        idle_timeout: 20,
+        ..config
+    };
     assert_eq!(lower.check_idle(), Duration::from_secs(20));
     Ok(())
 }

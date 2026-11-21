@@ -113,12 +113,7 @@ impl Forward {
             return None;
         }
         let idle = Duration::from_secs(self.state.config.relay.idle_timeout);
-        let next = next_within(
-            &mut self.source,
-            (idle, self.deadline),
-            &self.state.cancel,
-        )
-        .await;
+        let next = next_within(&mut self.source, (idle, self.deadline), &self.state.cancel).await;
         match next {
             Ok(Some(Ok(bytes))) => Some(self.observe(bytes)),
             Ok(None) => {
