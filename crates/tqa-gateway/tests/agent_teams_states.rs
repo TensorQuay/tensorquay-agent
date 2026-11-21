@@ -259,7 +259,7 @@ async fn gw_i_260_a_failed_run_makes_a_helper_failed_until_the_leads_next_messag
         // The lead's next message is taken, not refused member_gone, and wakes it; its run makes it working.
         assign(f, &t, "r-1:c-2", "researcher").await?;
         assert_eq!(
-            wakes_settle(f, &t.researcher.0, 1).await?.len(),
+            wakes_reach(f, &t.researcher.0, 1).await?.len(),
             1,
             "a helper whose run failed is woken"
         );
@@ -282,7 +282,7 @@ async fn gw_i_260_a_failed_run_makes_a_helper_failed_until_the_leads_next_messag
         // The failed run r-3 was itself a wake and failed before reading, so its place hasn't moved: the lead's next
         // message still wakes it, as a new wake.
         assign(f, &t, "r-1:c-4", "researcher").await?;
-        let woken = wakes_settle(f, &t.researcher.0, 2).await?;
+        let woken = wakes_reach(f, &t.researcher.0, 2).await?;
         assert_eq!(woken.len(), 2, "a second wake: {woken:?}");
         assert_ne!(woken[0], woken[1]);
         f.gateway

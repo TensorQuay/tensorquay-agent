@@ -298,3 +298,24 @@ pub(crate) async fn wakes_settle(
     }
     wakes(f, reader).await
 }
+
+/// How long [`wakes_reach`] waits: two of the reconciler's 15 s passes. A wake skipped after the post's commit (the
+/// reader's earlier wake not yet marked delivered, as on a loaded machine) is sent by the reconciler's next pass.
+const WAKES_REACH: Duration = Duration::from_secs(30);
+
+/// Waits for `reader` to have `count` wakes, up to [`WAKES_REACH`], and answers the wakes it then has. For a wake that
+/// must come; [`wakes_settle`]'s short wait stays for checks that one doesn't.
+pub(crate) async fn wakes_reach(
+    f: &Fixture,
+    reader: &ConversationId,
+    count: usize,
+) -> Result<Vec<String>> {
+    let until = tokio::time::Instant::now() + WAKES_REACH;
+    loop {
+        let found = wakes(f, reader).await?;
+        if found.len() >= count || tokio::time::Instant::now() >= until {
+            return Ok(found);
+        }
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
+}
