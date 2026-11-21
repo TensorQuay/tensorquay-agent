@@ -448,9 +448,12 @@ class Soak:
         elif kind == "runtime_link":
             require(not any(start <= time.time() <= end for start, end in self.windows), "overlapping link/restart fault")
             self.mark_fault(kind, [target])
-            record["pause_window"] = {"start": time.time(), "end": None}
-            self.audits[target].pause_windows.append(record["pause_window"])
+            # The window starts once `docker pause` has returned: nothing starts in a frozen runtime, and a call that
+            # started while the pause was being asked for is in flight across it (soak 47c679f55, 21 Nov 2026).
+            asked = time.time()
             record.update(identity=self.stack.pause(self.conversations[target]), resume_at=time.monotonic() + fault["pause_seconds"])
+            record["pause_window"] = {"asked": asked, "start": time.time(), "end": None}
+            self.audits[target].pause_windows.append(record["pause_window"])
             record["deadline"] = record["resume_at"] + 60
             self.pending.append(record)
         elif kind in ("db_restart", "db_crash"):
@@ -485,14 +488,18 @@ class Soak:
             # The proxy stalls only the calls that change containers, which come when a sandbox is made or retired: an
             # idle conversation's sandbox is retired now, so its replacement goes through the stalled engine.
             slot = self.idle_slot()
+            asked = time.time()
             record["retired"] = {"slot": slot, "killed": self.stack.kill_sandbox(self.conversations[slot])}
-            self.audits[slot].kill_windows.append(time.time())
+            self.audits[slot].kill_windows.append((asked, time.time()))
             self.pending.append(record)
         elif kind == "sandbox_kill":
             self.mark_fault(kind, [target])
-            self.audits[target].kill_windows.append(time.time())
+            # A kill's window is (asked, done): a call may start until `docker kill` returns, and its interrupted
+            # result may come before it does.
+            asked = time.time()
             record.update(killed=self.stack.kill_sandbox(self.conversations[target]),
                           deadline=time.monotonic() + WITNESS_SECONDS)
+            self.audits[target].kill_windows.append((asked, time.time()))
             self.pending.append(record)
         elif kind == "link_cut":
             self.mark_fault(kind, [target])

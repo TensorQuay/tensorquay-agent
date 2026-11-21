@@ -179,7 +179,7 @@ class RunAudit:
             self.tool_result(frame)
         elif kind == "run.resumed":
             when = timestamp_seconds(frame["ts"])
-            kills = [kill for kill in self.kill_windows if kill <= when <= kill + KILL_RECOVERY_SECONDS
+            kills = [kill for kill in self.kill_windows if kill[0] <= when <= kill[1] + KILL_RECOVERY_SECONDS
                      and kill not in self.used_kills]
             disks = [window for window in self.disk_windows
                      if window[0] <= when <= window[1] + DISK_RESUME_MARGIN_SECONDS]
@@ -245,7 +245,8 @@ class RunAudit:
         name = self.tool_names[identity]
         if outcome == "interrupted":
             when, started = timestamp_seconds(frame["ts"]), self.tool_started[identity]
-            if any(started < kill <= when <= kill + KILL_RECOVERY_SECONDS for kill in self.kill_windows):
+            # Each kill window is (asked, done): the call started before the kill took effect and ended after it was asked.
+            if any(started < done and asked <= when <= done + KILL_RECOVERY_SECONDS for asked, done in self.kill_windows):
                 outcome = "interrupted_by_kill"
             else:
                 # A sandbox lost on a full disk is replaced and its run resumes (the run.resumed the full-disk rule

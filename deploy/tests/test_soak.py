@@ -1,10 +1,14 @@
 """SOAK-002: ordered receipts and terminal accounting must reject false success."""
 import copy
+import datetime
 import json
 from pathlib import Path
 import tempfile
+import types
 import unittest
+from unittest import mock
 
+import soak
 from soak_audit import AuditError, ReceiptLog, RunAudit
 
 
@@ -219,7 +223,7 @@ class RunTests(unittest.TestCase):
     def test_a_tool_running_when_its_sandbox_was_killed_may_come_back_interrupted(self):
         audit = self.started()
         self.tool(audit)
-        audit.kill_windows.append(946684815)
+        audit.kill_windows.append((946684815, 946684815))
         audit.record(self.at(frame(5, "tool.result", call_id="call-example", status="interrupted", content=""), 20))
         self.assertEqual(audit.tool_outcomes, {"shell.interrupted_by_kill": 1})
 
@@ -250,7 +254,7 @@ class RunTests(unittest.TestCase):
                 audit = self.started()
                 self.tool(audit)
                 if kill is not None:
-                    audit.kill_windows.append(kill)
+                    audit.kill_windows.append((kill, kill))
                 result = frame(5, "tool.result", call_id="call-example", status="interrupted", content="")
                 result["ts"] = "2000-01-01T00:{:02d}:{:02d}Z".format(*divmod(when if when != 59 else 15 + 181, 60))
                 with self.assertRaises(AuditError):
@@ -258,7 +262,7 @@ class RunTests(unittest.TestCase):
 
     def test_a_run_resumes_once_inside_its_own_kill_window_and_never_parks(self):
         audit = self.started()
-        audit.kill_windows.append(946684815)
+        audit.kill_windows.append((946684815, 946684815))
         audit.record(self.at(frame(6, "run.resumed", run_id="run-example"), 20))
         self.assertEqual(audit.resumed, 1)
         with self.assertRaisesRegex(AuditError, "resumed"):
@@ -347,3 +351,90 @@ class RunTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FaultWindowStampTests(unittest.TestCase):
+    """A fault's window is stamped around the moment it takes effect (soak 47c679f55, 21 Nov: a shell call started
+    23 ms after the pause window's stamp, before `docker pause` froze it, timed out while paused, and was rejected)."""
+    BASE = 946684800.0
+
+    @staticmethod
+    def iso(seconds):
+        return datetime.datetime.fromtimestamp(seconds, datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+    def at(self, seq, kind, seconds, **fields):
+        event = frame(seq, kind, **fields)
+        event["ts"] = self.iso(self.BASE + seconds)
+        return event
+
+    def driver(self, clock):
+        audit = RunAudit()
+        audit.record(self.at(1, "message.user", 1, text="work"))
+        audit.record(self.at(2, "run.started", 1, run_id="run-example"))
+        paused = {}
+
+        def pause(conversation):
+            clock[0] += 0.030  # the lookup, then `docker pause`: frozen when it returns
+            paused[conversation] = {"container": "runtime-1"}
+            return paused[conversation]
+
+        def unpause(conversation):
+            clock[0] += 0.020
+            del paused[conversation]
+
+        def kill_sandbox(conversation):
+            clock[0] += 0.030  # the lookup, then `docker kill`: dead when it returns
+            return "runtime-1"
+        driver = soak.Soak.__new__(soak.Soak)
+        driver.slots, driver.conversations, driver.audits, driver.windows = 1, ["task-1"], [audit], []
+        driver.clients = [types.SimpleNamespace(receipts=types.SimpleNamespace(last_seq=2), snapshots=0, connections=1)
+                          for _ in range(2)]
+        driver.stack = types.SimpleNamespace(paused=paused, pause=pause, unpause=unpause, kill_sandbox=kill_sandbox,
+                                             gateway="gateway-1", logs=lambda *args: "")
+        driver.started, driver.pending, driver.faults = 0.0, [], []
+        driver.log = lambda kind, **fields: None
+        return driver, audit
+
+    def clocked(self, clock):
+        now = lambda: self.BASE + clock[0]  # noqa: E731
+        return mock.patch.object(soak.time, "time", now), mock.patch.object(soak.time, "monotonic", now)
+
+    def test_a_call_started_before_the_freeze_but_after_the_fault_was_asked_for_may_time_out_while_paused(self):
+        for start, result, allowed in [(15.023, 164.15, True), (14.5, 164.15, True), (164.3, 165.0, False)]:
+            with self.subTest(start=start):
+                clock = [15.0]
+                driver, audit = self.driver(clock)
+                wall, monotonic = self.clocked(clock)
+                with wall, monotonic:
+                    driver.inject({"kind": "runtime_link", "target": 0, "pause_seconds": 149})
+                    clock[0] = 164.13
+                    driver.resumed_link(driver.pending[0])
+                audit.record(self.at(3, "tool.call", start, call_id="call-1", name="shell"))
+                audit.record(self.at(4, "tool.start", start, call_id="call-1"))
+                timeout = self.at(5, "tool.result", result, call_id="call-1", status="error",
+                                  content="timeout: tool deadline elapsed")
+                if allowed:
+                    audit.record(timeout)
+                    self.assertEqual(len(audit.tool_timeouts), 1)
+                else:
+                    with self.assertRaisesRegex(AuditError, "outside its in-flight pause window"):
+                        audit.record(timeout)
+
+    def test_a_call_started_while_its_sandbox_was_being_killed_may_come_back_interrupted(self):
+        # Interrupted 20 ms after it started, before `docker kill` returned; one started after the kill fails.
+        for start, result, allowed in [(15.010, 15.020, True), (14.0, 15.5, True), (15.5, 16.0, False)]:
+            with self.subTest(start=start):
+                clock = [15.0]
+                driver, audit = self.driver(clock)
+                wall, monotonic = self.clocked(clock)
+                with wall, monotonic:
+                    driver.inject({"kind": "sandbox_kill", "target": 0})
+                audit.record(self.at(3, "tool.call", start, call_id="call-1", name="shell"))
+                audit.record(self.at(4, "tool.start", start, call_id="call-1"))
+                interrupted = self.at(5, "tool.result", result, call_id="call-1", status="interrupted", content="")
+                if allowed:
+                    audit.record(interrupted)
+                    self.assertEqual(audit.tool_outcomes, {"shell.interrupted_by_kill": 1})
+                else:
+                    with self.assertRaisesRegex(AuditError, "outside its sandbox-kill"):
+                        audit.record(interrupted)
