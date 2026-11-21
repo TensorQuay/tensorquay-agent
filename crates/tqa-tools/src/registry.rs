@@ -197,9 +197,17 @@ impl ToolRegistry {
         }
         Ok(entry)
     }
+    /// The unknown-tool answer names only the tools the model is offered now: a tool kept known without being offered
+    /// (a run's team tools when it may not lead, ADR-0034 A6) is not something to suggest, and a restricted profile's
+    /// run reads its own allow-list back.
     fn unknown_tool(&self) -> ToolError {
         let mut names = String::new();
-        for name in self.entries.keys() {
+        for name in self
+            .entries
+            .iter()
+            .filter(|(_, entry)| entry.tool.offered())
+            .map(|(name, _)| name)
+        {
             if names.len() + name.len() + 2 > 400 {
                 names.push('…');
                 break;
@@ -769,6 +777,47 @@ mod tests {
             known(&registry_named(&["alpha".into(), "beta".into()])?),
             "alpha, beta"
         );
+        Ok(())
+    }
+
+    /// A tool registered but never offered to the model (as a run's team tools are when it may not lead).
+    struct Unoffered(ToolSpec);
+    #[async_trait::async_trait]
+    impl Tool for Unoffered {
+        fn spec(&self) -> &ToolSpec {
+            &self.0
+        }
+        fn offered(&self) -> bool {
+            false
+        }
+        async fn call(&self, _: Value, _: &ToolContext) -> Result<ToolOutput, ToolError> {
+            Err(ToolError::Unsupported("refused in words".into()))
+        }
+    }
+
+    // TOOL-U-159: the unknown-tool answer lists only the tools the model is offered; a tool kept known but not offered
+    // is left out of the list, and a call to it still reaches that tool rather than the unknown-tool answer.
+    #[test]
+    fn tool_u_159_the_known_tools_list_names_only_offered_tools()
+    -> Result<(), Box<dyn std::error::Error>> {
+        let mut registry = registry_named(&["mcp_lookup".into(), "read_file".into()])?;
+        for name in ["start_member", "send_to_lead"] {
+            registry.register(Arc::new(Unoffered(ToolSpec {
+                name: ToolName::new(name)?,
+                description: String::new(),
+                parameters: serde_json::json!({}),
+                parallel_safe: true,
+                changes_workspace: false,
+            })))?;
+        }
+        assert_eq!(known(&registry), "mcp_lookup, read_file");
+        // Still known: preparing a call to it finds it.
+        assert!(
+            registry
+                .prepare("start_member", &serde_json::json!({}))
+                .is_ok()
+        );
+        assert!(registry.prepare("shell", &serde_json::json!({})).is_err());
         Ok(())
     }
 
