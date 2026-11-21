@@ -79,6 +79,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **A call to a tool a task doesn't have lists only the tools it is offered (TOOL-U-159, E2E-PROFILE-007).** A task
+  under a profile that allows a few tools, with agent teams off, was told the team tools' names as well; the answer
+  now names only the tools the model is offered. A call to a team tool is still answered in words, as before.
 - **A container left behind because its labels can't be read says so, with its true age (GW-I-387, WEB-U-489).** The
   Sandboxes page and Status read "the gateway couldn't read its labels" for it, not that the engine wouldn't remove it,
   and its age comes from the engine's own creation time instead of reading 0 s.
