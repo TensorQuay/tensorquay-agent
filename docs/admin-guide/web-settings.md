@@ -70,16 +70,20 @@ whether the account is **Active** or **Disabled**.
 <!-- Tests: GW-I-390. -->
 People change their own password from their account page. When someone can't sign in to do it, for example the only
 administrator, set a new one from the host with the gateway's configuration file. The new password is read from
-standard input, so it never shows in the process list or the shell's history:
+standard input, so it never shows in the process list or the shell's history. Read it without echo first, then pipe
+it to the command:
 
 ```sh
-docker compose exec -T gateway tqa-gateway reset-password ana@example.com /etc/tqa/gateway.toml
+read -rs -p 'New password: ' TQA_NEW_PASSWORD; echo
+printf '%s\n' "$TQA_NEW_PASSWORD" | docker compose exec -T gateway tqa-gateway reset-password ana@example.com /etc/tqa/gateway.toml
+unset TQA_NEW_PASSWORD
 ```
 
-Type the password and press Enter (or pipe it in). It must meet the same rules as a person's own change: at least 12
-characters, not the email or a common password. The person's sessions end at once; their API tokens keep working, as
-after their own change. The command prints the account's email, or why it refused: no active account uses that email,
-or the password is too weak. The change is recorded in the audit as the gateway's own, never with the password.
+Any other way of piping it in works too. Typing the password straight into the command instead would show it on the
+screen. It must meet the same rules as a person's own change: at least 12 characters, not the email or a common
+password. The person's sessions end at once; their API tokens keep working, as after their own change. The command
+prints the account's email, or why it refused: no active account uses that email, or the password is too weak. The
+change is recorded in the audit as the gateway's own, never with the password.
 
 ## Sandboxes
 <!-- The Sandboxes page design note (docs/design/sandboxes-page.md); its test rows are claimed after v18.0.0. -->
