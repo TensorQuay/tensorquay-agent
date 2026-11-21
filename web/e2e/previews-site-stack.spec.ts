@@ -193,12 +193,12 @@ test("WEB-E2E-122 real sites in the Files panel: the owner's map, a built site, 
   // loop's end): the app's own frames keep coming.
   const stall = await worstStall(page);
   if (browserName === "webkit")
-    // The known limit (the 18.0.0 changelog's known limits; plan row 12, a Safari-safe preview): WebKit runs the
+    // The known limit (the 18.0.0 changelog's known limits): WebKit runs the
     // preview on the app's own thread, so its 8 s loop holds the app for 8 s. Expected here, and said if it ever
     // stops: then this branch goes and WebKit is held to the same bound. Chromium is held to it now.
     expect(
       stall,
-      "WebKit no longer stalls on a busy preview: drop the known-limit branch (plan row 12)",
+      "WebKit no longer stalls on a busy preview: drop the known-limit branch",
     ).toBeGreaterThanOrEqual(500);
   else expect(stall).toBeLessThan(500);
   await expect(busyInside.locator("#s")).toHaveText(/^done \d+$/, {

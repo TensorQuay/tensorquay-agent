@@ -519,7 +519,7 @@ async fn gw_i_342_an_unreadable_container_is_counted_and_the_rest_are_swept(
 
 // TEST: GW-I-387
 /// A container whose labels the listing can't read is listed by its age from the engine's own creation time, not 0 s
-/// (a real-engine run listed one at "age 0 s", 20 Nov 2026; plan row 16): five minutes old, both the readiness detail's
+/// (a real-engine run listed one at "age 0 s", 20 Nov 2026): five minutes old, both the readiness detail's
 /// oldest and the Sandboxes answer's left-behind entry say so after the pass that makes it amber.
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]

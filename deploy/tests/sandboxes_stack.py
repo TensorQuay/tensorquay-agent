@@ -475,7 +475,7 @@ def page_case(stack):
         status = browse(admin, out, "read", path="/settings/status", name="4-status-amber")
         left = browse(admin, out, "read", path=PAGE, name="5-left-behind")
         command = "docker rm -f " + planted[:12]
-        # Its reason in the page's own words (fix-18): the gateway couldn't read its labels, never "the engine wouldn't
+        # Its reason in the page's own words: the gateway couldn't read its labels, never "the engine wouldn't
         # remove it"; and its age from the engine's clock, never 0 s, by its second pass.
         words = "the gateway couldn't read its labels"
         for width in status["texts"]:

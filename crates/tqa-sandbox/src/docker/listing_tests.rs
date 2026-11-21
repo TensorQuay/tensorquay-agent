@@ -42,7 +42,7 @@ async fn sbx_u_022_an_unreadable_container_is_left_out_of_the_listing_and_noted(
 
 // TEST: SBX-U-025
 /// An unreadable container keeps the engine's own creation time from the listing (none when the engine gives none), so
-/// the sweep lists its true age rather than 0 s (fix-18, plan row 16).
+/// the sweep lists its true age rather than 0 s (decided on 21 Nov 2026).
 #[tokio::test]
 async fn sbx_u_025_an_unreadable_container_keeps_the_engines_creation_time() -> TestResult {
     let (backend, listener, _storage) = scripted_backend(None).await?;

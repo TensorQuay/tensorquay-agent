@@ -49,7 +49,7 @@ function page(extra: Partial<Channel>) {
 const article = (seq: number) =>
   screen.getByRole("article", { name: new RegExp(`^#${seq} `) });
 
-// WEB-U-536 (web finding 5, decided on 21 Nov 2026): a used-up notice says when agents wake again, and offers Raise the
+// WEB-U-536 (decided on 21 Nov 2026): a used-up notice says when agents wake again, and offers Raise the
 // budget, only while it is true: the latest one, while the channel is used up today. Raised, set to 0 or renewed, every
 // one reads as a past line, with no time and no button.
 describe("WEB-U-536 only the used-up notice still true says when and offers Raise", () => {
