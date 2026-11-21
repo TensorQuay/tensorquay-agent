@@ -57,6 +57,7 @@ fn context(workspace: &std::path::Path) -> Result<ToolContext, Box<dyn Error>> {
         sleeper: std::sync::Arc::new(tqa_testkit::FakeSleeper::new(clock)),
         env_allow: vec![],
         limits: tqa_tools::ToolLimits::RECOMMENDED,
+        memory: None,
     })
 }
 

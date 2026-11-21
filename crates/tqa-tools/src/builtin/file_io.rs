@@ -128,6 +128,7 @@ mod tests {
             sleeper: Arc::new(FakeSleeper::new(clock.clone())),
             env_allow: vec![],
             limits: ToolLimits::RECOMMENDED,
+            memory: None,
         };
         let started = Arc::new(AtomicBool::new(false));
         let finished = Arc::new(AtomicBool::new(false));

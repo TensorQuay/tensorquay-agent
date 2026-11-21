@@ -18,6 +18,7 @@ async fn tool_u_011_fake_latency_failure_exhaustion_and_cancel() -> Result<(), B
         sleeper: sleeper.clone(),
         env_allow: vec![],
         limits: ToolLimits::RECOMMENDED,
+        memory: None,
     };
     let spec = ToolSpec {
         name: ToolName::new("fake")?,

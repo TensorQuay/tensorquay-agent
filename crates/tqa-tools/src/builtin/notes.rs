@@ -68,7 +68,7 @@ impl Tool for WriteNotes {
                 .parent()
                 .ok_or_else(|| ToolError::PathInvalid("missing parent directory".into()))?;
             fs::create_dir_all(parent)?;
-            atomic_write::replace(&workspace, &path, &args.text, cancel, |_| Ok(()))?;
+            atomic_write::replace((&workspace, None), &path, &args.text, cancel, |_| Ok(()))?;
             Ok(ToolOutput::text(format!(
                 "Notes saved ({} bytes).",
                 args.text.len()

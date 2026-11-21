@@ -105,6 +105,8 @@ impl Services {
             workspace,
             env_allow: vec![],
             tool_limits: ToolLimits::RECOMMENDED,
+            // The file tools guard, keep and record notes only with memory on (ADR-0041, A10, A11).
+            memory: self.config.memory,
             jitter: Box::new(SharedJitter(self.jitter.clone())),
             fallback_routes,
             gateway_link: Some(self.gateway_link.clone()),

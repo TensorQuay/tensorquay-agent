@@ -61,15 +61,16 @@ impl Tool for WriteFile {
     }
     async fn call(&self, args: Value, cx: &ToolContext) -> Result<ToolOutput, ToolError> {
         let args: Args = arguments(args)?;
-        let workspace = cx.workspace.clone();
+        let (workspace, memory) = (cx.workspace.clone(), cx.memory.clone());
         file_io::run(cx, move |cancel| {
-            write(&workspace, &args, cancel, || Ok(()))
+            write(&workspace, memory.as_ref(), &args, cancel, || Ok(()))
         })
         .await
     }
 }
 fn write(
     workspace: &WorkspaceRoot,
+    memory: Option<&crate::NoteWriter>,
     args: &Args,
     cancel: &CancellationToken,
     before_rename: impl FnOnce() -> Result<(), ToolError>,
@@ -83,9 +84,13 @@ fn write(
     if args.create_parents {
         fs::create_dir_all(parent)?;
     }
-    atomic_write::replace(workspace, &args.path, &args.content, cancel, |_| {
-        before_rename()
-    })?;
+    atomic_write::replace(
+        (workspace, memory),
+        &args.path,
+        &args.content,
+        cancel,
+        |_| before_rename(),
+    )?;
     Ok(ToolOutput::text(format!(
         "{}, {} bytes\nadded: {} lines\nremoved: {} lines",
         if previous.is_some() {

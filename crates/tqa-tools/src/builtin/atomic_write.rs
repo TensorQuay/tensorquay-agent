@@ -1,6 +1,6 @@
 //! Shared same-directory staging, permission preservation and atomic replacement.
 use super::file_io;
-use crate::{ToolError, WorkspaceRoot};
+use crate::{NoteWriter, ToolError, WorkspaceRoot};
 use std::{
     fs::{self, File, OpenOptions},
     io::Write,
@@ -9,8 +9,11 @@ use std::{
 };
 use tokio_util::sync::CancellationToken;
 
+/// Writes `content` to `requested` atomically. With memory on (`memory` names the writer), a note directly under
+/// `.memory/` is guarded against keys and its previous version kept for one Undo (ADR-0041); with memory off,
+/// `.memory/` is an ordinary folder (the third amendment, A11).
 pub(super) fn replace(
-    workspace: &WorkspaceRoot,
+    (workspace, memory): (&WorkspaceRoot, Option<&NoteWriter>),
     requested: &str,
     content: &str,
     cancel: &CancellationToken,
@@ -18,8 +21,10 @@ pub(super) fn replace(
 ) -> Result<(), ToolError> {
     file_io::cancelled(cancel)?;
     let path = workspace.resolve(requested)?;
-    // A memory note is kept and shown to later tasks: it may not hold a key (ADR-0041).
-    if let Some(reason) = super::memory_note::refusal(workspace.path(), &path, content) {
+    // A memory note is kept and shown to later tasks: it may not hold a key (ADR-0041), when memory is on.
+    if memory.is_some()
+        && let Some(reason) = super::memory_note::refusal(workspace.path(), &path, content)
+    {
         return Err(ToolError::invalid("/content", reason));
     }
     let permissions = match path.metadata() {
@@ -50,8 +55,10 @@ pub(super) fn replace(
             return Err(ToolError::PathOutsideWorkspace);
         }
         before_rename(&path)?;
-        // A memory note's previous version is kept for one Undo (ADR-0041); a new note has none.
-        super::memory_note::keep_previous(workspace.path(), &path)?;
+        // A memory note's previous version is kept for one Undo (ADR-0041), when memory is on; a new note has none.
+        if memory.is_some() {
+            super::memory_note::keep_previous(workspace.path(), &path)?;
+        }
         fs::rename(&temporary, &path)?;
         Ok(())
     })();

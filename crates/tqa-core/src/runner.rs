@@ -83,6 +83,9 @@ pub struct RunnerDeps {
     pub env_allow: Vec<String>,
     /// Explicit tool input, output and execution bounds.
     pub tool_limits: ToolLimits,
+    /// Long-term memory (ADR-0041, the runtime's `TQA_MEMORY`): the file tools guard, keep and record the notes under
+    /// `.memory/` (A10); off, that folder is an ordinary one (A11).
+    pub memory: bool,
     /// Retry jitter; production supplies `ThreadRngJitter` from the provider crate.
     pub jitter: Box<dyn Jitter>,
     /// Admin-declared fallback routes, in order; empty keeps every run on `route` (ADR-0025).
@@ -116,6 +119,7 @@ pub struct Runner {
     workspace: WorkspaceRoot,
     env_allow: Vec<String>,
     tool_limits: ToolLimits,
+    memory: bool,
     jitter: Mutex<Box<dyn Jitter>>,
     fallbacks: Vec<RouteProvider>,
     gateway_link: Option<Arc<dyn crate::GatewayLink>>,
@@ -161,6 +165,7 @@ impl Runner {
             workspace: deps.workspace,
             env_allow: deps.env_allow,
             tool_limits: deps.tool_limits,
+            memory: deps.memory,
             jitter: Mutex::new(deps.jitter),
             fallbacks: deps.fallback_routes,
             gateway_link: deps.gateway_link,

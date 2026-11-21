@@ -128,6 +128,21 @@ pub struct ToolContext {
     pub env_allow: Vec<String>,
     /// Explicit operation and traversal ceilings.
     pub limits: ToolLimits,
+    /// Long-term memory's note writer (ADR-0041's third amendment, A10, A11): who makes this call, when memory is on.
+    /// `None` means memory is off and `.memory/` is an ordinary folder: no key guard, no kept version, no record.
+    pub memory: Option<NoteWriter>,
+}
+
+/// Who writes a memory note through a file tool: the task, its run and the model's call, as the undo record keeps them
+/// (A10). A call id is the model's and not unique alone, so all three are kept.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct NoteWriter {
+    /// The task (conversation) whose run makes the call.
+    pub task: tqa_types::ConversationId,
+    /// The run.
+    pub run: tqa_types::RunId,
+    /// The model's call.
+    pub call: tqa_types::ToolCallId,
 }
 impl ToolContext {
     pub(crate) fn check(&self) -> Result<(), ToolError> {

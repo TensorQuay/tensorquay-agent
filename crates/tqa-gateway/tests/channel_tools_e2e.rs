@@ -43,6 +43,7 @@ fn context() -> Result<(tempfile::TempDir, ToolContext)> {
         sleeper: Arc::new(tqa_testkit::FakeSleeper::new(clock)),
         env_allow: vec![],
         limits: tqa_tools::ToolLimits::RECOMMENDED,
+        memory: None,
     };
     Ok((directory, cx))
 }

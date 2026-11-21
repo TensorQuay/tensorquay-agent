@@ -14,6 +14,7 @@ async fn tool_u_006_eperm_then_esrch_probe_preserves_primary_result() -> Result<
         sleeper: Arc::new(FakeSleeper::new(clock)),
         env_allow: vec![],
         limits: ToolLimits::RECOMMENDED,
+        memory: None,
     };
     let mut command = Command::new("true");
     command.process_group(0).kill_on_drop(true);

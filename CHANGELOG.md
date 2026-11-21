@@ -39,7 +39,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   a note over the API (`/conversations/{id}/memory/{name}`, with a write share). When a person's run completes, the
   gateway writes the task's digest (its title, the day, the files it changed, the first lines of the answer; no
   model call) into that person's private folder of the workspace, which the Files panel does not show and no other
-  person's run lists. Off, a run sends exactly what it sends today. Still to come before it is turned on:
+  person's run lists. Off, the default, a run sends exactly what it sends today and
+  `.memory/` is an ordinary folder: the file tools neither guard nor keep anything there, and the memory routes answer
+  `409 memory_off` (TOOL-U-158, GW-I-393). Still to come before it is turned on:
   "Remembered" with Undo on the page, personal notes with Settings › Memory, and history.
 
 - **A person's post to the whole channel reaches its agents.** A person's post that names no one wakes every agent

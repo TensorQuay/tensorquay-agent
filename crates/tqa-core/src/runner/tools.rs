@@ -117,7 +117,7 @@ impl Execution<'_> {
             return Ok(());
         };
         self.reserve_failure_slot(call).await?;
-        let cx = self.tool_context();
+        let cx = self.tool_context(&call.id);
         // The screen before an action, journaled ahead of its start (ADR-0039 "The record"); kept or not, the action
         // goes on. Taken only for the desktop's own tool, and when there is a store to keep it in.
         let before = if self.runner.screen_store.is_some() && call.name == "computer" {
@@ -147,8 +147,10 @@ impl Execution<'_> {
         });
         Ok(())
     }
-    /// A tool call's context: the run's workspace, clock and limits, cancelled with the run's children.
-    fn tool_context(&self) -> ToolContext {
+    /// A tool call's context: the run's workspace, clock and limits, cancelled with the run's children. With long-term
+    /// memory on, the call's writer (this task, its run and the model's call), so a note it changes is recorded for an
+    /// Undo (ADR-0041's third amendment, A10); off, none, and `.memory/` is an ordinary folder (A11).
+    fn tool_context(&self, call: &tqa_types::ToolCallId) -> ToolContext {
         ToolContext {
             workspace: self.runner.workspace.clone(),
             cancel: self.children.child_token(),
@@ -156,6 +158,16 @@ impl Execution<'_> {
             sleeper: self.runner.sleeper.clone(),
             env_allow: self.runner.env_allow.clone(),
             limits: self.runner.tool_limits,
+            memory: self
+                .context
+                .run_id
+                .clone()
+                .filter(|_| self.runner.memory)
+                .map(|run| tqa_tools::NoteWriter {
+                    task: self.runner.conversation_id.clone(),
+                    run,
+                    call: call.clone(),
+                }),
         }
     }
     /// A refusal (`refused`), with what the tool adds when it is the second identical failure since the last change
@@ -180,7 +192,7 @@ impl Execution<'_> {
         if failed.recent != 1 {
             return Ok(text);
         }
-        let cx = self.tool_context();
+        let cx = self.tool_context(&call.id);
         let note = self
             .watch()
             .wait(registry.repeated_refusal(&call.name, &call.arguments, &cx))

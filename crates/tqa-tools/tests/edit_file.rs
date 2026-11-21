@@ -813,10 +813,46 @@ async fn tool_u_151_a_replaced_note_keeps_its_previous_version_for_one_undo() ->
             &cx,
         )
         .await?;
-    let names: Vec<_> = fs::read_dir(fixture.root().join(".memory/.undo"))?
+    let mut names: Vec<_> = fs::read_dir(fixture.root().join(".memory/.undo"))?
         .filter_map(Result::ok)
         .map(|entry| entry.file_name())
         .collect();
+    names.sort();
+    // The kept version, for the note only.
     assert_eq!(names, ["build.md"]);
+    Ok(())
+}
+
+// TEST: TOOL-U-158
+// Memory off (ADR-0041's third amendment, A11): `.memory/` is an ordinary folder. A run without a note writer (the
+// runtime's TQA_MEMORY unset) saves there as anywhere: no key guard, no kept version, no mark.
+#[tokio::test]
+async fn tool_u_158_with_memory_off_the_memory_folder_is_an_ordinary_folder() -> TestResult {
+    use tqa_tools::builtin::WriteFile;
+    let fixture = workspace_fixture()?;
+    let mut cx = support::context(&fixture);
+    cx.memory = None;
+    let key = made_up_key();
+    let text = format!("about: the deploy key\n\nThe key is {key}\n");
+    WriteFile::new()
+        .call(
+            json!({"path": ".memory/deploy.md", "create_parents": true, "content": text}),
+            &cx,
+        )
+        .await?;
+    assert_eq!(
+        fs::read_to_string(fixture.root().join(".memory/deploy.md"))?,
+        text
+    );
+    EditFile::new()
+        .call(
+            request(".memory/deploy.md", "the deploy key", "the key"),
+            &cx,
+        )
+        .await?;
+    assert!(
+        !fixture.root().join(".memory/.undo").exists(),
+        "nothing kept or marked with memory off"
+    );
     Ok(())
 }

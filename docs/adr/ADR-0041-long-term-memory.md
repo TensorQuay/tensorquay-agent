@@ -109,6 +109,13 @@ detected from the folder (section 4) and the default (section 6), found while bu
 - **A8. History's scope (section 5) is decided:** a person's own tasks only (the Product Owner's delegation of 20 Nov
   2026).
 
+**Third amendment, 21 Nov 2026, before any release: memory off (A11).**
+
+- **A11. Memory off is an ordinary folder.** The runtime hands the file tools the note writer only with `TQA_MEMORY=1`.
+  Off, `.memory/` is a folder like any other: no key guard, no kept version, no mark. A person's write, removal and
+  Undo there answer `409 memory_off` (the files operations still work on it as on any folder). No protocol revision
+  and no new gateway-to-runtime message. Test rows: TOOL-U-158, CORE-U-094, GW-I-393; GW-I-356 runs with memory on.
+
 ## Consequences
 
 - People stop repeating themselves; agents learn a workspace's conventions once.

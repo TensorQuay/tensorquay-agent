@@ -29,5 +29,17 @@ pub(crate) fn context(fixture: &WorkspaceFixture) -> ToolContext {
         sleeper: Arc::new(RealTime),
         env_allow: vec![],
         limits: ToolLimits::RECOMMENDED,
+        // Memory on, as a run with TQA_MEMORY=1 has it: the file tools guard, keep and record notes (ADR-0041). A test
+        // of memory off sets this to None.
+        memory: note_writer(),
     }
+}
+
+/// The writer the file tools record for a note in these tests (always parses).
+pub(crate) fn note_writer() -> Option<tqa_tools::NoteWriter> {
+    Some(tqa_tools::NoteWriter {
+        task: "01a1f9c3-f35b-7207-bbdf-1540a49b989f".parse().ok()?,
+        run: "r-1".parse().ok()?,
+        call: "call-1".parse().ok()?,
+    })
 }

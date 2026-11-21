@@ -111,6 +111,7 @@ fn context(directory: &tempfile::TempDir) -> Result<ToolContext, ToolError> {
         sleeper: Arc::new(FakeSleeper::new(clock)),
         env_allow: vec![],
         limits: ToolLimits::RECOMMENDED,
+        memory: None,
     })
 }
 

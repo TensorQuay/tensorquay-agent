@@ -404,6 +404,7 @@ async fn tool_i_013_the_supervisor_registers_a_connector_whose_calls_name_their_
         sleeper: Arc::new(tqa_testkit::FakeSleeper::new(clock)),
         env_allow: vec![],
         limits: tqa_tools::ToolLimits::RECOMMENDED,
+        memory: None,
     };
     let action = tqa_tools::PreparedAction::new(
         tqa_tools::ToolName::mcp("tracker", "search")?,
@@ -497,6 +498,7 @@ async fn sec_040_connector_text_is_marked_untrusted_and_cannot_close_its_marker(
         sleeper: Arc::new(tqa_testkit::FakeSleeper::new(clock)),
         env_allow: vec![],
         limits: tqa_tools::ToolLimits::RECOMMENDED,
+        memory: None,
     };
     let call = |q: &str| {
         tqa_tools::PreparedAction::new(
