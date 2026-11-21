@@ -66,6 +66,21 @@ whether the account is **Active** or **Disabled**.
 - **Tasks:** opens the list of that person's tasks. Administrators see a task's details (owner, dates, environment,
   model and state), never its content.
 
+### Reset a password
+<!-- Tests: GW-I-390. -->
+People change their own password from their account page. When someone can't sign in to do it, for example the only
+administrator, set a new one from the host with the gateway's configuration file. The new password is read from
+standard input, so it never shows in the process list or the shell's history:
+
+```sh
+docker compose exec -T gateway tqa-gateway reset-password ana@example.com /etc/tqa/gateway.toml
+```
+
+Type the password and press Enter (or pipe it in). It must meet the same rules as a person's own change: at least 12
+characters, not the email or a common password. The person's sessions end at once; their API tokens keep working, as
+after their own change. The command prints the account's email, or why it refused: no active account uses that email,
+or the password is too weak. The change is recorded in the audit as the gateway's own, never with the password.
+
 ## Sandboxes
 <!-- The Sandboxes page design note (docs/design/sandboxes-page.md); its test rows are claimed after v18.0.0. -->
 Sandboxes lists every running sandbox across people: who owns it, its environment, whether it is **Starting**,
@@ -172,8 +187,8 @@ a few tokens; it can take up to a minute. A local model (on this computer or you
 `localhost`, the container host, a single-label name such as a compose service like `ollama`, a `.local` or
 `.internal` name, or a private, link-local or Tailscale address; or a route without a key) is checked by its
 progress instead: each answer may take 2 minutes to start (`[relay] local_check_timeout` in `gateway.toml`, 1-600
-seconds), and then the check waits as long as the model keeps answering, with no pause longer than `[relay]
-idle_timeout` (60 seconds by default), for up to 10 minutes in all. A model on a computer without a suitable GPU can
+seconds), and then the check waits as long as the model keeps answering, with no pause longer than a minute (or `[relay] idle_timeout`
+when that is lower), for up to 10 minutes in all. A model on a computer without a suitable GPU can
 take minutes: the dialog says "Checking… local models can take a minute or two.", and after the first minute how long
 it has waited. A check that runs out of time says what to do next: for a local model, that it may be busy with another
 task or slow on this computer, to try again when it's idle, and that setting; for another route, to try again in a

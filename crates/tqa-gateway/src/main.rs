@@ -50,6 +50,23 @@ async fn run() -> Result<(), GatewayError> {
     if first.as_deref() == Some(std::ffi::OsStr::new("check")) {
         return check(arguments).await;
     }
+    if first.as_deref() == Some(std::ffi::OsStr::new("reset-password")) {
+        let email = arguments
+            .next()
+            .and_then(|value| value.into_string().ok())
+            .ok_or(GatewayError::Configuration(
+                "reset-password requires the account's email",
+            ))?;
+        let path = arguments
+            .next()
+            .map_or_else(|| PathBuf::from("gateway.toml"), PathBuf::from);
+        if arguments.next().is_some() {
+            return Err(GatewayError::Configuration(
+                "unexpected reset-password argument",
+            ));
+        }
+        return reset_password(&path, &email).await;
+    }
     if first.as_deref() == Some(std::ffi::OsStr::new("rotate-host-ca")) {
         let path = arguments
             .next()
@@ -68,6 +85,37 @@ async fn run() -> Result<(), GatewayError> {
         ));
     }
     serve(path).await
+}
+
+/// `tqa-gateway reset-password <email> [gateway.toml]`: the new password is the first line of standard input (never an
+/// argument, which the process list and the shell's history would keep); the person's sessions end.
+async fn reset_password(path: &std::path::Path, email: &str) -> Result<(), GatewayError> {
+    use std::io::{BufRead as _, Write as _};
+    let mut line = String::new();
+    std::io::stdin().lock().read_line(&mut line).map_err(|_| {
+        GatewayError::Configuration("reset-password reads the new password from standard input")
+    })?;
+    let password = line.trim_end_matches(['\n', '\r']).to_owned();
+    if password.is_empty() {
+        return Err(GatewayError::Configuration(
+            "reset-password reads the new password from standard input",
+        ));
+    }
+    let cancel = CancellationToken::new();
+    let config = GatewayConfig::read(path, &cancel).await?;
+    let email = tqa_gateway::reset_password(
+        &config,
+        &GatewaySecrets::from_env()?,
+        email,
+        secrecy::SecretString::from(password),
+        &cancel,
+    )
+    .await?;
+    let _ = writeln!(
+        std::io::stdout(),
+        "password reset for {email}; their sessions have ended"
+    );
+    Ok(())
 }
 
 /// `tqa-gateway rotate-host-ca [gateway.toml]`: a new install CA for host keys in `[host_keys] ca_directory` (ADR-0037

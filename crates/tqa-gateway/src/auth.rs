@@ -16,6 +16,8 @@ mod policy_tests;
 #[cfg(test)]
 mod primitive_tests;
 mod rate;
+mod reset;
+pub use reset::{reset_password, reset_password_in};
 pub(crate) mod token;
 
 pub(crate) use password::Passwords;

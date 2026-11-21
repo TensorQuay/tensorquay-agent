@@ -7,6 +7,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Added
 
+- **An administrator can reset a password from the host (GW-I-390).** `tqa-gateway reset-password <email>
+  [gateway.toml]` reads the new password from standard input, applies the same rules as a person's own change, ends
+  that person's sessions and records the change in the audit, for when no one can sign in to do it from the page.
 - **Install in one command (INST-U-001, INST-I-001).** From a release's checkout, `deploy/install.sh` asks where
   people will open TensorQuay Agent, which model server to use (or none, for a first try with the test model) and who
   the first administrator is. It then pulls the release, writes what the guide's steps make by hand, starts it, and
