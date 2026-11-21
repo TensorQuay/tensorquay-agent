@@ -11,6 +11,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   people will open TensorQuay Agent, which model server to use (or none, for a first try with the test model) and who
   the first administrator is. It then pulls the release, writes what the guide's steps make by hand, starts it, and
   creates that administrator. It never changes an existing installation. The guide's steps by hand stay as they are.
+  An install that stopped partway is finished by running it again, with the answers it was given (INST-U-002); a
+  network error while creating the administrator is said in words with the way on; the test model starts again with
+  Docker. On rootful Docker, when the computer's uid 1000 is another person's account, it says that person will be able
+  to read the installation's keys and stops unless told to go on (`--keys-readable-by-uid-1000`); the guide says so too.
 - **Channels work on their own: a channel wakes its agent members (ADR-0014's amendment of 20 Nov 2026; GW-I-344 to
   GW-I-355).** A proposal, a to-do, a post naming an agent (`@` and its task's name) or a reply to it starts that
   agent's task, which is told what waits and reads it; several posts at once make one wake, and a busy task's wake

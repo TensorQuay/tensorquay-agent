@@ -128,9 +128,11 @@ Workstation at its first start, even when this build had no `--workstation`. Bef
 - **Without a model server**, build with `--fake-model` and use the test model as the route. In step 1 set
   `TQA_MODEL_BASE_URL='http://tqa-fake-model:8080/v1'` and `TQA_MODEL='fixture'`, and put any placeholder in the key
   file. After step 3 has started the stack, run it on the stack's control network:
-  `docker run -d --name tqa-fake-model --network tqa_control tqa-fake-model:local` (with `COMPOSE_PROJECT_NAME` set,
-  the network is `<that name>_control`). It follows a fixed script whatever the task says: it creates
-  `hello/README.md` and runs one command. That's enough to see a task run end to end, but it's not an assistant.
+  `docker run -d --restart unless-stopped --name tqa-fake-model --network tqa_control tqa-fake-model:local` (with
+  `COMPOSE_PROJECT_NAME` set, the network is `<that name>_control`). It isn't one of the stack's services: the restart
+  policy starts it again with Docker, and `docker start tqa-fake-model` does after you have stopped it. It follows a
+  fixed script whatever the task says: it creates `hello/README.md` and runs one command. That's enough to see a task
+  run end to end, but it's not an assistant.
 
 More environments come from recipes: `deploy/build-environment.sh recipe.toml` adds packages to a built-in and tags the
 image `tqa-env:<name>` for the Environments page (the admin guide's Environments section has a recipe and each message).
@@ -253,6 +255,12 @@ the file doesn't clear one: a description set in **Settings › Environments** s
 Give the container account its files, then fetch the images and start. Pull an image only when it is a registry
 reference: images from step 0 (a bare local ID `sha256:...` or a `:local` tag) are already on this host and are never
 pulled.
+
+**On rootful Docker, on a computer with more than one account, check who uid 1000 is first.** The gateway's account
+in its container is uid 1000, and the `chown` below gives it the installation's keys (`install.key`, `secrets.toml`)
+and its storage on this computer too. If `getent passwd 1000` names another person, that person will be able to read
+the keys, and you won't without sudo: use [rootless Docker](#rootless-docker) instead. `deploy/install.sh` says this
+and stops unless you add `--keys-readable-by-uid-1000`.
 
 ```sh
 case "$TQA_RUNTIME_IMAGE" in sha256:*) ;; *) docker pull "$TQA_RUNTIME_IMAGE" ;; esac
