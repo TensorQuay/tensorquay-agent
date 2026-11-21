@@ -1,14 +1,25 @@
 "use client";
 
 import "./catalogue";
-import type { ReactNode } from "react";
+import {
+  Bot,
+  ChevronDown,
+  ChevronUp,
+  FileText,
+  MessageSquare,
+} from "lucide-react";
+import { type ReactNode, useState } from "react";
 
 import { useT } from "../i18n/I18nProvider";
 import { formatSize } from "../i18n/message";
 import type { MessageKey, Translate } from "../i18n/translate";
 import { DeferredMarkdown } from "../transcript/DeferredMarkdown";
+import { knownFailure } from "../transcript/failure-keys";
 import { Button } from "../ui/Button";
+import { Icon } from "../ui/Icon";
 
+import { resetTime } from "./budget-time";
+import { initials } from "./ChannelHeader";
 import type {
   Author,
   ChannelMessage,
@@ -19,11 +30,6 @@ import type {
   VoteChoice,
 } from "./contract";
 
-const ROLES: Readonly<Record<Member["role"], MessageKey>> = {
-  lead: "channels.roleLead",
-  member: "channels.roleMember",
-  observer: "channels.roleObserver",
-};
 const CHOICES: Readonly<Record<VoteChoice, MessageKey>> = {
   accept: "channels.choiceAccept",
   reject: "channels.choiceReject",
@@ -40,6 +46,56 @@ const WEB_LINK = /^https?:\/\//i;
 const GROUP_MS = 5 * 60_000;
 
 /** An author as people read it: a person's name, or an agent's profile and its owner ("Coder · alice"). */
+/** A gateway notice's words by its kind (ADR-0014's amendment of 20 Nov 2026). */
+const NOTICES: Readonly<Record<string, MessageKey>> = {
+  wake_budget_80: "channels.noticeBudget80",
+  wake_budget_spent: "channels.noticeBudgetSpent",
+  wakes_bounded: "channels.noticeBounded",
+  unreachable_runtime: "channels.noticeUnreachable",
+  member_deleted: "channels.noticeDeleted",
+  wake_budget_set: "channels.noticeBudgetSet",
+  woken_run_stopped: "channels.noticeRunStopped",
+};
+
+/**
+ * An agent member's name as Members shows it to this viewer: its name in the channel, or, to its owner, the title of
+ * their own agent added before names (C-9). Notices about a member use it too, so two old agents never read as one
+ * "Agent" to their owner (C-15).
+ */
+export function memberShown(item: Member): string {
+  return item.kind === "conversation" &&
+    item.named === false &&
+    item.title !== undefined
+    ? item.title
+    : item.name;
+}
+
+/** The member a notice is about, as {@link memberShown} names it; by the notice's own word when it isn't a member. */
+function noticeMember(
+  body: { member?: string; member_id?: string },
+  members: readonly Member[],
+): string {
+  const member = body.member_id
+    ? members.find(
+        (item) => item.kind === "conversation" && item.id === body.member_id,
+      )
+    : undefined;
+  return member ? memberShown(member) : (body.member ?? "");
+}
+
+/** A name with break opportunities after "@" and "." only, so an e-mail wraps at sensible places (WEB-E2E-149). */
+export function breakable(name: string): ReactNode {
+  const parts = name.split(/(?<=[@.])/);
+  return parts.length < 2
+    ? name
+    : parts.map((part, index) => (
+        <span key={index}>
+          {part}
+          {index < parts.length - 1 && <wbr />}
+        </span>
+      ));
+}
+
 export function authorName(author: Author, members: readonly Member[]) {
   const member = members.find(
     (item) => item.kind === author.kind && item.id === author.id,
@@ -113,10 +169,16 @@ export function ChannelTimeline({
   onReply,
   after,
   fileHref,
+  onThread,
+  label,
 }: {
   messages: readonly ChannelMessage[];
   members: readonly Member[];
   onReply?: (seq: number) => void;
+  /** Opens a post's thread (WEB-U-523): the log then shows "N replies" in place of the replies. */
+  onThread?: (seq: number) => void;
+  /** The list's name; the channel's log by default. */
+  label?: string;
   /** Where a post's file downloads from, by its seq and index (ADR-0014's amendment of 20 Nov 2026, A9). */
   fileHref?: (seq: number, index: number) => string;
   /** Extra content under a post, by seq: a proposal's tally and controls, a task's claim state. */
@@ -131,6 +193,12 @@ export function ChannelTimeline({
   for (const { seq, body } of messages)
     if (body.type === "proposal" || body.type === "task")
       titles[body.type].set(seq, body.title);
+  // A decided proposal's text folds with its votes (WEB-U-521).
+  const decided = new Set(
+    messages.flatMap((message) =>
+      message.body.type === "decision" ? [message.body.proposal_seq] : [],
+    ),
+  );
   const replies = new Map<number, ChannelMessage[]>();
   for (const message of messages)
     if (message.parent != null && known.has(message.parent))
@@ -165,24 +233,49 @@ export function ChannelTimeline({
           members={members}
           titles={titles}
           continued={continues(message, list[index - 1])}
+          decided={decided.has(message.seq)}
           {...(onReply ? { onReply } : {})}
           {...(fileHref ? { fileHref } : {})}
           extra={after?.(message)}
         >
-          {thread.length > 0 && (
-            <ul
-              className="channel-replies"
-              aria-label={t("channels.repliesTo", { seq: message.seq })}
-            >
-              {thread.map(render)}
-            </ul>
-          )}
+          {thread.length > 0 &&
+            (onThread ? (
+              // The first replies show in the log without a click (decided on 20 Nov 2026, C-10): an agent's answer
+              // is a reply, and the log mustn't look silent while the work is done. The rest open the thread.
+              <>
+                <ul
+                  className="channel-replies"
+                  aria-label={t("channels.repliesTo", { seq: message.seq })}
+                >
+                  {thread.slice(0, INLINE_REPLIES).map(render)}
+                </ul>
+                <button
+                  type="button"
+                  className="proposal-fold type-small"
+                  onClick={() => onThread(message.seq)}
+                >
+                  <Icon glyph={MessageSquare} size={16} />
+                  {thread.length > INLINE_REPLIES
+                    ? t("channels.moreReplies", {
+                        count: thread.length - INLINE_REPLIES,
+                      })
+                    : t("channels.repliesCount", { count: thread.length })}
+                </button>
+              </>
+            ) : (
+              <ul
+                className="channel-replies"
+                aria-label={t("channels.repliesTo", { seq: message.seq })}
+              >
+                {thread.map(render)}
+              </ul>
+            ))}
         </Post>
       </li>
     );
   };
   return (
-    <ol className="channel-log" aria-label={t("channels.log")}>
+    <ol className="channel-log" aria-label={label ?? t("channels.log")}>
       {top.map(render)}
     </ol>
   );
@@ -193,6 +286,7 @@ function Post({
   members,
   titles,
   continued,
+  decided,
   onReply,
   fileHref,
   extra,
@@ -203,6 +297,8 @@ function Post({
   titles: Titles;
   /** Whether it continues the author's previous post, whose header it shares. */
   continued: boolean;
+  /** Whether it is a proposal whose decision is in the log: its text folds (WEB-U-521). */
+  decided: boolean;
   onReply?: (seq: number) => void;
   fileHref?: (seq: number, index: number) => string;
   extra: ReactNode;
@@ -215,8 +311,18 @@ function Post({
   const member = members.find(
     (item) => item.kind === author.kind && item.id === author.id,
   );
-  const tinted = body.type === "decision";
-  const line = ["vote", "claim", "done"].includes(body.type);
+  // The page's name for the author (WEB-U-520): an agent by its task's name, never its owner (who is in Members).
+  const shown = gateway
+    ? name
+    : author.kind === "conversation"
+      ? (member?.title ?? author.name ?? member?.name ?? author.id)
+      : name;
+  const agent = author.kind === "conversation";
+  const tinted = false;
+  // Events are one muted line each (WEB-U-520): a vote, a claim, the end, a decision, a notice.
+  const line = ["vote", "claim", "done", "decision", "notice"].includes(
+    body.type,
+  );
   return (
     <article
       id={`post-${message.seq}`}
@@ -227,28 +333,34 @@ function Post({
       data-continued={continued || undefined}
       aria-label={`#${message.seq} ${name}`}
     >
+      {!continued && !line && (
+        <span
+          className="channel-avatar channel-post-avatar"
+          data-agent={agent || undefined}
+          aria-hidden
+        >
+          {agent ? <Icon glyph={Bot} size={16} /> : initials(shown)}
+        </span>
+      )}
       <header className="channel-post-head type-small">
-        {!continued && (
+        {!continued && !(line && gateway) && (
           <span className="channel-post-who">
-            <span className="type-body-strong">{name}</span>
-            {author.kind === "conversation" && (
-              <span className="muted">{t("channels.kindAgent")}</span>
-            )}
-            {member && member.role !== "member" && (
-              <span className="status-pill type-label" data-tone="info">
-                {t(ROLES[member.role])}
-              </span>
-            )}
+            <span className="type-body-strong channel-post-name">
+              {breakable(shown)}
+            </span>
+            {agent && <span className="muted">{t("channels.kindAgent")}</span>}
           </span>
         )}
-        {/* Seq, time and Reply are quiet: shown on hover or focus, and always on touch screens (channels.css). */}
+        {/* Time and Reply are quiet: shown on hover or focus, and always on touch screens (channels.css). The time is
+            the post's link; no seq number is on the screen (WEB-U-520). */}
         <span className="channel-post-meta muted">
-          <a href={`#post-${message.seq}`}>{`#${message.seq}`}</a>
-          <time dateTime={message.ts}>
-            {new Intl.DateTimeFormat(t.locale, { timeStyle: "short" }).format(
-              new Date(message.ts),
-            )}
-          </time>
+          <a href={`#post-${message.seq}`}>
+            <time dateTime={message.ts}>
+              {new Intl.DateTimeFormat(t.locale, {
+                timeStyle: "short",
+              }).format(new Date(message.ts))}
+            </time>
+          </a>
           {onReply && !line && (
             <Button
               variant="ghost"
@@ -261,19 +373,32 @@ function Post({
           )}
         </span>
       </header>
-      <Body message={message} titles={titles} />
+      <Body
+        message={message}
+        members={members}
+        titles={titles}
+        decided={decided}
+      />
       {fileHref && message.files && message.files.length > 0 && (
         <ul
-          className="channel-files type-small"
+          className="attachment-chips channel-files type-small"
           aria-label={t("channels.filesOf", { seq: message.seq })}
         >
           {message.files.map((file, index) => (
-            <li key={index}>
-              <a href={fileHref(message.seq, index)} download>
-                {t("channels.file", {
-                  name: file.name,
-                  size: formatSize(file.size, t.locale),
-                })}
+            // A task's sent file's chip (the review of 20 Nov 2026): the file icon, then its name and size.
+            <li key={index} className="attachment-chip" data-status="sent">
+              <a
+                className="attachment-open"
+                href={fileHref(message.seq, index)}
+                download
+              >
+                <Icon glyph={FileText} size={16} />
+                <span className="attachment-name" title={file.name}>
+                  {t("channels.file", {
+                    name: file.name,
+                    size: formatSize(file.size, t.locale),
+                  })}
+                </span>
               </a>
             </li>
           ))}
@@ -285,24 +410,80 @@ function Post({
   );
 }
 
+/** How many of a post's replies the log shows under it before "N more replies" (C-10). */
+const INLINE_REPLIES = 3;
+
+/** A post longer than this many lines folds (WEB-U-522), showing the first {@link FOLDED_LINES}. */
+const FOLD_OVER = 12;
+const FOLDED_LINES = 6;
+
+/**
+ * A long report folded to its first lines, with "Show the whole report · N lines", and back (WEB-U-522, the mock of 17
+ * Nov 2026). Lines are the text's non-empty lines; a short text shows whole. `plain` text isn't Markdown.
+ */
+function Folding({ text, plain = false }: { text: string; plain?: boolean }) {
+  const t = useT();
+  const [open, setOpen] = useState(false);
+  const lines = text.split("\n");
+  const count = lines.filter((line) => line.trim() !== "").length;
+  const folds = count > FOLD_OVER;
+  let shown = text;
+  if (folds && !open) {
+    let seen = 0;
+    const kept: string[] = [];
+    for (const line of lines) {
+      if (line.trim() !== "") seen += 1;
+      if (seen > FOLDED_LINES) break;
+      kept.push(line);
+    }
+    shown = kept.join("\n");
+  }
+  return (
+    <>
+      {plain ? (
+        <p className="message-text">{shown}</p>
+      ) : (
+        <DeferredMarkdown text={shown} />
+      )}
+      {folds && (
+        <button
+          type="button"
+          className="proposal-fold type-small"
+          aria-expanded={open}
+          onClick={() => setOpen(!open)}
+        >
+          <Icon glyph={open ? ChevronUp : ChevronDown} size={16} />
+          {open
+            ? t("channels.showLess")
+            : t("channels.showWholeReport", { count })}
+        </button>
+      )}
+    </>
+  );
+}
+
 function Body({
   message,
+  members,
   titles,
+  decided,
 }: {
   message: ChannelMessage;
+  members: readonly Member[];
   titles: Titles;
+  decided: boolean;
 }) {
   const t = useT();
   const body = message.body;
   switch (body.type) {
     case "text":
-      return <DeferredMarkdown text={body.text} />;
+      return <Folding text={body.text} />;
     case "proposal":
       return (
         <div className="stack">
           <p className="type-label muted">{t("channels.proposal")}</p>
           <p className="type-body-strong">{body.title}</p>
-          <DeferredMarkdown text={body.text} />
+          {!decided && <DeferredMarkdown text={body.text} />}
         </div>
       );
     case "vote":
@@ -359,7 +540,7 @@ function Body({
               {t(copy)}
             </span>
           </p>
-          <p className="message-text">{body.summary}</p>
+          <Folding text={body.summary} plain />
           {body.refs && body.refs.length > 0 && (
             <ul className="channel-refs type-small">
               {body.refs.map((ref) => (
@@ -386,8 +567,37 @@ function Body({
             : t("channels.finished")}
         </p>
       );
-    case "notice":
-      // The gateway's line about the channel itself (ADR-0014's amendment of 20 Nov 2026), as one muted line.
-      return <p className="type-small muted">{body.text}</p>;
+    case "notice": {
+      // The gateway's line about the channel itself (ADR-0014's amendment of 20 Nov 2026), in the reader's words by its
+      // kind (WEB-U-520); a kind this page doesn't know, by the gateway's sentence.
+      const key = NOTICES[body.kind];
+      // A woken run's failure (C-6): its reason as the task page words it, never the code.
+      if (body.kind === "woken_run_failed")
+        return (
+          <p className="type-small muted">
+            {t("channels.noticeRunFailed", {
+              member: noticeMember(body, members),
+              reason: t(
+                knownFailure(body.code ?? "", body.refusal ?? "")?.reason ??
+                  "run.stoppedUnknown",
+              ),
+            })}
+          </p>
+        );
+      // A used-up daily budget says when agents are woken again, in the reader's own time (C-14).
+      if (body.kind === "wake_budget_spent" && body.resets_at)
+        return (
+          <p className="type-small muted">
+            {t("channels.noticeBudgetSpentUntil", {
+              time: resetTime(body.resets_at, t.locale),
+            })}
+          </p>
+        );
+      return (
+        <p className="type-small muted">
+          {key ? t(key, { member: noticeMember(body, members) }) : body.text}
+        </p>
+      );
+    }
   }
 }

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT m.conversation_id AS \"conversation!\", c.title FROM channel_members m JOIN conversations c ON c.id = m.conversation_id WHERE m.channel_id = $1 AND m.conversation_id IS NOT NULL AND m.role <> 'observer' AND c.state = 'active' ORDER BY m.added_at",
+  "query": "SELECT conversation_id AS \"conversation!\", name AS \"name!\" FROM channel_members WHERE channel_id = $1 AND conversation_id IS NOT NULL AND name IS NOT NULL",
   "describe": {
     "columns": [
       {
@@ -16,12 +16,12 @@
       },
       {
         "ordinal": 1,
-        "name": "title",
+        "name": "name!",
         "type_info": "Text",
         "origin": {
           "Table": {
-            "table": "conversations",
-            "name": "title"
+            "table": "channel_members",
+            "name": "name"
           }
         }
       }
@@ -33,8 +33,8 @@
     },
     "nullable": [
       true,
-      false
+      true
     ]
   },
-  "hash": "288d988c85b6eb01337885f3642d614f88e7495d6ad9d913f62a6adf131332aa"
+  "hash": "203da4e8cc6d6784af82fd8870cb78a0789db05a23075596ae99abe8cfa5b65e"
 }

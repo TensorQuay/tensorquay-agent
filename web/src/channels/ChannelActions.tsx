@@ -1,7 +1,7 @@
 "use client";
 
 import "./catalogue";
-import { CircleStop, Trash2 } from "lucide-react";
+import { CircleStop, Gauge, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 import { useT } from "../i18n/I18nProvider";
@@ -37,10 +37,16 @@ const LABELS: Readonly<Record<Action, MessageKey>> = {
  */
 export function ChannelActions({
   channel,
+  manage,
+  onBudget,
   onEnd,
   onDelete,
 }: {
   channel: Channel;
+  /** The owner or an administrator: End and Delete. */
+  manage: boolean;
+  /** Opens the wake budget, which every member reads (C-1, WEB-U-529). */
+  onBudget: () => void;
   onEnd: () => Promise<void>;
   onDelete: () => Promise<void>;
 }) {
@@ -48,8 +54,11 @@ export function ChannelActions({
   const [asking, setAsking] = useState<Action | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const actions: Action[] =
-    channel.state === "open" ? ["end", "delete"] : ["delete"];
+  const actions: Action[] = !manage
+    ? []
+    : channel.state === "open"
+      ? ["end", "delete"]
+      : ["delete"];
   async function confirm(action: Action) {
     setPending(true);
     setError(null);
@@ -66,16 +75,24 @@ export function ChannelActions({
     <div className="channel-actions">
       <ActionMenu
         label={t("channels.moreActions", { name: channel.name })}
-        actions={actions.map((action) => ({
-          id: action,
-          label: t(LABELS[action]),
-          icon: action === "end" ? CircleStop : Trash2,
-          danger: action === "delete",
-          onSelect: () => {
-            setError(null);
-            setAsking(action);
+        actions={[
+          {
+            id: "budget",
+            label: t("channels.budgetMenu"),
+            icon: Gauge,
+            onSelect: onBudget,
           },
-        }))}
+          ...actions.map((action) => ({
+            id: action,
+            label: t(LABELS[action]),
+            icon: action === "end" ? CircleStop : Trash2,
+            danger: action === "delete",
+            onSelect: () => {
+              setError(null);
+              setAsking(action);
+            },
+          })),
+        ]}
       />
       {asking && (
         <ConfirmDialog

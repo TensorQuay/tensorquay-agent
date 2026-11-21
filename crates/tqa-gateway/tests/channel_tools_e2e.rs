@@ -2,8 +2,9 @@
 //! routes (ADR-0014 point 6). A member run lists its channels, posts once per call key and reads what it posted as
 //! marked channel content; a run whose conversation isn't a member gets the gateway's `not_member`. A wait returns as
 //! soon as someone posts, says so when it runs out, and ends promptly when cancelled. A task posted by the run is
-//! claimed once by it (a repeat is its existing claim), refused `already_claimed` to another run when full, and a
-//! message that isn't a task is `not_a_task`.
+//! claimed once by it (a repeat is its existing claim), refused `already_claimed` to another run when full, a
+//! message that isn't a task is `not_a_task`, and a run holding an unreported to-do is refused a second with
+//! `one_at_a_time` (ADR-0014's amendment, A13).
 #[path = "support/fixture.rs"]
 mod support;
 use reqwest::Method;
@@ -302,6 +303,17 @@ async fn tool_i_015_a_task_is_claimed_once_up_to_its_limit(pool: PgPool) -> Test
             .err()
             .ok_or("claimed a text message")?;
         assert!(not_task.model_message().starts_with("not_a_task: "), "{}", not_task.model_message());
+
+        // One open to-do at a time (ADR-0014's amendment, A13): holding #1 unreported, the run is refused a second.
+        let second_task = json!({"channel": id, "type": "task", "title": "Write the notes", "spec": "Two lines"});
+        let posted = post.call_prepared(prepared(post.as_ref(), second_task, "call-task-2")?, &cx).await?.text;
+        let seq: u64 = posted.trim_start_matches("posted #").split(' ').next().ok_or("seq")?.parse()?;
+        let held = claim
+            .call(json!({"channel": id, "task_seq": seq}), &cx)
+            .await
+            .err()
+            .ok_or("a run holding a to-do claimed a second")?;
+        assert!(held.model_message().starts_with("one_at_a_time: You hold to-do 1 "), "{}", held.model_message());
         Ok(())
     })
     .await

@@ -40,6 +40,11 @@ export const settingsOperations = {
   channelMembers: { method: "GET", path: "/api/v1/channels/{id}/members" },
   channelMessages: { method: "GET", path: "/api/v1/channels/{id}/messages" },
   channelPost: { method: "POST", path: "/api/v1/channels/{id}/messages" },
+  channelUpload: { method: "POST", path: "/api/v1/channels/{id}/uploads" },
+  channelUploadDelete: {
+    method: "DELETE",
+    path: "/api/v1/channels/{id}/uploads/{upload}",
+  },
   channelFile: {
     method: "GET",
     path: "/api/v1/channels/{id}/messages/{seq}/files/{index}",
@@ -67,6 +72,7 @@ export const settingsOperations = {
     path: "/api/v1/channels/{id}/members/{kind}/{member}",
   },
   channelEnd: { method: "POST", path: "/api/v1/channels/{id}/end" },
+  channelBudget: { method: "PATCH", path: "/api/v1/channels/{id}" },
   channelDelete: { method: "DELETE", path: "/api/v1/channels/{id}" },
   adminMcpServers: { method: "GET", path: "/api/v1/admin/mcp/servers" },
   adminEgress: { method: "GET", path: "/api/v1/admin/egress" },

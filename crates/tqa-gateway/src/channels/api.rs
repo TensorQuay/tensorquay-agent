@@ -17,8 +17,7 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tqa_types::{
-    Author, AuthorKind, ChannelFilter, ChannelMessage, ChannelPost, ChannelRole, DecisionRule,
-    MAX_CHANNEL_READ,
+    Author, AuthorKind, ChannelFilter, ChannelPost, ChannelRole, DecisionRule, MAX_CHANNEL_READ,
 };
 use uuid::Uuid;
 
@@ -43,6 +42,17 @@ pub(crate) struct ChannelView {
     role: Option<ChannelRole>,
     member_count: i64,
     last_seq: i64,
+    /// The tokens woken runs may spend here: its own budget, or the installation's (ADR-0014's amendment of 20 Nov
+    /// 2026, A5); on one channel's read only.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    wake_budget: Option<i64>,
+    /// What woken runs have spent here today (in the open window); on one channel's read only.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    spent_tokens: Option<i64>,
+    /// When the open budget window ends and spent is 0 again (RFC 3339; decided on 21 Nov 2026, C-3); null while none
+    /// is open; on one channel's read only.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    budget_resets_at: Option<serde_json::Value>,
 }
 
 #[derive(Serialize)]
@@ -69,6 +79,9 @@ impl From<Listed> for ChannelView {
             role: listed.role,
             member_count: listed.member_count,
             last_seq: channel.last_seq,
+            wake_budget: None,
+            spent_tokens: None,
+            budget_resets_at: None,
         }
     }
 }
@@ -102,6 +115,10 @@ pub(crate) struct Member {
     /// `waking`, `idle`, `held` or `unreachable`; absent for a person.
     #[serde(skip_serializing_if = "Option::is_none")]
     state: Option<&'static str>,
+    /// Whether an agent member has a name in the channel (A12): one without shows by its profile's name until its
+    /// owner names it; absent for a person.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    named: Option<bool>,
 }
 
 impl From<MemberView> for Member {
@@ -121,6 +138,7 @@ impl From<MemberView> for Member {
             run_status: view.run_status,
             can_open: view.can_open,
             state: None,
+            named: view.named,
         }
     }
 }
@@ -128,14 +146,6 @@ impl From<MemberView> for Member {
 #[derive(Serialize)]
 pub(crate) struct Members {
     items: Vec<Member>,
-}
-
-/// A page of messages.
-#[derive(Serialize)]
-pub(crate) struct Page {
-    pub(super) messages: Vec<ChannelMessage>,
-    pub(super) next_since: u64,
-    pub(super) more: bool,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -151,6 +161,10 @@ pub(crate) struct NewChannelBody {
 #[serde(deny_unknown_fields)]
 pub(crate) struct RoleBody {
     role: ChannelRole,
+    /// An agent member's name in the channel, set by the agent's owner (its task's title when its owner adds it
+    /// without one).
+    #[serde(default)]
+    name: Option<String>,
 }
 
 pub(super) fn caller(user: &User) -> (Uuid, bool) {
@@ -240,11 +254,34 @@ pub(crate) async fn get(
     let id = channel_id(&id)?;
     crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
         let mut connection = state.pool.acquire().await?;
-        Ok(Json(
-            store::visible(&mut connection, caller(&user), id)
-                .await?
-                .into(),
-        ))
+        let mut view: ChannelView = store::visible(&mut connection, caller(&user), id)
+            .await?
+            .into();
+        // Its wake budget and today's spend, for the page's header (ADR-0014's amendment of 20 Nov 2026, A5): a window
+        // that has ended reads as none, spent 0, even before the sweep renews it (C-3).
+        let spend = sqlx::query!(
+            "SELECT budget, \
+                    CASE WHEN budget_window_start + make_interval(secs => $2) > CURRENT_TIMESTAMP \
+                         THEN spent_tokens ELSE 0 END AS \"spent!\", \
+                    CASE WHEN budget_window_start + make_interval(secs => $2) > CURRENT_TIMESTAMP \
+                         THEN budget_window_start + make_interval(secs => $2) END AS resets \
+             FROM channels WHERE id = $1",
+            id,
+            state.config.channels.budget_window.as_secs_f64()
+        )
+        .fetch_one(&mut *connection)
+        .await?;
+        let installation = i64::try_from(state.config.channels.wake_budget).unwrap_or(i64::MAX);
+        view.wake_budget = Some(spend.budget.unwrap_or(installation));
+        view.spent_tokens = Some(spend.spent);
+        view.budget_resets_at = Some(match spend.resets {
+            Some(at) => serde_json::Value::String(
+                at.format(&time::format_description::well_known::Rfc3339)
+                    .map_err(|_| GatewayError::StoreUnavailable)?,
+            ),
+            None => serde_json::Value::Null,
+        });
+        Ok(Json(view))
     })
     .await
 }
@@ -408,6 +445,11 @@ pub(crate) async fn put_member(
         let mut transaction = state.pool.begin().await?;
         let seen = store::visible(&mut transaction, caller(&user), id).await?;
         may_manage(&mut transaction, (&seen, &user), member, Some(body.role)).await?;
+        // Names are checked, then written: the channel's row is locked first, as claims and posts lock it, so two
+        // members given one name at once get it and a worded refusal (or the next default), never a constraint error.
+        sqlx::query!("SELECT id FROM channels WHERE id = $1 FOR UPDATE", id)
+            .fetch_one(&mut *transaction)
+            .await?;
         let exists = match member {
             MemberId::Conversation(conversation) => {
                 store::conversation_owner(&mut transaction, conversation)
@@ -426,7 +468,46 @@ pub(crate) async fn put_member(
         if !exists {
             return Err(GatewayError::NotFound);
         }
+        // Its name is its owner's to choose (ADR-0014's amendment): checked before anything is written.
+        let name = match (member, body.name.as_deref()) {
+            (MemberId::Conversation(conversation), given) => {
+                let owner = store::conversation_owner(&mut transaction, conversation).await?;
+                let theirs = owner == Some(user.id);
+                if given.is_some() && !theirs {
+                    return Err(GatewayError::Denied("not_agent_owner"));
+                }
+                match given {
+                    Some(given) => Some((store::member_name(given)?, false)),
+                    // ADDED by its owner without one: its task's title, which is theirs to show. A role change of a member
+                    // already here (an agent added before names among them) never names it (SEC-044).
+                    None if theirs && !store::is_member(&mut transaction, id, conversation).await? => {
+                        sqlx::query_scalar!("SELECT title FROM conversations WHERE id = $1", conversation)
+                            .fetch_one(&mut *transaction)
+                            .await
+                            .map(|title| store::member_name(&title).ok())?
+                            .map(|title| (title, true))
+                    }
+                    None => None,
+                }
+            }
+            (MemberId::User(_), Some(_)) => {
+                return Err(GatewayError::ParameterRefused {
+                    field: "name",
+                    said: "Only an agent member has a name of its own here; a person is shown by their account.".into(),
+                });
+            }
+            (MemberId::User(_), None) => None,
+        };
         store::add_member(&mut transaction, id, member, (body.role, Some(user.id))).await?;
+        if let (MemberId::Conversation(conversation), Some((name, default))) = (member, name) {
+            // A default name takes a number when another member has it; a chosen one is refused instead.
+            let name = if default {
+                store::free_name(&mut transaction, id, conversation, &name).await?
+            } else {
+                name
+            };
+            store::set_member_name(&mut transaction, id, conversation, &name).await?;
+        }
         let listed = store::members(&mut transaction, id, caller(&user)).await?;
         transaction.commit().await?;
         listed
@@ -549,7 +630,7 @@ pub(crate) async fn read(
     Authz(user): Authz,
     Path(id): Path<String>,
     RawQuery(raw): RawQuery,
-) -> Result<Json<Page>, GatewayError> {
+) -> Result<Json<super::runtime::Page>, GatewayError> {
     let id = channel_id(&id)?;
     let query = read_query(raw.as_deref())?;
     // People wait on the stream.
@@ -566,10 +647,11 @@ pub(crate) async fn read(
             true,
         )
         .await?;
-        Ok(Json(Page {
+        Ok(Json(super::runtime::Page {
             messages: page.messages,
             next_since: page.next_since,
             more: page.more,
+            woken: None,
         }))
     })
     .await
@@ -689,7 +771,7 @@ pub(super) fn claimed(
 /// `POST /api/v1/channels/{id}/tasks/{seq}/claim`: a voting member claims the task, up to its limit.
 ///
 /// # Errors
-/// `404`, `403 not_member` or `observer`, `409 channel_ended`, `429 channel_rate`, `not_a_task` or `already_claimed`, storage failure.
+/// `404`, `403 not_member` or `observer`, `409 channel_ended`, `429 channel_rate`, `not_a_task`, `one_at_a_time` (an agent) or `already_claimed`, storage failure.
 pub(crate) async fn claim(
     AppState(state): AppState<Arc<State>>,
     Authz(user): Authz,
@@ -838,51 +920,6 @@ pub(crate) async fn proposal(
         }))
     })
     .await
-}
-
-/// Decides the proposals whose window has closed, one transaction each; how many were decided. The gateway runs it
-/// every few seconds (ADR-0014 point 9).
-///
-/// # Errors
-/// Storage failure.
-pub(crate) async fn sweep(state: &State) -> Result<usize, GatewayError> {
-    let due = {
-        let mut connection = state.pool.acquire().await?;
-        store::due_proposals(&mut connection, None, false).await?
-    };
-    let mut decided = 0;
-    for (channel, seq) in due {
-        let mut transaction = state.pool.begin().await?;
-        let decision = store::decide(&mut transaction, channel, seq, false).await?;
-        transaction.commit().await?;
-        if let Some(decision) = decision {
-            state.channels.published(channel, decision.seq);
-            decided += 1;
-        }
-    }
-    // The wakes that are due, the decisions' among them, and any a restart lost or a run held back (A3).
-    super::wake::send(state, None).await?;
-    Ok(decided)
-}
-
-/// How often the sweep decides proposals whose window closed.
-const SWEEP_EVERY: std::time::Duration = std::time::Duration::from_secs(5);
-
-/// Starts the decision sweep.
-pub(crate) fn start(state: &Arc<State>) {
-    let owned = state.clone();
-    state.tasks.spawn(async move {
-        let mut interval = tokio::time::interval(SWEEP_EVERY);
-        interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
-        loop {
-            tokio::select! {biased;
-                () = owned.cancel.cancelled() => break,
-                _ = interval.tick() => if sweep(&owned).await.is_err() && !owned.cancel.is_cancelled() {
-                    tracing::warn!("channel decision sweep failed");
-                },
-            }
-        }
-    });
 }
 
 #[derive(Deserialize)]

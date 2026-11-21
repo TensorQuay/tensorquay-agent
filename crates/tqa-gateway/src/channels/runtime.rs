@@ -3,7 +3,7 @@
 //! member gets `403 not_member`, checked on every call, so a removal takes effect at once. The author is always the
 //! run's conversation.
 use super::{
-    api::{self, Page},
+    api,
     store::{self, MemberId},
 };
 use crate::{GatewayError, app::State, conversations::idempotent::Keyed};
@@ -97,6 +97,18 @@ pub(crate) async fn list(
     .await
 }
 
+/// A page of messages.
+#[derive(Serialize)]
+pub(crate) struct Page {
+    pub(crate) messages: Vec<tqa_types::ChannelMessage>,
+    pub(crate) next_since: u64,
+    pub(crate) more: bool,
+    /// A wait in a run a wake started didn't wait (decided on 20 Nov 2026, C-11): the agent is woken again when more
+    /// arrives, so it ends its turn. Absent otherwise.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) woken: Option<bool>,
+}
+
 /// `GET /runtime/channels/{id}/messages?since&limit&types&parent&task_seq&author_kind&wait`. With `wait` (1 to 300
 /// seconds) it returns as soon as a matching message is past `since`, or an empty page when the wait runs out; the
 /// sandbox sits idle meanwhile, and a caller that goes away ends the wait.
@@ -112,7 +124,19 @@ pub(crate) async fn read(
 ) -> Result<Json<Page>, GatewayError> {
     let conversation = conversation(&state, &headers, peer).await?;
     let id = api::channel_id(&id)?;
-    let query = api::read_query(raw.as_deref())?;
+    let mut query = api::read_query(raw.as_deref())?;
+    // A run a wake started never parks in a wait (C-11): it is answered at once, as a read, and told so; it is woken
+    // again when something for it arrives. Its channel charge marks such a run, from its start to its end.
+    let woken_run = query.wait.is_some()
+        && sqlx::query_scalar!(
+            "SELECT EXISTS (SELECT 1 FROM channel_charges WHERE conversation_id = $1) AS \"woken!\"",
+            conversation
+        )
+        .fetch_one(&state.pool)
+        .await?;
+    if woken_run {
+        query.wait = None;
+    }
     // Subscribed before the first read, so a post committed in between still wakes the wait.
     let mut woken = state.channels.subscribe(id);
     // In `channel_wait`, the member's state is `waiting` for as long as the wait lasts (ADR-0014's amendment, A7).
@@ -144,13 +168,14 @@ pub(crate) async fn read(
                 messages,
                 next_since: page.next_since,
                 more: page.more,
+                woken: woken_run.then_some(true),
             }));
         }
         tokio::select! {
             biased;
             () = state.cancel.cancelled() => return Err(GatewayError::StoreUnavailable),
             () = tokio::time::sleep_until(deadline) => {
-                return Ok(Json(Page { messages: Vec::new(), next_since: query.since, more: false }));
+                return Ok(Json(Page { messages: Vec::new(), next_since: query.since, more: false, woken: None }));
             }
             changed = woken.changed() => {
                 if changed.is_err() {
@@ -223,9 +248,13 @@ pub(crate) async fn post(
     let post = api::parse_post(&bytes)?;
     crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
         let mut transaction = state.pool.begin().await?;
-        let (owner, name) = store::conversation_author(&mut transaction, conversation)
+        let (owner, profile_name) = store::conversation_author(&mut transaction, conversation)
             .await?
             .ok_or(GatewayError::Unauthorized)?;
+        // Its posts carry its name in the channel, as every member sees it (ADR-0014's amendment).
+        let name = store::name_in(&mut transaction, id, conversation)
+            .await?
+            .or(profile_name);
         // The key is scoped to the conversation: another conversation of the same owner may send the same key.
         let keyed = if headers.contains_key("idempotency-key") {
             let route = format!("POST /runtime/channels/{id}/messages as {conversation}");
@@ -277,7 +306,7 @@ pub(crate) async fn post(
 /// limit; a retry returns its claim (`200`).
 ///
 /// # Errors
-/// `401`, `403 not_member` or `observer`, `404`, `409 channel_ended`, `429 channel_rate`, `not_a_task` or `already_claimed`, storage
+/// `401`, `403 not_member` or `observer`, `404`, `409 channel_ended`, `429 channel_rate`, `not_a_task`, `one_at_a_time` (an agent) or `already_claimed`, storage
 /// failure.
 pub(crate) async fn claim(
     AppState(state): AppState<Arc<State>>,
@@ -295,9 +324,13 @@ pub(crate) async fn claim(
         {
             return Err(GatewayError::Denied("observer"));
         }
-        let (_, name) = store::conversation_author(&mut transaction, conversation)
+        let (_, profile_name) = store::conversation_author(&mut transaction, conversation)
             .await?
             .ok_or(GatewayError::Unauthorized)?;
+        // A claim carries the member's name in the channel, as its posts do (C-12).
+        let name = store::name_in(&mut transaction, id, conversation)
+            .await?
+            .or(profile_name);
         let author = Author {
             kind: AuthorKind::Conversation,
             id: conversation.to_string(),

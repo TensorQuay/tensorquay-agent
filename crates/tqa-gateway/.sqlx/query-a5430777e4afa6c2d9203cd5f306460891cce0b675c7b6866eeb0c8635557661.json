@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(m.name, c.profile->>'display_name', c.profile->>'name', 'Agent') AS \"name!\" FROM conversations c LEFT JOIN channel_members m ON m.conversation_id = c.id AND m.channel_id = $1 WHERE c.id = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "a5430777e4afa6c2d9203cd5f306460891cce0b675c7b6866eeb0c8635557661"
+}

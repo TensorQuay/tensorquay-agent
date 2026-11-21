@@ -54,6 +54,7 @@ fn sec_035_each_message_is_one_marked_block_that_its_body_cannot_close() -> Test
         ],
         next_since: 5,
         more: false,
+        woken: false,
     };
     let rendered = format::page("ch-1", &page, format::BUDGET)?;
     // One block per message; each block's own id closes it exactly once. The forged closing tag has an id no block has.
@@ -116,6 +117,7 @@ fn tool_u_019_a_page_stops_at_the_budget_and_says_where_to_continue() -> TestRes
             .collect(),
         next_since: 3,
         more: false,
+        woken: false,
     };
     let rendered = format::page("ch-1", &page, format::BUDGET)?;
     assert!(rendered.len() <= format::BUDGET, "{}", rendered.len());
@@ -130,6 +132,7 @@ fn tool_u_019_a_page_stops_at_the_budget_and_says_where_to_continue() -> TestRes
         messages: vec![],
         next_since: 7,
         more: false,
+        woken: false,
     };
     assert_eq!(
         format::page("ch-1", &empty, format::BUDGET)?,
@@ -255,6 +258,7 @@ fn tool_u_036_an_unrecognised_message_is_an_opaque_marked_block() -> TestResult 
         ],
         next_since: 6,
         more: false,
+        woken: false,
     };
     let rendered = format::page("ch-1", &page, format::BUDGET)?;
     assert!(
@@ -285,6 +289,7 @@ fn tool_u_036_an_unrecognised_message_is_an_opaque_marked_block() -> TestResult 
         messages: vec![big(1), big(2), big(3)],
         next_since: 3,
         more: false,
+        woken: false,
     };
     let rendered = format::page("ch-1", &page, format::BUDGET)?;
     assert!(
@@ -319,6 +324,7 @@ fn tool_u_149_a_read_shows_each_files_workspace_path_inside_the_block() -> TestR
         messages: vec![posted.into()],
         next_since: 12,
         more: false,
+        woken: false,
     };
     let rendered = format::page("ch-1", &page, format::BUDGET)?;
     let block_end = rendered.find("</untrusted-content").ok_or("no block")?;
@@ -354,6 +360,7 @@ fn tool_u_150_a_read_says_a_file_that_didnt_fit_and_why() -> TestResult {
         messages: vec![posted.into()],
         next_since: 12,
         more: false,
+        woken: false,
     };
     let rendered = format::page("ch-1", &page, format::BUDGET)?;
     let inside = &rendered[..rendered.find("</untrusted-content").ok_or("no block")?];
@@ -364,5 +371,32 @@ fn tool_u_150_a_read_says_a_file_that_didnt_fit_and_why() -> TestResult {
         ),
         "{rendered}"
     );
+    Ok(())
+}
+
+// TOOL-U-156 (decided on 20 Nov 2026, C-11): a wait in a woken run is answered at once and marked `woken`; the model
+// reads that it is woken again when something arrives, so it ends its turn. An older gateway's page parses as before.
+#[test]
+fn tool_u_156_a_woken_runs_wait_says_to_end_the_turn() -> TestResult {
+    let end = "You were woken for this channel: you are woken again when something for you arrives, so end your \
+               turn now.\n";
+    let empty: ChannelPage = serde_json::from_value(
+        json!({"messages": [], "next_since": 7, "more": false, "woken": true}),
+    )?;
+    assert_eq!(
+        format::page("ch-1", &empty, format::BUDGET)?,
+        format!("channel ch-1: no new messages; next since=7\n{end}")
+    );
+    let older: ChannelPage =
+        serde_json::from_value(json!({"messages": [], "next_since": 7, "more": false}))?;
+    assert_eq!(
+        format::page("ch-1", &older, format::BUDGET)?,
+        "channel ch-1: no new messages; next since=7\n"
+    );
+    let page: ChannelPage = serde_json::from_value(json!({
+        "messages": [serde_json::to_value(message(3, AuthorKind::User, MessageBody::Text { text: "Go.".into() }))?],
+        "next_since": 3, "more": false, "woken": true
+    }))?;
+    assert!(format::page("ch-1", &page, format::BUDGET)?.ends_with(end));
     Ok(())
 }

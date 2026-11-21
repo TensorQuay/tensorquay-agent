@@ -8,6 +8,9 @@ import type { ChannelsApi } from "./contract";
 import "../protocol/generated/validators.channels";
 
 /** The channel pages' API on one client (the gateway's human channels API; ADR-0014). */
+/** How long a channel upload may take to send and be answered (a file up to the upload limit). */
+const UPLOAD_TIMEOUT_MS = 120_000;
+
 export function gatewayChannelsFor(client: ApiClient): ChannelsApi {
   return {
     channels: (signal) =>
@@ -70,17 +73,49 @@ export function gatewayChannelsFor(client: ApiClient): ChannelsApi {
         (value) => parseApi(value, "ChannelMessage"),
         { parameters: { id, seq: String(seq) }, key },
       ),
-    post: (id, write, key) =>
+    post: (id, write, key, files) =>
       client.request(
         settingsEndpoint("channelPost"),
         (value) => parseApi(value, "ChannelMessage"),
-        { parameters: { id }, body: JSON.stringify(write), key },
+        {
+          parameters: { id },
+          body: JSON.stringify(
+            files && files.length > 0 ? { ...write, files } : write,
+          ),
+          key,
+        },
       ),
-    setMember: (id, kind, member, role) =>
+    // The file is the raw body, as a task's upload is; the gateway sanitises its name (A9).
+    upload: (id, file) =>
+      client.request(
+        settingsEndpoint("channelUpload"),
+        (value) => parseApi(value, "ChannelUpload"),
+        {
+          parameters: { id },
+          query: new URLSearchParams({ name: file.name }),
+          body: file,
+          // A file can take longer than a JSON request to send.
+          timeoutMs: UPLOAD_TIMEOUT_MS,
+        },
+      ),
+    removeUpload: (id, upload) =>
+      client.request(settingsEndpoint("channelUploadDelete"), () => undefined, {
+        parameters: { id, upload },
+      }),
+    setMember: (id, kind, member, role, name) =>
       client.request(
         settingsEndpoint("channelMemberPut"),
         (value) => parseApi(value, "ChannelMember"),
-        { parameters: { id, kind, member }, body: JSON.stringify({ role }) },
+        {
+          parameters: { id, kind, member },
+          body: JSON.stringify(name === undefined ? { role } : { role, name }),
+        },
+      ),
+    setBudget: (id, budget) =>
+      client.request(
+        settingsEndpoint("channelBudget"),
+        (value) => parseApi(value, "Channel"),
+        { parameters: { id }, body: JSON.stringify({ wake_budget: budget }) },
       ),
     removeMember: (id, kind, member) =>
       client.request(settingsEndpoint("channelMemberDelete"), () => undefined, {

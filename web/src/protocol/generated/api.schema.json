@@ -2227,6 +2227,21 @@
         "last_seq": {
           "type": "integer",
           "minimum": 0
+        },
+        "wake_budget": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "spent_tokens": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "budget_resets_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
         }
       }
     },
@@ -2317,6 +2332,9 @@
           ]
         },
         "can_open": {
+          "type": "boolean"
+        },
+        "named": {
           "type": "boolean"
         }
       }
@@ -2575,11 +2593,31 @@
                 "wake_budget_spent",
                 "wakes_bounded",
                 "unreachable_runtime",
-                "member_deleted"
+                "member_deleted",
+                "wake_budget_set",
+                "woken_run_failed",
+                "woken_run_stopped"
               ]
             },
             "text": {
               "type": "string"
+            },
+            "member": {
+              "type": "string"
+            },
+            "member_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "code": {
+              "type": "string"
+            },
+            "refusal": {
+              "type": "string"
+            },
+            "resets_at": {
+              "type": "string",
+              "format": "date-time"
             }
           }
         }
@@ -2666,6 +2704,9 @@
           "minimum": 0
         },
         "more": {
+          "type": "boolean"
+        },
+        "woken": {
           "type": "boolean"
         }
       }

@@ -82,9 +82,10 @@ describe("GW-U-022 browser API contract", () => {
     // ADR-0039 added a desktop task's screen, its notices, its screenshots and its Sign out everywhere here.
     // 18.0 added a folder's site pass for the page preview (WEB-U-470) and the recent egress refusals to the settings
     // table (ADR-0035 point 3). 18.1 added the Sandboxes page's listing and its Stop now to the settings table. 18.2
-    // added a channel post's file download there (ADR-0014's amendment of 20 Nov 2026, A9).
+    // added a channel post's file download there, and the composer's upload and its remove (ADR-0014's amendment of 20
+    // Nov 2026, A9).
     expect(Object.keys(operations)).toHaveLength(50);
-    expect(Object.keys(settingsOperations)).toHaveLength(83);
+    expect(Object.keys(settingsOperations)).toHaveLength(86);
     expect(
       Object.keys(operations).filter((name) => name in settingsOperations),
     ).toEqual([]);

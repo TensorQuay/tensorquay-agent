@@ -38,6 +38,8 @@ pub struct EventStore {
     telemetry: Arc<Telemetry>,
     /// The agent-team reads waiting for their results; absent when agent teams are off (ADR-0034).
     team_reads: Option<Arc<crate::teams::pending::Pending>>,
+    /// The channels' publisher: a woken run that ends badly says so in its channel (C-6), published after the commit.
+    channels: Arc<crate::channels::Hub>,
 }
 
 impl EventStore {
@@ -59,7 +61,13 @@ impl EventStore {
                 .agent_teams
                 .enabled
                 .then(|| Arc::new(crate::teams::pending::Pending::default())),
+            channels: Arc::default(),
         }
+    }
+
+    /// The channels' publisher, shared with the rest of the gateway.
+    pub(crate) fn channels(&self) -> &Arc<crate::channels::Hub> {
+        &self.channels
     }
 
     /// The outstanding agent-team reads, when agent teams are on.

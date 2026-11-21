@@ -2,7 +2,6 @@
   "language": "English",
   "messages": {
     "page.actions": "Save or cancel",
-    "page.save": "Save",
     "page.unsaved": "Unsaved changes",
     "page.leaveTitle": "Leave without saving?",
     "page.leaveBody": "Your changes on this page aren’t saved.",

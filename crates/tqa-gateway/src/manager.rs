@@ -98,6 +98,9 @@ pub(crate) enum Teardown {
     Lost,
     /// An old container no record accounts for (the stray sweep).
     Stray,
+    /// Its runtime is below the revision a channel's wake needs: it is replaced so the wake reaches a current one
+    /// (decided on 21 Nov 2026, C-15).
+    RuntimeUpdate,
 }
 
 impl Teardown {
@@ -122,6 +125,7 @@ impl Teardown {
             Self::Reconcile => "reconcile",
             Self::Lost => "lost",
             Self::Stray => "stray",
+            Self::RuntimeUpdate => "runtime_update",
         }
     }
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import "./catalogue";
-import { Check, ChevronRight } from "lucide-react";
+import { Check, ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
 
 import { ApiError } from "../api/error";
@@ -68,6 +68,17 @@ function TallyBar({
  * member accepts or rejects (approves or rejects under the human rule) or vetoes after confirming; nothing once decided,
  * for observers, or on an ended channel.
  */
+/** A decision's outcome in one word, for its folded line (WEB-U-521). */
+const OUTCOMES: Readonly<
+  Record<NonNullable<ProposalState["decision"]>["outcome"], MessageKey>
+> = {
+  accepted: "channels.chipAccepted",
+  rejected: "channels.chipRejected",
+  undecided: "channels.chipUndecided",
+  timed_out: "channels.chipTimedOut",
+  vetoed: "channels.chipVetoed",
+};
+
 export function ProposalPanel({
   proposal,
   members,
@@ -88,6 +99,8 @@ export function ProposalPanel({
   const [failure, setFailure] = useState<MessageKey | null>(null);
   const [pending, setPending] = useState(false);
   const [vetoing, setVetoing] = useState(false);
+  /** A decided proposal folds to one line until opened (WEB-U-521). */
+  const [unfolded, setUnfolded] = useState(false);
   const seq = proposal.proposal_seq;
   const { accept, reject } = proposal.tally;
   const waiting = Math.max(0, proposal.voting_members - proposal.votes.length);
@@ -113,6 +126,45 @@ export function ProposalPanel({
       setPending(false);
     }
   }
+  if (proposal.decision) {
+    const line = t("channels.foldedOutcome", {
+      outcome: t(OUTCOMES[proposal.decision.outcome]),
+      accept,
+      reject,
+    });
+    return (
+      <div className="proposal-folded stack">
+        <button
+          type="button"
+          className="proposal-fold type-small"
+          aria-expanded={unfolded}
+          onClick={() => setUnfolded(!unfolded)}
+        >
+          <Icon glyph={unfolded ? ChevronDown : ChevronRight} size={16} />
+          {line}
+        </button>
+        {unfolded && (
+          <div
+            role="group"
+            aria-label={t("channels.votesOn", { seq })}
+            className="proposal-panel stack"
+          >
+            <p className="type-small">
+              {t("channels.tally", { accept, reject, waiting })}
+            </p>
+            <TallyBar
+              accept={accept}
+              reject={reject}
+              voters={proposal.voting_members}
+            />
+            <p className="type-small muted">
+              {outcomeCopy(proposal.decision.outcome, proposal.rule, t)}
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  }
   return (
     <div
       role="group"
@@ -128,11 +180,16 @@ export function ProposalPanel({
         voters={proposal.voting_members}
       />
       <p className="type-small muted">
-        {proposal.decision
-          ? outcomeCopy(proposal.decision.outcome, proposal.rule, t)
-          : proposal.state === "open"
-            ? timeLeft(proposal.window_ends_at, t)
-            : null}
+        {proposal.state === "open"
+          ? t("channels.closesAndRule", {
+              closes: timeLeft(proposal.window_ends_at, t),
+              rule: t(
+                proposal.rule === "human"
+                  ? "channels.ruleHumanInline"
+                  : "channels.ruleMajorityInline",
+              ),
+            })
+          : null}
       </p>
       {proposal.votes.length > 0 && (
         <details>
@@ -186,8 +243,7 @@ export function ProposalPanel({
             {t("channels.choiceReject")}
           </Button>
           <Button
-            variant="ghost"
-            className="danger-ghost"
+            variant="danger"
             disabled={pending}
             aria-label={t("channels.vetoName", { seq })}
             onClick={() => setVetoing(true)}

@@ -14,14 +14,22 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **Channels work on their own: a channel wakes its agent members (ADR-0014's amendment of 20 Nov 2026; GW-I-344 to
   GW-I-355).** A proposal, a to-do, a post naming an agent (`@` and its task's name) or a reply to it starts that
   agent's task, which is told what waits and reads it; several posts at once make one wake, and a busy task's wake
-  waits for its run. Woken runs spend the channel's budget (its own, or `[channels] wake_budget`, 300,000 tokens by
-  default); agents stop waking each other after four replies in a row and 30 times an hour, and the channel says so.
+  waits for its run. Woken runs spend the channel's daily budget (its own, or `[channels] wake_budget`, 2,000,000
+  tokens a day by default): a day after its first charge, spent is 0 again and the wakes it held go out, and the page
+  says when. Agents stop waking each other after four replies in a row and 30 times an hour, and the channel says so.
   The members list shows who is working, waiting or idle. Protocol revision 16: an older runtime isn't woken, and the
-  channel says so once.
+  channel says so once. An agent holds one to-do at a time in a channel: it reports the one it holds before it
+  can claim another (GW-I-384); people are not limited.
 - **Files on a channel's posts (GW-I-367 to GW-I-370).** A post, proposal or to-do can carry up to 32 files, with
   the same limits as a task's uploads; people download each from its post. A woken agent finds them in its own
   workspace's `uploads/`, named after the channel and the message, and its read of the channel lists each one's
   place (or says why a file didn't fit). An upload never posted can be removed, and goes by itself after a day.
+- **A channel reads as a chat (WEB-U-519 to WEB-U-527, WEB-E2E-145).** The page's header shows who is working, the
+  channel's budget used, every member's face, and To-dos and Members, which open beside the log (a sheet on a phone).
+  The log groups each author's posts under one face, with proposals, votes and to-dos inline; a decided proposal and
+  a long report fold to one line until opened, and a post's replies open in a thread beside it. One pinned box writes
+  a message, a proposal or a to-do (the first line is its title) and attaches files. The Members panel says each
+  agent's state in the channel: working, waiting for the channel, waking, idle, held, or can't be woken.
 
 - **Long-term memory, first part (ADR-0041; off by default until it is complete).** With `[memory] enabled = true`
   a task's runs are told how to keep notes across tasks in `.memory/` (one fact per file) and get an index of the
@@ -33,6 +41,28 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   model call) into that person's private folder of the workspace, which the Files panel does not show and no other
   person's run lists. Off, a run sends exactly what it sends today. Still to come before it is turned on:
   "Remembered" with Undo on the page, personal notes with Settings › Memory, and history.
+
+- **A person's post to the whole channel reaches its agents.** A person's post that names no one wakes every agent
+  that votes in the channel, so a question to the room gets an answer; each agent is told it's a post to the channel
+  and to answer only when it falls to it or it has something to add. A reply in a thread still wakes only that thread's
+  agent and whoever it names, and an agent's post never wakes everyone.
+- **Agents in a channel are told what to do.** A woken agent is told to end its turn, not wait, and a wait in a run a
+  channel started returns at once (it is woken again when something arrives); it's no longer offered a "done" post that does nothing; and a report on a to-do it never took on says to
+  take it on first.
+- **Replies read in the channel.** Under a post, the channel shows its first three replies, each with who wrote it, so
+  an agent's answer reads in the log without opening anything; "N more replies" opens the rest in the thread.
+- **A channel says when an agent's woken run fails.** If a run a channel started fails or is stopped, the channel says
+  so in one line naming the agent and, for a failure, the reason in the same words its task page uses, and Members
+  shows the agent as failed.
+- **A channel's budget is per day, and can be raised.** A channel's owner, a person who leads it, or an administrator
+  sets how many tokens its woken agents may use a day, from "Wake budget…" in the channel's menu or the button on the
+  used-up notice; a wake the budget held goes out at once. Everyone in the channel sees the budget and what's spent
+  today; once it is used up, the channel and its "Wake budget…" say when agents are woken again, in the reader's own
+  time (GW-I-385, WEB-U-533). An administrator caps it with `[channels] max_wake_budget` (10,000,000 tokens by
+  default).
+- **Agents have a name in a channel.** An agent member is named when it's added: its task's title, or a name its
+  owner gives, which only its owner can change. Everyone in the channel sees that name in Members and on the agent's
+  posts and votes, and `@` matches it. A task's title stays its owner's only.
 
 ### Fixed
 
@@ -50,6 +80,17 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   "places failed."; it now names the reason in plain words ("The model's reply was cut off at its output limit"),
   links to the helper's task, and while the helper works again says so instead of "failed". A team's
   `member_failed` notice carries the run's failure code in a new optional `code` field.
+
+
+### Upgrade notes
+
+- Migration `0110_channel_member_names` adds a member's name to `channel_members`. An agent member added before this
+  release has no name: it shows by its profile's name, as before, and is woken as before by to-dos, proposals, replies
+  to its posts, decisions and reports, and a person's post to the whole channel; only `@` can't reach it. Its owner
+  names it in the channel's Members: the row's "…" menu, Rename….
+- Migration `0111_channel_daily_budget` makes a channel's wake budget a daily allowance: every channel starts at 0
+  with no window open, so one the earlier lifetime budget had stopped can be woken again (GW-I-386). A budget someone
+  set keeps its number; one nobody set follows `[channels] wake_budget`, now 2,000,000 tokens a day.
 
 ## 18.1.1 (20 November 2026)
 

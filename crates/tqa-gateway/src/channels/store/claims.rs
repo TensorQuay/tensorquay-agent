@@ -2,7 +2,7 @@
 use super::{append_body, db_seq, kind_of, kind_text, read, seq_of};
 use crate::GatewayError;
 use sqlx::PgConnection;
-use tqa_types::{Author, ChannelFilter, ChannelMessage, MessageBody};
+use tqa_types::{Author, AuthorKind, ChannelFilter, ChannelMessage, MessageBody};
 use uuid::Uuid;
 
 /// What a claim did: a new claim, or the claimant's existing one (a retry).
@@ -17,7 +17,8 @@ pub(crate) enum Claimed {
 /// in the caller's transaction.
 ///
 /// # Errors
-/// `404` (the channel or the seq), `409 channel_ended`, `429 channel_rate`, `not_a_task` or `already_claimed`, storage failure.
+/// `404` (the channel or the seq), `409 channel_ended`, `429 channel_rate`, `not_a_task`, `one_at_a_time` (an agent
+/// holding an unreported claim on another to-do) or `already_claimed`, storage failure.
 pub(crate) async fn claim(
     connection: &mut PgConnection,
     channel: Uuid,
@@ -62,6 +63,7 @@ pub(crate) async fn claim(
             .await
             .map(Claimed::Held);
     }
+    one_at_a_time(connection, channel, task, author).await?;
     let counts = sqlx::query!(
         "SELECT (SELECT count(*) FROM channel_claims WHERE channel_id = $1 AND task_seq = $2) AS \"claimed!\", \
          (SELECT count(*) FROM channel_members WHERE channel_id = $1 AND role IN ('lead', 'member')) AS \"voting!\"",
@@ -92,6 +94,44 @@ pub(crate) async fn claim(
     .execute(connection)
     .await?;
     Ok(Claimed::New(stored))
+}
+
+/// An agent holds one open to-do at a time in a channel (ADR-0014's amendment, A13): a claim it has on another to-do
+/// there, with no report of its own on it whatever the report's status, refuses a new one. People are not limited.
+///
+/// # Errors
+/// `409 one_at_a_time`, storage failure.
+async fn one_at_a_time(
+    connection: &mut PgConnection,
+    channel: Uuid,
+    task: u64,
+    author: &Author,
+) -> Result<(), GatewayError> {
+    if author.kind != AuthorKind::Conversation {
+        return Ok(());
+    }
+    if let Some(open) = sqlx::query_scalar!(
+            "SELECT c.task_seq FROM channel_claims c WHERE c.channel_id = $1 AND c.claimant_kind = 'conversation' \
+             AND c.claimant_id = $2 AND c.task_seq <> $3 AND NOT EXISTS (SELECT 1 FROM channel_messages r \
+             WHERE r.channel_id = c.channel_id AND r.type = 'report' AND r.task_seq = c.task_seq \
+             AND r.author_kind = 'conversation' AND r.author_id = c.claimant_id) ORDER BY c.task_seq LIMIT 1",
+            channel,
+            author.id,
+            db_seq(task)?
+        )
+        .fetch_optional(&mut *connection)
+        .await?
+    {
+        let open = seq_of(open)?;
+        return Err(GatewayError::ConflictSaid {
+            code: "one_at_a_time",
+            said: format!(
+                "You hold to-do {open} in this channel and have not reported on it: post your report on it \
+                 (channel_post, type report, task_seq {open}), then claim another."
+            ),
+        });
+    }
+    Ok(())
 }
 
 /// One message by seq.

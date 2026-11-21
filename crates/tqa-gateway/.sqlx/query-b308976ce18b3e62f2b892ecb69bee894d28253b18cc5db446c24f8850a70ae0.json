@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT m.channel_id AS \"channel!\", m.conversation_id AS \"conversation!\", m.read_seq, cv.owner_id, cv.runtime_revision, cv.title, ch.budget, ch.spent_tokens, (SELECT min(x.hop) FROM channel_messages x WHERE x.channel_id = m.channel_id AND x.seq > m.read_seq AND m.conversation_id = ANY(x.wakes)) AS \"hop!\", (SELECT CASE WHEN e.lifecycle = 'run.failed' THEN e.seq END FROM events e WHERE e.conversation_id = m.conversation_id AND e.lifecycle IS NOT NULL ORDER BY e.seq DESC LIMIT 1) AS failed FROM channel_members m JOIN channels ch ON ch.id = m.channel_id JOIN conversations cv ON cv.id = m.conversation_id WHERE ch.kind = 'channel' AND ch.state = 'open' AND m.role <> 'observer' AND cv.state = 'active' AND ($1::uuid IS NULL OR m.channel_id = $1) AND EXISTS (SELECT 1 FROM channel_messages x WHERE x.channel_id = m.channel_id AND x.seq > m.read_seq AND m.conversation_id = ANY(x.wakes)) ORDER BY m.channel_id, m.conversation_id",
+  "query": "SELECT m.channel_id AS \"channel!\", m.conversation_id AS \"conversation!\", m.read_seq, cv.owner_id, cv.runtime_revision, ch.budget, ch.spent_tokens, (SELECT min(x.hop) FROM channel_messages x WHERE x.channel_id = m.channel_id AND x.seq > m.read_seq AND m.conversation_id = ANY(x.wakes)) AS \"hop!\", (SELECT CASE WHEN e.lifecycle = 'run.failed' THEN e.seq END FROM events e WHERE e.conversation_id = m.conversation_id AND e.lifecycle IS NOT NULL ORDER BY e.seq DESC LIMIT 1) AS failed FROM channel_members m JOIN channels ch ON ch.id = m.channel_id JOIN conversations cv ON cv.id = m.conversation_id WHERE ch.kind = 'channel' AND ch.state = 'open' AND m.role <> 'observer' AND cv.state = 'active' AND ($1::uuid IS NULL OR m.channel_id = $1) AND EXISTS (SELECT 1 FROM channel_messages x WHERE x.channel_id = m.channel_id AND x.seq > m.read_seq AND m.conversation_id = ANY(x.wakes)) ORDER BY m.channel_id, m.conversation_id",
   "describe": {
     "columns": [
       {
@@ -60,17 +60,6 @@
       },
       {
         "ordinal": 5,
-        "name": "title",
-        "type_info": "Text",
-        "origin": {
-          "Table": {
-            "table": "conversations",
-            "name": "title"
-          }
-        }
-      },
-      {
-        "ordinal": 6,
         "name": "budget",
         "type_info": "Int8",
         "origin": {
@@ -81,7 +70,7 @@
         }
       },
       {
-        "ordinal": 7,
+        "ordinal": 6,
         "name": "spent_tokens",
         "type_info": "Int8",
         "origin": {
@@ -92,13 +81,13 @@
         }
       },
       {
-        "ordinal": 8,
+        "ordinal": 7,
         "name": "hop!",
         "type_info": "Int2",
         "origin": "Expression"
       },
       {
-        "ordinal": 9,
+        "ordinal": 8,
         "name": "failed",
         "type_info": "Int8",
         "origin": "Expression"
@@ -115,12 +104,11 @@
       false,
       false,
       true,
-      false,
       true,
       false,
       null,
       null
     ]
   },
-  "hash": "833c18a77c63297c71e5cf8e4af63d6d303a7b7c46d2837b3e1491a6c8c5c441"
+  "hash": "b308976ce18b3e62f2b892ecb69bee894d28253b18cc5db446c24f8850a70ae0"
 }

@@ -2,7 +2,7 @@
 the Builder, in the choreography of tests/e2e/gate7_evidence.py. Each agent waits (by type) before it acts, so every seq
 it names is fixed: 1 text P, 2 proposal P, 3 proposal B, 4 B accepts 2, 5 the person accepts 2, 6 decision, 7 the person
 vetoes 3, 8 decision, 9 task P (two claimants), 10 P claims 9, 11 P reports, 12 the person claims 9, 13 the person
-reports, 14 P done.
+reports, 14 text P (the work is done; an agent has no `done` post since 20 Nov 2026).
 
     python3 tests/e2e/gate7_scenarios.py --channel <id> --out <dir>   # writes planner.json and builder.json
 """
@@ -45,7 +45,7 @@ def scenarios(channel_id):
         _call("channel_post", {"channel": c, "type": "report", "task_seq": 9, "status": "completed",
                                "summary": t["report"]}, 1000, 40),
         _call("channel_wait", wait(11, "report"), 1100, 20),
-        _call("channel_post", {"channel": c, "type": "done", "summary": t["done"]}, 1200, 40),
+        _call("channel_post", {"channel": c, "type": "text", "text": t["done"]}, 1200, 40),
         _answer(ANSWERS["Planner"], 1300),
     ]
     builder = [

@@ -104,6 +104,7 @@ impl ChannelClient for Fake {
             ],
             next_since: since + 1,
             more: false,
+            woken: false,
         })
     }
     async fn post(
@@ -501,4 +502,77 @@ fn gw_u_066_the_channel_tools_are_the_one_shared_list_a_profile_may_name() {
         assert!(crate::builtin::profile_tool(name), "{name}");
     }
     assert!(!crate::builtin::profile_tool("teleport"));
+}
+
+// TOOL-U-153 (decided on 20 Nov 2026): channel_wait is for a wait a person asked for in this turn; otherwise the run
+// ends its turn and a wake comes when something for it arrives. `done` isn't offered to agents (the gateway gives it no
+// effect; the API keeps it).
+#[test]
+fn tool_u_153_wait_says_when_to_end_the_turn_and_done_is_not_offered() -> TestResult {
+    let fake = Arc::new(Fake::default());
+    let wait = tool(&fake, "channel_wait")?;
+    let words = &wait.spec().description;
+    assert!(
+        words.contains("Use it only when a person asked you to wait in this turn"),
+        "{words}"
+    );
+    assert!(
+        words.contains("otherwise end your turn: a wake comes when something for you arrives"),
+        "{words}"
+    );
+    let post = tool(&fake, "channel_post")?;
+    let types = &post.spec().parameters["properties"]["type"];
+    let offered: Vec<&str> = types["enum"]
+        .as_array()
+        .ok_or("enum")?
+        .iter()
+        .filter_map(Value::as_str)
+        .collect();
+    assert_eq!(offered, ["text", "proposal", "vote", "task", "report"]);
+    assert!(!types["description"].as_str().unwrap_or("").contains("done"));
+    Ok(())
+}
+
+// TOOL-U-157 (C-13, 21 Nov 2026): task_claim says an agent holds one to-do at a time, claims it before working on it,
+// and reports it before claiming another; the refusal's code is named.
+#[test]
+fn tool_u_157_task_claim_says_one_at_a_time() -> TestResult {
+    let fake = Arc::new(Fake::default());
+    let claim = tool(&fake, "task_claim")?;
+    let words = &claim.spec().description;
+    for said in [
+        "before working on it",
+        "You hold one at a time",
+        "one_at_a_time",
+        "report it (channel_post, type report), then claim the next",
+        "already_claimed",
+    ] {
+        assert!(words.contains(said), "{said}: {words}");
+    }
+    Ok(())
+}
+
+// TOOL-U-154 (decided on 20 Nov 2026): a report refused because the member never claimed the task names the fix.
+#[tokio::test]
+async fn tool_u_154_a_report_without_a_claim_names_the_fix() -> TestResult {
+    let (_workspace, cx) = context()?;
+    let fake = Arc::new(Fake {
+        failure: Some(("not_claimant", "denied")),
+        ..Fake::default()
+    });
+    let post = tool(&fake, "channel_post")?;
+    let error = post
+        .call(
+            json!({"channel":"ch-9","type":"report","task_seq":4,"status":"completed","summary":"Done."}),
+            &cx,
+        )
+        .await
+        .err()
+        .ok_or("accepted")?;
+    assert_eq!(
+        error.model_message(),
+        "not_claimant: only a member that claimed the task may report on it. Claim it first with channel_claim \
+         (task_seq 4), then post the report again."
+    );
+    Ok(())
 }

@@ -31,6 +31,8 @@ fn gw_u_227_a_wake_is_keyed_by_the_members_place_and_its_failures() {
 // TEST: GW-U-228
 #[test]
 fn gw_u_228_the_wake_names_kinds_and_seqs_and_the_call_that_reads_them() {
+    // It ends with the manners (GW-U-236 pins their words; decided on 20 Nov 2026).
+    use super::sentence::MANNERS;
     let channel = Uuid::from_u128(9);
     assert_eq!(
         sentence(
@@ -47,19 +49,51 @@ fn gw_u_228_the_wake_names_kinds_and_seqs_and_the_call_that_reads_them() {
             ]
         ),
         format!(
-            "New in channel {channel} since message 11: a proposal for your vote (message 12); a to-do you may \
-             take on (message 13); 2 posts naming you (messages 14, 15); a reply to your post (message 16); the \
+            "New in channel {channel} since message 11: a proposal for your vote (message 12); a to-do open for \
+             claims (message 13); 2 posts naming you (messages 14, 15); a reply to your post (message 16); the \
              decision on your proposal (message 17); a report on your to-do (message 18). Read them with \
-             channel_read (channel {channel}, since 11); end your turn when you are waiting for more."
+             channel_read (channel {channel}, since 11). {MANNERS}"
         )
     );
     assert_eq!(
         sentence(channel, 0, &[Waiting::Proposal(3), Waiting::Proposal(5)]),
         format!(
             "New in channel {channel} since message 0: 2 proposals for your vote (messages 3, 5). Read them with \
-             channel_read (channel {channel}, since 0); end your turn when you are waiting for more."
+             channel_read (channel {channel}, since 0). {MANNERS}"
         )
     );
+}
+
+// TEST: GW-U-236
+// Every wake ends with the channel's manners, fixed words (decided on 20 Nov 2026, replacing C-4's one sentence): the
+// channel can't see the task, so an answer is posted, as a reply; a post to everyone is answered by whoever can help;
+// silence only when plainly not for it or already answered; short posts, no thanks; the turn ends after posting.
+#[test]
+fn gw_u_236_every_wake_ends_with_the_channels_manners() {
+    let channel = Uuid::from_u128(9);
+    let manners = "The people and agents in this channel don't see your task: whatever they should read, post it \
+                   with channel_post, as a reply (parent) to the message you answer. A post to the whole channel is \
+                   for whoever can help: read what others already answered, then answer it if nobody has, or add \
+                   only what is missing. Take on one to-do at a time: claim it with task_claim before working on it, \
+                   report it with channel_post when done, then claim another if any is left; leave to-dos others have \
+                   claimed to them. Stay silent only when a post is plainly not for you or already answered. \
+                   Keep posts short, with no thanks or acknowledgements. End your turn when you have posted or have \
+                   nothing to add.";
+    for waiting in [
+        vec![Waiting::Channel(4)],
+        vec![Waiting::Named(4)],
+        vec![Waiting::Proposal(4), Waiting::Reply(5)],
+    ] {
+        let said = sentence(channel, 3, &waiting);
+        assert!(said.ends_with(manners), "{said}");
+        assert!(
+            said.contains(&format!(
+                " Read them with channel_read (channel {channel}, since 3). The people"
+            )),
+            "{said}"
+        );
+        assert!(!said.contains("waiting for more"), "{said}");
+    }
 }
 
 // TEST: GW-U-229
@@ -129,4 +163,86 @@ fn gw_u_234_the_wake_counts_the_files_and_names_their_messages_only() {
         super::files_sentence(&[12, 14, 16]),
         " 3 files wait in your workspace, from messages 12, 14 and 16; channel_read lists their paths."
     );
+}
+
+// TEST: GW-U-237
+// C-13 (21 Nov 2026): the wake lists to-dos as open for claims, never as work it may take on (one agent took all
+// three); the manners say to take one at a time: claim, report, then the next, and leave others' to-dos to them.
+#[test]
+fn gw_u_237_the_wake_shares_out_to_dos_one_at_a_time() {
+    let channel = Uuid::from_u128(9);
+    let one = sentence(channel, 3, &[Waiting::Task(4)]);
+    assert!(
+        one.contains(": a to-do open for claims (message 4)."),
+        "{one}"
+    );
+    let three = sentence(
+        channel,
+        3,
+        &[Waiting::Task(4), Waiting::Task(5), Waiting::Task(6)],
+    );
+    assert!(
+        three.contains(": 3 to-dos open for claims (messages 4, 5, 6)."),
+        "{three}"
+    );
+    assert!(!three.contains("you may take on"), "{three}");
+    assert!(
+        three.contains(
+            "Take on one to-do at a time: claim it with task_claim before working on it, report it with \
+             channel_post when done, then claim another if any is left; leave to-dos others have claimed to them."
+        ),
+        "{three}"
+    );
+}
+
+// TEST: GW-U-239
+// A woken run that failed is said in its channel with what the page needs to word it as the task page does (decided on
+// 21 Nov 2026, the live check of a used-up channel): its code and, when the gateway refused it, that refusal
+// ("gateway.channel_budget 409"); any other failure detail, which may be the task's own words, never reaches the channel.
+#[test]
+fn gw_u_239_a_failed_runs_notice_carries_the_gateways_refusal_and_nothing_else()
+-> Result<(), Box<dyn std::error::Error>> {
+    use super::Ending;
+    use tqa_types::{ErrorCode, Event, ServerFrame};
+    let failed =
+        |reason: &str, code: ErrorCode| -> Result<ServerFrame, Box<dyn std::error::Error>> {
+            Ok(ServerFrame::Event {
+                seq: 1.into(),
+                run_id: None,
+                step: None,
+                ts: "2026-11-21T00:00:00Z".into(),
+                event: Event::RunFailed {
+                    run_id: "r-1".parse()?,
+                    reason: reason.into(),
+                    code,
+                    provider_message: None,
+                },
+            })
+        };
+    assert_eq!(
+        Ending::of(
+            "run.failed",
+            &failed("gateway.channel_budget 409", ErrorCode::Budget)?
+        ),
+        Ending::Failed {
+            code: Some("budget".into()),
+            refusal: Some("gateway.channel_budget 409".into())
+        }
+    );
+    for reason in [
+        "budget.output_tokens",
+        "the tool printed the customer's file",
+        "gateway.channel_budget",
+        "gateway.x 409 y",
+    ] {
+        assert_eq!(
+            Ending::of("run.failed", &failed(reason, ErrorCode::Budget)?),
+            Ending::Failed {
+                code: Some("budget".into()),
+                refusal: None
+            },
+            "{reason}"
+        );
+    }
+    Ok(())
 }

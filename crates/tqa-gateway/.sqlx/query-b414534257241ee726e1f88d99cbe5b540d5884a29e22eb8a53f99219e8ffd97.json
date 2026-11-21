@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT lower(name) AS \"name!\" FROM channel_members WHERE channel_id = $1 AND name IS NOT NULL AND conversation_id IS DISTINCT FROM $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "b414534257241ee726e1f88d99cbe5b540d5884a29e22eb8a53f99219e8ffd97"
+}

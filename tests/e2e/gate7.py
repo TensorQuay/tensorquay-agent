@@ -2,7 +2,7 @@
 
 Two agents (Planner, Builder) and a person on one channel: both agents propose, the person votes and the decision is
 posted, the person vetoes the other proposal, the winning agent claims the task and reports, the person claims the
-second place and reports, and the Planner closes with `done`. The script, the fixed seqs and the checks (C1-C5) are in
+second place and reports, and the Planner closes with a text post saying the work is done. The script, the fixed seqs and the checks (C1-C5) are in
 gate7_evidence.py; the agents' scenarios, filled in with the channel's id, in gate7_scenarios.py.
 
 The agents are real runs in sandboxes: each profile allows only the four channel tools, on its own route to its own

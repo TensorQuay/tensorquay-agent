@@ -12,18 +12,19 @@ import { useT } from "../i18n/I18nProvider";
 import { APP_NAME } from "../lib/app";
 import { parseApi } from "../protocol/validate";
 import { settingsEndpoint } from "../settings/operations";
-import { NavigationButton } from "../shell/NavigationButton";
 import { TabTitle } from "../shell/TabTitle";
+import { Button } from "../ui/Button";
 import { Skeleton } from "../ui/Skeleton";
 
 import { ChannelActions } from "./ChannelActions";
+import { ChannelBudget } from "./ChannelBudget";
 import { ChannelComposer } from "./ChannelComposer";
 import { ChannelFirstStep } from "./ChannelFirstStep";
-import { ChannelIdleAgents } from "./ChannelIdleAgents";
+import { ChannelHeader, type HeaderPanel } from "./ChannelHeader";
 import { ChannelMissing } from "./ChannelMissing";
 import { ChannelProposal, proposalKey } from "./ChannelProposal";
 import { ChannelSide, TaskClaims, tasksKey } from "./ChannelSide";
-import { RULES } from "./ChannelsPage";
+import { ChannelThread } from "./ChannelThread";
 import { ChannelTimeline } from "./ChannelTimeline";
 import type {
   ChannelMessage,
@@ -132,6 +133,13 @@ function useChannelLog(api: ChannelsApi, id: string, onEnded: () => void) {
   return { messages, add, loaded };
 }
 
+/** The notices that change a channel's budget or today's spend. */
+const BUDGET_NOTICES: ReadonlySet<string> = new Set([
+  "wake_budget_set",
+  "wake_budget_80",
+  "wake_budget_spent",
+]);
+
 /** One channel's page (ADR-0014; WEB-U-063): its bar, its log in seq order with threads, and the composer. */
 export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
   const t = useT();
@@ -144,16 +152,26 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
     queryKey: ["channel-members", id],
     queryFn: ({ signal }) => api.members(id, signal),
     retry: false,
-    // No members hint on the stream yet (the channels API contract): again on focus and every 15 s while shown.
+    // Each agent's live state (working, waiting, idle; WEB-U-519) comes with the members: again on focus and every 5 s
+    // while shown, so the header's "N working" follows the runs.
     refetchOnWindowFocus: true,
-    refetchInterval: 15_000,
+    refetchInterval: 5_000,
   });
   const cache = useQueryClient();
   // An ended channel reads only: its state comes again from the gateway (the stream's channel.state).
   const log = useChannelLog(api, id, () => {
     void cache.invalidateQueries({ queryKey: ["channel", id] });
   });
-  const [replyTo, setReplyTo] = useState<number | null>(null);
+  /** The panel open beside the log: the to-dos or the members (WEB-U-519), a post's thread (WEB-U-523), or none. */
+  const [budgetOpen, setBudgetOpen] = useState(false);
+  const [panel, setPanel] = useState<HeaderPanel | { thread: number } | null>(
+    null,
+  );
+  const board = useQuery({
+    queryKey: tasksKey(id),
+    queryFn: ({ signal }) => api.tasks(id, signal),
+    retry: false,
+  });
   /** A message put in the box from the first step; a new one remounts the composer with it. */
   const [draft, setDraft] = useState<{ n: number; text: string }>({
     n: 0,
@@ -174,9 +192,30 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
         // A task, claim or report changes the board (ADR-0014 point 8).
         if (["task", "claim", "report"].includes(message.body.type))
           void cache.invalidateQueries({ queryKey: tasksKey(id) });
+        // A budget notice changes the channel's budget or spend: the header and Wake budget… read it again, so they
+        // never disagree with the log (the review of 21 Nov 2026).
+        if (
+          message.body.type === "notice" &&
+          BUDGET_NOTICES.has(message.body.kind)
+        )
+          void cache.invalidateQueries({ queryKey: ["channel", id] });
       }
     seen.current = log.messages.at(-1)?.seq ?? seen.current;
   }, [log.messages, cache, id]);
+  // The viewer's role comes with the channel; Members (read every 5 s) shows a change first, for example the owner
+  // making them lead: the channel is read again, so the budget field and Raise the budget follow.
+  const listedRole = members.data?.items.find(
+    (member) => member.kind === "user" && member.id === me,
+  )?.role;
+  const channelRole = channel.data?.role;
+  useEffect(() => {
+    if (
+      listedRole !== undefined &&
+      channelRole !== undefined &&
+      listedRole !== channelRole
+    )
+      void cache.invalidateQueries({ queryKey: ["channel", id] });
+  }, [listedRole, channelRole, cache, id]);
   if (channel.isPending) return <Skeleton label={t("channels.opening")} />;
   if (channel.isError)
     return (
@@ -188,13 +227,16 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
       />
     );
   const item = channel.data;
-  async function post(write: ChannelPost) {
-    const stored = await api.post(id, write, newActionKey());
+  async function post(write: ChannelPost, files: readonly string[] = []) {
+    const stored = await api.post(id, write, newActionKey(), files);
     log.add([stored]);
-    setReplyTo(null);
   }
   async function claim(seq: number) {
     log.add([await api.claim(id, seq, newActionKey())]);
+  }
+  /** Sets the wake budget and shows the channel as the gateway answers it (C-1, WEB-U-529). */
+  async function setBudget(budget: number) {
+    cache.setQueryData(["channel", id], await api.setBudget(id, budget));
   }
   async function end() {
     cache.setQueryData(["channel", id], await api.endChannel(id));
@@ -204,8 +246,16 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
     void cache.invalidateQueries({ queryKey: ["channels"] });
     router.push("/channels");
   }
+  const fileHref = (seq: number, index: number) =>
+    pathFor(settingsEndpoint("channelFile"), {
+      id,
+      seq: String(seq),
+      index: String(index),
+    });
   // ADR-0014 point 13: its owner or an administrator ends or deletes a channel (WEB-U-066).
   const administers = item.owner.id === me || viewer?.role === "admin";
+  /** Who sets the wake budget: the owner, an administrator, or a person who leads the channel (C-1). */
+  const budgets = administers || item.role === "lead";
   const posts =
     item.state === "open" && item.role !== null && item.role !== "observer";
   // WEB-U-063: a new channel's empty log gives a first step, and the box has the focus.
@@ -213,47 +263,50 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
   // WEB-U-250: the title is usually the purpose's start; the line under it says only what it adds.
   const beyond = purposeBeyond(item.purpose, item.name);
   return (
-    <div className="channel-page">
+    <div
+      className="channel-page"
+      data-panel={
+        panel ? (typeof panel === "object" ? "thread" : panel) : undefined
+      }
+    >
       <TabTitle>
         {t("channels.pageTab", { name: item.name, product: APP_NAME })}
       </TabTitle>
-      <section className="channel-bar" aria-label={t("channels.header")}>
-        <NavigationButton />
-        <div className="channel-name">
-          {/* One line by design: a long name ends in an ellipsis, the whole in the tooltip (WEB-E2E-124). */}
-          <h1 className="type-heading" title={item.name}>
-            {item.name}
-          </h1>
-          {beyond && (
-            <p className="type-small muted" title={item.purpose}>
-              {beyond}
-            </p>
-          )}
-        </div>
-        <p className="channel-facts type-small muted">
-          <span
-            className="status-pill type-label"
-            data-tone={item.state === "open" ? "ok" : "muted"}
-          >
-            {t(item.state === "open" ? "channels.open" : "channels.ended")}
-          </span>
-          <span>{t(RULES[item.rule])}</span>
-          <span>{t("channels.members", { count: item.member_count })}</span>
-        </p>
-        {administers && (
-          <ChannelActions channel={item} onEnd={end} onDelete={remove} />
-        )}
-      </section>
+      <ChannelHeader
+        channel={item}
+        members={members.data?.items ?? []}
+        openTasks={
+          board.data
+            ? board.data.items.filter((task) => task.claims.length < task.limit)
+                .length
+            : null
+        }
+        panel={typeof panel === "string" ? panel : null}
+        onPanel={setPanel}
+        purpose={beyond || null}
+        actions={
+          <ChannelActions
+            channel={item}
+            manage={administers}
+            onBudget={() => setBudgetOpen(true)}
+            onEnd={end}
+            onDelete={remove}
+          />
+        }
+      />
+      {budgetOpen && (
+        <ChannelBudget
+          channel={item}
+          may={budgets && item.state === "open"}
+          onSave={setBudget}
+          onClose={() => setBudgetOpen(false)}
+        />
+      )}
       <ChannelTimeline
         messages={log.messages}
         members={members.data?.items ?? []}
-        fileHref={(seq, index) =>
-          pathFor(settingsEndpoint("channelFile"), {
-            id,
-            seq: String(seq),
-            index: String(index),
-          })
-        }
+        fileHref={fileHref}
+        onThread={(seq) => setPanel({ thread: seq })}
         after={(message) =>
           message.body.type === "proposal" ? (
             <ChannelProposal
@@ -268,12 +321,20 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
             />
           ) : message.body.type === "task" ? (
             <TaskClaims api={api} id={id} seq={message.seq} />
+          ) : message.body.type === "notice" &&
+            message.body.kind === "wake_budget_spent" &&
+            budgets &&
+            item.state === "open" ? (
+            // What the used-up notice says to do can be done here (C-1): for those who may.
+            <Button variant="secondary" onClick={() => setBudgetOpen(true)}>
+              {t("channels.budgetRaise")}
+            </Button>
           ) : null
         }
         {...(item.state === "open" &&
         item.role !== null &&
         item.role !== "observer"
-          ? { onReply: setReplyTo }
+          ? { onReply: (seq: number) => setPanel({ thread: seq }) }
           : {})}
       />
       {firstStep && (
@@ -282,29 +343,46 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
           onUse={(text) => setDraft(({ n }) => ({ n: n + 1, text }))}
         />
       )}
-      <ChannelSide
-        api={api}
-        id={id}
-        channel={item}
-        members={members.data?.items ?? []}
-        me={me}
-        memberRole={item.role}
-        ended={item.state === "ended"}
-        onClaim={claim}
-        onPost={post}
-      />
-      {/* WEB-U-426: an agent reads the channel only while its task runs: the panel names those that aren't. */}
-      {posts && <ChannelIdleAgents members={members.data?.items ?? []} />}
-      <ChannelComposer
-        key={draft.n}
-        initialText={draft.text}
-        focusBox={firstStep || draft.n > 0}
-        memberRole={item.role}
-        state={item.state}
-        replyTo={replyTo}
-        onCancelReply={() => setReplyTo(null)}
-        onPost={post}
-      />
+      {typeof panel === "object" && panel !== null && (
+        <ChannelThread
+          seq={panel.thread}
+          messages={log.messages}
+          members={members.data?.items ?? []}
+          fileHref={fileHref}
+          posts={posts}
+          onPost={post}
+          onClose={() => setPanel(null)}
+        />
+      )}
+      {typeof panel === "string" && (
+        <ChannelSide
+          view={panel}
+          onClose={() => setPanel(null)}
+          api={api}
+          id={id}
+          channel={item}
+          members={members.data?.items ?? []}
+          me={me}
+          memberRole={item.role}
+          ended={item.state === "ended"}
+          onClaim={claim}
+          onPost={post}
+        />
+      )}
+      <div className="channel-composer-dock">
+        <ChannelComposer
+          key={draft.n}
+          initialText={draft.text}
+          focusBox={firstStep || draft.n > 0}
+          memberRole={item.role}
+          state={item.state}
+          replyTo={null}
+          onCancelReply={() => undefined}
+          onUpload={(file) => api.upload(id, file)}
+          onRemoveUpload={(upload) => api.removeUpload(id, upload)}
+          onPost={post}
+        />
+      </div>
     </div>
   );
 }

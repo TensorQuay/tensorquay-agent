@@ -160,7 +160,7 @@ fn tk_u_020_the_choreography_names_fixed_seqs_after_each_wait() -> TestResult {
             some("task_claim", "#9"),                 // 10
             some("channel_post", "report #9"),        // 11
             some("channel_wait", "[\"report\"]>11"),  // 13: the person's report
-            some("channel_post", "done"),             // 14
+            some("channel_post", "text"),             // 14: the work is done
             None,
         ]
     );

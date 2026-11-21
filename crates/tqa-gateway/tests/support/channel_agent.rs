@@ -305,3 +305,34 @@ pub async fn notices(f: &Fixture, channel: &str, kind: &str) -> Result<i64> {
         .fetch_one(&f.pool)
         .await?)
 }
+
+/// Waits until `agent`'s sandbox was replaced (a destroy after `destroys`) and connects the new sandbox's runtime at
+/// `revision`.
+pub async fn replaced(
+    f: &Fixture,
+    agent: &mut Agent,
+    destroys: usize,
+    revision: u16,
+) -> TestResult {
+    let deadline = tokio::time::Instant::now() + WAKE;
+    while f.backend.destroys.load(std::sync::atomic::Ordering::SeqCst) == destroys {
+        if tokio::time::Instant::now() > deadline {
+            return Err("the old sandbox was not replaced".into());
+        }
+        tokio::time::sleep(Duration::from_millis(50)).await;
+    }
+    agent.runtime = None;
+    f.forget_runtime(&agent.id)?;
+    loop {
+        match f.runtime_of_sandbox_at(&agent.id, revision).await {
+            Ok(runtime) => {
+                agent.runtime = Some(runtime);
+                return Ok(());
+            }
+            Err(_) if tokio::time::Instant::now() < deadline => {
+                tokio::time::sleep(Duration::from_millis(100)).await;
+            }
+            Err(error) => return Err(format!("no replacement sandbox: {error}").into()),
+        }
+    }
+}

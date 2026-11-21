@@ -24,6 +24,10 @@ pub struct ChannelPage {
     pub next_since: u64,
     /// Whether more selected messages follow `next_since`.
     pub more: bool,
+    /// A wait in a run a wake started was answered at once (decided on 20 Nov 2026, C-11): the run ends its turn and
+    /// is woken again when more arrives. An older gateway sends none.
+    #[serde(default)]
+    pub woken: bool,
 }
 
 /// A message of a page: one this runtime reads, or one a later gateway sent that it doesn't recognise (a new type,
@@ -32,8 +36,8 @@ pub struct ChannelPage {
 #[derive(Clone, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 #[serde(untagged)]
 pub enum PageMessage {
-    /// A message this runtime reads.
-    Known(ChannelMessage),
+    /// A message this runtime reads (boxed: a message is far larger than the JSON value beside it).
+    Known(Box<ChannelMessage>),
     /// Any other message, as the gateway sent it.
     Unrecognised(serde_json::Value),
 }
@@ -51,6 +55,6 @@ impl PageMessage {
 
 impl From<ChannelMessage> for PageMessage {
     fn from(message: ChannelMessage) -> Self {
-        Self::Known(message)
+        Self::Known(Box::new(message))
     }
 }

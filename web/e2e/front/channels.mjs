@@ -2,6 +2,7 @@
 // newest first, and create. One seeded channel, open to everyone signed in; a person's own ones are theirs.
 import { randomUUID } from "node:crypto";
 
+import { user } from "./fixtures.mjs";
 import { seededMap } from "./state.mjs";
 
 const NAME_CONTROL = /[\u0000-\u001f\u007f]/;
@@ -20,6 +21,49 @@ const channels = seededMap([
       role: "member",
       member_count: 4,
       last_seq: 9,
+      viewers: null,
+    },
+  ],
+  // The channel page of 18.2 as the mock of 17 Nov 2026 drew it (WEB-E2E-145, the gallery WEB-E2E-146): two people,
+  // three agents (two at work), a PDF, a long report, an open proposal with its thread, two to-dos, a budget.
+  [
+    "0195d8c0-0000-7000-8000-00000000c4a2",
+    {
+      id: "0195d8c0-0000-7000-8000-00000000c4a2",
+      name: "Q4 pricing review",
+      purpose: "Settle the Q4 prices",
+      rule: "majority",
+      state: "open",
+      owner: { id: "0195d8c0-0000-7000-8000-00000000a0a0", name: "Ana" },
+      created_at: "2026-09-27T09:00:00Z",
+      ended_at: null,
+      role: "member",
+      member_count: 6,
+      last_seq: 12,
+      wake_budget: 300000,
+      spent_tokens: 114000,
+      viewers: null,
+    },
+  ],
+  // A channel whose budget for today is used up (C-3, C-14; WEB-E2E-148): the header, the dialog and the notice say
+  // when agents are woken again, in the viewer's own time.
+  [
+    "0195d8c0-0000-7000-8000-00000000c4a3",
+    {
+      id: "0195d8c0-0000-7000-8000-00000000c4a3",
+      name: "Used up today",
+      purpose: "",
+      rule: "human",
+      state: "open",
+      owner: { id: "0195d8c0-0000-7000-8000-00000000a0a0", name: "Ana" },
+      created_at: "2026-11-21T01:00:00Z",
+      ended_at: null,
+      role: "member",
+      member_count: 1,
+      last_seq: 3,
+      wake_budget: 2000000,
+      spent_tokens: 2000000,
+      budget_resets_at: "2026-11-22T03:00:00Z",
       viewers: null,
     },
   ],
@@ -55,7 +99,44 @@ const REVIEWER = {
   can_open: false,
   added_at: "2026-09-27T09:00:00Z",
 };
-const members = seededMap([[SEEDED, [CODER, REVIEWER]]]);
+const PRICING = "0195d8c0-0000-7000-8000-00000000c4a2";
+const agent = (id, title, state) => ({
+  kind: "conversation",
+  id: `0195d8c0-0000-7000-8000-0000000${id}`,
+  // Its name in the channel (A12): named by its task's title when Ana added it.
+  name: title,
+  title,
+  owner_name: "Ana",
+  role: "member",
+  run_status: state === "idle" ? "completed" : "running",
+  state,
+  can_open: true,
+  added_at: "2026-09-27T09:00:00Z",
+});
+const person = (id, name, role) => ({
+  kind: "user",
+  id: `0195d8c0-0000-7000-8000-0000000${id}`,
+  name,
+  role,
+  added_at: "2026-09-27T09:00:00Z",
+});
+const ANA = person("0a0a0", "Ana", "lead");
+const DANIEL = person("0d0d1", "Daniel Okafor", "member");
+const ANALYST = agent("0c0e1", "Pricing analyst", "working");
+const CHECKER = agent("0c0e2", "Data checker", "waiting");
+const FORECAST = agent("0c0e3", "Forecast", "idle");
+/** The person signed in is a voting member here, listed like the others: the header's count and the tally agree. */
+const VIEWER = {
+  kind: "user",
+  id: user.id,
+  name: user.email.split("@")[0],
+  role: "member",
+  added_at: "2026-09-28T09:00:00Z",
+};
+const members = seededMap([
+  [SEEDED, [CODER, REVIEWER]],
+  [PRICING, [ANA, DANIEL, VIEWER, ANALYST, CHECKER, FORECAST]],
+]);
 const at = (minute) => `2026-09-27T10:${String(minute).padStart(2, "0")}:00Z`;
 const by = (member) => ({
   kind: member.kind,
@@ -149,6 +230,171 @@ const logs = seededMap([
       },
     ],
   ],
+  [
+    PRICING,
+    [
+      {
+        seq: 1,
+        ts: at(12),
+        author: by(ANA),
+        body: {
+          type: "text",
+          text: "The Q3 numbers are in. Can we settle the EU price for the Pro plan this week?",
+        },
+        files: [{ name: "q3-revenue-by-region.pdf", size: 1258291 }],
+      },
+      {
+        seq: 2,
+        ts: at(12),
+        author: by(ANA),
+        body: {
+          type: "text",
+          text: "@Pricing analyst please start with churn by tier.",
+        },
+      },
+      {
+        seq: 3,
+        ts: at(21),
+        author: by(ANALYST),
+        body: {
+          type: "text",
+          text: [
+            "**Churn by tier, Q3** (from the PDF, pages 3 to 9)",
+            "Pro churn in the EU was 1.8 % a month, under the 2.5 % line we set in June.",
+            "Starter churn rose to 4.1 %, mostly in the first month after a trial.",
+            "- Pro, EU: 1.8 % (Q2: 1.9 %)",
+            "- Pro, US: 2.0 % (Q2: 2.2 %)",
+            "- Starter, EU: 4.1 % (Q2: 3.4 %)",
+            "- Starter, US: 3.6 % (Q2: 3.3 %)",
+            "- Team: 0.9 %, flat",
+            "- Enterprise: 0.4 %, flat",
+            "A rise to €24 is inside what Pro customers absorbed in the 2025 change.",
+            "Churn then moved 0.3 points for two months and came back.",
+            "The trial change would matter more for Starter than any price.",
+            "Method: monthly cohorts, active seats, refunds counted as churn.",
+            "Data: the PDF's tables 2 to 5; region from billing country.",
+          ].join("\n\n"),
+        },
+      },
+      {
+        seq: 4,
+        ts: at(40),
+        author: by(DANIEL),
+        body: {
+          type: "proposal",
+          title: "Raise the EU Pro plan to €24 from 1 December",
+          text: "Per the churn report above. Starter stays where it is until the trial change ships.",
+          window_seconds: 86400,
+        },
+      },
+      {
+        seq: 5,
+        ts: at(41),
+        author: by(ANALYST),
+        parent: 4,
+        body: {
+          type: "text",
+          text: "Agreed: churn stays under the line at €24.",
+        },
+      },
+      {
+        seq: 6,
+        ts: at(41),
+        author: by(ANALYST),
+        body: { type: "vote", proposal_seq: 4, choice: "accept" },
+      },
+      {
+        seq: 7,
+        ts: at(42),
+        author: by(CHECKER),
+        parent: 4,
+        body: { type: "text", text: "I'll recheck VAT before I vote." },
+      },
+      {
+        seq: 8,
+        ts: at(43),
+        author: by(ANA),
+        body: {
+          type: "task",
+          title: "Recheck the EU VAT figures in the PDF",
+          spec: "Pages 11 and 12: the German and French rows look swapped.",
+        },
+      },
+      {
+        seq: 9,
+        ts: at(44),
+        author: by(CHECKER),
+        body: { type: "claim", task_seq: 8 },
+      },
+      {
+        seq: 10,
+        ts: at(45),
+        author: by(ANA),
+        body: {
+          type: "task",
+          title: "Draft the customer email for the new price",
+          spec: "Short, with the date and what Pro customers get.",
+        },
+      },
+      {
+        seq: 11,
+        ts: at(50),
+        author: by(FORECAST),
+        body: {
+          type: "text",
+          text: "At €24 with churn held at 1.8 %, EU Pro revenue rises about 9 % by March.",
+        },
+      },
+      {
+        seq: 12,
+        ts: at(51),
+        author: { kind: "gateway", id: "gateway", name: "gateway" },
+        body: {
+          type: "notice",
+          kind: "wake_budget_80",
+          text: "Woken agents have used 80 % of this channel's budget for today.",
+        },
+      },
+    ],
+  ],
+  [
+    "0195d8c0-0000-7000-8000-00000000c4a3",
+    [
+      // A person's post with a 19-character e-mail as its name and an agent's answer (WEB-E2E-149, at 390 px).
+      {
+        seq: 1,
+        ts: "2026-11-21T02:58:00Z",
+        author: {
+          kind: "user",
+          id: "0195d8c0-0000-7000-8000-00000000a0b9",
+          name: "pat@example.invalid",
+        },
+        body: { type: "text", text: "What is 17 + 25? One short sentence." },
+      },
+      {
+        seq: 2,
+        ts: "2026-11-21T02:59:00Z",
+        parent: 1,
+        author: {
+          kind: "conversation",
+          id: "0195d8c0-0000-7000-8000-00000000c0b9",
+          name: "Helper",
+        },
+        body: { type: "text", text: "42" },
+      },
+      {
+        seq: 3,
+        ts: "2026-11-21T03:00:00Z",
+        author: { kind: "gateway", id: "gateway", name: "gateway" },
+        body: {
+          type: "notice",
+          kind: "wake_budget_spent",
+          resets_at: "2026-11-22T03:00:00Z",
+          text: "Woken agents have used this channel's budget for today: no agent is woken here until it renews at 03:00 UTC on 22 November 2026, or until the channel's owner, a lead or an administrator raises it.",
+        },
+      },
+    ],
+  ],
 ]);
 
 /** A channel as the API answers it: without the fake's own visibility list, with the caller's role. */
@@ -221,8 +467,14 @@ function proposal(member, id, seq, reply) {
     window_ends_at: new Date(
       Date.parse(posted.ts) + (posted.body.window_seconds ?? 600) * 1000,
     ).toISOString(),
-    // The seeded agents plus the person viewing: enough for the page's tally.
-    voting_members: voting(id) + 1,
+    // The voting members, the person viewing among them (a seed that lists them counts them once).
+    voting_members:
+      voting(id) +
+      ((members.get(id) ?? []).some(
+        (one) => one.kind === "user" && one.id === member.account.id,
+      )
+        ? 0
+        : 1),
     tally: {
       accept: votes.filter((vote) => vote.choice === "accept").length,
       reject: votes.filter((vote) => vote.choice === "reject").length,
@@ -298,6 +550,28 @@ async function oneChannel(member, url, method, read, key, reply, raw) {
     request.on("close", () => open.delete(response));
     return true;
   }
+  // A post's file (A9), as the gateway serves it: an attachment under its own name, the bytes a stand-in.
+  const filed =
+    /^\/api\/v1\/channels\/([^/]+)\/messages\/(\d+)\/files\/(\d+)$/.exec(
+      url.pathname,
+    );
+  if (filed && method === "GET") {
+    const id = decodeURIComponent(filed[1]);
+    const item = channels.get(id);
+    const file = (logs.get(id) ?? []).find(
+      (one) => one.seq === Number(filed[2]),
+    )?.files?.[Number(filed[3])];
+    if (!item || !visible(item, member) || !file) {
+      refused(reply, 404, "not_found");
+      return true;
+    }
+    raw.response.writeHead(200, {
+      "content-type": "application/octet-stream",
+      "content-disposition": `attachment; filename="${file.name}"`,
+    });
+    raw.response.end(`the file ${file.name}`);
+    return true;
+  }
   const proposed = /^\/api\/v1\/channels\/([^/]+)\/proposals\/(\d+)$/.exec(
     url.pathname,
   );
@@ -370,7 +644,12 @@ async function oneChannel(member, url, method, read, key, reply, raw) {
       refused(reply, 404, "not_found");
       return true;
     }
-    const changed = { ...found, role: input.role };
+    // A name in the channel (A12) comes with the member when its owner gives one.
+    const changed = {
+      ...found,
+      role: input.role,
+      ...(typeof input.name === "string" ? { name: input.name } : {}),
+    };
     members.set(item.id, [...rest, changed]);
     reply(200, changed);
     return true;
@@ -387,7 +666,38 @@ async function oneChannel(member, url, method, read, key, reply, raw) {
   }
   const part = match[2];
   if (!part && method === "GET") reply(200, shown(item, member));
-  else if (!part && method === "DELETE") {
+  else if (!part && method === "PATCH") {
+    // The wake budget (C-1), as the gateway sets it: its owner, a person who leads it, or an administrator; the
+    // channel says who set it.
+    const shownItem = shown(item, member);
+    if (
+      shownItem.role !== "lead" &&
+      item.owner.id !== member.account.id &&
+      member.account.role !== "admin"
+    ) {
+      refused(reply, 403, "not_lead");
+      return true;
+    }
+    const input = await read();
+    item.wake_budget = input.wake_budget;
+    item.spent_tokens = item.spent_tokens ?? 0;
+    const log = logs.get(item.id) ?? [];
+    const stored = {
+      seq: (log.at(-1)?.seq ?? 0) + 1,
+      ts: new Date().toISOString(),
+      author: { kind: "gateway", id: "gateway", name: "gateway" },
+      body: {
+        type: "notice",
+        kind: "wake_budget_set",
+        member: member.account.email,
+        text: `${member.account.email} set this channel's budget.`,
+      },
+    };
+    logs.set(item.id, [...log, stored]);
+    item.last_seq = stored.seq;
+    publish(item.id, stored);
+    reply(200, shown(item, member));
+  } else if (!part && method === "DELETE") {
     if (item.owner.id !== member.account.id && member.account.role !== "admin")
       refused(reply, 403, "not_owner");
     else {

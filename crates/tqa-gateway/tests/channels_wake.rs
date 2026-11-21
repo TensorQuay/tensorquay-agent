@@ -2,19 +2,22 @@
 //! member's place and one wake for a burst (A2, A3, GW-I-345), a failed run woken again (GW-I-346), a busy task's wake
 //! behind its run (GW-I-347), one turn at a time across channels (GW-I-348), the sweep after a restart (GW-I-349), the
 //! budget (A5, GW-I-350, GW-I-351), the hop bound and a person's own agent (A6, A11, GW-I-352), the hourly bound
-//! (GW-I-353), the members' live state (A7, GW-I-354) and a member that can't be woken (A10, GW-I-355). SEC-068: the
-//! wake's turn carries nothing written by anyone else.
+//! (GW-I-353), the members' live state (A7, GW-I-354) and a member that can't be woken (A10, GW-I-355; the replacement
+//! that comes first is GW-I-382's, in `channels_wake_handover.rs`). SEC-068: the wake's turn carries nothing written by
+//! anyone else.
 #[path = "support/channel_agent.rs"]
 mod channel_agent;
+#[path = "support/channel_spend.rs"]
+mod channel_spend;
 #[path = "support/fixture.rs"]
 mod support;
-use channel_agent::{Agent, Result, WAKE, channel, notices, post, text};
+use channel_agent::{Agent, Result, WAKE, channel, notices, post, replaced, text};
+use channel_spend::{model, model_call, registry, spent};
 use reqwest::Method;
-use serde_json::{Value, json};
+use serde_json::json;
 use sqlx::PgPool;
-use std::{sync::Arc, time::Duration};
+use std::{sync::atomic::Ordering, time::Duration};
 use support::{Fixture, TestResult, call};
-use tqa_testkit::{FakeModelServer, Script, Scripted};
 use tqa_types::ClientFrame;
 use uuid::Uuid;
 
@@ -36,10 +39,12 @@ async fn gw_i_344_a_message_wakes_whom_it_concerns_and_the_wake_carries_no_ones_
         let proposal = post(f, &cookie, &id, json!({"type": "proposal", "title": "Raise the Q3 price list", "text": words}), None).await?;
         for agent in [&mut analyst, &mut checker] {
             let sentence = agent.woken(f, &id, 0).await?;
-            assert_eq!(
-                sentence,
-                format!("New in channel {id} since message 0: a proposal for your vote (message {proposal}). Read them with channel_read (channel {id}, since 0); end your turn when you are waiting for more.")
+            // The kinds and the call, then the channel's manners (GW-U-236 pins their words).
+            assert!(
+                sentence.starts_with(&format!("New in channel {id} since message 0: a proposal for your vote (message {proposal}). Read them with channel_read (channel {id}, since 0). The people and agents")),
+                "{sentence}"
             );
+            assert!(sentence.ends_with("End your turn when you have posted or have nothing to add."), "{sentence}");
             for theirs in [words, "Raise the Q3", "pricing"] {
                 assert!(!sentence.contains(theirs), "{theirs} in {sentence}");
             }
@@ -48,19 +53,27 @@ async fn gw_i_344_a_message_wakes_whom_it_concerns_and_the_wake_carries_no_ones_
             agent.end(f).await?;
         }
         watcher.quiet(f).await?;
-        // A post naming a member wakes it, not its author; a person's plain post wakes no one.
+        // A post naming a member wakes it, not its author.
         let named = analyst.post(f, &id, text("@data checker, can you check the margins?")).await?;
         checker.woken(f, &id, proposal).await?;
         checker.start(f).await?;
         checker.read(f, &id, proposal).await?;
         checker.end(f).await?;
         analyst.quiet(f).await?;
-        post(f, &cookie, &id, text("Thanks, both."), None).await?;
-        analyst.quiet(f).await?;
-        checker.quiet(f).await?;
+        // A person's plain top-level post wakes both voting agents, not the observer (reversed by the decision of
+        // 20 Nov 2026, C-4: a person's first post met silence). "Thanks, both." on purpose: a thank-you wakes everyone,
+        // the rule's cost, which the budget, the hop bound, the gather and the wake's manners sentence bound.
+        let thanks = post(f, &cookie, &id, text("Thanks, both."), None).await?;
+        for (agent, after) in [(&mut analyst, proposal), (&mut checker, named)] {
+            agent.woken(f, &id, after).await?;
+            agent.start(f).await?;
+            agent.read(f, &id, after).await?;
+            agent.end(f).await?;
+        }
+        watcher.quiet(f).await?;
         // A reply to an agent's post wakes its author.
         post(f, &cookie, &id, text("Use last quarter's margins."), Some(named)).await?;
-        analyst.woken(f, &id, proposal).await?;
+        analyst.woken(f, &id, thanks).await?;
         checker.quiet(f).await?;
         Ok(())
     }))
@@ -254,66 +267,6 @@ async fn gw_i_349_a_wake_lost_to_a_restart_comes_from_the_sweep(pool: PgPool) ->
         Ok(())
     }))
     .await
-}
-
-/// A model server answering `answers` requests, each reporting 40 tokens (30 in, 10 out).
-async fn model(answers: usize) -> Result<FakeModelServer> {
-    let script = Script::new(vec![
-        Scripted::Text("done".into()),
-        Scripted::Usage(tqa_llm::Usage {
-            prompt_tokens: 30,
-            completion_tokens: 10,
-            cached_tokens: None,
-            reasoning_tokens: None,
-        }),
-    ]);
-    Ok(FakeModelServer::start(vec![script; answers], Arc::new(tqa_llm::TokioSleeper)).await?)
-}
-
-fn registry(server: &FakeModelServer) -> Result<tqa_llm::Registry> {
-    Ok(tqa_llm::Registry::from_toml(&format!(
-        "[[routes]]\nname='local'\nprotocol='openai_chat'\nbase_url='{}'\nmodel='pinned-model'\nauth={{kind='bearer'}}\nkey_ref='secrets/local'\nstream_usage=true",
-        server.base_url()
-    ))?)
-}
-
-/// A model call from the agent's run, through the relay: the status and the refusal's code.
-async fn model_call(f: &Fixture, agent: &Agent) -> Result<(u16, Value)> {
-    let response = f
-        .client
-        .post(f.url("/relay/r/local/chat/completions"))
-        .bearer_auth(agent.token(f)?)
-        .json(
-            &json!({"model": "m", "messages": [{"role": "user", "content": "hi"}], "stream": true}),
-        )
-        .send()
-        .await?;
-    let status = response.status().as_u16();
-    let text = response.text().await?;
-    Ok((
-        status,
-        serde_json::from_str::<Value>(&text)
-            .map_or(Value::Null, |body| body["error"]["code"].clone()),
-    ))
-}
-
-/// The channel's spend once it reaches `tokens` (the meter writes after the answer ends).
-async fn spent(f: &Fixture, channel: &str, tokens: i64) -> Result<i64> {
-    let id = Uuid::parse_str(channel)?;
-    tokio::time::timeout(Duration::from_secs(10), async {
-        loop {
-            let now: i64 = sqlx::query_scalar("SELECT spent_tokens FROM channels WHERE id = $1")
-                .bind(id)
-                .fetch_one(&f.pool)
-                .await?;
-            if now >= tokens {
-                return Ok::<i64, Box<dyn std::error::Error>>(now);
-            }
-            tokio::time::sleep(Duration::from_millis(50)).await;
-        }
-    })
-    .await
-    .map_err(|_| format!("the channel's spend never reached {tokens}"))?
 }
 
 // TEST: GW-I-350
@@ -541,7 +494,12 @@ async fn gw_i_354_each_agent_members_live_state_is_on_the_members_answer(
         analyst.woken(f, &id, 0).await?;
         analyst.start(f).await?;
         until_state(f, &cookie, &id, &[("Pricing analyst", "working")]).await?;
-        // In channel_wait on this channel: waiting, until the wait answers.
+        analyst.end(f).await?;
+        until_state(f, &cookie, &id, &[("Pricing analyst", "idle")]).await?;
+        // In channel_wait on this channel: waiting, until the wait answers. In a run its person started: a woken run's
+        // wait answers at once (C-11, GW-I-380).
+        analyst.start(f).await?;
+        until_state(f, &cookie, &id, &[("Pricing analyst", "working")]).await?;
         let token = analyst.token(f)?;
         let path = format!("/runtime/channels/{id}/messages?since=1&wait=20");
         let waiting = tokio::spawn({
@@ -557,7 +515,8 @@ async fn gw_i_354_each_agent_members_live_state_is_on_the_members_answer(
             }
         });
         until_state(f, &cookie, &id, &[("Pricing analyst", "waiting")]).await?;
-        post(f, &cookie, &id, text("an answer for the wait"), None).await?;
+        // A reply in the person's own thread: it answers the wait and wakes no one (C-4).
+        post(f, &cookie, &id, text("an answer for the wait"), Some(1)).await?;
         assert_eq!(waiting.await??, 200);
         until_state(f, &cookie, &id, &[("Pricing analyst", "working")]).await?;
         analyst.end(f).await?;
@@ -584,16 +543,37 @@ async fn gw_i_355_a_member_that_cant_be_woken_gets_one_notice_not_one_per_messag
         old.next_at(f, WAKE, 15).await?.ok_or("the person's turn")?;
         old.start(f).await?;
         old.end(f).await?;
-        for n in 0..3 {
+        // Its task's title is its owner's (SEC-044): renamed after it joined, the notice must still use its name here.
+        sqlx::query("UPDATE conversations SET title = 'Board pack, private' WHERE id = $1")
+            .bind(old.uuid)
+            .execute(&f.pool)
+            .await?;
+        // The first wake replaces its sandbox (C-15); the replacement's runtime is still too old, so the wake is
+        // withdrawn and the channel told once; the next posts are held, never a replacement or a notice each.
+        let destroys = f.backend.destroys.load(Ordering::SeqCst);
+        post(f, &cookie, &id, text("@old runtime 0"), None).await?;
+        replaced(f, &mut old, destroys, 15).await?;
+        for n in 1..3 {
             post(f, &cookie, &id, text(&format!("@old runtime {n}")), None).await?;
         }
         old.quiet(f).await?;
+        assert_eq!(f.backend.destroys.load(Ordering::SeqCst), destroys + 1, "one replacement, not one per message");
         assert_eq!(notices(f, &id, "unreachable_runtime").await?, 1, "one notice, not one per message");
         let notice: String = sqlx::query_scalar("SELECT body->>'text' FROM channel_messages WHERE channel_id = $1 AND type = 'notice' AND body->>'kind' = 'unreachable_runtime'")
             .bind(Uuid::parse_str(&id)?)
             .fetch_one(&f.pool)
             .await?;
-        assert_eq!(notice, "Old runtime can't be woken: its environment needs an update.");
+        assert!(!notice.contains("Board pack"), "a notice never holds a task's title: {notice}");
+        let member_id: Option<String> = sqlx::query_scalar("SELECT body->>'member_id' FROM channel_messages WHERE channel_id = $1 AND type = 'notice' AND body->>'kind' = 'unreachable_runtime'")
+            .bind(Uuid::parse_str(&id)?)
+            .fetch_one(&f.pool)
+            .await?;
+        assert_eq!(member_id.as_deref(), Some(old.id.as_str()), "the page names it by its member id");
+        assert_eq!(
+            notice,
+            "Old runtime can't be woken: its environment still runs an older version after it was started again. An \
+             administrator can update its image in Settings, and it is woken again then."
+        );
         // A deleted task leaves the channel with one notice.
         let (status, _) = call(f, Method::DELETE, &format!("/api/v1/conversations/{}", gone.id), &cookie, (None, None)).await?;
         assert!(status < 300, "{status}");
@@ -603,6 +583,143 @@ async fn gw_i_355_a_member_that_cant_be_woken_gets_one_notice_not_one_per_messag
             .fetch_one(&f.pool)
             .await?;
         assert_eq!(notice, "Gone can't be woken: its task was deleted.");
+        Ok(())
+    }))
+    .await
+}
+
+// TEST: GW-I-362
+// What the channel page shows (slice 3, decided on 20 Nov 2026): the channel's answer carries its wake budget (its own,
+// or the installation's) and what woken runs spent, for the header's "Budget N % used"; a notice about a member names
+// it as a field of its own, so a page words it in the reader's language.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_362_the_channel_answer_carries_its_budget_and_a_notice_its_member(
+    pool: PgPool,
+) -> TestResult {
+    Box::pin(support::run_configured(
+        pool,
+        None,
+        "\n[channels]\nwake_budget = 1000\n",
+        async |f| {
+            let (owner, cookie) = f.admin().await?;
+            let gone = Agent::new(f, owner.id, "Gone").await?;
+            let id = channel(f, &cookie, "pricing", &[(&gone, "member")]).await?;
+            sqlx::query("UPDATE channels SET spent_tokens = 250, budget_window_start = CURRENT_TIMESTAMP WHERE id = $1")
+                .bind(Uuid::parse_str(&id)?)
+                .execute(&f.pool)
+                .await?;
+            let (status, answer) = call(
+                f,
+                Method::GET,
+                &format!("/api/v1/channels/{id}"),
+                &cookie,
+                (None, None),
+            )
+            .await?;
+            assert_eq!(status, 200, "{answer}");
+            assert_eq!(
+                (&answer["wake_budget"], &answer["spent_tokens"]),
+                (&json!(1000), &json!(250)),
+                "{answer}"
+            );
+            sqlx::query("UPDATE channels SET budget = 4000 WHERE id = $1")
+                .bind(Uuid::parse_str(&id)?)
+                .execute(&f.pool)
+                .await?;
+            let (_, answer) = call(
+                f,
+                Method::GET,
+                &format!("/api/v1/channels/{id}"),
+                &cookie,
+                (None, None),
+            )
+            .await?;
+            assert_eq!(answer["wake_budget"], json!(4000), "its own budget wins");
+            let (status, _) = call(
+                f,
+                Method::DELETE,
+                &format!("/api/v1/conversations/{}", gone.id),
+                &cookie,
+                (None, None),
+            )
+            .await?;
+            assert!(status < 300, "{status}");
+            let (_, page) = call(
+                f,
+                Method::GET,
+                &format!("/api/v1/channels/{id}/messages?since=0"),
+                &cookie,
+                (None, None),
+            )
+            .await?;
+            let notice = &page["messages"][0]["body"];
+            assert_eq!(
+                (&notice["type"], &notice["kind"], &notice["member"]),
+                (&json!("notice"), &json!("member_deleted"), &json!("Gone")),
+                "{page}"
+            );
+            Ok(())
+        },
+    ))
+    .await
+}
+
+// TEST: GW-I-377
+// A person's post to the whole channel (decided on 20 Nov 2026, C-4): a person's top-level post that names no one wakes
+// every agent voting member, never an observer, and its wake says so as its own kind, with the one sentence of
+// manners; a person's reply that names no one wakes no one but the thread's agent writer; an agent's post that names no
+// one wakes no one; a person's post that names a member wakes only it.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_377_a_persons_post_to_the_channel_wakes_every_voting_agent(
+    pool: PgPool,
+) -> TestResult {
+    Box::pin(support::run(pool, async |f| {
+        let (owner, cookie) = f.admin().await?;
+        let mut analyst = Agent::new(f, owner.id, "Pricing analyst").await?;
+        let mut checker = Agent::new(f, owner.id, "Data checker").await?;
+        let mut watcher = Agent::new(f, owner.id, "Watcher").await?;
+        let id = channel(f, &cookie, "pricing", &[(&analyst, "member"), (&checker, "member"), (&watcher, "observer")]).await?;
+        let asked = post(f, &cookie, &id, text("The Q3 numbers are in; what stands out?"), None).await?;
+        for agent in [&mut analyst, &mut checker] {
+            let sentence = agent.woken(f, &id, 0).await?;
+            // Its own kind, then the channel's manners every wake ends with (GW-U-236 pins their words).
+            assert!(
+                sentence.starts_with(&format!(
+                    "New in channel {id} since message 0: a post to the channel (message {asked}). Read them with \
+                     channel_read (channel {id}, since 0). The people and agents in this channel don't see your task"
+                )),
+                "{sentence}"
+            );
+            assert!(sentence.contains("A post to the whole channel is for whoever can help"), "{sentence}");
+            agent.start(f).await?;
+            assert_eq!(agent.read(f, &id, 0).await?, vec![asked]);
+            agent.end(f).await?;
+        }
+        watcher.quiet(f).await?;
+        // A reply in a thread that names no one stays in its thread: a person's own thread wakes no agent.
+        post(f, &cookie, &id, text("Mostly the EU rows."), Some(asked)).await?;
+        analyst.quiet(f).await?;
+        checker.quiet(f).await?;
+        // An agent's post that names no one wakes no one (no agent fan-out).
+        analyst.start(f).await?;
+        let finding = analyst.post(f, &id, text("EU Pro churn fell to 1.8 %.")).await?;
+        analyst.end(f).await?;
+        checker.quiet(f).await?;
+        // A thank-you inside an agent's thread stays cheap: it wakes that thread's agent writer only.
+        post(f, &cookie, &id, text("Thanks."), Some(finding)).await?;
+        analyst.woken(f, &id, asked).await?;
+        analyst.start(f).await?;
+        analyst.read(f, &id, asked).await?;
+        analyst.end(f).await?;
+        checker.quiet(f).await?;
+        // A person's post that names a member wakes only it, as a post naming it.
+        let named = post(f, &cookie, &id, text("@Data checker please verify the EU rows"), None).await?;
+        let sentence = checker.woken(f, &id, asked).await?;
+        assert!(sentence.contains(&format!("a post naming you (message {named})")), "{sentence}");
+        assert!(!sentence.contains("a post to the channel"), "{sentence}");
+        analyst.quiet(f).await?;
         Ok(())
     }))
     .await

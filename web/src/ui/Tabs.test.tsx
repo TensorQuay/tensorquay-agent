@@ -162,16 +162,15 @@ describe("WEB-U-454 the one tab list", () => {
       expect(each.className).toBe("tab");
   });
 
-  it("is the app's only tab list: the Files panel and a channel's side use it", () => {
+  // A channel's side tabs became the header's To-dos and Members panels in 18.2 (WEB-U-519).
+  it("is the app's only tab list: the Files panel uses it", () => {
     const lists = sources("src").filter((path) =>
       readFileSync(path, "utf8").includes('role="tablist"'),
     );
     expect(lists).toEqual([join("src", "ui", "Tabs.tsx")]);
-    for (const path of [
-      "src/files/PanelTabs.tsx",
-      "src/channels/ChannelSide.tsx",
-    ])
-      expect(readFileSync(path, "utf8")).toMatch(/<TabList\b/);
+    expect(readFileSync("src/files/PanelTabs.tsx", "utf8")).toMatch(
+      /<TabList\b/,
+    );
   });
 
   it("draws Keys' Mine | Shared, links to two pages, as the same tabs", () => {

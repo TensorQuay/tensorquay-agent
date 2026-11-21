@@ -198,3 +198,136 @@ async fn gw_i_033_a_run_claims_through_the_runtime_route(pool: PgPool) -> TestRe
     })
     .await
 }
+
+/// A runtime call with the conversation's token: the status and the JSON answer (null when empty).
+async fn as_run(
+    f: &Fixture,
+    method: Method,
+    path: &str,
+    token: &str,
+    body: Option<Value>,
+) -> Result<(u16, Value)> {
+    let mut request = f.client.request(method, f.url(path)).bearer_auth(token);
+    if let Some(body) = body {
+        request = request.json(&body);
+    }
+    let response = request.send().await?;
+    let status = response.status().as_u16();
+    let text = response.text().await?;
+    Ok((
+        status,
+        if text.is_empty() {
+            Value::Null
+        } else {
+            serde_json::from_str(&text)?
+        },
+    ))
+}
+
+/// A run's claim through the runtime route.
+async fn claim_as_run(f: &Fixture, token: &str, id: &str, seq: u64) -> Result<(u16, Value)> {
+    as_run(
+        f,
+        Method::POST,
+        &format!("/runtime/channels/{id}/tasks/{seq}/claim"),
+        token,
+        None,
+    )
+    .await
+}
+
+/// A run's report on `seq` with `status`, through the runtime route.
+async fn report(
+    f: &Fixture,
+    token: &str,
+    id: &str,
+    seq: u64,
+    status: &str,
+) -> Result<(u16, Value)> {
+    let body = json!({"body": {"type": "report", "task_seq": seq, "status": status, "summary": "where it stands"}});
+    as_run(
+        f,
+        Method::POST,
+        &format!("/runtime/channels/{id}/messages"),
+        token,
+        Some(body),
+    )
+    .await
+}
+
+// TEST: GW-I-384
+// C-13 (21 Nov 2026): an agent holds one open to-do at a time in a channel. A claim by a conversation that holds an
+// unreported claim on another to-do there is refused one_at_a_time, in words naming the to-do it holds; a retry of the
+// held claim still answers 200; any report on the held to-do (here `blocked`, then `failed`) frees the agent to claim
+// the next. People are not limited.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_384_an_agent_holds_one_open_to_do_at_a_time(pool: PgPool) -> TestResult {
+    support::run(pool, async |f| {
+        let (owner, cookie) = f.admin().await?;
+        let agent = f.conversation(owner.id).await?;
+        let _runtime = f.runtime(&agent).await?;
+        let token = f
+            .backend
+            .token(&agent.id)
+            .ok_or("token")?
+            .expose_secret()
+            .to_owned();
+        let (id, people) = channel(f, &cookie, 1).await?;
+        call(
+            f,
+            Method::PUT,
+            &format!("/api/v1/channels/{id}/members/conversation/{}", agent.id),
+            &cookie,
+            (Some(json!({"role": "member"})), None),
+        )
+        .await?;
+        let mut todos = Vec::new();
+        for key in ["t1", "t2", "t3"] {
+            todos.push(task(f, &cookie, &id, Value::Null, key).await?);
+        }
+        let (one, two, three) = (todos[0], todos[1], todos[2]);
+        let (status, first) = claim_as_run(f, &token, &id, one).await?;
+        assert_eq!(status, 201, "{first}");
+        // A second to-do while the first is open: refused, in words that say what to do.
+        let (status, refused) = claim_as_run(f, &token, &id, two).await?;
+        assert_eq!(
+            (status, &refused["error"]["code"]),
+            (409, &json!("one_at_a_time")),
+            "{refused}"
+        );
+        let said = refused["error"]["message"].as_str().ok_or("message")?;
+        assert!(said.contains(&format!("to-do {one}")), "{said}");
+        assert!(
+            said.contains("report") && said.contains("then claim"),
+            "{said}"
+        );
+        // The held claim's retry is still the claim it holds.
+        let (status, again) = claim_as_run(f, &token, &id, one).await?;
+        assert_eq!((status, &again["seq"]), (200, &first["seq"]), "{again}");
+        // Any report closes the hold: blocked frees the agent for the second, failed for the third.
+        let (status, posted) = report(f, &token, &id, one, "blocked").await?;
+        assert_eq!(status, 201, "{posted}");
+        let (status, second) = claim_as_run(f, &token, &id, two).await?;
+        assert_eq!(status, 201, "{second}");
+        let (status, refused) = claim_as_run(f, &token, &id, three).await?;
+        assert_eq!(status, 409, "{refused}");
+        let said = refused["error"]["message"].as_str().ok_or("message")?;
+        assert!(said.contains(&format!("to-do {two}")), "{said}");
+        let (status, posted) = report(f, &token, &id, two, "failed").await?;
+        assert_eq!(status, 201, "{posted}");
+        let (status, third) = claim_as_run(f, &token, &id, three).await?;
+        assert_eq!(status, 201, "{third}");
+        // A person holds two open to-dos at once.
+        let (four, five) = (
+            task(f, &cookie, &id, Value::Null, "t4").await?,
+            task(f, &cookie, &id, Value::Null, "t5").await?,
+        );
+        for seq in [four, five] {
+            let (status, body) = claim(f, &people[0], &id, seq).await?;
+            assert_eq!(status, 201, "{body}");
+        }
+        Ok(())
+    })
+    .await
+}

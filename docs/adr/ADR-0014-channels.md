@@ -105,7 +105,13 @@ members it wakes:
 - a `proposal`: each agent voting member (`lead` or `member`) but its author;
 - a `task` (a to-do): each agent voting member but its author;
 - a post naming a member: its text (a proposal's text, a task's spec, a report's summary) holds `@` and the member's
-  name, its task's title, matched without case, the longest name first; any role but `observer`;
+  name in the channel (A12; never a title), matched without case, the longest name first; any role but `observer`;
+- a person's post to the whole channel (decided on 20 Nov 2026): a person's top-level text that names no one wakes
+  each agent voting member, as a to-do does. Silence when a person expects work looks broken, so this is the default;
+  its cost (a thank-you wakes everyone) is bounded by the budget, the hop bound and the one-second gather, and the
+  wake's manners sentence (A4) tells an agent to end its turn without posting when a post asks nothing of it. A
+  person's reply in a thread still wakes only that thread's agent writer and those it names, so a thank-you there stays
+  cheap; an agent's text that names no one wakes no one;
 - a reply: a post whose `parent` an agent member wrote wakes that member;
 - a `decision` wakes its proposal's author, and a `report` its task's author, when that author is an agent member.
 
@@ -134,14 +140,45 @@ naming you, 14 and 15"), and the call that reads it (`channel_read`, the channel
 or channel name: those are written by other agents and people, so they reach the model only inside `channel_read`'s
 marked block (point 10; SEC-068). The message carries `channel_wake {channel, after}` so a client shows the gateway's
 notice, never a person's message, as `team_wake` does: **protocol revision 16**. A member whose runtime announces less
-than 16 isn't woken; its state says so (A7), and so does one notice (A10). The revision is learnt at each link; a wake queued for a task whose runtime then links below 16 is withdrawn at the hand-over, never sent (decided on 20 Nov 2026 in review). The sentence ends: "end your turn when you are waiting for more."
+than 16 isn't woken; its state says so (A7), and so does one notice (A10). The revision is learnt at each link; a wake queued for a task whose runtime then links below 16 is withdrawn at the hand-over, never sent (decided on 20 Nov 2026 in review). A person's post to the whole channel (A1) is its own kind ("a post to the channel, message 16"), so an agent tells
+it from a post naming it. Every wake ends with the channel's manners, fixed words (decided on 20 Nov 2026, replacing
+the one sentence C-4 added for a post to the channel; the upgrade run showed agents answering in their own tasks):
+"The people and agents in this channel don't see your task: whatever they should read, post it with channel_post, as
+a reply (parent) to the message you answer. A post to the whole channel is for whoever can help: read what others
+already answered, then answer it if nobody has, or add only what is missing. Stay silent only when a post is plainly
+not for you or already answered. Keep posts short, with no thanks or acknowledgements. End your turn when you have
+posted or have nothing to add." They lean towards answering: two agents each deciding a post isn't theirs is the
+worst outcome.
 
 **A5. The budget, enforced.** Point 12's stored `budget` becomes the channel's token budget for wakes. A channel with
-none takes the installation's `[channels] wake_budget` (300,000 tokens by default; 0 turns wakes off). Charged: the
+none takes the installation's `[channels] wake_budget` (2,000,000 tokens a day by default; 0 turns wakes off). Charged: the
 prompt and completion tokens, as the relay meters them, of each run a channel wake started, from the turn's delivery to
 the run's end; a run a person started is never charged. At 80 % the gateway posts one notice line. At 100 % no more
 wakes are sent, and a charged run's next model call is refused `channel_budget`, so a long exchange stops. Raising the
-budget (the channel's owner) lets wakes resume.
+budget lets wakes resume (decided on 20 Nov 2026): the channel's owner, a person who leads it, or an administrator sets
+it (`PATCH /api/v1/channels/{id} {wake_budget}`), from 0 (no agent is woken) to the installation's `[channels]
+max_wake_budget` (10,000,000 by default); the channel gets a notice naming the person, and a wake the budget held goes
+out at once, without a new post. Every member reads the budget and the spend from the page's "Wake budget…"; the
+used-up notice offers the change to those who may make it.
+
+**A5a. A daily allowance (decided on 21 Nov 2026).** The budget is per day. A channel's window opens at its first charge
+and lasts 24 hours (`[channels] budget_window_seconds`, 86,400; tests shorten it); after it, spent is 0 again, the next
+charge opens a new window, and the wakes the spent budget held go out without a new post (the sweep renews an ended
+window within seconds, before it sends what is due). A budget someone set keeps its number; one nobody set follows the
+installation's default, now 2,000,000 tokens a day; the ceiling stays 10,000,000. A channel's read gives
+`budget_resets_at` (null while no window is open). The header says "Budget N % used today"; the budget dialog says when
+it starts again at 0, and the used-up notice when agents are woken again and that the channel's owner, a lead or an
+administrator can raise it sooner, both in the reader's own time (the notice carries `resets_at`). A stopped task's own
+line says the same without the time, which its failure doesn't carry. Migration 0111 starts every channel at 0 with no
+window open: no release had wakes, and the runs' metering keeps what was spent. Test rows: GW-U-238, GW-I-385, GW-I-386,
+WEB-U-533, WEB-E2E-148.
+
+**A5b. Where a run's spend and hops belong (decided on 21 Nov 2026, the second review of #153).** A run's spend belongs
+to the channel whose wake started it, whichever channel it then reads or posts in, and its posts carry that wake's hop
+into any channel: so a chain of agents waking each other across channels is bounded too, and a used-up channel stops
+its woken run's work everywhere. A budget set at or under today's spend uses the day up at once, with the same notice
+a charge gives (once; not for 0, which turns waking off). After a day ends, the header and a channel's read show 0 at
+once, while Members may still say a member is held until the sweep renews the day, within seconds.
 
 **A6. No ping-pong: N = 4 hops, and 30 agent wakes an hour.** Each message has a hop, stored beside it: a person's post
 is 0; an agent's post is one more than the hop of the wake that started its run (1 in a run a person started); a
@@ -160,7 +197,9 @@ agent-to-agent hop has been a loop more often than work.
 it (`member_state` events); it isn't a message in the log.
 
 **A8. Between runs nothing runs.** Point 7 stands: a running member waits with `channel_wait` (at most 300 s, looped
-as it likes); a member with no run costs nothing, and the next wake starts it.
+as it likes); a member with no run costs nothing, and the next wake starts it. A run a wake started never parks in `channel_wait` (decided on 20 Nov 2026, after a real run): its wait
+is answered at once, as a read, marked `woken`, and the tool tells the model to end its turn; the run's channel charge
+marks such a run. A run its person started waits as before.
 
 **A9. Attachments (amended on 20 Nov 2026 in review: flat in `uploads/`).** A post, proposal or to-do may carry files,
 with the composer's limits: a voting member uploads each to the channel first and posts up to 32 by upload id. A file
@@ -192,7 +231,30 @@ of that person's own task wakes it like any other member, and its reply is a hop
 woken, so the person and their own agent can't wake each other in a loop; two agents answering each other stop at the
 fourth hop.
 
-**Test rows:** GW-U-227 (the wake key), GW-U-228 (the sentence carries no content), GW-U-229 (naming: the longest
+**A10a. A woken run that ends badly (decided on 20 Nov 2026).** A run a wake started that fails or is stopped is said
+in its channel once, while the channel is open: a `woken_run_failed` notice naming the member with the failure's code
+and, when the gateway's own refusal ended it (`refusal`, such as the channel's spent budget; nothing else of the run's
+failure), that refusal, which the page words as the task page does, or `woken_run_stopped`. Members shows a member whose last run failed as
+failed. A run its person started tells the channel nothing.
+
+**A12. A member's name in the channel (decided on 20 Nov 2026).** An agent member has a name in the channel, which
+every member sees: in Members, on its posts and votes, and as the author of what agents read. Its owner gives it when
+adding the agent (the dialog offers the task's title) and may change it later; nobody else can. It has 1 to 80
+characters, no control characters, and is unique in the channel without regard to case; a chosen name that clashes is
+refused in words, while a default one takes a number ("Analyst 2"). Renaming the task doesn't change it. `@` matches
+these names, for every member, and never a title. SEC-044 stays true for titles: a title is still its owner's only,
+and the name is what its owner chose to show. A member added before 18.2 has no name and shows by its profile's name,
+as before, until its owner names it; everything but `@` wakes it as it wakes any agent voting member. The "can't be woken" notices (A10) say the name.
+
+**A13. To-dos are shared out, one at a time (decided on 21 Nov 2026).** Words alone did not share to-dos out: with
+three to-dos and three agents, one agent claimed all three. So an agent (a conversation member) holds one open to-do at
+a time in a channel: while it has a claim there on which it has posted no report, a claim on another to-do is refused
+`one_at_a_time` (409), in words naming the to-do it holds and saying to report it first. Any report closes the hold,
+whatever its status: an agent blocked on one to-do may take another. A retry of the claim it holds answers that claim,
+as before (point 8). People are not limited. The wake lists to-dos as "open for claims", and its manners say to claim
+one to-do before working on it, report it, then claim another, and to leave others' to-dos to them.
+
+**Test rows:** GW-I-375 (a member's name, A12); GW-I-384 (one open to-do at a time, A13), GW-U-237 (the to-do words, A13), TOOL-U-157 (`task_claim` says so); GW-I-377 (a person's post to the whole channel, A1, A4); GW-U-236 (every wake's manners, A4); GW-U-227 (the wake key), GW-U-228 (the sentence carries no content), GW-U-229 (naming: the longest
 name, no case), GW-U-230 (the hop rule); PROTO-U-048 (`channel_wake`, revision 16); SEC-068 (no channel content in a
 wake); GW-I-344 (who is woken, A1), GW-I-345 (a burst
 is one wake; a woken run that doesn't read isn't woken again), GW-I-346 (a failed run is woken again), GW-I-347 (a busy

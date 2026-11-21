@@ -84,23 +84,40 @@
   border-color: transparent;
   background: transparent;
 }
-/* A decision is tinted info (UI-GUIDELINES §7, Channel post). */
-.channel-post[data-tinted] {
-  border-color: color-mix(in srgb, var(--info) 45%, var(--line));
-  background: color-mix(in srgb, var(--info) var(--status-tint), var(--paper));
+/* The chat log (WEB-U-520, the mock of 17 Nov 2026): every post's text in one column after a gutter, the group's face
+   in the gutter on its first post only; an event line keeps to the same column, muted. */
+.channel-post {
+  padding-inline-start: calc(var(--avatar-size) + var(--space-3) * 2);
 }
-/* The author wraps within its own box; the quiet line keeps to the same line, at its end (no blank row at 390). */
+.channel-post > .channel-post-avatar {
+  position: absolute;
+  inset-inline-start: var(--space-3);
+  inset-block-start: var(--space-2);
+  margin-inline-start: 0;
+}
+.channel-post[data-line] {
+  color: var(--muted);
+}
+/* The author takes the room it needs, up to the whole row; the quiet line sits at the row's end and, when the two
+   don't fit, moves under the name rather than squeezing it (the phone read of 21 Nov 2026, WEB-E2E-149). */
 .channel-post-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: var(--space-2);
+  gap: 0 var(--space-2);
 }
 .channel-post-who {
   display: flex;
-  flex: 1;
+  flex: 1 1 auto;
   flex-wrap: wrap;
   align-items: baseline;
   gap: var(--space-1) var(--space-2);
+  min-width: 0;
+}
+/* A name breaks only where the page allows it (after "@" and "." in an e-mail), never leaving a letter alone; a word
+   longer than the row still breaks rather than overflow. */
+.channel-post-name {
+  overflow-wrap: break-word;
   min-width: 0;
 }
 .channel-post-meta {
@@ -150,6 +167,28 @@
     opacity: 1;
   }
 }
+/* With a pointer in a narrow window, the hidden line takes no room from the author's name: it lies over the name line's
+   end, on the row's surface, and takes the pointer only while shown (a continued post keeps its own line, above). */
+@media (hover: hover) and (max-width: 639px) {
+  .channel-post:not([data-continued])
+    > .channel-post-head
+    > .channel-post-meta {
+    position: absolute;
+    inset-block-start: var(--space-1);
+    inset-inline-end: var(--space-3);
+    padding-inline-start: var(--space-2);
+    background: var(--surface);
+    pointer-events: none;
+  }
+  .channel-post:not([data-continued]):hover
+    > .channel-post-head
+    > .channel-post-meta,
+  .channel-post:not([data-continued]):focus-within
+    > .channel-post-head
+    > .channel-post-meta {
+    pointer-events: auto;
+  }
+}
 .channel-refs {
   margin: 0;
   padding-left: var(--space-4);
@@ -164,11 +203,12 @@
 }
 
 /* The channel composer (WEB-U-063): a card like the task composer. */
+/* The task's composer card (§7 Composer, the review of 20 Nov 2026): its border, radius and 8 px; the post's kind above
+   the row, what a proposal or a to-do adds below it. */
 .channel-composer {
-  padding: var(--space-4);
-  border: var(--border-width) solid var(--line);
-  border-radius: var(--composer-radius);
-  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 .channel-replying {
   display: flex;
@@ -341,29 +381,169 @@
 .member-actions {
   flex: none;
 }
-/* From 1280 px the side sits beside the log: the two in the middle, the space left on either side, the bar across all. */
-@media (min-width: 1280px) {
+/* The chat page (WEB-U-519, the mock of 17 Nov 2026): the header stays on top and the composer at the bottom while the
+   log scrolls between them; To-dos, Members or a thread open beside the log from 1024 px, and as a sheet below that. */
+.channel-page > .channel-bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--paper);
+  padding-block: var(--space-2);
+  border-bottom: var(--border-width) solid var(--line);
+}
+/* The pinned composer reaches the window's bottom edge: the content area's end padding would leave a strip where the
+   log shows through, so the dock sticks that far lower and fills it. */
+.channel-page > .channel-composer-dock {
+  position: sticky;
+  bottom: calc(-1 * var(--content-end));
+  z-index: 2;
+  background: var(--paper);
+  padding-block: var(--space-2) calc(var(--space-2) + var(--content-end));
+}
+.channel-facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+.channel-working {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.channel-live,
+.channel-dot {
+  display: inline-block;
+  width: var(--dot-size);
+  height: var(--dot-size);
+  border-radius: var(--pill-radius);
+  /* Working is the info tone, as in the Members panel and a task's state; green means done. */
+  background: var(--info);
+}
+.channel-faces {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.channel-avatar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  margin-inline-start: calc(var(--space-1) * -1);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--pill-radius);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--label-size);
+  font-weight: 700;
+}
+.channel-avatar:first-child {
+  margin-inline-start: 0;
+}
+.channel-avatar > .channel-dot {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  border: var(--border-width) solid var(--paper);
+}
+.channel-panels {
+  display: flex;
+  gap: var(--space-1);
+}
+.channel-panel-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--composer-button-size);
+  padding-inline: var(--space-2);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+}
+.channel-panel-button[aria-expanded="true"] {
+  background: var(--surface-raised);
+}
+.channel-count {
+  color: var(--muted);
+}
+.channel-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.channel-panel-head h2 {
+  margin: 0;
+}
+/* On a phone the panel buttons are icons with their counts (decided on 20 Nov 2026); the words stay for readers. */
+@media (max-width: 599px) {
+  .channel-panel-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .channel-faces {
+    display: none;
+  }
+}
+/* Below 1024 px a panel is a sheet over the page: the whole screen on a phone, a drawer from the right on a tablet. */
+@media (max-width: 1023px) {
+  .channel-page > .channel-panel {
+    position: fixed;
+    inset: 0 0 0 auto;
+    z-index: 3;
+    width: min(100%, var(--drawer-width));
+    max-width: none;
+    margin: 0;
+    overflow-y: auto;
+    border-radius: 0;
+    box-shadow: var(--shadow-elevated);
+  }
+}
+/* From 1024 px the panel sits beside the log: the log in the middle column, the panel on the right. */
+@media (min-width: 1024px) {
   .channel-page {
     display: grid;
     grid-template-columns:
       [wide-start] minmax(0, 1fr) [log-start] minmax(0, var(--transcript-width))
-      [log-end] var(--space-6) [side-start] var(--channel-side-width)
-      [side-end] minmax(0, 1fr) [wide-end];
+      [log-end] minmax(0, 1fr) [wide-end];
     column-gap: 0;
     align-items: start;
   }
-  /* Everything on the page reads in the log's column (its idle agents, its first step, its composer), unless placed. */
+  .channel-page[data-panel] {
+    grid-template-columns:
+      [wide-start] minmax(0, 1fr) [log-start] minmax(0, var(--transcript-width))
+      [log-end] var(--space-6) [side-start] var(--channel-side-width)
+      [side-end] minmax(0, 1fr) [wide-end];
+  }
+  .channel-page[data-panel="thread"] {
+    grid-template-columns:
+      [wide-start] minmax(0, 1fr) [log-start] minmax(0, var(--transcript-width))
+      [log-end] var(--space-6) [side-start] var(--channel-thread-width)
+      [side-end] minmax(0, 1fr) [wide-end];
+  }
   .channel-page > * {
     grid-column: log;
   }
   .channel-page > .channel-bar {
     grid-column: wide;
   }
-  .channel-page > .channel-side {
+  .channel-page > .channel-panel {
     grid-column: side;
-    grid-row: 2 / span 2;
+    grid-row: 2 / span 3;
     position: sticky;
-    top: var(--space-4);
+    top: calc(var(--bar-height) + var(--space-4));
+    max-height: calc(100dvh - var(--bar-height) - var(--space-8));
+    overflow-y: auto;
   }
 }
 
@@ -485,13 +665,6 @@
   list-style: none;
 }
 /* WEB-U-063: Propose and Add a task on the left of the composer's Post. */
-.channel-composer-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
 .channel-composer-kinds {
   display: flex;
   flex-wrap: wrap;
@@ -516,4 +689,98 @@
   /* A link in a sentence is marked by more than its colour (WCAG 1.4.1). */
   text-decoration: underline;
   text-underline-offset: 0.15em;
+}
+
+/* A decided proposal folds to one line (WEB-U-521): its outcome and count, opening to the votes. */
+.proposal-fold {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.proposal-fold:hover {
+  color: var(--ink);
+}
+
+/* The composer (WEB-U-524): Message, Propose and To-do as one segmented row; the files to send as chips. */
+.channel-modes {
+  display: inline-flex;
+  gap: var(--space-1);
+}
+.channel-mode {
+  padding: var(--space-1) var(--space-3);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--pill-radius);
+  background: var(--paper);
+  color: var(--muted);
+  cursor: pointer;
+}
+.channel-mode[aria-pressed="true"] {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+.channel-attached {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.channel-file {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  max-width: 100%;
+  padding-inline-start: var(--space-2);
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--control-radius);
+  background: var(--surface);
+}
+.channel-file > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* On a phone a panel is the whole screen (the mock's sheet, with its own Close). */
+@media (max-width: 599px) {
+  .channel-page > .channel-panel {
+    width: 100%;
+  }
+}
+
+/* Keyboard focus never lands under the pinned header or composer (the a11y audit's covered stops): what the focus
+   reaches in the log scrolls clear of both. */
+.channel-log :is(a, button, summary, [tabindex]) {
+  scroll-margin-block: calc(var(--bar-height) + var(--space-8))
+    calc(var(--space-16) * 7);
+}
+
+/* A thread's replies sit flush with its root's text, no nesting rule, and its posts take a narrower face gutter: a
+   panel has no room to spare (the review of 20 Nov 2026). */
+.channel-thread {
+  --thread-gutter: calc(var(--avatar-size) + var(--space-2) * 2);
+}
+.channel-thread .channel-replies {
+  /* Back by the root's gutter and its border, so a reply's own border and gutter land where the root's do. */
+  margin-inline-start: calc(-1 * (var(--thread-gutter) + var(--border-width)));
+  padding-left: 0;
+  border-left: 0;
+}
+.channel-thread .channel-post {
+  padding-inline: var(--thread-gutter) var(--space-2);
+}
+.channel-thread .channel-post > .channel-post-avatar {
+  inset-inline-start: var(--space-1);
+}
+
+/* A post's files are a task's sent chips; the name and size share one line, so a name keeps more room before it is
+   cut (its title has it whole). */
+.channel-files .attachment-name {
+  max-width: 48ch;
 }

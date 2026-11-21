@@ -1,5 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ApiError } from "../api/error";
@@ -141,9 +147,10 @@ describe("WEB-U-064 a proposal's votes and decision", () => {
         decision: { seq: 9, outcome: "vetoed" },
       }),
     );
+    // Decided, it folds to one line with its outcome (WEB-U-521), and no vote control is offered.
     expect(
-      screen.getByRole("group", { name: "Votes on #2" }),
-    ).toHaveTextContent("Vetoed");
+      screen.getByRole("button", { name: "Vetoed · 1 to 0" }),
+    ).toBeVisible();
     expect(screen.queryByRole("button", { name: /#2$/ })).toBeNull();
   });
 
@@ -209,5 +216,75 @@ describe("WEB-U-166 the vote this person chose is marked", () => {
       "aria-pressed",
       "true",
     );
+  });
+});
+
+// WEB-U-521 (18.2 slice 3, decided on 20 Nov 2026): a decided proposal folds to one line, its outcome and the votes
+// for and against; opening it shows the tally and each vote, and closing folds it again. An open one stays unfolded.
+describe("WEB-U-521 a decided proposal folds to one line", () => {
+  it("says the outcome and the count on one line, and opens to the votes", () => {
+    show(
+      state({
+        state: "decided",
+        tally: { accept: 2, reject: 0 },
+        votes: [
+          { author: author(CODER), choice: "accept", seq: 3 },
+          { author: author(BEN), choice: "accept", seq: 4 },
+        ],
+        decision: { seq: 5, outcome: "accepted" },
+      }),
+    );
+    const fold = screen.getByRole("button", { name: "Accepted · 2 to 0" });
+    expect(fold).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("group", { name: "Votes on #2" })).toBeNull();
+    fireEvent.click(fold);
+    expect(fold).toHaveAttribute("aria-expanded", "true");
+    expect(
+      screen.getByRole("group", { name: "Votes on #2" }),
+    ).toHaveTextContent("Accept 2 · Reject 0");
+    fireEvent.click(fold);
+    expect(screen.queryByRole("group", { name: "Votes on #2" })).toBeNull();
+  });
+
+  it("leaves an open proposal unfolded", () => {
+    show(state());
+    expect(screen.getByRole("group", { name: "Votes on #2" })).toBeVisible();
+    expect(screen.queryByRole("button", { name: /·.*to/ })).toBeNull();
+  });
+});
+
+// WEB-U-526 (the review of 20 Nov 2026): Veto is a destructive action framed as a button (the danger variant, beside
+// Accept and Reject), offered to a person voting member only (ADR-0014 point 9); the rule decides the question, so
+// the open proposal says it on its closing line.
+describe("WEB-U-526 a proposal's veto and rule", () => {
+  it("frames Veto as a danger button for a person voting member, none for an observer", () => {
+    show(state());
+    expect(screen.getByRole("button", { name: "Veto #2" })).toHaveAttribute(
+      "data-variant",
+      "danger",
+    );
+    cleanup();
+    show(state(), { role: "observer" });
+    expect(screen.queryByRole("button", { name: "Veto #2" })).toBeNull();
+  });
+
+  it("says the rule on an open proposal's closing line, and not once decided", () => {
+    show(state());
+    expect(
+      screen.getByText("Closes in 8 minutes · decided by majority"),
+    ).toBeVisible();
+    cleanup();
+    show(state({ rule: "human" }));
+    expect(
+      screen.getByText("Closes in 8 minutes · decided by a person"),
+    ).toBeVisible();
+    cleanup();
+    show(
+      state({
+        state: "decided",
+        decision: { seq: 9, outcome: "accepted" },
+      }),
+    );
+    expect(screen.queryByText(/decided by/)).toBeNull();
   });
 });

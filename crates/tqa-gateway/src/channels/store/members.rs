@@ -125,6 +125,8 @@ pub(crate) struct MemberView {
     /// Whether the viewer may open a conversation member's task page: its owner, or an administrator (the private
     /// view); never set for a user.
     pub can_open: Option<bool>,
+    /// Whether an agent member has a name in the channel (A12); never set for a user.
+    pub named: Option<bool>,
 }
 
 /// The channel's members, in the order they were added.
@@ -140,7 +142,7 @@ pub(crate) async fn members(
         "SELECT m.user_id, m.conversation_id, m.role, m.added_at, u.email::text AS user_email, v.title AS \"title?\", \
          v.owner_id AS \"conversation_owner?\", ou.email::text AS conversation_owner_email, \
          COALESCE(v.profile->>'display_name', v.profile->>'name') AS profile_name, \
-         latest.lifecycle AS \"latest?\" \
+         m.name AS \"member_name?\", latest.lifecycle AS \"latest?\" \
          FROM channel_members m LEFT JOIN users u ON u.id = m.user_id \
          LEFT JOIN conversations v ON v.id = m.conversation_id LEFT JOIN users ou ON ou.id = v.owner_id \
          LEFT JOIN LATERAL (SELECT e.lifecycle FROM events e WHERE e.conversation_id = m.conversation_id \
@@ -163,18 +165,27 @@ pub(crate) async fn members(
                     added_at: row.added_at,
                     run_status: None,
                     can_open: None,
+                    named: None,
                 }),
-                (None, Some(conversation)) => Ok(MemberView {
-                    id: MemberId::Conversation(conversation),
-                    name: row.profile_name.unwrap_or_else(|| "Agent".into()),
-                    owner_name: row.conversation_owner_email,
-                    // Titles are content (SEC-044): its owner's only, never an administrator's.
-                    title: row.title.filter(|_| row.conversation_owner == Some(viewer)),
-                    role,
-                    added_at: row.added_at,
-                    run_status: Some(RunStatus::of(row.latest.as_deref())),
-                    can_open: Some(admin || row.conversation_owner == Some(viewer)),
-                }),
+                (None, Some(conversation)) => {
+                    let named = row.member_name.is_some();
+                    Ok(MemberView {
+                        id: MemberId::Conversation(conversation),
+                        // Its name in the channel, which its owner chose to show; one added before names had none.
+                        name: row
+                            .member_name
+                            .or(row.profile_name)
+                            .unwrap_or_else(|| "Agent".into()),
+                        owner_name: row.conversation_owner_email,
+                        // Titles are content (SEC-044): its owner's only, never an administrator's.
+                        title: row.title.filter(|_| row.conversation_owner == Some(viewer)),
+                        role,
+                        added_at: row.added_at,
+                        run_status: Some(RunStatus::of(row.latest.as_deref())),
+                        can_open: Some(admin || row.conversation_owner == Some(viewer)),
+                        named: Some(named),
+                    })
+                }
                 _ => Err(GatewayError::StoreUnavailable),
             }
         })
@@ -340,4 +351,149 @@ pub(crate) async fn exists(
     )
     .fetch_one(connection)
     .await?)
+}
+
+/// The most a member's name may have, in characters.
+pub(crate) const MAX_MEMBER_NAME: usize = 80;
+
+/// A member's name as given, checked: 1 to 80 characters, no control characters, trimmed.
+///
+/// # Errors
+/// `400` on the `name` field.
+pub(crate) fn member_name(name: &str) -> Result<String, GatewayError> {
+    let name = name.trim();
+    let refused = |said: &str| GatewayError::ParameterRefused {
+        field: "name",
+        said: said.to_owned(),
+    };
+    if name.is_empty() {
+        return Err(refused("A member's name can't be empty."));
+    }
+    if name.chars().count() > MAX_MEMBER_NAME {
+        return Err(refused("A member's name has at most 80 characters."));
+    }
+    if name.chars().any(char::is_control) {
+        return Err(refused("A member's name can't hold control characters."));
+    }
+    Ok(name.to_owned())
+}
+
+/// Names an agent member in the channel; another member of it already named so, without regard to case, refuses.
+///
+/// # Errors
+/// `409 member_name_taken`, storage failure.
+pub(crate) async fn set_member_name(
+    connection: &mut PgConnection,
+    channel: Uuid,
+    conversation: Uuid,
+    name: &str,
+) -> Result<(), GatewayError> {
+    let taken = sqlx::query_scalar!(
+        "SELECT EXISTS (SELECT 1 FROM channel_members WHERE channel_id = $1 AND lower(name) = lower($3) \
+         AND conversation_id IS DISTINCT FROM $2) AS \"taken!\"",
+        channel,
+        conversation,
+        name
+    )
+    .fetch_one(&mut *connection)
+    .await?;
+    if taken {
+        return Err(GatewayError::ConflictSaid {
+            code: "member_name_taken",
+            said: format!(
+                "Another member of this channel is already named {name}; choose another name."
+            ),
+        });
+    }
+    // The caller holds the channel's row; a name taken in between anyway (another path, a manual change) is still the
+    // worded refusal, never a constraint error (the second review of #153).
+    match sqlx::query!(
+        "UPDATE channel_members SET name = $3 WHERE channel_id = $1 AND conversation_id = $2",
+        channel,
+        conversation,
+        name
+    )
+    .execute(connection)
+    .await
+    {
+        Err(sqlx::Error::Database(error)) if error.code().as_deref() == Some("23505") => {
+            Err(GatewayError::ConflictSaid {
+                code: "member_name_taken",
+                said: format!(
+                    "Another member of this channel is already named {name}; choose another name."
+                ),
+            })
+        }
+        other => other.map(|_| ()).map_err(Into::into),
+    }
+}
+
+/// Whether `conversation` is already a member of `channel`.
+///
+/// # Errors
+/// Storage failure.
+pub(crate) async fn is_member(
+    connection: &mut PgConnection,
+    channel: Uuid,
+    conversation: Uuid,
+) -> Result<bool, GatewayError> {
+    Ok(sqlx::query_scalar!(
+        "SELECT EXISTS (SELECT 1 FROM channel_members WHERE channel_id = $1 AND conversation_id = $2) AS \"member!\"",
+        channel,
+        conversation
+    )
+    .fetch_one(connection)
+    .await?)
+}
+
+/// An agent member's name in the channel, if it has one.
+///
+/// # Errors
+/// Storage failure.
+pub(crate) async fn name_in(
+    connection: &mut PgConnection,
+    channel: Uuid,
+    conversation: Uuid,
+) -> Result<Option<String>, GatewayError> {
+    Ok(sqlx::query_scalar!(
+        "SELECT name FROM channel_members WHERE channel_id = $1 AND conversation_id = $2",
+        channel,
+        conversation
+    )
+    .fetch_optional(connection)
+    .await?
+    .flatten())
+}
+
+/// `base`, or `base 2`, `base 3` and on: the first no other member of the channel has, without regard to case (a
+/// default name never clashes; a chosen one does).
+///
+/// # Errors
+/// Storage failure.
+pub(crate) async fn free_name(
+    connection: &mut PgConnection,
+    channel: Uuid,
+    conversation: Uuid,
+    base: &str,
+) -> Result<String, GatewayError> {
+    let taken: Vec<String> = sqlx::query_scalar!(
+        "SELECT lower(name) AS \"name!\" FROM channel_members WHERE channel_id = $1 AND name IS NOT NULL \
+         AND conversation_id IS DISTINCT FROM $2",
+        channel,
+        conversation
+    )
+    .fetch_all(connection)
+    .await?;
+    let mut candidate = base.to_owned();
+    let mut number = 1;
+    while taken.contains(&candidate.to_lowercase()) {
+        number += 1;
+        let suffix = format!(" {number}");
+        let kept: String = base
+            .chars()
+            .take(MAX_MEMBER_NAME - suffix.chars().count())
+            .collect();
+        candidate = format!("{kept}{suffix}");
+    }
+    Ok(candidate)
 }

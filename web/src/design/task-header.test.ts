@@ -86,18 +86,26 @@ describe("WEB-U-456 the task header spans the main area", () => {
       );
       expect(declared(under, "margin-inline"), page).toBe("auto");
     }
-    // From 1280 px: the log and the side between two flexible tracks, which take what is left; the header across all.
+    // From 1024 px (18.2's chat page): the log centred between two flexible tracks, the header across all; an open
+    // panel (To-dos, Members or a thread) takes a side track beside the log, which keeps its width.
     const wide =
-      channels.match(/@media \(min-width: 1280px\) \{([\s\S]*?)\n\}/)?.[1] ??
+      channels.match(/@media \(min-width: 1024px\) \{([\s\S]*?)\n\}/)?.[1] ??
       "";
     const grid = rule(wide, ".channel-page");
     expect(declared(grid, "grid-template-columns")).toBe(
+      "[wide-start] minmax(0, 1fr) [log-start] minmax(0, var(--transcript-width)) [log-end] minmax(0, 1fr) [wide-end]",
+    );
+    expect(
+      declared(
+        rule(wide, ".channel-page[data-panel]"),
+        "grid-template-columns",
+      ),
+    ).toBe(
       "[wide-start] minmax(0, 1fr) [log-start] minmax(0, var(--transcript-width)) [log-end] var(--space-6) [side-start] var(--channel-side-width) [side-end] minmax(0, 1fr) [wide-end]",
     );
     expect(declared(grid, "column-gap")).toBe("0");
     expect(declared(grid, "max-width")).toBe(undefined);
-    // Everything reads in the log's column unless placed (the idle agents, the first step, the composer), so nothing
-    // lands in the gap between the log and the side.
+    // Everything reads in the log's column unless placed (the header, the panel), so nothing lands in the gap.
     expect(declared(rule(wide, ".channel-page > *"), "grid-column")).toBe(
       "log",
     );
@@ -105,7 +113,7 @@ describe("WEB-U-456 the task header spans the main area", () => {
       declared(rule(wide, ".channel-page > .channel-bar"), "grid-column"),
     ).toBe("wide");
     expect(
-      declared(rule(wide, ".channel-page > .channel-side"), "grid-column"),
+      declared(rule(wide, ".channel-page > .channel-panel"), "grid-column"),
     ).toBe("side");
   });
 });

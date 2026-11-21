@@ -41,6 +41,16 @@ pub(crate) async fn upgrade(
     )
     .execute(&state.pool)
     .await?;
+    // A runtime that reads channel wakes ends any "can't be woken" for its old one: a later failure is said again (A10,
+    // C-15).
+    if has >= tqa_types::CHANNEL_WAKE_REVISION {
+        sqlx::query!(
+            "DELETE FROM channel_unreachable WHERE conversation_id = $1 AND reason = 'runtime'",
+            crate::conversations::uuid(&conversation)?
+        )
+        .execute(&state.pool)
+        .await?;
+    }
     // An agent team's journals hold the lead's brief (a member's, revision 12) and the gateway's wakes (the lead's and
     // members', revision 13): an older runtime is refused, never run with either as a person's words or unable to read
     // its own history (ADR-0026's notes of 2 and 5 Oct 2026).

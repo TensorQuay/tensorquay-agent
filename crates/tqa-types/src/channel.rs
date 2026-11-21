@@ -327,6 +327,24 @@ pub enum MessageBody {
     Notice {
         /// What it says.
         kind: ChannelNoticeKind,
+        /// The member it is about, by its task's name, so a page words it in the reader's language.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        member: Option<String>,
+        /// That member's id (its task's), so a page names it as Members does: its owner sees the title of their own
+        /// unnamed agent, never two members alike as "Agent" (decided on 21 Nov 2026, C-15).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        member_id: Option<String>,
+        /// A woken run's failure code, so a page words it as the task page does (decided on 20 Nov 2026, C-6).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        code: Option<String>,
+        /// The gateway's own refusal that ended that run (`gateway.<code> <status>`, such as the channel's spent budget),
+        /// so a page words it as the task page does; never the run's other failure detail (decided on 21 Nov 2026).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        refusal: Option<String>,
+        /// When a used-up daily budget renews (RFC 3339), so a page says it in the reader's own time (decided on 21 Nov
+        /// 2026, C-14); on `wake_budget_spent` only.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        resets_at: Option<String>,
         /// The sentence.
         text: String,
     },
@@ -350,6 +368,15 @@ pub enum ChannelNoticeKind {
     /// A member can't be woken: its task was deleted (A10).
     #[serde(rename = "member_deleted")]
     MemberDeleted,
+    /// A person set the channel's wake budget; `member` names them (A5, decided on 20 Nov 2026).
+    #[serde(rename = "wake_budget_set")]
+    WakeBudgetSet,
+    /// A run a wake started failed; `member` names it and `code` says why (decided on 20 Nov 2026, C-6).
+    #[serde(rename = "woken_run_failed")]
+    WokenRunFailed,
+    /// A run a wake started was stopped; `member` names it (C-6).
+    #[serde(rename = "woken_run_stopped")]
+    WokenRunStopped,
 }
 
 impl MessageBody {

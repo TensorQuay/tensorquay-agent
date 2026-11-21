@@ -124,6 +124,7 @@ fn channels_router(route: ChannelRoute) -> MethodRouter<Arc<AppState>> {
         ChannelRoute::Get => get(api::get),
         ChannelRoute::End => post(api::end),
         ChannelRoute::Delete => delete(api::delete),
+        ChannelRoute::SetBudget => patch(crate::channels::budget::set_budget),
         ChannelRoute::Members => get(api::members),
         ChannelRoute::PutMember => put(api::put_member),
         ChannelRoute::RemoveMember => delete(api::remove_member),

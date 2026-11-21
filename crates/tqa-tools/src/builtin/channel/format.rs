@@ -15,8 +15,9 @@ pub(crate) const BUDGET: usize = 64 * 1024;
 pub(crate) fn page(channel: &str, page: &ChannelPage, budget: usize) -> Result<String, ToolError> {
     if page.messages.is_empty() {
         return Ok(format!(
-            "channel {channel}: no new messages; next since={}\n",
-            page.next_since
+            "channel {channel}: no new messages; next since={}\n{}",
+            page.next_since,
+            woken(page)
         ));
     }
     let mut blocks = Vec::new();
@@ -56,7 +57,18 @@ pub(crate) fn page(channel: &str, page: &ChannelPage, budget: usize) -> Result<S
         out.push_str(&block);
         out.push('\n');
     }
+    out.push_str(woken(page));
     Ok(out)
+}
+
+/// What a woken run's wait adds (decided on 20 Nov 2026, C-11): it didn't wait, and the run ends its turn.
+const fn woken(page: &ChannelPage) -> &'static str {
+    if page.woken {
+        "You were woken for this channel: you are woken again when something for you arrives, so end your turn \
+         now.\n"
+    } else {
+        ""
+    }
 }
 
 /// One message as a marked block.

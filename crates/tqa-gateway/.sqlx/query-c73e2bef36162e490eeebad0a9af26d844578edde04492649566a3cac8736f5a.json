@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT m.user_id, m.conversation_id, m.role, m.added_at, u.email::text AS user_email, v.title AS \"title?\", v.owner_id AS \"conversation_owner?\", ou.email::text AS conversation_owner_email, COALESCE(v.profile->>'display_name', v.profile->>'name') AS profile_name, latest.lifecycle AS \"latest?\" FROM channel_members m LEFT JOIN users u ON u.id = m.user_id LEFT JOIN conversations v ON v.id = m.conversation_id LEFT JOIN users ou ON ou.id = v.owner_id LEFT JOIN LATERAL (SELECT e.lifecycle FROM events e WHERE e.conversation_id = m.conversation_id AND e.lifecycle IS NOT NULL ORDER BY e.seq DESC LIMIT 1) latest ON true WHERE m.channel_id = $1 ORDER BY m.added_at, m.user_id, m.conversation_id",
+  "query": "SELECT m.user_id, m.conversation_id, m.role, m.added_at, u.email::text AS user_email, v.title AS \"title?\", v.owner_id AS \"conversation_owner?\", ou.email::text AS conversation_owner_email, COALESCE(v.profile->>'display_name', v.profile->>'name') AS profile_name, m.name AS \"member_name?\", latest.lifecycle AS \"latest?\" FROM channel_members m LEFT JOIN users u ON u.id = m.user_id LEFT JOIN conversations v ON v.id = m.conversation_id LEFT JOIN users ou ON ou.id = v.owner_id LEFT JOIN LATERAL (SELECT e.lifecycle FROM events e WHERE e.conversation_id = m.conversation_id AND e.lifecycle IS NOT NULL ORDER BY e.seq DESC LIMIT 1) latest ON true WHERE m.channel_id = $1 ORDER BY m.added_at, m.user_id, m.conversation_id",
   "describe": {
     "columns": [
       {
@@ -89,6 +89,17 @@
       },
       {
         "ordinal": 9,
+        "name": "member_name?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_members",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
         "name": "latest?",
         "type_info": "Text",
         "origin": {
@@ -114,8 +125,9 @@
       false,
       null,
       null,
+      true,
       true
     ]
   },
-  "hash": "7dae7e509adff97e71736ac21761e7b4dc63589d956a6c46a30a15fba5c57737"
+  "hash": "c73e2bef36162e490eeebad0a9af26d844578edde04492649566a3cac8736f5a"
 }

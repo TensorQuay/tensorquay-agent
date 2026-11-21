@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE channels SET spent_tokens = 0, budget_window_start = NULL WHERE budget_window_start IS NOT NULL AND budget_window_start + make_interval(secs => $1) <= CURRENT_TIMESTAMP",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Float8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e16c99a1cd2f82f14d8d43d96fd2083c7d7b5c54bc6fcd60b402602ec8dfea38"
+}

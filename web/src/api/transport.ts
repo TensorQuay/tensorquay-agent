@@ -18,7 +18,8 @@ export type Environment = {
 export type RequestOptions = {
   parameters?: Record<string, string>;
   query?: URLSearchParams;
-  body?: string;
+  /** JSON as text, or a file's bytes as the raw body (a channel upload; a task's upload reports progress instead). */
+  body?: string | Blob;
   key?: string;
   signal?: AbortSignal | undefined;
   /** Error statuses whose body is still the answer (for example readiness: 503 with the failing checks). */
@@ -57,7 +58,12 @@ export class Transport {
     try {
       const headers = new Headers({ accept: "application/json" });
       if (options.body !== undefined)
-        headers.set("content-type", "application/json");
+        headers.set(
+          "content-type",
+          typeof options.body === "string"
+            ? "application/json"
+            : "application/octet-stream",
+        );
       if (options.key !== undefined)
         headers.set("idempotency-key", options.key);
       const response = await this.environment.fetch(

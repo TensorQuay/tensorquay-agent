@@ -1116,7 +1116,7 @@
             }
           }
         },
-        "description": "Idempotency-Key is required and scoped to the authenticated user. The canonical request body is fingerprinted. A replay returns the original 201 response and conversation id without repeating side effects; a changed body returns 422 idempotency_key_reused and a key used on another route returns 409 idempotency_route. The conversation and key record commit atomically. Records expire after the configured idempotency retention (24 hours by default). The title given here counts as the first message's (title_source message): after the task's first completed run the gateway may replace it with a 3-6 word name, unless [tasks] auto_title is off; a later PATCH of the title is never replaced."
+        "description": "Idempotency-Key is required and scoped to the authenticated user. The canonical request body is fingerprinted. A replay returns the original 201 response and conversation id without repeating side effects; a changed body returns 422 idempotency_key_reused and a key used on another route returns 409 idempotency_route. The conversation and key record commit atomically. Records expire after the configured idempotency retention (24 hours by default). The title given here counts as the first message's (title_source message): after the task's first completed run the gateway may replace it with a 3-6 word name, unless [tasks] auto_title is off; a later PATCH of the title is never replaced. The title given at creation is provisional: the automatic title replaces it after the first run; a rename with PATCH holds."
       },
       "get": {
         "operationId": "list",
@@ -13065,6 +13065,153 @@
             }
           }
         ]
+      },
+      "patch": {
+        "operationId": "setChannelBudget",
+        "summary": "Set a channel's wake budget",
+        "description": "The channel's owner, a person with role lead in it, or an administrator sets the tokens its woken runs may spend (ADR-0014's amendment, A5; decided on 20 Nov 2026): from 0 (no agent is woken) to the installation's `[channels] max_wake_budget` (10,000,000 by default; 400 parameter_invalid past it, in words). The channel gets a `wake_budget_set` notice naming the person, and a wake the budget held goes out without a new post. Others get 403 not_lead; an ended channel 409 channel_ended. Answers the channel as GET does.",
+        "security": [
+          {
+            "sessionCookie": []
+          },
+          {
+            "personalToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "wake_budget"
+                ],
+                "properties": {
+                  "wake_budget": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Tokens a day; 0 turns waking off for this channel."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Channel"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or unsupported protocol",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origin, ownership or role denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Record not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Bootstrap closed, idempotency route conflict or deleted conversation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate or capacity limit reached",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable or gateway restarting",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "I/O deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/channels/{id}/end": {
@@ -13325,7 +13472,7 @@
       "put": {
         "operationId": "putChannelMemberByEmail",
         "summary": "Add a person by email",
-        "description": "The channel's owner adds a person by exact email, or changes their role, as workspace shares do: an unknown or disabled address is 404 user_not_found, and lookups share the per-user sharing rate (429). 403 not_owner for anyone else; 400 for the owner's own address; 409 channel_full past 32 members.",
+        "description": "The channel's owner adds a person by exact email, or changes their role, as workspace shares do: an unknown or disabled address is 404 user_not_found, and lookups share the per-user sharing rate (429). 403 not_owner for anyone else; 400 for the owner's own address; 409 channel_full past 32 members. An agent's owner names it with `name`, and renames it by sending the member again; 403 not_agent_owner when someone else names it, 409 member_name_taken when another member has the name.",
         "security": [
           {
             "sessionCookie": []
@@ -14564,7 +14711,7 @@
       "post": {
         "operationId": "claimChannelTask",
         "summary": "Claim a task",
-        "description": "A voting member claims the task, atomically up to its limit (ADR-0014 point 8): 201 with the new claim, 200 with the caller's existing one; 409 already_claimed when the limit is reached, not_a_task, channel_ended; 403 not_member or observer. 429 channel_rate once the channel has had 5,000 messages in the last 24 hours (ADR-0014), with Retry-After.",
+        "description": "A voting member claims the task, atomically up to its limit (ADR-0014 point 8): 201 with the new claim, 200 with the caller's existing one; 409 already_claimed when the limit is reached, not_a_task, channel_ended, one_at_a_time when the caller is an agent holding a claim on another to-do of this channel it has not reported on (ADR-0014's amendment, A13; people are not limited); 403 not_member or observer. 429 channel_rate once the channel has had 5,000 messages in the last 24 hours (ADR-0014), with Retry-After.",
         "security": [
           {
             "sessionCookie": []
@@ -25930,6 +26077,24 @@
           "last_seq": {
             "type": "integer",
             "minimum": 0
+          },
+          "wake_budget": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "The tokens woken runs may spend here a day: its own budget, or the installation's [channels] wake_budget (ADR-0014's amendment of 20 Nov 2026, A5; a daily allowance, decided on 21 Nov 2026); on one channel's read only."
+          },
+          "spent_tokens": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "What woken runs have spent here today, in the open budget window (0 when none is open); on one channel's read only."
+          },
+          "budget_resets_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "When the open budget window ends and spent is 0 again: a day after its first charge (decided on 21 Nov 2026); null while none is open; on one channel's read only."
           }
         }
       },
@@ -25969,6 +26134,12 @@
               "member",
               "observer"
             ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "description": "An agent member's name in the channel, shown to every member and matched by @ (ADR-0014's amendment of 20 Nov 2026). Only the agent's owner sets it (403 not_agent_owner); its task's title when its owner adds it without one. 1 to 80 characters, no control characters, unique in the channel without regard to case (409 member_name_taken). Refused for a person (400)."
           }
         }
       },
@@ -26044,6 +26215,10 @@
           "can_open": {
             "type": "boolean",
             "description": "Whether the caller may open this agent member's task page: true for the task's owner and for an administrator (who gets its private view), false otherwise. Present only for kind conversation."
+          },
+          "named": {
+            "type": "boolean",
+            "description": "Whether an agent member has a name in the channel (ADR-0014's amendment A12). One without shows by its profile's name, its owner sees its task's title, and @ can't reach it until its owner names it. Absent for a person."
           }
         }
       },
@@ -26302,11 +26477,36 @@
                   "wake_budget_spent",
                   "wakes_bounded",
                   "unreachable_runtime",
-                  "member_deleted"
+                  "member_deleted",
+                  "wake_budget_set",
+                  "woken_run_failed",
+                  "woken_run_stopped"
                 ]
               },
               "text": {
                 "type": "string"
+              },
+              "member": {
+                "type": "string",
+                "description": "Who it is about, so a page words it in the reader's language: an agent member by its name in the channel, or, for wake_budget_set, the person who set the budget."
+              },
+              "member_id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "The agent member's id (its task's), when the notice is about one that is still a member: a page names it as Members does, so its owner sees the title of their own agent without a name here (decided on 21 Nov 2026, C-15)."
+              },
+              "code": {
+                "type": "string",
+                "description": "For woken_run_failed: the run's failure code, so a page words it as the task page does (decided on 20 Nov 2026)."
+              },
+              "refusal": {
+                "type": "string",
+                "description": "For woken_run_failed: the gateway's own refusal that ended the run (gateway.<code> <status>, such as gateway.channel_budget 409), so a page words it as the task page does; never the run's other failure detail (decided on 21 Nov 2026)."
+              },
+              "resets_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "For wake_budget_spent: when the channel's daily budget renews, so a page says when agents are woken again in the reader's own time (decided on 21 Nov 2026)."
               }
             },
             "description": "Written only by the gateway, for people (ADR-0014's amendment of 20 Nov 2026): a line about the channel itself, in the gateway's fixed words. Never in an agent's reads; posting one is refused. A client shows it as one muted line, and an unknown kind by its text."
@@ -26396,6 +26596,10 @@
           },
           "more": {
             "type": "boolean"
+          },
+          "woken": {
+            "type": "boolean",
+            "description": "On a runtime's wait in a run a channel's wake started (decided on 20 Nov 2026): the wait didn't wait and the page is a read's; the run ends its turn and is woken again when more arrives. Absent otherwise."
           }
         }
       },

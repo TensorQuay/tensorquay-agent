@@ -57,6 +57,7 @@ impl EventStore {
             id, sequence, context.run_id, context.step, context.timestamp, inline, blob, context.lifecycle, context.call_id)
             .execute(&mut *transaction).await?;
         let team = self.team_frame(&mut transaction, id, frame).await?;
+        let mut said = None;
         // A run's placeholders are bound at its start and removed at its end, with the event (ADR-0037 §3); a resume
         // keeps the ones its start bound.
         match (context.lifecycle, context.run_id.as_deref()) {
@@ -65,9 +66,11 @@ impl EventStore {
                 // A run a channel's wake started is charged to that channel (ADR-0014's amendment, A5).
                 crate::channels::wake::run_started(&mut transaction, id).await?;
             }
-            (Some("run.completed" | "run.failed" | "run.cancelled"), Some(run)) => {
+            (Some(ended @ ("run.completed" | "run.failed" | "run.cancelled")), Some(run)) => {
                 crate::host_keys::end_run(&mut transaction, id, run).await?;
-                crate::channels::wake::run_ended(&mut transaction, id).await?;
+                // A woken run that failed or was stopped is said in its channel (C-6).
+                let ending = crate::channels::wake::Ending::of(ended, frame);
+                said = crate::channels::wake::run_ended(&mut transaction, id, ending).await?;
             }
             _ => {}
         }
@@ -90,6 +93,9 @@ impl EventStore {
         // A failed or cancelled commit may have reached PostgreSQL. Keep its immutable blob;
         // deleting it here could corrupt an acknowledged commit after a connection failure.
         transaction.commit().await?;
+        if let Some((channel, seq)) = said {
+            self.channels.published(channel, seq);
+        }
         if let Some(pending) = &self.team_reads {
             let (reads, ended) = team;
             pending.remove(id, &reads);
