@@ -86,6 +86,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   (a stray container takes about ten seconds to stop) was followed at once by another that found nothing left, so the
   readiness detail and the `tqa_sandbox_unowned` gauge showed no stray removed. The next sweep now starts a full period
   after one ends.
+- **A task's private folder never ends up in a git commit (RT-I-065).** The runtime keeps a `.gitignore` of `*` in the
+  workspace's `.tqa/` (spill files, history, notes and digests), so `git add -A` in the workspace never stages it,
+  whatever the project's own `.gitignore` says.
 - **The gateway logs why it ended a model's response early (GW-U-226).** When the relay stops a response before
   its end (the model server silent past the idle limit, the response deadline, the byte limit, the upstream
   breaking), a warning names the reason, the route, the bytes carried and the seconds it ran. Before, the task
