@@ -208,14 +208,26 @@ class IsolationStack(ConnectorStack):
         """Starts the capture helper in the sandbox's network namespace; returns its directory and container."""
         directory = self.directory.parent / "capture"
         directory.mkdir(mode=0o700)
-        container = self.command(["docker", "run", "-d", "--rm", "--network", "container:" + sandbox, "--user", "0",
-                                  "--cap-drop", "ALL", "--cap-add", "NET_RAW", "--read-only",
+        # Root in the container writes into this run's private folder: on a rootful engine that folder is another
+        # user's (the runner's, mode 0700), which root reaches only with DAC_OVERRIDE (the nightly of 21 Nov 2026 never
+        # saw "ready" on GitHub's rootful engine; rootless engines map root to the folder's owner). Not removed on exit,
+        # so a helper that stops early leaves its words for the failure below.
+        container = self.command(["docker", "run", "-d", "--network", "container:" + sandbox, "--user", "0",
+                                  "--cap-drop", "ALL", "--cap-add", "NET_RAW", "--cap-add", "DAC_OVERRIDE",
+                                  "--read-only",
                                   "-e", "CAPTURE_SECONDS={}".format(CAPTURE_SECONDS),
                                   "-v", "{}:/capture".format(directory), "--entrypoint", "python3", self.runtime,
                                   "-c", CAPTURE])
         deadline = time.monotonic() + CAPTURE_READY_SECONDS
         while not (directory / "ready").exists():
-            assert time.monotonic() < deadline, "The capture helper did not start"
+            if time.monotonic() >= deadline:
+                state = self.command(["docker", "inspect", "--format", "{{.State.Status}} exit {{.State.ExitCode}}",
+                                      container])
+                logs = subprocess.run(["docker", "logs", "--tail", "20", container], capture_output=True, text=True,
+                                      timeout=30)
+                subprocess.run(["docker", "rm", "-f", container], capture_output=True, timeout=60)
+                raise AssertionError("The capture helper did not start ({}): {}".format(
+                    state.strip(), (logs.stdout + logs.stderr).strip() or "no output"))
             time.sleep(0.2)
         return directory, container
 
@@ -237,6 +249,7 @@ class IsolationStack(ConnectorStack):
         finally:
             (directory / "stop").touch()
             self.command(["docker", "stop", "--time", "5", container])
+            self.command(["docker", "rm", container])
         return self.stored(), (directory / "packets.bin").read_bytes(), sandbox
 
     def outside_the_set(self, sandbox):
