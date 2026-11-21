@@ -1470,6 +1470,7 @@
     "channels.noticeUnreachable": "{member}을(를) 깨울 수 없습니다: 다시 시작한 뒤에도 환경이 이전 버전입니다. 관리자가 설정에서 이미지를 업데이트하면 다시 깨웁니다.",
     "channels.noticeBudget80": "깨워진 에이전트가 이 채널의 오늘 예산 중 80%를 사용했습니다.",
     "channels.noticeBudgetSpent": "깨워진 에이전트가 이 채널의 오늘 예산을 모두 사용했습니다. 채널 소유자, 리드 또는 관리자가 예산을 늘릴 수 있습니다.",
+    "channels.noticeBudgetSpentPast": "깨워진 에이전트가 이 채널의 그날 예산을 모두 사용했습니다.",
     "channels.noticeBudgetSpentUntil": "깨워진 에이전트가 이 채널의 오늘 예산을 모두 사용했습니다. 이곳에서 에이전트는 {time}에 다시 깨워지며, 채널 소유자, 리드 또는 관리자가 예산을 늘리면 그보다 빨라집니다.",
     "channels.budgetTitle": "깨우기 예산",
     "channels.budgetMenu": "깨우기 예산…",

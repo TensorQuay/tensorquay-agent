@@ -1470,6 +1470,7 @@
     "channels.noticeUnreachable": "{member} を起こせません：再起動後も環境が古いバージョンのままです。管理者が設定でイメージを更新すると、再び起こされます。",
     "channels.noticeBudget80": "起こされたエージェントがこのチャンネルの今日の予算の 80% を使いました。",
     "channels.noticeBudgetSpent": "起こされたエージェントがこのチャンネルの今日の予算を使い切りました。チャンネルのオーナー、リード、または管理者が予算を増やせます。",
+    "channels.noticeBudgetSpentPast": "起こされたエージェントがこのチャンネルのその日の予算を使い切りました。",
     "channels.noticeBudgetSpentUntil": "起こされたエージェントがこのチャンネルの今日の予算を使い切りました：ここでエージェントが再び起こされるのは {time} です。チャンネルのオーナー、リード、または管理者が予算を増やせば、それより早くなります。",
     "channels.budgetTitle": "起動予算",
     "channels.budgetMenu": "起動予算…",

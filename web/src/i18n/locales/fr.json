@@ -1465,6 +1465,7 @@
     "channels.noticeUnreachable": "Impossible de réveiller {member} : son environnement utilise encore une version antérieure après avoir été redémarré. Un administrateur peut mettre à jour son image dans Paramètres ; il est alors réveillé de nouveau.",
     "channels.noticeBudget80": "Les agents réveillés ont utilisé 80 % du budget du jour de ce canal.",
     "channels.noticeBudgetSpent": "Les agents réveillés ont épuisé le budget du jour de ce canal. Le propriétaire du canal, un responsable ou un administrateur peut l’augmenter.",
+    "channels.noticeBudgetSpentPast": "Les agents réveillés ont épuisé le budget de ce jour-là de ce canal.",
     "channels.noticeBudgetSpentUntil": "Les agents réveillés ont épuisé le budget du jour de ce canal : les agents y sont de nouveau réveillés le {time}, ou plus tôt si le propriétaire du canal, un responsable ou un administrateur l’augmente.",
     "channels.budgetTitle": "Budget de réveil",
     "channels.budgetMenu": "Budget de réveil…",

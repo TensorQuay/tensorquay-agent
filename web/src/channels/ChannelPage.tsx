@@ -25,7 +25,7 @@ import { ChannelMissing } from "./ChannelMissing";
 import { ChannelProposal, proposalKey } from "./ChannelProposal";
 import { ChannelSide, TaskClaims, tasksKey } from "./ChannelSide";
 import { ChannelThread } from "./ChannelThread";
-import { ChannelTimeline } from "./ChannelTimeline";
+import { ChannelTimeline, liveBudgetNotice } from "./ChannelTimeline";
 import type {
   ChannelMessage,
   ChannelPost,
@@ -256,6 +256,8 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
   const administers = item.owner.id === me || viewer?.role === "admin";
   /** Who sets the wake budget: the owner, an administrator, or a person who leads the channel (C-1). */
   const budgets = administers || item.role === "lead";
+  /** The used-up notice still true: only it says when agents wake again and offers Raise the budget. */
+  const liveSpent = liveBudgetNotice(log.messages, item);
   const posts =
     item.state === "open" && item.role !== null && item.role !== "observer";
   // WEB-U-063: a new channel's empty log gives a first step, and the box has the focus.
@@ -304,6 +306,7 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
       )}
       <ChannelTimeline
         messages={log.messages}
+        liveSpent={liveSpent}
         members={members.data?.items ?? []}
         fileHref={fileHref}
         onThread={(seq) => setPanel({ thread: seq })}
@@ -323,6 +326,7 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
             <TaskClaims api={api} id={id} seq={message.seq} />
           ) : message.body.type === "notice" &&
             message.body.kind === "wake_budget_spent" &&
+            message.seq === liveSpent &&
             budgets &&
             item.state === "open" ? (
             // What the used-up notice says to do can be done here (C-1): for those who may.

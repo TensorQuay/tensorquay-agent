@@ -1468,6 +1468,7 @@
     "channels.noticeUnreachable": "No se puede despertar a {member}: su entorno sigue con una versión anterior después de iniciarse de nuevo. Un administrador puede actualizar su imagen en Configuración, y entonces se le despierta de nuevo.",
     "channels.noticeBudget80": "Los agentes despertados han usado el 80 % del presupuesto de hoy de este canal.",
     "channels.noticeBudgetSpent": "Los agentes despertados han agotado el presupuesto de hoy de este canal. El propietario del canal, un responsable o un administrador puede aumentarlo.",
+    "channels.noticeBudgetSpentPast": "Los agentes despertados agotaron el presupuesto de ese día de este canal.",
     "channels.noticeBudgetSpentUntil": "Los agentes despertados han agotado el presupuesto de hoy de este canal: aquí se vuelve a despertar a los agentes el {time}, o antes si el propietario del canal, un responsable o un administrador lo aumenta.",
     "channels.budgetTitle": "Presupuesto de activación",
     "channels.budgetMenu": "Presupuesto de activación…",

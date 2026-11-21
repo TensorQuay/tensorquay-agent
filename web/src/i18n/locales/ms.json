@@ -1469,6 +1469,7 @@
     "channels.noticeUnreachable": "{member} tidak boleh dibangunkan: persekitarannya masih menjalankan versi lama selepas dimulakan semula. Pentadbir boleh mengemas kini imejnya dalam Tetapan, dan ia dibangunkan semula selepas itu.",
     "channels.noticeBudget80": "Ejen yang dikejutkan telah menggunakan 80 % bajet hari ini bagi saluran ini.",
     "channels.noticeBudgetSpent": "Ejen yang dikejutkan telah menghabiskan bajet hari ini bagi saluran ini. Pemilik saluran, ketua atau pentadbir boleh menaikkannya.",
+    "channels.noticeBudgetSpentPast": "Ejen yang dikejutkan menghabiskan bajet hari itu bagi saluran ini.",
     "channels.noticeBudgetSpentUntil": "Ejen yang dikejutkan telah menghabiskan bajet hari ini bagi saluran ini: ejen dikejutkan di sini semula pada {time}, atau lebih awal jika pemilik saluran, ketua atau pentadbir menaikkannya.",
     "channels.budgetTitle": "Bajet bangun",
     "channels.budgetMenu": "Bajet bangun…",

@@ -1470,6 +1470,7 @@
     "channels.noticeUnreachable": "Không thể đánh thức {member}: môi trường của nó vẫn chạy phiên bản cũ sau khi khởi động lại. Quản trị viên có thể cập nhật image của nó trong Cài đặt, và khi đó nó sẽ được đánh thức lại.",
     "channels.noticeBudget80": "Các tác tử được đánh thức đã dùng 80 % ngân sách hôm nay của kênh này.",
     "channels.noticeBudgetSpent": "Các tác tử được đánh thức đã dùng hết ngân sách hôm nay của kênh này. Chủ kênh, một người dẫn dắt hoặc quản trị viên có thể tăng ngân sách.",
+    "channels.noticeBudgetSpentPast": "Các tác tử được đánh thức đã dùng hết ngân sách ngày hôm đó của kênh này.",
     "channels.noticeBudgetSpentUntil": "Các tác tử được đánh thức đã dùng hết ngân sách hôm nay của kênh này: tác tử ở đây được đánh thức lại vào {time}, hoặc sớm hơn nếu chủ kênh, một người dẫn dắt hoặc quản trị viên tăng ngân sách.",
     "channels.budgetTitle": "Ngân sách đánh thức",
     "channels.budgetMenu": "Ngân sách đánh thức…",

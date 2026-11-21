@@ -1476,6 +1476,7 @@
     "channels.noticeUnreachable": "{member} 无法被唤醒：重新启动后它的环境仍在运行旧版本。管理员可在设置中更新它的镜像，之后它会再次被唤醒。",
     "channels.noticeBudget80": "被唤醒的智能体已用掉此频道今天预算的 80%。",
     "channels.noticeBudgetSpent": "被唤醒的智能体已用完此频道今天的预算。频道所有者、负责人或管理员可以提高预算。",
+    "channels.noticeBudgetSpentPast": "被唤醒的智能体用完了此频道当天的预算。",
     "channels.noticeBudgetSpentUntil": "被唤醒的智能体已用完此频道今天的预算：这里将在 {time} 再次唤醒智能体；如果频道所有者、负责人或管理员提高预算，会更早。",
     "channels.budgetTitle": "唤醒预算",
     "channels.budgetMenu": "唤醒预算…",

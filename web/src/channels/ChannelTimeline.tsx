@@ -163,6 +163,25 @@ const SeqLink = ({ seq, title }: { seq: number; title: string | undefined }) =>
  * says so), a role only when it isn't a plain member, and replies under their parent. What agents and people wrote is untrusted: Markdown through the safe renderer, other
  * text as text, and links only for http(s).
  */
+/**
+ * The used-up notice that is still true: the latest one, while the channel's budget is used up today (spent at or over
+ * a budget above 0). Raised, set to 0 or renewed, none is: every earlier one reads as a past line, without its time.
+ */
+export function liveBudgetNotice(
+  messages: readonly ChannelMessage[],
+  channel: { wake_budget?: number | null; spent_tokens?: number | null },
+): number | null {
+  const budget = channel.wake_budget ?? 0;
+  if (budget <= 0 || (channel.spent_tokens ?? 0) < budget) return null;
+  return (
+    messages.findLast(
+      (message) =>
+        message.body.type === "notice" &&
+        message.body.kind === "wake_budget_spent",
+    )?.seq ?? null
+  );
+}
+
 export function ChannelTimeline({
   messages,
   members,
@@ -171,6 +190,7 @@ export function ChannelTimeline({
   fileHref,
   onThread,
   label,
+  liveSpent,
 }: {
   messages: readonly ChannelMessage[];
   members: readonly Member[];
@@ -183,6 +203,8 @@ export function ChannelTimeline({
   fileHref?: (seq: number, index: number) => string;
   /** Extra content under a post, by seq: a proposal's tally and controls, a task's claim state. */
   after?: (message: ChannelMessage) => ReactNode;
+  /** The used-up notice still true ([`liveBudgetNotice`]); others read as past. Absent, every one reads as current. */
+  liveSpent?: number | null;
 }) {
   const t = useT();
   const known = new Set(messages.map((message) => message.seq));
@@ -234,6 +256,7 @@ export function ChannelTimeline({
           titles={titles}
           continued={continues(message, list[index - 1])}
           decided={decided.has(message.seq)}
+          past={liveSpent !== undefined && liveSpent !== message.seq}
           {...(onReply ? { onReply } : {})}
           {...(fileHref ? { fileHref } : {})}
           extra={after?.(message)}
@@ -287,6 +310,7 @@ function Post({
   titles,
   continued,
   decided,
+  past,
   onReply,
   fileHref,
   extra,
@@ -299,6 +323,8 @@ function Post({
   continued: boolean;
   /** Whether it is a proposal whose decision is in the log: its text folds (WEB-U-521). */
   decided: boolean;
+  /** Whether it is a used-up notice no longer true. */
+  past: boolean;
   onReply?: (seq: number) => void;
   fileHref?: (seq: number, index: number) => string;
   extra: ReactNode;
@@ -378,6 +404,7 @@ function Post({
         members={members}
         titles={titles}
         decided={decided}
+        past={past}
       />
       {fileHref && message.files && message.files.length > 0 && (
         <ul
@@ -467,11 +494,13 @@ function Body({
   members,
   titles,
   decided,
+  past,
 }: {
   message: ChannelMessage;
   members: readonly Member[];
   titles: Titles;
   decided: boolean;
+  past: boolean;
 }) {
   const t = useT();
   const body = message.body;
@@ -582,6 +611,13 @@ function Body({
                   "run.stoppedUnknown",
               ),
             })}
+          </p>
+        );
+      // One no longer true (raised, set to 0, or the day renewed) is a past line, with no time to wait for.
+      if (body.kind === "wake_budget_spent" && past)
+        return (
+          <p className="type-small muted">
+            {t("channels.noticeBudgetSpentPast")}
           </p>
         );
       // A used-up daily budget says when agents are woken again, in the reader's own time (C-14).
