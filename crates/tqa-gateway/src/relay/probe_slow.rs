@@ -9,8 +9,9 @@ use tqa_llm::Route;
 /// The whole probe's bound.
 const DEADLINE: Duration = Duration::from_mins(1);
 /// A local route's whole check: bounded by progress, not by its total (a first-hour check before 17.0). Each answer's
-/// first byte waits up to `[relay] local_check_timeout`, then a gap of `[relay] idle_timeout` without a token ends it;
-/// a model that keeps answering may finish within this outer cap, however slowly it thinks.
+/// first byte waits up to `[relay] local_check_timeout`, then a gap of the check's idle limit (`[relay] idle_timeout`,
+/// at most 60 s) without a token ends it; a model that keeps answering may finish within this outer cap, however
+/// slowly it thinks.
 const LOCAL_OUTER_CAP: Duration = Duration::from_mins(10);
 
 /// The longest any route's check may take: a local route's outer cap, or its first-byte wait if that is longer.
@@ -44,8 +45,7 @@ pub(super) fn first_byte(route: &Route, config: &RelayConfig) -> Duration {
 }
 
 /// The checks, within `until` unless cancelled, and whether `until` ended them: a model still answering then is slow
-/// (GW-U-092), while a gap past `[relay] idle_timeout` is a `timeout` from the steps themselves, which tasks meet the
-/// same way.
+/// (GW-U-092), while a gap past the check's idle limit is a `timeout` from the steps themselves.
 pub(super) async fn steps_until(
     route: &Route,
     probe: &Probe<'_>,
@@ -65,7 +65,8 @@ pub(super) async fn steps_until(
 /// A local model that passed the call and the round trip, and was still answering when the check's own deadline ended
 /// it in the strict-lines step, works for tasks, slowly (the 7 Nov 2026 first hour: 5,078 tokens of thinking at 12 a
 /// second reached the outer cap there): the check passes, with the line breaks unverified, and says the model is slow
-/// (GW-U-092). A gap past `[relay] idle_timeout` stays a `timeout` in every step, since tasks meet the same gap.
+/// (GW-U-092). A gap past the check's idle limit stays a `timeout` in every step (a task's own answers may pause
+/// longer).
 /// Answers whether it passed.
 pub(super) fn out_of_time_after_round_trip(
     route: &Route,

@@ -370,7 +370,7 @@ async fn name(state: &State, id: &ConversationId) -> Result<(), GatewayError> {
         .as_ref()
         .map_or_else(CancellationToken::new, |call| call.token.clone());
     let mut asked = request(&task.title, &route);
-    let idle = Duration::from_secs(state.config.relay.idle_timeout);
+    let idle = state.config.relay.check_idle();
     // Any request waiting on the route, from any task, takes the slot: a title never delays real work.
     let waiter = async {
         while limiter.queued() == 0 {

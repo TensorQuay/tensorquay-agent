@@ -239,6 +239,12 @@ A route check waits up to a minute, or 2 minutes for a local model (on this comp
 loopback address, `localhost`, the container host, a single-label name such as a compose service, a `.local` or
 `.internal` name, or a private, link-local, Tailscale or unique-local address; or a route without a key); `[relay] local_check_timeout` (1-600 seconds) sets the local limit.
 
+Once a model has begun its answer, the relay lets it pause up to `[relay] idle_timeout` between its parts: 300 seconds
+by default (1-900). Some model servers send a tool call whole once its arguments are complete, after minutes of silence;
+a shorter limit cuts such an answer, and the gateway's log says "relayed response ended early" with the reason
+`relay response idle deadline`. The runtime waits a little longer than 900 seconds itself, so the relay is always the
+limit that ends an answer. A route check and a task's title request keep at most a minute of silence.
+
 Two more settings are file-only and apply to custom environment templates; the admin guide describes both
 ([Credential files in an image](../docs/admin-guide/web-settings.md#credential-files-in-an-image)).
 `acknowledged_secret_files` in a `[[templates]]` entry lists credential files that image may carry (absolute paths, at

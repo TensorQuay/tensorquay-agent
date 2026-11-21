@@ -123,7 +123,7 @@ fn gw_u_032_every_relay_bound_is_enforced_at_both_edges() -> TestResult {
         ("sse_event_bytes", "128", "4194304", "127", "4194305"),
         ("response_bytes", "1024", "268435456", "1023", "268435457"),
         ("header_timeout", "1", "300", "0", "301"),
-        ("idle_timeout", "1", "300", "0", "301"),
+        ("idle_timeout", "1", "900", "0", "901"),
         ("response_timeout", "1", "3600", "0", "3601"),
         ("queue_wait", "1", "120", "0", "121"),
         ("queue_max", "1", "10000", "0", "10001"),

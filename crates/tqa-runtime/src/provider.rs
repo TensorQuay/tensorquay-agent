@@ -116,6 +116,8 @@ impl ModelProvider for Unsupported {
 /// How much longer than the relay the runtime waits for the first byte, so the relay's own refusal (a 504 naming the
 /// gateway) is what the run sees.
 const FIRST_BYTE_MARGIN: Duration = Duration::from_secs(10);
+/// How much longer than the relay's largest idle limit the runtime waits between an answer's chunks.
+const IDLE_MARGIN: Duration = Duration::from_secs(15);
 
 /// Every model call goes to the gateway's relay, never to a provider: a relay that is briefly unresolvable or
 /// unreachable while the gateway restarts is retried like a refused connection (LLM-E-029). The first byte is awaited
@@ -128,6 +130,10 @@ fn relay_http(first_response_secs: Option<u32>) -> HttpConfig {
     HttpConfig {
         peer: tqa_llm::Peer::Relay,
         first_byte_timeout: bound + FIRST_BYTE_MARGIN,
+        // Between an answer's chunks the relay is the bound (`[relay] idle_timeout`, at most
+        // `RELAY_IDLE_MAX_SECONDS`): a server may send a tool call whole after a long silence. Waiting a little longer
+        // than the most it may be set to, the runtime never cuts first, and the relay's log says why.
+        idle_timeout: Duration::from_secs(tqa_types::RELAY_IDLE_MAX_SECONDS) + IDLE_MARGIN,
         ..HttpConfig::new(StreamLimits::RECOMMENDED)
     }
 }
@@ -151,6 +157,12 @@ mod tests {
             super::relay_http(None).first_byte_timeout,
             Duration::from_secs(70)
         );
+        // Between chunks, longer than the largest idle limit the relay accepts: 900 + 15 s.
+        assert_eq!(
+            super::relay_http(None).idle_timeout,
+            Duration::from_secs(tqa_types::RELAY_IDLE_MAX_SECONDS + 15)
+        );
+        assert_eq!(tqa_types::RELAY_IDLE_MAX_SECONDS, 900);
     }
 
     // TEST: LLM-E-029

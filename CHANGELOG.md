@@ -99,6 +99,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   something the sweep couldn't remove; the rest are listed and swept as before.
 ### Changed
 
+- **A model may pause 5 minutes inside an answer (GW-U-241).** `[relay] idle_timeout` is now 300 seconds by
+  default (1-900, was 60 and 1-300), and the runtime waits a little longer than its largest value, so the relay is
+  the limit that ends an answer and logs why. Some model servers hold a tool call back until its arguments are
+  complete and then send it whole; a 60-second limit cut such answers. A route check and a task's title keep at most
+  a minute of silence.
 - **A helper's failed run says why on the lead's page (GW-I-343, WEB-U-512).** The lead task's line read only
   "places failed."; it now names the reason in plain words ("The model's reply was cut off at its output limit"),
   links to the helper's task, and while the helper works again says so instead of "failed". A team's
