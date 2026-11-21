@@ -40,7 +40,7 @@ pub struct Backend {
     /// A destroy that fails still removes the sandbox: the timeout lied (the removal completed after it).
     pub destroy_lies: AtomicBool,
     /// Containers the listing found with this instance's labels but couldn't read (GW-I-342).
-    pub unreadable: Mutex<Vec<String>>,
+    pub unreadable: Mutex<Vec<tqa_sandbox::Unreadable>>,
     /// The engine's networks the backend reports (ADR-0035 amendment); `None` answers as an unreachable engine.
     pub engine: Mutex<Option<tqa_sandbox::EngineNetworks>>,
 }
@@ -282,7 +282,7 @@ impl SandboxBackend for Backend {
             unreadable: self
                 .unreadable
                 .lock()
-                .map(|ids| ids.clone())
+                .map(|items| items.clone())
                 .unwrap_or_default(),
         })
     }

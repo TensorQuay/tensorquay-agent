@@ -36,12 +36,16 @@ impl SandboxManager {
         let mut sweep = ContainerSweep::default();
         // A container the listing couldn't read (its labels malformed) can't be checked against a record: it is counted
         // as a stray that couldn't be removed, so the verdict says so, and the sweep goes on (GW-I-342).
-        for id in &listed.unreadable {
+        for item in &listed.unreadable {
             sweep.failed += 1;
             sweep.findings.push(super::verdict::Finding {
                 kind: super::verdict::Kind::Container,
-                name: id.chars().take(12).collect(),
-                age_seconds: 0,
+                name: item.id.chars().take(12).collect(),
+                // The engine's own creation time (GW-I-387); 0 only when the engine gave none.
+                age_seconds: item
+                    .created_at
+                    .and_then(|created| now.duration_since(created).ok())
+                    .map_or(0, |age| age.as_secs()),
                 outcome: Err("invalid_labels"),
             });
         }

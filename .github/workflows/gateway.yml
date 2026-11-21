@@ -50,7 +50,8 @@ permissions:
 
 jobs:
   # The contracts and the stack run side by side (15 Nov 2026: one job of both took about 65 minutes on a pull
-  # request; the contracts need no image, and only compose.rs and robustness_stack.rs start the built stack).
+  # request; the contracts need no image, and only compose.rs, robustness_stack.rs and admin_sandboxes_stack.rs start
+  # the built stack).
   gateway:
     runs-on: ubuntu-latest
     timeout-minutes: 240
@@ -120,7 +121,7 @@ jobs:
         # Every failure in one run, the database-independent contracts included (`--run-ignored all` runs both, so they
         # have no step of their own since 14 Nov 2026). PERF-002 and PERF-003 measure a release
         # build and refuse this debug one; a shared 2-core runner's timings would measure the runner anyway.
-        run: cargo nextest run -p tqa-gateway --run-ignored all --no-fail-fast -E 'not test(/^perf_/) and not (binary(compose) | binary(robustness_stack))'
+        run: cargo nextest run -p tqa-gateway --run-ignored all --no-fail-fast -E 'not test(/^perf_/) and not (binary(compose) | binary(robustness_stack) | binary(admin_sandboxes_stack))'
       - name: Prove explicitly selected database tests fail without opt-in
         shell: bash
         env:
@@ -166,7 +167,7 @@ jobs:
         # The same contracts as above, instrumented (the release-only PERF tests left out as there). The coverage
         # build goes once the report is printed.
         run: |
-          cargo llvm-cov nextest -p tqa-gateway --run-ignored all --no-fail-fast -E 'not test(/^perf_/) and not (binary(compose) | binary(robustness_stack))'
+          cargo llvm-cov nextest -p tqa-gateway --run-ignored all --no-fail-fast -E 'not test(/^perf_/) and not (binary(compose) | binary(robustness_stack) | binary(admin_sandboxes_stack))'
           rm -rf target/llvm-cov-target
       - name: Stop the ephemeral database
         if: always()
@@ -265,7 +266,7 @@ jobs:
           SQLX_OFFLINE: "true"
           TQA_DOCKER_TESTS: "1"
           TQA_GATEWAY_IMAGE: tqa-gateway:local
-        run: cargo nextest run -p tqa-gateway --run-ignored all --no-fail-fast -E 'binary(compose) | binary(robustness_stack)'
+        run: cargo nextest run -p tqa-gateway --run-ignored all --no-fail-fast -E 'binary(compose) | binary(robustness_stack) | binary(admin_sandboxes_stack)'
       - name: Test the deployment harness failures without Docker
         run: python3 -m unittest discover -s deploy/tests -p 'test_*.py' -v
       - name: Run the full-stack browser and workspace contract

@@ -485,7 +485,9 @@ prefix = 29              # each sandbox's subnet, 24 through 29
 
 If the pool ever runs out (only leaked networks can cause that, since it is sized to twice `max_live`), new sandboxes
 wait in the queue, the gateway logs an error once, and `tqa_sandbox_network_pool_exhausted_total` counts it; a sweep
-that runs every five minutes, and at once in that case, removes networks whose sandbox is gone.
+that runs every five minutes, and at once in that case, removes networks whose sandbox is gone. `[sandbox]
+sweep_seconds` (default 300, 10 through 3600) sets that period, and with it how soon a stray container or network is
+found and reported.
 
 Upgrading from a version where sandboxes shared one network: at start the gateway retires sandboxes still on the
 shared network, and their runs resume in new, isolated sandboxes. Before starting the new version, add

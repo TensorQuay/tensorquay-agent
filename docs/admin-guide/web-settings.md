@@ -124,11 +124,12 @@ page keeps the last one and says "The latest read failed, so this shows the one 
 
 A **Sandboxes** section says how many sandboxes run and whether the gateway's sweeps left anything unowned behind:
 "Sandboxes: none running. Nothing left behind." is the quiet case, or with sandboxes running, how many and the
-oldest one's age. Every five minutes the gateway removes containers and networks of its own that no task accounts
-for; one it could not remove twice in a row, or found again after removing it, is left behind, and the line turns
-amber, naming what and the engine's reason: "… Left behind after the last sweep: … (…). The gateway tries again
-every 5 minutes." with **Open Sandboxes**, where each is named with the command that removes it by hand. Volumes are
-not counted: workspaces are folders on the host.
+oldest one's age. Every five minutes by default (`[sandbox] sweep_seconds` in `gateway.toml`, 10 through 3600
+seconds) the gateway removes containers and networks of its own that no task accounts for; one it could not remove
+twice in a row, or found again after removing it, is left behind, and the line turns amber, naming what and the
+engine's reason: "… Left behind: … (…). The gateway keeps trying to remove what's left." with **Open Sandboxes**,
+where each is named with the command that removes it by hand. Volumes are not counted: workspaces are folders on
+the host.
 
 A **Git credentials** section appears only while some Git credentials from an earlier release couldn't become keys.
 "N Git credentials couldn't become keys: their address isn't a web address" means a person saved one for an address

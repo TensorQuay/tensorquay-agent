@@ -69,9 +69,20 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **Agents have a name in a channel.** An agent member is named when it's added: its task's title, or a name its
   owner gives, which only its owner can change. Everyone in the channel sees that name in Members and on the agent's
   posts and votes, and `@` matches it. A task's title stays its owner's only.
+- **An administrator can shorten the stray sweep (GW-U-233).** `[sandbox] sweep_seconds` in `gateway.toml` (default
+  300, 10 through 3600) sets how often the gateway looks for containers and networks of its own that no task accounts
+  for, and so how soon Status reports one it could not remove. Unset, nothing changes. The real-engine tests use it to
+  run a sweep in seconds.
 
 ### Fixed
 
+- **A container left behind because its labels can't be read says so, with its true age (GW-I-387, WEB-U-489).** The
+  Sandboxes page and Status read "the gateway couldn't read its labels" for it, not that the engine wouldn't remove it,
+  and its age comes from the engine's own creation time instead of reading 0 s.
+- **A slow sandbox sweep's counts stand until the next sweep (GW-I-373).** A sweep that took longer than its period
+  (a stray container takes about ten seconds to stop) was followed at once by another that found nothing left, so the
+  readiness detail and the `tqa_sandbox_unowned` gauge showed no stray removed. The next sweep now starts a full period
+  after one ends.
 - **The gateway logs why it ended a model's response early (GW-U-226).** When the relay stops a response before
   its end (the model server silent past the idle limit, the response deadline, the byte limit, the upstream
   breaking), a warning names the reason, the route, the bytes carried and the seconds it ran. Before, the task
