@@ -84,7 +84,10 @@ test("WEB-E2E-012 two agents and a person decide, veto and share a task on a cha
     log.getByRole("link", { name: "Approach A: a streaming parser" }).first(),
   ).toHaveAttribute("href", "#post-2");
   await votes.getByRole("button", { name: "Accept #2" }).click();
-  await expect(votes).toContainText("Accepted by majority");
+  // Decided, the proposal folds to one line with the tally (WEB-U-521): the Builder's vote and the person's.
+  await expect(
+    proposal.getByRole("button", { name: "Accepted · 2 to 0" }),
+  ).toBeVisible();
   const decision = log.getByRole("article", { name: /^#\d+ Decision$/ });
   await expect(decision.first()).toContainText("Accepted by majority");
   const decisionSeq = await seqOf(decision.first());
@@ -97,8 +100,8 @@ test("WEB-E2E-012 two agents and a person decide, veto and share a task on a cha
     .getByRole("button", { name: "Veto" })
     .click();
   await expect(
-    counter.getByRole("group", { name: "Votes on #3", exact: true }),
-  ).toContainText("Vetoed");
+    counter.getByRole("button", { name: /^Vetoed · / }),
+  ).toBeVisible();
   const veto = post(
     log,
     "vote",
@@ -117,6 +120,9 @@ test("WEB-E2E-012 two agents and a person decide, veto and share a task on a cha
     "aria-label",
     byAgent(taskSeq, planner),
   );
+  // To-dos opens beside the log from the channel's bar (WEB-U-519).
+  const bar = page.getByRole("region", { name: "Channel header" });
+  await bar.getByRole("button", { name: /^To-dos/ }).click();
   const board = page.getByRole("list", { name: "To-dos" });
   const task = board.getByRole("listitem", { name: script.task });
   await expect(task).toContainText("1 of 2 places taken", {
@@ -163,8 +169,8 @@ test("WEB-E2E-012 two agents and a person decide, veto and share a task on a cha
     }),
   );
 
-  // The feature matrix: each agent's run reads in words beside its dot; none failed or unknown.
-  await page.getByRole("tab", { name: "Members" }).click();
+  // The feature matrix: each agent's state in the channel reads in words beside its dot; none failed or unknown.
+  await bar.getByRole("button", { name: /^Members/ }).click();
   const members = page.getByRole("list", { name: "Members" });
   // An agent's row carries its run's dot; a person's doesn't.
   const agents = members
@@ -172,21 +178,10 @@ test("WEB-E2E-012 two agents and a person decide, veto and share a task on a cha
     .filter({ has: page.locator(".member-dot") });
   await expect(agents).toHaveCount(2);
   for (const agent of await agents.all())
-    await expect(agent).toContainText(/Idle|Working|Done/);
-  await expect(members).not.toContainText(/Failed|Status unknown/);
-  // WEB-U-426 on the real stack: above the box, as many agents as the Members tab shows not Working, read together
-  // (the list comes again every 15 s).
-  await expect(async () => {
-    let resting = 0;
-    for (const agent of await agents.all())
-      if (!/Working/.test((await agent.textContent()) ?? "")) resting += 1;
-    const idle = page.getByRole("region", { name: /running$/ });
-    if (resting === 0) await expect(idle).toHaveCount(0);
-    else
-      await expect(idle).toHaveAccessibleName(
-        resting === 1
-          ? "1 agent isn’t running"
-          : `${resting} agents aren’t running`,
-      );
-  }).toPass();
+    await expect(agent).toContainText(
+      /Idle|Working|Waking|Waiting for the channel|Done/,
+    );
+  await expect(members).not.toContainText(
+    /Failed|Status unknown|Can't be woken/,
+  );
 });

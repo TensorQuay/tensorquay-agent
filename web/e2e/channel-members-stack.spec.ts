@@ -82,12 +82,16 @@ test("WEB-U-066 channel membership, end and delete on the real stack", async ({
   const note = "The owner's first note on this channel.";
   const composer = page.getByRole("form", { name: "Post to the channel" });
   await composer.getByLabel("Your message").fill(note);
-  await composer.getByRole("button", { name: "Post" }).click();
+  await composer.getByRole("button", { name: "Send" }).click();
   await expect(page.getByText(note, { exact: true })).toBeVisible();
   await page.reload();
   await expect(page.getByText(note, { exact: true })).toBeVisible();
 
-  await page.getByRole("tab", { name: "Members" }).click();
+  // Members opens beside the log from the channel's bar (WEB-U-519).
+  await page
+    .getByRole("region", { name: "Channel header" })
+    .getByRole("button", { name: /^Members/ })
+    .click();
   const members = page.getByRole("list", { name: "Members" });
   await expect(
     members.getByRole("listitem", { name: /\(you\)$/ }),
@@ -98,15 +102,19 @@ test("WEB-U-066 channel membership, end and delete on the real stack", async ({
   const box = page.getByRole("combobox", { name: "Add to the channel" });
   await box.fill(TASK);
   await page.getByRole("option", { name: new RegExp(TASK) }).click();
+  // Its name in the channel, suggested from the task's title, which the owner keeps here (A12).
+  const naming = page.getByLabel("Its name in this channel");
+  await expect(naming).toHaveValue(TASK);
+  await page.getByRole("button", { name: "Add to the channel" }).click();
   await expect(page.getByRole("status")).toContainText(`Added ${TASK}.`);
   await expect(members).toContainText(TASK);
 
   // A person by exact email: an unknown address first, then the colleague, who joins as a member.
   await box.fill("nobody@example.invalid");
   await box.press("Enter");
-  await expect(page.getByRole("tabpanel").getByRole("alert")).toContainText(
-    "No account uses that email.",
-  );
+  await expect(
+    page.getByRole("complementary", { name: "Members" }).getByRole("alert"),
+  ).toContainText("No account uses that email.");
   await box.fill(PERSON);
   await box.press("Enter");
   await expect(page.getByRole("status")).toContainText(`Added ${PERSON}.`);
