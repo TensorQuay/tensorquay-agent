@@ -27,6 +27,22 @@ pub(crate) struct RelayConfig {
     pub live_runs: u32,
 }
 
+/// The longest `idle_timeout` accepted: the runtime's own wait between a relayed answer's chunks is just above it
+/// (`tqa_types::RELAY_IDLE_MAX_SECONDS`), so the gateway is always the bound that ends an answer and logs why.
+pub(crate) const MAX_IDLE_SECONDS: u64 = tqa_types::RELAY_IDLE_MAX_SECONDS;
+/// The longest silence a title request or a route check waits through: they keep the bound they had before the
+/// relay's idle limit grew, so a check in Settings never sits minutes on a silent server; a lower `idle_timeout` still
+/// applies.
+pub(crate) const CHECK_IDLE_SECONDS: u64 = 60;
+
+impl RelayConfig {
+    /// The silence a title request or a route check waits through: `idle_timeout`, at most [`CHECK_IDLE_SECONDS`].
+    #[must_use]
+    pub fn check_idle(&self) -> std::time::Duration {
+        std::time::Duration::from_secs(self.idle_timeout.min(CHECK_IDLE_SECONDS))
+    }
+}
+
 /// The burst each live run of a user adds when `capacity` is unset.
 pub(crate) const BURST_PER_RUN: u32 = 60;
 /// The sustained requests per second each live run of a user adds when `refill_per_second` is unset.
@@ -43,7 +59,8 @@ impl Default for RelayConfig {
             sse_event_bytes: 1024 * 1024,
             response_bytes: 64 * 1024 * 1024,
             header_timeout: 60,
-            idle_timeout: 60,
+            // A server may hold a whole tool call back until its arguments are complete (decided on 21 Nov 2026).
+            idle_timeout: 300,
             response_timeout: 1800,
             local_check_timeout: 120,
             queue_wait: 30,
@@ -84,7 +101,7 @@ impl RelayConfig {
             || !(128..=4 * 1024 * 1024).contains(&self.sse_event_bytes)
             || !(1024..=256 * 1024 * 1024).contains(&self.response_bytes)
             || !(1..=300).contains(&self.header_timeout)
-            || !(1..=300).contains(&self.idle_timeout)
+            || !(1..=MAX_IDLE_SECONDS).contains(&self.idle_timeout)
             || !(1..=3600).contains(&self.response_timeout)
             || !(1..=600).contains(&self.local_check_timeout)
             || !(1..=120).contains(&self.queue_wait)

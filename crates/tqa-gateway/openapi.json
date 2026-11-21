@@ -6959,7 +6959,7 @@
       "put": {
         "operationId": "putMemoryNote",
         "summary": "Write a memory note of the workspace (ADR-0041)",
-        "description": "The request body is the note's text (UTF-8, at most 64 KiB): .memory/<name> is written atomically and its previous version kept for one Undo. A text that holds what looks like a key or token is refused (400 invalid_request): notes are kept and shown to every later task. Authorization is workspace access with a write share, as for uploads; the administrator role grants no content. Cookie requests need the exact Origin. Directory workspaces only: a Firecracker installation answers 409 files_unavailable until its workspace link gains the operation. A link in the way (the memory folder, its undo folder or the note) is 400 path_invalid. Listing and reading notes use the files operations on .memory/.",
+        "description": "The request body is the note's text (UTF-8, at most 64 KiB): .memory/<name> is written atomically and its previous version kept for one Undo. A text that holds what looks like a key or token is refused (400 invalid_request): notes are kept and shown to every later task. Authorization is workspace access with a write share, as for uploads; the administrator role grants no content. Cookie requests need the exact Origin. Directory workspaces only: a Firecracker installation answers 409 files_unavailable until its workspace link gains the operation. A link in the way (the memory folder, its undo folder or the note) is 400 path_invalid. Listing and reading notes use the files operations on .memory/. With memory off (`[memory] enabled = false`, the default) .memory/ is an ordinary folder and this is 409 memory_off (ADR-0041's third amendment, A11).",
         "parameters": [
           {
             "name": "id",
@@ -7099,7 +7099,7 @@
       "delete": {
         "operationId": "deleteMemoryNote",
         "summary": "Remove a memory note, keeping it for one Undo",
-        "description": "Removes .memory/<name>; its content is kept for one Undo. 404 when there is no such note. Authorization is workspace access with a write share, as for uploads; the administrator role grants no content. Cookie requests need the exact Origin. Directory workspaces only: a Firecracker installation answers 409 files_unavailable until its workspace link gains the operation. A link in the way (the memory folder, its undo folder or the note) is 400 path_invalid. Listing and reading notes use the files operations on .memory/.",
+        "description": "Removes .memory/<name>; its content is kept for one Undo. 404 when there is no such note. Authorization is workspace access with a write share, as for uploads; the administrator role grants no content. Cookie requests need the exact Origin. Directory workspaces only: a Firecracker installation answers 409 files_unavailable until its workspace link gains the operation. A link in the way (the memory folder, its undo folder or the note) is 400 path_invalid. Listing and reading notes use the files operations on .memory/. With memory off (`[memory] enabled = false`, the default) .memory/ is an ordinary folder and this is 409 memory_off (ADR-0041's third amendment, A11).",
         "parameters": [
           {
             "name": "id",
@@ -7230,7 +7230,7 @@
       "post": {
         "operationId": "undoMemoryNote",
         "summary": "Undo the last change to a memory note",
-        "description": "Undoes the last change to .memory/<name>, the agent's or a person's: its kept previous version comes back (outcome restored), or, a note that was new at that change is removed (outcome removed). Once: 404 when there is nothing to undo, so the same Undo sent again changes nothing. Authorization is workspace access with a write share, as for uploads; the administrator role grants no content. Cookie requests need the exact Origin. Directory workspaces only: a Firecracker installation answers 409 files_unavailable until its workspace link gains the operation. A link in the way (the memory folder, its undo folder or the note) is 400 path_invalid. Listing and reading notes use the files operations on .memory/.",
+        "description": "Undoes the last change to .memory/<name>, the agent's or a person's: its kept previous version comes back (outcome restored), or, a note that was new at that change is removed (outcome removed). Once: 404 when there is nothing to undo, so the same Undo sent again changes nothing. Authorization is workspace access with a write share, as for uploads; the administrator role grants no content. Cookie requests need the exact Origin. Directory workspaces only: a Firecracker installation answers 409 files_unavailable until its workspace link gains the operation. A link in the way (the memory folder, its undo folder or the note) is 400 path_invalid. Listing and reading notes use the files operations on .memory/. With memory off (`[memory] enabled = false`, the default) .memory/ is an ordinary folder and this is 409 memory_off (ADR-0041's third amendment, A11).",
         "parameters": [
           {
             "name": "id",

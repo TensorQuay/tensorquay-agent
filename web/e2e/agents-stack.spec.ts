@@ -342,7 +342,13 @@ test("E2E-AGENTS-021 a helper whose run fails: its state, the lead's notice, the
   const chip = strip.getByRole("link", { name: "ghost: Failed" });
   await expect(chip).toBeVisible();
   await expect(chip).toHaveAttribute("data-tone", "danger");
-  await expect(page.getByText("ghost failed.")).toBeVisible();
+  // The lead's line says why, in the run's own words, and opens the helper's task (GW-I-343, WEB-U-512): the fake
+  // model refuses a brief it has no script for.
+  const line = page.getByRole("link", {
+    name: "ghost failed: The model provider refused the request.",
+  });
+  await expect(line).toBeVisible();
+  await expect(line).toHaveAttribute("href", /^\/c\/[^/]+$/);
   // The list says so in the count's place, in the danger tone (§13b).
   await expect(leadRow(page, leadId)).toHaveAccessibleName(/1 failed$/, {
     timeout: afterStart(45_000),

@@ -697,6 +697,7 @@ mod tests {
             sleeper: Arc::new(tqa_testkit::FakeSleeper::new(clock)),
             env_allow: vec![],
             limits: crate::ToolLimits::RECOMMENDED,
+            memory: None,
         };
         let spec = ToolSpec {
             name: ToolName::new("failure")?,

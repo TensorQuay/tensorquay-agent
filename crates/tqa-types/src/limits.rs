@@ -22,6 +22,10 @@ pub const TEAM_WAKE_REVISION: u16 = 13;
 /// The revision that marks the gateway's wake of a channel member (ADR-0014's amendment of 20 Nov 2026, A4): a member
 /// whose runtime announces less isn't woken, so a wake never reaches a page as the person's words.
 pub const CHANNEL_WAKE_REVISION: u16 = 16;
+/// The longest the gateway's relay may wait between a model's answer chunks (`[relay] idle_timeout` at most). The
+/// runtime's own wait on the relay is a little longer, so the gateway is always the bound that ends an answer and logs
+/// why (decided on 21 Nov 2026).
+pub const RELAY_IDLE_MAX_SECONDS: u64 = 900;
 /// The revision that brought the Desktop (ADR-0039): a conversation whose environment declares `desktop` is refused at
 /// the link below it, so its runtime always has the `computer` tool the environment was chosen for.
 pub const DESKTOP_REVISION: u16 = 14;

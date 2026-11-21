@@ -79,6 +79,7 @@ async function witnessed(page: Page): Promise<string[]> {
 test("WEB-E2E-122 real sites in the Files panel: the owner's map, a built site, the freeze pages", async ({
   page,
   baseURL,
+  browserName,
 }) => {
   test.setTimeout(budget(1, 300_000));
   if (!baseURL) throw new Error("The driver must supply the stack origin");
@@ -190,7 +191,16 @@ test("WEB-E2E-122 real sites in the Files panel: the owner's map, a built site, 
   const busyInside = busy.frameLocator("iframe");
   // Measured at once, while the frame's thread is held by its loop (a locator inside the frame would wait for the
   // loop's end): the app's own frames keep coming.
-  expect(await worstStall(page)).toBeLessThan(500);
+  const stall = await worstStall(page);
+  if (browserName === "webkit")
+    // The known limit (the 18.0.0 changelog's known limits): WebKit runs the
+    // preview on the app's own thread, so its 8 s loop holds the app for 8 s. Expected here, and said if it ever
+    // stops: then this branch goes and WebKit is held to the same bound. Chromium is held to it now.
+    expect(
+      stall,
+      "WebKit no longer stalls on a busy preview: drop the known-limit branch",
+    ).toBeGreaterThanOrEqual(500);
+  else expect(stall).toBeLessThan(500);
   await expect(busyInside.locator("#s")).toHaveText(/^done \d+$/, {
     timeout: 15_000,
   });

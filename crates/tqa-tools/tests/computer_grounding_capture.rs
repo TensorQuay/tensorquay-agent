@@ -213,6 +213,7 @@ impl Capture {
             sleeper: Arc::new(RealSleeper),
             env_allow: vec![],
             limits: ToolLimits::RECOMMENDED,
+            memory: None,
         };
         let tool = Computer::with_view(driver.clone(), view());
         Ok(Self {

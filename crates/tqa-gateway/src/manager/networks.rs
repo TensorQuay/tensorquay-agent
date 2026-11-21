@@ -3,18 +3,11 @@
 //! ones), swept periodically and at once when the subnet pool runs out.
 use super::{SandboxManager, failure, verdict};
 use crate::GatewayError;
-use std::{
-    sync::{
-        Arc,
-        atomic::{AtomicBool, Ordering},
-    },
-    time::Duration,
+use std::sync::{
+    Arc,
+    atomic::{AtomicBool, Ordering},
 };
 use tokio::sync::Notify;
-
-/// How often orphaned sandbox networks and stray sandbox containers (GW-I-191) are looked for, besides at start and,
-/// for networks, on exhaustion.
-const NETWORK_SWEEP: Duration = Duration::from_mins(5);
 
 #[derive(Default)]
 pub(super) struct Sweeper {
@@ -112,7 +105,9 @@ impl SandboxManager {
     pub(crate) fn start_network_sweep(self: &Arc<Self>) {
         let manager = self.clone();
         self.services.tasks.spawn(async move {
-            let mut timer = tokio::time::interval(NETWORK_SWEEP);
+            // Orphaned sandbox networks and stray sandbox containers (GW-I-191) are looked for every `[sandbox]
+            // sweep_seconds` (GW-U-233; 5 minutes by default), besides at start and, for networks, on exhaustion.
+            let mut timer = tokio::time::interval(manager.config.sandbox.sweep_period());
             timer.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
             timer.tick().await; // the start-up reconciliation has just run
             loop {
@@ -121,11 +116,22 @@ impl SandboxManager {
                     () = manager.networks.wake.notified() => {}
                     _ = timer.tick() => {}
                 }
-                let mut findings = manager.sweep_strays().await;
-                findings.extend(manager.sweep_networks().await);
-                manager.record_sweep(findings).await;
+                manager.sweep_pass_now().await;
+                // The next pass is a full period after this one ends. A pass slower than the period (a stray's stop
+                // takes about 10 s) otherwise met its missed tick at once, and a pass that found nothing left replaced
+                // the slow pass's verdict within a millisecond (GW-I-373).
+                timer.reset();
             }
         });
+    }
+
+    /// Runs one sweep pass now (stray containers, then orphaned networks) and records it for the leak verdict. The
+    /// owned sweep runs the same pass every `sweep_seconds`; this entry point exists so a caller can wait for one
+    /// deterministically.
+    pub async fn sweep_pass_now(&self) {
+        let mut findings = self.sweep_strays().await;
+        findings.extend(self.sweep_networks().await);
+        self.record_sweep(findings).await;
     }
 
     /// Keeps the pass for the leak verdict (the Sandboxes page design note, §3.6), with what runs now.

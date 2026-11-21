@@ -85,6 +85,8 @@ impl Services {
         self.prepare_teams(&input, &mut tools).await?;
         let fallback_routes = crate::provider::fallbacks(&self.config, &input.session, &self.time)?;
         let decision = self.decision_engine(&input.session, &tools)?;
+        // `.tqa/` is the task's private state, never a project's commit.
+        crate::private_git::keep_private_out_of_git(&self.config.workspace);
         let runner = Runner::new(RunnerDeps {
             conversation_id: input.session.conversation.clone(),
             provider: crate::provider::build(&self.config, &input.session, &self.time)?,
@@ -105,6 +107,8 @@ impl Services {
             workspace,
             env_allow: vec![],
             tool_limits: ToolLimits::RECOMMENDED,
+            // The file tools guard, keep and record notes only with memory on (ADR-0041, A10, A11).
+            memory: self.config.memory,
             jitter: Box::new(SharedJitter(self.jitter.clone())),
             fallback_routes,
             gateway_link: Some(self.gateway_link.clone()),

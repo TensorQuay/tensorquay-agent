@@ -14,6 +14,9 @@ use support::{Fixture, TestResult};
 
 use files_api::{body, call, code, task};
 
+/// Memory on, as `[memory] enabled = true` sets it: the changes here are made (off, they answer `memory_off`).
+const MEMORY_ON: &str = "\n[memory]\nenabled = true\n";
+
 fn note(
     f: &Fixture,
     cookie: &str,
@@ -75,7 +78,7 @@ fn made_up_key() -> String {
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
 async fn gw_i_356_a_note_is_written_listed_edited_undone_and_removed(pool: PgPool) -> TestResult {
-    support::run(pool, async |f| {
+    Box::pin(support::run_configured(pool, None, MEMORY_ON, async |f| {
         let (_, cookie) = f.admin().await?;
         let id = task(f, &cookie).await?;
         let first = "about: The build command is make all\nkind: convention\n\nRun make all.\n";
@@ -175,7 +178,7 @@ async fn gw_i_356_a_note_is_written_listed_edited_undone_and_removed(pool: PgPoo
             404
         );
         Ok(())
-    })
+    }))
     .await
 }
 
@@ -185,7 +188,7 @@ async fn gw_i_356_a_note_is_written_listed_edited_undone_and_removed(pool: PgPoo
 async fn gw_i_356_keys_bad_names_and_readers_are_refused_and_nothing_is_written(
     pool: PgPool,
 ) -> TestResult {
-    support::run(pool, async |f| {
+    Box::pin(support::run_configured(pool, None, MEMORY_ON, async |f| {
         let (_, admin) = f.admin().await?;
         let (_, owner) = f.member("owner@example.invalid").await?;
         let (reader, reader_cookie) = f.member("reader@example.invalid").await?;
@@ -268,6 +271,43 @@ async fn gw_i_356_keys_bad_names_and_readers_are_refused_and_nothing_is_written(
             .send()
             .await?;
         assert_eq!(no_origin.status(), 403);
+        Ok(())
+    }))
+    .await
+}
+
+// TEST: GW-I-393
+// Memory off, the default (ADR-0041's third amendment, A11): `.memory/` is an ordinary folder. A person's write,
+// removal and Undo here answer 409 memory_off and write nothing, not even a kept version.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_393_with_memory_off_the_memory_routes_answer_memory_off(pool: PgPool) -> TestResult {
+    support::run(pool, async |f| {
+        let (_, cookie) = f.admin().await?;
+        let id = task(f, &cookie).await?;
+        assert_eq!(
+            code(
+                note(f, &cookie, Method::PUT, &id, "a.md")
+                    .body("about: a\n")
+                    .send()
+                    .await?
+            )
+            .await?,
+            (409, "memory_off".into())
+        );
+        assert_eq!(
+            read(f, &cookie, &id, "a.md").await?.0,
+            404,
+            "nothing written"
+        );
+        assert_eq!(
+            code(note(f, &cookie, Method::DELETE, &id, "a.md").send().await?).await?,
+            (409, "memory_off".into())
+        );
+        assert_eq!(
+            code(undo(f, &cookie, &id, "a.md").send().await?).await?,
+            (409, "memory_off".into())
+        );
         Ok(())
     })
     .await

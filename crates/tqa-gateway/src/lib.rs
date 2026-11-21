@@ -58,7 +58,7 @@ mod wire;
 mod workspaces;
 
 pub use app::{Gateway, SandboxDependencies};
-pub use auth::{Role, User};
+pub use auth::{Role, User, reset_password, reset_password_in};
 pub use config::{GatewayConfig, GatewaySecrets, Template};
 pub use connectors::{ConnectorCredential, CredentialSource};
 pub use conversations::Conversation;

@@ -107,3 +107,30 @@ fn gw_u_040_the_pool_must_hold_twice_max_live() -> Result<(), Box<dyn Error>> {
     GatewayConfig::from_toml(&firecracker)?;
     Ok(())
 }
+
+// TEST: GW-U-233
+#[test]
+fn gw_u_233_the_sweep_runs_every_five_minutes_unless_set_and_a_period_out_of_bounds_is_refused()
+-> Result<(), Box<dyn Error>> {
+    // Unset, the period the sweep has always had.
+    let parsed = GatewayConfig::from_toml(&config(""))?;
+    assert_eq!(
+        parsed.sandbox.sweep_period(),
+        std::time::Duration::from_mins(5)
+    );
+    for (seconds, period) in [(10, 10), (60, 60), (3600, 3600)] {
+        let parsed = GatewayConfig::from_toml(&config(&format!("sweep_seconds={seconds}\n")))?;
+        assert_eq!(
+            parsed.sandbox.sweep_period(),
+            std::time::Duration::from_secs(period)
+        );
+    }
+    for seconds in [0, 9, 3601] {
+        assert_eq!(
+            refused(&config(&format!("sweep_seconds={seconds}\n"))),
+            Some("sandbox.sweep_seconds must be 10 through 3600"),
+            "{seconds}"
+        );
+    }
+    Ok(())
+}

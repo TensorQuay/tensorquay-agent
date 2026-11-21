@@ -25,19 +25,30 @@ pub(crate) struct UndoResponse {
     outcome: &'static str,
 }
 
+/// Memory off is an ordinary folder (ADR-0041's third amendment, A11): every change here answers `409 memory_off`;
+/// the files operations still work on `.memory/` as on any folder.
+fn memory_on(state: &State) -> Result<(), GatewayError> {
+    if state.config.memory.enabled {
+        Ok(())
+    } else {
+        Err(GatewayError::Conflict("memory_off"))
+    }
+}
+
 /// `PUT /conversations/{id}/memory/{name}`: the request body is the note's text. Its previous version is kept for one
 /// Undo.
 ///
 /// # Errors
 /// `400 path_invalid` for a name that can't be a note, a text over 64 KiB or a link in the way; `400 invalid_request`
-/// when the text holds what looks like a key; `403` without a write share; `409 files_unavailable` on a microVM
-/// install; host I/O failures.
+/// when the text holds what looks like a key; `403` without a write share; `409 memory_off` while memory is off;
+/// `409 files_unavailable` on a microVM install; host I/O failures.
 pub(crate) async fn put_note(
     AppState(state): AppState<Arc<State>>,
     Authz(user): Authz,
     UrlPath((id, name)): UrlPath<(ConversationId, String)>,
     text: String,
 ) -> Result<StatusCode, GatewayError> {
+    memory_on(&state)?;
     if memory_note::holds_key(&text) {
         return Err(GatewayError::BadRequest(
             "a memory note can't hold a key, token or password",
@@ -62,6 +73,7 @@ pub(crate) async fn delete_note(
     Authz(user): Authz,
     UrlPath((id, name)): UrlPath<(ConversationId, String)>,
 ) -> Result<StatusCode, GatewayError> {
+    memory_on(&state)?;
     let root = workspace(&state, user.id, &id, true).await?;
     blocking(move || {
         let root = path::open_root(&root)?;
@@ -83,6 +95,7 @@ pub(crate) async fn undo_note(
     Authz(user): Authz,
     UrlPath((id, name)): UrlPath<(ConversationId, String)>,
 ) -> Result<Json<UndoResponse>, GatewayError> {
+    memory_on(&state)?;
     let root = workspace(&state, user.id, &id, true).await?;
     let undone = blocking(move || {
         let root = path::open_root(&root)?;

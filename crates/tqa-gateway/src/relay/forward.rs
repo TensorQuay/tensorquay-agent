@@ -112,11 +112,8 @@ impl Forward {
         if self.finished {
             return None;
         }
-        let next = tokio::select! {biased;
-            ()=self.state.cancel.cancelled()=>Err(io::Error::other("relay cancelled")),
-            ()=tokio::time::sleep_until(self.deadline)=>Err(io::Error::other("relay response deadline")),
-            next=tokio::time::timeout(Duration::from_secs(self.state.config.relay.idle_timeout),self.source.next())=>next.map_err(|_|io::Error::other("relay response idle deadline")),
-        };
+        let idle = Duration::from_secs(self.state.config.relay.idle_timeout);
+        let next = next_within(&mut self.source, (idle, self.deadline), &self.state.cancel).await;
         match next {
             Ok(Some(Ok(bytes))) => Some(self.observe(bytes)),
             Ok(None) => {
@@ -176,6 +173,24 @@ impl Forward {
             }
         }
         Ok(bytes)
+    }
+}
+
+/// The next chunk of a relayed response, unless the gateway stops, the response's deadline passes, or the stream is
+/// silent for `idle` (`[relay] idle_timeout`, 300 s by default: a server may send a tool call whole once its arguments
+/// are complete, after a long silence). Each ending has its own words for the "ended early" line.
+pub(super) async fn next_within<S, T>(
+    source: &mut S,
+    (idle, deadline): (Duration, tokio::time::Instant),
+    cancel: &tokio_util::sync::CancellationToken,
+) -> Result<Option<T>, io::Error>
+where
+    S: Stream<Item = T> + Unpin,
+{
+    tokio::select! {biased;
+        () = cancel.cancelled() => Err(io::Error::other("relay cancelled")),
+        () = tokio::time::sleep_until(deadline) => Err(io::Error::other("relay response deadline")),
+        next = tokio::time::timeout(idle, source.next()) => next.map_err(|_| io::Error::other("relay response idle deadline")),
     }
 }
 

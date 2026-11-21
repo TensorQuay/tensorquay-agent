@@ -23,14 +23,20 @@ fn tool_u_004_concurrent_length_or_mtime_change_is_not_overwritten() -> Result<(
                 replace_all: false,
             }],
         };
-        let error = apply(&workspace, &args, 1024, &CancellationToken::new(), || {
-            fs::write(&path, changed)?;
-            File::options()
-                .write(true)
-                .open(&path)?
-                .set_modified(UNIX_EPOCH + Duration::from_secs(2000))?;
-            Ok(())
-        })
+        let error = apply(
+            (&workspace, None),
+            &args,
+            1024,
+            &CancellationToken::new(),
+            || {
+                fs::write(&path, changed)?;
+                File::options()
+                    .write(true)
+                    .open(&path)?
+                    .set_modified(UNIX_EPOCH + Duration::from_secs(2000))?;
+                Ok(())
+            },
+        )
         .err()
         .ok_or_else(|| ToolError::Io("expected conflict".into()))?;
         assert!(

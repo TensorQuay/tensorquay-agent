@@ -11,8 +11,10 @@ import ipaddress
 import json
 import os
 from pathlib import Path
+import pwd
 import re
 import shlex
+import shutil
 import socket
 import subprocess
 import sys
@@ -34,6 +36,11 @@ DEFAULT_CONTEXT = 32768
 READY_SECONDS = 180
 PROBE_SECONDS = 60
 FAKE_IMAGE = "tqa-fake-model:local"
+# What an installation this installer started and hasn't finished says about itself (its answers), beside its files.
+# It goes once the administrator exists, so a finished installation is step 2's files exactly, as one made by hand is.
+UNFINISHED = ".install-unfinished"
+CONTAINER_UID = 1000
+BOOTSTRAP_TRIES = 3
 DEFAULT_POOL = ipaddress.ip_network("10.213.0.0/16")
 ADDRESS_HELP = ("Use http://localhost:8080 (this computer; any free port from 1024) or the https:// address your TLS "
                 "proxy serves, such as https://agent.example.org.")
@@ -180,6 +187,8 @@ def parse(argv):
     add("--port", type=int, help="the local port the gateway listens on")
     add("--network-pool", help="a second installation's sandbox network pool, such as 10.214.0.0/16")
     add("--dry-run", action="store_true", help="ask and check, then say what it would write and run")
+    add("--keys-readable-by-uid-1000", action="store_true",
+        help="go on when rootful Docker hands the installation's keys to this computer's uid 1000, another account")
     add("--upgrade", action="store_true", help=argparse.SUPPRESS)
     return parser.parse_args(argv)
 
@@ -257,6 +266,16 @@ class HostSystem:
     def sleep(self, seconds):
         time.sleep(seconds)
 
+    def uid(self):
+        return os.getuid()
+
+    def account(self, uid):
+        """The name of this computer's account with `uid`, or None when there is none."""
+        try:
+            return pwd.getpwuid(uid).pw_name
+        except KeyError:
+            return None
+
 
 # ---- The install -----------------------------------------------------------------------------------------------------
 
@@ -265,8 +284,10 @@ class Installer:
         self.args, self.io, self.system, self.repository = args, io, system, Path(repository)
         self.install_dir = Path(args.install_dir or default_install_dir()).expanduser().absolute()
         self.compose_env = self.install_dir / "compose.env"
+        self.unfinished = self.install_dir / UNFINISHED
         self.secrets_env = {}
         self.extra = ()
+        self.email, self.password = None, None
 
     # One answer: from its flag (checked once), or asked until it passes; --yes takes the default.
     def answer(self, given, prompt, check, default=""):
@@ -289,6 +310,18 @@ class Installer:
 
     def compose(self, *more):
         return ["docker", "compose", "--env-file", str(self.compose_env), "-f", "deploy/compose/docker.yml", *more]
+
+    def left_unfinished(self):
+        """The answers of an installation this installer started here and didn't finish, or None. One made by hand,
+        or one this installer finished, has no such file: it is never touched."""
+        if not (self.unfinished.is_file() and self.compose_env.is_file()):
+            return None
+        try:
+            state = json.loads(self.unfinished.read_text())
+        except (OSError, ValueError):
+            return None
+        keys = {"origin", "port", "https", "fake", "name"}
+        return state if isinstance(state, dict) and keys <= state.keys() else None
 
     def refuse_existing(self):
         if self.compose_env.exists():
@@ -350,16 +383,7 @@ class Installer:
             self.context = DEFAULT_CONTEXT
             if is_local(url) or args.context is not None:
                 self.context = self.answer(args.context, "  Context window in tokens [32768]:", check_context)
-        self.email = self.answer(args.admin_email, "First administrator's email:", check_email)
-        if args.admin_password_file:
-            try:
-                text = Path(args.admin_password_file).expanduser().read_text()
-            except OSError:
-                raise Refused("Can't read {}.".format(args.admin_password_file)) from None
-            self.password = check_password(text.splitlines()[0] if text.splitlines() else "")
-        else:
-            self.password = self.secret_answer("Password (12 characters or more, not shown):", check_password)
-        self.extra = (self.password,)
+        self.email, self.password = self.administrator()
 
     def fake_name(self):
         return "tqa-fake-model" + ("-" + self.args.name if self.args.name else "")
@@ -409,14 +433,27 @@ class Installer:
         return env
 
     def write_files(self, images, detected):
-        with tempfile.TemporaryDirectory(prefix="tqa-install-") as scratch:
-            key_file = self.key_file
-            if key_file is None:
-                # A server that needs no key still gets a placeholder (step 1's rule); it lives only for this write.
-                key_file = Path(scratch) / "model-key"
-                key_file.write_text("local\n")
-                key_file.chmod(0o600)
-            install_files.create(self.environment(images, detected, key_file), self.repository)
+        try:
+            with tempfile.TemporaryDirectory(prefix="tqa-install-") as scratch:
+                key_file = self.key_file
+                if key_file is None:
+                    # A server that needs no key still gets a placeholder (step 1's rule); it lives only for this write.
+                    key_file = Path(scratch) / "model-key"
+                    key_file.write_text("local\n")
+                    key_file.chmod(0o600)
+                install_files.create(self.environment(images, detected, key_file), self.repository)
+        except (OSError, SystemExit) as error:
+            # The folder didn't exist before (refuse_existing, and create's own exist_ok=False): a half-made one is
+            # this run's, and goes, so a rerun starts clean instead of finding a folder "that isn't empty".
+            if isinstance(error, FileExistsError):
+                raise Refused("{} appeared while installing; nothing was written.".format(self.install_dir)) from None
+            shutil.rmtree(self.install_dir, ignore_errors=True)
+            raise StepFailed("Writing the installation's files failed: {}".format(
+                error if isinstance(error, SystemExit) else error.strerror or error)) from None
+        self.unfinished.write_text(json.dumps({
+            "origin": self.address.origin, "port": self.address.port, "https": self.address.https,
+            "fake": self.fake, "name": self.args.name}) + "\n")
+        self.unfinished.chmod(0o600)
         if self.args.network_pool:
             with (self.install_dir / "gateway.toml").open("a") as toml:
                 toml.write('[sandbox.network_pool]\ncidr = "{}"\nprefix = 29\n'.format(self.args.network_pool))
@@ -429,9 +466,13 @@ class Installer:
         args = self.args
         if args.upgrade:
             raise Refused(UPGRADE)
+        state = self.left_unfinished()
+        if state is not None:
+            return self.finish(state)
         self.refuse_existing()
         self.gather()
         detected = self.detect()
+        self.warn_shared_owner(detected)
         if args.dry_run:
             self.io.say("Would write in {}: install.key, secrets.toml, models.toml, gateway.toml, compose.env and "
                         "storage/.".format(self.install_dir))
@@ -452,6 +493,86 @@ class Installer:
         self.io.say("Created {}.".format(self.install_dir))
         self.name_other_workstation()
         return self.start(images)
+
+    def warn_shared_owner(self, detected):
+        """Rootful Docker: the gateway's account inside its container is uid 1000, and the installation's keys are
+        handed to it on the host (the guide's step 2). When uid 1000 is another person's account on this computer,
+        that person can then read them: said before anything is written, and the install stops unless told to go on."""
+        if "TQA_DOCKER_SOCKET" in detected or self.system.uid() == CONTAINER_UID:
+            return
+        other = self.system.account(CONTAINER_UID)
+        if other is None:
+            return
+        self.io.say("On this computer uid {uid} is the account {name}, not yours. Docker here runs as root, so the "
+                    "installation's keys (install.key, secrets.toml and the database's storage) will belong to "
+                    "{name}, who will be able to read them, and you won't without sudo. Rootless Docker keeps them "
+                    "yours (deploy/README.md, \"Rootless Docker\").".format(uid=CONTAINER_UID, name=other))
+        if self.args.keys_readable_by_uid_1000:
+            return
+        if self.args.yes or self.args.dry_run:
+            raise Refused("Stopped before writing anything. To go on anyway, add --keys-readable-by-uid-1000.")
+        if self.io.ask("Go on? [y/N]").strip().lower() not in ("y", "yes"):
+            raise Refused("Stopped before writing anything.")
+
+    def finish(self, state):
+        """Finishes an installation this installer started here and left unfinished: its files and answers stay as
+        they were; what is left of the start is done again (each step is safe to repeat) and the administrator is
+        created unless one exists."""
+        self.address = Address(state["origin"], int(state["port"]), bool(state["https"]))
+        self.fake = bool(state["fake"])
+        if state["name"] != self.args.name:
+            self.args.name = state["name"]
+        self.io.say("Finishing the installation an earlier run left unfinished in {}, with the answers it was given "
+                    "({}).".format(self.install_dir, self.address.origin))
+        for line in self.compose_env.read_text().splitlines():
+            name, _, value = line.partition("=")
+            if name in shell.SECRET_NAMES:
+                self.secrets_env[name] = value
+        if self.args.dry_run:
+            self.io.say("Would run: " + " ".join(self.compose("up", "-d", "--no-build", "--wait"))
+                        + (", the test model" if self.fake else "") + ", then create the administrator.")
+            return 0
+        return self.start(self.images_written())
+
+    def images_written(self):
+        """The image lines this installation's files name: the gateway's and web's in compose.env, the runtime's in
+        gateway.toml."""
+        env = dict(line.partition("=")[::2] for line in self.compose_env.read_text().splitlines() if "=" in line)
+        runtime = re.search(r'^image="([^"]+)"$', (self.install_dir / "gateway.toml").read_text(), re.M)
+        images = {"TQA_GATEWAY_IMAGE": env.get("TQA_GATEWAY_IMAGE", ""), "TQA_WEB_IMAGE": env.get("TQA_WEB_IMAGE", ""),
+                  "TQA_RUNTIME_IMAGE": runtime[1] if runtime else ""}
+        if not all(images.values()):
+            raise StepFailed("This installation's files don't name its images; remove {} and run the installer "
+                             "again.".format(self.install_dir))
+        return images
+
+    def administrator(self):
+        """The first administrator's email and password: from their flags, else asked."""
+        args = self.args
+        email = self.answer(args.admin_email, "First administrator's email:", check_email)
+        if args.admin_password_file:
+            try:
+                text = Path(args.admin_password_file).expanduser().read_text()
+            except OSError:
+                raise Refused("Can't read {}.".format(args.admin_password_file)) from None
+            password = check_password(text.splitlines()[0] if text.splitlines() else "")
+        else:
+            password = self.secret_answer("Password (12 characters or more, not shown):", check_password)
+        self.extra = (password,)
+        return email, password
+
+    def start_test_model(self):
+        """The test model, which isn't one of the stack's services: it starts again with Docker, as the stack's
+        containers do after a restart, and a rerun starts the one an earlier run made instead of a second."""
+        name = self.fake_name()
+        try:
+            self.system.run(["docker", "container", "inspect", "--format", "{{.Id}}", name],
+                            env=commands_environment(), capture=True, timeout=60)
+        except subprocess.CalledProcessError:
+            self.step("Starting the test model", ["docker", "run", "-d", "--restart", "unless-stopped", "--name",
+                                                  name, "--network", self.control_network(), FAKE_IMAGE], 300)
+            return
+        self.step("Starting the test model", ["docker", "start", name], 300)
 
     def name_other_workstation(self):
         """The gateway takes a tqa-runtime:workstation already on the host as this installation's Workstation (the
@@ -481,8 +602,7 @@ class Installer:
         self.io.say("Starting…")
         self.step("Starting the stack", self.compose("up", "-d", "--no-build", "--wait"), 900)
         if self.fake:
-            self.step("Starting the test model", ["docker", "run", "-d", "--name", self.fake_name(), "--network",
-                                                  self.control_network(), FAKE_IMAGE], 300)
+            self.start_test_model()
         base = "http://127.0.0.1:{}".format(self.address.port)
         waited = 0
         while not self.ready(base):
@@ -494,21 +614,60 @@ class Installer:
         # Started, not yet ready for a person: "Ready" is said once the administrator exists, and this wait is only
         # what was left after the start's own (it read "Ready in 0 s." then "Ready. Open …").
         self.io.say("Started.")
-        status, _ = self.system.http("POST", base + "/api/v1/auth/bootstrap", body=json.dumps(
-            {"email": self.email, "password": self.password, "token": self.secrets_env["TQA_BOOTSTRAP_TOKEN"]}),
-            headers={"Origin": self.address.origin, "Content-Type": "application/json"}, timeout=30)
-        if status not in (200, 201):
-            self.io.say("It is running, but the first administrator couldn't be created (the gateway answered {}). "
-                        "Open {}/setup and create it there with TQA_BOOTSTRAP_TOKEN in {}.".format(
-                            status, self.address.origin, self.compose_env))
-            return 4
+        made = self.create_administrator(base)
+        if made is not None:
+            return made
         self.report_detail(base)
         self.check_route(base)
         if self.address.https:
             self.io.say("Behind your TLS proxy, send {} to http://127.0.0.1:{} and pass the Host and Origin headers "
                         "through.".format(self.address.origin, self.address.port))
+        # Finished: what is left is exactly step 2's files, as an installation made by hand.
+        self.unfinished.unlink(missing_ok=True)
         self.io.say("Ready. Open {} and sign in as {}.".format(self.address.origin, self.email))
         return 0
+
+    def create_administrator(self, base):
+        """The first administrator, unless the installation already has one (a rerun after an earlier run made it);
+        None when done, else exit 4 with what to do. A network error is said in words and tried again twice."""
+        setup = self.gateway("GET", base + "/api/v1/auth/setup", None)
+        if isinstance(setup, tuple) and setup[0] == 200 and (setup[1] or {}).get("required") is False:
+            self.io.say("The first administrator already exists.")
+            self.email = self.email or "the administrator you created"
+            return None
+        if self.password is None:
+            self.email, self.password = self.administrator()
+        answer = self.gateway("POST", base + "/api/v1/auth/bootstrap", json.dumps(
+            {"email": self.email, "password": self.password, "token": self.secrets_env["TQA_BOOTSTRAP_TOKEN"]}))
+        if isinstance(answer, tuple) and answer[0] in (200, 201):
+            return None
+        why = ("the gateway answered {}".format(answer[0]) if isinstance(answer, tuple) else
+               "the gateway didn't answer: {}".format(answer))
+        self.io.say("It is running, but the first administrator couldn't be created ({}). Run deploy/install.sh "
+                    "again{} to finish, or open {}/setup and create it there with TQA_BOOTSTRAP_TOKEN in {}.".format(
+                        why, self.install_dir_flag(), self.address.origin, self.compose_env))
+        return 4
+
+    def gateway(self, method, url, body):
+        """One call to the gateway: (status, answer), or the network error in words after three tries."""
+        headers = {"Origin": self.address.origin}
+        if body is not None:
+            headers["Content-Type"] = "application/json"
+        reason = None
+        for attempt in range(BOOTSTRAP_TRIES):
+            try:
+                return self.system.http(method, url, body=body, headers=headers, timeout=30)
+            except (OSError, TimeoutError) as error:
+                reason = getattr(error, "reason", None) or error
+                if attempt + 1 < BOOTSTRAP_TRIES:
+                    self.system.sleep(2)
+        return shell.redact(str(reason), self.secrets_env, self.extra)
+
+    def install_dir_flag(self):
+        """How a rerun names this installation: nothing for the default folder, else its --install-dir."""
+        if self.install_dir == Path(default_install_dir()).expanduser().absolute():
+            return ""
+        return " with --install-dir " + shlex.quote(str(self.install_dir))
 
     def ready(self, base):
         try:
@@ -567,9 +726,10 @@ def main(argv=None, io=None, system=None, repository=None):
     except StepFailed as failed:
         for line in str(failed).splitlines():
             io.say(line)
-        if installer.compose_env.exists():
-            io.say("The files stay in {}. Once the cause is fixed, start it with: {}".format(
-                installer.install_dir, " ".join(installer.compose("up", "-d", "--no-build", "--wait"))))
+        if installer.unfinished.exists():
+            io.say("The files stay in {}. Once the cause is fixed, run deploy/install.sh again{}: it does what is "
+                   "left and creates the administrator, keeping the answers given.".format(
+                       installer.install_dir, installer.install_dir_flag()))
         return 3
 
 

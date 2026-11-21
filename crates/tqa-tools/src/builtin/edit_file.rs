@@ -83,14 +83,14 @@ impl Tool for EditFile {
         // An edit naming the same text twice changes nothing: it is left out and said so, never refused, so a model
         // repeating it isn't stopped as a failure (proposal E, with the refusals of A, B and D).
         let unchanged = args.edits.iter().filter(|edit| same(edit)).count();
-        let workspace = cx.workspace.clone();
+        let (workspace, memory) = (cx.workspace.clone(), cx.memory.clone());
         let max = cx.limits.file_read_bytes;
         file_io::run(cx, move |cancel| {
             if unchanged == args.edits.len() {
                 read(&workspace, &args.path, max, cancel)?;
                 return Ok(ToolOutput::text(NO_CHANGE));
             }
-            let mut output = apply(&workspace, &args, max, cancel, || Ok(()))?;
+            let mut output = apply((&workspace, memory.as_ref()), &args, max, cancel, || Ok(()))?;
             if unchanged > 0 {
                 let said = if unchanged == 1 {
                     "1 edit changed nothing: its old_text and new_text are the same.\n".to_owned()
@@ -192,7 +192,7 @@ fn edited(
     Ok((text, regions))
 }
 fn apply(
-    workspace: &WorkspaceRoot,
+    (workspace, memory): (&WorkspaceRoot, Option<&crate::NoteWriter>),
     args: &Args,
     max: usize,
     cancel: &CancellationToken,
@@ -213,7 +213,7 @@ fn apply(
     };
     let changing = args.edits.iter().filter(|edit| !same(edit)).count();
     let output = diff::render(&args.path, changing, &original, &text, regions);
-    atomic_write::replace(workspace, &args.path, &text, cancel, |path| {
+    atomic_write::replace((workspace, memory), &args.path, &text, cancel, |path| {
         before_rename()?;
         let current = path.metadata()?;
         if (current.len(), current.modified()?) != stamp {

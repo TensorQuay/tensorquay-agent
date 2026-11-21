@@ -7,10 +7,17 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Added
 
+- **An administrator can reset a password from the host (GW-I-390).** `tqa-gateway reset-password <email>
+  [gateway.toml]` reads the new password from standard input, applies the same rules as a person's own change, ends
+  that person's sessions and records the change in the audit, for when no one can sign in to do it from the page.
 - **Install in one command (INST-U-001, INST-I-001).** From a release's checkout, `deploy/install.sh` asks where
   people will open TensorQuay Agent, which model server to use (or none, for a first try with the test model) and who
   the first administrator is. It then pulls the release, writes what the guide's steps make by hand, starts it, and
   creates that administrator. It never changes an existing installation. The guide's steps by hand stay as they are.
+  An install that stopped partway is finished by running it again, with the answers it was given (INST-U-002); a
+  network error while creating the administrator is said in words with the way on; the test model starts again with
+  Docker. On rootful Docker, when the computer's uid 1000 is another person's account, it says that person will be able
+  to read the installation's keys and stops unless told to go on (`--keys-readable-by-uid-1000`); the guide says so too.
 - **Channels work on their own: a channel wakes its agent members (ADR-0014's amendment of 20 Nov 2026; GW-I-344 to
   GW-I-355).** A proposal, a to-do, a post naming an agent (`@` and its task's name) or a reply to it starts that
   agent's task, which is told what waits and reads it; several posts at once make one wake, and a busy task's wake
@@ -39,7 +46,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   a note over the API (`/conversations/{id}/memory/{name}`, with a write share). When a person's run completes, the
   gateway writes the task's digest (its title, the day, the files it changed, the first lines of the answer; no
   model call) into that person's private folder of the workspace, which the Files panel does not show and no other
-  person's run lists. Off, a run sends exactly what it sends today. Still to come before it is turned on:
+  person's run lists. Off, the default, a run sends exactly what it sends today and
+  `.memory/` is an ordinary folder: the file tools neither guard nor keep anything there, and the memory routes answer
+  `409 memory_off` (TOOL-U-158, GW-I-393). Still to come before it is turned on:
   "Remembered" with Undo on the page, personal notes with Settings › Memory, and history.
 
 - **A person's post to the whole channel reaches its agents.** A person's post that names no one wakes every agent
@@ -63,9 +72,23 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **Agents have a name in a channel.** An agent member is named when it's added: its task's title, or a name its
   owner gives, which only its owner can change. Everyone in the channel sees that name in Members and on the agent's
   posts and votes, and `@` matches it. A task's title stays its owner's only.
+- **An administrator can shorten the stray sweep (GW-U-233).** `[sandbox] sweep_seconds` in `gateway.toml` (default
+  300, 10 through 3600) sets how often the gateway looks for containers and networks of its own that no task accounts
+  for, and so how soon Status reports one it could not remove. Unset, nothing changes. The real-engine tests use it to
+  run a sweep in seconds.
 
 ### Fixed
 
+- **A container left behind because its labels can't be read says so, with its true age (GW-I-387, WEB-U-489).** The
+  Sandboxes page and Status read "the gateway couldn't read its labels" for it, not that the engine wouldn't remove it,
+  and its age comes from the engine's own creation time instead of reading 0 s.
+- **A slow sandbox sweep's counts stand until the next sweep (GW-I-373).** A sweep that took longer than its period
+  (a stray container takes about ten seconds to stop) was followed at once by another that found nothing left, so the
+  readiness detail and the `tqa_sandbox_unowned` gauge showed no stray removed. The next sweep now starts a full period
+  after one ends.
+- **A task's private folder never ends up in a git commit (RT-I-065).** The runtime keeps a `.gitignore` of `*` in the
+  workspace's `.tqa/` (spill files, history, notes and digests), so `git add -A` in the workspace never stages it,
+  whatever the project's own `.gitignore` says.
 - **The gateway logs why it ended a model's response early (GW-U-226).** When the relay stops a response before
   its end (the model server silent past the idle limit, the response deadline, the byte limit, the upstream
   breaking), a warning names the reason, the route, the bytes carried and the seconds it ran. Before, the task
@@ -76,6 +99,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   something the sweep couldn't remove; the rest are listed and swept as before.
 ### Changed
 
+- **A model may pause 5 minutes inside an answer (GW-U-241).** `[relay] idle_timeout` is now 300 seconds by
+  default (1-900, was 60 and 1-300), and the runtime waits a little longer than its largest value, so the relay is
+  the limit that ends an answer and logs why. Some model servers hold a tool call back until its arguments are
+  complete and then send it whole; a 60-second limit cut such answers. A route check and a task's title keep at most
+  a minute of silence.
 - **A helper's failed run says why on the lead's page (GW-I-343, WEB-U-512).** The lead task's line read only
   "places failed."; it now names the reason in plain words ("The model's reply was cut off at its output limit"),
   links to the helper's task, and while the helper works again says so instead of "failed". A team's
@@ -84,13 +112,28 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Upgrade notes
 
+- **Channels start waking their agents at the upgrade.** From the first post after it, a post that concerns an agent
+  starts its task, and each channel may spend up to `[channels] wake_budget` tokens a day (2,000,000 by default), so an
+  installation with many channels may spend many times that. On 18.1 a channel never started a run. To keep 18.1's
+  behaviour until you are ready, set `wake_budget = 0` under `[channels]` in `gateway.toml` before the upgrade: 0 turns
+  waking off, and a channel can still be given its own budget from its page.
+- **Agents in channels are woken only on this release's runtime images.** Finish the upgrade's `runtime.image` step,
+  run `deploy/pull-images.sh --workstation` (or the build) again for Workstation, and rebuild custom environments, on
+  microVM installs with their root filesystems. An agent whose environment still runs an earlier image can't be woken,
+  and the channel says so once. Tasks themselves keep working on earlier images.
+- Migrations `0108` to `0111` add channel wakes, files on posts, members' names and the daily budget. None removes
+  data; back up as usual.
+- New answers a client may meet, all on channels and the memory routes: `409 channel_budget`, `409
+  member_name_taken`, `409 one_at_a_time` and `409 memory_off`; a channel post over 16 KiB is `400 invalid_request`
+  with the reason `message_invalid`.
+- `[relay] idle_timeout` now defaults to 300 seconds (was 60): a model server that stops sending holds a run up to
+  five minutes longer before the task fails. Set `idle_timeout = 60` under `[relay]` to keep the old limit.
 - Migration `0110_channel_member_names` adds a member's name to `channel_members`. An agent member added before this
   release has no name: it shows by its profile's name, as before, and is woken as before by to-dos, proposals, replies
   to its posts, decisions and reports, and a person's post to the whole channel; only `@` can't reach it. Its owner
   names it in the channel's Members: the row's "…" menu, Rename….
-- Migration `0111_channel_daily_budget` makes a channel's wake budget a daily allowance: every channel starts at 0
-  with no window open, so one the earlier lifetime budget had stopped can be woken again (GW-I-386). A budget someone
-  set keeps its number; one nobody set follows `[channels] wake_budget`, now 2,000,000 tokens a day.
+- Migration `0111_channel_daily_budget` makes each channel's wake budget a daily one (2,000,000 tokens a day unless
+  you set `[channels] wake_budget`), and every channel starts its first day at 0 (GW-I-386).
 
 ## 18.1.1 (20 November 2026)
 

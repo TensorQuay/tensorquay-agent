@@ -39,6 +39,9 @@ pub(crate) struct SandboxConfig {
     pub state_bytes: u64,
     /// The installation's ceiling on every environment's size (`[sandbox.ceiling]`, file-only).
     pub ceiling: super::sizes::Ceiling,
+    /// How often the stray container and network sweep runs, in seconds (GW-U-233): 300 by default, 10 through 3600.
+    /// A shorter period finds and reports leftovers sooner, at the cost of an engine listing each time.
+    pub sweep_seconds: u32,
 }
 
 impl Default for SandboxConfig {
@@ -62,6 +65,7 @@ impl Default for SandboxConfig {
             gateway_container: None,
             state_bytes: 1 << 30,
             ceiling: super::sizes::Ceiling::default(),
+            sweep_seconds: 300,
         }
     }
 }
@@ -111,6 +115,11 @@ impl SandboxConfig {
         if !(60..=600).contains(&self.startup_budget_seconds) {
             return Err(GatewayError::Configuration(
                 "sandbox.startup_budget_seconds must be 60 through 600",
+            ));
+        }
+        if !(10..=3600).contains(&self.sweep_seconds) {
+            return Err(GatewayError::Configuration(
+                "sandbox.sweep_seconds must be 10 through 3600",
             ));
         }
         if !((16 << 20)..=(1 << 40)).contains(&self.state_bytes) {
@@ -183,6 +192,11 @@ impl SandboxConfig {
     /// How long start-up keeps trying the backend's connect.
     pub fn startup_budget(&self) -> Duration {
         Duration::from_secs(u64::from(self.startup_budget_seconds))
+    }
+
+    /// How often the stray container and network sweep runs (GW-U-233).
+    pub fn sweep_period(&self) -> Duration {
+        Duration::from_secs(u64::from(self.sweep_seconds))
     }
 
     /// The budget one start's engine work shares, retries included.

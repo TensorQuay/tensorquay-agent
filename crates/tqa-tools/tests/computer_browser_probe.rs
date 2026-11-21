@@ -82,6 +82,7 @@ async fn open_on(
         sleeper: Arc::new(RealSleeper),
         env_allow: vec![],
         limits: ToolLimits::RECOMMENDED,
+        memory: None,
     };
     // The page loads after the port opens: wait until its title is there.
     let tool = Computer::new(Arc::new(browser));

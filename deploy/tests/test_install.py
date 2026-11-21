@@ -17,6 +17,7 @@ import sys
 import tempfile
 import unittest
 from unittest import mock
+import urllib.error
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "deploy" / "tools"))
@@ -77,7 +78,16 @@ class FakeSystem:
     """Answers the installer's commands and HTTP calls; records each."""
 
     def __init__(self, *, rootless=False, probe=None, bootstrap=201, up_fails=None, ready_after=1,
-                 busy_ports=(), detail=None, group_fails=False, workstation=None):
+                 busy_ports=(), detail=None, group_fails=False, workstation=None, uid=1000, accounts=None,
+                 setup_required=True, test_model=None, unreachable=0):
+        # This computer's own uid, and its accounts by uid (uid 1000's name, when another person has it).
+        self.own_uid = uid
+        self.accounts = accounts or {}
+        # Whether the gateway still needs its first administrator; the test model's container ID, when one exists.
+        self.setup_required = setup_required
+        self.test_model = test_model
+        # How many of the next calls to the gateway's auth routes fail on the network first.
+        self.unreachable = unreachable
         self.commands = []
         self.environments = []
         self.requests = []
@@ -130,7 +140,14 @@ class FakeSystem:
             if self.workstation is None:
                 raise shell.CommandFailed(args, 1, "Error response from daemon: No such image: tqa-runtime:workstation")
             return self.workstation + "\n"
-        if args[:3] == ["docker", "run", "-d"] or args[:2] == ["docker", "pull"]:
+        if args[:3] == ["docker", "container", "inspect"]:
+            if self.test_model is None:
+                raise shell.CommandFailed(args, 1, "Error: No such container: " + args[-1])
+            return self.test_model + "\n"
+        if args[:3] == ["docker", "run", "-d"]:
+            self.test_model = "f" * 64
+            return self.test_model + "\n"
+        if args[:2] in (["docker", "pull"], ["docker", "start"]):
             return ""
         # A command a real host would answer in its own way: the fake must know it, never answer it blindly.
         raise AssertionError("a command the scripted host doesn't know: {}".format(args))
@@ -140,7 +157,14 @@ class FakeSystem:
         if url.endswith("/readyz"):
             self.ready_after -= 1
             return (200 if self.ready_after <= 0 else 503), None
+        if url.endswith(("/api/v1/auth/bootstrap", "/api/v1/auth/setup")) and self.unreachable > 0:
+            self.unreachable -= 1
+            raise urllib.error.URLError(ConnectionResetError(104, "Connection reset by peer"))
+        if url.endswith("/api/v1/auth/setup"):
+            return 200, {"required": self.setup_required}
         if url.endswith("/api/v1/auth/bootstrap"):
+            if self.bootstrap < 400:
+                self.setup_required = False
             return self.bootstrap, ({"code": "conflict"} if self.bootstrap >= 400 else {"id": "u"})
         if url.endswith("/readyz?detail=1"):
             return 200, self.detail or {"ready": True, "checks": {"database": True, "secret_store": True,
@@ -153,6 +177,12 @@ class FakeSystem:
 
     def port_free(self, port):
         return port not in self.busy_ports
+
+    def uid(self):
+        return self.own_uid
+
+    def account(self, uid):
+        return self.accounts.get(uid)
 
     def sleep(self, seconds):
         self.slept += seconds
@@ -311,7 +341,8 @@ class Yes(Case):
         self.assertEqual((code, out.prompts), (0, []), out.text)
         names = [" ".join(command) for command in system.commands]
         order = ["deploy/pull-images.sh", "docker build -f images/fake-model/Dockerfile", "chown -R 1000:1000",
-                 "up -d --no-build --wait", "docker run -d --name tqa-fake-model --network tqa_control"]
+                 "up -d --no-build --wait",
+                 "docker run -d --restart unless-stopped --name tqa-fake-model --network tqa_control"]
         positions = [next(i for i, name in enumerate(names) if part in name) for part in order]
         self.assertEqual(positions, sorted(positions), names)
         bootstrap = next(request for request in system.requests if request[1].endswith("/auth/bootstrap"))
@@ -735,3 +766,126 @@ class Wrapper(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Finishing(Case):
+    """INST-U-002 (the review of 21 Nov 2026): an installation this installer started and didn't finish is finished by
+    running it again, keeping its answers; one made by hand, or one it finished, is never touched. A network error at
+    the administrator's creation is said in words with the way on, never a traceback. The test model starts again with
+    Docker. On rootful Docker, uid 1000 being another person's account is said before anything is written."""
+
+    def failed_start(self, *more):
+        code, out, system = self.run_installer(self.yes(*more), system=FakeSystem(up_fails=lambda env: "boom"))
+        self.assertEqual(code, 3, out.text)
+        return out, system
+
+    def test_a_failed_start_says_to_run_it_again_and_a_rerun_finishes_it(self):
+        out, _ = self.failed_start()
+        self.assertTrue((self.install_dir / install.UNFINISHED).is_file())
+        self.assertIn("run deploy/install.sh again with --install-dir " + str(self.install_dir), out.text)
+        self.assertNotIn("up -d --no-build --wait", out.text.split("The files stay")[1])
+        before = {path.name: path.read_bytes() for path in self.install_dir.iterdir() if path.is_file()}
+        # The rerun asks nothing it was given, writes nothing new, and does what was left: the owner's chown, the
+        # start, the test model, the administrator.
+        code, out, system = self.run_installer(self.yes())
+        self.assertEqual(code, 0, out.text)
+        self.assertIn("Finishing the installation an earlier run left unfinished in " + str(self.install_dir),
+                      out.text)
+        names = [" ".join(command) for command in system.commands]
+        self.assertFalse(any("pull-images.sh" in name or "docker build" in name for name in names), names)
+        for part in ("chown -R 1000:1000", "up -d --no-build --wait", "--name tqa-fake-model"):
+            self.assertTrue(any(part in name for name in names), (part, names))
+        self.assertTrue(any(url.endswith("/auth/bootstrap") for _, url, _, _ in system.requests))
+        self.assertEqual(out.lines[-1], "Ready. Open http://localhost:8080 and sign in as ana@example.org.")
+        after = {path.name: path.read_bytes() for path in self.install_dir.iterdir() if path.is_file()}
+        del before[install.UNFINISHED]
+        self.assertEqual(after, before, "a rerun changed the installation's files")
+        # Finished: a third run refuses as for any installation.
+        code, out, system = self.run_installer(self.yes())
+        self.assertEqual((code, system.commands), (2, []))
+        self.assertIn("There is already an installation in", out.text)
+
+    def test_a_rerun_after_the_administrator_was_made_skips_it(self):
+        code, out, _ = self.run_installer(self.yes(), system=FakeSystem(bootstrap=409))
+        self.assertEqual(code, 4)
+        self.assertTrue((self.install_dir / install.UNFINISHED).is_file())
+        code, out, system = self.run_installer(["--yes"], system=FakeSystem(setup_required=False,
+                                                                            test_model="f" * 64))
+        self.assertEqual(code, 0, out.text)
+        self.assertIn("The first administrator already exists.", out.lines)
+        self.assertFalse(any(url.endswith("/auth/bootstrap") for _, url, _, _ in system.requests))
+        # The test model an earlier run made is started, not made twice.
+        names = [" ".join(command) for command in system.commands]
+        self.assertIn("docker start tqa-fake-model", names)
+        self.assertFalse(any(name.startswith("docker run -d") for name in names), names)
+
+    def test_one_made_by_hand_or_without_its_answers_is_never_touched(self):
+        for name, marker in (("by hand", None), ("a broken mark", "not json"), ("a mark missing answers", "{}")):
+            with self.subTest(name):
+                shutil.rmtree(self.install_dir, ignore_errors=True)
+                self.install_dir.mkdir(parents=True)
+                (self.install_dir / "compose.env").write_text("TQA_HTTP_PORT=8081\n")
+                if marker is not None:
+                    (self.install_dir / install.UNFINISHED).write_text(marker)
+                code, out, system = self.run_installer(self.yes())
+                self.assertEqual((code, system.commands), (2, []), out.text)
+                self.assertIn("There is already an installation in", out.text)
+
+    def test_a_half_written_folder_goes_and_the_failure_is_said(self):
+        with mock.patch.object(install.install_files, "create",
+                               side_effect=lambda env, repo: (Path(env["TQA_INSTALL_DIR"]).mkdir(parents=True),
+                                                              (_ for _ in ()).throw(OSError(28, "No space left"))
+                                                              )):
+            code, out, _ = self.run_installer(self.yes())
+        self.assertEqual(code, 3, out.text)
+        self.assertIn("Writing the installation's files failed", out.text)
+        self.assert_nothing_written()
+
+    def test_a_network_error_at_the_administrator_is_words_and_the_way_on(self):
+        code, out, system = self.run_installer(self.yes(), system=FakeSystem(unreachable=99))
+        self.assertEqual(code, 4, out.text)
+        self.assertIn("the gateway didn't answer: [Errno 104] Connection reset by peer", out.text)
+        self.assertIn("Run deploy/install.sh again with --install-dir", out.text)
+        self.assertIn("http://localhost:8080/setup", out.text)
+        self.assertNotIn("Traceback", out.text)
+        self.assertNotIn(ADMIN_PASSWORD, out.text)
+        # Tried three times each, two seconds apart, before saying so.
+        self.assertGreaterEqual(system.slept, 4)
+
+    def test_a_short_network_error_is_tried_again(self):
+        code, out, _ = self.run_installer(self.yes(), system=FakeSystem(unreachable=1))
+        self.assertEqual(code, 0, out.text)
+
+    def test_the_test_model_starts_again_with_docker(self):
+        code, out, system = self.run_installer(self.yes())
+        self.assertEqual(code, 0, out.text)
+        run = next(command for command in system.commands if command[:3] == ["docker", "run", "-d"])
+        self.assertEqual(run[3:5], ["--restart", "unless-stopped"])
+
+    def test_uid_1000_another_persons_account_is_said_and_stops_before_writing(self):
+        other = FakeSystem(uid=1001, accounts={1000: "mei"})
+        code, out, system = self.run_installer(self.yes(), system=other)
+        self.assertEqual(code, 2, out.text)
+        self.assertIn("uid 1000 is the account mei, not yours", out.text)
+        self.assertIn("--keys-readable-by-uid-1000", out.text)
+        self.assert_nothing_written()
+        self.assertFalse(any("pull-images.sh" in " ".join(command) for command in system.commands))
+        # Asked, a no stops; a yes, or the flag, goes on.
+        code, out, _ = self.run_installer(
+            ["--fake-model", "--admin-email", "ana@example.org", "--admin-password-file", str(self.password_file)],
+            io_=FakeIO(["", "n"]), system=FakeSystem(uid=1001, accounts={1000: "mei"}))
+        self.assertEqual(code, 2, out.text)
+        self.assert_nothing_written()
+        code, out, _ = self.run_installer(self.yes("--keys-readable-by-uid-1000"),
+                                          system=FakeSystem(uid=1001, accounts={1000: "mei"}))
+        self.assertEqual(code, 0, out.text)
+
+    def test_no_warning_when_it_cannot_happen(self):
+        for name, system in (("rootless", FakeSystem(rootless=True, uid=1001, accounts={1000: "mei"})),
+                             ("no uid 1000", FakeSystem(uid=501)),
+                             ("the person is uid 1000", FakeSystem(uid=1000, accounts={1000: "ana"}))):
+            with self.subTest(name):
+                shutil.rmtree(self.install_dir, ignore_errors=True)
+                code, out, _ = self.run_installer(self.yes(), system=system)
+                self.assertEqual(code, 0, out.text)
+                self.assertNotIn("uid 1000", out.text)

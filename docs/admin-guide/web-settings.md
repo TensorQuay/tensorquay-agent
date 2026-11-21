@@ -66,6 +66,25 @@ whether the account is **Active** or **Disabled**.
 - **Tasks:** opens the list of that person's tasks. Administrators see a task's details (owner, dates, environment,
   model and state), never its content.
 
+### Reset a password
+<!-- Tests: GW-I-390. -->
+People change their own password from their account page. When someone can't sign in to do it, for example the only
+administrator, set a new one from the host with the gateway's configuration file. The new password is read from
+standard input, so it never shows in the process list or the shell's history. Read it without echo first, then pipe
+it to the command:
+
+```sh
+read -rs -p 'New password: ' TQA_NEW_PASSWORD; echo
+printf '%s\n' "$TQA_NEW_PASSWORD" | docker compose exec -T gateway tqa-gateway reset-password ana@example.com /etc/tqa/gateway.toml
+unset TQA_NEW_PASSWORD
+```
+
+Any other way of piping it in works too. Typing the password straight into the command instead would show it on the
+screen. It must meet the same rules as a person's own change: at least 12 characters, not the email or a common
+password. The person's sessions end at once; their API tokens keep working, as after their own change. The command
+prints the account's email, or why it refused: no active account uses that email, or the password is too weak. The
+change is recorded in the audit as the gateway's own, never with the password.
+
 ## Sandboxes
 <!-- The Sandboxes page design note (docs/design/sandboxes-page.md); its test rows are claimed after v18.0.0. -->
 Sandboxes lists every running sandbox across people: who owns it, its environment, whether it is **Starting**,
@@ -124,11 +143,12 @@ page keeps the last one and says "The latest read failed, so this shows the one 
 
 A **Sandboxes** section says how many sandboxes run and whether the gateway's sweeps left anything unowned behind:
 "Sandboxes: none running. Nothing left behind." is the quiet case, or with sandboxes running, how many and the
-oldest one's age. Every five minutes the gateway removes containers and networks of its own that no task accounts
-for; one it could not remove twice in a row, or found again after removing it, is left behind, and the line turns
-amber, naming what and the engine's reason: "… Left behind after the last sweep: … (…). The gateway tries again
-every 5 minutes." with **Open Sandboxes**, where each is named with the command that removes it by hand. Volumes are
-not counted: workspaces are folders on the host.
+oldest one's age. Every five minutes by default (`[sandbox] sweep_seconds` in `gateway.toml`, 10 through 3600
+seconds) the gateway removes containers and networks of its own that no task accounts for; one it could not remove
+twice in a row, or found again after removing it, is left behind, and the line turns amber, naming what and the
+engine's reason: "… Left behind: … (…). The gateway keeps trying to remove what's left." with **Open Sandboxes**,
+where each is named with the command that removes it by hand. Volumes are not counted: workspaces are folders on
+the host.
 
 A **Git credentials** section appears only while some Git credentials from an earlier release couldn't become keys.
 "N Git credentials couldn't become keys: their address isn't a web address" means a person saved one for an address
@@ -171,8 +191,8 @@ a few tokens; it can take up to a minute. A local model (on this computer or you
 `localhost`, the container host, a single-label name such as a compose service like `ollama`, a `.local` or
 `.internal` name, or a private, link-local or Tailscale address; or a route without a key) is checked by its
 progress instead: each answer may take 2 minutes to start (`[relay] local_check_timeout` in `gateway.toml`, 1-600
-seconds), and then the check waits as long as the model keeps answering, with no pause longer than `[relay]
-idle_timeout` (60 seconds by default), for up to 10 minutes in all. A model on a computer without a suitable GPU can
+seconds), and then the check waits as long as the model keeps answering, with no pause longer than a minute (or `[relay] idle_timeout`
+when that is lower), for up to 10 minutes in all. A model on a computer without a suitable GPU can
 take minutes: the dialog says "Checking… local models can take a minute or two.", and after the first minute how long
 it has waited. A check that runs out of time says what to do next: for a local model, that it may be busy with another
 task or slow on this computer, to try again when it's idle, and that setting; for another route, to try again in a
@@ -744,10 +764,13 @@ lead writes to it. A larger team therefore needs a larger **Tasks running at onc
 cores (see **Largest environment**).
 
 ### Channels: waking agents (18.2)
-<!-- Tests: GW-I-350, GW-I-351, GW-I-352, GW-I-353. -->
-From 18.2 a channel wakes its member agents on its own: a proposal, a to-do, a post naming an agent (`@` and its
-task's name) or a reply to it starts that agent's task, which reads what's new and answers (ADR-0014's amendment of
-20 Nov 2026). Only runs a channel started this way count against its budget; a run a person started never does.
+<!-- Tests: GW-I-350, GW-I-351, GW-I-352, GW-I-353, GW-I-377, GW-I-385. -->
+From 18.2 a channel wakes its member agents on its own: a person's post to the whole channel wakes every agent that
+votes in it; a post naming an agent (`@` and its name in the channel), a reply to its post, a proposal or a to-do wakes
+the agents it concerns; the decision on an agent's proposal and a report on its to-do wake that agent. The woken task
+reads what's new, answers in the channel and stops. Only runs a channel started this way count against its budget; a
+run a person started never does. People see each channel's budget and who may raise it in the channel's
+**Wake budget…** ([Channels](../user-guide/channels.md#the-daily-budget)).
 
 | Setting | What it bounds | Default |
 |---|---|---|

@@ -140,7 +140,7 @@ test("WEB-E2E-129 Status reads amber and opens the page's Left behind section", 
   await page.goto("/settings/status");
   const section = page.getByRole("region", { name: "Sandboxes" });
   await expect(section).toContainText(
-    "Left behind after the last sweep: 1 network (the engine timed out). The gateway tries again every 5 minutes.",
+    "Left behind: 1 network (the engine timed out). The gateway keeps trying to remove what's left.",
   );
   await expect(section).not.toContainText("tqa-sbx");
   await axe(page);

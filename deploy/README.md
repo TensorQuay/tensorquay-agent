@@ -128,9 +128,11 @@ Workstation at its first start, even when this build had no `--workstation`. Bef
 - **Without a model server**, build with `--fake-model` and use the test model as the route. In step 1 set
   `TQA_MODEL_BASE_URL='http://tqa-fake-model:8080/v1'` and `TQA_MODEL='fixture'`, and put any placeholder in the key
   file. After step 3 has started the stack, run it on the stack's control network:
-  `docker run -d --name tqa-fake-model --network tqa_control tqa-fake-model:local` (with `COMPOSE_PROJECT_NAME` set,
-  the network is `<that name>_control`). It follows a fixed script whatever the task says: it creates
-  `hello/README.md` and runs one command. That's enough to see a task run end to end, but it's not an assistant.
+  `docker run -d --restart unless-stopped --name tqa-fake-model --network tqa_control tqa-fake-model:local` (with
+  `COMPOSE_PROJECT_NAME` set, the network is `<that name>_control`). It isn't one of the stack's services: the restart
+  policy starts it again with Docker, and `docker start tqa-fake-model` does after you have stopped it. It follows a
+  fixed script whatever the task says: it creates `hello/README.md` and runs one command. That's enough to see a task
+  run end to end, but it's not an assistant.
 
 More environments come from recipes: `deploy/build-environment.sh recipe.toml` adds packages to a built-in and tags the
 image `tqa-env:<name>` for the Environments page (the admin guide's Environments section has a recipe and each message).
@@ -237,6 +239,12 @@ A route check waits up to a minute, or 2 minutes for a local model (on this comp
 loopback address, `localhost`, the container host, a single-label name such as a compose service, a `.local` or
 `.internal` name, or a private, link-local, Tailscale or unique-local address; or a route without a key); `[relay] local_check_timeout` (1-600 seconds) sets the local limit.
 
+Once a model has begun its answer, the relay lets it pause up to `[relay] idle_timeout` between its parts: 300 seconds
+by default (1-900). Some model servers send a tool call whole once its arguments are complete, after minutes of silence;
+a shorter limit cuts such an answer, and the gateway's log says "relayed response ended early" with the reason
+`relay response idle deadline`. The runtime waits a little longer than 900 seconds itself, so the relay is always the
+limit that ends an answer. A route check and a task's title request keep at most a minute of silence.
+
 Two more settings are file-only and apply to custom environment templates; the admin guide describes both
 ([Credential files in an image](../docs/admin-guide/web-settings.md#credential-files-in-an-image)).
 `acknowledged_secret_files` in a `[[templates]]` entry lists credential files that image may carry (absolute paths, at
@@ -253,6 +261,12 @@ the file doesn't clear one: a description set in **Settings › Environments** s
 Give the container account its files, then fetch the images and start. Pull an image only when it is a registry
 reference: images from step 0 (a bare local ID `sha256:...` or a `:local` tag) are already on this host and are never
 pulled.
+
+**On rootful Docker, on a computer with more than one account, check who uid 1000 is first.** The gateway's account
+in its container is uid 1000, and the `chown` below gives it the installation's keys (`install.key`, `secrets.toml`)
+and its storage on this computer too. If `getent passwd 1000` names another person, that person will be able to read
+the keys, and you won't without sudo: use [rootless Docker](#rootless-docker) instead. `deploy/install.sh` says this
+and stops unless you add `--keys-readable-by-uid-1000`.
 
 ```sh
 case "$TQA_RUNTIME_IMAGE" in sha256:*) ;; *) docker pull "$TQA_RUNTIME_IMAGE" ;; esac
@@ -477,7 +491,9 @@ prefix = 29              # each sandbox's subnet, 24 through 29
 
 If the pool ever runs out (only leaked networks can cause that, since it is sized to twice `max_live`), new sandboxes
 wait in the queue, the gateway logs an error once, and `tqa_sandbox_network_pool_exhausted_total` counts it; a sweep
-that runs every five minutes, and at once in that case, removes networks whose sandbox is gone.
+that runs every five minutes, and at once in that case, removes networks whose sandbox is gone. `[sandbox]
+sweep_seconds` (default 300, 10 through 3600) sets that period, and with it how soon a stray container or network is
+found and reported.
 
 Upgrading from a version where sandboxes shared one network: at start the gateway retires sandboxes still on the
 shared network, and their runs resume in new, isolated sandboxes. Before starting the new version, add

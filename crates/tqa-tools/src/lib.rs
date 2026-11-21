@@ -20,7 +20,9 @@ mod workspace;
 pub mod workspace_tree;
 
 pub use builtin::{MAX_NOTES_BYTES, PAGE_MARK, PDF_SUMMARY, PICTURE_SUMMARY};
-pub use context::{MAX_READ_FILE_BYTES, MIN_PAGE_BYTES, READ_PAGE_BYTES, ToolContext, ToolLimits};
+pub use context::{
+    MAX_READ_FILE_BYTES, MIN_PAGE_BYTES, NoteWriter, READ_PAGE_BYTES, ToolContext, ToolLimits,
+};
 pub use error::ToolError;
 pub use git_env::{GIT_SAFETY_ENV, HostKeyEnv};
 pub use image::{

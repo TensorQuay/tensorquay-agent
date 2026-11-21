@@ -146,6 +146,7 @@ fn context() -> Result<(tempfile::TempDir, ToolContext), Box<dyn std::error::Err
         sleeper: Arc::new(tqa_testkit::FakeSleeper::new(clock)),
         env_allow: vec![],
         limits: crate::ToolLimits::RECOMMENDED,
+        memory: None,
     };
     Ok((directory, cx))
 }

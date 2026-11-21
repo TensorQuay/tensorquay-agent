@@ -165,6 +165,7 @@ impl Harness {
             workspace: WorkspaceRoot::open(directory.path())?,
             env_allow: vec![],
             tool_limits: ToolLimits::RECOMMENDED,
+            memory: false,
             jitter: Box::new(FixedJitter::new(0.5)?),
             fallback_routes: vec![],
             gateway_link: None,

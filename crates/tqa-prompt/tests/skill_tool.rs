@@ -18,6 +18,7 @@ fn context(workspace: &Path) -> Result<ToolContext, Box<dyn Error>> {
         sleeper: Arc::new(tqa_testkit::FakeSleeper::new(clock)),
         env_allow: vec![],
         limits: ToolLimits::RECOMMENDED,
+        memory: None,
     })
 }
 fn skill(root: &Path, name: &str, body: &str) -> Result<(), std::io::Error> {

@@ -876,7 +876,7 @@ async fn exchange_as(
     let response = as_stream(response, probe, observed).await?;
     let streaming = Instant::now();
     let mut http = HttpConfig::new(StreamLimits::RECOMMENDED);
-    http.idle_timeout = Duration::from_secs(probe.config.idle_timeout);
+    http.idle_timeout = probe.config.check_idle();
     let stream = tqa_llm::decode_response(
         route.protocol,
         response,

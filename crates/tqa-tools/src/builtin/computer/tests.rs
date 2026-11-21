@@ -159,6 +159,7 @@ pub(super) fn context(
         sleeper: sleeper.clone(),
         env_allow: vec![],
         limits: ToolLimits::RECOMMENDED,
+        memory: None,
     };
     Ok((cx, sleeper))
 }

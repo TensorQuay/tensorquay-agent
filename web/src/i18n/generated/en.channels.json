@@ -176,6 +176,7 @@
     "channels.noticeUnreachable": "{member} can't be woken: its environment still runs an older version after it was started again. An administrator can update its image in Settings, and it is woken again then.",
     "channels.noticeBudget80": "Woken agents have used 80 % of this channel's budget for today.",
     "channels.noticeBudgetSpent": "Woken agents have used this channel's budget for today. The channel's owner, a lead or an administrator can raise it.",
+    "channels.noticeBudgetSpentPast": "Woken agents used up this channel's budget for that day.",
     "channels.noticeBudgetSpentUntil": "Woken agents have used this channel's budget for today: agents are woken here again on {time}, or sooner if the channel's owner, a lead or an administrator raises it.",
     "channels.budgetTitle": "Wake budget",
     "channels.budgetMenu": "Wake budget…",

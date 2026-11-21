@@ -10,7 +10,7 @@ fn tool_u_003_failure_before_rename_preserves_original_and_cleans_stage() -> Res
         content: "replacement".into(),
         create_parents: false,
     };
-    let result = write(&workspace, &args, &CancellationToken::new(), || {
+    let result = write(&workspace, None, &args, &CancellationToken::new(), || {
         Err(ToolError::Io("injected failure".into()))
     });
     assert!(matches!(result, Err(ToolError::Io(_))));

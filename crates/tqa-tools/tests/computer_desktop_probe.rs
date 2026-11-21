@@ -94,6 +94,7 @@ async fn desktop_with(
         sleeper: Arc::new(RealSleeper),
         env_allow: vec![],
         limits: ToolLimits::RECOMMENDED,
+        memory: None,
     };
     let driver = Arc::new(driver);
     let tool = Computer::with_view(driver.clone(), view);
@@ -148,6 +149,7 @@ async fn office(
         sleeper: Arc::new(RealSleeper),
         env_allow: vec![],
         limits: ToolLimits::RECOMMENDED,
+        memory: None,
     };
     let tool = Computer::with_view(driver.clone(), view);
     let mut last = String::new();
@@ -431,6 +433,7 @@ async fn page_in_front(
         sleeper: Arc::new(RealSleeper),
         env_allow: vec![],
         limits: ToolLimits::RECOMMENDED,
+        memory: None,
     };
     let tool = Computer::with_view(driver.clone(), grounded());
     for _ in 0..50 {
@@ -711,6 +714,7 @@ async fn start_center(
         sleeper: Arc::new(RealSleeper),
         env_allow: vec![],
         limits: ToolLimits::RECOMMENDED,
+        memory: None,
     };
     let tool = Computer::with_view(driver, View::default());
     let launch = Launch {

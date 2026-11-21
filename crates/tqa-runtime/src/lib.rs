@@ -13,6 +13,7 @@ mod journal;
 mod limits;
 mod link;
 pub mod mcp;
+mod private_git;
 mod process_cleanup;
 mod provider;
 mod run_services;

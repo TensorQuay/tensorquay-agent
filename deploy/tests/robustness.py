@@ -153,7 +153,10 @@ class Stack:
     def command(self, args):
         return compose.command(args, self.env, capture=True).stdout.strip()
 
-    def prepare(self, case):
+    def prepare(self, case, *, scenario=None, settings=None, top=None, services=None):
+        """Starts the stack for `case`. Another driver passes its own fake-model `scenario`, `settings` for
+        `[sandbox]`, `top`-level gateway settings (they replace the stack's `metrics_listen=false`) and extra Compose
+        `services` (sandboxes_stack.py)."""
         # A tag can point at a stale build; the log records exactly which gateway image ran.
         image = compose.required_image(self.env, "TQA_GATEWAY_IMAGE")
         print("Gateway image: " + image + " " + self.command(["docker", "image", "inspect", "--format", "{{.Id}}", image]),
@@ -166,20 +169,31 @@ class Stack:
         compose.ownership(self.directory, self.env)
         self.origin = "http://127.0.0.1:" + str(port)
         command = "printf 'kept' > marker; while [ ! -f release ]; do printf 'tick\\n'; sleep 1; done; cat marker"
-        scenario = CASES[case][0] if case in CASES else {"model": "fixture", "responses": [
+        if scenario is None and case in CASES:
+            scenario, settings = CASES[case]
+        scenario = scenario or {"model": "fixture", "responses": [
             {"events": [{"type": "tool_call", "name": "shell", "split_into": 1, "arguments": {"command": command}}],
              "usage": {"prompt_tokens": 10, "completion_tokens": 10}},
             {"events": [{"type": "text", "text": "The run continued."}],
              "usage": {"prompt_tokens": 20, "completion_tokens": 10}}]}
         compose.write(self.directory / "scenario.json", json.dumps(scenario))
-        compose.write(self.directory.parent / "robustness.json", json.dumps({"services": {
+        compose.write(self.directory.parent / "robustness.json", json.dumps({"services": dict({
             "fake-model": {"command": ["--scenario", "/scenarios/robustness.json"],
                            "volumes": [{"type": "bind", "source": str(self.directory / "scenario.json"),
-                                        "target": "/scenarios/robustness.json", "read_only": True}]}}}))
+                                        "target": "/scenarios/robustness.json", "read_only": True}]}},
+            **(services or {}))}))
         check_stream_timeout((self.directory / "gateway.toml").read_text())
-        if case in CASES:
-            config = self.directory / "gateway.toml"
-            compose.write(config, config.read_text().replace("[sandbox]\n", "[sandbox]\n" + CASES[case][1], 1))
+        config = self.directory / "gateway.toml"
+        if settings:
+            # A key the caller sets replaces the stack's own line for it (TOML refuses a key twice).
+            text = config.read_text()
+            for key in [line.split("=", 1)[0].strip() for line in settings.splitlines() if "=" in line]:
+                text = re.sub(r"(?m)^{}\s*=.*\n".format(re.escape(key)), "", text)
+            compose.write(config, text.replace("[sandbox]\n", "[sandbox]\n" + settings, 1))
+        if top:
+            text = config.read_text()
+            assert "metrics_listen=false\n" in text, "the stack's gateway.toml has no metrics_listen line to replace"
+            compose.write(config, text.replace("metrics_listen=false\n", top, 1))
         compose.ownership(self.directory, self.env, "1000:1000")
         self.up()
 
