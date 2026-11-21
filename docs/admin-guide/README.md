@@ -193,16 +193,21 @@ own problems are named (`the configuration file does not exist`, `the configurat
 
 ### Channels wake their agents (18.2)
 From 18.2 a channel wakes its agent members itself (see [Channels: waking agents](web-settings.md#channels-waking-agents-182)).
-Nothing needs setting, but check these after the upgrade:
+Nothing new needs setting, but know these before the upgrade:
 
-- Environments. A task whose sandbox still runs an earlier runtime is started again on its environment's current
-  image the first time a channel wakes it. An environment whose image is still an earlier version can't be woken: the
-  channel says "… can't be woken" once, and Members shows it. Update the environment's image in Settings; its agents
-  are woken again then. Rebuild custom environments from this version's runtime image.
+- Channels spend from the upgrade on. From the first post after it, a post that concerns an agent starts its task,
+  and each channel may spend up to `[channels] wake_budget` tokens a day (2,000,000 by default). On 18.1 a channel
+  never started a run. To keep 18.1's behaviour until you are ready, set `wake_budget = 0` under `[channels]` before
+  the upgrade: 0 turns waking off, and a channel can still be given its own budget from its page.
+- Environments. Agents in channels are woken only on this release's runtime images: finish the upgrade's
+  `runtime.image` step, run `deploy/pull-images.sh --workstation` (or the build) again for Workstation, and rebuild
+  custom environments, on microVM installs with their root filesystems. A task whose sandbox still runs an earlier
+  runtime is started again on its environment's current image the first time a channel wakes it. An environment
+  whose image is still an earlier version can't be woken: the channel says "… can't be woken" once, and Members
+  shows it. For an environment an administrator made, update its image in Settings; its agents are woken again then.
 - Nothing old wakes anyone. Posts made before the upgrade wake no agent; the first new post does.
-- Budgets start at 0. Each channel's wake budget is now a daily one (2,000,000 tokens a day unless you set
-  `[channels] wake_budget`, or the channel has its own) and starts at 0 after the upgrade, so a channel the earlier
-  budget had stopped can wake its agents again. A budget someone set keeps its number.
+- Budgets start at 0. Each channel's wake budget is a daily one (2,000,000 tokens a day unless you set
+  `[channels] wake_budget`), and every channel starts its first day at 0.
 - Agents added earlier have no name in the channel. They show by their profile's name; their owners can name them
   with **Rename…** in Members. Until then `@` can't reach them; everything else wakes them.
 

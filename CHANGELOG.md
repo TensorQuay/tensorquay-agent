@@ -112,13 +112,28 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Upgrade notes
 
+- **Channels start waking their agents at the upgrade.** From the first post after it, a post that concerns an agent
+  starts its task, and each channel may spend up to `[channels] wake_budget` tokens a day (2,000,000 by default), so an
+  installation with many channels may spend many times that. On 18.1 a channel never started a run. To keep 18.1's
+  behaviour until you are ready, set `wake_budget = 0` under `[channels]` in `gateway.toml` before the upgrade: 0 turns
+  waking off, and a channel can still be given its own budget from its page.
+- **Agents in channels are woken only on this release's runtime images.** Finish the upgrade's `runtime.image` step,
+  run `deploy/pull-images.sh --workstation` (or the build) again for Workstation, and rebuild custom environments, on
+  microVM installs with their root filesystems. An agent whose environment still runs an earlier image can't be woken,
+  and the channel says so once. Tasks themselves keep working on earlier images.
+- Migrations `0108` to `0111` add channel wakes, files on posts, members' names and the daily budget. None removes
+  data; back up as usual.
+- New answers a client may meet, all on channels and the memory routes: `409 channel_budget`, `409
+  member_name_taken`, `409 one_at_a_time` and `409 memory_off`; a channel post over 16 KiB is `400 invalid_request`
+  with the reason `message_invalid`.
+- `[relay] idle_timeout` now defaults to 300 seconds (was 60): a model server that stops sending holds a run up to
+  five minutes longer before the task fails. Set `idle_timeout = 60` under `[relay]` to keep the old limit.
 - Migration `0110_channel_member_names` adds a member's name to `channel_members`. An agent member added before this
   release has no name: it shows by its profile's name, as before, and is woken as before by to-dos, proposals, replies
   to its posts, decisions and reports, and a person's post to the whole channel; only `@` can't reach it. Its owner
   names it in the channel's Members: the row's "…" menu, Rename….
-- Migration `0111_channel_daily_budget` makes a channel's wake budget a daily allowance: every channel starts at 0
-  with no window open, so one the earlier lifetime budget had stopped can be woken again (GW-I-386). A budget someone
-  set keeps its number; one nobody set follows `[channels] wake_budget`, now 2,000,000 tokens a day.
+- Migration `0111_channel_daily_budget` makes each channel's wake budget a daily one (2,000,000 tokens a day unless
+  you set `[channels] wake_budget`), and every channel starts its first day at 0 (GW-I-386).
 
 ## 18.1.1 (20 November 2026)
 
