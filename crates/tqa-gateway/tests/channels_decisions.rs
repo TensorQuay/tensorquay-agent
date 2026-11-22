@@ -148,7 +148,9 @@ async fn gw_i_394_two_sweeps_at_once_decide_a_proposal_once(pool: PgPool) -> Tes
             let count = decided.iter().filter(|(proposal, ..)| proposal == seq).count();
             assert_eq!(count, 1, "proposal {seq} has {count} decisions: {decided:?}");
         }
-        assert_eq!(swept, due.len(), "each proposal counted once across the sweeps");
+        // The gateway's own sweep (every 5 s) runs beside these four and may decide some first (main's CI on
+        // 0adcdbb61: the four counted 9 of 12), so the count is at most one per proposal, never more.
+        assert!(swept <= due.len(), "{swept} decisions counted for {} proposals", due.len());
         Ok(())
     })
     .await
