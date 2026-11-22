@@ -143,7 +143,7 @@ impl ChannelPostTool {
             ("channel", channel_id(true)),
             // `done` stays in the API but isn't offered: the gateway gives it no effect (decided on 20 Nov 2026).
             ("type", json!({"type":"string","enum":["text","proposal","vote","task","report"],
-                "description":"text: text. proposal: title, text, optional window_seconds (60 to 86400). vote: proposal_seq, choice, optional reason. task: title, spec, optional claims. report (only on a task you claimed): task_seq, status, summary, optional refs."})),
+                "description":"text: text. proposal (a decision put to the channel's vote: when you are asked to propose something, post it as a proposal, not as text): title, text, optional window_seconds (60 to 86400). vote: proposal_seq, choice, optional reason. task: title, spec, optional claims. report (only on a task you claimed): task_seq, status, summary, optional refs."})),
             ("text", text("The message, or the proposal's reasoning.")),
             ("title", text("A proposal's or task's one-line title.")),
             ("spec", text("What the task asks for.")),
