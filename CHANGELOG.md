@@ -125,6 +125,13 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   `member_failed` notice carries the run's failure code in a new optional `code` field.
 
 
+### Security
+
+- **The URL library is url 2.5.9** (it was 2.5.8), past RUSTSEC-2026-0592: `Url::origin()` on a nested `blob:` URL
+  called itself until the stack overflowed and the process aborted. Here it reads the origin of the configured public
+  address, of the sandbox proxy from the configuration, and of a connector's address, which is refused unless it is
+  `https` (or `http` where allowed) before it is stored, so no input from outside reached the affected case.
+
 ### Upgrade notes
 
 - **Channels start waking their agents at the upgrade.** From the first post after it, a post that concerns an agent
