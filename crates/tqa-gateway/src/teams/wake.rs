@@ -3,8 +3,9 @@
 //! reader's place in the log, so several messages before it reads make one wake, two posts at once make one too, and a
 //! woken run that ends without reading isn't woken again for the same messages: nothing retries in a loop. A failed
 //! run is the exception: it leaves the reader's place where it was, so after one the key also names the failure, and
-//! the next message wakes it once more (E2E-AGENTS-021). Only a running team wakes anyone, so the stop never meets a
-//! wake made after it began.
+//! the next message wakes it once more (E2E-AGENTS-021). Only a running team wakes anyone: a wake is stored only while
+//! its team runs with the reader in it, under the team's row lock, so a stop never meets a wake made after it began
+//! (GW-I-395).
 use crate::{GatewayError, app::State};
 use tqa_types::{ClientFrame, ConversationId, TeamWake};
 use uuid::Uuid;
@@ -125,13 +126,20 @@ pub(crate) async fn team(state: &State, team: Uuid) -> Result<(), GatewayError> 
             .parse()
             .map_err(|_| GatewayError::StoreUnavailable)?;
         let turn = turn(reader.lead, reader.after)?;
-        crate::actions::send_turn(
+        // Read as running above; stored only while the team still runs with the reader in it, so a stop that began
+        // since refuses it (GW-I-395).
+        match crate::actions::send_turn(
             state,
             &user,
             &id,
             (&key(reader.conversation, reader.after, reader.failed), turn),
+            Some(team),
         )
-        .await?;
+        .await
+        {
+            Ok(_) | Err(GatewayError::TeamEnded(_)) => {}
+            Err(error) => return Err(error),
+        }
     }
     Ok(())
 }

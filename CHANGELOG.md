@@ -79,6 +79,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **A stopped agent team runs no one after its end (GW-I-395 to GW-I-397).** When a helper's message woke the lead
+  at the moment a person stopped the team, the wake could be stored just after the stop had dropped the waiting
+  turns, and the lead then ran after the team ended; a helper's first turn could do the same, and a helper brought
+  back for another round kept its waiting turn through the stop. A team's own turn is now stored only while its
+  team runs with that task in it, and the stop drops a brought-back helper's turn too.
 - **A proposal is decided once (GW-I-394).** When the channel's sweep and another decider closed the same proposal at
   the same moment, for example when its window ended just as the last vote arrived, both could write a decision, and
   the channel showed it twice. The decision is now taken under the channel's lock.

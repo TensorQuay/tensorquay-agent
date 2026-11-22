@@ -653,3 +653,194 @@ async fn gw_i_312_a_stop_withdraws_the_teams_waiting_turns_and_retires_a_startin
     })
     .await
 }
+
+// TEST: GW-I-396
+// A brought-back helper's turn still waiting when its team stops goes with the stop, as a first turn does: its key is
+// `team-round:<helper>:<round>`, which the stop's drop didn't match (only `team-wake:` and `team-start:`), so the
+// helper would have run its round's brief after the team ended. Found reading the stop for GW-I-395 (23 Nov 2026).
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_396_a_brought_back_helpers_waiting_turn_goes_with_the_stop(
+    pool: PgPool,
+) -> TestResult {
+    let config = "[agent_teams]\nenabled = true\n[admission]\nslots=2\nper_user=2";
+    support::run_configured(pool, None, config, async |f| {
+        let (owner, cookie) = f.admin().await?;
+        let _busy = full_host(f).await?;
+        let (lead, helper) = (
+            f.conversation(owner.id).await?,
+            f.conversation(owner.id).await?,
+        );
+        let team = team_of(f, owner.id, &lead.id, &helper.id).await?;
+        // Brought back for round 2 and waiting: its turn is stored, not yet run.
+        sqlx::query(
+            "UPDATE agent_team_members SET state = 'queued', round = 2 WHERE conversation_id = $1",
+        )
+        .bind(uuid::Uuid::parse_str(helper.id.as_str())?)
+        .execute(&f.pool)
+        .await?;
+        sqlx::query("UPDATE agent_teams SET round = 2 WHERE id = $1")
+            .bind(team)
+            .execute(&f.pool)
+            .await?;
+        send(f, &cookie, &helper.id, "round").await?;
+        let round = format!("team-round:{}:2", helper.id.as_str());
+        as_team_turn(f, "round", &round).await?;
+        assert_eq!(status(f, &round).await?, "queued");
+        sqlx::query(
+            "UPDATE agent_teams SET state = 'stopping', stop_reason = 'stopped' WHERE id = $1",
+        )
+        .bind(team)
+        .execute(&f.pool)
+        .await?;
+        f.gateway.reconcile_agent_teams_now().await?;
+        let ended: String = sqlx::query_scalar("SELECT state FROM agent_teams WHERE id = $1")
+            .bind(team)
+            .fetch_one(&f.pool)
+            .await?;
+        assert_eq!(ended, "ended");
+        assert_eq!(
+            status(f, &round).await?,
+            "cancelled",
+            "the round's turn goes with the stop"
+        );
+        Ok(())
+    })
+    .await
+}
+
+/// Holds the waiting statement `like` names until it waits (a test's own lock is what it waits on).
+async fn until_waiting(f: &Fixture, like: &str) -> TestResult {
+    tokio::time::timeout(support::DEADLINE, async {
+        while !sqlx::query_scalar::<_, bool>(
+            "SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE datname = current_database() \
+             AND wait_event_type = 'Lock' AND query LIKE $1)",
+        )
+        .bind(like)
+        .fetch_one(&f.pool)
+        .await?
+        {
+            tokio::time::sleep(std::time::Duration::from_millis(20)).await;
+        }
+        Ok::<_, Box<dyn std::error::Error>>(())
+    })
+    .await
+    .map_err(|_| format!("nothing waited at {like}"))?
+}
+
+/// The stop's first step, as a person's Stop team or the reconciler takes it.
+const STOPPING: &str =
+    "UPDATE agent_teams SET state = 'stopping', stop_reason = 'stopped' WHERE id = $1";
+
+// TEST: GW-I-395
+// A team's stop waits for a wake being stored, and its drop then finds it. Found by GW-I-312 on main's CI (d1bbc3e57,
+// 22 Nov 2026): `teams::wake` read the team as running, the stop then set `stopping` and dropped the lead's queued
+// turns, and the wake stored after that drop stayed queued, took the slot the stopped helper freed, and would have
+// run the lead after the end. The wake (for the person's message to the helper, which the log copies to the lead) now
+// holds the team's row while it is stored; here its key is held by an open transaction, so it waits mid-store.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_395_a_stop_waits_for_a_wake_being_stored_and_its_drop_then_finds_it(
+    pool: PgPool,
+) -> TestResult {
+    let config = "[agent_teams]\nenabled = true\n[admission]\nslots=2\nper_user=2";
+    support::run_configured(pool, None, config, async |f| {
+        let (owner, cookie) = f.admin().await?;
+        let _busy = full_host(f).await?;
+        let (lead, helper) = (
+            f.conversation(owner.id).await?,
+            f.conversation(owner.id).await?,
+        );
+        let team = team_of(f, owner.id, &lead.id, &helper.id).await?;
+        let wake = format!("team-wake:{}:0", lead.id.as_str());
+        let mut held = f.pool.begin().await?;
+        sqlx::query(
+            "INSERT INTO idempotency (key, user_id, route, response_status, response_body) VALUES ($1, $2, 'held', 202, '{}')",
+        )
+        .bind(&wake)
+        .bind(owner.id)
+        .execute(&mut *held)
+        .await?;
+        send(f, &cookie, &helper.id, "start").await?;
+        until_waiting(f, "INSERT INTO idempotency%").await?;
+        let pool = f.pool.clone();
+        let mut stopping = tokio::spawn(async move {
+            sqlx::query(STOPPING).bind(team).execute(&pool).await.map(|_| ())
+        });
+        assert!(
+            tokio::time::timeout(std::time::Duration::from_millis(500), &mut stopping)
+                .await
+                .is_err(),
+            "the stop went ahead of the wake being stored"
+        );
+        held.rollback().await?;
+        tokio::time::timeout(support::DEADLINE, stopping).await???;
+        f.gateway.reconcile_agent_teams_now().await?;
+        let ended: String = sqlx::query_scalar("SELECT state FROM agent_teams WHERE id = $1")
+            .bind(team)
+            .fetch_one(&f.pool)
+            .await?;
+        assert_eq!(ended, "ended");
+        if status(f, &wake).await? != "cancelled" {
+            let facts = facts(f, &lead.id, team).await?;
+            return Err(format!("the wake stored before the stop outlived its drop: {facts}").into());
+        }
+        Ok(())
+    })
+    .await
+}
+
+// TEST: GW-I-395
+// A wake read while the team ran and stored after its stop began is refused, so an idle lead with its runtime up isn't
+// run after the end. Here the wake waits for the lead task's row (every message takes it first), held while the
+// stop's first step commits; before, it was stored then and went straight to the lead's runtime.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_395_an_idle_leads_wake_read_before_the_stop_is_refused_after_it(
+    pool: PgPool,
+) -> TestResult {
+    support::run_configured(pool, None, "[agent_teams]\nenabled = true", async |f| {
+        let (owner, cookie) = f.admin().await?;
+        let (lead, helper) = (
+            f.conversation(owner.id).await?,
+            f.conversation(owner.id).await?,
+        );
+        let mut runtime = f.runtime(&lead).await?;
+        let team = team_of(f, owner.id, &lead.id, &helper.id).await?;
+        let mut held = f.pool.begin().await?;
+        sqlx::query("SELECT state FROM conversations WHERE id = $1 FOR UPDATE")
+            .bind(uuid::Uuid::parse_str(lead.id.as_str())?)
+            .execute(&mut *held)
+            .await?;
+        send(f, &cookie, &helper.id, "start").await?;
+        until_waiting(f, "SELECT state FROM conversations WHERE id=$1 FOR UPDATE%").await?;
+        sqlx::query(STOPPING).bind(team).execute(&f.pool).await?;
+        held.rollback().await?;
+        f.gateway.reconcile_agent_teams_now().await?;
+        let mut turns = Vec::new();
+        while let Some(frame) = runtime
+            .try_action(std::time::Duration::from_secs(2))
+            .await?
+        {
+            if let ClientFrame::UserMessage { text, .. } = frame {
+                turns.push(text);
+            }
+        }
+        let facts = facts(f, &lead.id, team).await?;
+        assert!(
+            turns.is_empty(),
+            "the lead got {turns:?} after its team's stop began: {facts}"
+        );
+        let stored: Option<String> =
+            sqlx::query_scalar("SELECT execution_status FROM idempotency WHERE key = $1")
+                .bind(format!("team-wake:{}:0", lead.id.as_str()))
+                .fetch_optional(&f.pool)
+                .await?;
+        assert_eq!(
+            stored, None,
+            "no wake is stored after the stop began: {facts}"
+        );
+        Ok(())
+    })
+    .await
+}

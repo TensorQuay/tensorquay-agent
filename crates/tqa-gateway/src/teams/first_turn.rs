@@ -66,7 +66,8 @@ fn frame(name: &str, workspace: WorkspaceMode, consistent: bool) -> String {
 /// Storage failure, or the message route's refusals.
 pub(crate) async fn send(state: &State, member: Uuid) -> Result<(), GatewayError> {
     let Some(row) = sqlx::query!(
-        "SELECT m.name, m.role, m.workspace, m.state, m.round, t.channel_id, t.owner_id, w.state AS workspace_state, \
+        "SELECT m.name, m.role, m.workspace, m.state, m.round, m.team_id, t.channel_id, t.owner_id, \
+         w.state AS workspace_state, \
          w.fork_consistent FROM agent_team_members m JOIN agent_teams t ON t.id = m.team_id \
          JOIN conversations c ON c.id = m.conversation_id JOIN workspaces w ON w.id = c.workspace_id \
          WHERE m.conversation_id = $1",
@@ -130,7 +131,36 @@ pub(crate) async fn send(state: &State, member: Uuid) -> Result<(), GatewayError
         team_wake: None,
         channel_wake: None,
     };
-    crate::actions::send_turn(state, &user, &id, (&key(&id, row.round), turn)).await?;
+    if !sent(
+        state,
+        (&user, &id),
+        (&key(&id, row.round), turn),
+        row.team_id,
+    )
+    .await?
+    {
+        return Ok(());
+    }
+    stored(state, member, &key(&id, row.round), assigned.seq).await
+}
+
+/// Stores `member`'s turn under `key`; false when its team's stop began since the member was read as starting, so the
+/// turn is refused (GW-I-397).
+async fn sent(
+    state: &State,
+    (user, id): (&crate::auth::User, &ConversationId),
+    (key, turn): (&str, ClientFrame),
+    team: Uuid,
+) -> Result<bool, GatewayError> {
+    match crate::actions::send_turn(state, user, id, (key, turn), Some(team)).await {
+        Ok(_) => Ok(true),
+        Err(GatewayError::TeamEnded(_)) => Ok(false),
+        Err(error) => Err(error),
+    }
+}
+
+/// Marks `member` no longer starting once its turn under `key` is stored, its brief (at `seq`) read.
+async fn stored(state: &State, member: Uuid, key: &str, seq: i64) -> Result<(), GatewayError> {
     // Its brief is stored, so it's no longer starting: `queued` while the turn waits (for a slot, the lead's files or
     // its copy), else `working`; its run's start makes it `working` either way. And the brief is read: the turn carries
     // it, so it isn't work waiting for the member (a helper that ends without a read call is still told idle,
@@ -142,8 +172,8 @@ pub(crate) async fn send(state: &State, member: Uuid) -> Result<(), GatewayError
          ELSE 'working' END, last_read_seq = GREATEST(last_read_seq, $3) \
          WHERE conversation_id = $1 AND state = 'starting'",
         member,
-        key(&id, row.round),
-        assigned.seq
+        key,
+        seq
     )
     .execute(&state.pool)
     .await?;
