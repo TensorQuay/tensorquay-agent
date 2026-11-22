@@ -193,6 +193,8 @@ jobs:
         run: python3 deploy/tests/demo.py --suite catch-up
       - name: Web search (public network)
         if: ${{ !cancelled() }}
+        # The check reaches public sites and refuses to start without this switch (SBX-C-021).
+        env: { TQA_PUBLIC_NETWORK_TESTS: "1" }
         run: PYTHONPATH=crates/tqa-sandbox/tests python3 -m egress.web_search
       - name: Gate demos without KVM (gates 4, 6 and 7)
         if: ${{ !cancelled() }}
