@@ -79,6 +79,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **For contributors: the guide check checks again.** `web/scripts/check-guide-copy.mjs` (part of `pnpm check`) is
+  meant to fail when a Settings section or a sidebar page has no guide. Since the Settings menu moved to `sections.ts`
+  and the sidebar's labels onto their own line, it found nothing to check and passed. It now reads both where they
+  are, and fails when it finds no section or no page at all. The settings guide gains the **Overview** section it
+  lacked.
 - **A call to a tool a task doesn't have lists only the tools it is offered (TOOL-U-159, E2E-PROFILE-007).** A task
   under a profile that allows a few tools, with agent teams off, was told the team tools' names as well; the answer
   now names only the tools the model is offered. A call to a team tool is still answered in words, as before.
