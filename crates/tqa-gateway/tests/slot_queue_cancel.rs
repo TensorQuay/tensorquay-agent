@@ -530,6 +530,45 @@ async fn as_team_turn(f: &Fixture, key: &str, team_key: &str) -> TestResult {
     Ok(())
 }
 
+/// What the gateway holds for `conversation` and for `team`'s log: its turns (key, status), its sandbox record (phase,
+/// and how long after the team ended it was made) and the log's messages (seq, type, to whom). Said when GW-I-312's lead
+/// reads a state it shouldn't: main's CI on d1bbc3e57 (22 Nov 2026) read `creating` once after the stop, with
+/// nothing in the test sending the lead anything after the stop withdrew it. A passing run holds two lead turns, both
+/// cancelled by the stop: the test's wake and the gateway's own (`team-wake:<lead>:0`, for the person's message the
+/// log copies), which `teams::wake` stores after it read the team as running; stored after the stop's drop, it would
+/// stay queued and take the slot the helper frees.
+async fn facts(f: &Fixture, conversation: &ConversationId, team: uuid::Uuid) -> Result<String> {
+    let id = uuid::Uuid::parse_str(conversation.as_str())?;
+    let turns: Vec<(String, String, Option<f64>, Option<f64>)> = sqlx::query_as(
+        "SELECT i.key, i.execution_status, EXTRACT(EPOCH FROM i.created_at - t.ended_at)::float8, \
+         EXTRACT(EPOCH FROM i.updated_at - t.ended_at)::float8 FROM idempotency i, agent_teams t \
+         WHERE i.conversation_id = $1 AND t.id = $2 ORDER BY i.ordinal",
+    )
+    .bind(id)
+    .bind(team)
+    .fetch_all(&f.pool)
+    .await?;
+    let sandbox: Option<(String, Option<f64>)> = sqlx::query_as(
+        "SELECT s.phase, EXTRACT(EPOCH FROM s.created_at - t.ended_at)::float8 FROM sandbox_instances s, agent_teams t \
+         WHERE s.conversation_id = $1 AND t.id = $2",
+    )
+    .bind(id)
+    .bind(team)
+    .fetch_optional(&f.pool)
+    .await?;
+    let log: Vec<(i64, String, Option<String>, Option<f64>)> = sqlx::query_as(
+        "SELECT m.seq, m.type, m.to_kind, EXTRACT(EPOCH FROM m.created_at - t.ended_at)::float8 FROM channel_messages m \
+         JOIN agent_teams t ON t.channel_id = m.channel_id WHERE t.id = $1 ORDER BY m.seq",
+    )
+    .bind(team)
+    .fetch_all(&f.pool)
+    .await?;
+    Ok(format!(
+        "turns (key, status, made and changed in seconds after the team ended) {turns:?}; sandbox (phase, made after \
+         the end) {sandbox:?}; team log (seq, type, to, made after the end) {log:?}"
+    ))
+}
+
 /// Reads the stream until it is told the task left the queue (`destroyed`, no queue).
 async fn told_it_left(stream: &mut support::stream::Stream) -> TestResult {
     for _ in 0..16 {
@@ -593,7 +632,14 @@ async fn gw_i_312_a_stop_withdraws_the_teams_waiting_turns_and_retires_a_startin
         assert_eq!(status(f, &wake).await?, "cancelled");
         told_it_left(&mut stream).await?;
         let stream = f.stream(&lead.id, &cookie, 0).await?;
-        assert_eq!(stream.initial, SandboxState::Destroyed);
+        if stream.initial != SandboxState::Destroyed {
+            let facts = facts(f, &lead.id, team).await?;
+            return Err(format!(
+                "the lead reads {:?} after the stop: {facts}",
+                stream.initial
+            )
+            .into());
+        }
         assert_eq!(stream.initial_queue, None);
         tokio::time::timeout(support::DEADLINE, async {
             while f.backend.list_conversations().await?.contains(&helper.id) {
