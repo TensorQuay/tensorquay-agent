@@ -87,6 +87,13 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   a local model wrote its proposal as an ordinary message, so the channel had nothing to vote on; and a to-do it could
   not do (a letter only the bank can sign) was reported completed. The channel's post tool now says what a proposal is
   for and when to post one, and what completed, failed and blocked each mean.
+- **A proposal says how many must agree (WEB-U-539).** Under the majority rule a proposal is decided when more than
+  half of the channel's voting members, people and agents alike, vote the same way, and times out otherwise. An open
+  proposal now says so, for example "decided when 3 of 4 agree", and the rule's hint when you make a channel says the
+  same: it used to say "most of the members who vote", which is not the rule.
+- **The channel's To-dos count shows the work still to finish (WEB-U-540).** It counted only to-dos with a free place,
+  so a channel whose to-dos were all claimed showed "To-dos 0" while work was still going on or had failed. It now
+  counts every to-do not yet completed by everyone who took it on.
 - **A woken agent knows what its channel is about (TOOL-U-160).** When a channel wakes an agent, the agent reads the
   new messages; that read now starts with the channel's name and purpose. Before, an agent saw only the messages, so a
   short post such as "start research and propose" in a channel named for its topic reached it with no topic, and it

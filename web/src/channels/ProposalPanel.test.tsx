@@ -12,7 +12,7 @@ import { ApiError } from "../api/error";
 import { member } from "../test/channels";
 
 import type { ChannelPost, Member, ProposalState } from "./contract";
-import { ProposalPanel } from "./ProposalPanel";
+import { majorityNeeds, ProposalPanel } from "./ProposalPanel";
 
 const CODER = member("conversation", "Coder", {
   owner_name: "alice",
@@ -271,7 +271,7 @@ describe("WEB-U-526 a proposal's veto and rule", () => {
   it("says the rule on an open proposal's closing line, and not once decided", () => {
     show(state());
     expect(
-      screen.getByText("Closes in 8 minutes · decided by majority"),
+      screen.getByText("Closes in 8 minutes · decided when 2 of 3 agree"),
     ).toBeVisible();
     cleanup();
     show(state({ rule: "human" }));
@@ -286,5 +286,23 @@ describe("WEB-U-526 a proposal's veto and rule", () => {
       }),
     );
     expect(screen.queryByText(/decided by/)).toBeNull();
+  });
+});
+
+// WEB-U-539 (the owner's choice of 22 Nov 2026: keep the majority rule for 18.2 and say it on the proposal): under
+// majority a proposal is decided when more than half of every voting member, people and agents alike, vote the same
+// way, so an open proposal says how many that is. Tonight's runs had a person's own proposal time out 1 to 0 of 2.
+describe("WEB-U-539 an open majority proposal says how many must agree", () => {
+  it("names more than half of the voting members", () => {
+    expect([1, 2, 3, 4, 5, 6].map(majorityNeeds)).toEqual([1, 2, 2, 3, 3, 4]);
+    show(state({ voting_members: 4 }));
+    expect(
+      screen.getByText("Closes in 8 minutes · decided when 3 of 4 agree"),
+    ).toBeVisible();
+    cleanup();
+    show(state({ voting_members: 2 }));
+    expect(
+      screen.getByText("Closes in 8 minutes · decided when 2 of 2 agree"),
+    ).toBeVisible();
   });
 });
