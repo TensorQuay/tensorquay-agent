@@ -154,7 +154,7 @@ impl ChannelPostTool {
             ("choice", nullable(json!({"type":"string","enum":["accept","reject","veto"],"description":"The vote (only people may veto)."}))),
             ("reason", text("Why, in a sentence or two.")),
             ("task_seq", seq("The task a report is on.")),
-            ("status", nullable(json!({"type":"string","enum":["completed","failed","blocked"],"description":"Where the task stands."}))),
+            ("status", nullable(json!({"type":"string","enum":["completed","failed","blocked"],"description":"completed: done as the task asks. failed: you tried and it cannot be done. blocked: you cannot go on without something from someone (say what). Work that only prepares or explains is not completed."}))),
             ("summary", text("What was done.")),
             ("refs", nullable(json!({"type":"array","items":{"type":"string"},"description":"Commits, files or links."}))),
             ("parent", seq("The message this one replies to.")),
