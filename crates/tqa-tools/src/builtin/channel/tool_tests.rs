@@ -285,8 +285,10 @@ async fn tool_u_019_read_lists_channels_without_one_and_pages_with_one() -> Test
         )
         .await?
         .text;
+    // The page follows the channel's own lines (C-22, TOOL-U-160).
     assert!(
-        page.starts_with("channel ch-1: messages 5-5 (1); next since=5\n"),
+        page.starts_with("ch-1: role member, rule majority, open\n")
+            && page.contains("channel ch-1: messages 5-5 (1); next since=5\n"),
         "{page}"
     );
     let wait = tool(&fake, "channel_wait")?;
@@ -297,11 +299,57 @@ async fn tool_u_019_read_lists_channels_without_one_and_pages_with_one() -> Test
         seen[1],
         r#"read ch-1 since=4 limit=10 wait=None filter={"types":["task","report"]}"#
     );
+    // The read asks for the list after its page, for the channel's name and purpose; the wait doesn't.
+    assert_eq!(seen[2], "channels");
     assert_eq!(
-        seen[2],
+        seen[3],
         "read ch-1 since=5 limit=50 wait=Some(120s) filter={}"
     );
+    assert_eq!(seen.len(), 4, "{seen:?}");
     let _ = MessageType::Task;
+    Ok(())
+}
+
+/// C-22 (the owner, 22 Nov 2026): a woken agent is told to read the channel with `channel_read` and a channel; that
+/// read must say what the channel is about (its name and purpose, people's words, so wrapped as untrusted), or a short
+/// post such as "start research and propose" reaches it with no topic at all. A wait (`channel_wait`) adds nothing:
+/// it follows a read.
+#[tokio::test]
+async fn tool_u_160_a_read_of_one_channel_starts_with_its_name_and_purpose() -> TestResult {
+    let (_workspace, cx) = context()?;
+    let fake = Arc::new(Fake::default());
+    let read = tool(&fake, "channel_read")?;
+    let page = read
+        .call(json!({"channel":"ch-1","since":0}), &cx)
+        .await?
+        .text;
+    let (head, rest) = page
+        .split_once("channel ch-1: messages")
+        .ok_or("no page line")?;
+    assert!(
+        head.starts_with("ch-1: role member, rule majority, open\n"),
+        "{page}"
+    );
+    assert!(
+        head.contains(
+            "<untrusted-content source=\"channel\" channel=\"ch-1\" field=\"name_and_purpose\""
+        ) && head.contains("Refactor\n\nSplit the parser"),
+        "{page}"
+    );
+    assert!(rest.contains("(1)"), "{page}");
+    // A channel the list doesn't hold (left meanwhile) still pages: the read is not refused for its header.
+    let page = read
+        .call(json!({"channel":"ch-7","since":0}), &cx)
+        .await?
+        .text;
+    assert!(page.starts_with("channel ch-7: messages"), "{page}");
+    // The wait adds no header.
+    let wait = tool(&fake, "channel_wait")?;
+    let waited = wait
+        .call(json!({"channel":"ch-1","since":5}), &cx)
+        .await?
+        .text;
+    assert!(!waited.contains("name_and_purpose"), "{waited}");
     Ok(())
 }
 

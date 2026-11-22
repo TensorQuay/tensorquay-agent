@@ -122,13 +122,16 @@ async fn tool_i_015_a_member_run_lists_posts_once_per_call_and_reads_marked_cont
             "a retry with the same call key returns the first answer"
         );
 
-        // The read shows it as one marked block with the gateway's record: seq 1, text, by this conversation.
+        // The read shows it as one marked block with the gateway's record: seq 1, text, by this conversation. It starts
+        // with what the channel is about, its name and purpose marked as channel content (C-22, TOOL-U-160).
         let page = read
             .call(json!({"channel": id, "since": 0}), &cx)
             .await?
             .text;
         assert!(
-            page.starts_with(&format!("channel {id}: messages 1-1 (1); next since=1\n")),
+            page.starts_with(&format!("{id}: role member, rule majority, open\n"))
+                && page.contains("field=\"name_and_purpose\"")
+                && page.contains(&format!("channel {id}: messages 1-1 (1); next since=1\n")),
             "{page}"
         );
         assert!(

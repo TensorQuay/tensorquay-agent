@@ -1,5 +1,5 @@
 //! The four channel tools. Reads and waits are class `read`; posts and claims are `communication` (ADR-0014 point 6).
-use super::{ChannelClient, ChannelFailure, ReadRequest, format, post};
+use super::{ChannelClient, ChannelFailure, ChannelSummary, ReadRequest, format, post};
 use crate::{
     PreparedAction, Tool, ToolContext, ToolError, ToolOutput, ToolSpec,
     builtin::{arguments, specification},
@@ -279,21 +279,27 @@ impl ChannelRead {
             return Ok(ToolOutput::text("you are not a member of any channel"));
         }
         let mut out = format!("your channels ({}):\n", channels.len());
-        for channel in channels {
-            let _ = writeln!(
-                out,
-                "{}: role {}, rule {}, {}",
-                channel.id, channel.role, channel.rule, channel.state
-            );
-            let words = format!("{}\n\n{}", channel.name, channel.purpose);
-            out.push_str(&untrusted::wrap(
-                "channel",
-                &[("channel", &channel.id), ("field", "name_and_purpose")],
-                &words,
-            )?);
-            out.push('\n');
+        for channel in &channels {
+            out.push_str(&Self::describe(channel)?);
         }
         Ok(ToolOutput::text(out))
+    }
+
+    /// One channel as the agent sees it: its id, role, rule and state, then its name and purpose (people's words,
+    /// wrapped as untrusted). The membership list and the head of a channel's read share it.
+    fn describe(channel: &ChannelSummary) -> Result<String, ToolError> {
+        let mut out = format!(
+            "{}: role {}, rule {}, {}\n",
+            channel.id, channel.role, channel.rule, channel.state
+        );
+        let words = format!("{}\n\n{}", channel.name, channel.purpose);
+        out.push_str(&untrusted::wrap(
+            "channel",
+            &[("channel", &channel.id), ("field", "name_and_purpose")],
+            &words,
+        )?);
+        out.push('\n');
+        Ok(out)
     }
 }
 
@@ -338,6 +344,22 @@ impl Tool for ChannelRead {
         let mut text = format::page(&channel, &page, format::BUDGET)?;
         if self.wait && page.messages.is_empty() {
             text.push_str("the wait ended without a match; call again to keep waiting\n");
+        }
+        // C-22: a read says what the channel is about, so a short post ("start research and propose") reaches the
+        // agent with its topic. A wait follows a read and adds nothing; a channel the list no longer holds, or a list
+        // the gateway refuses, leaves the page as it is: the header never refuses a read. A cancel still cancels.
+        if !self.wait {
+            match cancellable(cx, self.client.channels(&cx.cancel)).await {
+                Ok(channels) => {
+                    if let Some(summary) = channels.iter().find(|summary| summary.id == channel) {
+                        let mut head = Self::describe(summary)?;
+                        head.push_str(&text);
+                        text = head;
+                    }
+                }
+                Err(ToolError::Cancelled) => return Err(ToolError::Cancelled),
+                Err(_) => {}
+            }
         }
         Ok(ToolOutput::text(text))
     }

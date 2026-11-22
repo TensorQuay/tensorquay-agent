@@ -48,7 +48,7 @@ calamine = { version = "=0.38.0", default-features = false }
 # it on for the whole build.
 quick-xml = { version = "=0.41.0", features = ["encoding"] }
 zip = { version = "=9.0.5", default-features = false, features = ["deflate"] }
-url = { version = "=2.5.8", features = ["serde"] }
+url = { version = "=2.5.9", features = ["serde"] }
 
 # Directory-fd path walking with O_NOFOLLOW for workspace files.
 rustix = { version = "~1.1", features = ["fs"] }

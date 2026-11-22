@@ -157,6 +157,13 @@ pub(crate) async fn decide(
     seq: u64,
     force_close: bool,
 ) -> Result<Option<ChannelMessage>, GatewayError> {
+    // Under the channel's row lock, as posts and claims take it: two deciders at once (the periodic sweep and another
+    // sweep, or a vote and the sweep at the window's end) each saw no decision and each appended one (GW-I-394). The
+    // second now waits, then finds the first one's decision. A caller that holds the lock already just keeps it.
+    sqlx::query_scalar!("SELECT id FROM channels WHERE id = $1 FOR UPDATE", channel)
+        .fetch_optional(&mut *connection)
+        .await?
+        .ok_or(GatewayError::NotFound)?;
     let proposal = proposal(connection, channel, seq).await?;
     if proposal.decision.is_some() {
         return Ok(None);

@@ -79,6 +79,13 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **A proposal is decided once (GW-I-394).** When the channel's sweep and another decider closed the same proposal at
+  the same moment, for example when its window ended just as the last vote arrived, both could write a decision, and
+  the channel showed it twice. The decision is now taken under the channel's lock.
+- **A woken agent knows what its channel is about (TOOL-U-160).** When a channel wakes an agent, the agent reads the
+  new messages; that read now starts with the channel's name and purpose. Before, an agent saw only the messages, so a
+  short post such as "start research and propose" in a channel named for its topic reached it with no topic, and it
+  answered from its own task instead.
 - **For contributors: the guide check checks again.** `web/scripts/check-guide-copy.mjs` (part of `pnpm check`) is
   meant to fail when a Settings section or a sidebar page has no guide. Since the Settings menu moved to `sections.ts`
   and the sidebar's labels onto their own line, it found nothing to check and passed. It now reads both where they
@@ -117,6 +124,13 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   links to the helper's task, and while the helper works again says so instead of "failed". A team's
   `member_failed` notice carries the run's failure code in a new optional `code` field.
 
+
+### Security
+
+- **The URL library is url 2.5.9** (it was 2.5.8), past RUSTSEC-2026-0592: `Url::origin()` on a nested `blob:` URL
+  called itself until the stack overflowed and the process aborted. Here it reads the origin of the configured public
+  address, of the sandbox proxy from the configuration, and of a connector's address, which is refused unless it is
+  `https` (or `http` where allowed) before it is stored, so no input from outside reached the affected case.
 
 ### Upgrade notes
 

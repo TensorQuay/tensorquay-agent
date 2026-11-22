@@ -115,6 +115,45 @@ async fn decisions(f: &Fixture, cookie: &str, id: &str) -> Result<Vec<(u64, Stri
         .collect())
 }
 
+// TEST: GW-I-394
+/// Two deciders at once must still give one decision (found on a CI run of GW-I-033, 22 Nov 2026: the gateway's own
+/// sweep and the test's sweep both decided proposal 13, and the log held two `timed_out` decisions). Each decider ran
+/// in its own transaction, saw no decision and appended one; the decision is now taken under the channel's row lock.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_394_two_sweeps_at_once_decide_a_proposal_once(pool: PgPool) -> TestResult {
+    support::run(pool, async |f| {
+        let (_, lead) = f.admin().await?;
+        let (id, _) = channel(f, &lead, "majority", 2).await?;
+        let mut due = Vec::new();
+        for _ in 0..12 {
+            let seq = propose(f, &lead, &id).await?;
+            sqlx::query("UPDATE channel_messages SET created_at = created_at - interval '11 minutes' WHERE seq = $1 AND channel_id = $2::uuid")
+                .bind(i64::try_from(seq)?)
+                .bind(&id)
+                .execute(&f.pool)
+                .await?;
+            due.push(seq);
+        }
+        // Several sweeps at the same moment, as the periodic sweep and another decider can run.
+        let (a, b, c, d) = tokio::join!(
+            f.gateway.channel_decisions_now(),
+            f.gateway.channel_decisions_now(),
+            f.gateway.channel_decisions_now(),
+            f.gateway.channel_decisions_now()
+        );
+        let swept = a? + b? + c? + d?;
+        let decided = decisions(f, &lead, &id).await?;
+        for seq in &due {
+            let count = decided.iter().filter(|(proposal, ..)| proposal == seq).count();
+            assert_eq!(count, 1, "proposal {seq} has {count} decisions: {decided:?}");
+        }
+        assert_eq!(swept, due.len(), "each proposal counted once across the sweeps");
+        Ok(())
+    })
+    .await
+}
+
 // TEST: GW-I-033
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
