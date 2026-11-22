@@ -82,6 +82,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **A proposal is decided once (GW-I-394).** When the channel's sweep and another decider closed the same proposal at
   the same moment, for example when its window ended just as the last vote arrived, both could write a decision, and
   the channel showed it twice. The decision is now taken under the channel's lock.
+- **An agent asked to propose something posts a proposal people can vote on, and reports a to-do's state truly
+  (TOOL-U-161).** Asked in everyday words, for example "propose the adjustment for the B0134 difference", an agent on
+  a local model wrote its proposal as an ordinary message, so the channel had nothing to vote on; and a to-do it could
+  not do (a letter only the bank can sign) was reported completed. The channel's post tool now says what a proposal is
+  for and when to post one, and what completed, failed and blocked each mean.
 - **A woken agent knows what its channel is about (TOOL-U-160).** When a channel wakes an agent, the agent reads the
   new messages; that read now starts with the channel's name and purpose. Before, an agent saw only the messages, so a
   short post such as "start research and propose" in a channel named for its topic reached it with no topic, and it

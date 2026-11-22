@@ -601,6 +601,29 @@ fn tool_u_157_task_claim_says_one_at_a_time() -> TestResult {
     Ok(())
 }
 
+// TOOL-U-161 (22 Nov 2026, the S7 October-close runs on the local model): asked in a person's words to "propose the
+// adjustment", an agent posted its proposal as text twice in two runs, so nobody could vote on it; asked with "(a
+// proposal, ...)" spelled out, it posted a proposal. channel_post's type now says what a proposal is for and when to use
+// one, and what each report status means (the same runs: a to-do the agent said it had not done was reported
+// "completed").
+#[test]
+fn tool_u_161_channel_post_says_when_to_post_a_proposal() -> TestResult {
+    let fake = Arc::new(Fake::default());
+    let post = tool(&fake, "channel_post")?;
+    let schema = serde_json::to_string(&post.spec().parameters)?;
+    for said in [
+        "a decision put to the channel's vote",
+        "when you are asked to propose something, post it as a proposal, not as text",
+        // A report's status (S7 on 22 Nov 2026: "completed" on a to-do the agent said it had not done).
+        "completed: done as the task asks",
+        "blocked: you cannot go on without something from someone (say what)",
+        "Work that only prepares or explains is not completed",
+    ] {
+        assert!(schema.contains(said), "{said}: {schema}");
+    }
+    Ok(())
+}
+
 // TOOL-U-154 (decided on 20 Nov 2026): a report refused because the member never claimed the task names the fix.
 #[tokio::test]
 async fn tool_u_154_a_report_without_a_claim_names_the_fix() -> TestResult {
