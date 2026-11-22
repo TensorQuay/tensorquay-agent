@@ -138,6 +138,10 @@ pub(crate) async fn team(state: &State, team: Uuid) -> Result<(), GatewayError> 
         .await
         {
             Ok(_) | Err(GatewayError::TeamEnded(_)) => {}
+            // The team's row was held (a post, a read, a stop): the next pass wakes this reader.
+            Err(GatewayError::Busy) => {
+                tracing::debug!(team = %team, "an agent team's wake waits for the next pass: its team was busy");
+            }
             Err(error) => return Err(error),
         }
     }

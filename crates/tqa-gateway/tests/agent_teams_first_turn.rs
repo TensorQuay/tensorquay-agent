@@ -908,3 +908,57 @@ async fn gw_i_397_a_first_turn_read_before_the_stop_is_refused_after_it(
     }))
     .await
 }
+
+// TEST: GW-I-397
+// A helper's first turn read while it was starting is refused once the helper is stopped, its team still running (as
+// at the budget share, which marks it `stopped` before it drops its turns).
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_397_a_first_turn_read_before_its_helper_was_stopped_is_refused_after_it(
+    pool: PgPool,
+) -> TestResult {
+    Box::pin(support::run_configured(pool, None, ENABLED, async |f| {
+        let (_, token, _runtime) = lead(f).await?;
+        let started = start(f, &token, "c-1", "own_copy").await?;
+        let member = member_id(&started)?;
+        until(async || Ok(first_turns(f, &member).await?.0 == 1)).await?;
+        let mut held = f.pool.begin().await?;
+        sqlx::query("SELECT state FROM conversations WHERE id = $1 FOR UPDATE")
+            .bind(Uuid::parse_str(member.as_str())?)
+            .execute(&mut *held)
+            .await?;
+        unsent(f, &member).await?;
+        until(async || {
+            Ok(sqlx::query_scalar::<_, bool>(
+                "SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE datname = current_database() \
+                 AND wait_event_type = 'Lock' AND query LIKE 'SELECT state FROM conversations WHERE id=$1 FOR UPDATE%')",
+            )
+            .fetch_one(&f.pool)
+            .await?)
+        })
+        .await?;
+        sqlx::query("UPDATE agent_team_members SET state = 'stopped' WHERE conversation_id = $1")
+            .bind(Uuid::parse_str(member.as_str())?)
+            .execute(&f.pool)
+            .await?;
+        held.rollback().await?;
+        // The sweep has gone on: it no longer waits for the helper's row.
+        until(async || {
+            Ok(!sqlx::query_scalar::<_, bool>(
+                "SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE datname = current_database() \
+                 AND wait_event_type = 'Lock' AND query LIKE 'SELECT state FROM conversations WHERE id=$1 FOR UPDATE%')",
+            )
+            .fetch_one(&f.pool)
+            .await?)
+        })
+        .await?;
+        f.gateway.reconcile_agent_teams_now().await?;
+        assert_eq!(
+            first_turns(f, &member).await?,
+            (0, 0),
+            "no first turn is stored for a helper stopped since it was read"
+        );
+        Ok(())
+    }))
+    .await
+}

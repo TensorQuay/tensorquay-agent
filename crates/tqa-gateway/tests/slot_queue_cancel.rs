@@ -781,9 +781,16 @@ async fn gw_i_395_a_stop_waits_for_a_wake_being_stored_and_its_drop_then_finds_i
             .fetch_one(&f.pool)
             .await?;
         assert_eq!(ended, "ended");
-        if status(f, &wake).await? != "cancelled" {
-            let facts = facts(f, &lead.id, team).await?;
-            return Err(format!("the wake stored before the stop outlived its drop: {facts}").into());
+        let stored: Option<String> =
+            sqlx::query_scalar("SELECT execution_status FROM idempotency WHERE key = $1")
+                .bind(&wake)
+                .fetch_optional(&f.pool)
+                .await?;
+        let facts = facts(f, &lead.id, team).await?;
+        match stored.as_deref() {
+            Some("cancelled") => {}
+            None => return Err(format!("the wake was never stored (did its insert give up at the store's lock wait?): {facts}").into()),
+            Some(_) => return Err(format!("the wake stored before the stop outlived its drop: {facts}").into()),
         }
         Ok(())
     })
@@ -839,6 +846,76 @@ async fn gw_i_395_an_idle_leads_wake_read_before_the_stop_is_refused_after_it(
         assert_eq!(
             stored, None,
             "no wake is stored after the stop began: {facts}"
+        );
+        Ok(())
+    })
+    .await
+}
+
+// TEST: GW-I-395
+// A wake never waits for its team's row: a team post holds that row while it writes a message to a helper, whose task
+// row the wake holds, so a wait could close a cycle. A row held now leaves the wake to the next pass, which sends it.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_395_a_wake_never_waits_for_its_teams_row_and_the_next_pass_sends_it(
+    pool: PgPool,
+) -> TestResult {
+    let config = "[agent_teams]\nenabled = true\n[admission]\nslots=2\nper_user=2";
+    support::run_configured(pool, None, config, async |f| {
+        let (owner, cookie) = f.admin().await?;
+        let _busy = full_host(f).await?;
+        let (lead, helper) = (
+            f.conversation(owner.id).await?,
+            f.conversation(owner.id).await?,
+        );
+        let team = team_of(f, owner.id, &lead.id, &helper.id).await?;
+        let wake = format!("team-wake:{}:0", lead.id.as_str());
+        let stored = async || -> Result<Option<String>> {
+            Ok(
+                sqlx::query_scalar("SELECT execution_status FROM idempotency WHERE key = $1")
+                    .bind(&wake)
+                    .fetch_optional(&f.pool)
+                    .await?,
+            )
+        };
+        // The person's message to the helper, copied to the lead: the lead's wake goes, and is taken back, as if the
+        // wake had never been sent.
+        send(f, &cookie, &helper.id, "start").await?;
+        tokio::time::timeout(support::DEADLINE, async {
+            while stored().await?.is_none() {
+                tokio::time::sleep(std::time::Duration::from_millis(20)).await;
+            }
+            Ok::<_, Box<dyn std::error::Error>>(())
+        })
+        .await
+        .map_err(|_| "the lead was never woken")??;
+        sqlx::query("DELETE FROM idempotency WHERE key = $1")
+            .bind(&wake)
+            .execute(&f.pool)
+            .await?;
+        // The team's row held, as a post holds it: the pass neither waits for it nor stores the wake.
+        let mut held = f.pool.begin().await?;
+        sqlx::query("SELECT state FROM agent_teams WHERE id = $1 FOR UPDATE")
+            .bind(team)
+            .execute(&mut *held)
+            .await?;
+        tokio::time::timeout(
+            std::time::Duration::from_secs(3),
+            f.gateway.reconcile_agent_teams_now(),
+        )
+        .await
+        .map_err(|_| "the wake waited for its team's held row")??;
+        assert_eq!(
+            stored().await?,
+            None,
+            "no wake while the team's row is held"
+        );
+        held.rollback().await?;
+        f.gateway.reconcile_agent_teams_now().await?;
+        assert_eq!(
+            stored().await?.as_deref(),
+            Some("queued"),
+            "the next pass wakes the lead"
         );
         Ok(())
     })

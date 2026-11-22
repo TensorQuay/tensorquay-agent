@@ -91,21 +91,31 @@ pub(crate) async fn send_turn(
 }
 
 /// Refuses unless `team` runs with `conversation` in it, as its lead or a helper not stopped; the team's row and the
-/// helper's are locked for share until the caller's transaction ends.
+/// helper's are locked for share until the caller's transaction ends. Neither is waited for: a team post holds the
+/// team's row while it writes a message to a helper, whose task row this transaction holds, so a wait could close a
+/// cycle; a row held now is `busy`, and the turn is left to the next pass, which reads the team again.
 ///
 /// # Errors
-/// `409 team_ended`, storage failure.
+/// `409 team_ended`, `429 busy` while either row is held, storage failure.
 async fn team_runs_with(
     transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     team: uuid::Uuid,
     conversation: uuid::Uuid,
 ) -> Result<(), GatewayError> {
+    let busy = |error: sqlx::Error| {
+        if crate::db::LockTimeout::of(&error).is_some() {
+            GatewayError::Busy
+        } else {
+            error.into()
+        }
+    };
     let Some(leader) = sqlx::query_scalar!(
-        "SELECT lead_conversation FROM agent_teams WHERE id = $1 AND state = 'running' FOR SHARE",
+        "SELECT lead_conversation FROM agent_teams WHERE id = $1 AND state = 'running' FOR SHARE NOWAIT",
         team
     )
     .fetch_optional(&mut **transaction)
-    .await?
+    .await
+    .map_err(busy)?
     else {
         return Err(GatewayError::TeamEnded(None));
     };
@@ -113,12 +123,13 @@ async fn team_runs_with(
         return Ok(());
     }
     let member = sqlx::query_scalar!(
-        "SELECT state FROM agent_team_members WHERE conversation_id = $1 AND team_id = $2 FOR SHARE",
+        "SELECT state FROM agent_team_members WHERE conversation_id = $1 AND team_id = $2 FOR SHARE NOWAIT",
         conversation,
         team
     )
     .fetch_optional(&mut **transaction)
-    .await?;
+    .await
+    .map_err(busy)?;
     if member.is_some_and(|state| state != "stopped") {
         Ok(())
     } else {

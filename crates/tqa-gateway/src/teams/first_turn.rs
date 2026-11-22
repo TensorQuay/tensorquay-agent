@@ -145,7 +145,7 @@ pub(crate) async fn send(state: &State, member: Uuid) -> Result<(), GatewayError
 }
 
 /// Stores `member`'s turn under `key`; false when its team's stop began since the member was read as starting, so the
-/// turn is refused (GW-I-397).
+/// turn is refused (GW-I-397), or when its team's row was held, so the sweep sends it on its next pass.
 async fn sent(
     state: &State,
     (user, id): (&crate::auth::User, &ConversationId),
@@ -154,7 +154,8 @@ async fn sent(
 ) -> Result<bool, GatewayError> {
     match crate::actions::send_turn(state, user, id, (key, turn), Some(team)).await {
         Ok(_) => Ok(true),
-        Err(GatewayError::TeamEnded(_)) => Ok(false),
+        // Busy: its team's row was held; the sweep sends it on its next pass.
+        Err(GatewayError::TeamEnded(_) | GatewayError::Busy) => Ok(false),
         Err(error) => Err(error),
     }
 }

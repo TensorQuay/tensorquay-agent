@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT lead_conversation FROM agent_teams WHERE id = $1 AND state = 'running' FOR SHARE",
+  "query": "SELECT lead_conversation FROM agent_teams WHERE id = $1 AND state = 'running' FOR SHARE NOWAIT",
   "describe": {
     "columns": [
       {
@@ -24,5 +24,5 @@
       false
     ]
   },
-  "hash": "162a2646bc835aa5d3e790af84959a637ded3fbc756be28aa9ed6d4f46a7ef2e"
+  "hash": "51f4b54f71d8ee00bf99fd34892512e3e96db0aba114e7cff1de467b3d00bbea"
 }
