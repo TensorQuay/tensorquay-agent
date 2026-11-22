@@ -66,7 +66,16 @@ async fn gw_i_074_an_exhausted_network_pool_queues_work_until_a_subnet_is_free(
         // A subnet is free again: the next admission pass starts the sandbox and the work runs.
         f.backend.pool_exhausted.store(false, Ordering::SeqCst);
         f.gateway.sandboxes().admission_pass_now().await?;
-        let _runtime = f.runtime(&conversation).await?;
+        // The pass's worker makes the sandbox: wait for it, then connect its runtime with that sandbox's own token. The
+        // fixture's `runtime` asked for a sandbox itself (`ensure`) beside the worker's, and on a loaded runner the
+        // second registration was refused `sandbox_token_exists` (main's CI on 3388b41a9, 23 Nov 2026).
+        tokio::time::timeout(support::DEADLINE, async {
+            while !matches!(f.backend.live_token(&conversation.id).await, Ok(Some(_))) {
+                tokio::time::sleep(std::time::Duration::from_millis(20)).await;
+            }
+        })
+        .await?;
+        let _runtime = f.runtime_of_sandbox(&conversation.id).await?;
         assert!(
             f.backend.created(&conversation.id).is_some(),
             "a sandbox exists"
