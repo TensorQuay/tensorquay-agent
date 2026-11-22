@@ -79,6 +79,11 @@ const OUTCOMES: Readonly<
   vetoed: "channels.chipVetoed",
 };
 
+/** How many of `voters` voting members must vote the same way to decide a proposal under majority: more than half. */
+export function majorityNeeds(voters: number): number {
+  return Math.floor(voters / 2) + 1;
+}
+
 export function ProposalPanel({
   proposal,
   members,
@@ -183,11 +188,15 @@ export function ProposalPanel({
         {proposal.state === "open"
           ? t("channels.closesAndRule", {
               closes: timeLeft(proposal.window_ends_at, t),
-              rule: t(
+              // Under majority, how many must vote the same way: more than half of every voting member, people and
+              // agents alike (ADR-0014 point 9), not of those who voted (the owner's question of 22 Nov 2026).
+              rule:
                 proposal.rule === "human"
-                  ? "channels.ruleHumanInline"
-                  : "channels.ruleMajorityInline",
-              ),
+                  ? t("channels.ruleHumanInline")
+                  : t("channels.ruleMajorityInline", {
+                      needed: majorityNeeds(proposal.voting_members),
+                      voters: proposal.voting_members,
+                    }),
             })
           : null}
       </p>

@@ -33,6 +33,7 @@ import type {
   ChannelsApi,
 } from "./contract";
 import { purposeBeyond } from "./suggest-title";
+import { unfinished } from "./task-state";
 import "../protocol/generated/validators.channels";
 
 /** A closed stream (the browser gave up reconnecting) is opened again after this long, from the last seq. */
@@ -278,10 +279,7 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
         channel={item}
         members={members.data?.items ?? []}
         openTasks={
-          board.data
-            ? board.data.items.filter((task) => task.claims.length < task.limit)
-                .length
-            : null
+          board.data ? board.data.items.filter(unfinished).length : null
         }
         panel={typeof panel === "string" ? panel : null}
         onPanel={setPanel}

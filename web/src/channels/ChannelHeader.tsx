@@ -51,7 +51,7 @@ export function ChannelHeader({
 }: {
   channel: Channel;
   members: readonly Member[];
-  /** How many to-dos are open, or null before the board is read. */
+  /** How many to-dos are unfinished (a free place, or a claimant not done), or null before the board is read. */
   openTasks: number | null;
   panel: HeaderPanel | null;
   onPanel: (panel: HeaderPanel | null) => void;
