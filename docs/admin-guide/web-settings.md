@@ -22,6 +22,7 @@ Each page loads its list when it opens. If loading fails, the page says so, for 
 loaded.", and offers to try again. A refused save shows the reason next to the field it concerns, in the language the
 person has chosen.
 
+- [Overview](#overview)
 - [People](#people)
 - [Sandboxes](#sandboxes)
 - [Status](#status)
@@ -38,6 +39,23 @@ person has chosen.
 - [API tokens](#api-tokens)
 - [Keys](#keys)
 - [Agent profiles](#agent-profiles)
+
+## Overview
+<!-- Tests: WEB-U-077, WEB-U-318. -->
+**Overview** is where an administrator lands in **Settings**; a member lands on **Account** instead. It says whether
+tasks can start, what is set up, and what still needs doing, one line each, with a link to the page that changes it:
+
+- Whether tasks can start: "All … checks pass. Tasks can start.", or how many checks fail and which, with
+  **View status** ([Status](#status)).
+- **Models**: how many routes there are and how their checks stand, with **Check them** while any is not verified, or
+  **Manage** ([Models](#models)).
+- **People**: how many people have accounts and how many invitations are waiting, with **Manage** ([People](#people)).
+- **Desktop** and **Teams**, only when the installation has them: tasks can use a desktop, and a task leads helpers
+  when you ask it to.
+
+Under **Needs attention** it lists what is missing, each with its action: "No internet access is allowed yet. Tasks
+can't install packages." with **Allow sites**, and shared keys due for rotation with **Review keys**. Each line loads on
+its own: one that can't load says so, for example "The people could not be loaded.", and the others still show.
 
 ## People
 <!-- Tests: WEB-U-023, WEB-U-075, WEB-U-117, WEB-U-156, WEB-E2E-020. -->

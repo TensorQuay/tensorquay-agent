@@ -138,10 +138,12 @@ export function staleLabels(markdown, forms) {
 export function coveredPages(messages, sources) {
   const keys = (source, pattern) =>
     [...source.matchAll(pattern)].map((match) => messages[match[1]]);
+  // Only the SECTIONS list: the groups (Your account, Administration, Operations) head the menu and are not pages.
+  const sections = sources.settings.split("export const SECTIONS")[1] ?? "";
   return {
-    settings: keys(sources.settings, /label: t\("(settings\.\w+)"\)/g),
+    settings: keys(sections, /label: "(settings\.\w+)"/g),
     pages: sources.links.flatMap((source) =>
-      keys(source, /nav-label">\{t\("([\w.]+)"\)\}/g),
+      keys(source, /className="nav-label"[^>]*>\s*\{t\("([\w.]+)"\)\}/g),
     ),
   };
 }
@@ -219,10 +221,16 @@ function selfTest() {
       "desks.title": "Desks",
     },
     {
-      settings:
-        '{ id: "models", label: t("settings.models") },\n{ id: "profiles", label: t("settings.profiles") }',
+      // The shapes they have in src/settings/sections.ts and src/shell/*Link.tsx: a group's label is not a section.
+      settings: [
+        'export const GROUPS = [\n  { id: "account", label: "settings.groupAccount" },\n];',
+        "export const SECTIONS = [",
+        '  {\n    id: "models",\n    group: "account",\n    label: "settings.models",\n  },',
+        '  { id: "profiles", group: "account", label: "settings.profiles" },',
+        "];",
+      ].join("\n"),
       links: [
-        '<span className="nav-label">{t("rooms.title")}</span>',
+        '<span className="nav-label" data-nav-label="">\n  {t("rooms.title")}\n</span>',
         '<span className="nav-label">{t("desks.title")}</span>',
       ],
     },
@@ -261,24 +269,30 @@ else {
   } else console.log("Every label the guides quote is current English copy.");
   const read = (path) => readFileSync(path, "utf8");
   const shell = resolve("src", "shell");
-  const uncovered = uncoveredPages(
-    coveredPages(JSON.parse(read(CATALOGUE)).messages, {
-      settings: read(resolve("src", "settings", "SettingsShell.tsx")),
-      links: readdirSync(shell)
-        .filter((name) => name.endsWith("Link.tsx"))
-        .map((name) => read(join(shell, name))),
-    }),
-    {
-      settings: read(join(GUIDES[0], "web-settings.md")),
-      user: readdirSync(GUIDES[1])
-        .filter((name) => name.endsWith(".md"))
-        .map((name) => read(join(GUIDES[1], name))),
-    },
-  );
+  const labels = coveredPages(JSON.parse(read(CATALOGUE)).messages, {
+    settings: read(resolve("src", "settings", "sections.ts")),
+    links: readdirSync(shell)
+      .filter((name) => name.endsWith("Link.tsx"))
+      .map((name) => read(join(shell, name))),
+  });
+  // A check that finds nothing to check is broken, not passed: the menu's source moved once and nobody noticed.
+  if (!labels.settings.length || !labels.pages.length) {
+    console.error(
+      "Found no Settings sections or no sidebar pages to check: their source has moved; update coveredPages.",
+    );
+    process.exitCode = 1;
+  }
+  const uncovered = uncoveredPages(labels, {
+    settings: read(join(GUIDES[0], "web-settings.md")),
+    user: readdirSync(GUIDES[1])
+      .filter((name) => name.endsWith(".md"))
+      .map((name) => read(join(GUIDES[1], name))),
+  });
   if (uncovered.length) {
     console.error(
       `Pages the guides don't cover (a Settings section needs a "##" section in docs/admin-guide/web-settings.md; a sidebar page needs a user guide page titled with it):\n  ${uncovered.join("\n  ")}`,
     );
     process.exitCode = 1;
-  } else console.log("Every Settings section and sidebar page has its guide.");
+  } else if (labels.settings.length && labels.pages.length)
+    console.log("Every Settings section and sidebar page has its guide.");
 }
