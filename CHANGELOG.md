@@ -79,6 +79,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **A woken agent knows what its channel is about (TOOL-U-160).** When a channel wakes an agent, the agent reads the
+  new messages; that read now starts with the channel's name and purpose. Before, an agent saw only the messages, so a
+  short post such as "start research and propose" in a channel named for its topic reached it with no topic, and it
+  answered from its own task instead.
 - **For contributors: the guide check checks again.** `web/scripts/check-guide-copy.mjs` (part of `pnpm check`) is
   meant to fail when a Settings section or a sidebar page has no guide. Since the Settings menu moved to `sections.ts`
   and the sidebar's labels onto their own line, it found nothing to check and passed. It now reads both where they
