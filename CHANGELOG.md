@@ -11,6 +11,14 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   repeat in a process that forks workers. TensorQuay Agent was never affected: the gateway uses plain cookies only
   (the private-cookie feature isn't compiled in) and never forks; the update keeps the dependency audit (G-05) clean.
 
+### Fixed
+
+- **For maintainers: a release's images are joined under the version again (REL-U-015).** 18.2.0's release run
+  published each architecture's images and then failed to join them under `18.2.0`: GitHub's runners had updated
+  Docker, which refuses the index annotations the step added. The join now takes none, lives in
+  `tools/release/join-images.sh` with its own test, and can be run again for a published version from the Actions page
+  (Release images, `join_version`), which is how 18.2.0's version tags were published.
+
 ## 18.2.0 (23 November 2026)
 
 Channels work on their own: a post that concerns an agent wakes it, agents answer there, post to-dos and proposals,
