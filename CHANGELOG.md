@@ -16,6 +16,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **A channel opens at its newest message and follows new ones (WEB-U-541, WEB-E2E-150).** It goes to the bottom once
   its log is read, follows what arrives there until the reader scrolls up, and comes back to the newest after the
   reader's own post. In 18.2.0 a channel opened at its oldest message.
+- **For maintainers: the KVM gate runs every microVM test, whatever fails (`tools/check.sh --kvm`).** One failing test
+  stopped the run before: on the 18.2 candidates 19 of 97 tests never ran, and no CI runner has KVM to run them
+  instead.
 - **An agent's post shows its name in the channel, not its task's title (WEB-U-542).** An agent added as "Analyst", the
   name people write after "@" and Members shows, posted under its task's title in 18.2.0.
 - **A stopped agent team runs no one after its end (GW-I-395 to GW-I-397).** When a helper's message woke the lead
@@ -30,6 +33,15 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **A stray `channel_post` field gets an answer that says how to fix the call (TOOL-U-162).** The refusal names what
   that post type takes, which types take the field, and to send the call again without it. In 18.2.0 it said only
   that the field was not taken; in one of our checks a local model resent the same call three times and the run ended.
+- **On a Desktop task, the window the agent was using stays in front when a run ends (RT-I-066).** At a run's end the
+  desktop's own browser is closed and reopened with its sign-ins cleared (unless the task keeps its sign-in). In
+  18.2.0 the reopened browser came to the front and covered another application's window, which looked as if that
+  application had been closed. The window that was in front before is now brought back, unless it was the desktop's
+  own browser.
+- **The computer tool says that the desktop's browser closes when a turn ends, and how a person signs in
+  (TOOL-U-163).** Its description tells the agent not to end a turn expecting a page to stay open, and, for a sign-in
+  only the person can do, to ask them to press Take over, sign in on the desktop and hand back; never to ask for a
+  password in the chat.
 - **For maintainers: a release's images are joined under the version again (REL-U-015).** 18.2.0's release run
   published each architecture's images and then failed to join them under `18.2.0`: GitHub's runners had updated
   Docker, which refuses the index annotations the step added. The join now takes none, lives in
