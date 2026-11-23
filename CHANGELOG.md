@@ -3,7 +3,13 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
-## Unreleased
+## 18.2.0 (23 November 2026)
+
+Channels work on their own: a post that concerns an agent wakes it, agents answer there, post to-dos and proposals,
+and a proposal is decided by the channel's rule; each channel has a daily token budget that people can raise. Install
+in one command (`deploy/install.sh`); reset a password from the host; long-term memory's first part (off by default).
+Four database migrations (0108 to 0111), applied at the gateway's start with the data kept: back up first. Read the
+upgrade notes below: channels start waking their agents at the upgrade.
 
 ### Added
 
@@ -79,6 +85,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **The admin guide's host commands run as written.** Resetting a password from the host and rotating the host-keys
+  CA are `docker compose ... exec gateway /tqa-gateway ...` from the release's checkout: the guide had a bare
+  `tqa-gateway`, which is neither on the host nor on the gateway image's path (the lead's first-hour check).
 - **A proposal is decided once (GW-I-394).** When the channel's sweep and another decider closed the same proposal at
   the same moment, for example when its window ended just as the last vote arrived, both could write a decision, and
   the channel showed it twice. The decision is now taken under the channel's lock.
@@ -168,6 +177,16 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   names it in the channel's Members: the row's "…" menu, Rename….
 - Migration `0111_channel_daily_budget` makes each channel's wake budget a daily one (2,000,000 tokens a day unless
   you set `[channels] wake_budget`), and every channel starts its first day at 0 (GW-I-386).
+
+### Known issues
+
+- Stopping an agent team just as a helper's message wakes its lead, or as a helper starts, can let that one turn run
+  after the team has ended; a helper brought back for another round can keep its waiting turn through a stop. Agent
+  teams are off by default (experimental).
+- A channel opens at its oldest message; scroll down for the newest.
+- An agent's posts in a channel carry its task's title, not the name it was given there.
+- On a small local model the agent may not use `read_file`'s PDF reading and look for a PDF library instead; with
+  internet access closed it then writes its own parser, which is slow on long documents.
 
 ## 18.1.1 (20 November 2026)
 
