@@ -61,12 +61,8 @@ pub(crate) async fn at_share(state: &State, team: Uuid) -> Result<(), GatewayErr
     if helpers.is_empty() {
         return Ok(());
     }
-    for helper in &helpers {
-        // One cancel that fails leaves the others to stop; its run then ends on the relay's refusal.
-        if let Err(error) = super::stop::cancel_member(state, *helper).await {
-            tracing::warn!(member = %helper, code = error.code(), "a helper's run wasn't cancelled at its share");
-        }
-    }
+    // `stopped` first, then the cancels and their drop: a wake or first turn stored in between is refused as the
+    // helper's (GW-I-395), where before it stayed queued past the drop.
     crate::io::bounded(state.config.io_timeout(), &state.cancel, async {
         sqlx::query!(
             "UPDATE agent_team_members SET state = 'stopped' WHERE conversation_id = ANY($1) \
@@ -78,6 +74,12 @@ pub(crate) async fn at_share(state: &State, team: Uuid) -> Result<(), GatewayErr
         Ok(())
     })
     .await?;
+    for helper in &helpers {
+        // One cancel that fails leaves the others to stop; its run then ends on the relay's refusal.
+        if let Err(error) = super::stop::cancel_member(state, *helper).await {
+            tracing::warn!(member = %helper, code = error.code(), "a helper's run wasn't cancelled at its share");
+        }
+    }
     if let Some((channel, seq)) = hand_back(state, team, &helpers, Why::Share).await? {
         state.channels.published(channel, seq);
     }

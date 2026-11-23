@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT m.name, m.role, m.workspace, m.state, m.round, t.channel_id, t.owner_id, w.state AS workspace_state, w.fork_consistent FROM agent_team_members m JOIN agent_teams t ON t.id = m.team_id JOIN conversations c ON c.id = m.conversation_id JOIN workspaces w ON w.id = c.workspace_id WHERE m.conversation_id = $1",
+  "query": "SELECT m.name, m.role, m.workspace, m.state, m.round, m.team_id, t.channel_id, t.owner_id, w.state AS workspace_state, w.fork_consistent FROM agent_team_members m JOIN agent_teams t ON t.id = m.team_id JOIN conversations c ON c.id = m.conversation_id JOIN workspaces w ON w.id = c.workspace_id WHERE m.conversation_id = $1",
   "describe": {
     "columns": [
       {
@@ -60,6 +60,17 @@
       },
       {
         "ordinal": 5,
+        "name": "team_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "agent_team_members",
+            "name": "team_id"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
         "name": "channel_id",
         "type_info": "Uuid",
         "origin": {
@@ -70,7 +81,7 @@
         }
       },
       {
-        "ordinal": 6,
+        "ordinal": 7,
         "name": "owner_id",
         "type_info": "Uuid",
         "origin": {
@@ -81,7 +92,7 @@
         }
       },
       {
-        "ordinal": 7,
+        "ordinal": 8,
         "name": "workspace_state",
         "type_info": "Text",
         "origin": {
@@ -92,7 +103,7 @@
         }
       },
       {
-        "ordinal": 8,
+        "ordinal": 9,
         "name": "fork_consistent",
         "type_info": "Bool",
         "origin": {
@@ -117,8 +128,9 @@
       false,
       false,
       false,
+      false,
       true
     ]
   },
-  "hash": "edba39d4f54fb881512cdc14c33ff47452cf11ac95a398fed877933b0db1a059"
+  "hash": "2ca1750cdaa223e24b5fa1c493d6d9e8e027effb713e3fbe73bb1484cc7871e2"
 }

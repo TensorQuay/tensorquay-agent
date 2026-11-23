@@ -21,6 +21,11 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   instead.
 - **An agent's post shows its name in the channel, not its task's title (WEB-U-542).** An agent added as "Analyst", the
   name people write after "@" and Members shows, posted under its task's title in 18.2.0.
+- **A stopped agent team runs no one after its end (GW-I-395 to GW-I-397).** When a helper's message woke the lead
+  at the moment a person stopped the team, the wake could be stored just after the stop had dropped the waiting
+  turns, and the lead then ran after the team ended; a helper's first turn could do the same, and a helper brought
+  back for another round kept its waiting turn through the stop. A team's own turn is now stored only while its
+  team runs with that task in it, and the stop drops a brought-back helper's turn too.
 - **On a small local model the agent reads PDFs with `read_file` (PROMPT-U-030, prompt version 16).** The Workstation's
   libraries line says "Read PDFs with read_file.", and `read_file`'s description starts with what it does for a PDF. In
   our law-firm checks on a local 27B model the agent used it in 3 of 3 attempts and wrote no parser (in 18.2.0: 1 of 8,

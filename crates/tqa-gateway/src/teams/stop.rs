@@ -224,8 +224,9 @@ pub(crate) async fn cancel_member(state: &State, member: Uuid) -> Result<(), Gat
 }
 
 /// Drops the team turns still queued for `conversations`: their wakes (ADR-0034 point 10: stopping drops queued
-/// wakes) and a helper's first turn not yet started (`team-start:`), so a helper stopped while it waited for a slot, the
-/// lead's lease or its copy never starts with the lead's brief after the stop. A person's own queued messages stay.
+/// wakes) and a helper's first turn not yet started (`team-start:`, or `team-round:` once brought back: GW-I-396), so a
+/// helper stopped while it waited for a slot, the lead's lease or its copy never starts with the lead's brief after the
+/// stop. A person's own queued messages stay.
 /// Answers each dropped turn's task and whether the turn was its first, for [`withdraw`] once the drop has committed.
 async fn drop_queued_turns(
     connection: &mut PgConnection,
@@ -234,7 +235,7 @@ async fn drop_queued_turns(
     let rows = sqlx::query!(
         "UPDATE idempotency SET execution_status = 'cancelled', updated_at = CURRENT_TIMESTAMP \
          WHERE conversation_id = ANY($1) AND execution_status = 'queued' \
-         AND (key LIKE 'team-wake:%' OR key LIKE 'team-start:%') \
+         AND (key LIKE 'team-wake:%' OR key LIKE 'team-start:%' OR key LIKE 'team-round:%') \
          RETURNING conversation_id AS \"conversation_id!\", key LIKE 'team-start:%' AS \"first!\"",
         conversations
     )

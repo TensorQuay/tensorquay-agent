@@ -65,6 +65,13 @@ pub(super) async fn dispatch_copying(
             let body = serde_json::from_slice(&cached.response_body).map_err(|_| GatewayError::StoreUnavailable)?;
             return response(status,body,&cached.execution_status);
         }
+        // A team's own turn goes only while its team runs with this task in it, read under the team's and the member's
+        // row locks: a stop (`stopping`, or a helper's `stopped`) that comes now waits for this to commit, and its drop
+        // then finds the turn; one that came first refuses it here. Read before and stored after the stop's drop, a
+        // wake or a first turn stayed queued and ran its task after the end (GW-I-395, GW-I-397).
+        if let Some(team) = action.team {
+            super::team_runs_with(&mut transaction, team, conversation).await?;
+        }
         // A new message names only uploaded files of the task's workspace;
         // checked after the replay lookup so a replayed key keeps its first answer.
         if let tqa_types::ClientFrame::UserMessage { attachments, .. } = &action.frame {

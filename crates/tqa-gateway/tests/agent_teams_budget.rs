@@ -738,3 +738,79 @@ async fn gw_i_304_with_no_helper_working_the_80_notice_wakes_the_lead(pool: PgPo
     model.shutdown().await?;
     result
 }
+
+// TEST: GW-I-397
+// At the helpers' share, a helper is marked `stopped` before its queued team turns are dropped: a wake or first turn
+// stored in between is then refused as the stopped helper's (GW-I-397), where before, stored after the drop and
+// before the mark, it stayed queued. Here the helper's row is held, so the share's stop waits at the mark: its queued
+// turn must not have been dropped yet.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_397_at_its_share_a_helper_is_marked_stopped_before_its_turns_are_dropped(
+    pool: PgPool,
+) -> TestResult {
+    let model = server(3).await?;
+    let config = "[agent_teams]\nenabled=true\nhelpers_stop_percent=50\n";
+    let result = support::run_configured(pool, Some(registry(&model)?), config, async |f| {
+        let t = team(f).await?;
+        let member = Uuid::parse_str(t.member.as_str())?;
+        // A team turn of the helper's, waiting.
+        let response = f
+            .action(
+                &format!("/api/v1/conversations/{}/messages", t.member),
+                &t.cookie,
+                Some("w"),
+                &json!({"text": "w"}),
+            )
+            .await?;
+        assert_eq!(response.status().as_u16(), 202);
+        let turn = format!("team-wake:{}:9", t.member);
+        sqlx::query("UPDATE idempotency SET key = $1 WHERE key = 'w'")
+            .bind(&turn)
+            .execute(&f.pool)
+            .await?;
+        let status = async || -> Result<String> {
+            Ok(sqlx::query_scalar("SELECT execution_status FROM idempotency WHERE key = $1")
+                .bind(&turn)
+                .fetch_one(&f.pool)
+                .await?)
+        };
+        assert_eq!(status().await?, "queued");
+        assert_eq!(call(f, &t.member).await?.0, 200, "40 %");
+        let mut held = f.pool.begin().await?;
+        sqlx::query("SELECT state FROM agent_team_members WHERE conversation_id = $1 FOR UPDATE")
+            .bind(member)
+            .execute(&mut *held)
+            .await?;
+        assert_eq!(call(f, &t.member).await?.0, 200, "80 %: past the helpers' 50 %");
+        // The share's stop waits for the held row at its mark.
+        tokio::time::timeout(support::DEADLINE, async {
+            while !sqlx::query_scalar::<_, bool>(
+                "SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE datname = current_database() \
+                 AND wait_event_type = 'Lock' AND query LIKE 'UPDATE agent_team_members SET state = ''stopped''%')",
+            )
+            .fetch_one(&f.pool)
+            .await?
+            {
+                tokio::time::sleep(std::time::Duration::from_millis(20)).await;
+            }
+            Ok::<_, Box<dyn std::error::Error>>(())
+        })
+        .await
+        .map_err(|_| "the share's stop never waited to mark the helper")??;
+        assert_eq!(status().await?, "queued", "the helper's turns are dropped only once it is marked stopped");
+        held.rollback().await?;
+        tokio::time::timeout(support::DEADLINE, async {
+            while status().await? != "cancelled" {
+                tokio::time::sleep(std::time::Duration::from_millis(20)).await;
+            }
+            Ok::<_, Box<dyn std::error::Error>>(())
+        })
+        .await
+        .map_err(|_| "the helper's queued turn outlived its stop")??;
+        Ok(())
+    })
+    .await;
+    model.shutdown().await?;
+    result
+}

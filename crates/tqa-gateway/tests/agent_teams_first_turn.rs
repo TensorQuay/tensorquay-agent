@@ -838,3 +838,127 @@ async fn gw_i_300_a_members_waiting_first_turn_is_listed_as_the_gateways_and_can
     }))
     .await
 }
+
+// TEST: GW-I-397
+// A helper's first turn read while its team ran and stored after the team's stop began is refused, so the helper
+// doesn't start with the lead's brief after the stop: GW-I-395's race on `first_turn::send`. Here the sweep resends
+// a turn never stored (as after a failed send) and waits for the helper task's row (every message takes it first),
+// held while the stop's first step commits; before, the turn was stored then and went to the helper's runtime.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_397_a_first_turn_read_before_the_stop_is_refused_after_it(
+    pool: PgPool,
+) -> TestResult {
+    Box::pin(support::run_configured(pool, None, ENABLED, async |f| {
+        let (lead_task, token, _runtime) = lead(f).await?;
+        let started = start(f, &token, "c-1", "own_copy").await?;
+        let member = member_id(&started)?;
+        until(async || Ok(f.backend.created(&member).is_some())).await?;
+        let mut runtime = f.runtime_for(&member).await?;
+        let ClientFrame::UserMessage { .. } = runtime.action().await? else {
+            return Err("the first turn".into());
+        };
+        let team: Uuid =
+            sqlx::query_scalar("SELECT id FROM agent_teams WHERE lead_conversation = $1")
+                .bind(lead_task)
+                .fetch_one(&f.pool)
+                .await?;
+        let mut held = f.pool.begin().await?;
+        sqlx::query("SELECT state FROM conversations WHERE id = $1 FOR UPDATE")
+            .bind(Uuid::parse_str(member.as_str())?)
+            .execute(&mut *held)
+            .await?;
+        unsent(f, &member).await?;
+        until(async || {
+            Ok(sqlx::query_scalar::<_, bool>(
+                "SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE datname = current_database() \
+                 AND wait_event_type = 'Lock' AND query LIKE 'SELECT state FROM conversations WHERE id=$1 FOR UPDATE%')",
+            )
+            .fetch_one(&f.pool)
+            .await?)
+        })
+        .await?;
+        sqlx::query(
+            "UPDATE agent_teams SET state = 'stopping', stop_reason = 'stopped' WHERE id = $1",
+        )
+        .bind(team)
+        .execute(&f.pool)
+        .await?;
+        held.rollback().await?;
+        f.gateway.reconcile_agent_teams_now().await?;
+        // What reaches the helper's runtime now, read or not.
+        let mut frames = Vec::new();
+        for _ in 0..20 {
+            match runtime.try_action(Duration::from_secs(2)).await {
+                Ok(Some(frame)) => frames.push(format!("{frame:?}")),
+                Ok(None) => break,
+                Err(error) => frames.push(format!("unreadable: {error}")),
+            }
+        }
+        assert_eq!(
+            first_turns(f, &member).await?,
+            (0, 0),
+            "no first turn is stored after the stop began; the helper's runtime got {frames:?}"
+        );
+        assert!(
+            !frames.iter().any(|frame| frame.starts_with("UserMessage")),
+            "the helper got a turn after its team's stop began: {frames:?}"
+        );
+        Ok(())
+    }))
+    .await
+}
+
+// TEST: GW-I-397
+// A helper's first turn read while it was starting is refused once the helper is stopped, its team still running (as
+// at the budget share, which marks it `stopped` before it drops its turns).
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_397_a_first_turn_read_before_its_helper_was_stopped_is_refused_after_it(
+    pool: PgPool,
+) -> TestResult {
+    Box::pin(support::run_configured(pool, None, ENABLED, async |f| {
+        let (_, token, _runtime) = lead(f).await?;
+        let started = start(f, &token, "c-1", "own_copy").await?;
+        let member = member_id(&started)?;
+        until(async || Ok(first_turns(f, &member).await?.0 == 1)).await?;
+        let mut held = f.pool.begin().await?;
+        sqlx::query("SELECT state FROM conversations WHERE id = $1 FOR UPDATE")
+            .bind(Uuid::parse_str(member.as_str())?)
+            .execute(&mut *held)
+            .await?;
+        unsent(f, &member).await?;
+        until(async || {
+            Ok(sqlx::query_scalar::<_, bool>(
+                "SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE datname = current_database() \
+                 AND wait_event_type = 'Lock' AND query LIKE 'SELECT state FROM conversations WHERE id=$1 FOR UPDATE%')",
+            )
+            .fetch_one(&f.pool)
+            .await?)
+        })
+        .await?;
+        sqlx::query("UPDATE agent_team_members SET state = 'stopped' WHERE conversation_id = $1")
+            .bind(Uuid::parse_str(member.as_str())?)
+            .execute(&f.pool)
+            .await?;
+        held.rollback().await?;
+        // The sweep has gone on: it no longer waits for the helper's row.
+        until(async || {
+            Ok(!sqlx::query_scalar::<_, bool>(
+                "SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE datname = current_database() \
+                 AND wait_event_type = 'Lock' AND query LIKE 'SELECT state FROM conversations WHERE id=$1 FOR UPDATE%')",
+            )
+            .fetch_one(&f.pool)
+            .await?)
+        })
+        .await?;
+        f.gateway.reconcile_agent_teams_now().await?;
+        assert_eq!(
+            first_turns(f, &member).await?,
+            (0, 0),
+            "no first turn is stored for a helper stopped since it was read"
+        );
+        Ok(())
+    }))
+    .await
+}
