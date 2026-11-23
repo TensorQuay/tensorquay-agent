@@ -16,6 +16,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **A channel opens at its newest message and follows new ones (WEB-U-541, WEB-E2E-150).** It goes to the bottom once
   its log is read, follows what arrives there until the reader scrolls up, and comes back to the newest after the
   reader's own post. In 18.2.0 a channel opened at its oldest message.
+- **For maintainers: the KVM gate runs every microVM test, whatever fails (`tools/check.sh --kvm`).** One failing test
+  stopped the run before: on the 18.2 candidates 19 of 97 tests never ran, and no CI runner has KVM to run them
+  instead.
 - **An agent's post shows its name in the channel, not its task's title (WEB-U-542).** An agent added as "Analyst", the
   name people write after "@" and Members shows, posted under its task's title in 18.2.0.
 - **On a small local model the agent reads PDFs with `read_file` (PROMPT-U-030, prompt version 16).** The Workstation's
