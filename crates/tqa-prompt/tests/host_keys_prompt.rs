@@ -45,7 +45,7 @@ fn prompt_u_019_the_prompt_names_each_key_and_where_it_goes_never_a_placeholder(
     ];
     let without = render(&[]);
     let with = render(&keys);
-    assert_eq!(PROMPT_VERSION, 15);
+    assert_eq!(PROMPT_VERSION, 16);
     // Without keys nothing changes; with them, the lines follow the network lines.
     assert!(with.starts_with(&without), "{with}");
     assert_eq!(

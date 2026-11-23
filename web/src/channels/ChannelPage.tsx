@@ -34,6 +34,7 @@ import type {
 } from "./contract";
 import { purposeBeyond } from "./suggest-title";
 import { unfinished } from "./task-state";
+import { useChannelFollow } from "./use-channel-follow";
 import "../protocol/generated/validators.channels";
 
 /** A closed stream (the browser gave up reconnecting) is opened again after this long, from the last seq. */
@@ -163,6 +164,13 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
   const log = useChannelLog(api, id, () => {
     void cache.invalidateQueries({ queryKey: ["channel", id] });
   });
+  // The page opens at the newest message and follows new ones while the reader is at the bottom (WEB-U-541).
+  const pageRef = useRef<HTMLDivElement>(null);
+  const toNewest = useChannelFollow(
+    pageRef,
+    log.loaded && channel.isSuccess,
+    log.messages.at(-1)?.seq ?? 0,
+  );
   /** The panel open beside the log: the to-dos or the members (WEB-U-519), a post's thread (WEB-U-523), or none. */
   const [budgetOpen, setBudgetOpen] = useState(false);
   const [panel, setPanel] = useState<HeaderPanel | { thread: number } | null>(
@@ -231,6 +239,7 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
   async function post(write: ChannelPost, files: readonly string[] = []) {
     const stored = await api.post(id, write, newActionKey(), files);
     log.add([stored]);
+    toNewest();
   }
   async function claim(seq: number) {
     log.add([await api.claim(id, seq, newActionKey())]);
@@ -267,6 +276,7 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
   const beyond = purposeBeyond(item.purpose, item.name);
   return (
     <div
+      ref={pageRef}
       className="channel-page"
       data-panel={
         panel ? (typeof panel === "object" ? "thread" : panel) : undefined
