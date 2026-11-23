@@ -190,6 +190,42 @@ fn tool_u_019_flat_post_arguments_become_a_validated_post() -> TestResult {
     Ok(())
 }
 
+// TEST: TOOL-U-162
+/// A field the post's type doesn't take is refused with what that type takes, which types take the field, and to send
+/// the call again without it. With "not taken by a text post" alone, a 27B agent resent the same call three times and
+/// its run ended on `repeated_failure` (S7 pass D on the 18.2 build, 23 Nov 2026).
+#[test]
+fn tool_u_162_a_stray_field_says_how_to_fix_the_call() -> TestResult {
+    for (args, field, detail) in [
+        (
+            json!({"channel":"ch-1","type":"text","text":"hi","summary":"two items"}),
+            "/summary",
+            "not taken by a text post, which takes text and parent; summary is taken by a report or done post. Send \
+             the call again without summary, or as one of those types.",
+        ),
+        (
+            json!({"channel":"ch-1","type":"text","text":"hi","refs":["7"]}),
+            "/refs",
+            "not taken by a text post, which takes text and parent; refs is taken by a report post. Send the call \
+             again without refs, or as one of those types.",
+        ),
+        (
+            json!({"channel":"ch-1","type":"done","colour":"red"}),
+            "/colour",
+            "not taken by a done post, which takes summary and parent; no post takes colour. Send the call again \
+             without colour.",
+        ),
+    ] {
+        match post::from_args(&args) {
+            Err(crate::ToolError::InvalidArgs { path, detail: said }) => {
+                assert_eq!((path.as_str(), said.as_str()), (field, detail), "{args}");
+            }
+            other => return Err(format!("{args}: {other:?}").into()),
+        }
+    }
+    Ok(())
+}
+
 #[test]
 fn tool_u_019_a_task_shows_and_takes_its_claim_limit() -> TestResult {
     use tqa_types::ClaimLimit;

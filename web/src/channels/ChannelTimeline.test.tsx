@@ -342,8 +342,8 @@ describe("WEB-U-515 a post's files", () => {
 });
 
 // WEB-U-520 (18.2 slice 3, the mock of 17 Nov 2026): one plain log. A run of posts by one author shows its face and name
-// once; an agent by its task's name with the agent mark, no role pill (roles live in Members); no seq numbers on the
-// screen. A vote, a claim, a decision and a notice are each one muted line, a notice in the reader's own words.
+// once; an agent by its name in the channel (WEB-U-542; its task's title only for an agent added before names, to its
+// owner) with the agent mark, no role pill (roles live in Members); no seq numbers on the screen. A vote, a claim, a decision and a notice are each one muted line, a notice in the reader's own words.
 describe("WEB-U-520 the chat log", () => {
   const analyst = {
     kind: "conversation" as const,
@@ -387,7 +387,7 @@ describe("WEB-U-520 the chat log", () => {
       },
     },
   ];
-  it("groups a run of posts, names an agent by its task once, and keeps events to one muted line", () => {
+  it("groups a run of posts, names an agent by its channel name once, and keeps events to one muted line", () => {
     render(
       <ChannelTimeline
         messages={log}
@@ -397,7 +397,8 @@ describe("WEB-U-520 the chat log", () => {
       />,
     );
     const view = screen.getByRole("list", { name: "Channel log" });
-    expect(within(view).getAllByText("Pricing analyst")).toHaveLength(1);
+    expect(within(view).getAllByText("Coder")).toHaveLength(1);
+    expect(within(view).queryByText("Pricing analyst")).toBeNull();
     expect(within(view).getAllByText("Agent")).toHaveLength(1);
     expect(within(view).queryByText("Lead")).toBeNull();
     expect(view.textContent ?? "", view.textContent ?? "").not.toMatch(/#\d/);
@@ -684,5 +685,57 @@ describe("WEB-U-531 a post's replies in the log", () => {
     expect(
       within(log).getByRole("button", { name: "2 replies" }),
     ).toBeVisible();
+  });
+});
+
+// TEST: WEB-U-542
+// 18.2.1 (the lead's first-hour check, 23 Nov 2026): an agent's post shows the name it has in the channel, the one
+// people write after "@" and Members shows, never its task's title. On 18.2 an agent added as "Analyst" posted as
+// "Summarise Regional Sales Chart", its task's automatic title. One added before names keeps its title to its owner.
+describe("WEB-U-542 an agent's post shows its name in the channel", () => {
+  const AGENT = "0195d8c0-0000-7000-8000-0000000000c1";
+  const OLD = "0195d8c0-0000-7000-8000-0000000000c2";
+  const answer = (seq: number, id: string, name: string): ChannelMessage =>
+    post(
+      seq,
+      { kind: "conversation", id, name },
+      { type: "text", text: "South sold the most." },
+    );
+
+  it("names a named agent by its channel name, to its owner too", () => {
+    render(
+      <ChannelTimeline
+        messages={[answer(1, AGENT, "Analyst"), answer(2, OLD, "Agent")]}
+        members={[
+          {
+            kind: "conversation",
+            id: AGENT,
+            name: "Analyst",
+            named: true,
+            title: "Summarise Regional Sales Chart",
+            owner_name: "first",
+            role: "member",
+            added_at: "2026-11-23T04:57:00Z",
+          },
+          {
+            kind: "conversation",
+            id: OLD,
+            name: "Agent",
+            named: false,
+            title: "Numbers helper",
+            owner_name: "first",
+            role: "member",
+            added_at: "2026-09-27T09:00:00Z",
+          },
+        ]}
+      />,
+    );
+    const first =
+      screen.getByRole("article", { name: /^#1/ }).textContent ?? "";
+    expect(first).toContain("Analyst");
+    expect(first).not.toContain("Summarise Regional Sales Chart");
+    expect(screen.getByRole("article", { name: /^#2/ }).textContent).toContain(
+      "Numbers helper",
+    );
   });
 });
