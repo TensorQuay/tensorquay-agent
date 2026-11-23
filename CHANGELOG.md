@@ -25,6 +25,15 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **A stray `channel_post` field gets an answer that says how to fix the call (TOOL-U-162).** The refusal names what
   that post type takes, which types take the field, and to send the call again without it. In 18.2.0 it said only
   that the field was not taken; in one of our checks a local model resent the same call three times and the run ended.
+- **On a Desktop task, the window the agent was using stays in front when a run ends (RT-I-066).** At a run's end the
+  desktop's own browser is closed and reopened with its sign-ins cleared (unless the task keeps its sign-in). In
+  18.2.0 the reopened browser came to the front and covered another application's window, which looked as if that
+  application had been closed. The window that was in front before is now brought back, unless it was the desktop's
+  own browser.
+- **The computer tool says that the desktop's browser closes when a turn ends, and how a person signs in
+  (TOOL-U-163).** Its description tells the agent not to end a turn expecting a page to stay open, and, for a sign-in
+  only the person can do, to ask them to press Take over, sign in on the desktop and hand back; never to ask for a
+  password in the chat.
 - **For maintainers: a release's images are joined under the version again (REL-U-015).** 18.2.0's release run
   published each architecture's images and then failed to join them under `18.2.0`: GitHub's runners had updated
   Docker, which refuses the index annotations the step added. The join now takes none, lives in
