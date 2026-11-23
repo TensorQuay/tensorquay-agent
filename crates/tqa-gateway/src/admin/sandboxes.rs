@@ -360,7 +360,10 @@ fn item(
         .map_err(|_| GatewayError::StoreUnavailable)?;
     let item_state = row.state;
     let kept_on = row.kept_on;
-    let screen_held = row.desktop && !crate::screen::may_retire(&id);
+    // Only a person holding the screen now (a Take over in progress) refuses a Stop (decision 5). Whether the profile
+    // may hold a sign-in (`screen::may_retire`) is the question for giving way unasked, not for a person's Stop: asked
+    // here, it left an idle Desktop with a kept sign-in unstoppable (18.1.0 to 18.2.0; GW-I-398).
+    let screen_held = row.desktop && crate::screen::taken_over(&id);
     let stop_refusal = refusal(item_state, row.work_waiting, screen_held);
     let size = Size {
         cpu_millicores: row.cpu_millicores.and_then(|n| u32::try_from(n).ok()),

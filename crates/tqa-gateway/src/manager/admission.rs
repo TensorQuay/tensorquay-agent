@@ -669,7 +669,9 @@ impl SandboxManager {
         if active == crate::events::RunActivity::Active {
             return Err(GatewayError::Conflict("working"));
         }
-        if record.desktop && !crate::screen::may_retire(id) {
+        // A person holds its screen now. A profile that may hold a sign-in is no refusal: that guard
+        // (`screen::may_retire`) is for giving way unasked, and a Stop is a person's choice (GW-I-398).
+        if record.desktop && crate::screen::taken_over(id) {
             return Err(GatewayError::Conflict("working"));
         }
         // Under the eviction lock, as evict_one takes it: one retire asked at a time, so a stop and an eviction never
