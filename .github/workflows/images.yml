@@ -29,7 +29,7 @@ env:
   # One name per published image: the local tag the build gives it, then the published repository's name.
   IMAGES: >-
     gateway=tqa-gateway:@ web=tqa-web:@ runtime=tqa-runtime:base-@ workstation=tqa-runtime:workstation-@
-    desktop=tqa-runtime:desktop-@
+    desktop=tqa-runtime:desktop-@ fake-model=tqa-fake-model:@
 
 jobs:
   build:
@@ -78,6 +78,8 @@ jobs:
           for target in base workstation desktop; do
             build "tqa-runtime:$target-$VERSION" -f images/runtime/Dockerfile --target "$target"
           done
+          # The scripted test model, published too so a first try without a model server builds nothing (REL-U-014).
+          build "tqa-fake-model:$VERSION" -f images/fake-model/Dockerfile
           docker image ls --format '{{.Repository}}:{{.Tag}} {{.ID}} {{.Size}}' | grep -F -- "$VERSION"
           df -h /
       - name: Check each image's architecture and each runtime's protocol revision
@@ -121,7 +123,7 @@ jobs:
             docker push --quiet "$mirror/tensorquay-agent-$name:$VERSION"
             docker rmi "$mirror/tensorquay-agent-$name:$VERSION" > /dev/null
           done
-          TQA_IMAGE_REGISTRY="$mirror" deploy/pull-images.sh --desktop "$VERSION" | tee pulled.txt
+          TQA_IMAGE_REGISTRY="$mirror" deploy/pull-images.sh --desktop --fake-model "$VERSION" | tee pulled.txt
           eval "$(grep '^export ' pulled.txt)"
           id() { docker image inspect --format '{{.Id}}' "$1"; }
           test "$(id "$TQA_GATEWAY_IMAGE")" = "$(id "tqa-gateway:$VERSION")"
@@ -132,6 +134,7 @@ jobs:
             [ "$target" = minimal ] && built=base
             test "$(id "tqa-runtime:$target")" = "$(id "tqa-runtime:$built-$VERSION")"
           done
+          test "$(id tqa-fake-model:local)" = "$(id "tqa-fake-model:$VERSION")"
           case "$TQA_GATEWAY_IMAGE" in "$mirror/tensorquay-agent-gateway@sha256:"*) ;; *) exit 1 ;; esac
           echo "pulled back by digest: every image is the one built"
       - name: Publish this architecture's images (a release tag only)

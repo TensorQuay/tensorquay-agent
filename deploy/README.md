@@ -80,8 +80,9 @@ deploy/pull-images.sh
 It pulls the release the checkout's tag names (or the one you name: `deploy/pull-images.sh 18.1.1`), pins each image by
 the digest the registry gives, tags the runtimes as the build does, so the environments register themselves the same
 way, and prints the three `export` lines step 1 needs. `--workstation` and `--desktop` work as for the build below.
-It needs no build tools and takes a few minutes. The test model (`--fake-model`) is only built, never pulled. Releases
-before 18.0 have no prebuilt images.
+It needs no build tools and takes a few minutes. `--fake-model` also pulls the scripted test model, tagged
+`tqa-fake-model:local` as the build tags it (releases after 18.2.0; earlier ones build it). Releases before 18.0 have no
+prebuilt images.
 
 **Or build them** on the machine that runs the stack, every image from this checkout's source. From the repository
 root:
@@ -125,7 +126,8 @@ Workstation at its first start, even when this build had no `--workstation`. Bef
 - **Without a GPU**, a local model runs on the processor: it works, but each step of a task takes minutes, too slow for
   helpers or the desktop (the user guide's [Running without a GPU](../docs/user-guide/tasks.md#running-without-a-gpu)
   section has the figures).
-- **Without a model server**, build with `--fake-model` and use the test model as the route. In step 1 set
+- **Without a model server**, build with `--fake-model` (or pull it: `deploy/pull-images.sh --fake-model`) and use the
+  test model as the route. In step 1 set
   `TQA_MODEL_BASE_URL='http://tqa-fake-model:8080/v1'` and `TQA_MODEL='fixture'`, and put any placeholder in the key
   file. After step 3 has started the stack, run it on the stack's control network:
   `docker run -d --restart unless-stopped --name tqa-fake-model --network tqa_control tqa-fake-model:local` (with

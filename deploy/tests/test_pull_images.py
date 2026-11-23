@@ -89,6 +89,18 @@ class PullImagesTests(unittest.TestCase):
                                 "tqa-runtime:desktop"])
         self.assertIn("Desktop is registered the same way", result.stdout)
 
+    # TEST: REL-U-014
+    def test_fake_model_brings_the_test_model_tagged_as_the_installer_runs_it(self):
+        """The scripted test model is a published image too, so a try without a model server builds nothing."""
+        result, calls = self.run_script("--fake-model", "v18.0.0")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("pull --quiet ghcr.io/tensorquay/tensorquay-agent-fake-model:18.0.0", calls)
+        model = f"ghcr.io/tensorquay/tensorquay-agent-fake-model@sha256:{digest('ghcr.io/tensorquay/tensorquay-agent-fake-model:18.0.0')}"
+        self.assertIn(f"tag {model} tqa-fake-model:local", calls)
+        plain, plain_calls = self.run_script("v18.0.0")
+        self.assertEqual(plain.returncode, 0, plain.stderr)
+        self.assertFalse(any("fake-model" in call for call in plain_calls), plain_calls)
+
     def test_the_version_defaults_to_the_checkouts_release_tag(self):
         result, calls = self.run_script(GIT_TAG="v18.1.2")
         self.assertEqual(result.returncode, 0, result.stderr)

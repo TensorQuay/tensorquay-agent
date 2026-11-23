@@ -340,7 +340,7 @@ class Yes(Case):
         # Nothing was asked: the scripted IO has no answers and would have failed.
         self.assertEqual((code, out.prompts), (0, []), out.text)
         names = [" ".join(command) for command in system.commands]
-        order = ["deploy/pull-images.sh", "docker build -f images/fake-model/Dockerfile", "chown -R 1000:1000",
+        order = ["deploy/pull-images.sh --fake-model", "chown -R 1000:1000",
                  "up -d --no-build --wait",
                  "docker run -d --restart unless-stopped --name tqa-fake-model --network tqa_control"]
         positions = [next(i for i, name in enumerate(names) if part in name) for part in order]
@@ -361,6 +361,8 @@ class Yes(Case):
         self.assertEqual([line for line in out.lines if line.startswith("Ready")], [out.lines[-1]])
         models = (self.install_dir / "models.toml").read_text()
         self.assertIn('base_url="http://tqa-fake-model:8080/v1"\nmodel="fixture"\n', models)
+        # The test model comes with the release's images (REL-U-014): nothing is built on the host.
+        self.assertFalse(any("docker build" in name for name in names), names)
 
     def test_yes_without_an_administrator_refuses_before_anything(self):
         for argv in (["--yes", "--fake-model"], ["--yes", "--fake-model", "--admin-email", "ana@example.org"]):
