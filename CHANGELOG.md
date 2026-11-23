@@ -3,6 +3,14 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
+## Unreleased
+
+### Security
+
+- **The cookie library is cookie 0.18.3** (it was 0.18.2), past RUSTSEC-2026-0594: private cookies' nonces could
+  repeat in a process that forks workers. TensorQuay Agent was never affected: the gateway uses plain cookies only
+  (the private-cookie feature isn't compiled in) and never forks; the update keeps the dependency audit (G-05) clean.
+
 ## 18.2.0 (23 November 2026)
 
 Channels work on their own: a post that concerns an agent wakes it, agents answer there, post to-dos and proposals,
