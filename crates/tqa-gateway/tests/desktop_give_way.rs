@@ -2,14 +2,17 @@
 //! 9.5 min for desktops whose tasks had finished): with `desktop.max_sessions` reached, an idle desktop gives way to a
 //! waiting desktop task, but only while its browser's profile is known empty (a clean run-end reset, no Take over
 //! since), and never while a run is active or it is pinned. A desktop whose reset this gateway hasn't seen keeps its
-//! place (GW-I-224). GW-I-308: the same guard holds when a non-desktop task waits for a slot.
+//! place (GW-I-224). GW-I-308: the same guard holds when a non-desktop task waits for a slot. GW-I-398: the guard is for
+//! giving way unasked; an administrator's Stop takes an idle desktop that may hold a sign-in, and is refused only while
+//! a person holds its screen.
 #[path = "support/fixture.rs"]
 mod support;
 
 use std::sync::atomic::Ordering;
 
 use futures::SinkExt;
-use serde_json::json;
+use reqwest::Method;
+use serde_json::{Value, json};
 use sqlx::PgPool;
 use support::{DEADLINE, Fixture, TestResult};
 use tokio_tungstenite::tungstenite::{Message, client::IntoClientRequest};
@@ -358,5 +361,98 @@ async fn gw_i_308_a_desktop_that_may_hold_a_sign_in_isnt_evicted_for_a_slot(
             gives_way(f, &plain.id).await
         },
     )
+    .await
+}
+
+/// Whether the Sandboxes listing lets an administrator stop `id`'s sandbox, and the reason it gives when not.
+async fn stoppable(
+    f: &Fixture,
+    cookie: &str,
+    id: &str,
+) -> Result<(bool, Value), Box<dyn std::error::Error>> {
+    let (status, body) = support::call(
+        f,
+        Method::GET,
+        "/api/v1/admin/sandboxes",
+        cookie,
+        (None, None),
+    )
+    .await?;
+    assert_eq!(status, 200, "{body}");
+    let row = body["items"]
+        .as_array()
+        .ok_or("items")?
+        .iter()
+        .find(|row| row["conversation_id"] == id)
+        .ok_or("the desktop isn't listed")?;
+    Ok((
+        row["can_stop"].as_bool().ok_or("can_stop")?,
+        row["stop_refusal"].clone(),
+    ))
+}
+
+// TEST: GW-I-398
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_398_an_administrators_stop_takes_an_idle_desktop_that_may_hold_a_sign_in(
+    pool: PgPool,
+) -> TestResult {
+    // Found by the Product Owner on 18.2.0 (23 Nov 2026): a Desktop task that kept its sign-in, idle for two hours
+    // after a Take over was handed back, had Stop now dimmed as "It is working now". The stop used eviction's guard
+    // (the profile known empty), which a kept sign-in, a Take over since the last reset, a new sandbox and a gateway
+    // restart all fail; kept on, such a desktop doesn't idle out either, so it held its place until its lifetime's
+    // end unless the keep was switched off or the task deleted. The Sandboxes page's decision 5: a Desktop with a
+    // kept sign-in can be stopped; a held screen is refused.
+    support::run_configured(pool, None, CONFIG, async |f| {
+        let (user, cookie) = f.admin().await?;
+        let task = f.conversation(user.id).await?;
+        desktop(f, &task.id).await?;
+        let mut runtime = f.runtime(&task).await?;
+        let id = task.id.to_string();
+        let stop = format!("/api/v1/admin/sandboxes/{id}/stop");
+        // A new sandbox, no reset seen (as every desktop is after a gateway restart): it gives way to nobody, and a
+        // person may stop it.
+        assert_eq!(stoppable(f, &cookie, &id).await?, (true, Value::Null));
+        // Its run ends with the sign-in kept, and the person takes over: while they hold the screen, a stop is refused.
+        let run: tqa_types::RunId = "r-1".parse()?;
+        let started = Event::RunStarted {
+            run_id: run.clone(),
+        };
+        event(f, &mut runtime, &task.id, (1, "r-1"), started).await?;
+        let completed = Event::RunCompleted { run_id: run };
+        event(f, &mut runtime, &task.id, (2, "r-1"), completed).await?;
+        runtime
+            .send(&ServerFrame::ScreenReset {
+                ok: true,
+                ready: true,
+                kept: true,
+            })
+            .await?;
+        let mut page = viewer(f, &task.id, &cookie).await?;
+        let _bridge = bridge(f, &task.id).await?;
+        page.send(Message::Text(r#"{"type":"take_over"}"#.into()))
+            .await?;
+        until_holder(&mut page, "you").await?;
+        assert_eq!(stoppable(f, &cookie, &id).await?, (false, json!("working")));
+        let (status, body) =
+            support::call(f, Method::POST, &stop, &cookie, (None, Some("held"))).await?;
+        assert_eq!(
+            (status, body["error"]["code"].as_str()),
+            (409, Some("working")),
+            "{body}"
+        );
+        assert_eq!(f.backend.destroys.load(Ordering::SeqCst), 0);
+        // Handed back, the sign-in still in it and never known empty: it is the person's to stop.
+        page.send(Message::Text(r#"{"type":"hand_back"}"#.into()))
+            .await?;
+        until_holder(&mut page, "none").await?;
+        assert_eq!(stoppable(f, &cookie, &id).await?, (true, Value::Null));
+        let (status, body) =
+            support::call(f, Method::POST, &stop, &cookie, (None, Some("handed-back"))).await?;
+        assert_eq!((status, &body), (202, &json!({"stopping": true})));
+        f.until_released(&task.id).await?;
+        assert_eq!(f.backend.destroys.load(Ordering::SeqCst), 1);
+        Ok(())
+    })
     .await
 }
