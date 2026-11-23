@@ -36,5 +36,15 @@ class KvmTier(unittest.TestCase):
                 self.assertEqual(result.stdout, "", "no gate ran")
 
 
+    def test_the_kvm_suites_run_every_test_even_after_a_failure(self):
+        """One failing microVM test must not hide the rest: on the 18.2 candidates PERF-013's miss stopped nextest and
+        19 of 97 tests of the suite never ran, and no CI runner has KVM to run them (23 Nov 2026)."""
+        text = SCRIPT.read_text()
+        start = text.index("run_gate G-13-suites")
+        command = text[start:text.index("\n    run_gate G-13-images", start)]
+        self.assertIn("cargo nextest run", command)
+        self.assertIn("--no-fail-fast", command, "the KVM suites stop at their first failure")
+
+
 if __name__ == "__main__":
     unittest.main()

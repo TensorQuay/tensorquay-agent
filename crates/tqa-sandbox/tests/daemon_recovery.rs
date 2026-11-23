@@ -38,9 +38,14 @@ async fn sbx_d_003_backend_loss_restarts_the_runtime_on_its_persistent_wal() -> 
             .contains(&Duration::from_secs(1))
     })
     .await?;
+    // The model call now waits on its header delay. What the gateway has committed so far is the prefix, and it can
+    // be behind the runtime: on a loaded runner nothing was committed yet and the prefix read empty (CI, 24 Nov
+    // 2026). So wait for a first commit, stop committing, and only then read the prefix: nothing joins it after the
+    // read, and every frame not in it stays in the WAL as the tail.
+    wait_for(|| !f.gateway.stored().is_empty()).await?;
+    f.gateway.set_persist(false);
     let prefix = f.gateway.stored();
     assert!(!prefix.is_empty());
-    f.gateway.set_persist(false);
     f.clock.advance(Duration::from_secs(1))?;
     f.wait_event("text.delta").await?;
 

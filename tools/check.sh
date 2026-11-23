@@ -68,7 +68,10 @@ if [[ "$kvm" == true ]]; then
     export TQA_DOCKER_TESTS=1
     run_gate G-13-host bash deploy/firecracker/host-setup.sh --check
     run_gate G-13-kvm-acl bash deploy/firecracker/kvm-no-uaccess.sh --check
+    # --no-fail-fast: every test of the suites runs and is counted, whatever fails. On the 18.2 candidates one failing
+    # test (PERF-013) stopped the run and 19 of 97 never ran; no CI runner has KVM to run them instead.
     run_gate G-13-suites tools/rootless-test.sh cargo nextest run -p tqa-sandbox --run-ignored all --retries 0 -j 1 \
+        --no-fail-fast \
         -E 'binary(firecracker_kvm) | binary(firecracker_contract) | test(sbx_f_)'
     # Each test removes the images it builds, also on failure; the probe cache keeps one image per variant (SBX-F-034).
     run_gate G-13-images python3 tools/check_test_images.py

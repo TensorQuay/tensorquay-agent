@@ -80,6 +80,18 @@ async function save(page: Page, info: TestInfo, log: Evidence) {
     await page.screenshot({ path: join(folder, `ux-${suffix}-result.png`) });
 }
 
+/** " at <path>" for a console line that came from a resource, so a failed load names what failed (CI, 24 Nov 2026:
+ * "Failed to load resource: ... 502 (Bad Gateway)" in one of six UX passes, and nothing said which request). The
+ * path only: a query can carry a token. */
+function resourcePath(url: string): string {
+  if (!url) return "";
+  try {
+    return ` at ${new URL(url).pathname}`;
+  } catch {
+    return "";
+  }
+}
+
 /** Always retain observations and failures, including a test that stops at a hard assertion. */
 export const test = base.extend<{ log: Evidence }>({
   log: async ({ page }, run, info) => {
@@ -96,7 +108,7 @@ export const test = base.extend<{ log: Evidence }>({
         log.consoleFailures.length < 20
       )
         log.consoleFailures.push(
-          `${message.type()}: ${message.text().slice(0, 1000)}`,
+          `${message.type()}: ${message.text().slice(0, 1000)}${resourcePath(message.location().url)}`,
         );
     });
     page.on("pageerror", (error) => {
