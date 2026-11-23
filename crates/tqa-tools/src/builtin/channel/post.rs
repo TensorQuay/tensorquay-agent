@@ -17,6 +17,34 @@ const TYPES: [(&str, &[&str], &[&str]); 6] = [
     ("done", &[], &["summary"]),
 ];
 
+/// A stray field's refusal (TOOL-U-162): what `kind` takes, which types take `name`, and to send the call again without
+/// it. "Not taken by a text post" alone was resent unchanged three times by a 27B agent (S7, 23 Nov 2026).
+fn not_taken(kind: &str, name: &str, required: &[&str], optional: &[&str]) -> String {
+    let takes = required
+        .iter()
+        .chain(optional)
+        .chain(&["parent"])
+        .copied()
+        .collect::<Vec<_>>()
+        .join(" and ");
+    let others = TYPES
+        .iter()
+        .filter(|(_, required, optional)| required.contains(&name) || optional.contains(&name))
+        .map(|(other, ..)| *other)
+        .collect::<Vec<_>>();
+    if others.is_empty() {
+        format!(
+            "not taken by a {kind} post, which takes {takes}; no post takes {name}. Send the call again without {name}."
+        )
+    } else {
+        format!(
+            "not taken by a {kind} post, which takes {takes}; {name} is taken by a {} post. Send the call again \
+             without {name}, or as one of those types.",
+            others.join(" or ")
+        )
+    }
+}
+
 /// The post the arguments describe. Null arguments count as absent.
 ///
 /// # Errors
@@ -64,7 +92,7 @@ pub(crate) fn from_args(args: &Value) -> Result<ChannelPost, ToolError> {
         if !required.contains(&name.as_str()) && !optional.contains(&name.as_str()) {
             return Err(ToolError::invalid(
                 &format!("/{name}"),
-                &format!("not taken by a {kind} post"),
+                &not_taken(kind, name, required, optional),
             ));
         }
         body.insert(name.clone(), value.clone());
