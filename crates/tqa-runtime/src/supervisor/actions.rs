@@ -135,6 +135,18 @@ impl Supervisor {
             });
             return;
         }
+        // The window the run left in front, and the desktop's own browser then: the reopened browser takes the focus,
+        // and the front goes back to another window that had it (RT-I-066).
+        let x = tqa_tools::builtin::computer::x11::XDo::new(std::sync::Arc::new(
+            tqa_tools::builtin::computer::x11::Process,
+        ));
+        let before = x.active().await.ok().flatten();
+        let own = self
+            .services
+            .cleanup
+            .supervised()
+            .spared_browser()
+            .and_then(|pid| u32::try_from(pid).ok());
         let (ok, ready) = match crate::desktop::sign_out(
             &self.services.desktop,
             &self.browser_profile(),
@@ -143,7 +155,11 @@ impl Supervisor {
         )
         .await
         {
-            Ok(()) => (true, self.reopen_browser().await),
+            Ok(()) => {
+                let ready = self.reopen_browser().await;
+                crate::desktop::front_again(&x, before.as_ref(), own).await;
+                (true, ready)
+            }
             Err(reason) => {
                 tracing::warn!(
                     ?reason,

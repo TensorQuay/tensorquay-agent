@@ -1,7 +1,9 @@
 //! GW-I-222's runtime half and SEC-059's Sign out everywhere (ADR-0039 section 6): the session's browser closed and its
 //! profile emptied; a driver a run still holds, a process still naming the profile, and a profile that can't be
 //! removed each refuse with their reason.
-use super::{READY_WAIT, Slot, exited, focused, forget_dead, release, reopened, sign_out};
+use super::{
+    READY_WAIT, Slot, exited, focused, forget_dead, front_again, release, reopened, sign_out,
+};
 use crate::SupervisedGroups;
 use async_trait::async_trait;
 use std::os::unix::process::ExitStatusExt as _;
@@ -614,4 +616,75 @@ async fn rt_i_061_a_browser_that_died_is_forgotten_so_it_starts_again() -> TestR
     living.wait()?;
     dead.wait()?;
     Ok(())
+}
+
+/// A display that records what it is asked: the window active before a reset, and each `windowactivate`.
+struct Front {
+    active: Option<(&'static str, Option<u32>)>,
+    raised: std::sync::Mutex<Vec<String>>,
+}
+
+#[async_trait]
+impl Runner for Front {
+    async fn run(&self, _program: &str, args: &[String]) -> Result<String, DriverError> {
+        match (args.first().map(String::as_str), self.active) {
+            (Some("getactivewindow"), Some((id, _))) => Ok(format!("{id}\n")),
+            (Some("getwindowpid"), Some((_, Some(pid)))) => Ok(format!("{pid}\n")),
+            (Some("getwindowname"), Some(_)) => Ok("Mozilla Firefox\n".into()),
+            (Some("windowactivate"), _) => {
+                self.raised
+                    .lock()
+                    .unwrap_or_else(std::sync::PoisonError::into_inner)
+                    .push(args.last().cloned().unwrap_or_default());
+                Ok(String::new())
+            }
+            _ => Err(DriverError::Unavailable("unscripted".into())),
+        }
+    }
+}
+
+// TEST: RT-I-066
+/// A run-end reset gives the front back to the window the run left there (the owner's real use, 23 Nov 2026): the
+/// agent left its own browser on a sign-in page for the person, the reset reopened the desktop's browser, which takes
+/// the focus (RT-I-057), and its blank window covered the page. A window that was the desktop's own browser, and an
+/// empty desktop, are left as the reopen made them.
+#[tokio::test]
+async fn rt_i_066_a_reset_gives_the_front_back_to_the_window_the_run_left_there() {
+    let raised = |front: &Front| {
+        front
+            .raised
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .clone()
+    };
+    // The agent's own window (another process than the desktop's browser, pid 700) was in front: it is again.
+    let other = Arc::new(Front {
+        active: Some(("31", Some(4242))),
+        raised: std::sync::Mutex::new(Vec::new()),
+    });
+    let x = XDo::new(other.clone());
+    let before = x.active().await.ok().flatten();
+    assert!(front_again(&x, before.as_ref(), Some(700)).await);
+    assert_eq!(raised(&other), ["31"]);
+    // A window that names no process is not the desktop's browser either.
+    let unnamed = Arc::new(Front {
+        active: Some(("32", None)),
+        raised: std::sync::Mutex::new(Vec::new()),
+    });
+    let x = XDo::new(unnamed.clone());
+    let before = x.active().await.ok().flatten();
+    assert!(front_again(&x, before.as_ref(), Some(700)).await);
+    assert_eq!(raised(&unnamed), ["32"]);
+    // The desktop's own browser was in front: the reopened one keeps the front.
+    let own = Arc::new(Front {
+        active: Some(("33", Some(700))),
+        raised: std::sync::Mutex::new(Vec::new()),
+    });
+    let x = XDo::new(own.clone());
+    let before = x.active().await.ok().flatten();
+    assert!(!front_again(&x, before.as_ref(), Some(700)).await);
+    assert!(raised(&own).is_empty());
+    // Nothing was in front: nothing is raised.
+    assert!(!front_again(&x, None, Some(700)).await);
+    assert!(raised(&own).is_empty());
 }
