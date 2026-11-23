@@ -69,8 +69,22 @@ async fn gw_i_074_an_exhausted_network_pool_queues_work_until_a_subnet_is_free(
         // The pass's worker makes the sandbox: wait for it, then connect its runtime with that sandbox's own token. The
         // fixture's `runtime` asked for a sandbox itself (`ensure`) beside the worker's, and on a loaded runner the
         // second registration was refused `sandbox_token_exists` (main's CI on 3388b41a9, 23 Nov 2026).
+        // The token authenticates only once the gateway has bound it to the sandbox (runtime_tokens' sandbox_id), which
+        // happens after the backend's create returns: connecting when the fake backend has the token but the binding is
+        // not stored yet answered 401 on a loaded runner (PR #168's CI, 23 Nov 2026). Wait for both.
+        let id = uuid::Uuid::parse_str(&conversation.id.to_string())?;
         tokio::time::timeout(support::DEADLINE, async {
-            while !matches!(f.backend.live_token(&conversation.id).await, Ok(Some(_))) {
+            loop {
+                let bound: i64 = sqlx::query_scalar(
+                    "SELECT count(*) FROM runtime_tokens WHERE conversation_id = $1 AND sandbox_id IS NOT NULL",
+                )
+                .bind(id)
+                .fetch_one(&f.pool)
+                .await
+                .unwrap_or(0);
+                if bound > 0 && matches!(f.backend.live_token(&conversation.id).await, Ok(Some(_))) {
+                    break;
+                }
                 tokio::time::sleep(std::time::Duration::from_millis(20)).await;
             }
         })
