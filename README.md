@@ -13,14 +13,15 @@ out. A hosted model; local models work the same way. Sped up.*
 From a release, not `main`. Linux, or a Mac with Docker Desktop; Docker Engine 27.4 and Compose 2.31 or newer.
 
 ```sh
-git clone --branch v18.1.1 https://github.com/TensorQuay/tensorquay-agent.git && cd tensorquay-agent
-deploy/pull-images.sh   # pulls the release's prebuilt images (amd64 and arm64) and prints the lines the install needs
+git clone --branch v18.2.0 https://github.com/TensorQuay/tensorquay-agent.git && cd tensorquay-agent
+deploy/install.sh
 ```
 
-Then choose the settings, create the installation and start it: steps 1 to 3 of the
-[install guide](deploy/README.md#install), about 10 minutes. Then open the page, create the
-[first administrator](deploy/README.md#first-administrator-route-and-task) and start a task. No model server yet?
-The guide's `--fake-model` builds a scripted one, enough to see a task run end to end.
+The installer asks three things: where people will open it, which model server to use (or none, to try it with a
+scripted test model that runs a task end to end), and who the first administrator is. It pulls the release's prebuilt
+images (amd64 and arm64), starts the stack and creates that administrator: about ten minutes, most of it the pull. Then
+open the page, sign in and start a task. The [install guide](deploy/README.md#install) does the same by hand, step by
+step.
 
 ## What it does
 
