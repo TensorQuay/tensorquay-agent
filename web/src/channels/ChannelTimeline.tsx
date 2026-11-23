@@ -337,11 +337,15 @@ function Post({
   const member = members.find(
     (item) => item.kind === author.kind && item.id === author.id,
   );
-  // The page's name for the author (WEB-U-520): an agent by its task's name, never its owner (who is in Members).
+  // The page's name for the author (WEB-U-520): an agent never by its owner (who is in Members), and by its name in the
+  // channel as Members shows it (WEB-U-542): the name people write after "@", or, to its owner, the title of one added
+  // before names. On 18.2 the task's title came first, so an agent added as "Analyst" posted under its task's title.
   const shown = gateway
     ? name
     : author.kind === "conversation"
-      ? (member?.title ?? author.name ?? member?.name ?? author.id)
+      ? member
+        ? memberShown(member)
+        : (author.name ?? author.id)
       : name;
   const agent = author.kind === "conversation";
   const tinted = false;

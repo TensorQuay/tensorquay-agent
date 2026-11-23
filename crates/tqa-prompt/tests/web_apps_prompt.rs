@@ -85,5 +85,5 @@ fn prompt_u_028_no_web_apps_line_where_none_can_be_built() {
         render(&[], &NetworkSnapshot::default()),
         include_str!("fixtures/system-v9.txt")
     );
-    assert_eq!(PROMPT_VERSION, 15, "the prompt contract changed");
+    assert_eq!(PROMPT_VERSION, 16, "the prompt contract changed");
 }

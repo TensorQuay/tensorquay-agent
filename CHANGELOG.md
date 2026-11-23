@@ -5,6 +5,45 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ## Unreleased
 
+### Security
+
+- **The cookie library is cookie 0.18.3** (it was 0.18.2), past RUSTSEC-2026-0594: private cookies' nonces could
+  repeat in a process that forks workers. TensorQuay Agent was never affected: the gateway uses plain cookies only
+  (the private-cookie feature isn't compiled in) and never forks; the update keeps the dependency audit (G-05) clean.
+
+### Fixed
+
+- **A channel opens at its newest message and follows new ones (WEB-U-541, WEB-E2E-150).** It goes to the bottom once
+  its log is read, follows what arrives there until the reader scrolls up, and comes back to the newest after the
+  reader's own post. In 18.2.0 a channel opened at its oldest message.
+- **An agent's post shows its name in the channel, not its task's title (WEB-U-542).** An agent added as "Analyst", the
+  name people write after "@" and Members shows, posted under its task's title in 18.2.0.
+- **A stopped agent team runs no one after its end (GW-I-395 to GW-I-397).** When a helper's message woke the lead
+  at the moment a person stopped the team, the wake could be stored just after the stop had dropped the waiting
+  turns, and the lead then ran after the team ended; a helper's first turn could do the same, and a helper brought
+  back for another round kept its waiting turn through the stop. A team's own turn is now stored only while its
+  team runs with that task in it, and the stop drops a brought-back helper's turn too.
+- **On a small local model the agent reads PDFs with `read_file` (PROMPT-U-030, prompt version 16).** The Workstation's
+  libraries line says "Read PDFs with read_file.", and `read_file`'s description starts with what it does for a PDF. In
+  our law-firm checks on a local 27B model the agent used it in 3 of 3 attempts and wrote no parser (in 18.2.0: 1 of 8,
+  the others looking for a PDF library or hand-writing one until the time limit).
+- **A stray `channel_post` field gets an answer that says how to fix the call (TOOL-U-162).** The refusal names what
+  that post type takes, which types take the field, and to send the call again without it. In 18.2.0 it said only
+  that the field was not taken; in one of our checks a local model resent the same call three times and the run ended.
+- **For maintainers: a release's images are joined under the version again (REL-U-015).** 18.2.0's release run
+  published each architecture's images and then failed to join them under `18.2.0`: GitHub's runners had updated
+  Docker, which refuses the index annotations the step added. The join now takes none, lives in
+  `tools/release/join-images.sh` with its own test, and can be run again for a published version from the Actions page
+  (Release images, `join_version`), which is how 18.2.0's version tags were published.
+
+## 18.2.0 (23 November 2026)
+
+Channels work on their own: a post that concerns an agent wakes it, agents answer there, post to-dos and proposals,
+and a proposal is decided by the channel's rule; each channel has a daily token budget that people can raise. Install
+in one command (`deploy/install.sh`); reset a password from the host; long-term memory's first part (off by default).
+Four database migrations (0108 to 0111), applied at the gateway's start with the data kept: back up first. Read the
+upgrade notes below: channels start waking their agents at the upgrade.
+
 ### Added
 
 - **An administrator can reset a password from the host (GW-I-390).** `tqa-gateway reset-password <email>
@@ -79,11 +118,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
-- **A stopped agent team runs no one after its end (GW-I-395 to GW-I-397).** When a helper's message woke the lead
-  at the moment a person stopped the team, the wake could be stored just after the stop had dropped the waiting
-  turns, and the lead then ran after the team ended; a helper's first turn could do the same, and a helper brought
-  back for another round kept its waiting turn through the stop. A team's own turn is now stored only while its
-  team runs with that task in it, and the stop drops a brought-back helper's turn too.
+- **The admin guide's host commands run as written.** Resetting a password from the host and rotating the host-keys
+  CA are `docker compose ... exec gateway /tqa-gateway ...` from the release's checkout: the guide had a bare
+  `tqa-gateway`, which is neither on the host nor on the gateway image's path (the lead's first-hour check).
 - **A proposal is decided once (GW-I-394).** When the channel's sweep and another decider closed the same proposal at
   the same moment, for example when its window ended just as the last vote arrived, both could write a decision, and
   the channel showed it twice. The decision is now taken under the channel's lock.
@@ -173,6 +210,16 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   names it in the channel's Members: the row's "…" menu, Rename….
 - Migration `0111_channel_daily_budget` makes each channel's wake budget a daily one (2,000,000 tokens a day unless
   you set `[channels] wake_budget`), and every channel starts its first day at 0 (GW-I-386).
+
+### Known issues
+
+- Stopping an agent team just as a helper's message wakes its lead, or as a helper starts, can let that one turn run
+  after the team has ended; a helper brought back for another round can keep its waiting turn through a stop. Agent
+  teams are off by default (experimental).
+- A channel opens at its oldest message; scroll down for the newest.
+- An agent's posts in a channel carry its task's title, not the name it was given there.
+- On a small local model the agent may not use `read_file`'s PDF reading and look for a PDF library instead; with
+  internet access closed it then writes its own parser, which is slow on long documents.
 
 ## 18.1.1 (20 November 2026)
 
