@@ -89,11 +89,13 @@ whether the account is **Active** or **Disabled**.
 People change their own password from their account page. When someone can't sign in to do it, for example the only
 administrator, set a new one from the host with the gateway's configuration file. The new password is read from
 standard input, so it never shows in the process list or the shell's history. Read it without echo first, then pipe
-it to the command:
+it to the command, from the release's checkout with `TQA_INSTALL_DIR` set as when you installed (the gateway's
+program is `/tqa-gateway` inside its container):
 
 ```sh
 read -rs -p 'New password: ' TQA_NEW_PASSWORD; echo
-printf '%s\n' "$TQA_NEW_PASSWORD" | docker compose exec -T gateway tqa-gateway reset-password ana@example.com /etc/tqa/gateway.toml
+printf '%s\n' "$TQA_NEW_PASSWORD" | docker compose --env-file "$TQA_INSTALL_DIR/compose.env" -f deploy/compose/docker.yml \
+  exec -T gateway /tqa-gateway reset-password ana@example.com /etc/tqa/gateway.toml
 unset TQA_NEW_PASSWORD
 ```
 
