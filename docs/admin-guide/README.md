@@ -123,11 +123,13 @@ root now include it: keep them as private as the install key.
 mounts (the storage root's `workspaces`, `runtime-state` and `skills`, or the installation's skills), and an existing
 directory that others can read, saying which.
 
-To replace it, for example if the key file may have been copied, run this with the gateway's configuration file; the
-gateway can keep running:
+To replace it, for example if the key file may have been copied, run this from the release's checkout with
+`TQA_INSTALL_DIR` set as when you installed (the gateway's program is `/tqa-gateway` inside its container); the gateway
+can keep running:
 
 ```sh
-tqa-gateway rotate-host-ca /etc/tqa/gateway.toml
+docker compose --env-file "$TQA_INSTALL_DIR/compose.env" -f deploy/compose/docker.yml \
+  exec gateway /tqa-gateway rotate-host-ca /etc/tqa/gateway.toml
 ```
 
 It takes effect at the gateway's next start. Tasks already running keep working: their sandboxes trust the previous
