@@ -47,6 +47,14 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   Docker, which refuses the index annotations the step added. The join now takes none, lives in
   `tools/release/join-images.sh` with its own test, and can be run again for a published version from the Actions page
   (Release images, `join_version`), which is how 18.2.0's version tags were published.
+- **"Stop now" works on an idle Desktop task that may hold a sign-in (GW-I-398).** On Settings › Sandboxes, an idle
+  Desktop task read as working and its Stop now was dimmed whenever its browser might hold a sign-in: a task that keeps
+  its sign-in, a Take over since its last run, a new sandbox before its first run ended, and every Desktop after a
+  gateway restart. Kept on, such a task doesn't idle out either, so it held a Desktop place until its lifetime's end
+  unless the keep was switched off or the task deleted. Stop now is refused only while a run is working, a message is
+  waiting, or a person holds the desktop through Take over; the dialog still warns that a kept sign-in ends with the
+  sandbox. An idle Desktop that may hold a sign-in still never gives way to a waiting task by itself. Before, in
+  18.1.0 to 18.2.0, the stop asked the question meant for giving way.
 
 ## 18.2.0 (23 November 2026)
 
