@@ -113,7 +113,7 @@ fn prompt_u_003_system_is_versioned_short_and_deterministic()
     // Python-libraries line of version 8 (PROMPT-U-017) and the documents line of version 12 (PROMPT-U-020); version
     // 10's golden has the open web. Version 13's search line needs a browser and the open web, which none of these has
     // together, so they hold too; its own golden is in PROMPT-U-021.
-    assert_eq!(PROMPT_VERSION, 15);
+    assert_eq!(PROMPT_VERSION, 16);
     assert!(prompt.split_whitespace().count() < 400);
     assert_eq!(prompt, include_str!("fixtures/system-v9.txt"));
     let open_web = tqa_types::NetworkSnapshot {
@@ -150,7 +150,7 @@ fn prompt_u_003_system_is_versioned_short_and_deterministic()
     assert!(workstation.split_whitespace().count() < 400);
     assert_eq!(
         workstation,
-        include_str!("fixtures/system-v12-workstation.txt")
+        include_str!("fixtures/system-v16-workstation.txt")
     );
     for required in [
         "/workspace",
@@ -230,9 +230,10 @@ fn rt_i_013_prompt_environment_block_changes_only_with_template_or_capabilities(
     Ok(())
 }
 
+// TEST: PROMPT-U-030
 /// PROMPT-U-017: an environment with the 'data' capability says its Python data libraries are installed, so the model
 /// uses them instead of trying to install them (the sandbox usually has no route to a package index); without it, the
-/// prompt says nothing about them.
+/// prompt says nothing about them. Version 16 (PROMPT-U-030): the same line says PDFs are read with `read_file`.
 #[test]
 fn prompt_u_017_the_data_capability_says_the_python_data_libraries_are_installed()
 -> Result<(), Box<dyn std::error::Error>> {
@@ -259,7 +260,7 @@ fn prompt_u_017_the_data_capability_says_the_python_data_libraries_are_installed
     ])?;
     assert!(
         data.contains(
-            "Capabilities: shell, python, data\nCommands: python3 (also as python)\nPython libraries: pandas, matplotlib and openpyxl are installed; use them, and do not install them or alternatives. Save charts to files.\nNetwork:"
+            "Capabilities: shell, python, data\nCommands: python3 (also as python)\nPython libraries: pandas, matplotlib and openpyxl are installed; use them; install no alternatives. Read PDFs with read_file. Save charts to files.\nNetwork:"
         ),
         "{data}"
     );
@@ -471,7 +472,7 @@ fn prompt_u_021_the_workstation_on_the_open_web() -> Result<(), Box<dyn std::err
     assert!(workstation.split_whitespace().count() < 485);
     assert_eq!(
         workstation,
-        include_str!("fixtures/system-v15-workstation-open-web.txt")
+        include_str!("fixtures/system-v16-workstation-open-web.txt")
     );
     Ok(())
 }

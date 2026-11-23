@@ -152,3 +152,21 @@ for (const width of [1440, 390] as const)
         await pageProblems(page, `the to-dos at ${width}, ${theme}`),
       ).toEqual([]);
     });
+
+// WEB-E2E-150 (18.2.1; the lead's live check of 23 Nov 2026): a channel opens at its newest message. At 390 px the
+// pricing channel's log is several screens tall; on 18.2 the page opened at its first post.
+test("WEB-E2E-150 a channel opens at its newest message", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await signIn(page);
+  await page.goto(PRICING);
+  const log = page.getByRole("list", { name: "Channel log" });
+  await expect(
+    log.getByText(
+      "Woken agents have used 80 % of this channel's budget for today.",
+    ),
+  ).toBeInViewport();
+  await expect(
+    log.getByText("The Q3 numbers are in.", { exact: false }),
+  ).not.toBeInViewport();
+});
