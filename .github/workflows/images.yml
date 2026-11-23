@@ -16,6 +16,11 @@ on:
       - deploy/pull-images.sh
       - deploy/tests/test_pull_images.py
   workflow_dispatch:
+    inputs:
+      join_version:
+        description: "Join again the amd64 and arm64 images of a published version (for example 18.2.0) under its version; builds nothing"
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -34,6 +39,8 @@ env:
 jobs:
   build:
     name: build (${{ matrix.arch }})
+    # A join of a published version (workflow_dispatch with join_version) builds nothing.
+    if: github.event_name != 'workflow_dispatch' || inputs.join_version == ''
     strategy:
       fail-fast: false
       matrix:
@@ -153,36 +160,27 @@ jobs:
   publish:
     name: publish (one index per image)
     needs: build
-    if: github.event_name == 'push' && github.ref_type == 'tag'
+    # A release tag, once both architectures are built and pushed; or a join asked for by hand, of a version whose
+    # architecture images are in the registry already (18.2.0: the join failed on the runner's updated Docker).
+    if: >-
+      always() && (
+        (github.event_name == 'push' && github.ref_type == 'tag' && needs.build.result == 'success') ||
+        (github.event_name == 'workflow_dispatch' && inputs.join_version != ''))
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
       contents: read
       packages: write
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Join amd64 and arm64 under the version
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ github.ref_name }}
+          VERSION: ${{ inputs.join_version || github.ref_name }}
         run: |
           set -euo pipefail
-          version="${VERSION#v}"
           echo "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
-          {
-            echo "### Images of $version"
-            echo
-            echo "| Image | Index digest |"
-            echo "|---|---|"
-          } >> "$GITHUB_STEP_SUMMARY"
-          for entry in $IMAGES; do
-            name="${entry%%=*}"
-            repository="$REGISTRY/tensorquay-agent-$name"
-            docker buildx imagetools create -t "$repository:$version" \
-              --annotation "index:org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}" \
-              --annotation "index:org.opencontainers.image.licenses=Apache-2.0" \
-              --annotation "index:org.opencontainers.image.version=$version" \
-              "$repository:$version-amd64" "$repository:$version-arm64"
-            digest="$(docker buildx imagetools inspect --format '{{.Manifest.Digest}}' "$repository:$version")"
-            echo "| \`$repository\` | \`$digest\` |" >> "$GITHUB_STEP_SUMMARY"
-          done
+          tools/release/join-images.sh "$VERSION"
           docker logout ghcr.io

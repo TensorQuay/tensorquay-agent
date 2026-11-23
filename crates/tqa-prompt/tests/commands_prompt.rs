@@ -31,5 +31,5 @@ fn prompt_u_015_the_prompt_names_the_commands_the_environment_has() {
         "{}",
         render(&[])
     );
-    assert_eq!(PROMPT_VERSION, 15, "the prompt contract changed");
+    assert_eq!(PROMPT_VERSION, 16, "the prompt contract changed");
 }

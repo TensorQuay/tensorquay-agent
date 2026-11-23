@@ -11,6 +11,26 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   repeat in a process that forks workers. TensorQuay Agent was never affected: the gateway uses plain cookies only
   (the private-cookie feature isn't compiled in) and never forks; the update keeps the dependency audit (G-05) clean.
 
+### Fixed
+
+- **A channel opens at its newest message and follows new ones (WEB-U-541, WEB-E2E-150).** It goes to the bottom once
+  its log is read, follows what arrives there until the reader scrolls up, and comes back to the newest after the
+  reader's own post. In 18.2.0 a channel opened at its oldest message.
+- **An agent's post shows its name in the channel, not its task's title (WEB-U-542).** An agent added as "Analyst", the
+  name people write after "@" and Members shows, posted under its task's title in 18.2.0.
+- **On a small local model the agent reads PDFs with `read_file` (PROMPT-U-030, prompt version 16).** The Workstation's
+  libraries line says "Read PDFs with read_file.", and `read_file`'s description starts with what it does for a PDF. In
+  our law-firm checks on a local 27B model the agent used it in 3 of 3 attempts and wrote no parser (in 18.2.0: 1 of 8,
+  the others looking for a PDF library or hand-writing one until the time limit).
+- **A stray `channel_post` field gets an answer that says how to fix the call (TOOL-U-162).** The refusal names what
+  that post type takes, which types take the field, and to send the call again without it. In 18.2.0 it said only
+  that the field was not taken; in one of our checks a local model resent the same call three times and the run ended.
+- **For maintainers: a release's images are joined under the version again (REL-U-015).** 18.2.0's release run
+  published each architecture's images and then failed to join them under `18.2.0`: GitHub's runners had updated
+  Docker, which refuses the index annotations the step added. The join now takes none, lives in
+  `tools/release/join-images.sh` with its own test, and can be run again for a published version from the Actions page
+  (Release images, `join_version`), which is how 18.2.0's version tags were published.
+
 ## 18.2.0 (23 November 2026)
 
 Channels work on their own: a post that concerns an agent wakes it, agents answer there, post to-dos and proposals,
