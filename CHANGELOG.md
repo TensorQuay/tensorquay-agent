@@ -11,6 +11,14 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   repeat in a process that forks workers. TensorQuay Agent was never affected: the gateway uses plain cookies only
   (the private-cookie feature isn't compiled in) and never forks; the update keeps the dependency audit (G-05) clean.
 
+### Added
+
+- **The scripted test model is a published image (REL-U-014).** `deploy/install.sh --fake-model` and
+  `deploy/pull-images.sh --fake-model` pull `tensorquay-agent-fake-model` with the release's other images, so a first
+  try without a model server builds nothing on the computer. Before, the installer built the test model there, which
+  took minutes and needed a working image build. A fix release adds nothing as a rule; this is the one exception in
+  18.2.1, so that the quick start works without a build.
+
 ### Fixed
 
 - **A channel opens at its newest message and follows new ones (WEB-U-541, WEB-E2E-150).** It goes to the bottom once

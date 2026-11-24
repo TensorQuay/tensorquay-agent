@@ -177,7 +177,7 @@ def parse(argv):
     add("--model", help="the model's name on that server")
     add("--key-file", help="a mode 0600 file holding the server's key")
     add("--context", help="the model's context in tokens (a local server; default 32768)")
-    add("--fake-model", action="store_true", help="the scripted test model, built here, instead of a model server")
+    add("--fake-model", action="store_true", help="the scripted test model, pulled with the release, instead of a model server")
     add("--admin-email", help="the first administrator's email")
     add("--admin-password-file", help="a file holding the first administrator's password (never the password itself)")
     add("--workstation", action="store_true", help="also pull the Workstation environment")
@@ -411,6 +411,9 @@ class Installer:
             command.append("--workstation")
         if self.args.desktop:
             command.append("--desktop")
+        if self.fake:
+            # The test model is a published image too (REL-U-014): a first try builds nothing on the host.
+            command.append("--fake-model")
         return command
 
     def step(self, name, args, timeout):
@@ -476,8 +479,7 @@ class Installer:
         if args.dry_run:
             self.io.say("Would write in {}: install.key, secrets.toml, models.toml, gateway.toml, compose.env and "
                         "storage/.".format(self.install_dir))
-            self.io.say("Would run: " + " ".join(self.pull_command()) + (", the test model's build" if self.fake
-                                                                          else "") + ", " + " ".join(
+            self.io.say("Would run: " + " ".join(self.pull_command()) + ", " + " ".join(
                 self.compose("up", "-d", "--no-build", "--wait")) + ".")
             return 0
         self.io.say("Pulling the release's images (a few minutes)…")
@@ -485,10 +487,6 @@ class Installer:
         images = dict(re.findall(r"^export (TQA_(?:RUNTIME|GATEWAY|WEB)_IMAGE)='([^']+)'$", exports, re.M))
         if len(images) != 3:
             raise StepFailed("Pulling the images failed: deploy/pull-images.sh printed no image lines.")
-        if self.fake:
-            self.io.say("Building the test model…")
-            self.step("Building the test model", ["docker", "build", "-f", "images/fake-model/Dockerfile", "-t",
-                                                  FAKE_IMAGE, "."], 3600)
         self.write_files(images, detected)
         self.io.say("Created {}.".format(self.install_dir))
         self.name_other_workstation()

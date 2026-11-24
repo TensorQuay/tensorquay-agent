@@ -114,7 +114,7 @@ TQA_DOCKER_TESTS=1 python3 tools/release/release.py --version X.Y.Z --commit <sh
 - an existing `dist/X.Y.Z/`.
 
 **Steps,** all from a clean `git archive` export of the commit, with `SOURCE_DATE_EPOCH` set to the commit's time:
-1. It builds the five images, tagged locally only. A runtime image whose protocol-revision label differs from the
+1. It builds the six images (the five an installation runs and the scripted test model), tagged locally only. A runtime image whose protocol-revision label differs from the
    commit's `PROTOCOL_REVISION` fails.
 2. It builds both template rootfs, and with `--kernel` the guest kernel. Whether a release ships the kernel binary is
    the Product Owner's decision.

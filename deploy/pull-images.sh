@@ -3,24 +3,28 @@
 # Registry, pins each by the digest it resolves to, tags the runtimes as deploy/build-images.sh does, and prints the
 # three `export` lines step 1 uses. Nothing is built or pushed. Each image is one index for amd64 and arm64, so Docker
 # pulls the host's own architecture (arm64 on a Mac with Apple silicon).
-# Usage: deploy/pull-images.sh [--workstation] [--desktop] [VERSION]
+# Usage: deploy/pull-images.sh [--workstation] [--desktop] [--fake-model] [VERSION]
 #   VERSION        the release, for example 18.0.0; by default the release tag this checkout is on
 #   --workstation  also the Workstation environment (Python, Node, Go and a browser; about 3.0 GB)
 #   --desktop      also the Desktop environment: the Workstation with a desktop the agent sees and operates (ADR-0039;
 #                  pulls the Workstation too)
+#   --fake-model   also the scripted test model (a few MB), tagged tqa-fake-model:local as the installer runs it,
+#                  for a first try without a model server (REL-U-014)
 # TQA_IMAGE_REGISTRY names another registry or mirror holding the same names (default ghcr.io/tensorquay).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-usage="usage: deploy/pull-images.sh [--workstation] [--desktop] [VERSION]"
+usage="usage: deploy/pull-images.sh [--workstation] [--desktop] [--fake-model] [VERSION]"
 registry="${TQA_IMAGE_REGISTRY:-ghcr.io/tensorquay}"
 workstation=0
 desktop=0
+fake_model=0
 version=""
 for arg in "$@"; do
   case "$arg" in
     --workstation) workstation=1 ;;
     --desktop) desktop=1; workstation=1 ;;
+    --fake-model) fake_model=1 ;;
     -*) echo "$usage" >&2; exit 2 ;;
     *)
       if [ -n "$version" ]; then echo "$usage" >&2; exit 2; fi
@@ -68,6 +72,9 @@ if [ "$workstation" = 1 ]; then
 fi
 if [ "$desktop" = 1 ]; then
   pull desktop tqa-runtime:desktop
+fi
+if [ "$fake_model" = 1 ]; then
+  pull fake-model tqa-fake-model:local
 fi
 
 echo "== $(date +%T) done. For step 1:"
