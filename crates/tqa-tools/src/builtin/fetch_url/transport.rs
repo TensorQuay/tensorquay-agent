@@ -151,12 +151,13 @@ async fn receive(response: hyper::Response<Incoming>) -> Result<Response, ToolEr
     }
     let headers = response.headers();
     let gzip = gzip_encoding(headers)?;
-    if !gzip
-        && response
-            .body()
-            .size_hint()
-            .upper()
-            .is_some_and(|bytes| bytes > BODY_BYTES as u64)
+    // A body declared past what may be received is refused from its header, before any of it is read; a gzip body's
+    // bound is the encoded one.
+    if response
+        .body()
+        .size_hint()
+        .upper()
+        .is_some_and(|bytes| bytes > received_limit(gzip) as u64)
     {
         return Err(ToolError::OutputTooLarge { max: BODY_BYTES });
     }
@@ -166,27 +167,28 @@ async fn receive(response: hyper::Response<Incoming>) -> Result<Response, ToolEr
 }
 
 fn gzip_encoding(headers: &hyper::HeaderMap) -> Result<bool, ToolError> {
-    let encodings: Vec<_> = headers.get_all(header::CONTENT_ENCODING).iter().collect();
-    match encodings.as_slice() {
+    // Every encoding the response names, across repeated headers and the values on one line, without `identity`:
+    // it means "not encoded", and a response that says it twice, or beside gzip, was read before gzip support
+    // (TOOL-U-010). A value that isn't text is refused, never skipped.
+    let mut named = Vec::new();
+    for value in headers.get_all(header::CONTENT_ENCODING) {
+        let Ok(text) = value.to_str() else {
+            return Err(ToolError::Unsupported(
+                "unsupported response content encoding".into(),
+            ));
+        };
+        named.extend(
+            text.split(',')
+                .map(|name| name.trim().to_ascii_lowercase())
+                .filter(|name| !name.is_empty() && name != "identity"),
+        );
+    }
+    match named.as_slice() {
         [] => Ok(false),
-        [encoding] if encoding.as_bytes().eq_ignore_ascii_case(b"identity") => Ok(false),
-        [encoding]
-            if encoding.to_str().is_ok_and(|value| {
-                matches!(
-                    value.trim().to_ascii_lowercase().as_str(),
-                    "gzip" | "x-gzip"
-                )
-            }) =>
-        {
-            Ok(true)
-        }
+        [name] if matches!(name.as_str(), "gzip" | "x-gzip") => Ok(true),
         _ => Err(ToolError::Unsupported(format!(
             "unsupported response content encoding: {}",
-            encodings
-                .iter()
-                .filter_map(|encoding| encoding.to_str().ok())
-                .collect::<Vec<_>>()
-                .join(", ")
+            named.join(", ")
         ))),
     }
 }
@@ -213,13 +215,22 @@ fn supported_content_type(headers: &hyper::HeaderMap) -> Result<bool, ToolError>
     Ok(html)
 }
 
+/// The most bytes a response body may bring over the wire: the page limit, or for a gzip body the page limit plus a
+/// head's worth for an incompressible page's gzip framing (its decoded size is bounded separately).
+const fn received_limit(gzip: bool) -> usize {
+    if gzip {
+        BODY_BYTES.saturating_add(HEAD_BYTES)
+    } else {
+        BODY_BYTES
+    }
+}
+
 async fn read_body(mut body: Incoming, gzip: bool) -> Result<Vec<u8>, ToolError> {
     let mut bytes = Vec::new();
-    let encoded_limit = BODY_BYTES.saturating_add(HEAD_BYTES);
+    let limit = received_limit(gzip);
     while let Some(frame) = body.frame().await {
         let frame = frame.map_err(|_| io_error("response body failed"))?;
         if let Some(data) = frame.data_ref() {
-            let limit = if gzip { encoded_limit } else { BODY_BYTES };
             if data.len() > limit.saturating_sub(bytes.len()) {
                 return Err(ToolError::OutputTooLarge { max: BODY_BYTES });
             }

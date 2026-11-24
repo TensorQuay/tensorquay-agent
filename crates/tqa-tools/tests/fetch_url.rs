@@ -252,6 +252,124 @@ async fn tool_u_010_invalid_gzip_stream_fails_closed() -> TestResult {
     Ok(())
 }
 
+/// A gzip-encoded reply: the given `Content-Encoding` line(s), the body as sent, and its declared length.
+fn gzip_reply(encoding: &str, sent: &[u8], declared: usize) -> Reply {
+    let mut reply = format!(
+        "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n{encoding}Content-Length: {declared}\r\nConnection: close\r\n\r\n"
+    )
+    .into_bytes();
+    reply.extend_from_slice(sent);
+    Reply::Page(reply)
+}
+
+fn gzipped(text: &[u8]) -> Result<Vec<u8>, std::io::Error> {
+    let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
+    encoder.write_all(text)?;
+    encoder.finish()
+}
+
+async fn fetch(
+    reply: Reply,
+) -> Result<Result<tqa_tools::ToolOutput, ToolError>, Box<dyn std::error::Error>> {
+    let proxy = Proxy::start(vec![reply]).await?;
+    let fixture = workspace_fixture()?;
+    let result = tool(&proxy, TOKEN)?
+        .call(
+            json!({"url":"http://allowed.invalid/"}),
+            &context::context(&fixture),
+        )
+        .await;
+    proxy.finish().await?;
+    Ok(result)
+}
+
+#[tokio::test]
+async fn tool_u_010_a_gzip_body_declared_too_large_is_refused_before_it_is_read() -> TestResult {
+    // A gzip response that declares more than the encoded bound is refused from its header, as a plain one is, and
+    // nothing of it is read: the reply sends no body at all, so reading it would fail as a short body instead.
+    let result = fetch(gzip_reply("Content-Encoding: gzip\r\n", b"", 20_000_000)).await?;
+    assert_eq!(
+        result,
+        Err(ToolError::OutputTooLarge {
+            max: 2 * 1024 * 1024
+        })
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn tool_u_010_a_gzip_body_decoding_to_exactly_the_limit_is_read() -> TestResult {
+    let page = format!("<!--{}-->ok", "x".repeat(2 * 1024 * 1024 - 9));
+    assert_eq!(page.len(), 2 * 1024 * 1024);
+    let sent = gzipped(page.as_bytes())?;
+    let result = fetch(gzip_reply("Content-Encoding: gzip\r\n", &sent, sent.len())).await?;
+    assert_eq!(proxy::body(&result?.text).trim(), "ok");
+    Ok(())
+}
+
+#[tokio::test]
+async fn tool_u_010_a_truncated_gzip_body_fails_closed() -> TestResult {
+    // A real gzip stream cut short: before its trailer (the checksum and length), and in the middle of its data.
+    let text: Vec<u8> = (0..20_000u32)
+        .flat_map(|n| format!("line {n} of a page\n").into_bytes())
+        .collect();
+    let whole = gzipped(&text)?;
+    for cut in [whole.len() - 8, whole.len() / 2] {
+        let sent = &whole[..cut];
+        let result = fetch(gzip_reply("Content-Encoding: gzip\r\n", sent, sent.len())).await?;
+        let error = result.err().ok_or(format!(
+            "a gzip body cut at {cut} of {} was accepted",
+            whole.len()
+        ))?;
+        assert_eq!(error.code(), "io", "cut at {cut}: {error:?}");
+    }
+    Ok(())
+}
+
+#[tokio::test]
+async fn tool_u_010_stacked_gzip_encodings_are_refused() -> TestResult {
+    // Gzip inside gzip is never unpacked twice: a response that says so, on one line or two, is refused by name.
+    let twice = gzipped(&gzipped(b"<p>inner page</p>")?)?;
+    for encoding in [
+        "Content-Encoding: gzip, gzip\r\n",
+        "Content-Encoding: gzip\r\nContent-Encoding: gzip\r\n",
+    ] {
+        let result = fetch(gzip_reply(encoding, &twice, twice.len())).await?;
+        let error = result.err().ok_or("stacked encodings were accepted")?;
+        assert_eq!(error.code(), "unsupported", "{encoding:?}");
+        assert!(
+            error.model_message().contains("gzip"),
+            "{}",
+            error.model_message()
+        );
+    }
+    Ok(())
+}
+
+#[tokio::test]
+async fn tool_u_010_identity_values_are_no_encoding() -> TestResult {
+    // `identity` says "not encoded". A response may say it more than once, in two headers or as two values on one
+    // line, and beside gzip it changes nothing: such responses were read before gzip support and still are.
+    let plain = b"<p>plain page</p>";
+    for encoding in [
+        "Content-Encoding: identity\r\nContent-Encoding: identity\r\n",
+        "Content-Encoding: identity, identity\r\n",
+        "Content-Encoding: Identity\r\n",
+    ] {
+        let output = fetch(gzip_reply(encoding, plain, plain.len())).await??;
+        assert!(body(&output.text).contains("plain page"), "{encoding:?}");
+    }
+    let packed = gzipped(b"<p>packed page</p>")?;
+    for encoding in [
+        "Content-Encoding: identity\r\nContent-Encoding: gzip\r\n",
+        "Content-Encoding: identity, gzip\r\n",
+    ] {
+        let output = fetch(gzip_reply(encoding, &packed, packed.len())).await??;
+        assert!(body(&output.text).contains("packed page"), "{encoding:?}");
+    }
+    Ok(())
+}
+
 #[tokio::test]
 async fn tool_u_010_exact_body_boundary_succeeds_and_text_has_its_own_cap() -> TestResult {
     let body = format!("<!--{}-->ok", "x".repeat(2 * 1024 * 1024 - 9));

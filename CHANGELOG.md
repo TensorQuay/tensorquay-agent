@@ -55,6 +55,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   waiting, or a person holds the desktop through Take over; the dialog still warns that a kept sign-in ends with the
   sandbox. An idle Desktop that may hold a sign-in still never gives way to a waiting task by itself. Before, in
   18.1.0 to 18.2.0, the stop asked the question meant for giving way.
+- **A page a server sends gzip-compressed is read (TOOL-U-010).** `fetch_url` asked for an uncompressed page but
+  refused one a server compressed anyway ("compressed responses are not supported"); it now reads gzip, with the same
+  2 MiB limit on what it unpacks, so a small compressed file can't expand past it. Other encodings are still refused,
+  now by name.
 
 ## 18.2.0 (23 November 2026)
 
