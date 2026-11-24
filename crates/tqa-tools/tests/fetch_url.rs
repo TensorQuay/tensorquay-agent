@@ -3,8 +3,10 @@
 mod context;
 #[path = "support/proxy.rs"]
 mod proxy;
+use flate2::{Compression, write::GzEncoder};
 use proxy::{Proxy, Reply, TOKEN, TestResult, body, page};
 use serde_json::json;
+use std::io::Write;
 use tqa_testkit::workspace_fixture;
 use tqa_tools::{ProxyEndpoint, Tool, ToolError, ToolRegistry, builtin::FetchUrl};
 
@@ -153,6 +155,100 @@ async fn tool_u_010_large_declared_and_chunked_bodies_are_refused() -> TestResul
             })
         );
     }
+    Ok(())
+}
+
+#[tokio::test]
+async fn tool_u_010_gzip_response_is_decoded_with_a_decoded_size_cap() -> TestResult {
+    for encoding in ["gzip", "x-gzip"] {
+        let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
+        encoder.write_all(b"compressed page text")?;
+        let compressed = encoder.finish()?;
+        let mut reply = format!(
+            "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: {encoding}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+            compressed.len()
+        )
+        .into_bytes();
+        reply.extend_from_slice(&compressed);
+        let proxy = Proxy::start(vec![Reply::Page(reply)]).await?;
+        let fixture = workspace_fixture()?;
+        let result = tool(&proxy, TOKEN)?
+            .call(
+                json!({"url":"http://allowed.invalid/"}),
+                &context::context(&fixture),
+            )
+            .await;
+        let seen = proxy.seen.clone();
+        proxy.finish().await?;
+        assert_eq!(body(&result?.text), "compressed page text");
+        assert!(
+            seen.lock().map_err(|_| "fixture lock")?.origin[0]
+                .to_ascii_lowercase()
+                .contains("accept-encoding: identity")
+        );
+    }
+
+    let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
+    encoder.write_all(&vec![b'x'; 2 * 1024 * 1024 + 1])?;
+    let compressed = encoder.finish()?;
+    let mut reply = format!(
+        "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+        compressed.len()
+    )
+    .into_bytes();
+    reply.extend_from_slice(&compressed);
+    let proxy = Proxy::start(vec![Reply::Page(reply)]).await?;
+    let fixture = workspace_fixture()?;
+    let result = tool(&proxy, TOKEN)?
+        .call(
+            json!({"url":"http://allowed.invalid/"}),
+            &context::context(&fixture),
+        )
+        .await;
+    proxy.finish().await?;
+    assert_eq!(
+        result,
+        Err(ToolError::OutputTooLarge {
+            max: 2 * 1024 * 1024
+        })
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn tool_u_010_unknown_response_encoding_is_refused() -> TestResult {
+    let reply = b"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: br\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".to_vec();
+    let proxy = Proxy::start(vec![Reply::Page(reply)]).await?;
+    let fixture = workspace_fixture()?;
+    let result = tool(&proxy, TOKEN)?
+        .call(
+            json!({"url":"http://allowed.invalid/"}),
+            &context::context(&fixture),
+        )
+        .await;
+    proxy.finish().await?;
+    let error = result.err().ok_or("unsupported encoding was accepted")?;
+    assert_eq!(error.code(), "unsupported");
+    assert!(error.model_message().contains("br"));
+    Ok(())
+}
+
+#[tokio::test]
+async fn tool_u_010_invalid_gzip_stream_fails_closed() -> TestResult {
+    let reply = b"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\nContent-Length: 6\r\nConnection: close\r\n\r\nnotzip".to_vec();
+    let proxy = Proxy::start(vec![Reply::Page(reply)]).await?;
+    let fixture = workspace_fixture()?;
+    let result = tool(&proxy, TOKEN)?
+        .call(
+            json!({"url":"http://allowed.invalid/"}),
+            &context::context(&fixture),
+        )
+        .await;
+    proxy.finish().await?;
+    assert_eq!(
+        result.err().ok_or("invalid gzip body was accepted")?.code(),
+        "io"
+    );
     Ok(())
 }
 
