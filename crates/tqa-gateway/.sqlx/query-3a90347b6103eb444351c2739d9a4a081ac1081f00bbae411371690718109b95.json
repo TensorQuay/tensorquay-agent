@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "UPDATE idempotency SET execution_status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE conversation_id = ANY($1) AND execution_status = 'queued' AND (key LIKE 'team-wake:%' OR key LIKE 'team-start:%') RETURNING conversation_id AS \"conversation_id!\", key LIKE 'team-start:%' AS \"first!\"",
+  "query": "UPDATE idempotency SET execution_status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE conversation_id = ANY($1) AND execution_status = 'queued' AND (key LIKE 'team-wake:%' OR key LIKE 'team-start:%' OR key LIKE 'team-round:%') RETURNING conversation_id AS \"conversation_id!\", key LIKE 'team-start:%' AS \"first!\"",
   "describe": {
     "columns": [
       {
@@ -31,5 +31,5 @@
       null
     ]
   },
-  "hash": "dd9c3e3fb6ff615e0a34c7c19ab77f6cc2ce23eca23ca5417ce5554fb54fcba7"
+  "hash": "3a90347b6103eb444351c2739d9a4a081ac1081f00bbae411371690718109b95"
 }

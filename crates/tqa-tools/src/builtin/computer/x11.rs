@@ -169,6 +169,15 @@ impl XDo {
         }))
     }
 
+    /// Brings window `id` to the front and gives it the input focus (`windowactivate`), as a click on it would
+    /// (RT-I-066: a reset hands the front back to the window a run left there).
+    ///
+    /// # Errors
+    /// `Unavailable` when the display doesn't answer or the window is gone.
+    pub async fn activate(&self, id: &str) -> Result<(), DriverError> {
+        self.xdotool(&["windowactivate", id]).await.map(|_| ())
+    }
+
     /// The process whose window holds the X server's input focus, where keys from the VNC server go, or `None` when
     /// that window names no process (the window manager's, or no window). The window manager's active window
     /// ([`Self::active`]) names the window it means to focus; the input focus follows it as a separate step, so for a

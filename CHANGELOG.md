@@ -11,6 +11,51 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   repeat in a process that forks workers. TensorQuay Agent was never affected: the gateway uses plain cookies only
   (the private-cookie feature isn't compiled in) and never forks; the update keeps the dependency audit (G-05) clean.
 
+### Fixed
+
+- **A channel opens at its newest message and follows new ones (WEB-U-541, WEB-E2E-150).** It goes to the bottom once
+  its log is read, follows what arrives there until the reader scrolls up, and comes back to the newest after the
+  reader's own post. In 18.2.0 a channel opened at its oldest message.
+- **For maintainers: the KVM gate runs every microVM test, whatever fails (`tools/check.sh --kvm`).** One failing test
+  stopped the run before: on the 18.2 candidates 19 of 97 tests never ran, and no CI runner has KVM to run them
+  instead.
+- **An agent's post shows its name in the channel, not its task's title (WEB-U-542).** An agent added as "Analyst", the
+  name people write after "@" and Members shows, posted under its task's title in 18.2.0.
+- **A stopped agent team runs no one after its end (GW-I-395 to GW-I-397).** When a helper's message woke the lead
+  at the moment a person stopped the team, the wake could be stored just after the stop had dropped the waiting
+  turns, and the lead then ran after the team ended; a helper's first turn could do the same, and a helper brought
+  back for another round kept its waiting turn through the stop. A team's own turn is now stored only while its
+  team runs with that task in it, and the stop drops a brought-back helper's turn too.
+- **On a small local model the agent reads PDFs with `read_file` (PROMPT-U-030, prompt version 16).** The Workstation's
+  libraries line says "Read PDFs with read_file.", and `read_file`'s description starts with what it does for a PDF. In
+  our law-firm checks on a local 27B model the agent used it in 3 of 3 attempts and wrote no parser (in 18.2.0: 1 of 8,
+  the others looking for a PDF library or hand-writing one until the time limit).
+- **A stray `channel_post` field gets an answer that says how to fix the call (TOOL-U-162).** The refusal names what
+  that post type takes, which types take the field, and to send the call again without it. In 18.2.0 it said only
+  that the field was not taken; in one of our checks a local model resent the same call three times and the run ended.
+- **On a Desktop task, the window the agent was using stays in front when a run ends (RT-I-066).** At a run's end the
+  desktop's own browser is closed and reopened with its sign-ins cleared (unless the task keeps its sign-in). In
+  18.2.0 the reopened browser came to the front and covered another application's window, which looked as if that
+  application had been closed. The window that was in front before is now brought back, unless it was the desktop's
+  own browser.
+- **The computer tool says that the desktop's browser closes when a turn ends, and how a person signs in
+  (TOOL-U-163).** Its description tells the agent not to end a turn expecting a page to stay open, and, for a sign-in
+  only the person can do, to ask them to press Take over, sign in on the desktop and hand back; never to ask for a
+  password in the chat.
+- **For maintainers: a release's images are joined under the version again (REL-U-015).** 18.2.0's release run
+  published each architecture's images and then failed to join them under `18.2.0`: GitHub's runners had updated
+  Docker, which refuses the index annotations the step added. The join now takes none, lives in
+  `tools/release/join-images.sh` with its own test, and can be run again for a published version from the Actions page
+  (Release images, `join_version`), which is how 18.2.0's version tags were published.
+- **"Stop now" works on an idle Desktop task that may hold a sign-in (GW-I-398).** On Settings › Sandboxes, an idle
+  Desktop task read as working and its Stop now was dimmed whenever its browser might hold a sign-in: a task that keeps
+  its sign-in, a Take over since its last run, a new sandbox before its first run ended, and every Desktop after a
+  gateway restart. Kept on, such a task doesn't idle out either, so it held a Desktop place until its lifetime's end
+  unless the keep was switched off or the task deleted. Stop now is refused only while a run is working, a message is
+  waiting, or a person holds the desktop through Take over; the dialog still warns that a kept sign-in ends with the
+  sandbox. An idle Desktop that may hold a sign-in still never gives way to a waiting task by itself. Before, in
+  18.1.0 to 18.2.0, the stop asked the question meant for giving way.
+
 ## 18.2.0 (23 November 2026)
 
 Channels work on their own: a post that concerns an agent wakes it, agents answer there, post to-dos and proposals,

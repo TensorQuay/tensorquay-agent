@@ -2,7 +2,7 @@
 use std::fmt::Write as _;
 
 /// Version of the base prompt contract.
-pub const PROMPT_VERSION: u32 = 15;
+pub const PROMPT_VERSION: u32 = 16;
 
 /// Stable workspace facts supplied once for a run.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -53,9 +53,12 @@ pub fn system_prompt(facts: &WorkspaceFacts<'_>) -> String {
         .join(", ");
     let names = if names.is_empty() { "none" } else { &names };
     // The sandbox usually has no route to a package index: say the data libraries are there, so none is installed.
+    // Version 16 (18.2.1): and that PDFs are read with read_file. On the 18.2 build a 27B agent with no internet looked
+    // for pypdf, pdfminer or pdftotext in 5 of 6 law-firm tasks, then wrote its own PDF parser (23 Nov 2026). Four
+    // words of the line went to keep the Workstation's prompt under 400 words.
     let libraries = if capabilities.contains(&tqa_types::Capability::Data) {
-        "Python libraries: pandas, matplotlib and openpyxl are installed; use them, and do not install them or \
-alternatives. Save charts to files.\n"
+        "Python libraries: pandas, matplotlib and openpyxl are installed; use them; install no alternatives. Read PDFs \
+with read_file. Save charts to files.\n"
     } else {
         ""
     };

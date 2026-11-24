@@ -640,7 +640,7 @@ async fn deliver(state: &State, due: &Due, hop: i16) -> Result<bool, GatewayErro
         .to_string()
         .parse()
         .map_err(|_| GatewayError::StoreUnavailable)?;
-    crate::actions::send_turn(state, &user, &id, (&key, turn)).await?;
+    crate::actions::send_turn(state, &user, &id, (&key, turn), None).await?;
     sqlx::query!(
         "INSERT INTO channel_wakes (channel_id, conversation_id, hop, key) VALUES ($1, $2, $3, $4)",
         due.channel,

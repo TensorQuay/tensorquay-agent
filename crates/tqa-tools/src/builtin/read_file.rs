@@ -31,7 +31,7 @@ impl ReadFile {
         Self {
             spec: specification(
                 "read_file",
-                "Read line-numbered workspace text. Line numbers are not part of the file; never copy them into edit_file. A default read returns the first 200 lines, within 8 KiB. Prefer grep to find the right range first, then set start_line and optional inclusive end_line. Follow the partial notice with start_line or cursor; cursor excludes both line arguments. A PDF reads as text by page: start_line and end_line are then page numbers.",
+                "Read line-numbered workspace text, or a PDF's text by page (no PDF library is needed; start_line and end_line are then page numbers). Line numbers are not part of the file; never copy them into edit_file. A default read returns the first 200 lines, within 8 KiB. Prefer grep to find the right range first, then set start_line and optional inclusive end_line. Follow the partial notice with start_line or cursor; cursor excludes both line arguments.",
                 json!({"type":"object","required":["path","start_line","end_line","cursor"],"additionalProperties":false,
                 "properties":{"path":{"type":"string"},"start_line":{"type":["integer","null"],"minimum":1},"end_line":{"type":["integer","null"],"minimum":1},"cursor":{"type":["string","null"],"description":super::CURSOR}}}),
                 true,

@@ -8,7 +8,8 @@ Implements [ARCHITECTURE](../../docs/ARCHITECTURE.md) sections 3, 7, 8 and 15.
 The versioned system prompt contains stable workspace facts and an environment block with the template and
 canonical capabilities. The image digest is excluded: repinning the same environment preserves the prompt bytes.
 An environment with the `data` capability also gets a line saying Python's pandas, matplotlib and openpyxl are
-installed, so the model uses them rather than installing (version 8, PROMPT-U-017).
+installed, so the model uses them rather than installing (version 8, PROMPT-U-017), and that PDFs are read with
+read_file (version 16, PROMPT-U-030).
 The Network lines tell the model to explain a blocked site to the person in plain words and point to an
 administrator (Settings > Internet access), never the proxy's status (version 9, PROMPT-U-018).
 The open-web rule `*` reads as "any website on ports 80 and 443" (or its own ports), never as the pattern

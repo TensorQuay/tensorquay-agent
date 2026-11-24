@@ -863,6 +863,31 @@ async fn tool_u_034_a_null_word_ref_is_absent_and_the_text_goes_to_the_focus() -
     Ok(())
 }
 
+// TEST: TOOL-U-163
+/// The tool says what happens to the browser when the agent's turn ends, and how a person signs in (the owner's real
+/// use, 23 Nov 2026): the agent opened a sign-in page, ended its turn and told the person to type their password in
+/// the window, or to paste it in the chat. The turn's end closed the browser and cleared it (ADR-0039 section 6), so
+/// the page was gone. The way that works is Take over, and no password belongs in the chat.
+#[test]
+fn tool_u_163_the_tool_says_how_a_person_signs_in_and_that_the_browser_closes_at_the_turns_end() {
+    for view in [View::default(), vision(1280)] {
+        let tool = Computer::with_view(Screen::with(vec![form()], vec![state("w1", 1)]), view);
+        let description = &tool.spec().description;
+        for said in [
+            "When your turn ends the browser closes and its pages and sign-ins are cleared",
+            "unless the person keeps the sign-in for this task",
+            "ask them to press Take over, sign in on the desktop and hand back",
+            "never ask for a password in the chat",
+            "Use the desktop's own browser",
+        ] {
+            assert!(
+                description.contains(said),
+                "missing {said:?} in: {description}"
+            );
+        }
+    }
+}
+
 // TEST: TOOL-U-061
 #[tokio::test]
 async fn tool_u_061_the_tool_says_how_to_open_a_web_address() -> TestResult {

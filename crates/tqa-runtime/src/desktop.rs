@@ -144,6 +144,31 @@ pub(crate) async fn reopen(slot: &Slot, spared: &SupervisedGroups) -> bool {
     readiness.ready
 }
 
+/// Gives the front back to the window that had it before a run-end reset (RT-I-066; the owner's real use, 23 Nov
+/// 2026): the reopened browser takes the focus so that a Take over can type (RT-I-057), and its blank window covered
+/// the one the run had left in front for the person, for example the agent's own browser on a sign-in page. `before`
+/// is the window active before the reset and `browser` the desktop's own browser then: its window went with the
+/// reset, so the reopened one keeps the front. Answers whether a window was brought back.
+pub(crate) async fn front_again(
+    x: &XDo,
+    before: Option<&tqa_tools::builtin::computer::x11::ActiveWindow>,
+    browser: Option<u32>,
+) -> bool {
+    let Some(window) = before else {
+        return false;
+    };
+    if browser.is_some() && window.pid == browser {
+        return false;
+    }
+    match x.activate(&window.id).await {
+        Ok(()) => true,
+        Err(error) => {
+            tracing::debug!(%error, "desktop: the window in front before the reset wasn't brought back");
+            false
+        }
+    }
+}
+
 /// Empties the slot when the browser its driver started has died (ADR-0039 section 6: "started again if it died"), so
 /// the next [`opened`] launches it again; before, a filled slot was trusted, and after a crash, a kill or an OOM the
 /// person's keys and the next run's went to no window (104a, 16 Nov 2026). A driver a run still holds is left: the run's

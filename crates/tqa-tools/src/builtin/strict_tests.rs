@@ -71,3 +71,17 @@ fn tool_u_032_a_null_argument_is_the_same_as_an_absent_one() {
         })
     );
 }
+
+// TEST: PROMPT-U-030
+/// `read_file` says in its first sentence that it reads a PDF's text with no PDF library needed (18.2.1). On 18.2 the
+/// PDF came last, and a 27B agent with no internet hunted for pypdf, pdfminer or pdftotext in 5 of 6 law-firm tasks,
+/// then wrote its own PDF parser (23 Nov 2026). The prompt's own line is in tqa-prompt's PROMPT-U-017 and goldens.
+#[test]
+fn prompt_u_030_read_file_leads_with_reading_a_pdf() {
+    let description = ReadFile::new().spec().description.clone();
+    let first = description.split(". ").next().unwrap_or_default();
+    assert!(
+        first.contains("a PDF's text by page") && first.contains("no PDF library is needed"),
+        "{description}"
+    );
+}

@@ -22,6 +22,9 @@ struct Action {
     /// Waits for another task's sandbox on the workspace whatever the installation's busy policy says: an agent team
     /// member's first turn on its lead's files (ADR-0034's decision of 2 Oct 2026).
     always_wait: bool,
+    /// An agent team's own turn (a wake, a helper's first turn): stored only while that team runs with this task in it
+    /// (GW-I-395).
+    team: Option<uuid::Uuid>,
 }
 
 /// Reads the one bounded ASCII `Idempotency-Key` every retried write carries (ARCHITECTURE §9).
@@ -62,23 +65,74 @@ impl Action {
             frame,
             fingerprint,
             always_wait: false,
+            team: None,
         })
     }
 }
 
 /// Sends `frame` on `user`'s task `id` under `key`, as the person's own message would go, waiting for the workspace
 /// whatever the busy policy: an agent team member's first turn (ADR-0034). A repeat with the same key replays the
-/// first answer and sends nothing again.
+/// first answer and sends nothing again. With `team`, the turn is that team's own and is stored only while the team
+/// runs with the task in it.
 ///
 /// # Errors
-/// As the message route.
+/// As the message route; `409 team_ended` when `team` no longer runs, or the task is a helper since stopped.
 pub(crate) async fn send_turn(
     state: &crate::app::State,
     user: &crate::auth::User,
     id: &tqa_types::ConversationId,
     (key, frame): (&str, ClientFrame),
+    team: Option<uuid::Uuid>,
 ) -> Result<axum::response::Response, GatewayError> {
     let mut action = Action::keyed(key, format!("/api/v1/conversations/{id}/messages"), frame)?;
     action.always_wait = true;
+    action.team = team;
     store::dispatch(state, user, id, action).await
+}
+
+/// Refuses unless `team` runs with `conversation` in it, as its lead or a helper not stopped; the team's row and the
+/// helper's are locked for share until the caller's transaction ends. Neither is waited for: a team post holds the
+/// team's row while it writes a message to a helper, whose task row this transaction holds, so a wait could close a
+/// cycle; a row held now is `busy`, and the turn is left to the next pass, which reads the team again.
+///
+/// # Errors
+/// `409 team_ended`, `429 busy` while either row is held, storage failure.
+async fn team_runs_with(
+    transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
+    team: uuid::Uuid,
+    conversation: uuid::Uuid,
+) -> Result<(), GatewayError> {
+    let busy = |error: sqlx::Error| {
+        if crate::db::LockTimeout::of(&error).is_some() {
+            GatewayError::Busy
+        } else {
+            error.into()
+        }
+    };
+    let Some(leader) = sqlx::query_scalar!(
+        "SELECT lead_conversation FROM agent_teams WHERE id = $1 AND state = 'running' FOR SHARE NOWAIT",
+        team
+    )
+    .fetch_optional(&mut **transaction)
+    .await
+    .map_err(busy)?
+    else {
+        return Err(GatewayError::TeamEnded(None));
+    };
+    if leader == conversation {
+        return Ok(());
+    }
+    let member = sqlx::query_scalar!(
+        "SELECT state FROM agent_team_members WHERE conversation_id = $1 AND team_id = $2 FOR SHARE NOWAIT",
+        conversation,
+        team
+    )
+    .fetch_optional(&mut **transaction)
+    .await
+    .map_err(busy)?;
+    if member.is_some_and(|state| state != "stopped") {
+        Ok(())
+    } else {
+        Err(GatewayError::TeamEnded(None))
+    }
 }
