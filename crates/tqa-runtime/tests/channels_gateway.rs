@@ -316,11 +316,13 @@ async fn tool_i_014_the_gateways_codes_and_the_clients_own() -> TestResult {
         Some("invalid_request".into())
     );
     assert_eq!(seen(&log).len(), before);
-    // Nothing listens: unreachable, which a model may retry.
+    // Nothing listens: unreachable, which a model may retry. The client itself tries again within its window first
+    // (RT-I-068, gateway_retry.rs); a short window keeps this test quick.
     let closed = std::net::TcpListener::bind("127.0.0.1:0")?;
     let origin = url::Url::parse(&format!("http://{}", closed.local_addr()?))?;
     drop(closed);
     let failure = GatewayChannels::new(&origin, &SecretString::from(TOKEN.to_owned()))?
+        .with_retry_window(Duration::from_millis(600))
         .channels(&cancel)
         .await
         .err()

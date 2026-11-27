@@ -9,6 +9,7 @@ pub use crate::mcp::{
     tool::McpTool,
 };
 pub use crate::supervisor::LINK_END_WAIT;
+pub use crate::teams::GatewayTeams;
 pub use crate::workspace::{WorkspaceFailure, WorkspaceInitializer};
 use std::sync::{
     Arc, Condvar, Mutex, PoisonError,
