@@ -3,6 +3,15 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
+## Unreleased
+
+### Fixed
+
+- **The scripted test model says what it is (TK-U-054).** A first try with `deploy/install.sh --fake-model` ran the
+  same short demonstration whatever a person asked, and nothing in the product said why. Each of its answers now ends
+  with a paragraph saying that the answer comes from the scripted test model and that an administrator can add a model
+  server under Settings › Models for real answers.
+
 ## 18.2.1 (27 November 2026)
 
 A fix release for what real use of 18.2.0 found: "Stop now" on an idle Desktop task, the Desktop's browser coming to
