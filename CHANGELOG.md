@@ -12,6 +12,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   again left its team waiting for the idle stop. The runtime now sends such a call again, with the same idempotency
   key, while the gateway can't be reached or answers that it is briefly unavailable, for up to a minute; the gateway
   answers a repeated call with its first answer. A refusal is never sent again.
+- **Settings › Sandboxes says when a person holds a Desktop (GW-I-399, WEB-U-543).** While a person uses a Desktop
+  through Take over, Stop now is rightly refused, but the page said "It is working now" though nothing ran. It now
+  says that a person is using the desktop through Take over and that it can be stopped once it is handed back. Each
+  row of `GET /api/v1/admin/sandboxes` gains `screen_held`.
 
 ## 18.2.1 (27 November 2026)
 

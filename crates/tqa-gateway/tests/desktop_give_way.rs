@@ -369,7 +369,7 @@ async fn stoppable(
     f: &Fixture,
     cookie: &str,
     id: &str,
-) -> Result<(bool, Value), Box<dyn std::error::Error>> {
+) -> Result<(bool, Value, bool), Box<dyn std::error::Error>> {
     let (status, body) = support::call(
         f,
         Method::GET,
@@ -388,10 +388,13 @@ async fn stoppable(
     Ok((
         row["can_stop"].as_bool().ok_or("can_stop")?,
         row["stop_refusal"].clone(),
+        // 18.2.2 (GW-I-399): whether a person holds its screen now, so the page can say so, not "It is working now".
+        row["screen_held"].as_bool().ok_or("screen_held")?,
     ))
 }
 
 // TEST: GW-I-398
+// TEST: GW-I-399
 #[sqlx::test]
 #[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
 async fn gw_i_398_an_administrators_stop_takes_an_idle_desktop_that_may_hold_a_sign_in(
@@ -412,7 +415,10 @@ async fn gw_i_398_an_administrators_stop_takes_an_idle_desktop_that_may_hold_a_s
         let stop = format!("/api/v1/admin/sandboxes/{id}/stop");
         // A new sandbox, no reset seen (as every desktop is after a gateway restart): it gives way to nobody, and a
         // person may stop it.
-        assert_eq!(stoppable(f, &cookie, &id).await?, (true, Value::Null));
+        assert_eq!(
+            stoppable(f, &cookie, &id).await?,
+            (true, Value::Null, false)
+        );
         // Its run ends with the sign-in kept, and the person takes over: while they hold the screen, a stop is refused.
         let run: tqa_types::RunId = "r-1".parse()?;
         let started = Event::RunStarted {
@@ -433,7 +439,10 @@ async fn gw_i_398_an_administrators_stop_takes_an_idle_desktop_that_may_hold_a_s
         page.send(Message::Text(r#"{"type":"take_over"}"#.into()))
             .await?;
         until_holder(&mut page, "you").await?;
-        assert_eq!(stoppable(f, &cookie, &id).await?, (false, json!("working")));
+        assert_eq!(
+            stoppable(f, &cookie, &id).await?,
+            (false, json!("working"), true)
+        );
         let (status, body) =
             support::call(f, Method::POST, &stop, &cookie, (None, Some("held"))).await?;
         assert_eq!(
@@ -446,7 +455,10 @@ async fn gw_i_398_an_administrators_stop_takes_an_idle_desktop_that_may_hold_a_s
         page.send(Message::Text(r#"{"type":"hand_back"}"#.into()))
             .await?;
         until_holder(&mut page, "none").await?;
-        assert_eq!(stoppable(f, &cookie, &id).await?, (true, Value::Null));
+        assert_eq!(
+            stoppable(f, &cookie, &id).await?,
+            (true, Value::Null, false)
+        );
         let (status, body) =
             support::call(f, Method::POST, &stop, &cookie, (None, Some("handed-back"))).await?;
         assert_eq!((status, &body), (202, &json!({"stopping": true})));

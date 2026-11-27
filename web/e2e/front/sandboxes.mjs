@@ -37,6 +37,7 @@ const seed = [
     },
     can_stop: false,
     stop_refusal: "working",
+    screen_held: false,
   },
   {
     conversation_id: "0195d8c0-0000-7000-8000-00000000c002",
@@ -54,6 +55,7 @@ const seed = [
     usage: null,
     can_stop: false,
     stop_refusal: "starting",
+    screen_held: false,
   },
   {
     conversation_id: "0195d8c0-0000-7000-8000-00000000c003",
@@ -71,6 +73,7 @@ const seed = [
     usage: { cpu_millicores: 20, memory_bytes: Math.round(0.4 * GIB), pids: 7 },
     can_stop: true,
     stop_refusal: null,
+    screen_held: false,
   },
   {
     conversation_id: "0195d8c0-0000-7000-8000-00000000c004",
@@ -89,6 +92,7 @@ const seed = [
     },
     can_stop: true,
     stop_refusal: null,
+    screen_held: false,
   },
 ];
 const rows = seededMap(seed.map((row) => [row.conversation_id, row]));
@@ -246,6 +250,7 @@ export async function sandboxesRoute(url, method, key, request, answer) {
     state: "stopping",
     can_stop: false,
     stop_refusal: "stopping",
+    screen_held: false,
     stops_at: null,
   });
   setTimeout(() => rows.delete(stop), 1500);
