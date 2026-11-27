@@ -149,6 +149,12 @@ pub(crate) async fn reopen(slot: &Slot, spared: &SupervisedGroups) -> bool {
 /// the one the run had left in front for the person, for example the agent's own browser on a sign-in page. `before`
 /// is the window active before the reset and `browser` the desktop's own browser then: its window went with the
 /// reset, so the reopened one keeps the front. Answers whether a window was brought back.
+///
+/// Only the very window comes back (RT-I-067; the 18.2.1 candidate's live sign-in case, 24 Nov 2026, where what was
+/// typed in a Take over went nowhere): one whose process is known, isn't the desktop's browser, and still names that
+/// same process after the reset. A window naming no process may be the old browser's (its getwindowpid failed), and X
+/// gives a gone client's window ids to the next one, so an id alone could raise another program's window over the
+/// reopened browser and take the keyboard from it.
 pub(crate) async fn front_again(
     x: &XDo,
     before: Option<&tqa_tools::builtin::computer::x11::ActiveWindow>,
@@ -157,7 +163,10 @@ pub(crate) async fn front_again(
     let Some(window) = before else {
         return false;
     };
-    if browser.is_some() && window.pid == browser {
+    let Some(pid) = window.pid else {
+        return false;
+    };
+    if browser == Some(pid) || x.window_pid(&window.id).await != Some(pid) {
         return false;
     }
     match x.activate(&window.id).await {

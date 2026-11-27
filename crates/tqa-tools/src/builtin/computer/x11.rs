@@ -152,12 +152,7 @@ impl XDo {
                 "the display named no window".into(),
             ));
         }
-        // A window without _NET_WM_PID makes getwindowpid fail: that only means it isn't the browser's.
-        let pid = self
-            .xdotool(&["getwindowpid", &id])
-            .await
-            .ok()
-            .and_then(|text| text.trim().parse().ok());
+        let pid = self.window_pid(&id).await;
         let title = self
             .xdotool(&["getwindowname", &id])
             .await
@@ -167,6 +162,15 @@ impl XDo {
             pid,
             title: title.trim_end_matches('\n').to_owned(),
         }))
+    }
+
+    /// The process that window `id` names (`_NET_WM_PID`), if it names one and still exists. A window without the
+    /// property makes getwindowpid fail, as a window that is gone does: either is `None`.
+    pub async fn window_pid(&self, id: &str) -> Option<u32> {
+        self.xdotool(&["getwindowpid", id])
+            .await
+            .ok()
+            .and_then(|text| text.trim().parse().ok())
     }
 
     /// Brings window `id` to the front and gives it the input focus (`windowactivate`), as a click on it would

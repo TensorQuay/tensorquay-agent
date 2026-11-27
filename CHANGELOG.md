@@ -45,7 +45,8 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   desktop's own browser is closed and reopened with its sign-ins cleared (unless the task keeps its sign-in). In
   18.2.0 the reopened browser came to the front and covered another application's window, which looked as if that
   application had been closed. The window that was in front before is now brought back, unless it was the desktop's
-  own browser.
+  own browser. Only that very window comes back, checked again after the reset (RT-I-067), so a Take over's typing
+  reaches the reopened browser.
 - **The computer tool says that the desktop's browser closes when a turn ends, and how a person signs in
   (TOOL-U-163).** Its description tells the agent not to end a turn expecting a page to stay open, and, for a sign-in
   only the person can do, to ask them to press Take over, sign in on the desktop and hand back; never to ask for a

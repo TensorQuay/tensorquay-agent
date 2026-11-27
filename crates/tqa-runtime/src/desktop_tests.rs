@@ -666,15 +666,16 @@ async fn rt_i_066_a_reset_gives_the_front_back_to_the_window_the_run_left_there(
     let before = x.active().await.ok().flatten();
     assert!(front_again(&x, before.as_ref(), Some(700)).await);
     assert_eq!(raised(&other), ["31"]);
-    // A window that names no process is not the desktop's browser either.
+    // A window that names no process can't be told from the desktop's own browser (a getwindowpid that failed on its
+    // window): it is left as the reopen made it (RT-I-067).
     let unnamed = Arc::new(Front {
         active: Some(("32", None)),
         raised: std::sync::Mutex::new(Vec::new()),
     });
     let x = XDo::new(unnamed.clone());
     let before = x.active().await.ok().flatten();
-    assert!(front_again(&x, before.as_ref(), Some(700)).await);
-    assert_eq!(raised(&unnamed), ["32"]);
+    assert!(!front_again(&x, before.as_ref(), Some(700)).await);
+    assert!(raised(&unnamed).is_empty());
     // The desktop's own browser was in front: the reopened one keeps the front.
     let own = Arc::new(Front {
         active: Some(("33", Some(700))),
@@ -687,4 +688,113 @@ async fn rt_i_066_a_reset_gives_the_front_back_to_the_window_the_run_left_there(
     // Nothing was in front: nothing is raised.
     assert!(!front_again(&x, None, Some(700)).await);
     assert!(raised(&own).is_empty());
+}
+
+/// A display whose windows can change between the read before a reset and the front's return: each window id names
+/// its process (`_NET_WM_PID`) until the test says otherwise, as X reuses a gone client's ids for the next one.
+#[derive(Default)]
+struct Windows {
+    active: std::sync::Mutex<Option<String>>,
+    pids: std::sync::Mutex<std::collections::HashMap<String, u32>>,
+    raised: std::sync::Mutex<Vec<String>>,
+}
+
+impl Windows {
+    fn set(&self, id: &str, pid: Option<u32>) {
+        let mut pids = self
+            .pids
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        match pid {
+            Some(pid) => pids.insert(id.to_owned(), pid),
+            None => pids.remove(id),
+        };
+    }
+    fn front(&self, id: &str) {
+        *self
+            .active
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner) = Some(id.to_owned());
+    }
+    fn raised(&self) -> Vec<String> {
+        self.raised
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .clone()
+    }
+}
+
+#[async_trait]
+impl Runner for Windows {
+    async fn run(&self, _program: &str, args: &[String]) -> Result<String, DriverError> {
+        let id = args.get(1).cloned().unwrap_or_default();
+        match args.first().map(String::as_str) {
+            Some("getactivewindow") => self
+                .active
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .clone()
+                .map(|id| format!("{id}\n"))
+                .ok_or_else(|| DriverError::Unavailable("no window".into())),
+            Some("getwindowpid") => self
+                .pids
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .get(&id)
+                .map(|pid| format!("{pid}\n"))
+                .ok_or_else(|| DriverError::Unavailable("no such window".into())),
+            Some("getwindowname") => Ok("A window\n".into()),
+            Some("windowactivate") => {
+                self.raised
+                    .lock()
+                    .unwrap_or_else(std::sync::PoisonError::into_inner)
+                    .push(args.last().cloned().unwrap_or_default());
+                Ok(String::new())
+            }
+            _ => Err(DriverError::Unavailable("unscripted".into())),
+        }
+    }
+}
+
+// TEST: RT-I-067
+/// The front goes back only to the very window the run left there (the 18.2.1 candidate's desktop-live sign-in case,
+/// 24 Nov 2026: "what was typed under control went nowhere"). The window read before the reset is checked again after
+/// it: if its id now names another process (X gave a gone client's ids to a new one), or no window at all, the
+/// reopened browser keeps the front, so a Take over's keys reach it.
+#[tokio::test]
+async fn rt_i_067_the_front_goes_back_only_to_the_same_window_of_the_same_process() {
+    // Still there, same process: brought back.
+    let same = Arc::new(Windows::default());
+    same.set("41", Some(4242));
+    same.front("41");
+    let x = XDo::new(same.clone());
+    let before = x.active().await.ok().flatten();
+    assert!(front_again(&x, before.as_ref(), Some(700)).await);
+    assert_eq!(same.raised(), ["41"]);
+    // The id now belongs to another process: left alone.
+    let reused = Arc::new(Windows::default());
+    reused.set("42", Some(4242));
+    reused.front("42");
+    let x = XDo::new(reused.clone());
+    let before = x.active().await.ok().flatten();
+    reused.set("42", Some(9001));
+    assert!(!front_again(&x, before.as_ref(), Some(700)).await);
+    assert!(reused.raised().is_empty());
+    // The window is gone (its process closed it during the reset): left alone.
+    let gone = Arc::new(Windows::default());
+    gone.set("43", Some(4242));
+    gone.front("43");
+    let x = XDo::new(gone.clone());
+    let before = x.active().await.ok().flatten();
+    gone.set("43", None);
+    assert!(!front_again(&x, before.as_ref(), Some(700)).await);
+    assert!(gone.raised().is_empty());
+    // The desktop's browser wasn't known: a window still named by its own living process is still brought back.
+    let unknown = Arc::new(Windows::default());
+    unknown.set("44", Some(4242));
+    unknown.front("44");
+    let x = XDo::new(unknown.clone());
+    let before = x.active().await.ok().flatten();
+    assert!(front_again(&x, before.as_ref(), None).await);
+    assert_eq!(unknown.raised(), ["44"]);
 }
