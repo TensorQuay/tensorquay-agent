@@ -1,7 +1,33 @@
 # Gate 10: Agent teams
 
-**State:** **draft, not reached** (21 Oct 2026, for the technical lead). The Evaluation below is the technical lead's
-to write. The release candidate is 16y. In the 16y integration (20 Oct), every row in this gate's
+**State:** **reached** (27 Nov 2026), on the evidence of release 18.2.1 below. Agent teams stay experimental and off by
+default, as the product owner decided on 12 Nov 2026. This page was a draft for the 16y candidate (21 Oct 2026); its
+two open points are closed below, and what it said then follows unchanged as the earlier evidence.
+
+## The evidence for 18.2.1 (27 Nov 2026)
+- **A 24-hour soak with agent teams in its mix** (22 to 23 Nov 2026, on 18.2.0's images; `deploy/tests/soak_mix.py`):
+  passed. Over 24 hours on 8 conversation slots, 144 agent teams ran, each ended by its lead's `done`, beside 239
+  Desktop tasks and the usual load. The harness injected 1,318 faults of 11 kinds: gateway kills and restarts, database
+  crashes, restarts and outages, a full disk, cut links, killed sandboxes, an engine stall and dropped page streams.
+  Every measured resource stayed within its growth limit in every judged period, and the end-of-run audit of
+  sandboxes, networks and volumes found no problem.
+- **A 2-hour mixed-load run with faults on 18.2.1's gateway and runtime** (27 Nov 2026): a team every 10 minutes and
+  a Desktop task every 6. 237 runs completed and none failed, through 111 faults.
+- **Rounds** (18.1.0, 20 Nov 2026; ADR-0034's rounds amendment): a follow-up to a lead whose team has stopped starts
+  another round with a fresh budget, brings finished helpers back with their own conversations and files, and adds
+  new ones. Verified end to end on the real stack with a real model (E2E-AGENTS-040, E2E-AGENTS-041).
+- **Teams proven on rounds** (23 Nov 2026, on 18.2.0's build; `agent-teams.md` §3.9): on a real goal, a team and one
+  agent were both correct 3 times of 3; the team took 7.5 times the tokens and 4 times the time, and its answers were
+  less finished. The same reading as October's evaluation.
+- **18.2.1's final candidate** (27 Nov 2026): the agents suite on the real stack 23 of 23, and every other step of the
+  integration (the sandbox suite on its rerun: its first run's two failures were the harness's own image argument and
+  the typed sign-in test's flake, which 18.2.2 fixes).
+- **One race, fixed for 18.2.2:** E2E-AGENTS-020's restart round failed once in 30 nightly runs (25 Nov 2026). The
+  gateway restarted the moment a lead called `done`, the call was lost, and the team waited for its idle stop. The
+  runtime now sends a team or channel call again through a restart, with the same idempotency key (RT-I-068).
+
+## The evidence for 16y (21 Oct 2026)
+The release candidate was 16y. In the 16y integration (20 Oct), every row in this gate's
 scope passed. That includes the agents suite on the real stack, 17 of 17 (16j's 12 and the five added since), and
 SEC-046 with its team case.
 
@@ -18,7 +44,7 @@ Since 16u, 16y changes no team code except WEB-U-415 and WEB-U-416, which the in
 16y itself is 16x plus TCP keepalive on the gateway's accepted sockets (GW-U-205, GW-I-314). The phase demo on 16j
 (15 Oct) passed and is supporting evidence.
 
-What isn't done yet:
+What wasn't done on 21 Oct (all closed since, above):
 - **a soak with agent teams in its mix: open.** Every c16 soak so far, 16y's included, has run with agent teams off.
   Off by default is ADR-0034's install switch (accepted 2 Oct 2026); keeping agent teams off for this release is still
   the Product Owner's open decision. While they stay off, this doesn't block 16y, but it isn't closed;
@@ -206,7 +232,9 @@ the real model. Its three findings were fixed before 16d.
 1280 and 390, light and dark, in English and Simplified Chinese. All were ok, and none of its findings was in agent
 teams.
 
-## What's still open
+## What was open on 21 Oct 2026, and how it closed
+Both closed by 27 Nov 2026: the soak by the 24-hour soak of 22 to 23 Nov with 144 teams in its mix, and the result by
+the product owner's decision of 12 Nov (experimental, off by default), which Teams proven on rounds (23 Nov) bears out.
 1. **The soak with agent teams in its mix.** Every c16 soak has run with agent teams off: 16e's (passed, 12 to 13 Oct),
    16j's (passed, 14 to 15 Oct), 16u's (stopped at 9 h 33 min on 18 Oct, once 16u could no longer
    be the candidate), 16x's (passed by the growth rule, with an idle-connection leak found and fixed as 16y) and 16y's
@@ -255,5 +283,13 @@ teams.
 - **A team's budget.** On 16k a two-helper research team spent the default 2M tokens in 7 minutes (B9b), and the same
   goal finished in 3.73M (B9c). Out of budget, a team now hands back what its helpers had (GW-I-304, GW-I-311).
 
-## Evaluation (the technical lead)
-*Left to the technical lead.*
+## Evaluation (the technical lead, 27 Nov 2026)
+**Reached.** Agent teams do what ADR-0034 and its rounds amendment say, on the real stack and under faults. A lead
+starts helpers. They work on their own copies, or take turns on the lead's files, and report. The team ends by
+`done`, by Stop, or by its budget, with the helpers' work handed back, and a follow-up starts another round. Over 24
+hours of injected faults, 144 teams ran and ended without leaving sandboxes, copies or budget reservations behind.
+
+What teams don't show is a gain over one agent. On the same budget, October's evaluation found no difference; on
+rounds, a team was as correct as one agent at 7.5 times the tokens. So teams stay **experimental and off by
+default**: an administrator turns them on for work that splits into independent parts, knowing the cost. The known
+limits above stand.
