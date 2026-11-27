@@ -19,8 +19,8 @@ they use, and the commit and image IDs they quote, are explained in [TEST-PLAN](
 | 7 | Channels | [gate-7.md](gate-7.md) | reached on c15 (2026-10-08) |
 | 8 | Firecracker | [gate-8.md](gate-8.md) | reached on 15b (2026-10-11); PERF-012's microVM half (Gate 9's row) waived by the product owner; the microVM host-key test is a known gap |
 | 9 | PRD metrics M1–M8 | [gate-9.md](gate-9.md) | reached on 15b (2026-10-11), with the product owner's waiver of PERF-012's microVM half |
-| 10 | Agent teams | [gate-10.md](gate-10.md) | **draft** (2026-10-12): every row passed in 16d, the agents suite 12 of 12; open: the technical lead's live session, SEC-046's agent-team case, the evaluation, the soak |
-| 11 | Computer use | [gate-11.md](gate-11.md) | **draft** (2026-10-21): every computer-use row passed in 16y's integration, none failed since 16u; 16k's real-world Desktop cases' defects fixed and passed live on 16o and 16x; open: a soak with Desktop tasks, the grounding evaluation on 16y's capture |
+| 10 | Agent teams | [gate-10.md](gate-10.md) | **reached** (2026-11-27), on 18.2.1's evidence: a 24-hour soak with 144 agent teams in its mix and 1,318 injected faults passed (22 to 23 Nov 2026); rounds verified on a real model; Teams proven on rounds (23 Nov) as correct as one agent at 7.5× the tokens; experimental and off by default (the product owner, 12 Nov 2026) |
+| 11 | Computer use | [gate-11.md](gate-11.md) | **reached** (2026-11-27), on 18.2.1's evidence: the same 24-hour soak with 239 Desktop tasks passed, the desktops' resources not building up; the Desktop suites 7 of 7 and 13 of 13 on 18.2.1's final candidate; grounding by ref 200 of 200 (14 Nov 2026); the product owner's real-use findings fixed in 18.2.1 and 18.2.2 |
 
 Other measurements, kept current before each `main` update:
 

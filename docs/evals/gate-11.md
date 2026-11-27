@@ -1,7 +1,36 @@
 # Gate 11: Computer use
 
-**State:** **draft, not reached** (21 Oct 2026, for the technical lead). The Evaluation below is the technical lead's
-to write. The release candidate is 16y. In the 16y integration (20 Oct), every row in this gate's
+**State:** **reached** (27 Nov 2026), on the evidence of release 18.2.1 below. This page was a draft for the 16y
+candidate (21 Oct 2026); its open points are closed below, and what it said then follows unchanged as the earlier
+evidence.
+
+## The evidence for 18.2.1 (27 Nov 2026)
+- **A 24-hour soak with Desktop tasks in its mix** (22 to 23 Nov 2026, on 18.2.0's images; `deploy/tests/soak_mix.py`
+  with the Desktop image pinned): passed. 239 Desktop tasks ran, each looking at the screen and acting on it, beside 144
+  agent teams and the usual load, through 1,318 injected faults of 11 kinds (gate 10 has the list). Every measured
+  resource stayed within its growth limit in every judged period, and the end-of-run audit of sandboxes, networks and
+  volumes found no problem. Its audit of the desktops' own resources peaked at 13 processes, 1 browser profile and 3
+  screenshot files, and none built up.
+- **A 2-hour mixed-load run with faults on 18.2.1's gateway and runtime** (27 Nov 2026): a Desktop task every 6
+  minutes and a team every 10. 237 runs completed and none failed, through 111 faults.
+- **18.2.1's final candidate** (27 Nov 2026): the Desktop suite 7 of 7, the live Desktop cases (`desktop_live`) 13 of
+  13, and the sandbox suite with SEC-059's sign-in by hand 214 of 214 on its rerun. Its first run's two failures were
+  the harness's own image argument and the typed sign-in test's flake, which 18.2.2 fixes (WEB-U-544 below).
+- **The grounding evaluation on a current capture** (14 Nov 2026, `computer-grounding.md` §6): by ref 200 of 200, by
+  mark 199 of 200, by coordinates 41 of 200. `pixel_grounding` stays off on the local route.
+- **Keys under Take over with a real keyboard:** ctrl+A selects all (the product owner, 15 Nov 2026). Caps Lock on a
+  Mac typed lower case; fixed in 18.0.0 (RT-I-059).
+- **The product owner's real use** (24 to 27 Nov 2026) found three things, each fixed:
+  - Stop now refused on an idle Desktop that might hold a sign-in: fixed in 18.2.1 (GW-I-398);
+  - the reopened browser covering the agent's window at a run's end, which looked as if the application had closed:
+    fixed in 18.2.1 (RT-I-066, RT-I-067);
+  - "It is working now" while a person held the desktop: Settings › Sandboxes says so for 18.2.2 (GW-I-399,
+    WEB-U-543).
+- **Found by the sign-in test's fix:** one Escape in a page's first second gave the keyboard back to the page; fixed
+  for 18.2.2 (WEB-U-544).
+
+## The evidence for 16y (21 Oct 2026)
+The release candidate was 16y. In the 16y integration (20 Oct), every row in this gate's
 scope passed, among them the sandbox's Desktop tests (SEC-059's sign-in by hand included), the Desktop suite's 7 tests
 and the 18 rows added on 21 Oct. No computer-use test has failed in an integration since 16u.
 
@@ -19,7 +48,7 @@ accepted socket, the Screen panel's viewer and the Desktop sandboxes' connection
 only for an idle connection whose peer is gone, which no computer-use test or live check relies on. The phase demo on
 16e (13 Oct), with its last step on 16i (14 Oct), is supporting evidence.
 
-What isn't done yet:
+What wasn't done on 21 Oct (all closed since, above):
 - **a soak with Desktop tasks in its mix: open.** No c16 soak has had one (16e, 16j, 16u, 16x and 16y's). This
   doesn't block 16y, but it isn't closed;
 - the grounding evaluation on 16y's own capture (below): the targets stand, but the tool's words and the Desktop's
@@ -265,7 +294,11 @@ snapshot byte-identical (TOOL-U-067). But the computer tool's words changed: bot
 web address (TOOL-U-061), and the evaluation sends the tool's own spec from the capture. The Desktop's root window is
 also white since 16n (SBX-C-024). A rerun on a 16y capture would measure both; it hasn't been run.
 
-## What's still open
+## What was open, and how it closed
+All closed or recorded as known limits by 27 Nov 2026: row 1 by the 24-hour soak of 22 to 23 Nov with 239 Desktop
+tasks in its mix; row 2 on 14 Nov; row 3's ctrl+A by the product owner's real keyboard on 15 Nov, its Caps Lock half
+fixed in 18.0.0 (RT-I-059), and a key sent within a few ms of a click stays a known limit (below).
+
 | # | What | When |
 |---|---|---|
 | 1 | **A soak with Desktop tasks.** The soak's mix (`deploy/tests/soak*.py`) has no Desktop task, and its launcher pins no Desktop image, so no c16 soak (16e's and 16j's, passed; 16u's, stopped at 9 h 33 min; 16x's, passed; 16y's, running) says anything about ADR-0039 §10's resources: a desktop's processes, its profile, its screenshots, `desktop.max_sessions`. Needed: Desktop tasks in the mix, a Desktop image pinned, and the audit counting those resources. A known gap for v1.1, reported to the owner. | c17 |
@@ -328,5 +361,13 @@ also white since 16n (SBX-C-024). A rerun on a 16y capture would measure both; i
   Limits page says so per limit ("a desktop already running keeps the cap it started with", GW-U-146). The way
   around: stop the task and start it again; the new cap applies from that start (recorded 14 Nov 2026).
 
-## Evaluation (the technical lead)
-*Left to the technical lead.*
+## Evaluation (the technical lead, 27 Nov 2026)
+**Reached.** Desktop tasks do what ADR-0039 says, on the real model and under faults. The agent sees the desktop by
+its accessibility tree and pictures and acts on it by ref and mark. A person watches live, takes over, signs in, and
+hands back. A desktop gives way when it is idle, and keeps a sign-in only as long as the task allows. Over 24 hours of
+injected faults, 239 Desktop tasks ran without the desktops' processes, profiles or screenshots building up.
+
+The product owner's own use is the strongest evidence. It found three defects, each fixed in 18.2.1 or 18.2.2 and
+checked again on the real stack. The known limits above stand: Docker only, no coordinate clicks on the local
+route, a key sent within a few ms of a click under Take over, and a changed cap reaching a running desktop at its next
+start.

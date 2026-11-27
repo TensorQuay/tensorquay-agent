@@ -151,6 +151,29 @@ async fn web_e2e_004_binary_turn_selection_is_stateless_and_repeats_the_last_res
     Ok(())
 }
 
+// TEST: TK-U-054
+#[tokio::test]
+async fn tk_u_054_the_demonstrations_answers_say_they_come_from_the_scripted_test_model()
+-> TestResult {
+    // 18.2.2: a first try with `install.sh --fake-model` answered every question with the same demonstration and
+    // nothing in the product said why. Both of its answers say so, and the one repeated for every later message too.
+    let server = Binary::start(DEMO).await?;
+    for turn in [2, 5, 30] {
+        let answer = server.complete(request(turn)).await?;
+        assert!(
+            answer.contains("This answer comes from the scripted test model")
+                && answer.contains("add a model server under Settings"),
+            "turn {turn}: {answer}"
+        );
+    }
+    // The demonstration's own sentences stay first, so what quotes them still reads them.
+    assert!(server.complete(request(2)).await?.contains(
+        "Created hello/README.md with a title and a project description.\\n\\nThis answer"
+    ));
+    server.stop().await?;
+    Ok(())
+}
+
 #[tokio::test]
 async fn llm_c_002_binary_rejects_other_routes_and_bounded_invalid_requests() -> TestResult {
     let server = Binary::start(DEMO).await?;

@@ -22,6 +22,9 @@ const finalAnswer =
 // DEV-PLAN Phase 1's demo: "create a small project and then change it" (gate 1's gap, 12 Oct 2026).
 const changeRequest = "Now add a usage section to it";
 const changedAnswer = "Added a Usage section to hello/README.md.";
+// TK-U-054 (18.2.2): the scripted test model says what it is, under its answer, in its own paragraph.
+const scriptedNote =
+  "This answer comes from the scripted test model: every task runs this same short demonstration, whatever you ask. For real answers, an administrator can add a model server under Settings › Models.";
 
 async function openDetails(page: Page) {
   const group = page.getByRole("button", { name: /Worked for/ });
@@ -151,6 +154,9 @@ async function verifyTranscript(page: Page) {
   // A command that succeeded says nothing of its exit code.
   await expect(shell.getByText(/code 0/)).toHaveCount(0);
   await expect(page.getByText(finalAnswer, { exact: true })).toBeVisible();
+  await expect(
+    page.getByText(scriptedNote, { exact: true }).first(),
+  ).toBeVisible();
 }
 
 /**
