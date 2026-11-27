@@ -135,7 +135,11 @@ export function SecretBindings({
         if (!pending) onClose();
       }}
     >
-      <form className="stack" onSubmit={(event) => void submit(event)}>
+      <form
+        method="post"
+        className="stack"
+        onSubmit={(event) => void submit(event)}
+      >
         {/* The one place the page states the reference: what configuration files name it by. */}
         <p className="type-small muted">
           {t("secrets.reference", { ref: item.ref })}

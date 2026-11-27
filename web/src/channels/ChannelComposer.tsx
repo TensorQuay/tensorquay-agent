@@ -212,6 +212,7 @@ export function ChannelComposer({
   ];
   return (
     <form
+      method="post"
       className="channel-composer composer-card"
       aria-label={t(thread ? "channels.replyInThread" : "channels.postTo")}
       onSubmit={(event) => void submit(event)}

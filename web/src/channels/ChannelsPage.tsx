@@ -277,6 +277,7 @@ function NewChannel({
       }}
     >
       <form
+        method="post"
         className="stack"
         noValidate
         onSubmit={(event) => void submit(event)}

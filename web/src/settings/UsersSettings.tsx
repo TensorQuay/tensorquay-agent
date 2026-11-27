@@ -369,6 +369,7 @@ function Administration({ me, clock }: { me: User; clock: () => Date }) {
         {t("users.inviteTitle")}
       </h2>
       <form
+        method="post"
         className="settings-form"
         aria-labelledby="invite-heading"
         noValidate

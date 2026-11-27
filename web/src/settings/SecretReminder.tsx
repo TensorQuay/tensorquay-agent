@@ -95,7 +95,11 @@ export function SecretReminder({
         if (!pending) onClose();
       }}
     >
-      <form className="stack" onSubmit={(event) => void submit(event)}>
+      <form
+        method="post"
+        className="stack"
+        onSubmit={(event) => void submit(event)}
+      >
         <p className="type-small muted">{t("secrets.reminderIntro")}</p>
         <Select
           label={t("secrets.remindMe")}

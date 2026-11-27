@@ -90,6 +90,7 @@ export function SetCredential({
       }}
     >
       <form
+        method="post"
         className="stack"
         noValidate
         onSubmit={(event) => void submit(event)}

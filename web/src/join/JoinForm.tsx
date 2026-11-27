@@ -86,6 +86,7 @@ export function JoinForm({ token }: { token: string }) {
         <Skeleton label={t("join.loading")} />
       ) : (
         <form
+          method="post"
           noValidate
           onSubmit={(event) => {
             void submit(event);

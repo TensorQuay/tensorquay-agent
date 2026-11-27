@@ -114,6 +114,7 @@ export function ConnectorForm(props: FormProps) {
       }}
     >
       <form
+        method="post"
         className="stack"
         noValidate
         onSubmit={(event) => void submit(event)}

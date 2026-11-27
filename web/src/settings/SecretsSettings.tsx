@@ -476,7 +476,11 @@ function AddSecret({
         if (!pending) onClose();
       }}
     >
-      <form className="stack" onSubmit={(event) => void submit(event)}>
+      <form
+        method="post"
+        className="stack"
+        onSubmit={(event) => void submit(event)}
+      >
         <Input
           label={t("secrets.name")}
           name="name"

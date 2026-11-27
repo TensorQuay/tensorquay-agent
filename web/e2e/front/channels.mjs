@@ -380,7 +380,7 @@ const logs = seededMap([
           id: "0195d8c0-0000-7000-8000-00000000c0b9",
           name: "Helper",
         },
-        body: { type: "text", text: "42" },
+        body: { type: "text", text: "42. That is 17 plus 25." },
       },
       {
         seq: 3,

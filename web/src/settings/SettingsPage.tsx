@@ -105,7 +105,12 @@ export function SettingsPage({
     if (!readOnly) onSave();
   }
   return (
-    <form className="stack settings-form-page" noValidate onSubmit={submit}>
+    <form
+      method="post"
+      className="stack settings-form-page"
+      noValidate
+      onSubmit={submit}
+    >
       <Link href={back.href} className="back-link type-small">
         <Icon glyph={ArrowLeft} size={16} />
         {back.label}
