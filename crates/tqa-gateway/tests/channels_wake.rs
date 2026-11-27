@@ -110,17 +110,18 @@ async fn gw_i_345_a_burst_is_one_wake_and_a_run_that_doesnt_read_isnt_woken_agai
         assert_eq!(status, 200);
         assert_eq!(analyst.place(f, &id).await?, 1);
         analyst.quiet(f).await?;
-        // Three posts before it reads: one wake, at its place.
-        for n in 0..3 {
-            post(
-                f,
-                &cookie,
-                &id,
-                text(&format!("@Pricing analyst point {n}")),
-                None,
-            )
-            .await?;
-        }
+        // Three posts before it reads: one wake, at its place. Sent at once, so they fall inside the wake's 1 s gathering
+        // however slow the host: one after another, a loaded CI runner took longer than that, and the first post was
+        // woken alone (27 Nov 2026).
+        let texts: Vec<_> = (0..3)
+            .map(|n| text(&format!("@Pricing analyst point {n}")))
+            .collect();
+        futures::future::try_join_all(
+            texts
+                .into_iter()
+                .map(|body| post(f, &cookie, &id, body, None)),
+        )
+        .await?;
         let sentence = analyst.woken(f, &id, 1).await?;
         assert!(
             sentence.contains("3 posts naming you (messages 2, 3, 4)"),
