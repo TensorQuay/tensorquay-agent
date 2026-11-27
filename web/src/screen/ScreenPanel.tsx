@@ -292,7 +292,8 @@ export function ScreenPanel({
   useEffect(() => {
     const target = picture();
     if (!typing) return;
-    let last = 0;
+    // No Escape yet: never 0, which in the page's first second made a single Escape the second of two (WEB-U-544).
+    let last = Number.NEGATIVE_INFINITY;
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
       const now = performance.now();

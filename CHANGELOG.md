@@ -3,6 +3,14 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
+## Unreleased
+
+### Fixed
+
+- **One Escape in a Take over reaches the desktop even just after the page opened (WEB-U-544).** Two Escapes within
+  a second give the keyboard back to the page; in the first second after the page loaded, a single Escape did, so
+  what was typed next went to the page, not the desktop.
+
 ## 18.2.1 (27 November 2026)
 
 A fix release for what real use of 18.2.0 found: "Stop now" on an idle Desktop task, the Desktop's browser coming to
