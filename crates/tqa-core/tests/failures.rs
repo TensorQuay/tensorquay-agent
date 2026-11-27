@@ -288,6 +288,36 @@ async fn core_e_007_context_budget_fails_before_provider_request() -> TestResult
     Ok(())
 }
 
+/// CORE-U-096 (18.2.2; the product owner's route, 27 Nov 2026): on a route whose context window isn't set, a run that
+/// doesn't fit says so in its reason, so the page can say that setting the window may help (the window is then only
+/// guessed, and counted at three quarters of 32,768). A set window keeps the reason as it was (CORE-E-007).
+#[tokio::test]
+async fn core_u_096_a_run_too_long_for_a_guessed_window_says_the_window_isnt_set() -> TestResult {
+    let mut h = Harness::new(vec![answer()], ToolRegistry::new())?;
+    h.deps.route.context_window = None;
+    h.deps.route.max_output = Some(20_000);
+    // The instruction files and the message together need more than any guessed window holds.
+    h.deps.prompt.instructions = "rule ".repeat(20_000);
+    let mut long = turn();
+    long.text = "word ".repeat(13_000);
+    assert_eq!(
+        Runner::new(h.deps)?
+            .run(
+                &[],
+                Some(long),
+                CancellationToken::new(),
+                CancellationToken::new()
+            )
+            .await?,
+        RunOutcome::Failed {
+            code: ErrorCode::Budget,
+            reason: "context window exceeded, window not set".into()
+        }
+    );
+    assert!(h.provider.requests().is_empty());
+    Ok(())
+}
+
 fn empty_response(reasoning: bool) -> tqa_testkit::ProviderReply {
     let mut chunks = Vec::new();
     if reasoning {

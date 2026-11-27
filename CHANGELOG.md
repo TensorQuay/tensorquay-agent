@@ -7,6 +7,16 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **A summary that keeps a model's conversation going no longer goes out empty (CORE-U-095).** When a conversation
+  grew past what a model's window leaves, the summary of its earlier steps was asked for with no room left for those
+  steps if the model's Max output was large next to its window, for example a window left unset (32,768 assumed) and
+  a Max output of 20,000. The model was asked to summarise nothing, and the next message failed with "The
+  conversation is too long for the model". The summary now always keeps at least half the window for the
+  conversation it summarises, for every model and protocol.
+- **A model whose context window isn't set is told apart (CORE-U-096, CORE-U-097, WEB-U-546, WEB-U-547).** Then a
+  smaller window is assumed. "The conversation is too long for the model" adds that an administrator can set the
+  real window in Settings › Models, and so does "The model spent its whole output limit thinking" when that smaller
+  window left the answer less room than the route's Max output; it said to raise Max output, which wasn't the limit.
 - **The scripted test model says what it is (TK-U-054).** A first try with `deploy/install.sh --fake-model` ran the
   same short demonstration whatever a person asked, and nothing in the product said why. Each of its answers now ends
   with a paragraph saying that the answer comes from the scripted test model and that an administrator can add a model

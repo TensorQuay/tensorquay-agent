@@ -75,7 +75,7 @@ impl Execution<'_> {
             .unwrap_or(u64::MAX)
             .saturating_mul(u64::from(IMAGE_TOKENS));
         if needed.saturating_add(images) > u64::from(capacity) {
-            return Err(window_exceeded());
+            return Err(window_exceeded(self.route().context_window.is_none()));
         }
         Ok((request, images))
     }

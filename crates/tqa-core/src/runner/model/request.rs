@@ -370,6 +370,14 @@ fn with_room_for(budget: Budget, tokens: u64) -> Budget {
     }
 }
 
+/// The whole window a request can fill, input and output together (a guessed window counts three quarters of its
+/// size): what a summary request, which plans its own output, is measured against (CORE-U-095).
+pub(in crate::runner) fn window_capacity(execution: &Execution<'_>) -> Result<u32, Stop> {
+    let mut budget = budget(execution)?;
+    budget.reserve_output = 0;
+    Ok(budget.input_capacity())
+}
+
 /// The window's input capacity once the request's output is narrowed to the documented reserve (or less, when the run
 /// or the route allows less): what a request can hold at most before it fails (CORE-U-073).
 pub(in crate::runner) fn capacity_at_floor(execution: &Execution<'_>) -> Result<u32, Stop> {
@@ -468,7 +476,7 @@ pub(super) fn build(
         &history,
         room,
     )
-    .map_err(|_| window_exceeded())?;
+    .map_err(|_| window_exceeded(budget.guessed))?;
     let request = CompletionRequest {
         messages: window
             .messages()
@@ -518,8 +526,16 @@ fn system(execution: &Execution<'_>) -> String {
 }
 /// System prompt, instruction files and tool definitions (an empty slot on native-tool routes) precede the history.
 const FIXED_SLOTS: usize = 3;
-pub(super) fn window_exceeded() -> Stop {
-    Stop::Failed(ErrorCode::Budget, "context window exceeded".into())
+/// A request that can't fit the window, even with its output at the floor. When the route's window isn't set, only a
+/// guessed one (three quarters of the default) was there to fill, and the reason says so, so the page can say that
+/// setting the window may help (CORE-U-096).
+pub(super) fn window_exceeded(guessed: bool) -> Stop {
+    let reason = if guessed {
+        "context window exceeded, window not set"
+    } else {
+        "context window exceeded"
+    };
+    Stop::Failed(ErrorCode::Budget, reason.into())
 }
 /// One projected message as a provider message; an assistant response carries its replayable
 /// reasoning states first (ADR-0027).
