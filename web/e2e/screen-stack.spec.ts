@@ -121,15 +121,23 @@ async function signInByHand(page: Page, panel: Locator) {
   });
   // The runtime's browser is open on the desktop, blank (ADR-0039 §6): focus the picture, then its address bar.
   await picture.click();
-  await page.keyboard.press("Control+l");
-  // A person's pause before typing: Chromium gives ctrl+L to the page first and focuses its address bar only once the
-  // page passes it on, so a letter sent within that round trip lands in the page. Typed at once, the URL lost its first
-  // letters and "ttp://…" asked to open xdg-open (c16, 12 Oct 2026).
-  await page.waitForTimeout(500);
-  await page.keyboard.type(process.env.TQA_SCREEN_LOGIN ?? "", { delay: 20 });
-  await page.keyboard.press("Enter");
-  // The site's page loads and sets its cookie; the driver checks where it landed.
-  await page.waitForTimeout(4_000);
+  // Chromium gives ctrl+L to the page first and focuses its address bar only once the page passes it on, so a letter
+  // sent within that round trip lands in the page: typed at once, the URL lost its first letters and "ttp://…" asked
+  // to open xdg-open (c16, 12 Oct 2026). A fixed pause wasn't always enough under load (500 ms: the sign-in "went
+  // nowhere" on 24 and 27 Nov 2026). The test can't see the desktop's address bar, so it types the address twice, as a
+  // person would retype it: Escape first closes the dialog a garbled try opens, and a second each time lets the bar
+  // take focus. Opening the sign-in page again sets the same cookie, and the driver counts only that it was reached.
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("Control+l");
+    await page.waitForTimeout(1_000);
+    await page.keyboard.type(process.env.TQA_SCREEN_LOGIN ?? "", {
+      delay: 20,
+    });
+    await page.keyboard.press("Enter");
+    // The site's page loads and sets its cookie; the driver checks where it landed.
+    await page.waitForTimeout(3_000);
+  }
   await panel.getByRole("button", { name: "Hand back" }).click();
   await expect(panel.getByRole("status").first()).toHaveText(
     words("screen.handedBackIdle"),

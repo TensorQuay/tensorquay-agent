@@ -36,6 +36,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **The sidebar shows a channel's woken agents working (WEB-U-545).** A post that woke a channel's agents showed in the
   sidebar's task list only when it next read the tasks, up to 30 seconds later, so it seemed to need a reload. The
   channel page now asks for the list again as soon as an agent starts or stops working.
+- **One Escape in a Take over reaches the desktop even just after the page opened (WEB-U-544).** Two Escapes within
+  a second give the keyboard back to the page; in the first second after the page loaded, a single Escape did, so
+  what was typed next went to the page, not the desktop.
 
 ## 18.2.1 (27 November 2026)
 
