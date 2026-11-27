@@ -475,6 +475,11 @@ C1 to C6, REL-I-001, and REL-I-003 to REL-I-005), and runs the first-hour check 
 page and is fixed in a fix release.
 A user installs either way (deploy/README.md, step 0); the test model is never published.
 
+**Amended 24 Nov 2026 (PO): the scripted test model is published too, from 18.2.1.** A first try without a model
+server then builds nothing on the user's computer: `tensorquay-agent-fake-model` is built, checked and published with
+the release's other images, and `deploy/pull-images.sh --fake-model` pulls it (REL-U-014). It went into a fix release
+as the one exception to "fixes only", by the PO's decision, for the quick start.
+
 **Amended 17 Nov 2026 (PO): from 18.0, version numbers follow standard semantic versioning.** MAJOR goes up only
 for a release that an existing installation can't take in place, and its upgrade notes say what to do. That means
 any of these:
