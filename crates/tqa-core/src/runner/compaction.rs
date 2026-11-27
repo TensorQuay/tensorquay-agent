@@ -159,9 +159,13 @@ impl Execution<'_> {
         capacity: u32,
         step_attempt: u32,
     ) -> Result<Option<CompactionSummary>, Stop> {
-        let output = self.summary_output(capacity)?;
+        // The summary request plans its own output, so it is measured against the whole window, not against the
+        // step's capacity, which already left room for the step's output: taking the summary's output from that again
+        // left a large Max output's conversation no room at all (CORE-U-095).
+        let window = request::window_capacity(self)?;
+        let output = self.summary_output(capacity, window)?;
         let prompt_tokens = u64::from(estimate(tqa_prompt::COMPACTION_PROMPT).tokens);
-        let input_tokens = u64::from(capacity)
+        let input_tokens = u64::from(window)
             .saturating_sub(prompt_tokens)
             .saturating_sub(u64::from(output))
             .saturating_sub(u64::from(estimate(INPUT_PREFIX).tokens) + 16);
@@ -214,14 +218,16 @@ impl Execution<'_> {
     }
 
     /// The summary request's output budget: the route's declared output, else [`COMPACTION_DEFAULT_OUTPUT_TOKENS`] up
-    /// to half the input `capacity`, within the run's remaining output, and never less than
-    /// [`COMPACTION_OUTPUT_TOKENS`]. A model that thinks first spends part of it on reasoning; with 1024 tokens a real
-    /// model spent them all there, and the summary never came (CORE-U-057).
-    fn summary_output(&self, capacity: u32) -> Result<u32, Stop> {
+    /// to half the input `capacity`; at most half the `window`, so the conversation it summarises always has the other
+    /// half (CORE-U-095); within the run's remaining output, and never less than [`COMPACTION_OUTPUT_TOKENS`]. A model
+    /// that thinks first spends part of it on reasoning; with 1024 tokens a real model spent them all there, and the
+    /// summary never came (CORE-U-057).
+    fn summary_output(&self, capacity: u32, window: u32) -> Result<u32, Stop> {
         let budget = self
             .route()
             .max_output
             .unwrap_or_else(|| COMPACTION_DEFAULT_OUTPUT_TOKENS.min(capacity / 2))
+            .min(window / 2)
             .min(self.remaining_output()?);
         Ok(budget.max(COMPACTION_OUTPUT_TOKENS))
     }

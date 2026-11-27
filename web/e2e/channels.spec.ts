@@ -434,3 +434,35 @@ for (const width of [1280, 390] as const)
     );
     expect(panel).toBeTruthy();
   });
+
+// WEB-E2E-152 (18.2.2; the product owner, 27 Nov 2026): beside the channel (from 1024 px) the Members panel scrolls in
+// its own box, as tall as its content, and "+ Add"'s suggestions opened below the box were cut off by it: a thin
+// strip, so the panel seemed to do nothing. Whatever the box offers or says is shown whole, at every width.
+for (const width of [1024, 1280, 1440, 390] as const)
+  test(`WEB-E2E-152 "+ Add" shows what it offers whole in the Members panel ${width}`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await signIn(page);
+    await page.goto("/channels");
+    await page.getByRole("button", { name: "New channel" }).first().click();
+    const dialog = page.getByRole("dialog", { name: "New channel" });
+    await type(
+      page,
+      "What's this channel for?",
+      `Members at ${width}. Check the add box.`,
+    );
+    await dialog.getByRole("button", { name: "Create channel" }).click();
+    await page
+      .getByRole("region", { name: "Channel header" })
+      .getByRole("button", { name: /^Members/ })
+      .click();
+    await page.getByRole("button", { name: "Add", exact: true }).click();
+    await page
+      .getByRole("combobox", { name: "Add to the channel" })
+      .fill("no such task");
+    const said = page.getByText(/^None of your tasks matches\./);
+    await expect(said).toBeVisible();
+    // Whole on the screen: no box around it cuts any of it off (an IntersectionObserver counts the clipping).
+    await expect(said).toBeInViewport({ ratio: 1 });
+  });

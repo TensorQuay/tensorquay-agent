@@ -598,6 +598,12 @@
   background: var(--surface-raised);
   box-shadow: var(--elevation);
 }
+/* In a channel's side panel, which scrolls in its own box only as tall as its content, the suggestions take their own
+   room under the box, so the panel grows to show them; floating, they were cut off from 1024 px (WEB-E2E-152). */
+.channel-panel .member-search-popup {
+  position: static;
+  margin-block-start: var(--space-1);
+}
 .member-search-popup ul {
   max-block-size: 18rem;
   margin: 0;

@@ -521,3 +521,55 @@ describe("WEB-U-066 ending, deleting and managing a channel", () => {
     );
   });
 });
+
+// WEB-U-545 (18.2.2; the product owner, 27 Nov 2026): a post woke the channel's agents, and the sidebar's task list
+// showed nothing until a reload. That list reads the tasks again only every 30 s while none of them runs; the channel
+// page reads each agent's state every 5 s, so when an agent starts or stops working it asks for the task list at once.
+describe("WEB-U-545 an agent starting or stopping refreshes the reader's task list", () => {
+  it("asks for the task list again when an agent's state changes, and not when nothing changed", async () => {
+    const { api } = fakeChannels({
+      channels: [RELEASE],
+      members: { [RELEASE.id]: [CODER, ME] },
+    });
+    let state: "idle" | "working" = "idle";
+    const members = vi.fn<ChannelsApi["members"]>(() =>
+      Promise.resolve({
+        items: [{ ...CODER, state }, ME],
+      }),
+    );
+    api.members = members;
+    const cache = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const refreshed = vi.spyOn(cache, "invalidateQueries");
+    const asked = () =>
+      refreshed.mock.calls.filter(
+        ([filters]) => filters?.queryKey?.[0] === "conversations",
+      ).length;
+    render(
+      <QueryClientProvider client={cache}>
+        <ChannelPage id={RELEASE.id} api={api} />
+      </QueryClientProvider>,
+    );
+    await vi.waitFor(() => expect(members).toHaveBeenCalled());
+    await settleLazy();
+    // The same states read again: nothing to refresh.
+    await act(() =>
+      cache.refetchQueries({ queryKey: ["channel-members", RELEASE.id] }),
+    );
+    expect(asked()).toBe(0);
+    // The agent starts working: the task list is asked for at once.
+    state = "working";
+    await act(() =>
+      cache.refetchQueries({ queryKey: ["channel-members", RELEASE.id] }),
+    );
+    await vi.waitFor(() => expect(asked()).toBe(1));
+    // And again when it stops.
+    state = "idle";
+    await act(() =>
+      cache.refetchQueries({ queryKey: ["channel-members", RELEASE.id] }),
+    );
+    await vi.waitFor(() => expect(asked()).toBe(2));
+    cleanup();
+  });
+});

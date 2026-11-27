@@ -120,6 +120,42 @@ async fn core_u_072_a_step_spent_thinking_says_so_and_isnt_asked_again() -> Test
     Ok(())
 }
 
+// TEST: CORE-U-097
+/// CORE-U-097 (18.2.2; the product owner's route, 27 Nov 2026): with no context window set, a conversation that fills
+/// most of the guessed window narrows a step's output below the route's Max output; a thinking model then spent it
+/// all and the page said to raise Max output, already 20,000. The reason says the window isn't set, so the page names
+/// that setting instead.
+#[tokio::test]
+async fn core_u_097_a_thinking_cut_narrowed_by_a_guessed_window_says_the_window_isnt_set()
+-> TestResult {
+    let mut h = Harness::new(vec![thinking_cut(4096)], ToolRegistry::new())?;
+    h.deps.route.context_window = None;
+    h.deps.route.max_output = Some(20_000);
+    h.deps.prompt.instructions = "rule ".repeat(8_000);
+    let outcome = run(h.deps).await?;
+    let requested = h.provider.requests()[0].max_output.ok_or("no limit sent")?;
+    assert!(
+        requested < 20_000,
+        "the window narrowed the output: {requested}"
+    );
+    let RunOutcome::Failed {
+        code: ErrorCode::ReplyCut,
+        reason,
+    } = outcome
+    else {
+        return Err(format!("not a cut reply: {outcome:?}").into());
+    };
+    assert!(
+        reason.starts_with("the model spent its whole output limit thinking"),
+        "{reason}"
+    );
+    assert!(
+        reason.ends_with(&format!("; {requested} requested; window not set")),
+        "{reason}"
+    );
+    Ok(())
+}
+
 // TEST: CORE-U-072
 #[tokio::test]
 async fn core_u_072_without_a_limit_it_says_so_too_and_a_cut_answer_keeps_its_words() -> TestResult

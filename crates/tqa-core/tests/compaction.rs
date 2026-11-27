@@ -655,3 +655,35 @@ async fn core_u_057_the_summary_gets_a_steps_output_budget() -> TestResult {
     }
     Ok(())
 }
+
+/// CORE-U-095 (18.2.2; the product owner's route, 27 Nov 2026): a route with no context window (32,768 assumed) and a
+/// large Max output (20,000). Its steps keep 12,768 tokens of input, and the summary request also took the route's whole
+/// Max output from that capacity again, which left the conversation no room: the summary was asked for with no data,
+/// came back empty, and the run failed as "too long". The summary's own output now comes out of the window, not out
+/// of the room already left after the step's output, and the conversation always gets room in it.
+#[tokio::test]
+async fn core_u_095_a_large_max_output_on_a_guessed_window_still_leaves_the_summary_its_conversation()
+-> TestResult {
+    let history = history(long_history(40)?)?;
+    let summary_text = serde_json::to_string(&model_summary())?;
+    let mut h = harness(vec![text_reply(&summary_text), answer()])?;
+    h.deps.route.context_window = None;
+    h.deps.route.max_output = Some(20_000);
+    h.sink_with(MemorySink::new(&history));
+    let provider = h.provider.clone();
+    let outcome = run_turn(h, &history).await?;
+    let requests = provider.requests();
+    let summary_request = requests.first().ok_or("no request")?;
+    assert!(
+        summary_request.tools.is_empty(),
+        "the first request is the summary"
+    );
+    let input = texts(&summary_request.messages[1]);
+    assert!(
+        input.contains("request 1"),
+        "the summary request carries the conversation it folds: {} bytes",
+        input.len()
+    );
+    assert_eq!(outcome, RunOutcome::Completed);
+    Ok(())
+}

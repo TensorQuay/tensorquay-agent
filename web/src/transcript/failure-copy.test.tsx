@@ -114,6 +114,46 @@ describe("WEB-U-016 every failure in plain words", () => {
     },
   );
 
+  // WEB-U-546 (18.2.2; CORE-U-096): on a route whose context window isn't set, the runtime says so in its reason, and
+  // the next step names the setting; a set window keeps the words it had.
+  it("WEB-U-546 says that setting the model's context window may help when it isn't set", () => {
+    const unset = {
+      code: "budget",
+      reason: "context window exceeded, window not set",
+    };
+    expect(failureReason(unset)).toBe(
+      "The conversation is too long for the model",
+    );
+    expect(failureNext(unset)).toBe(
+      "This model's context window isn't set, so a smaller one is assumed: an administrator can set it in Settings › Models. Or start a new task.",
+    );
+    expect(
+      failureNext({ code: "budget", reason: "context window exceeded" }),
+    ).toBe("Start a new task, or ask for a short summary first.");
+  });
+
+  // WEB-U-547 (18.2.2; CORE-U-097): a thinking cut the guessed window narrowed names the window's setting, not Max output.
+  it("WEB-U-547 a thinking cut narrowed by an unset window says to set the window", () => {
+    const narrowed = {
+      code: "reply_cut",
+      reason:
+        "the model spent its whole output limit thinking (4096 tokens) and wrote no answer; 4096 requested; window not set",
+    };
+    expect(failureReason(narrowed)).toBe(
+      "The model spent its whole output limit thinking and wrote no answer",
+    );
+    expect(failureNext(narrowed)).toBe(
+      "This model's context window isn't set, so a smaller one is assumed and left little room for the answer: an administrator can set it in Settings › Models. Or send the message again.",
+    );
+    expect(
+      failureNext({
+        code: "reply_cut",
+        reason:
+          "the model spent its whole output limit thinking (4096 tokens) and wrote no answer; 4096 requested",
+      }),
+    ).toMatch(/^Send the message again: a cut like this is often a one-off\./);
+  });
+
   // The repeat guard stops at three failures with no change between, or at six in a run: one sentence for both, which
   // keys on the code, never on the runtime's reason text.
   it.each([

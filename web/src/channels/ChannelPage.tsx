@@ -160,6 +160,19 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
     refetchInterval: 5_000,
   });
   const cache = useQueryClient();
+  // An agent starting or stopping work changes the reader's own task list (the sidebar), which reads the tasks again
+  // only every 30 s while none runs: asked for at once here, so a post's woken agents show as working (WEB-U-545).
+  const runs = (members.data?.items ?? [])
+    .filter((item) => item.kind === "conversation")
+    .map((item) => `${item.id}:${item.state ?? ""}`)
+    .join(",");
+  const lastRuns = useRef<string | null>(null);
+  useEffect(() => {
+    if (!members.isSuccess) return;
+    if (lastRuns.current !== null && lastRuns.current !== runs)
+      void cache.invalidateQueries({ queryKey: ["conversations"] });
+    lastRuns.current = runs;
+  }, [runs, members.isSuccess, cache]);
   // An ended channel reads only: its state comes again from the gateway (the stream's channel.state).
   const log = useChannelLog(api, id, () => {
     void cache.invalidateQueries({ queryKey: ["channel", id] });

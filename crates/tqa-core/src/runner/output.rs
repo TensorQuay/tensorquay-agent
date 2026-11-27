@@ -145,6 +145,15 @@ impl Execution<'_> {
     /// request asks for at most the run's remaining budget, so a length finish is the budget only when the budget is
     /// spent after the reply; otherwise the model server or the route's max output cut it (`reply_cut`), and a cut tool
     /// call never runs.
+    /// "; window not set" when a guessed window narrowed the request below the route's Max output: the window was the
+    /// limit, not Max output, so the page names the window's setting (CORE-U-097); else nothing.
+    fn window_note(&self, requested: Option<u32>) -> &'static str {
+        let route = self.route();
+        let narrowed = route.context_window.is_none()
+            && requested.is_some_and(|tokens| route.max_output.is_none_or(|max| tokens < max));
+        if narrowed { "; window not set" } else { "" }
+    }
+
     pub(super) fn check_output(
         &self,
         response: &Completion,
@@ -169,9 +178,10 @@ impl Execution<'_> {
                 && response.tool_calls.is_empty()
                 && !response.reasoning.trim().is_empty()
             {
+                let note = self.window_note(meter.requested);
                 let requested = meter.requested.map_or_else(
                     || "no limit was sent, so the model server's own applied".to_owned(),
-                    |tokens| format!("{tokens} requested"),
+                    |tokens| format!("{tokens} requested{note}"),
                 );
                 return Err(Stop::Failed(
                     ErrorCode::ReplyCut,

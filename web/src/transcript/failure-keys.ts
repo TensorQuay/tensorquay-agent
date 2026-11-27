@@ -72,6 +72,12 @@ const THINKING: Failure = {
   reason: "run.thinkingCut",
   next: "fail.thinkingCutNext",
 };
+/** The same cut when an unset window narrowed the answer's room below Max output: the window is what to set (CORE-U-097). */
+const THINKING_WINDOW = "; window not set";
+const THINKING_NARROWED: Failure = {
+  reason: "run.thinkingCut",
+  next: "fail.thinkingCutUnsetNext",
+};
 
 /**
  * A model that answered with nothing, every try (the runtime's `empty_response`, CORE-U): nothing refused the request,
@@ -125,6 +131,11 @@ const BUDGET_COPY: Readonly<Record<string, Failure>> = {
   "context window exceeded": {
     reason: "fail.contextWindow",
     next: "fail.contextWindowNext",
+  },
+  // The route's window isn't set, so only a guessed one was there to fill (CORE-U-096, WEB-U-546).
+  "context window exceeded, window not set": {
+    reason: "fail.contextWindow",
+    next: "fail.contextWindowUnsetNext",
   },
 };
 
@@ -203,7 +214,8 @@ export function knownFailure(
     return CHANNEL_BUDGET;
   if (code === "budget")
     return BUDGET_COPY[reason] ?? FAILURE_COPY.budget ?? null;
-  if (code === "reply_cut" && reason.startsWith(THINKING_CUT)) return THINKING;
+  if (code === "reply_cut" && reason.startsWith(THINKING_CUT))
+    return reason.endsWith(THINKING_WINDOW) ? THINKING_NARROWED : THINKING;
   if (code === "provider_error" && /^empty_response(:|$)/.test(reason))
     return EMPTY_REPLY;
   return FAILURE_COPY[code] ?? null;
