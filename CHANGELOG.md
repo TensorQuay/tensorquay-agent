@@ -13,6 +13,17 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   key, while the gateway can't be reached or answers that it is briefly unavailable, for up to a minute; the gateway
   answers a repeated call with its first answer. A refusal is never sent again.
 
+## Unreleased
+
+### Fixed
+
+- **"+ Add" in a channel's Members panel shows its suggestions (WEB-E2E-152).** Beside the channel, from 1024 px,
+  the panel cut the list under the search box to a thin strip, so a match, or "None of your tasks matches.", couldn't
+  be seen and the box seemed to do nothing. The list now takes its own room in the panel.
+- **The sidebar shows a channel's woken agents working (WEB-U-545).** A post that woke a channel's agents showed in the
+  sidebar's task list only when it next read the tasks, up to 30 seconds later, so it seemed to need a reload. The
+  channel page now asks for the list again as soon as an agent starts or stops working.
+
 ## 18.2.1 (27 November 2026)
 
 A fix release for what real use of 18.2.0 found: "Stop now" on an idle Desktop task, the Desktop's browser coming to
