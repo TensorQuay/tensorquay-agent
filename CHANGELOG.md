@@ -3,6 +3,16 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
+## Unreleased
+
+### Fixed
+
+- **A team or channel call goes on through a gateway restart (RT-I-068).** When the gateway restarted at the moment
+  an agent called a team or channel tool, for example a lead's `done`, the call failed and a model that didn't try
+  again left its team waiting for the idle stop. The runtime now sends such a call again, with the same idempotency
+  key, while the gateway can't be reached or answers that it is briefly unavailable, for up to a minute; the gateway
+  answers a repeated call with its first answer. A refusal is never sent again.
+
 ## 18.2.1 (27 November 2026)
 
 A fix release for what real use of 18.2.0 found: "Stop now" on an idle Desktop task, the Desktop's browser coming to
