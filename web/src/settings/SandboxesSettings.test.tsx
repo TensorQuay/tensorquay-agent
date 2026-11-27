@@ -9,6 +9,7 @@ import {
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ApiError } from "../api/error";
+import { english as t } from "../i18n/translate";
 import type { User } from "../protocol/generated/api";
 import { LIMITS } from "../test/user";
 
@@ -17,7 +18,7 @@ import type {
   SandboxRow,
   SandboxesApi,
 } from "./admin/sandboxes";
-import { SandboxesSettings } from "./SandboxesSettings";
+import { SandboxesSettings, stopRefusal } from "./SandboxesSettings";
 
 // The Sandboxes page (the Sandboxes page design note, §4): its states, each row's resources, Stop now and its results,
 // and the privacy rule (nothing of a task but its id reaches the page): WEB-U-486, 487 and 488.
@@ -57,6 +58,7 @@ function row(
     usage: { cpu_millicores: 200, memory_bytes: 0.4 * GIB, pids: 7 },
     can_stop: true,
     stop_refusal: null,
+    screen_held: false,
     ...overrides,
   };
 }
@@ -653,5 +655,43 @@ describe("WEB-U-488 the page never renders a task's title, link or count", () =>
     const own = within(table).getAllByRole("row").at(-1);
     expect(own).toHaveTextContent("You");
     expect(own).not.toHaveTextContent(admin.email);
+  });
+});
+
+// WEB-U-543 (18.2.2): a Desktop a person holds through Take over says so, where it said "It is working now" (the
+// owner's real use, 24 Nov 2026: nothing was running; a person had the screen).
+describe("WEB-U-543 a Desktop a person holds says so", () => {
+  const HELD = row({
+    conversation_id: "0195d8c0-0000-7000-8000-00000000c005",
+    environment: { name: "desktop", display_name: "Desktop", desktop: true },
+    can_stop: false,
+    stop_refusal: "working",
+    screen_held: true,
+  });
+
+  it("dims Stop now with the person's hold as its reason", async () => {
+    show(fake([listing({ items: [HELD] })]));
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "More actions for ben@example.org's sandbox",
+      }),
+    );
+    const stop = screen.getByRole("menuitem", {
+      name: "Stop ben@example.org's sandbox now",
+    });
+    expect(stop).toHaveAttribute("aria-disabled", "true");
+    expect(stop).toHaveAccessibleDescription(
+      "A person is using this desktop through Take over; it can be stopped once it is handed back.",
+    );
+  });
+
+  it("words a refused stop by the hold when the row was held, and by the run otherwise", () => {
+    const refused = new ApiError(409, "working", "conflict");
+    expect(stopRefusal(refused, "ben@example.org", t, true)).toBe(
+      "ben@example.org's desktop is in use through Take over; it can be stopped once it is handed back.",
+    );
+    expect(stopRefusal(refused, "ben@example.org", t, false)).toBe(
+      "ben@example.org's sandbox is working now; it can't be stopped until the run ends.",
+    );
   });
 });

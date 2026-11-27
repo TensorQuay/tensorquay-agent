@@ -3,6 +3,15 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
+## Unreleased
+
+### Fixed
+
+- **Settings › Sandboxes says when a person holds a Desktop (GW-I-399, WEB-U-543).** While a person uses a Desktop
+  through Take over, Stop now is rightly refused, but the page said "It is working now" though nothing ran. It now
+  says that a person is using the desktop through Take over and that it can be stopped once it is handed back. Each
+  row of `GET /api/v1/admin/sandboxes` gains `screen_held`.
+
 ## 18.2.1 (27 November 2026)
 
 A fix release for what real use of 18.2.0 found: "Stop now" on an idle Desktop task, the Desktop's browser coming to

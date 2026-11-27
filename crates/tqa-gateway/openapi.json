@@ -22751,6 +22751,10 @@
               null
             ],
             "description": "Why Stop is refused now, when can_stop is false."
+          },
+          "screen_held": {
+            "type": "boolean",
+            "description": "A person holds the sandbox's screen now (a Take over in progress); its Stop is then refused as working. Always false without a desktop."
           }
         },
         "required": [
@@ -22765,7 +22769,8 @@
           "size",
           "usage",
           "can_stop",
-          "stop_refusal"
+          "stop_refusal",
+          "screen_held"
         ]
       },
       "AdminSandboxLeftBehind": {

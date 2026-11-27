@@ -95,6 +95,9 @@ pub(crate) struct Item {
     usage: Option<Usage>,
     can_stop: bool,
     stop_refusal: Option<Refusal>,
+    /// A person holds its screen now (a Take over in progress): the page says so, where a Stop is refused as
+    /// `working` (18.2.2, GW-I-399). Never true for a sandbox without a desktop.
+    screen_held: bool,
 }
 
 impl Item {
@@ -129,6 +132,7 @@ impl Item {
             usage: None,
             can_stop: refusal(state, false, false).is_none(),
             stop_refusal: refusal(state, false, false),
+            screen_held: false,
         }
     }
 }
@@ -400,6 +404,7 @@ fn item(
         usage,
         can_stop: stop_refusal.is_none(),
         stop_refusal,
+        screen_held,
     })
 }
 

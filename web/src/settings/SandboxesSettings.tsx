@@ -102,9 +102,11 @@ export function stopRefusal(
   error: Error,
   email: string,
   t: Translate,
+  held = false,
 ): string | null {
   if (!(error instanceof ApiError)) return null;
-  if (error.code === "working") return t("sandboxes.stopWorking", { email });
+  if (error.code === "working")
+    return t(held ? "sandboxes.stopHeld" : "sandboxes.stopWorking", { email });
   if (error.code === "work_waiting")
     return t("sandboxes.stopWaiting", { email });
   if (error.code === "not_found") return t("sandboxes.stopGone");
@@ -282,7 +284,9 @@ function Sandboxes({
           confirm={t("sandboxes.stopConfirm")}
           pending={stop.isPending}
           error={stop.error}
-          errorCopy={(error) => stopRefusal(error, stopping.owner.email, t)}
+          errorCopy={(error) =>
+            stopRefusal(error, stopping.owner.email, t, stopping.screen_held)
+          }
           final={refused}
           onConfirm={() => stop.mutate(stopping)}
           onClose={() => setStopping(null)}
@@ -381,7 +385,12 @@ function Row({
   const unavailable = pending
     ? t("sandboxes.stopping")
     : row.stop_refusal
-      ? t(REFUSAL_LABEL[row.stop_refusal])
+      ? // A person holding the screen refuses a Stop as `working`; its own words say so (18.2.2, WEB-U-543).
+        t(
+          row.screen_held
+            ? "sandboxes.refusedHeld"
+            : REFUSAL_LABEL[row.stop_refusal],
+        )
       : undefined;
   return (
     <tr>

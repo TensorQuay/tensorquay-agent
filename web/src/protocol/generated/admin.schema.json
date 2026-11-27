@@ -1775,6 +1775,9 @@
             "work_waiting",
             null
           ]
+        },
+        "screen_held": {
+          "type": "boolean"
         }
       },
       "required": [
@@ -1789,7 +1792,8 @@
         "size",
         "usage",
         "can_stop",
-        "stop_refusal"
+        "stop_refusal",
+        "screen_held"
       ]
     },
     "AdminSandboxLeftBehind": {
