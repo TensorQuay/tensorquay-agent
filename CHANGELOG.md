@@ -3,17 +3,15 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
-## Unreleased
+## 18.2.1 (27 November 2026)
 
-### Security
-
-- **A form sent before the page's script has loaded keeps what it holds out of the address (SEC-070).** Every form
-  posts. Before, a sign-in clicked while the page was still loading went to `/login?email=…&password=…`, where the
-  browser's history and any proxy's access log kept the password; the same held for the join page and the forms that
-  take keys.
-- **The cookie library is cookie 0.18.3** (it was 0.18.2), past RUSTSEC-2026-0594: private cookies' nonces could
-  repeat in a process that forks workers. TensorQuay Agent was never affected: the gateway uses plain cookies only
-  (the private-cookie feature isn't compiled in) and never forks; the update keeps the dependency audit (G-05) clean.
+A fix release for what real use of 18.2.0 found: "Stop now" on an idle Desktop task, the Desktop's browser coming to
+the front at a run's end, a channel opening at its oldest message, agents' posts signed with their tasks' titles, PDFs
+on a small local model, an agent team stopped while it hands out work, gzip pages, a channel post's lists losing their
+numbers, and a sign-in sent before the page had loaded putting the password in the address. One addition: the scripted
+test model is a published image, so a first try builds nothing. No database migration and no protocol change. The
+fixes for PDFs and the Desktop are in the runtime images: pull the release's images again, and rebuild custom
+environments to get them.
 
 ### Added
 
@@ -75,6 +73,35 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   refused one a server compressed anyway ("compressed responses are not supported"); it now reads gzip, with the same
   2 MiB limit on what it unpacks, so a small compressed file can't expand past it. Other encodings are still refused,
   now by name.
+
+### Security
+
+- **A form sent before the page's script has loaded keeps what it holds out of the address (SEC-070).** Every form
+  posts. Before, a sign-in clicked while the page was still loading went to `/login?email=…&password=…`, where the
+  browser's history and any proxy's access log kept the password; the same held for the join page and the forms that
+  take keys.
+- **The cookie library is cookie 0.18.3** (it was 0.18.2), past RUSTSEC-2026-0594: private cookies' nonces could
+  repeat in a process that forks workers. TensorQuay Agent was never affected: the gateway uses plain cookies only
+  (the private-cookie feature isn't compiled in) and never forks; the update keeps the dependency audit (G-05) clean.
+
+### Upgrade notes
+
+- **Back up the database first** (`pg_dump`), as for every release; 18.2.1 has no migration.
+- **Pull this release's images and restart** ([Upgrading to a new release](deploy/README.md#upgrading-to-a-new-release)).
+  Run `deploy/pull-images.sh --workstation` (and `--desktop` where it is used) again: the fixes for PDFs and for the
+  Desktop are in the runtime images. Custom environments built on 18.2.0 keep working; rebuild them to get those fixes.
+
+### Known issues
+
+- While a person holds a Desktop through Take over, Stop now is rightly refused but says "It is working now"; it
+  should say that a person has the desktop. Hand back first.
+- The majority rule can surprise (18.2.0's notes): a proposal's author is not counted until they vote, and two people
+  cannot decide against two agents.
+- Writing files in a sandbox is slower than on the host, most of all on microVM installs (18.2.0's notes); the
+  measurement is being redone on a larger sample.
+- Agent teams (experimental, off by default): if the gateway restarts in the second an agent team's lead calls done,
+  that call can fail. The lead is reminded to call done twice; when it doesn't, the team ends at its idle stop (30
+  minutes by default). Seen once in our nightly checks, which restart the gateway on purpose.
 
 ## 18.2.0 (23 November 2026)
 

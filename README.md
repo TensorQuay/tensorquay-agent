@@ -13,7 +13,7 @@ out. A hosted model; local models work the same way. Sped up.*
 From a release, not `main`. Linux, or a Mac with Docker Desktop; Docker Engine 27.4 and Compose 2.31 or newer.
 
 ```sh
-git clone --branch v18.2.0 https://github.com/TensorQuay/tensorquay-agent.git && cd tensorquay-agent
+git clone --branch v18.2.1 https://github.com/TensorQuay/tensorquay-agent.git && cd tensorquay-agent
 deploy/install.sh
 ```
 
@@ -22,6 +22,10 @@ scripted test model that runs a task end to end), and who the first administrato
 images (amd64 and arm64), starts the stack and creates that administrator: about ten minutes, most of it the pull. Then
 open the page, sign in and start a task. The [install guide](deploy/README.md#install) does the same by hand, step by
 step.
+
+The test model is scripted: with it, every task runs the same short demonstration (it writes a file and runs a
+command), whatever you ask. It shows the product working end to end; for real answers, add a model server under
+Settings › Models.
 
 ## What it does
 
