@@ -150,7 +150,8 @@ and the owner's next message starts a new sandbox on the same workspace (the fil
 sandbox). The handler's checks are eviction's predicate without the pinned and keep-sign-in exclusions (decision 1),
 taken under `admission.evicting`'s lock as eviction does, so a start that lands between the check and the retire is
 refused with `409 working` instead of being killed. A Desktop whose screen a person holds now (a Take over in
-progress, `screen::taken_over`) is refused with `409 working`. A Desktop that may hold a sign-in but that nobody holds
+progress, `screen::taken_over`) is refused with `409 working`; its row says so with `screen_held: true`, and the page
+words the refusal by the hold, not by a run (18.2.2, GW-I-399, WEB-U-543). A Desktop that may hold a sign-in but that nobody holds
 is stopped like any idle sandbox (decision 5): ADR-0039 §10's guard, the profile known empty (`screen::may_retire`),
 is for giving way unasked, and a Stop is a person's choice, with the dialog's warning. **Corrected 24 Nov 2026:** this
 paragraph said the stop followed `screen::may_retire` as eviction does, and 18.1.0 to 18.2.0 did: an idle Desktop with
