@@ -487,3 +487,22 @@ the real model once it forms (`gate-10.md` has the details).
   budget stop, all on the real model.
 
 The defects these runs found are fixed (`gate-10.md`). They bear on cost and reliability, not on the question above.
+
+### 3.9 Teams proven on rounds (23 Nov 2026)
+Run again once rounds existed (18.1, ADR-0034's rounds amendment), as the product owner asked on 17 Nov 2026: one real
+goal (`x1-region-shares`), three pairs, the local 27B model, on the 18.2.0 build. It is indicative: one task and three
+pairs give no interval worth the name.
+- **Correct:** one agent 3 of 3, the team 3 of 3 (the check on `regions.md`).
+- **Cost:** 134,724 tokens for the three single-agent attempts against 1,004,525 for the team's: **7.5×**. Wall time
+  6 against 23 minutes: 4.0×.
+- **Judged quality** (one judge, the technical lead; 0 to 10): one agent 9.67, the team 7.67. The judging couldn't
+  stay blind: every single-agent answer made the shares add up to 100, as its follow-up asked, and every team answer
+  left them at 101 with an offer to adjust, the hint having gone to a helper between rounds. Read the difference as
+  "the team's answers left a decision to the person", not as a blind measure.
+- **Rounds worked as designed** (E2E-AGENTS-041) in every attempt: round 2 opened after the follow-up, both round-1
+  helpers came back with their conversations and a new helper joined, and the person's message between rounds reached
+  its helper first. Two team-only failure classes showed, both in attempt 3: a helper's report the lead hadn't read
+  when it called `done`, and a report with files the lead never took. Its answer still passed.
+
+The reading is the same as in October: on this task a team is correct but costs 7.5 times the tokens and 4 times the
+time of one agent. Agent teams stay **experimental and off by default** (`gate-10.md`, reached 27 Nov 2026).
