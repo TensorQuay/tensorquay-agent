@@ -138,6 +138,7 @@ export function ShareDialog({
     >
       <p className="muted">{t("workspaces.shareIntro")}</p>
       <form
+        method="post"
         className="share-form"
         noValidate
         onSubmit={(event) => {

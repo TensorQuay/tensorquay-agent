@@ -117,7 +117,11 @@ export function RuleForm(props: FormProps) {
         if (!pending) onClose();
       }}
     >
-      <form className="stack" onSubmit={(event) => void submit(event)}>
+      <form
+        method="post"
+        className="stack"
+        onSubmit={(event) => void submit(event)}
+      >
         {item === null && (
           <Input
             label={t("egress.host")}

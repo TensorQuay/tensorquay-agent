@@ -55,6 +55,7 @@ export function NameDialog({
       }}
     >
       <form
+        method="post"
         className="stack"
         noValidate
         onSubmit={(event) => {

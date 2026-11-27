@@ -444,6 +444,16 @@ function Post({
 /** How many of a post's replies the log shows under it before "N more replies" (C-10). */
 const INLINE_REPLIES = 3;
 
+/** A post's Markdown, styled as a task's answers are (markdown.css): without it a list lost its numbers and bullets to
+ * the log's own list reset, and an answer that began "391." showed without its number (WEB-E2E-151, 27 Nov 2026). */
+function PostMarkdown({ text }: { text: string }) {
+  return (
+    <div className="markdown-body">
+      <DeferredMarkdown text={text} />
+    </div>
+  );
+}
+
 /** A post longer than this many lines folds (WEB-U-522), showing the first {@link FOLDED_LINES}. */
 const FOLD_OVER = 12;
 const FOLDED_LINES = 6;
@@ -474,7 +484,7 @@ function Folding({ text, plain = false }: { text: string; plain?: boolean }) {
       {plain ? (
         <p className="message-text">{shown}</p>
       ) : (
-        <DeferredMarkdown text={shown} />
+        <PostMarkdown text={shown} />
       )}
       {folds && (
         <button
@@ -516,7 +526,7 @@ function Body({
         <div className="stack">
           <p className="type-label muted">{t("channels.proposal")}</p>
           <p className="type-body-strong">{body.title}</p>
-          {!decided && <DeferredMarkdown text={body.text} />}
+          {!decided && <PostMarkdown text={body.text} />}
         </div>
       );
     case "vote":
@@ -548,7 +558,7 @@ function Body({
         <div className="stack">
           <p className="type-label muted">{t("channels.task")}</p>
           <p className="type-body-strong">{body.title}</p>
-          <DeferredMarkdown text={body.spec} />
+          <PostMarkdown text={body.spec} />
           <p className="type-small muted">{claimLimit(body.claims, t)}</p>
         </div>
       );

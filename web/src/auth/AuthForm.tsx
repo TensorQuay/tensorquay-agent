@@ -171,6 +171,7 @@ export function AuthForm({ mode }: { mode: "login" | "setup" }) {
         </p>
       </header>
       <form
+        method="post"
         ref={formRef}
         noValidate
         onSubmit={(event) => {

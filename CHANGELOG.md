@@ -7,6 +7,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Security
 
+- **A form sent before the page's script has loaded keeps what it holds out of the address (SEC-070).** Every form
+  posts. Before, a sign-in clicked while the page was still loading went to `/login?email=…&password=…`, where the
+  browser's history and any proxy's access log kept the password; the same held for the join page and the forms that
+  take keys.
 - **The cookie library is cookie 0.18.3** (it was 0.18.2), past RUSTSEC-2026-0594: private cookies' nonces could
   repeat in a process that forks workers. TensorQuay Agent was never affected: the gateway uses plain cookies only
   (the private-cookie feature isn't compiled in) and never forks; the update keeps the dependency audit (G-05) clean.
@@ -24,6 +28,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 - **A channel opens at its newest message and follows new ones (WEB-U-541, WEB-E2E-150).** It goes to the bottom once
   its log is read, follows what arrives there until the reader scrolls up, and comes back to the newest after the
   reader's own post. In 18.2.0 a channel opened at its oldest message.
+- **A channel post's lists keep their numbers and bullets (WEB-E2E-151).** Posts, proposals and to-dos are styled as a
+  task's answers are. In 18.2.0 every list in a channel lost its markers, and an answer that began with a number and a
+  full stop, such as "391. That is 17 times 23.", showed without the number.
 - **For maintainers: the KVM gate runs every microVM test, whatever fails (`tools/check.sh --kvm`).** One failing test
   stopped the run before: on the 18.2 candidates 19 of 97 tests never ran, and no CI runner has KVM to run them
   instead.

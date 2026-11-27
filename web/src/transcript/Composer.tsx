@@ -191,6 +191,7 @@ export function Composer({
   }
   return (
     <form
+      method="post"
       className="composer"
       aria-label={t("composer.region")}
       data-dragging={drop.dragging || undefined}

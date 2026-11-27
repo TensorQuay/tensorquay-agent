@@ -470,6 +470,7 @@ export function ChannelMembers({
       )}
       {naming && (
         <form
+          method="post"
           className="stack channel-naming"
           onSubmit={(event) => {
             event.preventDefault();

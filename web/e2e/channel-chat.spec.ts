@@ -170,3 +170,48 @@ test("WEB-E2E-150 a channel opens at its newest message", async ({ page }) => {
     log.getByText("The Q3 numbers are in.", { exact: false }),
   ).not.toBeInViewport();
 });
+
+// WEB-E2E-151 (18.2.1; the lead's real-model walk of 27 Nov 2026): a post's lists keep their numbers and bullets. The
+// agent answered "391. That is 17 times 23.", Markdown read "391." as a numbered list's start, and the channel showed
+// "That is 17 times 23.": the answer itself was gone. Channel posts weren't styled as Markdown, so every list lost its
+// markers, in the gallery's churn report too.
+test("WEB-E2E-151 a channel post's lists keep their numbers and bullets", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await signIn(page);
+  const marker = (item: import("@playwright/test").Locator) =>
+    item.evaluate((li) => {
+      const list = li.closest("ol, ul");
+      const style = list ? getComputedStyle(list) : null;
+      return {
+        kind: list?.tagName ?? "",
+        start: list instanceof HTMLOListElement ? list.start : null,
+        type: style?.listStyleType ?? "",
+        inset: Number.parseFloat(style?.paddingLeft ?? "0"),
+      };
+    });
+  await page.goto("/channels/0195d8c0-0000-7000-8000-00000000c4a3");
+  const answer = page
+    .getByRole("list", { name: "Channel log" })
+    .getByRole("listitem")
+    .filter({ hasText: /^That is 17 plus 25\.$/ });
+  await expect(answer).toBeVisible();
+  const numbered = await marker(answer);
+  expect(numbered).toMatchObject({ kind: "OL", start: 42, type: "decimal" });
+  expect(
+    numbered.inset,
+    "room for the number before the text",
+  ).toBeGreaterThanOrEqual(16);
+  await page.goto(PRICING);
+  const log = page.getByRole("list", { name: "Channel log" });
+  await log
+    .getByRole("button", { name: /^Show the whole report/ })
+    .first()
+    .click();
+  const bullet = log.locator("li li", { hasText: "Pro, EU:" }).first();
+  await expect(bullet).toBeVisible();
+  const bulleted = await marker(bullet);
+  expect(bulleted).toMatchObject({ kind: "UL", type: "disc" });
+  expect(bulleted.inset).toBeGreaterThanOrEqual(16);
+});

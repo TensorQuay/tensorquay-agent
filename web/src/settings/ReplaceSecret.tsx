@@ -76,7 +76,11 @@ export function ReplaceSecret({
         if (!pending) onClose();
       }}
     >
-      <form className="stack" onSubmit={(event) => void submit(event)}>
+      <form
+        method="post"
+        className="stack"
+        onSubmit={(event) => void submit(event)}
+      >
         {item.seed === "current" && (
           <p className="type-small muted">{t("secrets.seedNote")}</p>
         )}

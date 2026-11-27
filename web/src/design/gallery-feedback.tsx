@@ -54,6 +54,7 @@ function Toasts({ tone }: { tone: "info" | "success" | "error" }) {
 function RefusedForm() {
   return (
     <form
+      method="post"
       className="stack"
       noValidate
       onSubmit={(event) => event.preventDefault()}

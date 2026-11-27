@@ -189,6 +189,7 @@ export function EngineForm(props: FormProps) {
         />
       )}
       <form
+        method="post"
         className="stack"
         noValidate
         hidden={!kindChosen}

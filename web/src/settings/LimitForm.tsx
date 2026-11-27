@@ -162,6 +162,7 @@ export function LimitForm(props: FormProps) {
     >
       {/* The page's range check and the gateway's reason speak, not the browser's own tooltip. */}
       <form
+        method="post"
         className="stack"
         noValidate
         onSubmit={(event) => void form.submit(event)}

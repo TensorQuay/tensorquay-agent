@@ -91,6 +91,7 @@ export function TokensSettings({
         {outro}
       </p>
       <form
+        method="post"
         className="settings-form"
         noValidate
         onSubmit={(event) => {

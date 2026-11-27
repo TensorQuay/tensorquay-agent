@@ -226,7 +226,11 @@ function ReportDialog({
         if (!pending) onClose();
       }}
     >
-      <form className="stack" onSubmit={(event) => void submit(event)}>
+      <form
+        method="post"
+        className="stack"
+        onSubmit={(event) => void submit(event)}
+      >
         <Select
           label={t("channels.status")}
           value={status}
