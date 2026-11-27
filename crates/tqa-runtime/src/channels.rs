@@ -31,6 +31,8 @@ pub struct GatewayChannels {
     client: reqwest::Client,
     origin: Url,
     authorization: HeaderValue,
+    /// How long a call keeps trying through a gateway that is restarting ([`send_retrying`]).
+    retry_window: Duration,
 }
 
 impl GatewayChannels {
@@ -52,7 +54,15 @@ impl GatewayChannels {
             client,
             origin: origin.clone(),
             authorization,
+            retry_window: RETRY_WINDOW,
         })
+    }
+
+    /// The same client with another retry window (a test's own).
+    #[must_use]
+    pub const fn with_retry_window(mut self, window: Duration) -> Self {
+        self.retry_window = window;
+        self
     }
 
     /// `/runtime/channels` followed by `segments`, each a validated path segment.
@@ -90,25 +100,97 @@ impl GatewayChannels {
 }
 
 /// Sends `request` and reads its answer within the bounds; `Ok((status, body))` for any 2xx.
+/// How long a team or channel call keeps trying through a gateway that is restarting (RT-I-068): a gateway restart
+/// takes seconds; its database coming back can take longer.
+pub(crate) const RETRY_WINDOW: Duration = Duration::from_mins(1);
+
 pub(crate) async fn send(
     request: reqwest::RequestBuilder,
     cancel: &CancellationToken,
 ) -> Result<(StatusCode, Vec<u8>), ChannelFailure> {
+    attempt(request, cancel).await.0
+}
+
+/// The first pause before a call is sent again, doubled each time up to [`LONGEST_PAUSE`].
+const FIRST_PAUSE: Duration = Duration::from_millis(250);
+/// The longest pause between two sendings of one call.
+const LONGEST_PAUSE: Duration = Duration::from_secs(4);
+
+/// [`send`], and sent again while the gateway is restarting (RT-I-068): a call that couldn't reach the gateway, or that
+/// it answered 503 or with an error it marks `retryable`, goes again after a pause that doubles, until `window` ends.
+/// The request is the same each time, its idempotency key included, so the gateway answers a call it already took
+/// with its first answer. A refusal, a timeout (the gateway may still be working on it) and a cancel end it at once;
+/// past the window, the last failure is the answer. A request whose body can't be copied is sent once.
+pub(crate) async fn send_retrying(
+    request: reqwest::RequestBuilder,
+    window: Duration,
+    cancel: &CancellationToken,
+) -> Result<(StatusCode, Vec<u8>), ChannelFailure> {
+    let deadline = tokio::time::Instant::now() + window;
+    let mut pause = FIRST_PAUSE;
+    loop {
+        let Some(this) = request.try_clone() else {
+            return send(request, cancel).await;
+        };
+        match attempt(this, cancel).await {
+            (Err(failure), true) if tokio::time::Instant::now() + pause < deadline => {
+                tracing::debug!(
+                    code = %failure.code,
+                    pause_ms = u64::try_from(pause.as_millis()).unwrap_or(u64::MAX),
+                    "the gateway didn't take the call; it is sent again"
+                );
+                tokio::select! {
+                    biased;
+                    () = cancel.cancelled() => return Err(cancelled()),
+                    () = tokio::time::sleep(pause) => {}
+                }
+                pause = (pause * 2).min(LONGEST_PAUSE);
+            }
+            (result, _) => return result,
+        }
+    }
+}
+
+fn cancelled() -> ChannelFailure {
+    ChannelFailure::new("cancelled", "the call was cancelled")
+}
+
+/// One sending: its result, and whether the failure is one a restarting gateway gives (the gateway unreachable, a 503,
+/// or an error the gateway marks `retryable`).
+async fn attempt(
+    request: reqwest::RequestBuilder,
+    cancel: &CancellationToken,
+) -> (Result<(StatusCode, Vec<u8>), ChannelFailure>, bool) {
     let exchange = async {
-        let mut response = request.send().await.map_err(|error| transport(&error))?;
+        let mut response = match request.send().await {
+            Ok(response) => response,
+            Err(error) => return (Err(transport(&error)), !error.is_timeout()),
+        };
         let status = response.status();
-        let body = bounded_body(&mut response).await?;
+        let body = match bounded_body(&mut response).await {
+            Ok(body) => body,
+            Err(failure) => return (Err(failure), false),
+        };
         if status.is_success() {
-            Ok((status, body))
+            (Ok((status, body)), false)
         } else {
-            Err(refusal(status, &body))
+            let again = status == StatusCode::SERVICE_UNAVAILABLE || marked_retryable(&body);
+            (Err(refusal(status, &body)), again)
         }
     };
     tokio::select! {
         biased;
-        () = cancel.cancelled() => Err(ChannelFailure::new("cancelled", "the call was cancelled")),
+        () = cancel.cancelled() => (Err(cancelled()), false),
         result = exchange => result,
     }
+}
+
+/// Whether the gateway's error envelope says the call may be tried again (`"retryable": true`).
+fn marked_retryable(body: &[u8]) -> bool {
+    serde_json::from_slice::<Value>(body)
+        .ok()
+        .and_then(|envelope| envelope["error"]["retryable"].as_bool())
+        .unwrap_or(false)
 }
 
 fn transport(error: &reqwest::Error) -> ChannelFailure {
@@ -206,8 +288,9 @@ impl ChannelClient for GatewayChannels {
         struct Listed {
             channels: Vec<ChannelSummary>,
         }
-        let (_, body) = send(
+        let (_, body) = send_retrying(
             self.request(Method::GET, self.url(&[]), "", CALL_TIMEOUT),
+            self.retry_window,
             cancel,
         )
         .await?;
@@ -247,7 +330,12 @@ impl ChannelClient for GatewayChannels {
         let query = url.query().map(|query| query.replace("%2C", ","));
         url.set_query(query.as_deref());
         let timeout = request.wait.map_or(CALL_TIMEOUT, |wait| wait + WAIT_GRACE);
-        let (_, body) = send(self.request(Method::GET, url, "", timeout), cancel).await?;
+        let (_, body) = send_retrying(
+            self.request(Method::GET, url, "", timeout),
+            self.retry_window,
+            cancel,
+        )
+        .await?;
         parse(&body)
     }
 
@@ -262,7 +350,7 @@ impl ChannelClient for GatewayChannels {
         let request = self
             .request(Method::POST, url, key, CALL_TIMEOUT)
             .json(post);
-        let (_, body) = send(request, cancel).await?;
+        let (_, body) = send_retrying(request, self.retry_window, cancel).await?;
         parse(&body)
     }
 
@@ -275,8 +363,12 @@ impl ChannelClient for GatewayChannels {
     ) -> Result<Claimed, ChannelFailure> {
         let task = task_seq.to_string();
         let url = self.url(&[channel_id(channel)?, "tasks", &task, "claim"]);
-        let (status, body) =
-            send(self.request(Method::POST, url, key, CALL_TIMEOUT), cancel).await?;
+        let (status, body) = send_retrying(
+            self.request(Method::POST, url, key, CALL_TIMEOUT),
+            self.retry_window,
+            cancel,
+        )
+        .await?;
         Ok(Claimed {
             message: parse(&body)?,
             existing: status == StatusCode::OK,
