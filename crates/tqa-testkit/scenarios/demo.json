@@ -17,7 +17,7 @@
     },
     {
       "events": [
-        {"type": "text", "text": "Created hello/README.md with a title and a project description."}
+        {"type": "text", "text": "Created hello/README.md with a title and a project description.\n\nThis answer comes from the scripted test model: every task runs this same short demonstration, whatever you ask. For real answers, an administrator can add a model server under Settings › Models."}
       ],
       "usage": {"prompt_tokens": 90, "completion_tokens": 14}
     },
@@ -37,7 +37,7 @@
     },
     {
       "events": [
-        {"type": "text", "text": "Added a Usage section to hello/README.md."}
+        {"type": "text", "text": "Added a Usage section to hello/README.md.\n\nThis answer comes from the scripted test model: every task runs this same short demonstration, whatever you ask. For real answers, an administrator can add a model server under Settings › Models."}
       ],
       "usage": {"prompt_tokens": 190, "completion_tokens": 11}
     }

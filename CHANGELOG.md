@@ -7,6 +7,10 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
 
 ### Fixed
 
+- **The scripted test model says what it is (TK-U-054).** A first try with `deploy/install.sh --fake-model` ran the
+  same short demonstration whatever a person asked, and nothing in the product said why. Each of its answers now ends
+  with a paragraph saying that the answer comes from the scripted test model and that an administrator can add a model
+  server under Settings › Models for real answers.
 - **A team or channel call goes on through a gateway restart (RT-I-068).** When the gateway restarted at the moment
   an agent called a team or channel tool, for example a lead's `done`, the call failed and a model that didn't try
   again left its team waiting for the idle stop. The runtime now sends such a call again, with the same idempotency
