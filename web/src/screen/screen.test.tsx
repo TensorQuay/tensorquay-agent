@@ -710,6 +710,41 @@ describe("WEB-U-242 the Screen panel", () => {
     ).toBeVisible();
   });
 
+  // WEB-U-544 (18.2.2): one Escape is the desktop's even in the page's first second. The time of the last Escape began
+  // at 0 on the page's own clock, so in the first second after the page loaded a single Escape read as the second of
+  // two and gave the keyboard back to the page (the live sign-in's second phase, 27 Nov 2026: typed into nothing).
+  it("WEB-U-544 gives the keyboard back on two Escapes, never on one, even just after the page loaded", async () => {
+    const { ScreenPanel } = await import("./ScreenPanel");
+    render(<ScreenPanel conversationId="task-1" working={false} />);
+    await act(async () => {
+      socket().open();
+      await Promise.resolve();
+    });
+    await connected();
+    fireEvent.click(screen.getByRole("button", { name: "Take over" }));
+    act(() => socket().frame(control("you")));
+    const desktop = screen.getByRole("application", {
+      name: "The agent's desktop, live, you have control",
+    });
+    const clock = vi.spyOn(performance, "now");
+    try {
+      // 400 ms after the page loaded: the desktop's.
+      clock.mockReturnValue(400);
+      fireEvent.keyDown(desktop, { key: "Escape" });
+      expect(clients[0]?.blur).not.toHaveBeenCalled();
+      // A second within the second: the keyboard goes back to the page.
+      clock.mockReturnValue(900);
+      fireEvent.keyDown(desktop, { key: "Escape" });
+      expect(clients[0]?.blur).toHaveBeenCalledOnce();
+      // Later, one alone is the desktop's again.
+      clock.mockReturnValue(5_000);
+      fireEvent.keyDown(desktop, { key: "Escape" });
+      expect(clients[0]?.blur).toHaveBeenCalledOnce();
+    } finally {
+      clock.mockRestore();
+    }
+  });
+
   // In the expanded screen, while this tab has control and the keyboard is in the screen, one Escape is the desktop's,
   // whatever the screen client does with it; once the keyboard is back on the page (Escape twice), Escape closes the
   // dialog. The close button always does.

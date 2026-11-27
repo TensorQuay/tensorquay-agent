@@ -20,6 +20,9 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   through Take over, Stop now is rightly refused, but the page said "It is working now" though nothing ran. It now
   says that a person is using the desktop through Take over and that it can be stopped once it is handed back. Each
   row of `GET /api/v1/admin/sandboxes` gains `screen_held`.
+- **One Escape in a Take over reaches the desktop even just after the page opened (WEB-U-544).** Two Escapes within
+  a second give the keyboard back to the page; in the first second after the page loaded, a single Escape did, so
+  what was typed next went to the page, not the desktop.
 
 ## 18.2.1 (27 November 2026)
 

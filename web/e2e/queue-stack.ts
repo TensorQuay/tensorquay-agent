@@ -26,7 +26,18 @@ export async function observeQueue(page: Page) {
   page.on("pageerror", (error) => {
     if (errors.length < 20) errors.push(error.message);
   });
+  // Chromium logs this when the host's network changes under the page: Docker adds and removes a sandbox's network
+  // as this suite's tasks sleep and wake, so a request in flight then can fail on the runner (twice on 27 Nov 2026,
+  // WEB-E2E-018). The page's own errors still count; these are kept apart, in the evidence, and the gateway's outcomes
+  // are checked after.
+  const networkChanged: string[] = [];
   page.on("console", (message) => {
+    if (
+      message.text() === "Failed to load resource: net::ERR_NETWORK_CHANGED"
+    ) {
+      networkChanged.push(message.location().url);
+      return;
+    }
     if (errors.length < 20 && ["warning", "error"].includes(message.type()))
       errors.push(message.text());
   });
@@ -75,7 +86,7 @@ export async function observeQueue(page: Page) {
       { once: true },
     );
   });
-  return { session, snapshots, frames, invalid, errors };
+  return { session, snapshots, frames, invalid, errors, networkChanged };
 }
 
 /**
@@ -201,6 +212,7 @@ export async function queueEvidence(
         frames: [...stream.frames.values()],
         invalid: stream.invalid,
         errors: stream.errors,
+        network_changed: stream.networkChanged,
         displayed: await page.evaluate(() => window.__queueStatus),
       },
       null,
