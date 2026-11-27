@@ -13,7 +13,7 @@ use tqa_tools::builtin::team::{ReadAnswer, RoleAnswer, TeamClient, TeamFailure};
 use url::Url;
 
 use crate::RuntimeError;
-use crate::channels::{parse, send};
+use crate::channels::{parse, send, send_retrying};
 
 /// A plain call's deadline; a read gets its wait on top.
 const CALL_TIMEOUT: Duration = Duration::from_secs(30);
@@ -25,6 +25,8 @@ pub struct GatewayTeams {
     client: reqwest::Client,
     origin: Url,
     authorization: HeaderValue,
+    /// How long a call keeps trying through a gateway that is restarting ([`crate::channels::send_retrying`]).
+    retry_window: Duration,
 }
 
 impl GatewayTeams {
@@ -46,7 +48,15 @@ impl GatewayTeams {
             client,
             origin: origin.clone(),
             authorization,
+            retry_window: crate::channels::RETRY_WINDOW,
         })
+    }
+
+    /// The same client with another retry window (a test's own).
+    #[must_use]
+    pub const fn with_retry_window(mut self, window: Duration) -> Self {
+        self.retry_window = window;
+        self
     }
 
     fn request(
@@ -109,7 +119,7 @@ impl TeamClient for GatewayTeams {
         let request = self
             .request(Method::POST, "/runtime/teams/members", call, CALL_TIMEOUT)
             .json(body);
-        let (_, answer) = send(request, cancel).await?;
+        let (_, answer) = send_retrying(request, self.retry_window, cancel).await?;
         parse(&answer)
     }
 
@@ -122,7 +132,7 @@ impl TeamClient for GatewayTeams {
         let request = self
             .request(Method::POST, "/runtime/teams/messages", call, CALL_TIMEOUT)
             .json(body);
-        let (_, answer) = send(request, cancel).await?;
+        let (_, answer) = send_retrying(request, self.retry_window, cancel).await?;
         parse(&answer)
     }
 
@@ -135,7 +145,7 @@ impl TeamClient for GatewayTeams {
         let request = self
             .request(Method::POST, "/runtime/teams/files", call, CALL_TIMEOUT)
             .json(body);
-        let (_, answer) = send(request, cancel).await?;
+        let (_, answer) = send_retrying(request, self.retry_window, cancel).await?;
         parse(&answer)
     }
 
@@ -148,7 +158,7 @@ impl TeamClient for GatewayTeams {
         let request = self
             .request(Method::POST, "/runtime/teams/done", call, CALL_TIMEOUT)
             .json(body);
-        let (_, answer) = send(request, cancel).await?;
+        let (_, answer) = send_retrying(request, self.retry_window, cancel).await?;
         parse(&answer)
     }
 
@@ -163,7 +173,7 @@ impl TeamClient for GatewayTeams {
         let request = self
             .request(Method::POST, &path, call, CALL_TIMEOUT)
             .json(body);
-        let (_, answer) = send(request, cancel).await?;
+        let (_, answer) = send_retrying(request, self.retry_window, cancel).await?;
         parse(&answer)
     }
 
@@ -186,7 +196,7 @@ impl TeamClient for GatewayTeams {
         if let Some(limit) = limit {
             query.push(("limit", limit.to_string()));
         }
-        let (_, answer) = send(request.query(&query), cancel).await?;
+        let (_, answer) = send_retrying(request.query(&query), self.retry_window, cancel).await?;
         parse(&answer)
     }
 
@@ -210,7 +220,7 @@ impl TeamClient for GatewayTeams {
         if let Some(wait) = wait {
             query.push(("wait", wait.to_string()));
         }
-        let (_, answer) = send(request.query(&query), cancel).await?;
+        let (_, answer) = send_retrying(request.query(&query), self.retry_window, cancel).await?;
         parse(&answer)
     }
 
@@ -225,7 +235,7 @@ impl TeamClient for GatewayTeams {
             ("", run),
             CALL_TIMEOUT,
         );
-        let (_, answer) = send(request, cancel).await?;
+        let (_, answer) = send_retrying(request, self.retry_window, cancel).await?;
         let answer: Value = parse(&answer)?;
         Ok(answer["check"].as_str().map(str::to_owned))
     }
