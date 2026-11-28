@@ -739,3 +739,37 @@ describe("WEB-U-542 an agent's post shows its name in the channel", () => {
     );
   });
 });
+
+// WEB-U-550 (18.3.0; the product owner, 27 Nov 2026: "the majority voted, but not closed"): a decision ends its proposal,
+// never the channel. Under the newest decision, the person who can end the channel (its owner or an administrator)
+// reads that it stays open and how to end it; nobody else, and no older decision, gets the line.
+describe("WEB-U-550 a decision says the channel stays open, to whoever can end it", () => {
+  const STAYS =
+    "The channel stays open. End it from the … menu at the top once its work is done.";
+  const second = post(
+    10,
+    { kind: "gateway", id: "gateway", name: "gateway" },
+    {
+      type: "decision",
+      proposal_seq: 2,
+      outcome: "rejected",
+      rule: "majority",
+    },
+  );
+  it("shows the line once, under the newest decision, when the viewer can end the channel", () => {
+    render(
+      <ChannelTimeline
+        messages={[...LOG, second]}
+        members={members}
+        closeHint
+      />,
+    );
+    expect(screen.getAllByText(STAYS)).toHaveLength(1);
+    expect(card(10)).toHaveTextContent(STAYS);
+    expect(card(4)).not.toHaveTextContent(STAYS);
+  });
+  it("shows nothing to someone who can't end the channel", () => {
+    show([...LOG, second]);
+    expect(screen.queryByText(STAYS)).toBeNull();
+  });
+});

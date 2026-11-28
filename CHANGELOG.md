@@ -3,6 +3,24 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
+## Unreleased
+
+### Fixed
+
+- **Sign in waits until the page is ready (WEB-U-548).** A sign-in clicked, or Enter pressed, before the page had
+  finished loading went the browser's plain way and signed no one in, which left the person on the sign-in page. Until
+  the page is ready, Sign in (and Create administrator) stays disabled for that moment.
+- **Settings › Models says what an empty Context window means (WEB-U-549).** It said "The server's own", but tasks
+  then assume 32,768 tokens and plan with three quarters of that, so a hosted model with a far larger window had long
+  conversations summarised early or cut off. The field now says "Not set (32,768 assumed)" and why setting the real
+  window from the provider's model page matters.
+
+### Added
+
+- **A decision says the channel stays open (WEB-U-550).** Under a channel's newest decision, its owner or an
+  administrator reads that the channel stays open and that its … menu ends it once the work is done. A decision ends
+  its proposal, never the channel.
+
 ## 18.2.2 (28 November 2026)
 
 A fix release for what use of 18.2.1 found: an agent team's or a channel's call lost when the gateway restarted at that

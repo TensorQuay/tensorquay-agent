@@ -191,6 +191,7 @@ export function ChannelTimeline({
   onThread,
   label,
   liveSpent,
+  closeHint = false,
 }: {
   messages: readonly ChannelMessage[];
   members: readonly Member[];
@@ -205,6 +206,8 @@ export function ChannelTimeline({
   after?: (message: ChannelMessage) => ReactNode;
   /** The used-up notice still true ([`liveBudgetNotice`]); others read as past. Absent, every one reads as current. */
   liveSpent?: number | null;
+  /** The viewer can end the open channel (its owner or an administrator): the newest decision says it stays open. */
+  closeHint?: boolean;
 }) {
   const t = useT();
   const known = new Set(messages.map((message) => message.seq));
@@ -221,6 +224,15 @@ export function ChannelTimeline({
       message.body.type === "decision" ? [message.body.proposal_seq] : [],
     ),
   );
+  // A decision ends its proposal, never the channel (WEB-U-550, the product owner's question of 27 Nov 2026).
+  const newestDecision = closeHint
+    ? Math.max(
+        -1,
+        ...messages.flatMap((message) =>
+          message.body.type === "decision" ? [message.seq] : [],
+        ),
+      )
+    : -1;
   const replies = new Map<number, ChannelMessage[]>();
   for (const message of messages)
     if (message.parent != null && known.has(message.parent))
@@ -259,7 +271,18 @@ export function ChannelTimeline({
           past={liveSpent !== undefined && liveSpent !== message.seq}
           {...(onReply ? { onReply } : {})}
           {...(fileHref ? { fileHref } : {})}
-          extra={after?.(message)}
+          extra={
+            message.seq === newestDecision ? (
+              <>
+                {after?.(message)}
+                <p className="type-small muted">
+                  {t("channels.decidedStaysOpen")}
+                </p>
+              </>
+            ) : (
+              after?.(message)
+            )
+          }
         >
           {thread.length > 0 &&
             (onThread ? (

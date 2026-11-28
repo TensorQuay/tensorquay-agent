@@ -285,9 +285,15 @@ describe("WEB-U-039 model routes", () => {
       "Requests per minute",
     ])
       expect(labelled(label, advanced)).toBeInTheDocument();
-    // An empty limit says what it means: the server's own, or no limit here.
+    // An empty limit says what it means: for the context window, what tasks then assume (WEB-U-549: it said "The
+    // server's own", but tasks plan with 32,768 tokens, three quarters counted); otherwise the server's own, or no limit.
+    expect(
+      within(advanced).getByText(
+        "Not set: tasks assume 32 768 tokens and plan with three quarters of that. Set this model's real context window, from its provider's model page, so long conversations aren't summarised early or cut off.",
+      ),
+    ).toBeInTheDocument();
     for (const [label, placeholder] of [
-      ["Context window", "The server's own"],
+      ["Context window", "Not set (32\u202f768 assumed)"],
       ["Max output", "The server's own (no limit sent)"],
       ["Concurrency", "No limit"],
       ["Requests per minute", "No limit"],
