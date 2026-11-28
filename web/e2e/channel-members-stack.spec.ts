@@ -95,6 +95,7 @@ test("WEB-U-066 channel membership, end and delete on the real stack", async ({
       type: "task",
       title: "Check the links",
       spec: "Every link in the notes.",
+      claims: 2,
     },
   });
   const todoSeq = Number(todo.seq);
@@ -105,7 +106,7 @@ test("WEB-U-066 channel membership, end and delete on the real stack", async ({
   const board = page.getByRole("list", { name: "To-dos" });
   const item = board.getByRole("listitem", { name: /Check the links/ });
   await item.getByRole("button", { name: `Take on #${todoSeq}` }).click();
-  await expect(item).toContainText("1 of 1 place taken");
+  await expect(item).toContainText("1 of 2 places taken");
   await item
     .getByRole("button", { name: `Give back your place on #${todoSeq}` })
     .click();
@@ -115,7 +116,7 @@ test("WEB-U-066 channel membership, end and delete on the real stack", async ({
   await axe(page);
   await giving.getByRole("button", { name: "Give back" }).click();
   await expect(giving).toHaveCount(0);
-  await expect(item).toContainText("Open · 1 place");
+  await expect(item).toContainText("Open · 2 places");
   await expect(
     page.getByText(/gave back their place on #\d+; it is free again\.$/),
   ).toBeVisible();
@@ -129,7 +130,7 @@ test("WEB-U-066 channel membership, end and delete on the real stack", async ({
     page
       .getByRole("list", { name: "To-dos" })
       .getByRole("listitem", { name: /Check the links/ }),
-  ).toContainText("Open · 1 place");
+  ).toContainText("Open · 2 places");
   const tasks = (await (
     await page.request.get(`/api/v1/channels/${id}/tasks`)
   ).json()) as { items: { claims: unknown[] }[] };
