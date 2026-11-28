@@ -363,3 +363,29 @@ describe("WEB-U-501 the sign-in and setup pages show the app's one lockup", () =
     expectAppLockup();
   });
 });
+
+// WEB-U-548 (18.3.0; the nightly real-stack run of 27 Nov 2026): a sign-in clicked before the page has finished
+// loading went the browser's plain way (a POST to /login since SEC-070) and signed no one in. Until the page is ready,
+// its submit button is disabled, which also stops Enter in a field from sending the form (implicit submission needs an
+// enabled default button); once ready, it is enabled.
+describe("WEB-U-548 the sign-in and setup forms wait until the page is ready", () => {
+  it.each(["login", "setup"] as const)(
+    "%s: the first HTML has the submit button disabled; the live page enables it",
+    async (mode) => {
+      const { renderToString } = await import("react-dom/server");
+      const html = renderToString(
+        <QueryClientProvider client={new QueryClient()}>
+          <AuthForm mode={mode} />
+        </QueryClientProvider>,
+      );
+      const submit = /<button[^>]*type="submit"[^>]*>/.exec(html)?.[0] ?? "";
+      expect(submit).not.toBe("");
+      expect(submit).toMatch(/\sdisabled(=""|\s|>)/);
+      page(mode);
+      const button = screen.getByRole("button", {
+        name: mode === "login" ? "Sign in" : "Create administrator",
+      });
+      await waitFor(() => expect(button).toBeEnabled());
+    },
+  );
+});

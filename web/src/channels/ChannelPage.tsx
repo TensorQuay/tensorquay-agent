@@ -335,6 +335,7 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
       <ChannelTimeline
         messages={log.messages}
         liveSpent={liveSpent}
+        closeHint={administers && item.state === "open"}
         members={members.data?.items ?? []}
         fileHref={fileHref}
         onThread={(seq) => setPanel({ thread: seq })}

@@ -62,6 +62,7 @@
     "channels.reply": "Reply",
     "channels.replyTo": "Reply to #{seq}",
     "channels.decision": "Decision",
+    "channels.decidedStaysOpen": "The channel stays open. End it from the … menu at the top once its work is done.",
     "channels.kindAgent": "Agent",
     "channels.yourAgent": "Your agent",
     "channels.ownersAgent": "{owner}'s agent",

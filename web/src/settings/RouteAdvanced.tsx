@@ -13,6 +13,9 @@ import { ROLES, type Draft, type Problems } from "./route-copy";
 import { Group, Text, type Preset, type Section } from "./route-form-fields";
 import { localRoute } from "./route-local";
 
+/** What tasks assume for a route with no Context window: tqa-core's `DEFAULT_CONTEXT_WINDOW` (WEB-U-549). */
+const GUESSED_CONTEXT_WINDOW = 32_768;
+
 /** How the route reaches its server: the protocol and how the key is sent (under Advanced). */
 export function Connection(section: Section) {
   const t = useT();
@@ -85,7 +88,12 @@ export function Limits({
   }, [focused]);
   // An empty limit says what it means: the model server's own, or no limit from this gateway. An empty Max output
   // sends no limit on Chat Completions and Responses; Anthropic Messages requires one (WEB-U-108).
-  const own = t("models.serversOwn");
+  // An empty Context window isn't the server's own: tasks assume the runtime's default and plan with three quarters
+  // of it (tqa-core's DEFAULT_CONTEXT_WINDOW and its guessed-window rule; WEB-U-549, the owner's route of 27 Nov 2026).
+  const unsetWindow = t("models.contextWindowUnset", {
+    n: GUESSED_CONTEXT_WINDOW,
+  });
+  const windowUnset = String(section.draft.context_window ?? "").trim() === "";
   const output =
     section.draft.protocol === "anthropic_messages"
       ? t("models.maxOutputRequired")
@@ -105,9 +113,14 @@ export function Limits({
         name="context_window"
         labelKey="models.contextWindow"
         inputMode="numeric"
-        placeholder={own}
+        placeholder={unsetWindow}
         id={contextId}
       />
+      {windowUnset && !contextSuggested && (
+        <p className="type-small muted">
+          {t("models.contextWindowUnsetHint", { n: GUESSED_CONTEXT_WINDOW })}
+        </p>
+      )}
       {suggested && (
         <p className="type-small" role="status">
           {t("models.presetMaxOutput", {

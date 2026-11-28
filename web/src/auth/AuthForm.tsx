@@ -3,7 +3,13 @@
 import "./catalogue";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type FormEvent,
+} from "react";
 
 import { api, ApiError } from "../api/client";
 import { useRequest } from "../api/use-request";
@@ -22,6 +28,11 @@ import {
 import { PasswordField } from "./PasswordField";
 import { returnPath } from "./return-path";
 import { setupState } from "./setup-state";
+
+// The page's readiness for useSyncExternalStore: false in the server's HTML and while hydrating, true once live.
+const noChange = () => () => {};
+const isLive = () => true;
+const notLive = () => false;
 
 /** Keeps credentials in the form, then uses the session established by either successful auth action. */
 /**
@@ -49,6 +60,9 @@ export function AuthForm({ mode }: { mode: "login" | "setup" }) {
   const router = useRouter();
   const query = useQueryClient();
   const request = useRequest();
+  // Until the page is live (hydrated), its submit stays disabled: a click or Enter sent before then went the browser's
+  // plain way and signed no one in (the nightly real-stack run of 27 Nov 2026; WEB-U-548).
+  const ready = useSyncExternalStore(noChange, isLive, notLive);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   // Each field's problem in the page's words, before anything is sent (WEB-U-355).
@@ -246,7 +260,7 @@ export function AuthForm({ mode }: { mode: "login" | "setup" }) {
             {t("auth.checkSetup")}
           </Button>
         )}
-        <Button type="submit" loading={request.pending}>
+        <Button type="submit" loading={request.pending} disabled={!ready}>
           {t(setup ? "auth.createAdministrator" : "auth.signIn")}
         </Button>
       </form>
