@@ -2,7 +2,9 @@
 use super::{append_body, db_seq, kind_of, kind_text, read, seq_of};
 use crate::GatewayError;
 use sqlx::PgConnection;
-use tqa_types::{Author, AuthorKind, ChannelFilter, ChannelMessage, MessageBody};
+use tqa_types::{
+    Author, AuthorKind, ChannelFilter, ChannelMessage, ChannelNoticeKind, MessageBody,
+};
 use uuid::Uuid;
 
 /// What a claim did: a new claim, or the claimant's existing one (a retry).
@@ -96,6 +98,89 @@ pub(crate) async fn claim(
     Ok(Claimed::New(stored))
 }
 
+/// Gives back `author`'s place on task `task` before they report on it (18.3.0, GW-I-401): the claim goes, the place is
+/// free again, and a gateway notice says who gave it back and wakes the channel's agents as a new to-do does
+/// (`wake::mark`). Locked as a claim is. Runs in the caller's transaction; the notice is returned.
+///
+/// # Errors
+/// `404` (the channel or the seq), `409 channel_ended`, `not_a_task` or `already_reported`, `403 not_claimant` (no
+/// place held), `429 channel_rate`, storage failure.
+pub(crate) async fn give_back(
+    connection: &mut PgConnection,
+    channel: Uuid,
+    task: u64,
+    (author, name): (&Author, &str),
+) -> Result<ChannelMessage, GatewayError> {
+    let state = sqlx::query_scalar!(
+        "SELECT state FROM channels WHERE id = $1 FOR UPDATE",
+        channel
+    )
+    .fetch_optional(&mut *connection)
+    .await?
+    .ok_or(GatewayError::NotFound)?;
+    if state == "ended" {
+        return Err(GatewayError::Conflict("channel_ended"));
+    }
+    // A give-back writes a message, as a claim does: within the channel's day (ADR-0014).
+    super::within_the_day(connection, channel).await?;
+    let kind = sqlx::query_scalar!(
+        "SELECT type FROM channel_messages WHERE channel_id = $1 AND seq = $2",
+        channel,
+        db_seq(task)?
+    )
+    .fetch_optional(&mut *connection)
+    .await?
+    .ok_or(GatewayError::NotFound)?;
+    if kind != "task" {
+        return Err(GatewayError::Conflict("not_a_task"));
+    }
+    let reported = sqlx::query_scalar!(
+        "SELECT EXISTS (SELECT 1 FROM channel_messages WHERE channel_id = $1 AND task_seq = $2 AND type = 'report' \
+         AND author_kind = $3 AND author_id = $4) AS \"reported!\"",
+        channel,
+        db_seq(task)?,
+        kind_text(author.kind),
+        author.id
+    )
+    .fetch_one(&mut *connection)
+    .await?;
+    if reported {
+        return Err(GatewayError::Conflict("already_reported"));
+    }
+    let removed = sqlx::query!(
+        "DELETE FROM channel_claims WHERE channel_id = $1 AND task_seq = $2 AND claimant_kind = $3 AND claimant_id = $4",
+        channel,
+        db_seq(task)?,
+        kind_text(author.kind),
+        author.id
+    )
+    .execute(&mut *connection)
+    .await?;
+    if removed.rows_affected() == 0 {
+        return Err(GatewayError::Denied("not_claimant"));
+    }
+    append_body(
+        connection,
+        channel,
+        &super::gateway_author(),
+        (
+            None,
+            &MessageBody::Notice {
+                kind: ChannelNoticeKind::PlaceGivenBack,
+                member: Some(name.to_owned()),
+                // The person's id, so the board's replay of the log removes this place (`tasks`).
+                member_id: Some(author.id.clone()),
+                code: None,
+                refusal: None,
+                resets_at: None,
+                task_seq: Some(task),
+                text: format!("{name} gave back their place on to-do #{task}; it is free again."),
+            },
+        ),
+    )
+    .await
+}
+
 /// An agent holds one open to-do at a time in a channel (ADR-0014's amendment, A13): a claim it has on another to-do
 /// there, with no report of its own on it whatever the report's status, refuses a new one. People are not limited.
 ///
@@ -183,7 +268,8 @@ pub(crate) async fn tasks(
     let voting = u32::try_from(voting).unwrap_or(u32::MAX);
     let rows = sqlx::query!(
         "SELECT seq, type, task_seq, author_kind, author_id, author_name, body FROM channel_messages \
-         WHERE channel_id = $1 AND type IN ('task', 'claim', 'report') ORDER BY seq LIMIT 5000",
+         WHERE channel_id = $1 AND (type IN ('task', 'claim', 'report') OR (type = 'notice' AND task_seq IS NOT NULL)) \
+         ORDER BY seq LIMIT 5000",
         channel
     )
     .fetch_all(connection)
@@ -218,8 +304,23 @@ pub(crate) async fn tasks(
                     task.reports.push((author, seq, status));
                 }
             }
+            // A place given back (GW-I-401): that person's claim goes, so the place is free again.
+            MessageBody::Notice {
+                kind: ChannelNoticeKind::PlaceGivenBack,
+                task_seq: Some(task_seq),
+                member_id: Some(person),
+                ..
+            } => given_back(&mut tasks, task_seq, &person),
             _ => {}
         }
     }
     Ok(tasks)
+}
+
+/// A place given back (GW-I-401): `person`'s claim on to-do `task_seq` leaves the board.
+fn given_back(tasks: &mut [TaskState], task_seq: u64, person: &str) {
+    if let Some(task) = tasks.iter_mut().find(|task| task.task_seq == task_seq) {
+        task.claims
+            .retain(|(claimant, _)| !(claimant.kind == AuthorKind::User && claimant.id == person));
+    }
 }

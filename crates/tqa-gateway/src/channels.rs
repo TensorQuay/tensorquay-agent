@@ -4,6 +4,7 @@ pub(crate) mod budget;
 pub(crate) mod candidates;
 mod decide;
 pub(crate) mod files;
+pub(crate) mod give_back;
 mod hub;
 pub(crate) mod runtime;
 pub(crate) mod store;

@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { member } from "../test/channels";
 import { settleLazy } from "../test/lazy";
 
 import { ChannelTimeline } from "./ChannelTimeline";
@@ -606,6 +607,41 @@ describe("WEB-U-530 a woken run that ended badly", () => {
     );
     expect(view).toHaveTextContent("Data checker's run was stopped.");
     expect(view).not.toHaveTextContent("reply_cut");
+  });
+});
+
+// TEST: WEB-U-553
+// WEB-U-553 (18.3.0): a place given back is said in the log with the person's name as Members shows it and the
+// to-do's number; a person who left the channel keeps the notice's own word.
+describe("WEB-U-553 a place given back", () => {
+  it("names the person and the to-do", () => {
+    const ana = member("user", "Ana Lim");
+    const notice = (seq: number, id: string): ChannelMessage => ({
+      seq,
+      ts: "2026-09-27T10:04:00Z",
+      author: { kind: "gateway", id: "gateway", name: "gateway" },
+      body: {
+        type: "notice",
+        kind: "place_given_back",
+        member: "ana@example.invalid",
+        member_id: id,
+        task_seq: 4,
+        text: "ana@example.invalid gave back their place on to-do #4; it is free again.",
+      },
+    });
+    render(
+      <ChannelTimeline
+        messages={[notice(5, ana.id), notice(6, "someone-who-left")]}
+        members={[ana]}
+      />,
+    );
+    const lines = within(
+      screen.getByRole("list", { name: "Channel log" }),
+    ).getAllByText(/gave back their place/);
+    expect(lines.map((line) => line.textContent)).toEqual([
+      "Ana Lim gave back their place on #4; it is free again.",
+      "ana@example.invalid gave back their place on #4; it is free again.",
+    ]);
   });
 });
 

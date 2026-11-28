@@ -55,6 +55,7 @@ const NOTICES: Readonly<Record<string, MessageKey>> = {
   member_deleted: "channels.noticeDeleted",
   wake_budget_set: "channels.noticeBudgetSet",
   woken_run_stopped: "channels.noticeRunStopped",
+  place_given_back: "channels.noticePlaceGivenBack",
 };
 
 /**
@@ -70,15 +71,16 @@ export function memberShown(item: Member): string {
     : item.name;
 }
 
-/** The member a notice is about, as {@link memberShown} names it; by the notice's own word when it isn't a member. */
+/**
+ * The member a notice is about, as {@link memberShown} names it: an agent, or a person who gave back a place (18.3.0);
+ * by the notice's own word when it isn't a member.
+ */
 function noticeMember(
   body: { member?: string; member_id?: string },
   members: readonly Member[],
 ): string {
   const member = body.member_id
-    ? members.find(
-        (item) => item.kind === "conversation" && item.id === body.member_id,
-      )
+    ? members.find((item) => item.id === body.member_id)
     : undefined;
   return member ? memberShown(member) : (body.member ?? "");
 }
@@ -645,7 +647,12 @@ function Body({
         );
       return (
         <p className="type-small muted">
-          {key ? t(key, { member: noticeMember(body, members) }) : body.text}
+          {key
+            ? t(key, {
+                member: noticeMember(body, members),
+                seq: body.task_seq ?? "",
+              })
+            : body.text}
         </p>
       );
     }

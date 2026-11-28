@@ -134,6 +134,7 @@ fn channels_router(route: ChannelRoute) -> MethodRouter<Arc<AppState>> {
         ChannelRoute::RuntimeRead => get(crate::channels::runtime::read),
         ChannelRoute::RuntimePost => post(crate::channels::runtime::post),
         ChannelRoute::Claim => post(api::claim),
+        ChannelRoute::GiveBack => post(crate::channels::give_back::give_back),
         ChannelRoute::Tasks => get(api::tasks),
         ChannelRoute::Proposal => get(api::proposal),
         ChannelRoute::Events => get(crate::channels::stream::events),

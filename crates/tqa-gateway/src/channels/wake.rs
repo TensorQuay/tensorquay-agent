@@ -168,6 +168,11 @@ async fn addressees(
     let (everyone, words) = match body {
         MessageBody::Proposal { text, .. } => (true, Some(text.as_str())),
         MessageBody::Task { spec, .. } => (true, Some(spec.as_str())),
+        // A place given back on a to-do wakes the agents as the to-do did: the place is free again (GW-I-402).
+        MessageBody::Notice {
+            kind: ChannelNoticeKind::PlaceGivenBack,
+            ..
+        } => (true, None),
         MessageBody::Text { text } => (false, Some(text.as_str())),
         MessageBody::Report { summary, .. } => (false, Some(summary.as_str())),
         _ => (false, None),
@@ -318,6 +323,7 @@ pub(crate) async fn notice(
                 code: None,
                 refusal: None,
                 resets_at: None,
+                task_seq: None,
                 text,
             },
         ),
@@ -566,7 +572,7 @@ async fn waiting(state: &State, due: &Due) -> Result<Vec<Waiting>, GatewayError>
         .map(|(id, name)| (*id, name.as_str()))
         .collect();
     Ok(sqlx::query!(
-        "SELECT x.seq, x.type AS kind, p.author_id AS \"parent_author?\", x.author_kind, x.parent, \
+        "SELECT x.seq, x.type AS kind, x.task_seq, p.author_id AS \"parent_author?\", x.author_kind, x.parent, \
                 x.body->>'text' AS words FROM channel_messages x \
          LEFT JOIN channel_messages p ON p.channel_id = x.channel_id AND p.seq = x.parent \
          WHERE x.channel_id = $1 AND x.seq > $2 AND $3 = ANY(x.wakes) ORDER BY x.seq",
@@ -580,6 +586,8 @@ async fn waiting(state: &State, due: &Due) -> Result<Vec<Waiting>, GatewayError>
     .map(|message| match message.kind.as_str() {
         "proposal" => Waiting::Proposal(message.seq),
         "task" => Waiting::Task(message.seq),
+        // A place given back (GW-I-402): the to-do itself, whose place is free again; agents never read notices.
+        "notice" if message.task_seq.is_some() => Waiting::Task(message.task_seq.unwrap_or(message.seq)),
         "decision" => Waiting::Decision(message.seq),
         "report" => Waiting::Report(message.seq),
         _ if message.parent_author.as_deref() == Some(member.as_str()) => {

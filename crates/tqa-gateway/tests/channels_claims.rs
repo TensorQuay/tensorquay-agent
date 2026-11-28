@@ -396,3 +396,100 @@ async fn gw_i_400_the_channel_list_counts_open_votes_and_open_todos(pool: PgPool
     })
     .await
 }
+
+async fn give_back(f: &Fixture, cookie: &str, id: &str, seq: u64) -> Result<(u16, Value)> {
+    call(
+        f,
+        Method::POST,
+        &format!("/api/v1/channels/{id}/tasks/{seq}/give-back"),
+        cookie,
+        (None, None),
+    )
+    .await
+}
+
+// TEST: GW-I-401
+/// GW-I-401 (18.3.0; the product owner, 27 Nov 2026: a place taken by mistake stayed "Working"): a person gives back
+/// their place on a to-do before reporting on it. The place is free again, the log says who gave it back (a notice,
+/// for people), and the refusals say why: no place held, already reported, the channel ended, not a to-do.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_401_a_person_gives_back_a_place_before_reporting(pool: PgPool) -> TestResult {
+    support::run(pool, async |f| {
+        let (_, cookie) = f.admin().await?;
+        let (id, cookies) = channel(f, &cookie, 2).await?;
+        let todo = task(f, &cookie, &id, json!(1), "t").await?;
+        let (status, _) = claim(f, &cookies[0], &id, todo).await?;
+        assert_eq!(status, 201);
+        // Someone without a place can't give one back.
+        let (status, body) = give_back(f, &cookies[1], &id, todo).await?;
+        assert_eq!(
+            (status, &body["error"]["code"]),
+            (403, &json!("not_claimant"))
+        );
+        // The taker gives it back: the place is free, and the other member can take it.
+        let (status, notice) = give_back(f, &cookies[0], &id, todo).await?;
+        assert_eq!(status, 200, "{notice}");
+        assert_eq!(notice["body"]["type"], "notice");
+        assert_eq!(notice["body"]["kind"], "place_given_back");
+        assert_eq!(notice["body"]["task_seq"], json!(todo));
+        assert_eq!(notice["body"]["member"], "m0@example.invalid");
+        let (_, board) = call(
+            f,
+            Method::GET,
+            &format!("/api/v1/channels/{id}/tasks"),
+            &cookie,
+            (None, None),
+        )
+        .await?;
+        assert_eq!(
+            board["items"][0]["claims"].as_array().map(Vec::len),
+            Some(0),
+            "{board}"
+        );
+        let (status, _) = claim(f, &cookies[1], &id, todo).await?;
+        assert_eq!(status, 201, "the freed place is taken");
+        // A report ends the giving back: the place is the taker's to report on.
+        post_body(
+            f,
+            &cookies[1],
+            &id,
+            json!({"type": "report", "task_seq": todo, "status": "blocked", "summary": "s"}),
+            "r",
+        )
+        .await?;
+        let (status, body) = give_back(f, &cookies[1], &id, todo).await?;
+        assert_eq!(
+            (status, &body["error"]["code"]),
+            (409, &json!("already_reported"))
+        );
+        // Not a to-do, an unknown seq.
+        let text = post_body(f, &cookie, &id, json!({"type": "text", "text": "hi"}), "x").await?;
+        let (status, body) = give_back(f, &cookies[1], &id, text).await?;
+        assert_eq!(
+            (status, &body["error"]["code"]),
+            (409, &json!("not_a_task"))
+        );
+        let (status, _) = give_back(f, &cookies[1], &id, 999).await?;
+        assert_eq!(status, 404);
+        // An ended channel takes nothing back.
+        let other = task(f, &cookie, &id, json!(1), "t2").await?;
+        claim(f, &cookies[0], &id, other).await?;
+        let (status, _) = call(
+            f,
+            Method::POST,
+            &format!("/api/v1/channels/{id}/end"),
+            &cookie,
+            (None, None),
+        )
+        .await?;
+        assert!(status < 300, "{status}");
+        let (status, body) = give_back(f, &cookies[0], &id, other).await?;
+        assert_eq!(
+            (status, &body["error"]["code"]),
+            (409, &json!("channel_ended"))
+        );
+        Ok(())
+    })
+    .await
+}

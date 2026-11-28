@@ -59,6 +59,10 @@ export const settingsOperations = {
     method: "POST",
     path: "/api/v1/channels/{id}/tasks/{seq}/claim",
   },
+  channelGiveBack: {
+    method: "POST",
+    path: "/api/v1/channels/{id}/tasks/{seq}/give-back",
+  },
   channelMemberByEmail: {
     method: "PUT",
     path: "/api/v1/channels/{id}/members",

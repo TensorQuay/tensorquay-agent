@@ -330,8 +330,9 @@ pub enum MessageBody {
         /// The member it is about, by its task's name, so a page words it in the reader's language.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         member: Option<String>,
-        /// That member's id (its task's), so a page names it as Members does: its owner sees the title of their own
-        /// unnamed agent, never two members alike as "Agent" (decided on 21 Nov 2026, C-15).
+        /// That member's id (its task's, or on `place_given_back` the person's user id), so a page names it as Members
+        /// does: its owner sees the title of their own unnamed agent, never two members alike as "Agent" (decided on
+        /// 21 Nov 2026, C-15).
         #[serde(default, skip_serializing_if = "Option::is_none")]
         member_id: Option<String>,
         /// A woken run's failure code, so a page words it as the task page does (decided on 20 Nov 2026, C-6).
@@ -345,6 +346,9 @@ pub enum MessageBody {
         /// 2026, C-14); on `wake_budget_spent` only.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         resets_at: Option<String>,
+        /// The to-do it is about, on `place_given_back` only: the to-do whose place a person gave back (18.3.0).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        task_seq: Option<u64>,
         /// The sentence.
         text: String,
     },
@@ -377,6 +381,10 @@ pub enum ChannelNoticeKind {
     /// A run a wake started was stopped; `member` names it (C-6).
     #[serde(rename = "woken_run_stopped")]
     WokenRunStopped,
+    /// A person gave back their place on a to-do before reporting; `member` names them and `task_seq` the to-do, whose
+    /// place is free again (18.3.0, GW-I-401).
+    #[serde(rename = "place_given_back")]
+    PlaceGivenBack,
 }
 
 impl MessageBody {
@@ -401,6 +409,7 @@ impl MessageBody {
     pub const fn task_seq(&self) -> Option<u64> {
         match self {
             Self::Claim { task_seq } | Self::Report { task_seq, .. } => Some(*task_seq),
+            Self::Notice { task_seq, .. } => *task_seq,
             _ => None,
         }
     }

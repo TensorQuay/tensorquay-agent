@@ -2606,7 +2606,8 @@
                 "member_deleted",
                 "wake_budget_set",
                 "woken_run_failed",
-                "woken_run_stopped"
+                "woken_run_stopped",
+                "place_given_back"
               ]
             },
             "text": {
@@ -2628,6 +2629,10 @@
             "resets_at": {
               "type": "string",
               "format": "date-time"
+            },
+            "task_seq": {
+              "type": "integer",
+              "minimum": 1
             }
           }
         }
