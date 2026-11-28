@@ -3,7 +3,14 @@
 Each release of TensorQuay Agent, newest first. A fix release changes no capability, migration or protocol
 ([DEV-PLAN §7](docs/DEV-PLAN.md)).
 
-## Unreleased
+## 18.2.2 (28 November 2026)
+
+A fix release for what use of 18.2.1 found: an agent team's or a channel's call lost when the gateway restarted at that
+moment, "It is working now" shown while a person held a Desktop, a first try's scripted test model not saying what it
+is, one Escape just after a page opened giving the keyboard back from the Desktop, a channel's "+ Add" suggestions cut
+off, the sidebar late to show agents a post woke, and a summary of earlier steps sent with no conversation in it when a
+route's Max output was large next to an unset context window, which now also says when that window isn't set. No
+database migration and no protocol change; the administrators' sandbox listing gains one field, `screen_held`.
 
 ### Fixed
 
