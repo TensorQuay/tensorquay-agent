@@ -31,6 +31,8 @@ export function channel(name: string, extra: Partial<Channel> = {}): Channel {
     role: "lead",
     member_count: 1,
     last_seq: 0,
+    open_votes: 0,
+    todos_open: 0,
     ...extra,
   };
 }

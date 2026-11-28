@@ -331,3 +331,68 @@ async fn gw_i_384_an_agent_holds_one_open_to_do_at_a_time(pool: PgPool) -> TestR
     })
     .await
 }
+
+/// The listing's counts for one channel: (open votes, open to-dos).
+async fn work_left(f: &Fixture, cookie: &str, id: &str) -> Result<(Value, Value)> {
+    let (status, listed) = call(f, Method::GET, "/api/v1/channels", cookie, (None, None)).await?;
+    assert_eq!(status, 200, "{listed}");
+    let item = listed["items"]
+        .as_array()
+        .ok_or("items")?
+        .iter()
+        .find(|item| item["id"] == id)
+        .ok_or("the channel isn't listed")?;
+    Ok((item["open_votes"].clone(), item["todos_open"].clone()))
+}
+
+async fn post_body(f: &Fixture, cookie: &str, id: &str, body: Value, key: &str) -> Result<u64> {
+    let (status, posted) = call(
+        f,
+        Method::POST,
+        &format!("/api/v1/channels/{id}/messages"),
+        cookie,
+        (Some(json!({"body": body})), Some(key)),
+    )
+    .await?;
+    assert_eq!(status, 201, "{posted}");
+    posted["seq"].as_u64().ok_or_else(|| "seq".into())
+}
+
+// TEST: GW-I-400
+/// GW-I-400 (18.3.0; the product owner, 27 Nov 2026: "inside complete, outside open"): the channel list says how much
+/// work is left: the proposals not yet decided, and the to-dos whose places aren't all taken by members whose latest
+/// report is completed ("all" counts every voting member; failed or blocked is still open).
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_400_the_channel_list_counts_open_votes_and_open_todos(pool: PgPool) -> TestResult {
+    support::run(pool, async |f| {
+        let (_, cookie) = f.admin().await?;
+        let (id, cookies) = channel(f, &cookie, 2).await?;
+        assert_eq!(work_left(f, &cookie, &id).await?, (json!(0), json!(0)));
+        // A proposal is open until it is decided.
+        let proposal = post_body(f, &cookie, &id, json!({"type": "proposal", "title": "Ship", "text": "now"}), "p").await?;
+        assert_eq!(work_left(f, &cookie, &id).await?, (json!(1), json!(0)));
+        // A to-do of two places: open while a place is free, or a taker's latest report isn't completed.
+        let todo = task(f, &cookie, &id, json!(2), "t").await?;
+        assert_eq!(work_left(f, &cookie, &id).await?.1, json!(1));
+        let report = |status: &str| json!({"type": "report", "task_seq": todo, "status": status, "summary": "s"});
+        claim(f, &cookies[0], &id, todo).await?;
+        post_body(f, &cookies[0], &id, report("completed"), "r0").await?;
+        assert_eq!(work_left(f, &cookie, &id).await?.1, json!(1), "a place is still free");
+        claim(f, &cookies[1], &id, todo).await?;
+        post_body(f, &cookies[1], &id, report("blocked"), "r1").await?;
+        assert_eq!(work_left(f, &cookie, &id).await?.1, json!(1), "blocked is still open");
+        post_body(f, &cookies[1], &id, report("completed"), "r2").await?;
+        assert_eq!(work_left(f, &cookie, &id).await?.1, json!(0), "every place completed");
+        // "all": every voting member, the lead included (three here).
+        task(f, &cookie, &id, json!("all"), "t-all").await?;
+        assert_eq!(work_left(f, &cookie, &id).await?.1, json!(1));
+        // Two of three vote accept: decided, so no vote is open.
+        for (index, member) in cookies.iter().enumerate() {
+            post_body(f, member, &id, json!({"type": "vote", "proposal_seq": proposal, "choice": "accept"}), &format!("v{index}")).await?;
+        }
+        assert_eq!(work_left(f, &cookie, &id).await?.0, json!(0));
+        Ok(())
+    })
+    .await
+}

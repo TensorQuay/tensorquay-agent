@@ -26007,7 +26007,9 @@
           "ended_at",
           "role",
           "member_count",
-          "last_seq"
+          "last_seq",
+          "open_votes",
+          "todos_open"
         ],
         "properties": {
           "id": {
@@ -26082,6 +26084,16 @@
           "last_seq": {
             "type": "integer",
             "minimum": 0
+          },
+          "open_votes": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Proposals not yet decided."
+          },
+          "todos_open": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "To-dos whose places aren't all taken by members whose latest report is completed; failed or blocked counts as open."
           },
           "wake_budget": {
             "type": "integer",

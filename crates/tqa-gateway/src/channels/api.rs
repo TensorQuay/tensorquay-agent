@@ -42,6 +42,10 @@ pub(crate) struct ChannelView {
     role: Option<ChannelRole>,
     member_count: i64,
     last_seq: i64,
+    /// Proposals not yet decided, so the list says how much work is left (GW-I-400).
+    open_votes: i64,
+    /// To-dos whose places aren't all taken by members whose latest report is completed (GW-I-400).
+    todos_open: i64,
     /// The tokens woken runs may spend here: its own budget, or the installation's (ADR-0014's amendment of 20 Nov
     /// 2026, A5); on one channel's read only.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -79,6 +83,8 @@ impl From<Listed> for ChannelView {
             role: listed.role,
             member_count: listed.member_count,
             last_seq: channel.last_seq,
+            open_votes: listed.open_votes,
+            todos_open: listed.todos_open,
             wake_budget: None,
             spent_tokens: None,
             budget_resets_at: None,
