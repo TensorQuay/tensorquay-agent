@@ -357,6 +357,7 @@
     "activity.keyAbsent": "The task used a key for {host} that isn't set up.",
     "activity.keyAdd": "Add a key for {host}",
     "models.credential": "Credential",
+    "models.serversOwn": "The server's own",
     "tool.pushing": "Saving the changes to {project}…",
     "tool.fallbackProject": "the project",
     "tool.pushed": "Saved the changes to {project}",
