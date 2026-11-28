@@ -419,3 +419,26 @@ describe("WEB-U-362 Open navigation on Channels", () => {
     expect(openNavigation).toHaveBeenCalledTimes(1);
   });
 });
+
+// WEB-U-551 (18.3.0; the product owner, 27 Nov 2026: "why inside complete, outside got open"): an open channel's row
+// says how much work is left, not only that the channel is open; an ended one doesn't.
+describe("WEB-U-551 the channels list says how much work is left", () => {
+  it("counts open to-dos and votes, says when nothing waits, and leaves an ended channel as it was", async () => {
+    show(
+      fakeChannels({
+        channels: [
+          channel("busy", { todos_open: 2, open_votes: 1 }),
+          channel("quiet"),
+          channel("done", { state: "ended", todos_open: 1 }),
+        ],
+      }).api,
+    );
+    const list = await screen.findByRole("list", { name: "Channels" });
+    const [busy, quiet, done] = within(list).getAllByRole("listitem");
+    expect(busy).toHaveTextContent("2 to-dos open");
+    expect(busy).toHaveTextContent("1 vote open");
+    expect(quiet).toHaveTextContent("Nothing waiting");
+    expect(done).not.toHaveTextContent("to-do");
+    expect(done).not.toHaveTextContent("Nothing waiting");
+  });
+});

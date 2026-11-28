@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (SELECT 1 FROM channel_messages WHERE channel_id = $1 AND task_seq = $2 AND type = 'report' AND author_kind = $3 AND author_id = $4) AS \"reported!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "reported!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "e3b119b9ba0a0b7775daa89a237ac7fba1880e6a24408c67c23b780109a5e32b"
+}

@@ -82,12 +82,15 @@ def verify_accounts(env):
 
 
 def verify_channel_members(env):
-    """WEB-U-066: after the page's changes the channel held its lead and the task's agent, then ended, then was gone."""
+    """WEB-U-066: after the page's changes the channel held its lead and the task's agent, then ended, then was gone;
+    WEB-U-552: the owner's place on a to-do, given back, left no claim and one place_given_back notice."""
     result = json.loads(Path(env["TQA_STACK_RESULT"]).read_text())
-    expected = {"members": ["conversation:member", "user:lead"], "state": "ended", "deleted": 404}
+    expected = {"members": ["conversation:member", "user:lead"], "state": "ended", "deleted": 404,
+                "given_back": {"claims": 0, "notice": "place_given_back"}}
     if result != expected:
         raise AssertionError("Unexpected channel-members result: {}".format(result))
-    print("Channel members: agent and person added, role changed, person removed; ended, then deleted", flush=True)
+    print("Channel members: a place given back; agent and person added, role changed, person removed; ended, then "
+          "deleted", flush=True)
 
 
 def verify_reply_cut(env):

@@ -85,6 +85,8 @@ export type ChannelsApi = {
   tasks(id: string, signal?: AbortSignal): Promise<ChannelTaskBoard>;
   /** Claims a task for the caller (ADR-0014 point 8); a repeat answers the existing claim. */
   claim(id: string, seq: number, key: string): Promise<ChannelMessage>;
+  /** Gives back the caller's place on a to-do before they report on it (18.3.0): answers the log's notice. */
+  giveBack(id: string, seq: number, key: string): Promise<ChannelMessage>;
   /**
    * The channel's live messages past `after` (ADR-0014 point 11): server-sent events, `channel.message` frames with
    * their seq as the event id (so a reconnect replays from the last one) and an unsequenced `channel.state` when the

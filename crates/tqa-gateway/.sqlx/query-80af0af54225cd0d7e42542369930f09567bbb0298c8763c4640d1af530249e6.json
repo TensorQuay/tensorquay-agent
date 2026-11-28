@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT c.id, c.owner_id, c.name, c.purpose, c.rule, c.state, c.last_seq, c.created_at, c.ended_at, o.email::text AS \"owner_name!\", (SELECT count(*) FROM channel_members m WHERE m.channel_id = c.id) AS \"member_count!\", (SELECT m.role FROM channel_members m WHERE m.channel_id = c.id AND m.user_id = $1) AS role FROM channels c JOIN users o ON o.id = c.owner_id WHERE c.kind = 'channel' AND ($3::uuid IS NULL OR c.id = $3) AND ($2 OR c.owner_id = $1 OR EXISTS (SELECT 1 FROM channel_members m WHERE m.channel_id = c.id AND m.user_id = $1) OR EXISTS (SELECT 1 FROM channel_members m JOIN conversations v ON v.id = m.conversation_id WHERE m.channel_id = c.id AND v.owner_id = $1)) ORDER BY COALESCE((SELECT max(x.created_at) FROM channel_messages x WHERE x.channel_id = c.id), c.created_at) DESC, c.id DESC LIMIT $4",
+  "query": "SELECT c.id, c.owner_id, c.name, c.purpose, c.rule, c.state, c.last_seq, c.created_at, c.ended_at, o.email::text AS \"owner_name!\", (SELECT count(*) FROM channel_members m WHERE m.channel_id = c.id) AS \"member_count!\", (SELECT m.role FROM channel_members m WHERE m.channel_id = c.id AND m.user_id = $1) AS role, (SELECT count(*) FROM channel_messages p WHERE p.channel_id = c.id AND p.type = 'proposal' AND NOT EXISTS (SELECT 1 FROM channel_messages d WHERE d.channel_id = c.id AND d.type = 'decision' AND d.proposal_seq = p.seq)) AS \"open_votes!\", (SELECT count(*) FROM channel_messages t WHERE t.channel_id = c.id AND t.type = 'task' AND (SELECT count(*) FROM (SELECT DISTINCT ON (r.author_kind, r.author_id) r.body->>'status' AS status FROM channel_messages r WHERE r.channel_id = c.id AND r.type = 'report' AND r.task_seq = t.seq ORDER BY r.author_kind, r.author_id, r.seq DESC) latest WHERE latest.status = 'completed') < CASE WHEN t.body->'claims' IS NULL THEN 1 WHEN jsonb_typeof(t.body->'claims') = 'number' THEN (t.body->>'claims')::bigint ELSE (SELECT count(*) FROM channel_members v WHERE v.channel_id = c.id AND v.role IN ('lead', 'member')) END) AS \"todos_open!\" FROM channels c JOIN users o ON o.id = c.owner_id WHERE c.kind = 'channel' AND ($3::uuid IS NULL OR c.id = $3) AND ($2 OR c.owner_id = $1 OR EXISTS (SELECT 1 FROM channel_members m WHERE m.channel_id = c.id AND m.user_id = $1) OR EXISTS (SELECT 1 FROM channel_members m JOIN conversations v ON v.id = m.conversation_id WHERE m.channel_id = c.id AND v.owner_id = $1)) ORDER BY COALESCE((SELECT max(x.created_at) FROM channel_messages x WHERE x.channel_id = c.id), c.created_at) DESC, c.id DESC LIMIT $4",
   "describe": {
     "columns": [
       {
@@ -119,6 +119,18 @@
         "name": "role",
         "type_info": "Text",
         "origin": "Expression"
+      },
+      {
+        "ordinal": 12,
+        "name": "open_votes!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 13,
+        "name": "todos_open!",
+        "type_info": "Int8",
+        "origin": "Expression"
       }
     ],
     "parameters": {
@@ -141,8 +153,10 @@
       true,
       null,
       null,
+      null,
+      null,
       null
     ]
   },
-  "hash": "8011f14b3a1927189b62498e698ead725bf7c14d818e642480c2faabd3a837de"
+  "hash": "80af0af54225cd0d7e42542369930f09567bbb0298c8763c4640d1af530249e6"
 }

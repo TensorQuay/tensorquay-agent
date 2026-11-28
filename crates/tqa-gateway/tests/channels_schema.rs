@@ -17,6 +17,7 @@ fn every_kind() -> Vec<ChannelNoticeKind> {
         K::WakeBudgetSet,
         K::WokenRunFailed,
         K::WokenRunStopped,
+        K::PlaceGivenBack,
     ];
     for kind in &all {
         match kind {
@@ -27,7 +28,8 @@ fn every_kind() -> Vec<ChannelNoticeKind> {
             | K::MemberDeleted
             | K::WakeBudgetSet
             | K::WokenRunFailed
-            | K::WokenRunStopped => {}
+            | K::WokenRunStopped
+            | K::PlaceGivenBack => {}
         }
     }
     all
@@ -71,6 +73,7 @@ fn gw_u_235_every_notice_kind_and_field_is_in_the_api_document()
         code: Some("budget".into()),
         refusal: Some("gateway.channel_budget 409".into()),
         resets_at: Some("2026-11-22T03:00:00Z".into()),
+        task_seq: None,
         text: "Ana changed this channel's budget.".into(),
     };
     let MessageBody::Notice { .. } = &notice else {

@@ -7,6 +7,7 @@ import { ApiError } from "../api/error";
 import { useT } from "../i18n/I18nProvider";
 import type { MessageKey } from "../i18n/translate";
 import { Button } from "../ui/Button";
+import { ConfirmDialog } from "../ui/ConfirmDialog";
 import { Dialog } from "../ui/Dialog";
 import { Select } from "../ui/Select";
 import { Textarea } from "../ui/Textarea";
@@ -36,13 +37,22 @@ const REFUSALS: Readonly<Record<string, MessageKey>> = {
 };
 const refusal = (error: unknown, fallback: MessageKey): MessageKey =>
   (error instanceof ApiError ? REFUSALS[error.code] : undefined) ?? fallback;
+/** Why a place couldn't be given back (18.3.0): its own words, never the report's. */
+const GIVE_BACK_REFUSALS: Readonly<Record<string, MessageKey>> = {
+  not_claimant: "channels.giveBackNotClaimant",
+  already_reported: "channels.giveBackReported",
+  not_a_task: "channels.claimNotTask",
+  channel_ended: "channels.postEnded",
+  not_member: "channels.postNotMember",
+};
 
 const same = (a: Author, kind: string, id: string) =>
   a.kind === kind && a.id === id;
 
 /**
  * The channel's tasks (ADR-0014 point 8; WEB-U-065): each task's claims against its limit, and each claimant's report
- * or "Working". A person voting member claims a task with a place left, and reports on one they claimed.
+ * or "Working". A person voting member claims a task with a place left, and reports on one they claimed; until they
+ * report, they can give the place back (18.3.0, WEB-U-552).
  */
 export function TaskBoard({
   tasks,
@@ -51,6 +61,7 @@ export function TaskBoard({
   memberRole,
   ended,
   onClaim,
+  onGiveBack,
   onPost,
 }: {
   tasks: readonly TaskState[];
@@ -60,10 +71,14 @@ export function TaskBoard({
   memberRole: ChannelRole | null;
   ended: boolean;
   onClaim: (seq: number) => Promise<void>;
+  onGiveBack: (seq: number) => Promise<void>;
   onPost: (write: ChannelPost) => Promise<void>;
 }) {
   const t = useT();
   const [reporting, setReporting] = useState<number | null>(null);
+  const [givingBack, setGivingBack] = useState<number | null>(null);
+  const [giveBackError, setGiveBackError] = useState<Error | null>(null);
+  const [givingPending, setGivingPending] = useState(false);
   const [failure, setFailure] = useState<MessageKey | null>(null);
   const [pending, setPending] = useState(false);
   const acts = !ended && (memberRole === "lead" || memberRole === "member");
@@ -82,6 +97,20 @@ export function TaskBoard({
       setPending(false);
     }
   }
+  async function giveBack(seq: number) {
+    setGiveBackError(null);
+    setGivingPending(true);
+    try {
+      await onGiveBack(seq);
+      setGivingBack(null);
+    } catch (error) {
+      setGiveBackError(
+        error instanceof Error ? error : new Error("give back failed"),
+      );
+    } finally {
+      setGivingPending(false);
+    }
+  }
   if (tasks.length === 0)
     return <p className="type-small muted">{t("channels.noTasks")}</p>;
   return (
@@ -91,6 +120,9 @@ export function TaskBoard({
         {tasks.map((task) => {
           const mine = task.claims.some((item) =>
             same(item.author, "user", me),
+          );
+          const reported = task.reports.some((one) =>
+            same(one.author, "user", me),
           );
           const full = task.claims.length >= task.limit;
           return (
@@ -156,12 +188,49 @@ export function TaskBoard({
                       {t("channels.report")}
                     </Button>
                   )}
+                  {mine && !reported && (
+                    <Button
+                      variant="secondary"
+                      aria-label={t("channels.giveBackName", {
+                        seq: task.task_seq,
+                      })}
+                      onClick={() => {
+                        setGiveBackError(null);
+                        setGivingBack(task.task_seq);
+                      }}
+                    >
+                      {t("channels.giveBack")}
+                    </Button>
+                  )}
                 </div>
               )}
             </li>
           );
         })}
       </ul>
+      {givingBack !== null && (
+        <ConfirmDialog
+          title={t("channels.giveBackName", { seq: givingBack })}
+          confirm={t("channels.giveBack")}
+          pending={givingPending}
+          error={giveBackError}
+          errorCopy={(error) =>
+            t(
+              (error instanceof ApiError
+                ? GIVE_BACK_REFUSALS[error.code]
+                : undefined) ?? "channels.giveBackFailed",
+            )
+          }
+          // The place changed under the dialog: nothing to confirm again.
+          final={(error) =>
+            error instanceof ApiError && error.code in GIVE_BACK_REFUSALS
+          }
+          onConfirm={() => void giveBack(givingBack)}
+          onClose={() => setGivingBack(null)}
+        >
+          {t("channels.giveBackBody", { seq: givingBack })}
+        </ConfirmDialog>
+      )}
       {reporting !== null && (
         <ReportDialog
           seq={reporting}

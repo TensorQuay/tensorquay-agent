@@ -14854,6 +14854,143 @@
         ]
       }
     },
+    "/api/v1/channels/{id}/tasks/{seq}/give-back": {
+      "post": {
+        "operationId": "giveBackChannelTask",
+        "summary": "Give back a place on a to-do",
+        "description": "A person gives back their place on a to-do before reporting on it (18.3.0): the claim is removed, the place is free again, and the log gets a gateway notice (kind place_given_back, with member and task_seq); the channel's agents are woken as for a new to-do. 200 with the notice; 403 not_member or not_claimant (no place held); 409 not_a_task, already_reported or channel_ended; 404 for an unknown channel or seq. 429 channel_rate once the channel has had 5,000 messages in the last 24 hours (ADR-0014), with Retry-After.",
+        "security": [
+          {
+            "sessionCookie": []
+          },
+          {
+            "personalToken": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid request or unsupported protocol",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origin, ownership or role denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Record not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Bootstrap closed, idempotency route conflict or deleted conversation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate or capacity limit reached; channel_rate past the channel's daily message limit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database unavailable or gateway restarting",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "I/O deadline exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The notice that says the place was given back",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelMessage"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "seq",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ]
+      }
+    },
     "/runtime/channels/{id}/tasks/{seq}/claim": {
       "post": {
         "operationId": "runtimeClaimChannelTask",
@@ -26007,7 +26144,9 @@
           "ended_at",
           "role",
           "member_count",
-          "last_seq"
+          "last_seq",
+          "open_votes",
+          "todos_open"
         ],
         "properties": {
           "id": {
@@ -26082,6 +26221,16 @@
           "last_seq": {
             "type": "integer",
             "minimum": 0
+          },
+          "open_votes": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Proposals not yet decided."
+          },
+          "todos_open": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "To-dos whose places aren't all taken by members whose latest report is completed; failed or blocked counts as open."
           },
           "wake_budget": {
             "type": "integer",
@@ -26485,7 +26634,8 @@
                   "member_deleted",
                   "wake_budget_set",
                   "woken_run_failed",
-                  "woken_run_stopped"
+                  "woken_run_stopped",
+                  "place_given_back"
                 ]
               },
               "text": {
@@ -26498,7 +26648,7 @@
               "member_id": {
                 "type": "string",
                 "format": "uuid",
-                "description": "The agent member's id (its task's), when the notice is about one that is still a member: a page names it as Members does, so its owner sees the title of their own agent without a name here (decided on 21 Nov 2026, C-15)."
+                "description": "The agent member's id (its task's), when the notice is about one that is still a member, or on place_given_back the person's user id: a page names it as Members does, so its owner sees the title of their own agent without a name here (decided on 21 Nov 2026, C-15)."
               },
               "code": {
                 "type": "string",
@@ -26512,6 +26662,11 @@
                 "type": "string",
                 "format": "date-time",
                 "description": "For wake_budget_spent: when the channel's daily budget renews, so a page says when agents are woken again in the reader's own time (decided on 21 Nov 2026)."
+              },
+              "task_seq": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "The to-do it is about, on place_given_back only: the to-do whose place a person gave back."
               }
             },
             "description": "Written only by the gateway, for people (ADR-0014's amendment of 20 Nov 2026): a line about the channel itself, in the gateway's fixed words. Never in an agent's reads; posting one is refused. A client shows it as one muted line, and an unknown kind by its text."

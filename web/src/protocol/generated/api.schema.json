@@ -2153,7 +2153,9 @@
         "ended_at",
         "role",
         "member_count",
-        "last_seq"
+        "last_seq",
+        "open_votes",
+        "todos_open"
       ],
       "properties": {
         "id": {
@@ -2225,6 +2227,14 @@
           "minimum": 0
         },
         "last_seq": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "open_votes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "todos_open": {
           "type": "integer",
           "minimum": 0
         },
@@ -2596,7 +2606,8 @@
                 "member_deleted",
                 "wake_budget_set",
                 "woken_run_failed",
-                "woken_run_stopped"
+                "woken_run_stopped",
+                "place_given_back"
               ]
             },
             "text": {
@@ -2618,6 +2629,10 @@
             "resets_at": {
               "type": "string",
               "format": "date-time"
+            },
+            "task_seq": {
+              "type": "integer",
+              "minimum": 1
             }
           }
         }

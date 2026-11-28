@@ -31,6 +31,8 @@ export function channel(name: string, extra: Partial<Channel> = {}): Channel {
     role: "lead",
     member_count: 1,
     last_seq: 0,
+    open_votes: 0,
+    todos_open: 0,
     ...extra,
   };
 }
@@ -149,6 +151,7 @@ export function fakeChannels({
     ChannelsApi,
     | "tasks"
     | "claim"
+    | "giveBack"
     | "proposal"
     | "setMember"
     | "removeMember"
@@ -263,8 +266,18 @@ export function fakeChannels({
           task_seq: task.seq,
           title: body.title,
           limit: limitOf(id, body),
+          // A place given back later in the log leaves the board (18.3.0), as the gateway's replay does.
           claims: log.flatMap((item) =>
-            item.body.type === "claim" && item.body.task_seq === task.seq
+            item.body.type === "claim" &&
+            item.body.task_seq === task.seq &&
+            !log.some(
+              (later) =>
+                later.seq > item.seq &&
+                later.body.type === "notice" &&
+                later.body.kind === "place_given_back" &&
+                later.body.task_seq === task.seq &&
+                later.body.member_id === item.author.id,
+            )
               ? [{ author: item.author, seq: item.seq }]
               : [],
           ),
@@ -309,6 +322,42 @@ export function fakeChannels({
         type: "claim",
         task_seq: seq,
       });
+      logs.set(id, [...log, stored]);
+      return stored;
+    });
+  /** `me` gives back their place before reporting (18.3.0): not_claimant without one, already_reported after a report. */
+  api.giveBack = (id, seq) =>
+    settle(() => {
+      find(id);
+      const log = logs.get(id) ?? [];
+      const task = board(id).find((item) => item.task_seq === seq);
+      if (!task) throw new ApiError(409, "not_a_task", "fixture refusal");
+      if (
+        task.reports.some(
+          (one) => one.author.kind === me.kind && one.author.id === me.id,
+        )
+      )
+        throw new ApiError(409, "already_reported", "fixture refusal");
+      if (
+        !task.claims.some(
+          (one) => one.author.kind === me.kind && one.author.id === me.id,
+        )
+      )
+        throw new ApiError(403, "not_claimant", "fixture refusal");
+      const name = me.name ?? me.id;
+      const said = message((log.at(-1)?.seq ?? 0) + 1, me, {
+        type: "notice",
+        kind: "place_given_back",
+        member: name,
+        member_id: me.id,
+        task_seq: seq,
+        text: `${name} gave back their place on to-do #${seq}; it is free again.`,
+      });
+      // The gateway's own line, as the gateway writes it.
+      const stored: ChannelMessage = {
+        ...said,
+        author: { kind: "gateway", id: "gateway", name: "gateway" },
+      };
       logs.set(id, [...log, stored]);
       return stored;
     });

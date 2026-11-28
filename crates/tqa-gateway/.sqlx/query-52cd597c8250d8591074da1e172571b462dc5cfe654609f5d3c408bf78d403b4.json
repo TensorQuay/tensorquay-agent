@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT seq, type, task_seq, author_kind, author_id, author_name, body FROM channel_messages WHERE channel_id = $1 AND type IN ('task', 'claim', 'report') ORDER BY seq LIMIT 5000",
+  "query": "SELECT x.seq, x.type AS kind, x.task_seq, p.author_id AS \"parent_author?\", x.author_kind, x.parent, x.body->>'text' AS words FROM channel_messages x LEFT JOIN channel_messages p ON p.channel_id = x.channel_id AND p.seq = x.parent WHERE x.channel_id = $1 AND x.seq > $2 AND $3 = ANY(x.wakes) ORDER BY x.seq",
   "describe": {
     "columns": [
       {
@@ -16,7 +16,7 @@
       },
       {
         "ordinal": 1,
-        "name": "type",
+        "name": "kind",
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -38,6 +38,17 @@
       },
       {
         "ordinal": 3,
+        "name": "parent_author?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "channel_messages",
+            "name": "author_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
         "name": "author_kind",
         "type_info": "Text",
         "origin": {
@@ -48,41 +59,27 @@
         }
       },
       {
-        "ordinal": 4,
-        "name": "author_id",
-        "type_info": "Text",
-        "origin": {
-          "Table": {
-            "table": "channel_messages",
-            "name": "author_id"
-          }
-        }
-      },
-      {
         "ordinal": 5,
-        "name": "author_name",
-        "type_info": "Text",
+        "name": "parent",
+        "type_info": "Int8",
         "origin": {
           "Table": {
             "table": "channel_messages",
-            "name": "author_name"
+            "name": "parent"
           }
         }
       },
       {
         "ordinal": 6,
-        "name": "body",
-        "type_info": "Jsonb",
-        "origin": {
-          "Table": {
-            "table": "channel_messages",
-            "name": "body"
-          }
-        }
+        "name": "words",
+        "type_info": "Text",
+        "origin": "Expression"
       }
     ],
     "parameters": {
       "Left": [
+        "Uuid",
+        "Int8",
         "Uuid"
       ]
     },
@@ -90,11 +87,11 @@
       false,
       false,
       true,
-      false,
+      true,
       false,
       true,
-      false
+      null
     ]
   },
-  "hash": "647122e6a71381d9942329cc428f643a5c4862e7fb5092c5911ceb0b9b97504f"
+  "hash": "52cd597c8250d8591074da1e172571b462dc5cfe654609f5d3c408bf78d403b4"
 }

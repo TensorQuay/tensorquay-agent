@@ -55,26 +55,31 @@ function show({
   role = "member",
   ended = false,
   claim = vi.fn<(seq: number) => Promise<void>>(() => Promise.resolve()),
+  giveBack = vi.fn<(seq: number) => Promise<void>>(() => Promise.resolve()),
   post = vi.fn<(write: ChannelPost) => Promise<void>>(() => Promise.resolve()),
+  tasks = TASKS,
 }: {
   me?: Member;
   role?: Member["role"] | null;
   ended?: boolean;
   claim?: (seq: number) => Promise<void>;
+  giveBack?: (seq: number) => Promise<void>;
   post?: (write: ChannelPost) => Promise<void>;
+  tasks?: TaskState[];
 } = {}) {
   render(
     <TaskBoard
-      tasks={TASKS}
+      tasks={tasks}
       members={members}
       me={me.id}
       memberRole={role}
       ended={ended}
       onClaim={claim}
+      onGiveBack={giveBack}
       onPost={post}
     />,
   );
-  return { claim, post };
+  return { claim, giveBack, post };
 }
 const task = (title: string) =>
   screen.getByRole("listitem", { name: new RegExp(title) });
@@ -229,5 +234,77 @@ describe("WEB-U-065 member status", () => {
         row.querySelector(".member-dot")?.getAttribute("data-tone"),
       ),
     ).toEqual(["muted", "info", "muted", "ok", "danger", "muted", "muted"]);
+  });
+  // TEST: WEB-U-552
+  it("gives back a person's place before they report, after a confirm (WEB-U-552)", async () => {
+    const { giveBack } = show();
+    // Only on the to-do the person holds and hasn't reported on.
+    for (const other of ["Write the changelog", "Tag the release"])
+      expect(
+        within(task(other)).queryByRole("button", { name: /^Give back/ }),
+      ).toBeNull();
+    fireEvent.click(
+      within(task("Compare the benchmarks")).getByRole("button", {
+        name: "Give back your place on #8",
+      }),
+    );
+    const dialog = screen.getByRole("dialog", {
+      name: "Give back your place on #8",
+    });
+    expect(dialog).toHaveTextContent(
+      "Your place on #8 is free again for someone else, and the channel's agents are told.",
+    );
+    expect(giveBack).not.toHaveBeenCalled();
+    fireEvent.click(within(dialog).getByRole("button", { name: "Give back" }));
+    await vi.waitFor(() => expect(giveBack).toHaveBeenCalledWith(8));
+    await vi.waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  });
+
+  it("offers no give-back once the person has reported (WEB-U-552)", () => {
+    const reported: TaskState[] = TASKS.map((item) =>
+      item.task_seq === 8
+        ? {
+            ...item,
+            reports: [
+              ...item.reports,
+              { author: by(ANA), seq: 15, status: "blocked" },
+            ],
+          }
+        : item,
+    );
+    show({ tasks: reported });
+    const row = task("Compare the benchmarks");
+    expect(
+      within(row).queryByRole("button", { name: /^Give back/ }),
+    ).toBeNull();
+    expect(
+      within(row).getByRole("button", { name: "Report back on #8" }),
+    ).toBeVisible();
+  });
+
+  it("says why a late give-back is refused, and offers only Close (WEB-U-552)", async () => {
+    // The person's report reached the gateway first.
+    show({
+      giveBack: () =>
+        Promise.reject(new ApiError(409, "already_reported", "reported")),
+    });
+    fireEvent.click(
+      within(task("Compare the benchmarks")).getByRole("button", {
+        name: "Give back your place on #8",
+      }),
+    );
+    const dialog = screen.getByRole("dialog", {
+      name: "Give back your place on #8",
+    });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Give back" }));
+    expect(
+      await within(dialog).findByText(
+        "You have reported back on this to-do, so its place stays yours.",
+      ),
+    ).toBeVisible();
+    expect(
+      within(dialog).queryByRole("button", { name: "Give back" }),
+    ).toBeNull();
+    expect(within(dialog).getByRole("button", { name: "Close" })).toBeVisible();
   });
 });

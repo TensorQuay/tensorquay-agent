@@ -397,12 +397,44 @@ const logs = seededMap([
   ],
 ]);
 
-/** A channel as the API answers it: without the fake's own visibility list, with the caller's role. */
+/**
+ * The work left, as the gateway counts it (GW-I-400): proposals without a decision, and to-dos whose places aren't all
+ * taken by members whose latest report is completed ("all" counts every voting member).
+ */
+function workLeft(id) {
+  const log = logs.get(id) ?? [];
+  const decided = new Set(
+    log
+      .filter((one) => one.body.type === "decision")
+      .map((one) => one.body.proposal_seq),
+  );
+  const open_votes = log.filter(
+    (one) => one.body.type === "proposal" && !decided.has(one.seq),
+  ).length;
+  const todos_open = log.filter((task) => {
+    if (task.body.type !== "task") return false;
+    const claims = task.body.claims;
+    const limit =
+      claims === undefined ? 1 : claims === "all" ? voting(id) : claims;
+    const latest = new Map();
+    for (const one of log)
+      if (one.body.type === "report" && one.body.task_seq === task.seq)
+        latest.set(`${one.author.kind}:${one.author.id}`, one.body.status);
+    return (
+      [...latest.values()].filter((status) => status === "completed").length <
+      limit
+    );
+  }).length;
+  return { open_votes, todos_open };
+}
+
+/** A channel as the API answers it: without the fake's own visibility list, with the caller's role and its work left. */
 function shown(item, member) {
   const answer = { ...item };
   delete answer.viewers;
   return {
     ...answer,
+    ...workLeft(item.id),
     role: item.owner.id === member.account.id ? "lead" : item.role,
   };
 }
@@ -423,9 +455,20 @@ function board(id) {
       task_seq: task.seq,
       title: task.body.title,
       limit: task.body.claims === "all" ? voting(id) : (task.body.claims ?? 1),
+      // A place given back later leaves the board (18.3.0), as the gateway's replay does.
       claims: log
         .filter(
-          (one) => one.body.type === "claim" && one.body.task_seq === task.seq,
+          (one) =>
+            one.body.type === "claim" &&
+            one.body.task_seq === task.seq &&
+            !log.some(
+              (later) =>
+                later.seq > one.seq &&
+                later.body.type === "notice" &&
+                later.body.kind === "place_given_back" &&
+                later.body.task_seq === task.seq &&
+                later.body.member_id === one.author.id,
+            ),
         )
         .map((one) => ({ author: one.author, seq: one.seq })),
       reports: log
@@ -518,6 +561,37 @@ function claim(member, id, seq, reply) {
   reply(201, stored);
 }
 
+/** A person gives back their place before reporting (18.3.0): the gateway's notice, which frees it on the board. */
+function giveBack(member, id, seq, reply) {
+  const item = channels.get(id);
+  if (!item || !visible(item, member)) return refused(reply, 404, "not_found");
+  if (item.state === "ended") return refused(reply, 409, "channel_ended");
+  const task = board(id).find((one) => one.task_seq === seq);
+  if (!task) return refused(reply, 409, "not_a_task");
+  const mine = (one) =>
+    one.author.kind === "user" && one.author.id === member.account.id;
+  if (task.reports.some(mine)) return refused(reply, 409, "already_reported");
+  if (!task.claims.some(mine)) return refused(reply, 403, "not_claimant");
+  const log = logs.get(id) ?? [];
+  const name = member.account.email;
+  const stored = {
+    seq: (log.at(-1)?.seq ?? 0) + 1,
+    ts: new Date().toISOString(),
+    author: { kind: "gateway", id: "gateway", name: "gateway" },
+    body: {
+      type: "notice",
+      kind: "place_given_back",
+      member: name,
+      member_id: member.account.id,
+      task_seq: seq,
+      text: `${name} gave back their place on to-do #${seq}; it is free again.`,
+    },
+  };
+  logs.set(id, [...log, stored]);
+  publish(id, stored);
+  reply(200, stored);
+}
+
 /** Answers /api/v1/channels/{id}, its members and its messages; returns false for any other path. */
 async function oneChannel(member, url, method, read, key, reply, raw) {
   const events = /^\/api\/v1\/channels\/([^/]+)\/events$/.exec(url.pathname);
@@ -589,6 +663,13 @@ async function oneChannel(member, url, method, read, key, reply, raw) {
   );
   if (claimed && method === "POST") {
     claim(member, decodeURIComponent(claimed[1]), Number(claimed[2]), reply);
+    return true;
+  }
+  const given = /^\/api\/v1\/channels\/([^/]+)\/tasks\/(\d+)\/give-back$/.exec(
+    url.pathname,
+  );
+  if (given && method === "POST") {
+    giveBack(member, decodeURIComponent(given[1]), Number(given[2]), reply);
     return true;
   }
   // WEB-U-066: membership, end and delete, with the owner's authority (an administrator may also end or delete).

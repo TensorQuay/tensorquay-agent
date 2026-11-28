@@ -73,6 +73,12 @@ export function gatewayChannelsFor(client: ApiClient): ChannelsApi {
         (value) => parseApi(value, "ChannelMessage"),
         { parameters: { id, seq: String(seq) }, key },
       ),
+    giveBack: (id, seq, key) =>
+      client.request(
+        settingsEndpoint("channelGiveBack"),
+        (value) => parseApi(value, "ChannelMessage"),
+        { parameters: { id, seq: String(seq) }, key },
+      ),
     post: (id, write, key, files) =>
       client.request(
         settingsEndpoint("channelPost"),

@@ -87,12 +87,15 @@ class DemoTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             result = Path(temporary) / "browser.json"
             env = {"TQA_STACK_RESULT": str(result)}
-            good = {"members": ["conversation:member", "user:lead"], "state": "ended", "deleted": 404}
+            good = {"members": ["conversation:member", "user:lead"], "state": "ended", "deleted": 404,
+                    "given_back": {"claims": 0, "notice": "place_given_back"}}
             result.write_text(json.dumps(good))
             with contextlib.redirect_stdout(io.StringIO()):
                 demo.verify_channel_members(env)
             for change in ({"members": ["conversation:member", "user:lead", "user:member"]},
-                           {"members": ["user:lead"]}, {"state": "open"}, {"deleted": 200}):
+                           {"members": ["user:lead"]}, {"state": "open"}, {"deleted": 200},
+                           {"given_back": {"claims": 1, "notice": "place_given_back"}},
+                           {"given_back": {"claims": 0, "notice": None}}):
                 result.write_text(json.dumps({**good, **change}))
                 with self.assertRaises(AssertionError):
                     demo.verify_channel_members(env)

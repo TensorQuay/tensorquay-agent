@@ -315,9 +315,12 @@ pub(crate) async fn append_body(
         });
     }
     let (task, proposal) = match body {
-        MessageBody::Claim { task_seq } | MessageBody::Report { task_seq, .. } => {
-            (Some(db_seq(*task_seq)?), None)
-        }
+        MessageBody::Claim { task_seq }
+        | MessageBody::Report { task_seq, .. }
+        | MessageBody::Notice {
+            task_seq: Some(task_seq),
+            ..
+        } => (Some(db_seq(*task_seq)?), None),
         MessageBody::Vote { proposal_seq, .. } | MessageBody::Decision { proposal_seq, .. } => {
             (None, Some(db_seq(*proposal_seq)?))
         }
@@ -458,7 +461,7 @@ mod claims;
 mod decisions;
 mod members;
 
-pub(crate) use claims::{Claimed, claim, tasks};
+pub(crate) use claims::{Claimed, claim, give_back, tasks};
 pub(crate) use decisions::{
     ballots, close_open, decide, due_proposals, gateway_author, post, proposal, voters,
 };

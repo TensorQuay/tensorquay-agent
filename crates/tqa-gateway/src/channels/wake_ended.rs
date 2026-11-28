@@ -113,6 +113,7 @@ pub(crate) async fn run_ended(
                     code,
                     refusal,
                     resets_at: None,
+                    task_seq: None,
                     text,
                 },
             ),

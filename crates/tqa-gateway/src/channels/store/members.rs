@@ -13,6 +13,10 @@ pub(crate) struct Listed {
     pub owner_name: String,
     pub member_count: i64,
     pub role: Option<ChannelRole>,
+    /// Proposals not yet decided (GW-I-400).
+    pub open_votes: i64,
+    /// To-dos whose places aren't all taken by members whose latest report is completed (GW-I-400).
+    pub todos_open: i64,
 }
 
 /// The channels `user` may see (ADR-0014 point 5): those they own or belong to, those a conversation of theirs
@@ -30,7 +34,18 @@ pub(crate) async fn listed(
         "SELECT c.id, c.owner_id, c.name, c.purpose, c.rule, c.state, c.last_seq, c.created_at, c.ended_at, \
          o.email::text AS \"owner_name!\", \
          (SELECT count(*) FROM channel_members m WHERE m.channel_id = c.id) AS \"member_count!\", \
-         (SELECT m.role FROM channel_members m WHERE m.channel_id = c.id AND m.user_id = $1) AS role \
+         (SELECT m.role FROM channel_members m WHERE m.channel_id = c.id AND m.user_id = $1) AS role, \
+         (SELECT count(*) FROM channel_messages p WHERE p.channel_id = c.id AND p.type = 'proposal' \
+           AND NOT EXISTS (SELECT 1 FROM channel_messages d WHERE d.channel_id = c.id AND d.type = 'decision' \
+                           AND d.proposal_seq = p.seq)) AS \"open_votes!\", \
+         (SELECT count(*) FROM channel_messages t WHERE t.channel_id = c.id AND t.type = 'task' \
+           AND (SELECT count(*) FROM (SELECT DISTINCT ON (r.author_kind, r.author_id) r.body->>'status' AS status \
+                  FROM channel_messages r WHERE r.channel_id = c.id AND r.type = 'report' AND r.task_seq = t.seq \
+                  ORDER BY r.author_kind, r.author_id, r.seq DESC) latest WHERE latest.status = 'completed') \
+             < CASE WHEN t.body->'claims' IS NULL THEN 1 \
+                    WHEN jsonb_typeof(t.body->'claims') = 'number' THEN (t.body->>'claims')::bigint \
+                    ELSE (SELECT count(*) FROM channel_members v WHERE v.channel_id = c.id \
+                          AND v.role IN ('lead', 'member')) END) AS \"todos_open!\" \
          FROM channels c JOIN users o ON o.id = c.owner_id \
          WHERE c.kind = 'channel' AND ($3::uuid IS NULL OR c.id = $3) AND ($2 OR c.owner_id = $1 \
            OR EXISTS (SELECT 1 FROM channel_members m WHERE m.channel_id = c.id AND m.user_id = $1) \
@@ -62,6 +77,8 @@ pub(crate) async fn listed(
                 owner_name: row.owner_name,
                 member_count: row.member_count,
                 role: row.role.as_deref().map(role_of).transpose()?,
+                open_votes: row.open_votes,
+                todos_open: row.todos_open,
             })
         })
         .collect()

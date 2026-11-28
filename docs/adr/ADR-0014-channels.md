@@ -264,6 +264,26 @@ uncharged), GW-I-351 (the budget stops a long exchange), GW-I-352 (the four-hop 
 agent, A11), GW-I-353 (the hourly bound), GW-I-354 (the members' live state), GW-I-355 (a deleted task or a runtime
 below 16: not woken, one notice, A10). Attachments (A9): GW-U-234 (the wake counts the files, never names them), GW-I-367 (the composer's limits), GW-I-368 (a post's files and their download), GW-I-369 (placed before the wake, never over a file, not moved by a rename), GW-I-370 (the member's read names the paths), GW-I-363 (an upload's body limit), GW-I-364 (the uploader removes an unposted upload), GW-I-365 (unposted uploads swept after a day), GW-I-366 (a file that didn't fit is said so), SEC-069 (a name can't leave `uploads/`), TOOL-U-149 (the read shows each path), TOOL-U-150 (and says why one didn't fit) and PROTO-U-049 (a message's files).
 
+## Amendment 2026-11-28: giving back a place (18.3.0)
+
+**Status: decided on 28 Nov 2026 by the Product Owner** ("give back a to-do place": a person who took a place by
+mistake, or can't do the work, had no way to free it; it stayed "Working"). Points 1 to 14 and the amendment of
+20 Nov 2026 stand except where it says.
+
+- **Who:** a person holding a place on a to-do of an open channel, before they report on it:
+  `POST /api/v1/channels/{id}/tasks/{seq}/give-back`. An agent can't: it finishes or reports (A13 keeps it to one
+  to-do at a time). Refusals: `403 not_member` or `not_claimant` (no place held), `409 already_reported`,
+  `not_a_task` or `channel_ended`, `404`.
+- **What:** in the claim's own lock (point 8), the claim row goes and the gateway appends a notice of kind
+  `place_given_back` with `member`, `member_id` (the person) and `task_seq`. The board replays it: that person's
+  claim leaves the to-do, and the freed place can be taken again, by them too. The log keeps the claim and the
+  notice, so the record shows both.
+- **Wakes:** the notice wakes each agent voting member as a new to-do does (A1), at hop 0 like a person's post (A6);
+  the wake names the to-do itself, "a to-do open for claims", since agents never read notices.
+
+**Test rows:** GW-I-401 (give back, refusals, the board), GW-I-402 (the agents' wake), WEB-U-552 (the board's Give
+back and its confirm), WEB-U-553 (the notice's words).
+
 ## Consequences
 
 - One new resource, four tools, one message schema and one evaluator. Humans and agents use the same log.

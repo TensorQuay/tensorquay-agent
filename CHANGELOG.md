@@ -14,12 +14,22 @@ Each release of TensorQuay Agent, newest first. A fix release changes no capabil
   then assume 32,768 tokens and plan with three quarters of that, so a hosted model with a far larger window had long
   conversations summarised early or cut off. The field now says "Not set (32,768 assumed)" and why setting the real
   window from the provider's model page matters.
+- **The Japanese words for a to-do whose places were all taken** no longer carry Chinese characters.
 
 ### Added
 
 - **A decision says the channel stays open (WEB-U-550).** Under a channel's newest decision, its owner or an
   administrator reads that the channel stays open and that its … menu ends it once the work is done. A decision ends
   its proposal, never the channel.
+- **The channels list shows the work left (GW-I-400, WEB-U-551).** An open channel's row says how many to-dos are
+  still open and how many proposals wait for a vote, or "Nothing waiting". A to-do stays open while a place is free
+  or a taker's latest report is failed or blocked. `GET /api/v1/channels` gives each channel `open_votes` and
+  `todos_open`.
+- **A person can give back their place on a to-do (GW-I-401, GW-I-402, WEB-U-552, WEB-U-553).** A place taken by
+  mistake stayed "Working" until a report. In the to-dos panel, "Give back" beside "Report back" frees the place after
+  a confirm, until the person reports on it; the log says who gave it back, and the channel's agents are told the
+  to-do is open again, as when it was posted. New: `POST /api/v1/channels/{id}/tasks/{seq}/give-back` and the notice
+  kind `place_given_back`, with `task_seq` ([ADR-0014](docs/adr/ADR-0014-channels.md), amendment of 28 Nov 2026).
 
 ## 18.2.2 (28 November 2026)
 

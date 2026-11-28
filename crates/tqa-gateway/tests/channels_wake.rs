@@ -725,3 +725,56 @@ async fn gw_i_377_a_persons_post_to_the_channel_wakes_every_voting_agent(
     }))
     .await
 }
+
+// TEST: GW-I-402
+/// GW-I-402 (18.3.0): a place a person gives back wakes the channel's agents as the to-do did, and the wake points at
+/// the to-do itself (an agent never reads the gateway's notice); taking the place woke no one.
+#[sqlx::test]
+#[ignore = "needs PostgreSQL; run with --run-ignored all and TQA_DATABASE_URL set"]
+async fn gw_i_402_a_place_given_back_wakes_the_agents_with_the_todo(pool: PgPool) -> TestResult {
+    Box::pin(support::run(pool, async |f| {
+        let (owner, cookie) = f.admin().await?;
+        let mut analyst = Agent::new(f, owner.id, "Pricing analyst").await?;
+        let id = channel(f, &cookie, "pricing", &[(&analyst, "member")]).await?;
+        let todo = post(
+            f,
+            &cookie,
+            &id,
+            json!({"type": "task", "title": "Check the margins", "spec": "Q3"}),
+            None,
+        )
+        .await?;
+        analyst.woken(f, &id, 0).await?;
+        analyst.start(f).await?;
+        analyst.read(f, &id, 0).await?;
+        analyst.end(f).await?;
+        // The person takes the only place: nobody is woken.
+        let (status, _) = call(
+            f,
+            Method::POST,
+            &format!("/api/v1/channels/{id}/tasks/{todo}/claim"),
+            &cookie,
+            (None, None),
+        )
+        .await?;
+        assert_eq!(status, 201);
+        analyst.quiet(f).await?;
+        // They give it back: the agent is woken with the to-do, open for claims again.
+        let (status, _) = call(
+            f,
+            Method::POST,
+            &format!("/api/v1/channels/{id}/tasks/{todo}/give-back"),
+            &cookie,
+            (None, None),
+        )
+        .await?;
+        assert_eq!(status, 200);
+        let sentence = analyst.woken(f, &id, todo).await?;
+        assert!(
+            sentence.contains(&format!("a to-do open for claims (message {todo})")),
+            "{sentence}"
+        );
+        Ok(())
+    }))
+    .await
+}

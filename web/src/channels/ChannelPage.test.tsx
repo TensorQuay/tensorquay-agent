@@ -326,6 +326,53 @@ describe("WEB-U-063 the channel page", () => {
     );
   });
 
+  // TEST: WEB-U-552
+  it("gives back a place from the board: the place is open again and the log says so (WEB-U-552)", async () => {
+    const fake = fakeChannels({
+      channels: [RELEASE],
+      members: { [RELEASE.id]: [CODER, ME] },
+      messages: {
+        [RELEASE.id]: [
+          message(1, CODER, {
+            type: "task",
+            title: "Write the changelog",
+            spec: "From the merged PRs.",
+            claims: 2,
+          }),
+          message(2, ME, { type: "claim", task_seq: 1 }),
+        ],
+      },
+      me: ME,
+    });
+    // Signed in as Ana, who holds the place.
+    show(fake.api, RELEASE.id, { id: ME.id, role: "member" });
+    fireEvent.click(await screen.findByRole("button", { name: /^To-dos/ }));
+    const tasks = await screen.findByRole("list", { name: "To-dos" });
+    expect(tasks).toHaveTextContent("1 of 2 places taken");
+    fireEvent.click(
+      within(tasks).getByRole("button", { name: "Give back your place on #1" }),
+    );
+    const dialog = screen.getByRole("dialog", {
+      name: "Give back your place on #1",
+    });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Give back" }));
+    await vi.waitFor(() =>
+      expect(screen.getByRole("list", { name: "To-dos" })).toHaveTextContent(
+        "Open · 2 places",
+      ),
+    );
+    expect(
+      within(screen.getByRole("list", { name: "To-dos" })).getByRole("button", {
+        name: "Take on #1",
+      }),
+    ).toBeVisible();
+    expect(
+      await screen.findByText(
+        "Ana gave back their place on #1; it is free again.",
+      ),
+    ).toBeVisible();
+  });
+
   // WEB-U-263 (a first-hour check before 17.0): a task added as a member is an agent's task; the channel's own work
   // items are to-dos, so the side panel never says "No tasks yet" beside a member task.
   it("calls the channel's own work items to-dos, apart from the member tasks", async () => {

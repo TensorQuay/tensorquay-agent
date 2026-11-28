@@ -246,6 +246,11 @@ pub(crate) const ROUTES: &[Route] = &[
         handler: Handler::Channels(ChannelRoute::Claim),
     },
     Route {
+        method: "POST",
+        path: "/api/v1/channels/{id}/tasks/{seq}/give-back",
+        handler: Handler::Channels(ChannelRoute::GiveBack),
+    },
+    Route {
         method: "GET",
         path: "/api/v1/channels/{id}/tasks",
         handler: Handler::Channels(ChannelRoute::Tasks),

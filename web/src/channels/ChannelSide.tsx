@@ -66,6 +66,7 @@ export function ChannelSide({
   memberRole,
   ended,
   onClaim,
+  onGiveBack,
   onPost,
   view,
   onClose,
@@ -78,6 +79,7 @@ export function ChannelSide({
   memberRole: ChannelRole | null;
   ended: boolean;
   onClaim: (seq: number) => Promise<void>;
+  onGiveBack: (seq: number) => Promise<void>;
   onPost: (write: ChannelPost) => Promise<void>;
   /** What the panel shows, as the header chose it (WEB-U-519). */
   view: "tasks" | "members";
@@ -139,6 +141,7 @@ export function ChannelSide({
               memberRole={memberRole}
               ended={ended}
               onClaim={onClaim}
+              onGiveBack={onGiveBack}
               onPost={onPost}
             />
           ) : tasks.isError ? (

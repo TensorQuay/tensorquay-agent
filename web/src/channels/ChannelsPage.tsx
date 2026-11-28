@@ -125,6 +125,24 @@ function ChannelCard({ item }: { item: Channel }) {
         >
           {t(item.state === "open" ? "channels.open" : "channels.ended")}
         </span>
+        {/* How much work is left, not only that the channel is open (WEB-U-551, GW-I-400). */}
+        {item.state === "open" &&
+          (item.todos_open > 0 || item.open_votes > 0 ? (
+            <>
+              {item.todos_open > 0 && (
+                <span>
+                  {t("channels.todosOpen", { count: item.todos_open })}
+                </span>
+              )}
+              {item.open_votes > 0 && (
+                <span>
+                  {t("channels.votesOpen", { count: item.open_votes })}
+                </span>
+              )}
+            </>
+          ) : (
+            <span>{t("channels.nothingWaiting")}</span>
+          ))}
         <span>{t(RULES[item.rule])}</span>
         <span>{t("channels.members", { count: item.member_count })}</span>
         <span>{t("channels.ledBy", { name: item.owner.name })}</span>

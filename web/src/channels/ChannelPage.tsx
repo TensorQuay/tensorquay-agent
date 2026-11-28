@@ -211,8 +211,12 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
           void cache.invalidateQueries({
             queryKey: proposalKey(id, message.body.proposal_seq),
           });
-        // A task, claim or report changes the board (ADR-0014 point 8).
-        if (["task", "claim", "report"].includes(message.body.type))
+        // A task, claim or report changes the board (ADR-0014 point 8), and so does a place given back (18.3.0).
+        if (
+          ["task", "claim", "report"].includes(message.body.type) ||
+          (message.body.type === "notice" &&
+            message.body.kind === "place_given_back")
+        )
           void cache.invalidateQueries({ queryKey: tasksKey(id) });
         // A budget notice changes the channel's budget or spend: the header and Wake budget… read it again, so they
         // never disagree with the log (the review of 21 Nov 2026).
@@ -256,6 +260,9 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
   }
   async function claim(seq: number) {
     log.add([await api.claim(id, seq, newActionKey())]);
+  }
+  async function giveBack(seq: number) {
+    log.add([await api.giveBack(id, seq, newActionKey())]);
   }
   /** Sets the wake budget and shows the channel as the gateway answers it (C-1, WEB-U-529). */
   async function setBudget(budget: number) {
@@ -392,6 +399,7 @@ export function ChannelPage({ api, id }: { api: ChannelsApi; id: string }) {
           memberRole={item.role}
           ended={item.state === "ended"}
           onClaim={claim}
+          onGiveBack={giveBack}
           onPost={post}
         />
       )}

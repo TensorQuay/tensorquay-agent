@@ -119,6 +119,31 @@ describe("WEB-U-062 the channels client", () => {
     });
   });
 
+  it("gives back a place on a to-do with an Idempotency-Key and reads the gateway's notice (WEB-U-552)", async () => {
+    const made = channel("release");
+    const notice = {
+      seq: 7,
+      ts: "2026-09-27T10:07:00Z",
+      author: { kind: "gateway", id: "gateway", name: "gateway" },
+      body: {
+        type: "notice",
+        kind: "place_given_back",
+        member: "ana@example.invalid",
+        member_id: "01a2211f-fae0-7344-98fd-222194da4da1",
+        task_seq: 5,
+        text: "ana@example.invalid gave back their place on to-do #5; it is free again.",
+      },
+    };
+    const { channels, sent } = setup(Response.json(notice));
+    expect(await channels.giveBack(made.id, 5, "key-4")).toEqual(notice);
+    expect(sent(0)).toEqual({
+      url: `/api/v1/channels/${made.id}/tasks/5/give-back`,
+      method: "POST",
+      key: "key-4",
+      body: null,
+    });
+  });
+
   it("reads a proposal's state (G7; WEB-U-064)", async () => {
     const made = channel("release");
     const state = {

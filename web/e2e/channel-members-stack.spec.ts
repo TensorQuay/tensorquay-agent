@@ -9,7 +9,9 @@ import { bootstrap } from "./ux/flow";
 
 // WEB-U-066 on the real stack (ADR-0014 points 4 and 13): the owner of a channel adds one of their tasks' agents and a
 // person by exact email, changes the person's role, removes them, ends the channel and deletes it, all from the page
-// and against the gateway's real rules. The driver (deploy/tests/demo.py --suite channel-members) checks the result.
+// and against the gateway's real rules. Before any agent joins, the owner takes on a to-do and gives the place back
+// (WEB-U-552, ADR-0014's amendment of 28 Nov 2026). The driver (deploy/tests/demo.py --suite channel-members) checks
+// the result.
 test.skip(
   process.env.TQA_STACK_SUITE !== "channel-members",
   "Requires the owned channel-members stack",
@@ -86,6 +88,63 @@ test("WEB-U-066 channel membership, end and delete on the real stack", async ({
   await expect(page.getByText(note, { exact: true })).toBeVisible();
   await page.reload();
   await expect(page.getByText(note, { exact: true })).toBeVisible();
+
+  // WEB-U-552: a to-do the owner takes on and gives back before reporting; no agent is here yet, so none is woken.
+  const todo = await write(page, `/api/v1/channels/${id}/messages`, {
+    body: {
+      type: "task",
+      title: "Check the links",
+      spec: "Every link in the notes.",
+      claims: 2,
+    },
+  });
+  const todoSeq = Number(todo.seq);
+  await page
+    .getByRole("region", { name: "Channel header" })
+    .getByRole("button", { name: /^To-dos/ })
+    .click();
+  const board = page.getByRole("list", { name: "To-dos" });
+  const item = board.getByRole("listitem", { name: /Check the links/ });
+  await item.getByRole("button", { name: `Take on #${todoSeq}` }).click();
+  await expect(item).toContainText("1 of 2 places taken");
+  await item
+    .getByRole("button", { name: `Give back your place on #${todoSeq}` })
+    .click();
+  const giving = page.getByRole("dialog", {
+    name: `Give back your place on #${todoSeq}`,
+  });
+  await axe(page);
+  await giving.getByRole("button", { name: "Give back" }).click();
+  await expect(giving).toHaveCount(0);
+  await expect(item).toContainText("Open · 2 places");
+  await expect(
+    page.getByText(/gave back their place on #\d+; it is free again\.$/),
+  ).toBeVisible();
+  // The gateway kept it: after a reload the board is open again.
+  await page.reload();
+  await page
+    .getByRole("region", { name: "Channel header" })
+    .getByRole("button", { name: /^To-dos/ })
+    .click();
+  await expect(
+    page
+      .getByRole("list", { name: "To-dos" })
+      .getByRole("listitem", { name: /Check the links/ }),
+  ).toContainText("Open · 2 places");
+  const tasks = (await (
+    await page.request.get(`/api/v1/channels/${id}/tasks`)
+  ).json()) as { items: { claims: unknown[] }[] };
+  const given = (await (
+    await page.request.get(`/api/v1/channels/${id}/messages?since=0`)
+  ).json()) as { items: { body: { type: string; kind?: string } }[] };
+  const givenBack = {
+    claims: tasks.items[0]?.claims.length,
+    notice: given.items.find((one) => one.body.type === "notice")?.body.kind,
+  };
+  await page
+    .getByRole("complementary", { name: "To-dos" })
+    .getByRole("button", { name: "Close To-dos" })
+    .click();
 
   // Members opens beside the log from the channel's bar (WEB-U-519).
   await page
@@ -167,6 +226,11 @@ test("WEB-U-066 channel membership, end and delete on the real stack", async ({
 
   await writeFile(
     env("TQA_STACK_RESULT"),
-    JSON.stringify({ members: kinds, state: ended.state, deleted: gone }),
+    JSON.stringify({
+      members: kinds,
+      state: ended.state,
+      deleted: gone,
+      given_back: givenBack,
+    }),
   );
 });
